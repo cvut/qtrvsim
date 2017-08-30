@@ -5,6 +5,7 @@
 #include "instructions/loadstore.h"
 #include "instructions/nop.h"
 #include "instructions/shift.h"
+#include "utils.h"
 
 ProgramMemory::ProgramMemory(ProgramLoader *loader, MemoryAccess *memory) {
     this->memory = memory;
@@ -40,7 +41,7 @@ Instruction *ProgramMemory::at(std::uint32_t address) {
 }
 
 // TODO implement
-#define I_UNKNOWN(DATA) do { std::stringstream ss; ss << std::hex << DATA; throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Unknown instruction, can't decode", ss.str());  } while(false);
+#define I_UNKNOWN(DATA) throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Unknown instruction, can't decode", to_string_hex(DATA))
 #define I_UNSUPPORTED(INST) throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Decoded unsupported unstruction", #INST)
 
 Instruction *ProgramMemory::decode_r(std::uint32_t dt) {

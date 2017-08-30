@@ -1,6 +1,7 @@
 #include "instruction.h"
 #include <sstream>
 #include <iostream>
+#include "utils.h"
 
 InstructionR::InstructionR(std::uint8_t rs, std::uint8_t rd, std::uint8_t rt, std::uint8_t sa) {
     this->rs = rs;
@@ -16,22 +17,14 @@ std::vector<std::string> InstructionR::to_strs() {
     // Instruction name
     str.push_back("unknown"); // unknown instruction, should be replaced by child
 
-    std::stringstream ss;
     // Source register
-    ss << std::hex << (unsigned) this->rs;
-    str.push_back(ss.str());
-    ss.str("");
+    str.push_back(to_string_hex((unsigned)this->rs));
     // Target register
-    ss << std::hex << (unsigned) this->rt;
-    str.push_back(ss.str());
-    ss.str("");
+    str.push_back(to_string_hex((unsigned)this->rt));
     // Destination register
-    ss << std::hex << (unsigned) this->rd;
-    str.push_back(ss.str());
-    ss.str("");
+    str.push_back(to_string_hex((unsigned)this->rd));
     // Shift amount
-    ss << std::hex << (unsigned) this->sa;
-    str.push_back(ss.str());
+    str.push_back(to_string_hex((unsigned)this->sa));
 
     return str;
 }
@@ -39,7 +32,7 @@ std::vector<std::string> InstructionR::to_strs() {
 InstructionI::InstructionI(std::uint8_t rs, std::uint8_t rt, std::uint16_t immediate) {
     this->rs = rs;
     this->rt = rt;
-    this->immediage = immediate;
+    this->immediate = immediate;
 }
 
 std::vector<std::string> InstructionI::to_strs() {
@@ -47,18 +40,12 @@ std::vector<std::string> InstructionI::to_strs() {
     // Instruction name
     str.push_back("unknown"); // unknown instruction, should be replaced by child
 
-    std::stringstream ss;
     // Source register
-    ss << std::hex << (unsigned) this->rs;
-    str.push_back(ss.str());
-    ss.str("");
-    // Destination register
-    ss << std::hex << (unsigned) this->rt;
-    str.push_back(ss.str());
-    ss.str("");
+    str.push_back(to_string_hex((unsigned)this->rs));
+    // Target register
+    str.push_back(to_string_hex((unsigned)this->rt));
     // Immediate value
-    ss << std::hex << (unsigned) this->immediage;
-    str.push_back(ss.str());
+    str.push_back(to_string_hex((unsigned)this->immediate));
 
     return str;
 }
@@ -74,8 +61,7 @@ std::vector<std::string> InstructionJ::to_strs() {
 
     std::stringstream ss;
     // Source register
-    ss << std::hex << (unsigned) this->address;
-    str.push_back(ss.str());
+    str.push_back(to_string_hex((unsigned)this->address));
 
     return str;
 }

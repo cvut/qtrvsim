@@ -33,7 +33,7 @@ public:
     std::vector<std::string> to_strs();
 protected:
     std::uint8_t rs, rt;
-    std::uint16_t immediage;
+    std::uint16_t immediate;
 };
 
 class InstructionJ : public Instruction {
