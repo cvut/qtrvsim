@@ -1,30 +1,57 @@
 #include "memory.h"
 
+// Note about endianness: Current memory implementation is expected to be a big endian.
+// But we can be running on little endian so we should do conversion from bytes to word according that.
+
 void MemoryAccess::write_hword(std::uint32_t offset, std::uint16_t value) {
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+    this->write_byte(offset++, (std::uint8_t)(value >> 8));
+    this->write_byte(offset, (std::uint8_t)value);
+#else
     this->write_byte(offset++, (std::uint8_t)value);
     this->write_byte(offset, (std::uint8_t)(value >> 8));
+#endif
 }
 
 void MemoryAccess::write_word(std::uint32_t offset, std::uint32_t value) {
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+    this->write_byte(offset++, (std::uint8_t)(value >> 24));
+    this->write_byte(offset++, (std::uint8_t)(value >> 16));
+    this->write_byte(offset++, (std::uint8_t)(value >> 8));
+    this->write_byte(offset, (std::uint8_t)value);
+#else
     this->write_byte(offset++, (std::uint8_t)value);
     this->write_byte(offset++, (std::uint8_t)(value >> 8));
     this->write_byte(offset++, (std::uint8_t)(value >> 16));
-    this->write_byte(offset++, (std::uint8_t)(value >> 24));
+    this->write_byte(offset, (std::uint8_t)(value >> 24));
+#endif
 }
 
 std::uint16_t MemoryAccess::read_hword(std::uint32_t offset) {
     std::uint16_t dt = 0;
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+    dt |= (this->read_byte(offset++) << 8);
+    dt |= this->read_byte(offset);
+#else
     dt |= this->read_byte(offset++);
     dt |= (this->read_byte(offset) << 8);
+#endif
     return dt;
 }
 
 std::uint32_t MemoryAccess::read_word(std::uint32_t offset) {
     std::uint32_t dt = 0;
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+    dt |= (this->read_byte(offset++) << 24);
+    dt |= (this->read_byte(offset++) << 16);
+    dt |= (this->read_byte(offset++) << 8);
+    dt |= this->read_byte(offset);
+#else
     dt |= this->read_byte(offset++);
     dt |= (this->read_byte(offset++) << 8);
     dt |= (this->read_byte(offset++) << 16);
     dt |= (this->read_byte(offset) << 24);
+#endif
     return dt;
 }
 

@@ -16,6 +16,7 @@ private Q_SLOTS:
     void memory_data();
     void memory_section();
     void memory_section_data();
+    void memory_endian();
 };
 
 #endif // TST_MACHINE_H

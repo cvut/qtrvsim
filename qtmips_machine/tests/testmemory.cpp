@@ -59,3 +59,25 @@ void MachineTests::memory_section() {
    // Read trough memory
    QCOMPARE(m.read_byte(address), (std::uint8_t)0x66);
 }
+
+void MachineTests::memory_endian() {
+    Memory m;
+
+    // Memory should be bit endian so write bytes from most significant byte
+    m.write_byte(0x00, 0x12);
+    m.write_byte(0x01, 0x34);
+    m.write_byte(0x02, 0x56);
+    m.write_byte(0x03, 0x78);
+    QCOMPARE(m.read_hword(0x00), (std::uint16_t)0x1234);
+    QCOMPARE(m.read_word(0x00), (std::uint32_t)0x12345678);
+
+    m.write_hword(0x80, 0x1234);
+    QCOMPARE(m.read_byte(0x80), (std::uint8_t)0x12);
+    QCOMPARE(m.read_byte(0x81), (std::uint8_t)0x34);
+
+    m.write_word(0xF0, 0x12345678);
+    QCOMPARE(m.read_byte(0xF0), (std::uint8_t)0x12);
+    QCOMPARE(m.read_byte(0xF1), (std::uint8_t)0x34);
+    QCOMPARE(m.read_byte(0xF2), (std::uint8_t)0x56);
+    QCOMPARE(m.read_byte(0xF3), (std::uint8_t)0x78);
+}
