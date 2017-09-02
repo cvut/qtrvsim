@@ -5,7 +5,7 @@
 
 class InstructionNop : public Instruction {
 public:
-    std::vector<std::string> to_strs();
+    QVector<QString> to_strs();
 };
 
 #endif // NOP_H

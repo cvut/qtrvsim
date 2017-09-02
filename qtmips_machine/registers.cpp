@@ -1,6 +1,5 @@
 #include "registers.h"
 #include "qtmipsexception.h"
-#include "utils.h"
 
 // TODO should this be configurable?
 //////////////////////////////////////////////////////////////////////////////
@@ -26,26 +25,26 @@ std::uint32_t Registers::pc_inc() {
 
 std::uint32_t Registers::pc_jmp(std::int32_t offset) {
     if (offset % 4)
-        throw QTMIPS_EXCEPTION(UnalignedJump, "Trying to jump by unaligned offset", to_string_hex(offset));
+        throw QTMIPS_EXCEPTION(UnalignedJump, "Trying to jump by unaligned offset", QString::number(offset, 16));
     this->pc += offset;
     return this->pc;
 }
 
 void Registers::pc_abs_jmp(std::uint32_t address) {
     if (address % 4)
-        throw QTMIPS_EXCEPTION(UnalignedJump, "Trying to jump to unaligned address", to_string_hex(address));
+        throw QTMIPS_EXCEPTION(UnalignedJump, "Trying to jump to unaligned address", QString::number(address, 16));
     this->pc = address;
 }
 
 std::uint32_t Registers::read_gp(std::uint8_t i) {
-    SANITY_ASSERT(i < 32, std::string("Trying to read from register ") + std::to_string(i));
+    SANITY_ASSERT(i < 32, QString("Trying to read from register ") + QString(i));
     if (!i) // $0 always reads as 0
         return 0;
     return this->gp[i - 1];
 }
 
 void Registers::write_gp(std::uint8_t i, std::uint32_t value) {
-    SANITY_ASSERT(i < 32, std::string("Trying to write to register ") + std::to_string(i));
+    SANITY_ASSERT(i < 32, QString("Trying to write to register ") + QString(i));
     if (i == 0) // Skip write to $0
         return;
     this->gp[i - 1] = value;

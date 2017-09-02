@@ -5,8 +5,8 @@ InstructionJump::InstructionJump(bool link, std::uint32_t address)
     this->link = link;
 }
 
-std::vector<std::string> InstructionJump::to_strs() {
-    std::vector<std::string> str = this->InstructionJ::to_strs();
+QVector<QString> InstructionJump::to_strs() {
+    QVector<QString> str = this->InstructionJ::to_strs();
     if (link)
         str[0] = "j";
     else
@@ -19,8 +19,8 @@ InstructionJumpRegister::InstructionJumpRegister(bool link, std::uint8_t rs)
     this->link = link;
 }
 
-std::vector<std::string> InstructionJumpRegister::to_strs() {
-    std::vector<std::string> str = this->InstructionR::to_strs();
+QVector<QString> InstructionJumpRegister::to_strs() {
+    QVector<QString> str = this->InstructionR::to_strs();
     str.erase(str.begin() + 2, str.end()); // Drop every field after rs
     if (link)
         str[0] = "j";

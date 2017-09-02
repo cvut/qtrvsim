@@ -12,7 +12,7 @@ enum InstructionShiftT {
 class InstructionShift : public InstructionR {
 public:
     InstructionShift(enum InstructionShiftT type, std::uint8_t rt, std::uint8_t rd, std::uint8_t sa);
-    std::vector<std::string> to_strs();
+    QVector<QString> to_strs();
 private:
     enum InstructionShiftT type;
 };
@@ -20,7 +20,7 @@ private:
 class InstructionShiftVariable : public InstructionR {
 public:
     InstructionShiftVariable(enum InstructionShiftT type, std::uint8_t rs, std::uint8_t rt, std::uint8_t rd);
-    std::vector<std::string> to_strs();
+    QVector<QString> to_strs();
 private:
     enum InstructionShiftT type;
 };

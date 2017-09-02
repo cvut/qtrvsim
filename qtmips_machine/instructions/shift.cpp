@@ -5,8 +5,8 @@ InstructionShift::InstructionShift(enum InstructionShiftT type, std::uint8_t rt,
     this->type = type;
 }
 
-std::vector<std::string> InstructionShift::to_strs() {
-    std::vector<std::string> str = this->InstructionR::to_strs();
+QVector<QString> InstructionShift::to_strs() {
+    QVector<QString> str = this->InstructionR::to_strs();
     str.erase(str.begin() + 1); // Drop rs field
     switch (this->type) {
     case IST_LL:
@@ -30,8 +30,8 @@ InstructionShiftVariable::InstructionShiftVariable(enum InstructionShiftT type, 
     this->type = type;
 }
 
-std::vector<std::string> InstructionShiftVariable::to_strs() {
-    std::vector<std::string> str = this->InstructionR::to_strs();
+QVector<QString> InstructionShiftVariable::to_strs() {
+    QVector<QString> str = this->InstructionR::to_strs();
     str.erase(str.begin() + 4); // Drop sa field
     switch (this->type) {
     case IST_LL:

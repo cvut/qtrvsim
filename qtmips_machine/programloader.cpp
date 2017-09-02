@@ -69,13 +69,13 @@ std::uint32_t ProgramLoader::get_address(size_t sec) {
     return this->phdrs[this->map[sec]].p_vaddr;
 }
 
-std::vector<std::uint8_t> ProgramLoader::get_data(size_t sec) {
+QVector<std::uint8_t> ProgramLoader::get_data(size_t sec) {
     SANITY_ASSERT(sec > this->get_nsec(), "Requesting too big section");
-    std::vector<std::uint8_t> d;
+    QVector<std::uint8_t> d;
     char *f = elf_rawfile(this->elf, NULL);
     size_t phdrs_i = this->map[sec];
     for (unsigned i = 0; i < this->phdrs[phdrs_i].p_filesz; i++) {
-        d.push_back((std::uint8_t) f[this->phdrs[phdrs_i].p_offset + i]);
+        d << (std::uint8_t) f[this->phdrs[phdrs_i].p_offset + i];
     }
     return d;
 }

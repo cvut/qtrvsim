@@ -68,13 +68,13 @@ using namespace  std;
 
 void MemorySection::write_byte(std::uint32_t offset, std::uint8_t value) {
     if (offset >= this->length)
-        throw QTMIPS_EXCEPTION(OutOfMemoryAccess, "Trying to write outside of the memory section", std::string("Accessing using offset: ") + std::to_string(offset));
+        throw QTMIPS_EXCEPTION(OutOfMemoryAccess, "Trying to write outside of the memory section", QString("Accessing using offset: ") + QString(offset));
     this->dt[offset] = value;
 }
 
 std::uint8_t MemorySection::read_byte(std::uint32_t offset) {
     if (offset >= this->length)
-        throw QTMIPS_EXCEPTION(OutOfMemoryAccess, "Trying to read outside of the memory section", std::string("Accessing using offset: ") + std::to_string(offset));
+        throw QTMIPS_EXCEPTION(OutOfMemoryAccess, "Trying to read outside of the memory section", QString("Accessing using offset: ") + QString(offset));
     return this->dt[offset];
 }
 

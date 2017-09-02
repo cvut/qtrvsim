@@ -2,19 +2,19 @@
 #define QTMIPSEXCEPTION_H
 
 #include <exception>
-#include <string>
+#include <qstring.h>
 
-#define QTMIPS_EXCEPTION(TYPE, REASON, EXT) (QtMipsException ## TYPE (std::string(REASON), std::string(EXT), std::string(__FILE__), __LINE__))
-#define QTMIPS_ARGS_COMMON std::string reason, std::string ext, std::string file, int line
+#define QTMIPS_EXCEPTION(TYPE, REASON, EXT) (QtMipsException ## TYPE (QString(REASON), QString(EXT), QString(__FILE__), __LINE__))
+#define QTMIPS_ARGS_COMMON QString reason, QString ext, QString file, int line
 
 // Base exception for all machine ones
 class QtMipsException : public std::exception {
 public:
     QtMipsException(QTMIPS_ARGS_COMMON);
     const char *what() const throw();
-    std::string msg(bool pos) const;
+    QString msg(bool pos) const;
 protected:
-    std::string reason, ext, file;
+    QString reason, ext, file;
     int line;
 };
 

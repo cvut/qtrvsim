@@ -1,7 +1,4 @@
 #include "instruction.h"
-#include <sstream>
-#include <iostream>
-#include "utils.h"
 
 InstructionR::InstructionR(std::uint8_t rs, std::uint8_t rd, std::uint8_t rt, std::uint8_t sa) {
     this->rs = rs;
@@ -12,20 +9,18 @@ InstructionR::InstructionR(std::uint8_t rs, std::uint8_t rd, std::uint8_t rt, st
 
 // TODO for registers output as register ($0)!
 
-std::vector<std::string> InstructionR::to_strs() {
-    std::vector<std::string> str;
+QVector<QString> InstructionR::to_strs() {
+    QVector<QString> str;
     // Instruction name
-    str.push_back("unknown"); // unknown instruction, should be replaced by child
-
+    str << "unknown"; // unknown instruction, should be replaced by child
     // Source register
-    str.push_back(to_string_hex((unsigned)this->rs));
+    str << QString::number((unsigned)this->rs, 16);
     // Target register
-    str.push_back(to_string_hex((unsigned)this->rt));
+    str << QString::number((unsigned)this->rt, 16);
     // Destination register
-    str.push_back(to_string_hex((unsigned)this->rd));
+    str << QString::number((unsigned)this->rd, 16);
     // Shift amount
-    str.push_back(to_string_hex((unsigned)this->sa));
-
+    str << QString::number((unsigned)this->sa, 16);
     return str;
 }
 
@@ -35,18 +30,16 @@ InstructionI::InstructionI(std::uint8_t rs, std::uint8_t rt, std::uint16_t immed
     this->immediate = immediate;
 }
 
-std::vector<std::string> InstructionI::to_strs() {
-    std::vector<std::string> str;
+QVector<QString> InstructionI::to_strs() {
+    QVector<QString> str;
     // Instruction name
-    str.push_back("unknown"); // unknown instruction, should be replaced by child
-
+    str << "unknown"; // unknown instruction, should be replaced by child
     // Source register
-    str.push_back(to_string_hex((unsigned)this->rs));
+    str << QString::number((unsigned)this->rs, 16);
     // Target register
-    str.push_back(to_string_hex((unsigned)this->rt));
+    str << QString::number((unsigned)this->rt, 16);
     // Immediate value
-    str.push_back(to_string_hex((unsigned)this->immediate));
-
+    str << QString::number((unsigned)this->immediate, 16);
     return str;
 }
 
@@ -54,14 +47,11 @@ InstructionJ::InstructionJ(std::uint32_t address) {
     this->address = address;
 }
 
-std::vector<std::string> InstructionJ::to_strs() {
-    std::vector<std::string> str;
+QVector<QString> InstructionJ::to_strs() {
+    QVector<QString> str;
     // Instruction name
-    str.push_back("unknown"); // unknown instruction, should be replaced by child
-
-    std::stringstream ss;
+    str << "unknown"; // unknown instruction, should be replaced by child
     // Source register
-    str.push_back(to_string_hex((unsigned)this->address));
-
+    str << QString::number((unsigned)this->address, 16);
     return str;
 }

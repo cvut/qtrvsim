@@ -5,7 +5,7 @@
 #include <libelf.h>
 #include <gelf.h>
 #include <cstdint>
-#include <vector>
+#include <qvector.h>
 
 
 class ProgramLoader {
@@ -15,14 +15,14 @@ public:
 
     size_t get_nsec(); // Returns number of loadable sections
     std::uint32_t get_address(size_t sec); // Get target address for given section
-    std::vector<std::uint8_t> get_data(size_t sec); // Returns bytes of given section
+    QVector<std::uint8_t> get_data(size_t sec); // Returns bytes of given section
 private:
     int fd;
     Elf *elf;
     GElf_Ehdr hdr; // elf file header
     size_t n_secs; // number of sections in elf program header
     Elf32_Phdr *phdrs; // program section headers
-    std::vector<size_t> map; // external index to phdrs index
+    QVector<size_t> map; // external index to phdrs index
 };
 
 #endif // PROGRAM_H

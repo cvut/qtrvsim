@@ -5,14 +5,16 @@
 #include "instructions/loadstore.h"
 #include "instructions/nop.h"
 #include "instructions/shift.h"
-#include "utils.h"
 
-ProgramMemory::ProgramMemory(ProgramLoader *loader, MemoryAccess *memory) {
+ProgramMemory::ProgramMemory(MemoryAccess *memory) {
     this->memory = memory;
+}
+
+void ProgramMemory::load(ProgramLoader *loader) {
     // Load program to memory (just dump it byte by byte, decode is done on demand)
     for (int i = 0; i < loader->get_nsec(); i++) {
         std::uint32_t base_address = loader->get_address(i);
-        std::vector<std::uint8_t> data = loader->get_data(i);
+        QVector<std::uint8_t> data = loader->get_data(i);
         for (auto it = data.begin(); it < data.end(); it++) {
             memory->write_byte(base_address + i, *it);
         }
@@ -40,7 +42,7 @@ Instruction *ProgramMemory::at(std::uint32_t address) {
     }
 }
 
-#define I_UNKNOWN(DATA) throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Unknown instruction, can't decode", to_string_hex(DATA))
+#define I_UNKNOWN(DATA) throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Unknown instruction, can't decode", QString::number(DATA, 16))
 #define I_UNSUPPORTED(INST) throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Decoded unsupported unstruction", #INST)
 
 Instruction *ProgramMemory::decode_r(std::uint32_t dt) {

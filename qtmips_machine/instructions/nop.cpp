@@ -1,7 +1,7 @@
 #include "nop.h"
 
-std::vector<std::string> InstructionNop::to_strs() {
-    std::vector<std::string> str;
-    str.push_back("nop");
+QVector<QString> InstructionNop::to_strs() {
+    QVector<QString> str;
+    str << QString("nop");
     return str;
 }

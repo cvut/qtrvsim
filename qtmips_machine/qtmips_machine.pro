@@ -25,7 +25,6 @@ SOURCES += \
     instructions/shift.cpp \
     instructions/nop.cpp \
     instructions/jumpbranch.cpp \
-    utils.cpp \
     cache.cpp
 
 HEADERS += \
@@ -42,5 +41,4 @@ HEADERS += \
     instructions/shift.h \
     instructions/nop.h \
     instructions/jumpbranch.h \
-    utils.h \
     cache.h

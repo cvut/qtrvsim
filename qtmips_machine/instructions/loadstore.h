@@ -16,7 +16,7 @@ enum InstructionLoadStoreT {
 class InstructionLoad : public InstructionI {
 public:
     InstructionLoad(enum InstructionLoadStoreT type, std::uint8_t rs, std::uint8_t rt, std::uint16_t offset);
-    std::vector<std::string> to_strs();
+    QVector<QString> to_strs();
 private:
     enum InstructionLoadStoreT type;
 };
@@ -24,7 +24,7 @@ private:
 class InstructionStore : public InstructionI {
 public:
     InstructionStore(enum InstructionLoadStoreT type, std::uint8_t rs, std::uint8_t rt, std::uint16_t offset);
-    std::vector<std::string> to_strs();
+    QVector<QString> to_strs();
 private:
     enum InstructionLoadStoreT type;
 };

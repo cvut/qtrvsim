@@ -8,8 +8,9 @@
 
 class ProgramMemory {
 public:
-    ProgramMemory(ProgramLoader *loader, MemoryAccess *memory);
+    ProgramMemory(MemoryAccess *memory);
 
+    void load(ProgramLoader *l);
     Instruction *at(std::uint32_t address); // return instruction isntance for given address
 
 private:

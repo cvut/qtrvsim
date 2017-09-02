@@ -1,13 +1,12 @@
 #include "instructions/arithmetic.h"
-#include <iostream>
 
 InstructionArithmetic::InstructionArithmetic(enum InstructionArithmeticT type, std::uint8_t rs, std::uint8_t rd, std::uint8_t rt)
     : InstructionR(rs, rd, rt, 0) {
     this->type = type;
 }
 
-std::vector<std::string> InstructionArithmetic::to_strs() {
-    std::vector<std::string> str = this->InstructionR::to_strs();
+QVector<QString> InstructionArithmetic::to_strs() {
+    QVector<QString> str = this->InstructionR::to_strs();
     str.erase(str.begin() + 4); // Drop sa field
     switch (this->type) {
     case IAT_ADD:
@@ -52,8 +51,8 @@ InstructionArithmeticImmediate::InstructionArithmeticImmediate(enum InstructionA
     this->type = type;
 }
 
-std::vector<std::string> InstructionArithmeticImmediate::to_strs() {
-    std::vector<std::string> str = this->InstructionI::to_strs();
+QVector<QString> InstructionArithmeticImmediate::to_strs() {
+    QVector<QString> str = this->InstructionI::to_strs();
     switch (this->type) {
     case IAT_ADDI:
         str[0] = "addi";

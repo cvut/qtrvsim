@@ -10,19 +10,19 @@ QtMipsException::QtMipsException(QTMIPS_ARGS_COMMON) {
 }
 
 const char *QtMipsException::what() const throw() {
-    std::string message = this->msg(true);
+    QString message = this->msg(true);
     char * cstr = new char [message.length()+1];
-    std::strcpy (cstr, message.c_str());
+    std::strcpy (cstr, message.toStdString().c_str());
     return cstr;
 }
 
-std::string QtMipsException::msg(bool pos) const {
-    std::string message;
+QString QtMipsException::msg(bool pos) const {
+    QString message;
     if (pos)
-        message += std::string("(") + std::string(this->file) + std::string(":") + std::to_string(this->line) + std::string(") ");
+        message += QString("(") + QString(this->file) + QString(":") + QString(this->line) + QString(") ");
     message += this->reason;
-    if (!this->ext.empty()) {
-        message += std::string(": ");
+    if (!this->ext.isEmpty()) {
+        message += QString(": ");
         message += this->ext;
     }
     return message;

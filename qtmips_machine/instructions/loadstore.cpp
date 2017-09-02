@@ -5,8 +5,8 @@ InstructionLoad::InstructionLoad(enum InstructionLoadStoreT type, std::uint8_t r
     this->type = type;
 }
 
-std::vector<std::string> InstructionLoad::to_strs() {
-    std::vector<std::string> str = this->InstructionI::to_strs();
+QVector<QString> InstructionLoad::to_strs() {
+    QVector<QString> str = this->InstructionI::to_strs();
     switch (this->type) {
     case ILST_B:
         str[0] = "lb";
@@ -41,8 +41,8 @@ InstructionStore::InstructionStore(enum InstructionLoadStoreT type, std::uint8_t
     this->type = type;
 }
 
-std::vector<std::string> InstructionStore::to_strs() {
-    std::vector<std::string> str = this->InstructionI::to_strs();
+QVector<QString> InstructionStore::to_strs() {
+    QVector<QString> str = this->InstructionI::to_strs();
     switch (this->type) {
     case ILST_B:
         str[0] = "sb";
