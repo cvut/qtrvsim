@@ -16,8 +16,8 @@ public:
 private:
     MemoryAccess *memory;
     Instruction *decode_r(std::uint32_t dt);
-    Instruction *decode_j(std::uint32_t dt);
-    Instruction *decode_i(std::uint32_t dt);
+    Instruction *decode_j(std::uint32_t dt, std::uint8_t opcode);
+    Instruction *decode_i(std::uint32_t dt, std::uint8_t opcode);
 };
 
 #endif // PROGRAMMEMORY_H

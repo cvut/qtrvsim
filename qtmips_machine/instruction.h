@@ -6,15 +6,32 @@
 #include "registers.h"
 #include "memory.h"
 
+enum InstructionState {
+    IS_FETCH,
+    IS_DECODE,
+    IS_EXECUTE,
+    IS_MEMORY,
+    IS_WRITE_BACK,
+};
+
 class Instruction {
 public:
-    // TODO return types should be according to what instruction can pass from this stage
-    //virtual void decode(Registers *regs) = 0; // Read and prepare instructions
-    //virtual void execute() = 0; // ALU operations
-    //virtual void memory(Memory *mem) = 0; // Read or write to memory
-    //virtual void write_back(Registers *regs) = 0; // Write results to registers
+    Instruction();
+
+    // TODO return some info for forwarding, stall, flush
+    virtual void decode(Registers *regs); // Read and prepare instructions
+    virtual void execute(); // ALU operations
+    virtual void memory(Memory *mem); // Read or write to memory
+    virtual void write_back(Registers *regs); // Write results to registers
+
+    enum InstructionState state();
+    bool running();
+    bool done();
 
     virtual QVector<QString> to_strs() = 0; // Returns all fields of instructions in string
+
+private:
+    enum InstructionState st;
 };
 
 class InstructionR : public Instruction {

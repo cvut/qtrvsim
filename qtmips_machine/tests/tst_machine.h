@@ -20,6 +20,11 @@ private Q_SLOTS:
     // ProgramMemory
     void program_memory();
     void program_memory_data();
+    // Instruction
+    void instruction_arithmetic();
+    void instruction_arithmetic_data();
+    void instruction_arithmetic_immediate();
+    void instruction_arithmetic_immediate_data();
 };
 
 #endif // TST_MACHINE_H

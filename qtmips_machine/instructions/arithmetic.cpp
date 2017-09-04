@@ -5,6 +5,58 @@ InstructionArithmetic::InstructionArithmetic(enum InstructionArithmeticT type, s
     this->type = type;
 }
 
+void InstructionArithmetic::decode(Registers *regs) {
+    Instruction::decode(regs);
+    this->rs_d = regs->read_gp(this->rs);
+    this->rd_d = regs->read_gp(this->rd);
+}
+
+void InstructionArithmetic::execute() {
+    Instruction::execute();
+    switch (this->type) {
+    case IAT_ADD:
+        this->rt_d = (std::uint32_t)((std::int32_t)this->rs_d + (std::int32_t)this->rd_d);
+        break;
+    case IAT_ADDU:
+        this->rt_d = this->rs_d + this->rd_d;
+        break;
+    case IAT_SUB:
+        this->rt_d = (std::uint32_t)((std::int32_t)this->rs_d - (std::int32_t)this->rd_d);
+        break;
+    case IAT_SUBU:
+        this->rt_d = this->rs_d - this->rd_d;
+        break;
+    case IAT_AND:
+        this->rt_d = this->rs_d & this->rd_d;
+        break;
+    case IAT_OR:
+        this->rt_d = this->rs_d | this->rd_d;
+        break;
+    case IAT_XOR:
+        this->rt_d = this->rs_d ^ this->rd_d;
+        break;
+    case IAT_NOR:
+        // TODO
+        break;
+    case IAT_SLT:
+        // TODO
+        break;
+    case IAT_SLTU:
+        // TODO
+        break;
+    }
+}
+
+void InstructionArithmetic::memory(Memory *mem) {
+    Instruction::memory(mem);
+    // pass
+}
+
+void InstructionArithmetic::write_back(Registers *regs) {
+    Instruction::write_back(regs);
+    regs->write_gp(this->rt, this->rt_d);
+}
+
 QVector<QString> InstructionArithmetic::to_strs() {
     QVector<QString> str = this->InstructionR::to_strs();
     str.erase(str.begin() + 4); // Drop sa field
@@ -51,6 +103,42 @@ InstructionArithmeticImmediate::InstructionArithmeticImmediate(enum InstructionA
     this->type = type;
 }
 
+void InstructionArithmeticImmediate::decode(Registers *regs) {
+    Instruction::decode(regs);
+    this->rs_d = regs->read_gp(this->rs);
+}
+
+void InstructionArithmeticImmediate::execute() {
+    Instruction::execute();
+    switch (this->type) {
+    case IAT_ADDI:
+        this->rt_d = (std::uint32_t)((std::int32_t)this->rs_d + (std::int32_t)this->immediate);
+        break;
+    case IAT_ADDIU:
+        this->rt_d = this->rs_d + this->immediate;
+        break;
+    case IAT_ANDI:
+        this->rt_d = (std::uint32_t)((std::int32_t)this->rs_d - (std::int32_t)this->immediate);
+        break;
+    case IAT_ORI:
+        this->rt_d = this->rs_d - this->immediate;
+        break;
+    case IAT_XORI:
+        this->rt_d = this->rs_d & this->immediate;
+        break;
+    }
+}
+
+void InstructionArithmeticImmediate::memory(Memory *mem) {
+    Instruction::memory(mem);
+    // pass
+}
+
+void InstructionArithmeticImmediate::write_back(Registers *regs) {
+    Instruction::write_back(regs);
+    regs->write_gp(this->rt, this->rt_d);
+}
+
 QVector<QString> InstructionArithmeticImmediate::to_strs() {
     QVector<QString> str = this->InstructionI::to_strs();
     switch (this->type) {
@@ -76,7 +164,7 @@ QVector<QString> InstructionArithmeticImmediate::to_strs() {
         str[0] = "sltiu";
         break;
     case IAT_LUI:
-        str[0] = "lu";
+        str[0] = "lui";
         break;
     default:
         // TODO different exception

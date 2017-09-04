@@ -19,9 +19,16 @@ enum InstructionArithmeticT {
 class InstructionArithmetic : public InstructionR  {
 public:
     InstructionArithmetic(enum InstructionArithmeticT type, std::uint8_t rs, std::uint8_t rd, std::uint8_t rt);
+
+    void decode(Registers *regs);
+    void execute();
+    void memory(Memory *mem);
+    void write_back(Registers *regs);
+
     QVector<QString> to_strs();
 private:
     enum InstructionArithmeticT type;
+    std::uint32_t rs_d, rd_d, rt_d;
 };
 
 enum InstructionArithmeticImmediateT {
@@ -38,9 +45,16 @@ enum InstructionArithmeticImmediateT {
 class InstructionArithmeticImmediate : public InstructionI {
 public:
     InstructionArithmeticImmediate(enum InstructionArithmeticImmediateT type, std::uint8_t rs, std::uint8_t rt, std::uint16_t value);
+
+    void decode(Registers *regs);
+    void execute();
+    void memory(Memory *mem);
+    void write_back(Registers *regs);
+
     QVector<QString> to_strs();
 private:
     enum InstructionArithmeticImmediateT type;
+    std::uint32_t rs_d, rt_d;
 };
 
 #endif // ARITHMETIC_H
