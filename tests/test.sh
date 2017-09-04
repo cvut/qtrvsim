@@ -87,9 +87,10 @@ mips_compiler() {
 	[ ! -d "$MIPS_COMPILER" ] || return 0
 	# Otherwise compile it
 	mkdir -p "$TEST_DIR_ROOT"
-	pushd "$TEST_DIR_ROOT" >/dev/null
+	local ORIG="$(pwd)"
+	cd "$TEST_DIR_ROOT"
 	"$PROJECT_ROOT"/compiler/compile.sh
-	popd >/dev/null
+	cd "$ORIG"
 }
 
 mips_make_test() {
