@@ -7,6 +7,7 @@ TEMPLATE = lib
 
 LIBS += -lelf
 QMAKE_CXXFLAGS += -std=c++0x
+QMAKE_CXXFLAGS += -ggdb
 
 DEFINES += QTMIPS_MACHINE_LIBRARY
 DEFINES += QT_DEPRECATED_WARNINGS
@@ -19,13 +20,9 @@ SOURCES += \
     instruction.cpp \
     registers.cpp \
     programloader.cpp \
-    programmemory.cpp \
-    instructions/arithmetic.cpp \
-    instructions/loadstore.cpp \
-    instructions/shift.cpp \
-    instructions/nop.cpp \
-    instructions/jumpbranch.cpp \
-    cache.cpp
+    cache.cpp \
+    alu.cpp \
+    machineconfig.cpp
 
 HEADERS += \
     qtmipsmachine.h \
@@ -41,4 +38,6 @@ HEADERS += \
     instructions/shift.h \
     instructions/nop.h \
     instructions/jumpbranch.h \
-    cache.h
+    cache.h \
+    alu.h \
+    machineconfig.h

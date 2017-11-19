@@ -19,7 +19,7 @@ const char *QtMipsException::what() const throw() {
 QString QtMipsException::msg(bool pos) const {
     QString message;
     if (pos)
-        message += QString("(") + QString(this->file) + QString(":") + QString(this->line) + QString(") ");
+        message += QString("(") + QString(this->file) + QString(":") + QString::number(this->line) + QString(") ");
     message += this->reason;
     if (!this->ext.isEmpty()) {
         message += QString(": ");
@@ -40,6 +40,16 @@ QtMipsExceptionRuntime::QtMipsExceptionRuntime(QTMIPS_ARGS_COMMON)
 }
 
 QtMipsExceptionUnsupportedInstruction::QtMipsExceptionUnsupportedInstruction(QTMIPS_ARGS_COMMON)
+        : QtMipsExceptionRuntime(reason, ext, file, line) {
+    return;
+}
+
+QtMipsExceptionUnsupportedAluOperation::QtMipsExceptionUnsupportedAluOperation(QTMIPS_ARGS_COMMON)
+        : QtMipsExceptionRuntime(reason, ext, file, line) {
+    return;
+}
+
+QtMipsExceptionOverflow::QtMipsExceptionOverflow(QTMIPS_ARGS_COMMON)
         : QtMipsExceptionRuntime(reason, ext, file, line) {
     return;
 }

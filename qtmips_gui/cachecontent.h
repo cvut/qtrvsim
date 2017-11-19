@@ -1,11 +1,16 @@
-#ifndef CACHE_CONTENT_H
-#define CACHE_CONTENT_H
+#ifndef CACHECONTENT_H
+#define CACHECONTENT_H
 
+#include <QDockWidget>
+#include "ui_CacheContent.h"
 
-class cache_content
-{
+class CacheContentDock : public QDockWidget {
 public:
-    cache_content();
+    CacheContentDock(QWidget *parent);
+    ~CacheContentDock();
+
+private:
+    Ui::CacheContent *ui;
 };
 
-#endif // CACHE_CONTENT_H
+#endif // CACHECONTENT_H

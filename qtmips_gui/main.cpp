@@ -1,11 +1,14 @@
-#include "mainwindow.h"
 #include <QApplication>
+#include <QCommandLineParser>
+#include "mainwindow.h"
 
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
+int main(int argc, char *argv[]) {
+    QApplication app(argc, argv);
+    app.setApplicationName("qtmips_gui");
+    app.setApplicationVersion("0.1");
+
     MainWindow w;
-    w.show();
+    w.start();
 
-    return a.exec();
+    return app.exec();
 }

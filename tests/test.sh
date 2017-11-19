@@ -66,10 +66,11 @@ TEST_DIR="$TEST_DIR_ROOT/$TEST_NAME"
 
 qtmips_make() {
 	mkdir -p "$BUILD_DIR"
-	pushd "$BUILD_DIR" >/dev/null
+	local ORIG="$(pwd)"
+	cd "$BUILD_DIR"
 	/usr/lib64/qt5/bin/qmake "$PROJECT_ROOT" || echo_fail "QtMips qmake failed!"
 	make "$@" || echo_fail "QtMips build failed! (target: $@)"
-	popd >/dev/null
+	cd "$ORIG"
 }
 
 qtmips_run() {

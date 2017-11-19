@@ -9,5 +9,7 @@ qtmips_make sub-qtmips_machine-tests
 # Build test data
 mips_make_test
 
+cd "$TEST_DIR"
+
 # Run unit tests
 qtmips_run qtmips_machine/tests/tst_machine || echo_fail "Test $TEST_NAME failed!"

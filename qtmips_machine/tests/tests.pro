@@ -18,8 +18,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += tst_machine.cpp \
     testmemory.cpp \
     testregisters.cpp \
-    testprogrammemory.cpp \
-    testinstruction.cpp
+    testprogramloader.cpp \
+    testinstruction.cpp \
+    testalu.cpp \
+    testcore.cpp
 
 HEADERS += tst_machine.h
 

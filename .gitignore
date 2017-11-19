@@ -7,3 +7,5 @@
 
 # Common test directory
 test_dir
+# Build directory
+build

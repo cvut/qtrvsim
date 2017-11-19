@@ -1,6 +1,10 @@
-#include "registers.h"
+#include "registersdock.h"
 
-Registers::Registers()
-{
+RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
+    ui = new Ui::RegistersDock();
+    ui->setupUi(this);
+}
 
+RegistersDock::~RegistersDock() {
+    delete ui;
 }

@@ -1,11 +1,17 @@
-#ifndef REGISTERS_H
-#define REGISTERS_H
+#ifndef REGISTERSDOCK_H
+#define REGISTERSDOCK_H
 
+#include <QDockWidget>
+#include "ui_registersdock.h"
 
-class Registers
-{
+class RegistersDock : public QDockWidget {
 public:
-    Registers();
+    RegistersDock(QWidget *parent);
+    ~RegistersDock();
+
+private:
+    Ui::RegistersDock *ui;
+
 };
 
-#endif // REGISTERS_H
+#endif // REGISTERSDOCK_H

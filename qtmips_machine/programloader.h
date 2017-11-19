@@ -6,16 +6,18 @@
 #include <gelf.h>
 #include <cstdint>
 #include <qvector.h>
+#include <qstring.h>
+#include "memory.h"
 
 
 class ProgramLoader {
 public:
-    ProgramLoader(char *file);
+    ProgramLoader(const char *file);
+    ProgramLoader(QString file);
     ~ProgramLoader();
 
-    size_t get_nsec(); // Returns number of loadable sections
-    std::uint32_t get_address(size_t sec); // Get target address for given section
-    QVector<std::uint8_t> get_data(size_t sec); // Returns bytes of given section
+    void to_memory(Memory *mem); // Writes all loaded sections to memory
+    std::uint32_t end(); // Return address after which there is no more code for sure
 private:
     int fd;
     Elf *elf;

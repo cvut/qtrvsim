@@ -2,12 +2,11 @@
 #include <exception>
 #include <unistd.h>
 #include <fcntl.h>
-#include <iostream>
 #include <errno.h>
 #include <cstring>
 #include "qtmipsexception.h"
 
-ProgramLoader::ProgramLoader(char *file) {
+ProgramLoader::ProgramLoader(const char *file) {
     // Initialize elf library
     if (elf_version(EV_CURRENT) == EV_NONE)
         throw QTMIPS_EXCEPTION(Input, "Elf library initialization failed", elf_errmsg(-1));
@@ -53,29 +52,35 @@ ProgramLoader::ProgramLoader(char *file) {
     // TODO instead of direct access should we be using sections and elf_data? And if so how to link program header and section?
 }
 
+ProgramLoader::ProgramLoader(QString file) : ProgramLoader(file.toStdString().c_str()) { }
+
 ProgramLoader::~ProgramLoader() {
     // Close elf
-    elf_end(this->elf);
+    // TODO fix (this results to segfault, there is probably somethig passed to it on stack or something)
+    //elf_end(this->elf);
     // Close file
     close(this->fd);
 }
 
-size_t ProgramLoader::get_nsec() {
-    return this->map.size();
-}
-
-std::uint32_t ProgramLoader::get_address(size_t sec) {
-    SANITY_ASSERT(sec > this->get_nsec(), "Requesting too big section");
-    return this->phdrs[this->map[sec]].p_vaddr;
-}
-
-QVector<std::uint8_t> ProgramLoader::get_data(size_t sec) {
-    SANITY_ASSERT(sec > this->get_nsec(), "Requesting too big section");
-    QVector<std::uint8_t> d;
-    char *f = elf_rawfile(this->elf, NULL);
-    size_t phdrs_i = this->map[sec];
-    for (unsigned i = 0; i < this->phdrs[phdrs_i].p_filesz; i++) {
-        d << (std::uint8_t) f[this->phdrs[phdrs_i].p_offset + i];
+void ProgramLoader::to_memory(Memory *mem) {
+    // Load program to memory (just dump it byte by byte)
+    for (int i = 0; i < this->map.size(); i++) {
+        std::uint32_t base_address = this->phdrs[this->map[i]].p_vaddr;
+        char *f = elf_rawfile(this->elf, NULL);
+        size_t phdrs_i = this->map[i];
+        for (unsigned y = 0; y < this->phdrs[phdrs_i].p_filesz; y++) {
+            mem->write_byte(base_address + y, (std::uint8_t) f[this->phdrs[phdrs_i].p_offset + y]);
+        }
     }
-    return d;
+}
+
+std::uint32_t ProgramLoader::end() {
+    std::uint32_t last = 0;
+    // Go trough all sections and found out last one
+    for (int i = 0; i < this->map.size(); i++) {
+        Elf32_Phdr *phdr = &(this->phdrs[this->map[i]]);
+        if ((phdr->p_vaddr + phdr->p_filesz) > last)
+            last = phdr->p_vaddr + phdr->p_filesz;
+    }
+    return last + 0x10; // We add offset so we are sure that also pipeline is empty
 }

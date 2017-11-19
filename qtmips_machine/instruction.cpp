@@ -1,102 +1,106 @@
 #include "instruction.h"
 #include "qtmipsexception.h"
 
-Instruction::Instruction() {
-    this->st = IS_FETCH;
+struct InstructionMap {
+    const char *name;
+};
+
+#define IM_UNKNOWN {"UNKNOWN"}
+const struct InstructionMap instruction_map[] = {
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    {"ADDI"},
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN
+};
+
+Instruction::Instruction(std::uint32_t inst) {
+    this->dt = inst;
 }
 
-void Instruction::decode(Registers *regs) {
-    if (this->st != IS_FETCH)
-        // TODO other exception
-        throw std::exception();
-    this->st = IS_DECODE;
+Instruction::Instruction(std::uint8_t opcode, std::uint8_t rs, std::uint8_t rt, std::uint8_t rd, std::uint8_t shamt, std::uint8_t funct) {
+    this->dt = 0;
+    this->dt |= opcode << 26;
+    this->dt |= rs << 21;
+    this->dt |= rt << 16;
+    this->dt |= rd << 11;
+    this->dt |= shamt << 6;
+    this->dt |= funct;
 }
 
-void Instruction::execute() {
-    if (this->st != IS_DECODE)
-        // TODO other exception
-        throw std::exception();
-    this->st = IS_EXECUTE;
+Instruction::Instruction(std::uint8_t opcode, std::uint8_t rs, std::uint8_t rt, std::uint16_t immediate) {
+    this->dt = 0;
+    this->dt |= opcode << 26;
+    this->dt |= rs << 21;
+    this->dt |= rt << 16;
+    this->dt |= immediate;
 }
 
-void Instruction::memory(Memory *mem) {
-    if (this->st != IS_EXECUTE)
-        // TODO other exception
-        throw std::exception();
-    this->st = IS_MEMORY;
+Instruction::Instruction(std::uint8_t opcode, std::uint32_t address) {
+    this->dt = 0;
+    this->dt |= opcode << 26;
+    this->dt |= address;
 }
 
-void Instruction::write_back(Registers *regs) {
-    if (this->st != IS_MEMORY)
-        // TODO other exception
-        throw std::exception();
-    this->st = IS_WRITE_BACK;
+QString Instruction::to_str() {
+    if  (this->opcode() >= sizeof(instruction_map))
+        return QString("UNKNOWN");
+    return QString(instruction_map[this->opcode()].name);
 }
 
-enum InstructionState Instruction::state() {
-    return this->st;
+#define MASK(LEN,OFF) ((this->dt >> (OFF)) & ((1 << (LEN)) - 1))
+
+std::uint8_t Instruction::opcode() const {
+    return (std::uint8_t) MASK(6, 26);
 }
 
-bool Instruction::running() {
-    return this->st > IS_FETCH && this->st < IS_WRITE_BACK;
+std::uint8_t Instruction::rs() const {
+    return (std::uint8_t) MASK(5, 21);
 }
 
-bool Instruction::done() {
-    return this->st >= IS_WRITE_BACK;
+std::uint8_t Instruction::rt() const {
+    return (std::uint8_t) MASK(5, 16);
 }
 
-InstructionR::InstructionR(std::uint8_t rs, std::uint8_t rd, std::uint8_t rt, std::uint8_t sa) : Instruction() {
-    this->rs = rs;
-    this->rd = rd;
-    this->rt = rt;
-    this->sa = sa;
+std::uint8_t Instruction::rd() const {
+    return (std::uint8_t) MASK(5, 11);
 }
 
-// TODO for registers output as register ($0)!
+std::uint8_t Instruction::shamt() const {
+    return (std::uint8_t) MASK(5, 6);
 
-QVector<QString> InstructionR::to_strs() {
-    QVector<QString> str;
-    // Instruction name
-    str << "unknown"; // unknown instruction, should be replaced by child
-    // Source register
-    str << QString::number((unsigned)this->rs, 10);
-    // Target register
-    str << QString::number((unsigned)this->rt, 10);
-    // Destination register
-    str << QString::number((unsigned)this->rd, 10);
-    // Shift amount
-    str << QString::number((unsigned)this->sa, 10);
-    return str;
 }
 
-InstructionI::InstructionI(std::uint8_t rs, std::uint8_t rt, std::uint16_t immediate) : Instruction() {
-    this->rs = rs;
-    this->rt = rt;
-    this->immediate = immediate;
+std::uint8_t Instruction::funct() const {
+    return (std::uint8_t) MASK(6, 0);
 }
 
-QVector<QString> InstructionI::to_strs() {
-    QVector<QString> str;
-    // Instruction name
-    str << "unknown"; // unknown instruction, should be replaced by child
-    // Source register
-    str << QString::number((unsigned)this->rs, 10);
-    // Target register
-    str << QString::number((unsigned)this->rt, 10);
-    // Immediate value
-    str << QString::number((unsigned)this->immediate, 16);
-    return str;
+std::uint16_t Instruction::immediate() const {
+    return (std::uint16_t) MASK(16, 0);
 }
 
-InstructionJ::InstructionJ(std::uint32_t address) : Instruction() {
-    this->address = address;
+std::uint32_t Instruction::address() const {
+    return (std::uint32_t) MASK(26, 0);
 }
 
-QVector<QString> InstructionJ::to_strs() {
-    QVector<QString> str;
-    // Instruction name
-    str << "unknown"; // unknown instruction, should be replaced by child
-    // Source register
-    str << QString::number((unsigned)this->address, 16);
-    return str;
+std::uint32_t Instruction::data() const {
+    return this->dt;
+}
+
+bool Instruction::operator ==(const Instruction &c) const {
+    return (this->data() == c.data());
 }

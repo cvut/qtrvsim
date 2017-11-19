@@ -1,6 +1,10 @@
-#include "cache_content.h"
+#include "cachecontent.h"
 
-cache_content::cache_content()
-{
+CacheContentDock::CacheContentDock(QWidget *parent) : QDockWidget(parent) {
+    ui = new Ui::CacheContent();
+    ui->setupUi(this);
+}
 
+CacheContentDock::~CacheContentDock() {
+    delete ui;
 }

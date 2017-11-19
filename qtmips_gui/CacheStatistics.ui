@@ -1,7 +1,7 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DockWidget</class>
- <widget class="QDockWidget" name="DockWidget">
+ <class>CacheStatistics</class>
+ <widget class="QDockWidget" name="CacheStatistics">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,8 +11,10 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>DockWidget</string>
+   <string>Cache statistics</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents"/>
  </widget>
+ <resources/>
+ <connections/>
 </ui>

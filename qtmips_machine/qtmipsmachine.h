@@ -2,24 +2,47 @@
 #define QTMIPSMACHINE_H
 
 #include <QObject>
-
+#include <QTimer>
+#include <cstdint>
 #include "qtmipsexception.h"
-#include "programloader.h"
+#include "machineconfig.h"
+#include "registers.h"
+#include "memory.h"
 #include "core.h"
-// TODO piplined core
+#include "cache.h"
 
-class QtMipsMachine : QObject {
+class QtMipsMachine : public QObject {
     Q_OBJECT
 public:
-    QtMipsMachine(char *file);
+    QtMipsMachine(const MachineConfig &cc);
 
+    void set_speed(unsigned);
+
+    const Registers *registers();
+    const Memory *memory();
+    const Cache *cache();
+    const Core *core();
+
+public slots:
     // TODO handle speed
     void play();
     void pause();
     void step();
     void restart();
+
+signals:
+    void program_exit();
+
 private:
-    ProgramLoader *loader;
+    Registers *regs;
+    Memory *mem;
+    Cache *cch;
+    Core *cr;
+
+    unsigned run_speed;
+    QTimer *run_t;
+
+    std::uint32_t program_end;
 };
 
 #endif // QTMIPSMACHINE_H

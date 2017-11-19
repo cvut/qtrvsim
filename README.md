@@ -4,7 +4,7 @@ MIPS CPU simulator for education purposes.
 
 Dependencies
 ------------
-* Qt 5 (version 4 is not tested but it might work)
+* Qt 5 (qtmips\_gui can be compiled with Qt4 but not qtmips\_cli)
 * elfutils (libelf works too but you might have problems with it)
 
 Compilation
@@ -43,3 +43,7 @@ being so.
 * Privileged instructions and all features dependent on it
 * Coprocessors (so no floating point unit nor any other type)
 * Peripherals
+* Memory access stall (stalling execution because of cache miss would be pretty
+  annoying for users so difference between cache and memory is just in collected
+  statistics)
+* Interrupts and exceptions (if exception occurs then machine execution is halted)

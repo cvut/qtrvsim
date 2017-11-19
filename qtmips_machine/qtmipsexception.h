@@ -37,6 +37,20 @@ public:
     QtMipsExceptionUnsupportedInstruction(QTMIPS_ARGS_COMMON);
 };
 
+// Decoded ALU operation is not supported
+// This is basically same exception as QtMipsExceptionUnsupportedInstruction but it is emmited from ALU when executed and not before that.
+class QtMipsExceptionUnsupportedAluOperation : public QtMipsExceptionRuntime {
+public:
+    QtMipsExceptionUnsupportedAluOperation(QTMIPS_ARGS_COMMON);
+};
+
+// Integer operation resulted to overflow (or underflow as we are working with unsigned values)
+// This is for sure caused by program it self.
+class QtMipsExceptionOverflow : public QtMipsExceptionRuntime {
+public:
+    QtMipsExceptionOverflow(QTMIPS_ARGS_COMMON);
+};
+
 // Instruction is jumping to unaligned address (ADDR%4!=0)
 // This can be caused by bug or by user program as it can be jumping relative to register
 // This shouldn't be happening with non-register jumps as those should be verified by compiler

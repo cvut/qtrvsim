@@ -1,11 +1,18 @@
 #ifndef CACHESTATISTICS_H
 #define CACHESTATISTICS_H
 
+#include <QDockWidget>
+#include "ui_CacheStatistics.h"
 
-class CacheStatistics
-{
+class CacheStatisticsDock : public QDockWidget {
+    Q_OBJECT
 public:
-    CacheStatistics();
+    CacheStatisticsDock(QWidget *parent);
+    ~CacheStatisticsDock();
+
+private:
+    Ui::CacheStatistics *ui;
+
 };
 
 #endif // CACHESTATISTICS_H

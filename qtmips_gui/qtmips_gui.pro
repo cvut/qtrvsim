@@ -14,10 +14,27 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+        newdialog.cpp \
+        coreview.cpp \
+        registersdock.cpp \
+        cachestatistics.cpp \
+        cachecontent.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+        newdialog.h \
+        coreview.h \
+        registersdock.h \
+        cachestatistics.h \
+        cachecontent.h
 
 FORMS += \
-        mainwindow.ui
+        NewDialog.ui \
+        MainWindow.ui \
+        CacheContent.ui \
+        registersdock.ui \
+        CacheStatistics.ui
+
+RESOURCES += \
+        icons.qrc

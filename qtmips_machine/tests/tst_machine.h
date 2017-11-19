@@ -17,14 +17,21 @@ private Q_SLOTS:
     void memory_section();
     void memory_section_data();
     void memory_endian();
-    // ProgramMemory
-    void program_memory();
-    void program_memory_data();
+    // Program loader
+    void program_loader();
     // Instruction
-    void instruction_arithmetic();
-    void instruction_arithmetic_data();
-    void instruction_arithmetic_immediate();
-    void instruction_arithmetic_immediate_data();
+    void instruction();
+    void instruction_access();
+    // Alu
+    void alu();
+    void alu_data();
+    void alu_except();
+    void alu_except_data();
+    // Core
+    void core_regs();
+    void core_regs_data();
+    void core_mem();
+    void core_mem_data();
 };
 
 #endif // TST_MACHINE_H
