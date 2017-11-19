@@ -6,6 +6,8 @@ TEST_NAME="machine-unit-test"
 
 # Build tests binary
 qtmips_make sub-qtmips_machine-tests
+# Build test data
+mips_make_test
 
 # Run unit tests
 qtmips_run qtmips_machine/tests/tst_machine || echo_fail "Test $TEST_NAME failed!"
