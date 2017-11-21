@@ -28,7 +28,7 @@ protected:
         Instruction inst;
         bool mem2reg; // Write memory output to register (instead alu output)
         bool memwrite; // If memory should write input
-        bool alubimm; // If b value to alu is immediate value (rt used otherwise)
+        bool alusrc; // If second value to alu is immediate value (rt used otherwise)
         bool regd; // If rd is used (otherwise rt is used for write target)
         bool regwrite; // If output should be written back to register (which one depends on regd)
         bool branch; // If this is branch instruction
@@ -37,13 +37,13 @@ protected:
         std::uint32_t val_rt; // Value from register rt
     };
     struct dtExecute {
-        bool mem2reg;
+        bool regwrite;
         std::uint8_t rwrite; // Writeback register (multiplexed between rt and rd according to regd)
         std::uint32_t alu_val; // Result of ALU execution
         // TODO
     };
     struct dtMemory {
-        bool mem2reg;
+        bool regwrite;
         std::uint8_t rwrite;
         std::uint32_t alu_val;
         // TODO

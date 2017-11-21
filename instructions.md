@@ -11,8 +11,8 @@ Explanation of checkboxes:
 CPU Arithmetic Instruction
 --------------------------
 * [-] ADD
-* [ ] ADDI
-* [ ] ADDIU
+* [-] ADDI
+* [-] ADDIU
 * [-] ADDU
 * [ ] CLO
 * [ ] CLZ
@@ -26,8 +26,8 @@ CPU Arithmetic Instruction
 * [ ] MULT
 * [ ] MULTU
 * [-] SLT
-* [ ] SLTI
-* [ ] SLTIU
+* [-] SLTI
+* [-] SLTIU
 * [?] SLTU
 * [-] SUB
 * [-] SUBU

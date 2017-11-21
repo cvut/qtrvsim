@@ -20,6 +20,12 @@ void MachineTests::core_regs_data() {
     QTest::newRow("ADDU") << Instruction(0, 24, 25, 26, 0, 33) \
                          << regs_init \
                          << regs_res;
+    QTest::newRow("ADDI") << Instruction(8, 24, 26, 12) \
+                         << regs_init \
+                         << regs_res;
+    QTest::newRow("ADDIU") << Instruction(9, 24, 26, 12) \
+                         << regs_init \
+                         << regs_res;
     regs_res.write_gp(26, 12);
     QTest::newRow("SUB") << Instruction(0, 24, 25, 26, 0, 34) \
                          << regs_init \
@@ -38,6 +44,12 @@ void MachineTests::core_regs_data() {
                          << regs_init \
                          << regs_res;
     QTest::newRow("SLTU") << Instruction(0, 24, 25, 26, 0, 43) \
+                         << regs_init \
+                         << regs_res;
+    QTest::newRow("SLTI") << Instruction(10, 24, 26, 24) \
+                         << regs_init \
+                         << regs_res;
+    QTest::newRow("SLTIU") << Instruction(11, 24, 26, 24) \
                          << regs_init \
                          << regs_res;
     }
@@ -79,10 +91,8 @@ void MachineTests::core_regs_data() {
     // TODO test other operations
 }
 
-/*
 #include <iostream>
 using namespace std;
-*/
 
 void MachineTests::core_regs() {
     QFETCH(Instruction, i);
@@ -98,7 +108,7 @@ void MachineTests::core_regs() {
     Registers regs_single(init); // Create registers copy
     CoreSingle core_single(&regs_single, &mem_single);
     core_single.step(); // Single step should be enought as this is risc without pipeline
-    //cout << "well:" << hex << regs_single.read_gp(26) << endl;
+    cout << "well:" << regs_single.read_gp(26) << endl;
     QCOMPARE(regs_single, res); // After doing changes from initial state this should be same state as in case of passed expected result
     QCOMPARE(mem, mem_single); // There should be no change in memory
 

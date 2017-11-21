@@ -1,33 +1,41 @@
 #include "core.h"
 #include "programloader.h"
 
+#define DM_SUPPORTED (1L<<0)
+#define DM_MEM2REG (1L<<1)
+#define DM_MEMWRITE (1L<<2)
+#define DM_ALUSRC (1L<<3)
+#define DM_REGD (1L<<4)
+#define DM_REGWRITE (1L<<5)
+#define DM_BRANCH (1L<<6)
+
  struct DecodeMap {
-    bool supported, mem2reg, memwrite, alubimm, regd, regwrite, branch;
+    long flags;
+    enum AluOp alu;
 };
 
 
 // This is temporally operation place holder
-#define NOPE { .supported = false }
+#define NOPE { .flags = 0, .alu = ALU_OP_SLL }
 
 // This is map from opcode to signals.
 static const struct DecodeMap dmap[]  = {
-    { .supported = true, .mem2reg = true, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // Alu operations
-    // TODO These are just copies of first one
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = false, .regwrite = false, .branch = true }, // Branch on alu operations
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // J
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // JAL
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // BEQ
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // BNE
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // BLEZ
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // BGTZ
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // ADDI
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // ADDIU
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // SLTI
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // SLTIU
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // ANDI
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // ORI
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // XORI
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // LUI
+    { .flags = DM_SUPPORTED | DM_REGD | DM_REGWRITE, .alu = ALU_OP_SLL }, // Alu operations
+    NOPE, // Branch on alu operations
+    NOPE, // J
+    NOPE, // JAL
+    NOPE, // BEQ
+    NOPE, // BNE
+    NOPE, // BLEZ
+    NOPE, // BGTZ
+    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE, .alu = ALU_OP_ADD }, // ADDI
+    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE, .alu = ALU_OP_ADDU }, // ADDIU
+    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE, .alu = ALU_OP_SLT }, // SLTI
+    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE, .alu = ALU_OP_SLTU }, // SLTIU
+    NOPE, // ANDI
+    NOPE, // ORI
+    NOPE, // XORI
+    NOPE, // LUI
     NOPE, // 16
     NOPE, // 17
     NOPE, // 18
@@ -44,21 +52,21 @@ static const struct DecodeMap dmap[]  = {
     NOPE, // 29
     NOPE, // 30
     NOPE, // 31
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // LB
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // LH
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // LWL
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // LW
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // LBU
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // LHU
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // LWR
+    NOPE, // LB
+    NOPE, // LH
+    NOPE, // LWL
+    NOPE, // LW
+    NOPE, // LBU
+    NOPE, // LHU
+    NOPE, // LWR
     NOPE, // 39
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // SB
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // SH
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // SWL
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // SW
+    NOPE, // SB
+    NOPE, // SH
+    NOPE, // SWL
+    NOPE, // SW
     NOPE, // 44
     NOPE, // 45
-    { .supported = true, .mem2reg = false, .memwrite = false, .alubimm = false, .regd = true, .regwrite = true, .branch = false }, // SWR
+    NOPE, // SWR
     NOPE, // 47
     NOPE, // 48
     NOPE, // 49
@@ -94,27 +102,19 @@ struct Core::dtFetch Core::fetch() {
 
 struct Core::dtDecode Core::decode(struct dtFetch dt) {
     struct DecodeMap dec = dmap[dt.inst.opcode()];
-    if (!dec.supported)
+    if (!dec.flags & DM_SUPPORTED)
         // TODO message
         throw QTMIPS_EXCEPTION(UnsupportedInstruction, "", "");
 
-    // Prepare alu operation
-    enum AluOp d_alu;
-    if (dt.inst.opcode() == 0) {
-        d_alu = (enum  AluOp)dt.inst.funct();
-    } else
-        // TODO can't we ignore this?
-        d_alu = ALU_OP_SLL; // Just set it to zero so we won't do something stupid like throw exception
-
     return {
         .inst = dt.inst,
-        .mem2reg = dec.mem2reg,
-        .memwrite = dec.memwrite,
-        .alubimm = dec.alubimm,
-        .regd = dec.regd,
-        .regwrite = dec.regwrite,
-        .branch = dec.branch,
-        .aluop = d_alu,
+        .mem2reg = dec.flags & DM_MEM2REG,
+        .memwrite = dec.flags & DM_MEMWRITE,
+        .alusrc = dec.flags & DM_ALUSRC,
+        .regd = dec.flags & DM_REGD,
+        .regwrite = dec.flags & DM_REGWRITE,
+        .branch = dec.flags & DM_BRANCH,
+        .aluop = dt.inst.opcode() == 0 ? (enum AluOp)dt.inst.funct() : dec.alu,
         .val_rs = regs->read_gp(dt.inst.rs()),
         .val_rt = regs->read_gp(dt.inst.rt()),
     };
@@ -125,23 +125,23 @@ struct Core::dtExecute Core::execute(struct dtDecode dt) {
     // TODO signals
 
     return {
-        .mem2reg = dt.mem2reg,
+        .regwrite = dt.regwrite,
         .rwrite = dt.regd ? dt.inst.rd() : dt.inst.rt(),
-        .alu_val = alu_operate(dt.aluop, dt.val_rs, dt.val_rt, dt.inst.shamt()),
+        .alu_val = alu_operate(dt.aluop, dt.val_rs, dt.alusrc ? dt.inst.immediate() : dt.val_rt, dt.inst.shamt()),
     };
 }
 
 struct Core::dtMemory Core::memory(struct dtExecute dt) {
     // TODO signals
     return {
-        .mem2reg = dt.mem2reg,
+        .regwrite = dt.regwrite,
         .rwrite = dt.rwrite,
         .alu_val = dt.alu_val,
     };
 }
 
 void Core::writeback(struct dtMemory dt) {
-    if (dt.mem2reg) {
+    if (dt.regwrite) {
         regs->write_gp(dt.rwrite, dt.alu_val);
     }
 }
