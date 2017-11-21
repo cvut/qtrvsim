@@ -5,6 +5,7 @@ void MachineTests::core_regs_data() {
     QTest::addColumn<Instruction>("i");
     QTest::addColumn<Registers>("init");
     QTest::addColumn<Registers>("res");
+    // Note that we shouldn't be touching program counter as that is handled automatically and differs if we use pipelining
 
     // Test arithmetic instructions
     {
@@ -21,9 +22,6 @@ void MachineTests::core_regs_data() {
 }
 
 void MachineTests::core_regs() {
-    QTest::addColumn<Instruction>("i");
-    QTest::addColumn<Registers>("init");
-    QTest::addColumn<Registers>("res");
     QFETCH(Instruction, i);
     QFETCH(Registers, init);
     QFETCH(Registers, res);
@@ -32,10 +30,12 @@ void MachineTests::core_regs() {
     mem.write_word(res.read_pc(), i.data()); // Store single instruction (anything else should be 0 so NOP effectively)
 
     // Test on non-piplined
+    res.pc_inc(); // We did single step	so increment program counter accordingly
     Memory mem_single(mem); // Create memory copy
-    CoreSingle core_single(&init, &mem_single);
+    Registers regs_single(init); // Create registers copy
+    CoreSingle core_single(&regs_single, &mem_single);
     core_single.step(); // Single step should be enought as this is risc without pipeline
-    //QCOMPARE(init, res); // After doing changes from initial state this should be same state as in case of passed expected result
+    QCOMPARE(regs_single, res); // After doing changes from initial state this should be same state as in case of passed expected result
     QCOMPARE(mem, mem_single); // There should be no change in memory
 
     // TODO on pipelined core

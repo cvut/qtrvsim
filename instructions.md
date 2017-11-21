@@ -2,9 +2,14 @@ Instructions
 ============
 This is list of all MIPS1 instructions and their implementation status in QtMips.
 
+Explanation of checkboxes:
+* [ ] Not tested
+* [-] Tested non-pipelined core
+* [x] Tested on non-pipelined and pipelined core
+
 CPU Arithmetic Instruction
 --------------------------
-* [ ] ADD
+* [-] ADD
 * [ ] ADDI
 * [ ] ADDIU
 * [ ] ADDU

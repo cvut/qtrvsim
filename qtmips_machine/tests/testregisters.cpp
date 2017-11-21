@@ -37,3 +37,30 @@ void MachineTests::registers_pc() {
     QVERIFY_EXCEPTION_THROWN(r.pc_jmp(0x1), QtMipsExceptionUnalignedJump);
     QVERIFY_EXCEPTION_THROWN(r.pc_abs_jmp(0x80020101), QtMipsExceptionUnalignedJump);
 }
+
+void MachineTests::registers_compare() {
+    Registers r1, r2;
+    QCOMPARE(r1, r2);
+    // General purpose register
+    r1.write_gp(1, 24);
+    QVERIFY(r1 != r2);
+    r2.write_gp(1, 24);
+    QCOMPARE(r1, r2);
+    // Program counter
+    r1.pc_inc();
+    QVERIFY(r1 != r2);
+    r2.pc_inc();
+    QCOMPARE(r1, r2);
+    // LO/HI (testing just one as they have common codepath)
+    r1.write_hi_lo(false, 18);
+    QVERIFY(r1 != r2);
+    r2.write_hi_lo(false, 18);
+    QCOMPARE(r1, r2);
+    // Now let's try copy (and verify only with gp this time)
+    Registers r3(r1);
+    QCOMPARE(r3, r1);
+    r3.write_gp(12, 19);
+    QVERIFY(r1 != r3);
+    r1.write_gp(12, 19);
+    QCOMPARE(r3, r1);
+}

@@ -21,6 +21,7 @@ public:
     void write_hi_lo(bool hi, std::uint32_t value);
 
     bool operator ==(const Registers &c) const;
+    bool operator !=(const Registers &c) const;
 
 signals:
     void pc_update(std::uint32_t val);

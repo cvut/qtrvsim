@@ -7,17 +7,17 @@
 #define PC_INIT 0x80020000
 //////////////////////////////////////////////////////////////////////////////
 
-Registers::Registers() {
+Registers::Registers() : QObject() {
     this->pc = PC_INIT; // Initialize to beginning program section
     for (int i = 0; i < 31; i++)
         this->gp[i] = 0;
     this->hi = this->lo = 0;
 }
 
-Registers::Registers(const Registers &orig) : Registers() {
+Registers::Registers(const Registers &orig) : QObject() {
     this->pc = orig.read_pc();
     for (int i = 0; i < 31; i++)
-        this->gp[i] = orig.read_gp(i);
+        this->gp[i] = orig.read_gp(i + 1);
     this->lo = orig.read_hi_lo(false);
     this->hi = orig.read_hi_lo(true);
 }
@@ -74,7 +74,7 @@ void Registers::write_hi_lo(bool hi, std::uint32_t value) {
         this->lo = value;
 }
 
-bool Registers::operator ==(const Registers &c) const {
+bool Registers::operator==(const Registers &c) const {
     if (read_pc() != c.read_pc())
         return false;
     for (int i = 0; i < 31; i++)
@@ -85,4 +85,8 @@ bool Registers::operator ==(const Registers &c) const {
     if (read_hi_lo(true) != c.read_hi_lo(true))
         return false;
     return true;
+}
+
+bool Registers::operator!=(const Registers &c) const {
+    return ! this->operator==(c);
 }

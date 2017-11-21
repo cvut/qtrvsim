@@ -11,6 +11,7 @@ private Q_SLOTS:
     void registers_rw_gp();
     void registers_rw_hi_lo();
     void registers_pc();
+    void registers_compare();
     // Memory
     void memory();
     void memory_data();
