@@ -47,3 +47,4 @@ being so.
   annoying for users so difference between cache and memory is just in collected
   statistics)
 * Interrupts and exceptions (if exception occurs then machine execution is halted)
+* Branch-likeli instructions (they are marked as obsolete)
