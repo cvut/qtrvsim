@@ -109,6 +109,10 @@ std::uint32_t Instruction::data() const {
     return this->dt;
 }
 
-bool Instruction::operator ==(const Instruction &c) const {
+bool Instruction::operator==(const Instruction &c) const {
     return (this->data() == c.data());
+}
+
+bool Instruction::operator!=(const Instruction &c) const {
+    return ! this->operator==(c);
 }

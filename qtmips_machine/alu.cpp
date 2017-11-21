@@ -8,15 +8,15 @@ std::uint32_t alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t
         case ALU_OP_SRL:
             return t >> sa;
         case ALU_OP_SRA:
-            // TODO is this correct implementation? (Shouldn't we be masking top most bit?)
-            return (t >> sa) | (t & 0x80000000);
+            // TODO is this correct implementation? (Should we be masking top most bit?)
+            return ((t & 0x7fffffff) >> sa) | (t & 0x80000000);
         case ALU_OP_SLLV:
             return t << s;
         case ALU_OP_SRLV:
             return t >> s;
         case ALU_OP_SRAV:
-            // TODO is this correct implementation? (Shouldn't we be masking top most bit?)
-            return (t >> s) | (t & 0x80000000);
+            // TODO is this correct implementation? (Should we be masking top most bit?)
+            return ((t & 0x7fffffff) >> s) | (t & 0x80000000);
         case ALU_OP_ADD:
             if (s > (0xFFFFFFFF - t))
                 throw QTMIPS_EXCEPTION(Overflow, "ADD operation overflow/underflow", QString::number(s) + QString(" + ") + QString::number(t));

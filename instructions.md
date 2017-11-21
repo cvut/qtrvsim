@@ -4,6 +4,7 @@ This is list of all MIPS1 instructions and their implementation status in QtMips
 
 Explanation of checkboxes:
 * [ ] Not tested
+* [?] Somewhat tested but not sure about correctness of implementation
 * [-] Tested non-pipelined core
 * [x] Tested on non-pipelined and pipelined core
 
@@ -12,7 +13,7 @@ CPU Arithmetic Instruction
 * [-] ADD
 * [ ] ADDI
 * [ ] ADDIU
-* [ ] ADDU
+* [-] ADDU
 * [ ] CLO
 * [ ] CLZ
 * [ ] DIV
@@ -24,12 +25,12 @@ CPU Arithmetic Instruction
 * [ ] MUL
 * [ ] MULT
 * [ ] MULTU
-* [ ] SLT
+* [-] SLT
 * [ ] SLTI
 * [ ] SLTIU
-* [ ] SLTU
-* [ ] SUB
-* [ ] SUBU
+* [?] SLTU
+* [-] SUB
+* [-] SUBU
 
 CPU Branch and Jump Instructions
 --------------------------------
@@ -48,8 +49,8 @@ CPU Branch and Jump Instructions
 * [ ] JALR
 * [ ] JR
 
-CPU Instruction Control Instruction
------------------------------------
+CPU No Instructions
+-------------------
 * [ ] NOP
 * [ ] SSNOP
 
@@ -96,12 +97,12 @@ CPU Move Instruction
 
 CPU Shift Instructions
 ----------------------
-* [ ] SLL
-* [ ] SLLV
-* [ ] SRA
-* [ ] SRAV
-* [ ] SRL
-* [ ] SRLV
+* [-] SLL
+* [-] SLLV
+* [?] SRA
+* [?] SRAV
+* [-] SRL
+* [-] SRLV
 
 CPU Trap Instructions
 ---------------------

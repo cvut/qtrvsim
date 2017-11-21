@@ -26,7 +26,8 @@ public:
     std::uint32_t address() const;
     std::uint32_t data() const;
 
-    bool operator ==(const Instruction &c) const;
+    bool operator==(const Instruction &c) const;
+    bool operator!=(const Instruction &c) const;
 
 private:
     std::uint32_t dt;
