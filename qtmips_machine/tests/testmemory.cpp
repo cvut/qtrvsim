@@ -44,8 +44,7 @@ void MachineTests::memory_section() {
 
     QFETCH(std::uint32_t, address);
 
-    // First section shouldn't exists
-    QCOMPARE(m.get_section(address, false), (MemorySection*)nullptr);
+    // First section shouldn't exists QCOMPARE(m.get_section(address, false), (MemorySection*)nullptr);
     // Create section
     MemorySection *s = m.get_section(address, true);
     QVERIFY(s != nullptr);
@@ -63,7 +62,7 @@ void MachineTests::memory_section() {
 void MachineTests::memory_endian() {
     Memory m;
 
-    // Memory should be bit endian so write bytes from most significant byte
+    // Memory should be little endian so write bytes from most significant byte
     m.write_byte(0x00, 0x12);
     m.write_byte(0x01, 0x34);
     m.write_byte(0x02, 0x56);
@@ -80,4 +79,27 @@ void MachineTests::memory_endian() {
     QCOMPARE(m.read_byte(0xF1), (std::uint8_t)0x34);
     QCOMPARE(m.read_byte(0xF2), (std::uint8_t)0x56);
     QCOMPARE(m.read_byte(0xF3), (std::uint8_t)0x78);
+}
+
+void MachineTests::memory_compare() {
+    Memory m1, m2;
+    QCOMPARE(m1, m2);
+    m1.write_byte(0x20,0x0);
+    QVERIFY(m1 != m2); // This should not be equal as this identifies also memory write (difference between no write and zero write)
+    m1.write_byte(0x20,0x24);
+    QVERIFY(m1 != m2);
+    m2.write_byte(0x20,0x23);
+    QVERIFY(m1 != m2);
+    m2.write_byte(0x20,0x24);
+    QCOMPARE(m1, m2);
+    // Do the same with some other section
+    m1.write_byte(0xFFFF20, 0x24);
+    QVERIFY(m1 != m2);
+    m2.write_byte(0xFFFF20, 0x24);
+    QCOMPARE(m1, m2);
+    // And also check memory copy
+    Memory m3(m1);
+    QCOMPARE(m1, m3);
+    m3.write_byte(0x18, 0x22);
+    QVERIFY(m1 != m3);
 }

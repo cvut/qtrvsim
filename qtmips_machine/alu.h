@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <QString>
+#include <QObject>
 
 // TODO Any other operations? We seems to be missing a lot of them.
 enum AluOp : std::uint8_t {
@@ -35,5 +36,7 @@ std::uint32_t alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t
 
 // Returns string representation of ALU instruction (internally used by Instruction::to_str)
 QString alu_str(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa);
+
+Q_DECLARE_METATYPE(AluOp)
 
 #endif // ALU_H

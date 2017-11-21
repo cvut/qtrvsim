@@ -28,6 +28,10 @@ const struct InstructionMap instruction_map[] = {
     IM_UNKNOWN
 };
 
+Instruction::Instruction() {
+    this->dt = 0;
+}
+
 Instruction::Instruction(std::uint32_t inst) {
     this->dt = inst;
 }
@@ -54,6 +58,10 @@ Instruction::Instruction(std::uint8_t opcode, std::uint32_t address) {
     this->dt = 0;
     this->dt |= opcode << 26;
     this->dt |= address;
+}
+
+Instruction::Instruction(const Instruction &i) {
+    this->dt = i.data();
 }
 
 QString Instruction::to_str() {

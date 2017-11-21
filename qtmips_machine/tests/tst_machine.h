@@ -17,6 +17,7 @@ private Q_SLOTS:
     void memory_section();
     void memory_section_data();
     void memory_endian();
+    void memory_compare();
     // Program loader
     void program_loader();
     // Instruction

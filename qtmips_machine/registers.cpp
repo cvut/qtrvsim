@@ -14,12 +14,12 @@ Registers::Registers() {
     this->hi = this->lo = 0;
 }
 
-Registers::Registers(const Registers *orig) : Registers() {
-    this->pc = orig->read_pc();
+Registers::Registers(const Registers &orig) : Registers() {
+    this->pc = orig.read_pc();
     for (int i = 0; i < 31; i++)
-        this->gp[i] = orig->read_gp(i);
-    this->lo = orig->read_hi_lo(false);
-    this->hi = orig->read_hi_lo(true);
+        this->gp[i] = orig.read_gp(i);
+    this->lo = orig.read_hi_lo(false);
+    this->hi = orig.read_hi_lo(true);
 }
 
 std::uint32_t Registers::read_pc() const {

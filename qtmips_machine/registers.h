@@ -8,7 +8,7 @@ class Registers : public QObject {
     Q_OBJECT
 public:
     Registers();
-    Registers(const Registers*);
+    Registers(const Registers&);
 
     std::uint32_t read_pc() const; // Return current value of program counter
     std::uint32_t pc_inc(); // Increment program counter by four bytes
@@ -31,5 +31,7 @@ private:
     std::uint32_t hi, lo;
     std::uint32_t pc; // program counter
 };
+
+Q_DECLARE_METATYPE(Registers)
 
 #endif // REGISTERS_H
