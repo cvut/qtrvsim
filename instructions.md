@@ -76,14 +76,14 @@ CPU Load, Store and Memory Control Instructions
 
 CPU Logical Instructions
 ------------------------
-* [ ] AND
-* [ ] ANDI
+* [-] AND
+* [-] ANDI
 * [ ] LUI
-* [ ] NOR
-* [ ] OR
-* [ ] ORI
-* [ ] XOR
-* [ ] XORI
+* [-] NOR
+* [-] OR
+* [-] ORI
+* [-] XOR
+* [-] XORI
 
 CPU Move Instruction
 --------------------

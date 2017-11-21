@@ -88,7 +88,39 @@ void MachineTests::core_regs_data() {
                          << regs_init \
                          << regs_res;
     }
-    // TODO test other operations
+
+    // Logical instructions
+    {
+    Registers regs_init;
+    regs_init.write_gp(24, 0xf0);
+    regs_init.write_gp(25, 0xe1);
+    Registers regs_res(regs_init);
+    regs_res.write_gp(26, 0xe0);
+    QTest::newRow("AND") << Instruction(0, 24, 25, 26, 0, 36) \
+                         << regs_init \
+                         << regs_res;
+    QTest::newRow("ANDI") << Instruction(12, 24, 26, 0xe1) \
+                         << regs_init \
+                         << regs_res;
+    regs_res.write_gp(26, 0xf1);
+    QTest::newRow("OR") << Instruction(0, 24, 25, 26, 0, 37) \
+                         << regs_init \
+                         << regs_res;
+    QTest::newRow("ORI") << Instruction(13, 24, 26, 0xe1) \
+                         << regs_init \
+                         << regs_res;
+    regs_res.write_gp(26, 0x11);
+    QTest::newRow("XOR") << Instruction(0, 24, 25, 26, 0, 38) \
+                         << regs_init \
+                         << regs_res;
+    QTest::newRow("XORI") << Instruction(14, 24, 26, 0xe1) \
+                         << regs_init \
+                         << regs_res;
+    regs_res.write_gp(26, 0xffffff0e);
+    QTest::newRow("NOR") << Instruction(0, 24, 25, 26, 0, 39) \
+                         << regs_init \
+                         << regs_res;
+    }
 }
 
 #include <iostream>

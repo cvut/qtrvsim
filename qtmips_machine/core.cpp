@@ -18,6 +18,8 @@
 // This is temporally operation place holder
 #define NOPE { .flags = 0, .alu = ALU_OP_SLL }
 
+#define FLAGS_ALU_I (DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE)
+
 // This is map from opcode to signals.
 static const struct DecodeMap dmap[]  = {
     { .flags = DM_SUPPORTED | DM_REGD | DM_REGWRITE, .alu = ALU_OP_SLL }, // Alu operations
@@ -28,13 +30,13 @@ static const struct DecodeMap dmap[]  = {
     NOPE, // BNE
     NOPE, // BLEZ
     NOPE, // BGTZ
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE, .alu = ALU_OP_ADD }, // ADDI
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE, .alu = ALU_OP_ADDU }, // ADDIU
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE, .alu = ALU_OP_SLT }, // SLTI
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE, .alu = ALU_OP_SLTU }, // SLTIU
-    NOPE, // ANDI
-    NOPE, // ORI
-    NOPE, // XORI
+    { .flags = FLAGS_ALU_I, .alu = ALU_OP_ADD }, // ADDI
+    { .flags = FLAGS_ALU_I, .alu = ALU_OP_ADDU }, // ADDIU
+    { .flags = FLAGS_ALU_I, .alu = ALU_OP_SLT }, // SLTI
+    { .flags = FLAGS_ALU_I, .alu = ALU_OP_SLTU }, // SLTIU
+    { .flags = FLAGS_ALU_I, .alu = ALU_OP_AND }, // ANDI
+    { .flags = FLAGS_ALU_I, .alu = ALU_OP_OR }, // ORI
+    { .flags = FLAGS_ALU_I, .alu = ALU_OP_XOR }, // XORI
     NOPE, // LUI
     NOPE, // 16
     NOPE, // 17
