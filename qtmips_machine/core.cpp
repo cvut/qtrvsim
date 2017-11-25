@@ -163,14 +163,35 @@ void CoreSingle::step() {
 
 CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem) : \
     Core(regs, mem) {
-    // Nothing to do
+    // Initialize to NOPE //
+    // dtFetch
+    dt_f.inst = Instruction(0x00);
+    // dtDecode
+    dt_d.inst = dt_f.inst;
+    dt_d.mem2reg = false;
+    dt_d.memwrite = false;
+    dt_d.alusrc = false;
+    dt_d.regd = false;
+    dt_d.regwrite = false;
+    dt_d.branch = false;
+    dt_d.aluop = ALU_OP_SLL;
+    dt_d.val_rs = 0;
+    dt_d.val_rt = 0;
+    // dtExecute
+    dt_e.regwrite = dt_d.regwrite;
+    dt_e.rwrite = dt_d.regwrite;
+    dt_e.alu_val = 0;
+    // dtMemory
+    dt_m.regwrite = dt_e.regwrite;
+    dt_m.rwrite = dt_e.rwrite;
+    dt_m.alu_val = dt_e.alu_val;
 }
 
 void CorePipelined::step() {
     // TODO implement pipelined
-    struct dtFetch f = fetch();
-    struct dtDecode d = decode(f);
-    struct dtExecute e = execute(d);
-    struct dtMemory m =memory(e);
-    writeback(m);
+    writeback(dt_m);
+    dt_m =memory(dt_e);
+    dt_e = execute(dt_d);
+    dt_d = decode(dt_f);
+    dt_f = fetch();
 }

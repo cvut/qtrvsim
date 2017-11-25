@@ -1,7 +1,7 @@
 #include "tst_machine.h"
 #include "core.h"
 
-void MachineTests::core_regs_data() {
+static void core_regs_data() {
     QTest::addColumn<Instruction>("i");
     QTest::addColumn<Registers>("init");
     QTest::addColumn<Registers>("res");
@@ -123,10 +123,35 @@ void MachineTests::core_regs_data() {
     }
 }
 
+void MachineTests::singlecore_regs_data() {
+    core_regs_data();
+}
+
+void MachineTests::pipecore_regs_data() {
+    core_regs_data();
+}
+
 #include <iostream>
 using namespace std;
 
-void MachineTests::core_regs() {
+void MachineTests::singlecore_regs() {
+    QFETCH(Instruction, i);
+    QFETCH(Registers, init);
+    QFETCH(Registers, res);
+
+    Memory mem; // Just memory (it shouldn't be used here except instruction)
+    mem.write_word(res.read_pc(), i.data()); // Store single instruction (anything else should be 0 so NOP effectively)
+    Memory mem_used(mem); // Create memory copy
+
+    CoreSingle core(&init, &mem_used);
+    core.step(); // Single step should be enought as this is risc without pipeline
+
+    res.pc_inc(); // We did single step	so increment program counter accordingly
+    QCOMPARE(init, res); // After doing changes from initial state this should be same state as in case of passed expected result
+    QCOMPARE(mem, mem_used); // There should be no change in memory
+}
+
+void MachineTests::pipecore_regs() {
     QFETCH(Instruction, i);
     QFETCH(Registers, init);
     QFETCH(Registers, res);
@@ -134,17 +159,22 @@ void MachineTests::core_regs() {
     Memory mem; // Just memory (it shouldn't be used here except instruction)
     mem.write_word(res.read_pc(), i.data()); // Store single instruction (anything else should be 0 so NOP effectively)
 
-    // Test on non-piplined
-    res.pc_inc(); // We did single step	so increment program counter accordingly
-    Memory mem_single(mem); // Create memory copy
-    Registers regs_single(init); // Create registers copy
-    CoreSingle core_single(&regs_single, &mem_single);
-    core_single.step(); // Single step should be enought as this is risc without pipeline
-    cout << "well:" << regs_single.read_gp(26) << endl;
-    QCOMPARE(regs_single, res); // After doing changes from initial state this should be same state as in case of passed expected result
-    QCOMPARE(mem, mem_single); // There should be no change in memory
+    Memory mem_used(mem);
+    Registers regs_used(init);
 
-    // TODO on pipelined core
+    res.pc_jmp(0x14);
+
+    CorePipelined core(&regs_used, &mem_used);
+    for (int i = 0; i < 4; i++) {
+        core.step(); // Fire steps for five pipelines stages
+        init.pc_inc();
+        QCOMPARE(init, regs_used); // Untill writeback there should be no change in registers
+    }
+    core.step();
+
+    //cout << "well:" << init.read_gp(26) << ":" << regs_used.read_gp(26) << endl;
+    QCOMPARE(regs_used, res); // After doing changes from initial state this should be same state as in case of passed expected result
+    QCOMPARE(mem, mem_used); // There should be no change in memory
 }
 
 void MachineTests::core_mem_data() {

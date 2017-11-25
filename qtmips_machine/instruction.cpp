@@ -16,6 +16,13 @@ const struct InstructionMap instruction_map[] = {
     IM_UNKNOWN,
     IM_UNKNOWN,
     {"ADDI"},
+    {"ADDIU"},
+    {"SLTI"},
+    {"SLTIU"},
+    {"ANDI"},
+    {"ORI"},
+    {"XORI"},
+    {"LUI"},
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
@@ -115,4 +122,10 @@ bool Instruction::operator==(const Instruction &c) const {
 
 bool Instruction::operator!=(const Instruction &c) const {
     return ! this->operator==(c);
+}
+
+Instruction &Instruction::operator=(const Instruction &c) {
+    if (this != &c)
+        this->dt = c.data();
+    return *this;
 }

@@ -30,8 +30,10 @@ private Q_SLOTS:
     void alu_except();
     void alu_except_data();
     // Core
-    void core_regs();
-    void core_regs_data();
+    void singlecore_regs();
+    void singlecore_regs_data();
+    void pipecore_regs();
+    void pipecore_regs_data();
     void core_mem();
     void core_mem_data();
 };

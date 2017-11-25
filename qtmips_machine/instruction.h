@@ -28,6 +28,7 @@ public:
 
     bool operator==(const Instruction &c) const;
     bool operator!=(const Instruction &c) const;
+    Instruction &operator=(const Instruction &c);
 
 private:
     std::uint32_t dt;

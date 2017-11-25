@@ -69,6 +69,12 @@ public:
     CorePipelined(Registers *regs, MemoryAccess *mem);
 
     void step();
+
+private:
+    struct Core::dtFetch dt_f;
+    struct Core::dtDecode dt_d;
+    struct Core::dtExecute dt_e;
+    struct Core::dtMemory dt_m;
 };
 
 #endif // CORE_H
