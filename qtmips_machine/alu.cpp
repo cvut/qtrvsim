@@ -17,6 +17,12 @@ std::uint32_t alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t
         case ALU_OP_SRAV:
             // TODO is this correct implementation? (Should we be masking top most bit?)
             return ((t & 0x7fffffff) >> s) | (t & 0x80000000);
+        case ALU_OP_MOVZ:
+            // We do this just to implement valid alu operation but we have to evaluate comparison way before this to disable register write
+            return t == 0 ? s : 0;
+        case ALU_OP_MOVN:
+            // Same note as for MOVZ applies here
+            return t != 0 ? s : 0;
         case ALU_OP_MFHI:
             return regs->read_hi_lo(true);
         case ALU_OP_MTHI:

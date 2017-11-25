@@ -126,8 +126,14 @@ struct Core::dtDecode Core::decode(struct dtFetch dt) {
 struct Core::dtExecute Core::execute(struct dtDecode dt) {
     // TODO signals
 
+    // Handle conditional move (we have to change regwrite signal if conditional is not met)
+    // TODO can't we do this some cleaner way?
+    bool regwrite = dt.regwrite;
+    if (dt.inst.opcode() == 0 && ((dt.inst.funct() == 10 && dt.val_rt != 0) || (dt.inst.funct() == 11 && dt.val_rt == 0)))
+        regwrite = false;
+
     return {
-        .regwrite = dt.regwrite,
+        .regwrite = regwrite,
         .rwrite = dt.regd ? dt.inst.rd() : dt.inst.rt(),
         .alu_val = alu_operate(dt.aluop, dt.val_rs, dt.alusrc ? dt.inst.immediate() : dt.val_rt, dt.inst.shamt(), regs),
     };

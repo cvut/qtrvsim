@@ -90,8 +90,8 @@ CPU Move Instruction
 * [x] MFLO
 * [x] MTHI
 * [x] MTHO
-* [ ] MOVN
-* [ ] MOVZ
+* [x] MOVN
+* [x] MOVZ
 * MOVF, MOVT won't be implemented as floating coprocessor won't be implemented
 
 CPU Shift Instructions

@@ -12,6 +12,20 @@ void MachineTests::alu_data() {
     QTest::addColumn<std::uint32_t>("res");
 
     // TODO SLL-SRAV
+    QTest::newRow("MOVZ") << ALU_OP_MOVZ \
+                         << (std::uint32_t)22 \
+                         << (std::uint32_t)0 \
+                         << (std::uint8_t)0 \
+                         << Registers() \
+                         << Registers() \
+                         << (std::uint32_t)22;
+    QTest::newRow("MOVN") << ALU_OP_MOVN \
+                         << (std::uint32_t)22 \
+                         << (std::uint32_t)1 \
+                         << (std::uint8_t)0 \
+                         << Registers() \
+                         << Registers() \
+                         << (std::uint32_t)22;
     {
     Registers init;
     init.write_hi_lo(true, 42);

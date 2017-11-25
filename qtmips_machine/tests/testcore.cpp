@@ -127,6 +127,8 @@ static void core_regs_data() {
     Registers regs_init;
     regs_init.write_hi_lo(true, 24);
     regs_init.write_hi_lo(false, 28);
+    regs_init.write_gp(24, 55);
+    regs_init.write_gp(25, 56);
     regs_init.write_gp(27, 21);
     regs_init.write_gp(28, 22);
     Registers regs_res(regs_init);
@@ -146,6 +148,20 @@ static void core_regs_data() {
     regs_res.write_hi_lo(true, 24);
     regs_res.write_hi_lo(false, 22);
     QTest::newRow("MTLO") << Instruction(0, 28, 0, 0, 0, 19) \
+                         << regs_init \
+                         << regs_res;
+    regs_res.write_hi_lo(false, 28);
+    QTest::newRow("MOVZ-F") << Instruction(0, 24, 24, 25, 0, 10) \
+                         << regs_init \
+                         << regs_res;
+    QTest::newRow("MOVN-F") << Instruction(0, 24, 1, 25, 0, 11) \
+                         << regs_init \
+                         << regs_res;
+    regs_res.write_gp(25, 55);
+    QTest::newRow("MOVZ-T") << Instruction(0, 24, 1, 25, 0, 10) \
+                         << regs_init \
+                         << regs_res;
+    QTest::newRow("MOVN-T") << Instruction(0, 24, 24, 25, 0, 11) \
                          << regs_init \
                          << regs_res;
     }
