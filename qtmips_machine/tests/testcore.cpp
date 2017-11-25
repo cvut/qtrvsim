@@ -121,6 +121,34 @@ static void core_regs_data() {
                          << regs_init \
                          << regs_res;
     }
+
+    // Move instructions
+    {
+    Registers regs_init;
+    regs_init.write_hi_lo(true, 24);
+    regs_init.write_hi_lo(false, 28);
+    regs_init.write_gp(27, 21);
+    regs_init.write_gp(28, 22);
+    Registers regs_res(regs_init);
+    regs_res.write_gp(26, 24);
+    QTest::newRow("MFHI") << Instruction(0, 0, 0, 26, 0, 16) \
+                         << regs_init \
+                         << regs_res;
+    regs_res.write_gp(26, 28);
+    QTest::newRow("MFLO") << Instruction(0, 0, 0, 26, 0, 18) \
+                         << regs_init \
+                         << regs_res;
+    regs_res.write_gp(26, 0);
+    regs_res.write_hi_lo(true, 21);
+    QTest::newRow("MTHI") << Instruction(0, 27, 0, 0, 0, 17) \
+                         << regs_init \
+                         << regs_res;
+    regs_res.write_hi_lo(true, 24);
+    regs_res.write_hi_lo(false, 22);
+    QTest::newRow("MTLO") << Instruction(0, 28, 0, 0, 0, 19) \
+                         << regs_init \
+                         << regs_res;
+    }
 }
 
 void MachineTests::singlecore_regs_data() {
@@ -160,20 +188,17 @@ void MachineTests::pipecore_regs() {
     mem.write_word(res.read_pc(), i.data()); // Store single instruction (anything else should be 0 so NOP effectively)
 
     Memory mem_used(mem);
-    Registers regs_used(init);
 
     res.pc_jmp(0x14);
 
-    CorePipelined core(&regs_used, &mem_used);
+    CorePipelined core(&init, &mem_used);
     for (int i = 0; i < 4; i++) {
         core.step(); // Fire steps for five pipelines stages
-        init.pc_inc();
-        QCOMPARE(init, regs_used); // Untill writeback there should be no change in registers
     }
     core.step();
 
     //cout << "well:" << init.read_gp(26) << ":" << regs_used.read_gp(26) << endl;
-    QCOMPARE(regs_used, res); // After doing changes from initial state this should be same state as in case of passed expected result
+    QCOMPARE(init, res); // After doing changes from initial state this should be same state as in case of passed expected result
     QCOMPARE(mem, mem_used); // There should be no change in memory
 }
 

@@ -1,7 +1,7 @@
 #include "alu.h"
 #include "qtmipsexception.h"
 
-std::uint32_t alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa) {
+std::uint32_t alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa, Registers *regs) {
     switch(operation) {
         case ALU_OP_SLL:
             return t << sa;
@@ -17,6 +17,16 @@ std::uint32_t alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t
         case ALU_OP_SRAV:
             // TODO is this correct implementation? (Should we be masking top most bit?)
             return ((t & 0x7fffffff) >> s) | (t & 0x80000000);
+        case ALU_OP_MFHI:
+            return regs->read_hi_lo(true);
+        case ALU_OP_MTHI:
+            regs->write_hi_lo(true, s);
+            return 0x0;
+        case ALU_OP_MFLO:
+            return regs->read_hi_lo(false);
+        case ALU_OP_MTLO:
+            regs->write_hi_lo(false, s);
+            return 0x0;
         case ALU_OP_ADD:
             if (s > (0xFFFFFFFF - t))
                 throw QTMIPS_EXCEPTION(Overflow, "ADD operation overflow/underflow", QString::number(s) + QString(" + ") + QString::number(t));

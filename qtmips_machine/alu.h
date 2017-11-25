@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <QString>
 #include <QObject>
+#include <registers.h>
 
 // TODO Any other operations? We seems to be missing a lot of them.
 enum AluOp : std::uint8_t {
@@ -13,6 +14,10 @@ enum AluOp : std::uint8_t {
     ALU_OP_SLLV,
     ALU_OP_SRLV = 6,
     ALU_OP_SRAV,
+    ALU_OP_MFHI = 16,
+    ALU_OP_MTHI,
+    ALU_OP_MFLO,
+    ALU_OP_MTLO,
     ALU_OP_ADD = 32,
     ALU_OP_ADDU,
     ALU_OP_SUB,
@@ -31,8 +36,9 @@ enum AluOp : std::uint8_t {
 // s: Loaded from rs. Also calles as source.
 // t: Loaded from rt or immediate field from instruction it self. Also called as target.
 // sa: This is value directly from instruction it self (sa section) used for shift operations
+// regs: Registers used. We need direct access to lo and hi registers (those are not accessed from core it self but from alu directly
 // Returned value is commonly saved to rt/rd or any other way passed trough core
-std::uint32_t alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa);
+std::uint32_t alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa, Registers *regs);
 
 // Returns string representation of ALU instruction (internally used by Instruction::to_str)
 QString alu_str(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa);

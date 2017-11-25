@@ -129,7 +129,7 @@ struct Core::dtExecute Core::execute(struct dtDecode dt) {
     return {
         .regwrite = dt.regwrite,
         .rwrite = dt.regd ? dt.inst.rd() : dt.inst.rt(),
-        .alu_val = alu_operate(dt.aluop, dt.val_rs, dt.alusrc ? dt.inst.immediate() : dt.val_rt, dt.inst.shamt()),
+        .alu_val = alu_operate(dt.aluop, dt.val_rs, dt.alusrc ? dt.inst.immediate() : dt.val_rt, dt.inst.shamt(), regs),
     };
 }
 

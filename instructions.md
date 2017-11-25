@@ -86,10 +86,10 @@ CPU Logical Instructions
 
 CPU Move Instruction
 --------------------
-* [ ] MFHI
-* [ ] MFLO
-* [ ] MTHI
-* [ ] MTHO
+* [x] MFHI
+* [x] MFLO
+* [x] MTHI
+* [x] MTHO
 * [ ] MOVN
 * [ ] MOVZ
 * MOVF, MOVT won't be implemented as floating coprocessor won't be implemented
