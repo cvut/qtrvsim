@@ -27,7 +27,7 @@ CPU Arithmetic Instruction
 * [x] SLT
 * [x] SLTI
 * [x] SLTIU
-* [?] SLTU
+* [x] SLTU
 * [x] SUB
 * [x] SUBU
 

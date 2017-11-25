@@ -50,7 +50,16 @@ void MachineTests::alu_data() {
                          << (std::uint32_t)0x603 \
                          << (std::uint8_t)0 \
                          << (std::uint32_t)0xFFFFF17C;
-    // TODO SLT-SLTU
+    QTest::newRow("SLT") << ALU_OP_SLT \
+                         << (std::uint32_t)-31 \
+                         << (std::uint32_t)24 \
+                         << (std::uint8_t)0 \
+                         << (std::uint32_t)1;
+    QTest::newRow("SLTU") << ALU_OP_SLTU \
+                         << (std::uint32_t)24 \
+                         << (std::uint32_t)32 \
+                         << (std::uint8_t)0 \
+                         << (std::uint32_t)1;
 }
 
 void MachineTests::alu() {

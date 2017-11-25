@@ -37,10 +37,10 @@ std::uint32_t alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t
             return s ^ t;
         case ALU_OP_NOR:
             return ~(s | t);
-        case ALU_OP_SLTU:
-            // TODO is this correct implementation? (this is two's complement signed representation so do we care?)
-            // Intentional falltrough
         case ALU_OP_SLT:
+            // Note: this is in two's complement so there is difference in unsigned and signed compare
+            return ((std::int32_t)s < (std::int32_t)t) ? 1 : 0;
+        case ALU_OP_SLTU:
             return (s < t) ? 1 : 0;
         default:
             throw QTMIPS_EXCEPTION(UnsupportedAluOperation, "Unknown ALU operation", QString::number(operation, 16));
