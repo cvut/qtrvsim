@@ -68,7 +68,7 @@ qtmips_make() {
 	mkdir -p "$BUILD_DIR"
 	local ORIG="$(pwd)"
 	cd "$BUILD_DIR"
-	/usr/lib64/qt5/bin/qmake "$PROJECT_ROOT" || echo_fail "QtMips qmake failed!"
+	qtchooser -run-tool=qmake -qt=5 "$PROJECT_ROOT" || echo_fail "QtMips qmake failed!"
 	make "$@" || echo_fail "QtMips build failed! (target: $@)"
 	cd "$ORIG"
 }
