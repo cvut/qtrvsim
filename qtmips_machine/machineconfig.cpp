@@ -8,6 +8,7 @@ MachineConfig::MachineConfig() {
 MachineConfig::MachineConfig(MachineConfig *cc) {
     pipeline = cc->pipelined();
     jumppred = cc->jump_prediction();
+    elf_path = cc->elf();
 }
 
 void MachineConfig::set_pipelined(bool v) {
