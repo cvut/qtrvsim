@@ -97,5 +97,5 @@ mips_compiler() {
 mips_make_test() {
 	mips_compiler
 	mkdir -p "$TEST_DIR"
-	PATH="$PATH:$MIPS_COMPILER/bin" make -C "$TEST_SRC" O="$TEST_DIR" MIPS_PREFIX="mips-qtmips-elf" "$@"
+	PATH="$PATH:$MIPS_COMPILER/bin" make -C "$TEST_SRC" O="$TEST_DIR" MIPS_PREFIX="mips-qtmips-elf-" "$@"
 }

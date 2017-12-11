@@ -27,10 +27,10 @@ $$(info $$(OBJ_$(1)))
 all:: $$(O)/$(1)
 
 $$(O)/$(1): $$(OBJ_$(1))
-	$$(MIPS_PREFIX)-gcc $$(MIPS_LDFLAGS) -o $$@ $$^
+	$$(MIPS_PREFIX)gcc $$(MIPS_LDFLAGS) -o $$@ $$^
 
 $$(OBJ_$(1)): $$(O)/%.o: %.S
-	$$(MIPS_PREFIX)-gcc $$(MIPS_CFLAGS) -c -x assembler-with-cpp -o $$@ $$<
+	$$(MIPS_PREFIX)gcc $$(MIPS_CFLAGS) -c -x assembler-with-cpp -o $$@ $$<
 
 clean::
 	$(RM) $$(OBJ_$(1))
