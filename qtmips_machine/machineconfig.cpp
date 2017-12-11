@@ -3,11 +3,14 @@
 MachineConfig::MachineConfig() {
     pipeline = false;
     jumppred = false;
+    cache_type = CCT_NONE;
+    elf_path = QString("");
 }
 
 MachineConfig::MachineConfig(MachineConfig *cc) {
     pipeline = cc->pipelined();
     jumppred = cc->jump_prediction();
+    cache_type = cc->cache();
     elf_path = cc->elf();
 }
 

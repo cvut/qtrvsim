@@ -21,6 +21,8 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) {
         coremem = mem;
         //coremem = cch = new CacheAssociative();
         break;
+    default:
+        throw QTMIPS_EXCEPTION(Sanity, "Trying to configure unknown cache type", "");
     }
 
     // TODO pipelined
