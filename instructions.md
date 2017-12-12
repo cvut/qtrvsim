@@ -55,20 +55,20 @@ CPU No Instructions
 
 CPU Load, Store and Memory Control Instructions
 -----------------------------------------------
-* [ ] LB
-* [ ] LBU
-* [ ] LH
-* [ ] LHU
+* [x] LB
+* [x] LBU
+* [x] LH
+* [x] LHU
 * [ ] LL
-* [ ] LW
+* [x] LW
 * [ ] LWL
 * [ ] LWR
 * [ ] PREF
-* [ ] SB
+* [x] SB
 * [ ] SC
 * [ ] SD
-* [ ] SH
-* [ ] SW
+* [x] SH
+* [x] SW
 * [ ] SWL
 * [ ] SWR
 * [ ] SYNC

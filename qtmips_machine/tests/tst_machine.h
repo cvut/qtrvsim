@@ -19,6 +19,10 @@ private Q_SLOTS:
     void memory_section_data();
     void memory_endian();
     void memory_compare();
+    void memory_write_ctl();
+    void memory_write_ctl_data();
+    void memory_read_ctl();
+    void memory_read_ctl_data();
     // Program loader
     void program_loader();
     // Instruction
@@ -38,8 +42,10 @@ private Q_SLOTS:
     void singlecore_jmp_data();
     void pipecore_jmp();
     void pipecore_jmp_data();
-    void core_mem();
-    void core_mem_data();
+    void singlecore_mem();
+    void singlecore_mem_data();
+    void pipecore_mem();
+    void pipecore_mem_data();
 };
 
 #endif // TST_MACHINE_H

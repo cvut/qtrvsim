@@ -26,24 +26,29 @@ protected:
     };
     struct dtDecode {
         Instruction inst;
-        bool mem2reg; // Write memory output to register (instead alu output)
+        bool memread; // If memory should be read
         bool memwrite; // If memory should write input
         bool alusrc; // If second value to alu is immediate value (rt used otherwise)
         bool regd; // If rd is used (otherwise rt is used for write target)
         bool regwrite; // If output should be written back to register (which one depends on regd)
         enum AluOp aluop; // Decoded ALU operation
+        enum MemoryAccess::AccessControl memctl; // Decoded memory access type
         std::uint32_t val_rs; // Value from register rs
         std::uint32_t val_rt; // Value from register rt
     };
     struct dtExecute {
+        bool memread;
+        bool memwrite;
         bool regwrite;
+        enum MemoryAccess::AccessControl memctl;
+        std::uint32_t val_rt;
         std::uint8_t rwrite; // Writeback register (multiplexed between rt and rd according to regd)
         std::uint32_t alu_val; // Result of ALU execution
     };
     struct dtMemory {
         bool regwrite;
         std::uint8_t rwrite;
-        std::uint32_t alu_val;
+        std::uint32_t towrite_val;
     };
 
     struct dtFetch fetch();

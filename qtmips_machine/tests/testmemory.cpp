@@ -103,3 +103,61 @@ void MachineTests::memory_compare() {
     m3.write_byte(0x18, 0x22);
     QVERIFY(m1 != m3);
 }
+
+void MachineTests::memory_write_ctl_data() {
+    QTest::addColumn<MemoryAccess::AccessControl>("ctl");
+    QTest::addColumn<Memory>("result");
+
+    Memory mem;
+    QTest::newRow("none") << MemoryAccess::AC_NONE \
+                          << mem;
+    mem.write_byte(0x20, 0x26);
+    QTest::newRow("byte") << MemoryAccess::AC_BYTE \
+                          << mem;
+    QTest::newRow("byte-unsigned") << MemoryAccess::AC_BYTE_UNSIGNED \
+                          << mem;
+    mem.write_hword(0x20, 0x2526);
+    QTest::newRow("halfword") << MemoryAccess::AC_HALFWORD \
+                          << mem;
+    QTest::newRow("haldword-unsigned") << MemoryAccess::AC_HALFWORD_UNSIGNED \
+                          << mem;
+    mem.write_word(0x20, 0x23242526);
+    QTest::newRow("word") << MemoryAccess::AC_WORD \
+                          << mem;
+}
+
+void MachineTests::memory_write_ctl() {
+    QFETCH(MemoryAccess::AccessControl, ctl);
+    QFETCH(Memory, result);
+
+    Memory mem;
+    mem.write_ctl(ctl, 0x20, 0x23242526);
+    QCOMPARE(mem, result);
+}
+
+void MachineTests::memory_read_ctl_data() {
+    QTest::addColumn<MemoryAccess::AccessControl>("ctl");
+    QTest::addColumn<std::uint32_t>("result");
+
+    QTest::newRow("none") << MemoryAccess::AC_NONE \
+                          << (std::uint32_t)0;
+    QTest::newRow("byte") << MemoryAccess::AC_BYTE \
+                          << (std::uint32_t)0x80000023;
+    QTest::newRow("halfword") << MemoryAccess::AC_HALFWORD \
+                          << (std::uint32_t)0x80002324;
+    QTest::newRow("word") << MemoryAccess::AC_WORD \
+                          << (std::uint32_t)0xA3242526;
+    QTest::newRow("byte-unsigned") << MemoryAccess::AC_BYTE_UNSIGNED \
+                          << (std::uint32_t)0xA3;
+    QTest::newRow("halfword-unsigned") << MemoryAccess::AC_HALFWORD_UNSIGNED \
+                          << (std::uint32_t)0xA324;
+}
+
+void MachineTests::memory_read_ctl() {
+    QFETCH(MemoryAccess::AccessControl, ctl);
+    QFETCH(std::uint32_t, result);
+
+    Memory mem;
+    mem.write_word(0x20, 0xA3242526);
+    QCOMPARE(mem.read_ctl(ctl, 0x20), result);
+}

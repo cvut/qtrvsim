@@ -247,6 +247,7 @@ static void core_jmp_data() {
                          << regs \
                          << 0x80000000 + (24 << 2);
     /*
+     * TODO
     QTest::newRow("JR") << Instruction(1, 15, 0, 61) \
                          << regs \
                          << regs.read_pc() + (24 << 2);
@@ -305,10 +306,121 @@ void MachineTests::pipecore_jmp() {
     QCOMPARE(regs, regs_used); // There should be no change in registers now (except pc)
 }
 
-void MachineTests::core_mem_data() {
+static void core_mem_data() {
+    QTest::addColumn<Instruction>("i");
+    QTest::addColumn<Registers>("regs_init");
+    QTest::addColumn<Registers>("regs_res");
+    QTest::addColumn<Memory>("mem_init");
+    QTest::addColumn<Memory>("mem_res");
 
+    // Load
+    {
+    Memory mem;
+    mem.write_word(0x24, 0xA3242526);
+    Registers regs;
+    regs.write_gp(1, 0x22);
+    Registers regs_res(regs);
+    regs_res.write_gp(21, 0x80000023);
+    QTest::newRow("LB") << Instruction(32, 1, 21, 0x2) \
+                         << regs \
+                         << regs_res \
+                         << mem \
+                         << mem;
+    regs_res.write_gp(21, 0x80002324);
+    QTest::newRow("LH") << Instruction(33, 1, 21, 0x2) \
+                         << regs \
+                         << regs_res \
+                         << mem \
+                         << mem;
+    regs_res.write_gp(21, 0xA3242526);
+    QTest::newRow("LW") << Instruction(35, 1, 21, 0x2) \
+                         << regs \
+                         << regs_res \
+                         << mem \
+                         << mem;
+    regs_res.write_gp(21, 0x000000A3);
+    QTest::newRow("LBU") << Instruction(36, 1, 21, 0x2) \
+                         << regs \
+                         << regs_res \
+                         << mem \
+                         << mem;
+    regs_res.write_gp(21, 0x0000A324);
+    QTest::newRow("LHU") << Instruction(37, 1, 21, 0x2) \
+                         << regs \
+                         << regs_res \
+                         << mem \
+                         << mem;
+    }
+    // Store
+    {
+    Registers regs;
+    regs.write_gp(1, 0x22);
+    regs.write_gp(21, 0x23242526);
+    Memory mem;
+    mem.write_byte(0x24, 0x26); // Note: store least significant byte
+    QTest::newRow("SB") << Instruction(40, 1, 21, 0x2) \
+                         << regs \
+                         << regs \
+                         << Memory() \
+                         << mem;
+    mem.write_hword(0x24, 0x2526);
+    QTest::newRow("SH") << Instruction(41, 1, 21, 0x2) \
+                         << regs \
+                         << regs \
+                         << Memory() \
+                         << mem;
+    mem.write_word(0x24, 0x23242526);
+    QTest::newRow("SH") << Instruction(43, 1, 21, 0x2) \
+                         << regs \
+                         << regs \
+                         << Memory() \
+                         << mem;
+    }
 }
 
-void MachineTests::core_mem() {
+void MachineTests::singlecore_mem_data() {
+    core_mem_data();
+}
 
+void MachineTests::pipecore_mem_data() {
+    core_mem_data();
+}
+
+void MachineTests::singlecore_mem() {
+    QFETCH(Instruction, i);
+    QFETCH(Registers, regs_init);
+    QFETCH(Registers, regs_res);
+    QFETCH(Memory, mem_init);
+    QFETCH(Memory, mem_res);
+
+    // Write instruction to both memories
+    mem_init.write_word(regs_init.read_pc(), i.data());
+    mem_res.write_word(regs_init.read_pc(), i.data());
+
+    CoreSingle core(&regs_init, &mem_init);
+    core.step();
+
+    regs_res.pc_inc();
+    QCOMPARE(regs_init, regs_res);
+    QCOMPARE(mem_init, mem_res);
+}
+
+void MachineTests::pipecore_mem() {
+    QFETCH(Instruction, i);
+    QFETCH(Registers, regs_init);
+    QFETCH(Registers, regs_res);
+    QFETCH(Memory, mem_init);
+    QFETCH(Memory, mem_res);
+
+    // Write instruction to both memories
+    mem_init.write_word(regs_init.read_pc(), i.data());
+    mem_res.write_word(regs_init.read_pc(), i.data());
+
+    CorePipelined core(&regs_init, &mem_init);
+    for (int i = 0; i < 5; i++)
+        core.step(); // Fire steps for five pipelines stages
+
+    regs_res.pc_jmp(20);
+    QCOMPARE(regs_init, regs_res);
+    QCOMPARE(mem_init, mem_res);
 }
