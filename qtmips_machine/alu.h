@@ -16,7 +16,7 @@ enum AluOp : std::uint8_t {
     ALU_OP_SRAV,
     ALU_OP_JR,
     ALU_OP_JALR,
-    ALU_OP_MOVZ = 10,
+    ALU_OP_MOVZ,
     ALU_OP_MOVN,
     ALU_OP_MFHI = 16,
     ALU_OP_MTHI,

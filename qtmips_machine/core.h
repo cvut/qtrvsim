@@ -39,13 +39,11 @@ protected:
         bool regwrite;
         std::uint8_t rwrite; // Writeback register (multiplexed between rt and rd according to regd)
         std::uint32_t alu_val; // Result of ALU execution
-        // TODO
     };
     struct dtMemory {
         bool regwrite;
         std::uint8_t rwrite;
         std::uint32_t alu_val;
-        // TODO
     };
 
     struct dtFetch fetch();
