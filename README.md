@@ -48,3 +48,5 @@ being so.
   statistics)
 * Interrupts and exceptions (if exception occurs then machine execution is halted)
 * Branch-likeli instructions (they are marked as obsolete)
+* Complete binary instruction check (we check only minimal set of bites to decode
+  instruction, we don't check if zero sections are really zero unless we need it).
