@@ -67,9 +67,7 @@ Instruction::Instruction(std::uint8_t opcode, std::uint32_t address) {
     this->dt |= address;
 }
 
-Instruction::Instruction(const Instruction &i) {
-    this->dt = i.data();
-}
+Instruction::Instruction(const Instruction &i) : Instruction(i.data()) { }
 
 QString Instruction::to_str() {
     if  (this->opcode() >= sizeof(instruction_map))

@@ -36,13 +36,13 @@ std::uint32_t alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t
         case ALU_OP_ADD:
             if (s > (0xFFFFFFFF - t))
                 throw QTMIPS_EXCEPTION(Overflow, "ADD operation overflow/underflow", QString::number(s) + QString(" + ") + QString::number(t));
-            // Intentional falltrough
+            __attribute__((fallthrough));
         case ALU_OP_ADDU:
             return s + t;
         case ALU_OP_SUB:
             if (s < t)
                 throw QTMIPS_EXCEPTION(Overflow, "SUB operation overflow/underflow", QString::number(s) + QString(" - ") + QString::number(t));
-            // Intentional falltrough
+            __attribute__((fallthrough));
         case ALU_OP_SUBU:
             return s - t;
         case ALU_OP_AND:
