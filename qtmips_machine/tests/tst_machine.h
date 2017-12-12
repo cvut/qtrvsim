@@ -34,6 +34,10 @@ private Q_SLOTS:
     void singlecore_regs_data();
     void pipecore_regs();
     void pipecore_regs_data();
+    void singlecore_jmp();
+    void singlecore_jmp_data();
+    void pipecore_jmp();
+    void pipecore_jmp_data();
     void core_mem();
     void core_mem_data();
 };

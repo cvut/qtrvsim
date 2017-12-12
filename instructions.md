@@ -33,20 +33,20 @@ CPU Arithmetic Instruction
 
 CPU Branch and Jump Instructions
 --------------------------------
-* [ ] B
+* [x] B
 * [ ] BAL
-* [ ] BEQ
-* [ ] BGEZ
+* [x] BEQ
+* [x] BGEZ
 * [ ] BGEZAL
-* [ ] BGTZ
-* [ ] BLEZ
-* [ ] BLTZ
+* [x] BGTZ
+* [x] BLEZ
+* [x] BLTZ
 * [ ] BLTZAL
-* [ ] BNE
-* [ ] J
+* [x] BNE
+* [x] J
 * [ ] JAL
 * [ ] JALR
-* [ ] JR
+* [x] JR
 
 CPU No Instructions
 -------------------

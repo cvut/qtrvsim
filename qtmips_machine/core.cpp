@@ -7,7 +7,6 @@
 #define DM_ALUSRC (1L<<3)
 #define DM_REGD (1L<<4)
 #define DM_REGWRITE (1L<<5)
-#define DM_BRANCH (1L<<6)
 
  struct DecodeMap {
     long flags;
@@ -16,20 +15,21 @@
 
 
 // This is temporally operation place holder
-#define NOPE { .flags = 0, .alu = ALU_OP_SLL }
+#define NOALU .alu = ALU_OP_SLL
+#define NOPE { .flags = 0, NOALU }
 
 #define FLAGS_ALU_I (DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE)
 
 // This is map from opcode to signals.
 static const struct DecodeMap dmap[]  = {
-    { .flags = DM_SUPPORTED | DM_REGD | DM_REGWRITE, .alu = ALU_OP_SLL }, // Alu operations
-    NOPE, // Branch on alu operations
-    NOPE, // J
+    { .flags = DM_SUPPORTED | DM_REGD | DM_REGWRITE, NOALU }, // Alu operations (aluop is decoded from function explicitly)
+    { .flags = DM_SUPPORTED, NOALU }, // REGIMM (BLTZ, BGEZ, )
+    { .flags = DM_SUPPORTED, NOALU }, // J
     NOPE, // JAL
-    NOPE, // BEQ
-    NOPE, // BNE
-    NOPE, // BLEZ
-    NOPE, // BGTZ
+    { .flags = DM_SUPPORTED, NOALU }, // BEQ
+    { .flags = DM_SUPPORTED, NOALU }, // BNE
+    { .flags = DM_SUPPORTED, NOALU }, // BLEZ
+    { .flags = DM_SUPPORTED, NOALU }, // BGTZ
     { .flags = FLAGS_ALU_I, .alu = ALU_OP_ADD }, // ADDI
     { .flags = FLAGS_ALU_I, .alu = ALU_OP_ADDU }, // ADDIU
     { .flags = FLAGS_ALU_I, .alu = ALU_OP_SLT }, // SLTI
@@ -96,7 +96,6 @@ Core::Core(Registers *regs, MemoryAccess *mem) {
 struct Core::dtFetch Core::fetch() {
     // TODO signals
     Instruction inst(mem->read_word(regs->read_pc()));
-    regs->pc_inc();
     return {
         .inst = inst
     };
@@ -104,9 +103,13 @@ struct Core::dtFetch Core::fetch() {
 
 struct Core::dtDecode Core::decode(struct dtFetch dt) {
     struct DecodeMap dec = dmap[dt.inst.opcode()];
-    if (!dec.flags & DM_SUPPORTED)
+    if (!(dec.flags & DM_SUPPORTED))
         // TODO message
         throw QTMIPS_EXCEPTION(UnsupportedInstruction, "", "");
+
+    // TODO solve forwarding somehow in here
+    std::uint32_t rs = regs->read_gp(dt.inst.rs());
+    std::uint32_t rt = regs->read_gp(dt.inst.rt());
 
     return {
         .inst = dt.inst,
@@ -115,10 +118,9 @@ struct Core::dtDecode Core::decode(struct dtFetch dt) {
         .alusrc = dec.flags & DM_ALUSRC,
         .regd = dec.flags & DM_REGD,
         .regwrite = dec.flags & DM_REGWRITE,
-        .branch = dec.flags & DM_BRANCH,
         .aluop = dt.inst.opcode() == 0 ? (enum AluOp)dt.inst.funct() : dec.alu,
-        .val_rs = regs->read_gp(dt.inst.rs()),
-        .val_rt = regs->read_gp(dt.inst.rt()),
+        .val_rs = rs,
+        .val_rt = rt,
     };
     // TODO on jump there should be delay slot. Does processor addes it or compiler. And do we care?
 }
@@ -154,9 +156,88 @@ void Core::writeback(struct dtMemory dt) {
     }
 }
 
+void Core::handle_pc(struct dtDecode dt) {
+    // TODO signals
+    bool branch = false;
+    bool link = false;
+    // TODO implement link
+
+    switch (dt.inst.opcode()) {
+    case 0: // JR (JALR)
+        if (dt.inst.funct() == ALU_OP_JR || dt.inst.funct() == ALU_OP_JALR) {
+            regs->pc_abs_jmp(dt.val_rs);
+            return;
+        }
+        break;
+    case 1: // REGIMM instruction
+        //switch (dt.inst.rt() & 0xF) { // Should be used when linking is supported
+        switch (dt.inst.rt()) {
+        case 0: // BLTZ(AL)
+            branch = (std::int32_t)dt.val_rs < 0;
+            break;
+        case 1: // BGEZ(AL)
+            branch = (std::int32_t)dt.val_rs >= 0;
+            break;
+        default:
+            throw QTMIPS_EXCEPTION(UnsupportedInstruction, "REGIMM instruction with unknown rt code", QString::number(dt.inst.rt(), 16));
+        }
+        link = dt.inst.rs() & 0x10;
+        break;
+    case 2: // J
+    case 3: // JAL
+        regs->pc_abs_jmp_28(dt.inst.address() << 2);
+        return;
+    case 4: // BEQ
+        branch = dt.val_rs == dt.val_rt;
+        break;
+    case 5: // BNE
+        branch = dt.val_rs != dt.val_rt;
+        break;
+    case 6: // BLEZ
+        branch = (std::int32_t)dt.val_rs <= 0;
+        break;
+    case 7: // BGTZ
+        branch = (std::int32_t)dt.val_rs > 0;
+        break;
+    }
+
+    if (branch)
+        regs->pc_jmp((std::int32_t)(((dt.inst.immediate() & 0x7fff) << 2) | ((dt.inst.immediate() & 0x8000) << 16)));
+    else
+        regs->pc_inc();
+}
+
+void Core::dtFetchInit(struct dtFetch &dt) {
+    dt.inst = Instruction(0x00);
+}
+
+void Core::dtDecodeInit(struct dtDecode &dt) {
+    dt.inst = Instruction(0x00);
+    dt.mem2reg = false;
+    dt.memwrite = false;
+    dt.alusrc = false;
+    dt.regd = false;
+    dt.regwrite = false;
+    dt.aluop = ALU_OP_SLL;
+    dt.val_rs = 0;
+    dt.val_rt = 0;
+}
+
+void Core::dtExecuteInit(struct dtExecute &dt) {
+    dt.regwrite = false;
+    dt.rwrite = false;
+    dt.alu_val = 0;
+}
+
+void Core::dtMemoryInit(struct dtMemory &dt) {
+    dt.regwrite = false;
+    dt.rwrite = false;
+    dt.alu_val = 0;
+}
+
 CoreSingle::CoreSingle(Registers *regs, MemoryAccess *mem) : \
     Core(regs, mem) {
-    // Nothing to do
+    dtDecodeInit(jmp_delay_decode);
 }
 
 void CoreSingle::step() {
@@ -165,32 +246,16 @@ void CoreSingle::step() {
     struct dtExecute e = execute(d);
     struct dtMemory m = memory(e);
     writeback(m);
+    handle_pc(jmp_delay_decode);
+    jmp_delay_decode = d; // Copy current decode
 }
 
 CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem) : \
     Core(regs, mem) {
-    // Initialize to NOPE //
-    // dtFetch
-    dt_f.inst = Instruction(0x00);
-    // dtDecode
-    dt_d.inst = dt_f.inst;
-    dt_d.mem2reg = false;
-    dt_d.memwrite = false;
-    dt_d.alusrc = false;
-    dt_d.regd = false;
-    dt_d.regwrite = false;
-    dt_d.branch = false;
-    dt_d.aluop = ALU_OP_SLL;
-    dt_d.val_rs = 0;
-    dt_d.val_rt = 0;
-    // dtExecute
-    dt_e.regwrite = dt_d.regwrite;
-    dt_e.rwrite = dt_d.regwrite;
-    dt_e.alu_val = 0;
-    // dtMemory
-    dt_m.regwrite = dt_e.regwrite;
-    dt_m.rwrite = dt_e.rwrite;
-    dt_m.alu_val = dt_e.alu_val;
+    dtFetchInit(dt_f);
+    dtDecodeInit(dt_d);
+    dtExecuteInit(dt_e);
+    dtMemoryInit(dt_m);
 }
 
 void CorePipelined::step() {
@@ -200,4 +265,5 @@ void CorePipelined::step() {
     dt_e = execute(dt_d);
     dt_d = decode(dt_f);
     dt_f = fetch();
+    handle_pc(dt_d);
 }

@@ -240,8 +240,9 @@ union MemoryTree *Memory::copy_section_tree(const union MemoryTree *mt, size_t d
     union MemoryTree *nmt = allocate_section_tree();
     if (depth < (MEMORY_TREE_H - 1))  { // Following level is memory tree
         for (int i = 0; i < MEMORY_TREE_LEN; i++) {
-            if (mt[i].mt != nullptr)
+            if (mt[i].mt != nullptr) {
                 nmt[i].mt = copy_section_tree(mt[i].mt, depth + 1);
+            }
         }
     } else { // Following level is memory section
         for (int i = 0; i < MEMORY_TREE_LEN; i++) {

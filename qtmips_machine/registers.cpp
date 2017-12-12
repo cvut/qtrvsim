@@ -46,6 +46,10 @@ void Registers::pc_abs_jmp(std::uint32_t address) {
     this->pc = address;
 }
 
+void Registers::pc_abs_jmp_28(std::uint32_t address) {
+    this->pc_abs_jmp((pc & 0xF0000000) | (address & 0x0FFFFFFF));
+}
+
 std::uint32_t Registers::read_gp(std::uint8_t i) const {
     SANITY_ASSERT(i < 32, QString("Trying to read from register ") + QString(i));
     if (!i) // $0 always reads as 0

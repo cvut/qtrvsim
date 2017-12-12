@@ -175,9 +175,6 @@ void MachineTests::pipecore_regs_data() {
     core_regs_data();
 }
 
-#include <iostream>
-using namespace std;
-
 void MachineTests::singlecore_regs() {
     QFETCH(Instruction, i);
     QFETCH(Registers, init);
@@ -208,14 +205,104 @@ void MachineTests::pipecore_regs() {
     res.pc_jmp(0x14);
 
     CorePipelined core(&init, &mem_used);
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 5; i++)
         core.step(); // Fire steps for five pipelines stages
-    }
-    core.step();
 
     //cout << "well:" << init.read_gp(26) << ":" << regs_used.read_gp(26) << endl;
     QCOMPARE(init, res); // After doing changes from initial state this should be same state as in case of passed expected result
     QCOMPARE(mem, mem_used); // There should be no change in memory
+}
+
+static void core_jmp_data() {
+    QTest::addColumn<Instruction>("i");
+    QTest::addColumn<Registers>("regs");
+    QTest::addColumn<std::uint32_t>("pc");
+
+    Registers regs;
+    regs.write_gp(14, -22);
+    regs.write_gp(15, 22);
+    regs.write_gp(16, -22);
+    QTest::newRow("B") << Instruction(4, 0, 0, 61) \
+                         << regs \
+                         << regs.read_pc() + 4 + (61 << 2);
+    QTest::newRow("BEQ") << Instruction(4, 14, 16, 61) \
+                         << regs \
+                         << regs.read_pc() + 4 + (61 << 2);
+    QTest::newRow("BNE") << Instruction(5, 14, 15, 61) \
+                         << regs \
+                         << regs.read_pc() + 4 + (61 << 2);
+    QTest::newRow("BGEZ") << Instruction(1, 15, 1, 61) \
+                         << regs \
+                         << regs.read_pc() + 4 + (61 << 2);
+    QTest::newRow("BGTZ") << Instruction(7, 15, 0, 61) \
+                         << regs \
+                         << regs.read_pc() + 4 + (61 << 2);
+    QTest::newRow("BLEZ") << Instruction(6, 14, 0, 61) \
+                         << regs \
+                         << regs.read_pc() + 4 + (61 << 2);
+    QTest::newRow("BLTZ") << Instruction(1, 14, 0, 61) \
+                         << regs \
+                         << regs.read_pc() + 4 + (61 << 2);
+    QTest::newRow("J") << Instruction(2, 24) \
+                         << regs \
+                         << 0x80000000 + (24 << 2);
+    /*
+    QTest::newRow("JR") << Instruction(1, 15, 0, 61) \
+                         << regs \
+                         << regs.read_pc() + (24 << 2);
+                         */
+}
+
+void MachineTests::singlecore_jmp_data() {
+    core_jmp_data();
+}
+
+void MachineTests::pipecore_jmp_data() {
+    core_jmp_data();
+}
+
+void MachineTests::singlecore_jmp() {
+    QFETCH(Instruction, i);
+    QFETCH(Registers, regs);
+    QFETCH(std::uint32_t, pc);
+
+    Memory mem;
+    mem.write_word(regs.read_pc(), i.data());
+    Memory mem_used(mem);
+    Registers regs_used(regs);
+
+    CoreSingle core(&regs_used, &mem_used);
+    core.step();
+    QCOMPARE(regs.read_pc() + 4, regs_used.read_pc()); // First execute delay slot
+    core.step();
+    QCOMPARE(pc, regs_used.read_pc()); // Now do jump
+
+    QCOMPARE(mem, mem_used); // There should be no change in memory
+    regs_used.pc_abs_jmp(regs.read_pc()); // Reset program counter before we do registers compare
+    QCOMPARE(regs, regs_used); // There should be no change in registers now
+}
+
+void MachineTests::pipecore_jmp() {
+    QFETCH(Instruction, i);
+    QFETCH(Registers, regs);
+    QFETCH(std::uint32_t, pc);
+
+    Memory mem;
+    mem.write_word(regs.read_pc(), i.data());
+    Memory mem_used(mem);
+    Registers regs_used(regs);
+
+    CorePipelined core(&regs_used, &mem_used);
+    core.step();
+    QCOMPARE(regs.read_pc() + 4, regs_used.read_pc()); // First just fetch
+    core.step();
+    QCOMPARE(pc, regs_used.read_pc()); // Now do jump
+    for (int i = 0; i < 3; i++)
+        core.step(); // Follow up with three other steps to complete pipeline to be sure that instruction has no side effects
+
+    QCOMPARE(mem, mem_used); // There should be no change in memory
+    regs.pc_abs_jmp(pc + 12); // Set reference pc to three more instructions later (where regs_used should be)
+    QCOMPARE(regs, regs_used); // There should be no change in registers now (except pc)
 }
 
 void MachineTests::core_mem_data() {

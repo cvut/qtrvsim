@@ -14,6 +14,7 @@ public:
     std::uint32_t pc_inc(); // Increment program counter by four bytes
     std::uint32_t pc_jmp(std::int32_t offset); // Relative jump from current location in program counter
     void pc_abs_jmp(std::uint32_t address); // Absolute jump in program counter (write to pc)
+    void pc_abs_jmp_28(std::uint32_t address); // Absolute jump in current 256MB section (basically J implementation)
 
     std::uint32_t read_gp(std::uint8_t i) const; // Read general-purpose register
     void write_gp(std::uint8_t i, std::uint32_t value); // Write general-purpose register

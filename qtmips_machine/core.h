@@ -31,7 +31,6 @@ protected:
         bool alusrc; // If second value to alu is immediate value (rt used otherwise)
         bool regd; // If rd is used (otherwise rt is used for write target)
         bool regwrite; // If output should be written back to register (which one depends on regd)
-        bool branch; // If this is branch instruction
         enum AluOp aluop; // Decoded ALU operation
         std::uint32_t val_rs; // Value from register rs
         std::uint32_t val_rt; // Value from register rt
@@ -54,7 +53,13 @@ protected:
     struct dtExecute execute(struct dtDecode);
     struct dtMemory memory(struct dtExecute);
     void writeback(struct dtMemory);
+    void handle_pc(struct dtDecode);
 
+    // Initialize structures to NOPE instruction
+    void dtFetchInit(struct dtFetch &dt);
+    void dtDecodeInit(struct dtDecode &dt);
+    void dtExecuteInit(struct dtExecute &dt);
+    void dtMemoryInit(struct dtMemory &dt);
 };
 
 class CoreSingle : public Core {
@@ -62,6 +67,9 @@ public:
     CoreSingle(Registers *regs, MemoryAccess *mem);
 
     void step();
+
+private:
+    struct Core::dtDecode jmp_delay_decode;
 };
 
 class CorePipelined : public Core {
