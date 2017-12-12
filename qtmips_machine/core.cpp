@@ -134,10 +134,14 @@ struct Core::dtExecute Core::execute(struct dtDecode dt) {
     if (dt.inst.opcode() == 0 && ((dt.inst.funct() == 10 && dt.val_rt != 0) || (dt.inst.funct() == 11 && dt.val_rt == 0)))
         regwrite = false;
 
+    std::uint32_t alu_sec = dt.val_rt;
+    if (dt.alusrc)
+        alu_sec = ((dt.inst.immediate() & 0x8000) << 16) | (dt.inst.immediate() & 0x7FFF); // Sign extend to 32bit
+
     return {
         .regwrite = regwrite,
         .rwrite = dt.regd ? dt.inst.rd() : dt.inst.rt(),
-        .alu_val = alu_operate(dt.aluop, dt.val_rs, dt.alusrc ? dt.inst.immediate() : dt.val_rt, dt.inst.shamt(), regs),
+        .alu_val = alu_operate(dt.aluop, dt.val_rs, alu_sec, dt.inst.shamt(), regs),
     };
 }
 
