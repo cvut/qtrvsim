@@ -222,6 +222,7 @@ static void core_jmp_data() {
     regs.write_gp(14, -22);
     regs.write_gp(15, 22);
     regs.write_gp(16, -22);
+    regs.write_gp(12, 0x80040000);
     QTest::newRow("B") << Instruction(4, 0, 0, 61) \
                          << regs \
                          << regs.read_pc() + 4 + (61 << 2);
@@ -246,12 +247,9 @@ static void core_jmp_data() {
     QTest::newRow("J") << Instruction(2, 24) \
                          << regs \
                          << 0x80000000 + (24 << 2);
-    /*
-     * TODO
-    QTest::newRow("JR") << Instruction(1, 15, 0, 61) \
+    QTest::newRow("JR") << Instruction(0, 12, 0, 0, 0, 8) \
                          << regs \
-                         << regs.read_pc() + (24 << 2);
-                         */
+                         << 0x80040000;
 }
 
 void MachineTests::singlecore_jmp_data() {
