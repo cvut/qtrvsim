@@ -59,6 +59,14 @@ public:
     QtMipsExceptionUnalignedJump(QTMIPS_ARGS_COMMON);
 };
 
+// Used unknown MemoryAccess control value (write_ctl or read_ctl)
+// This can be raised by invalid instruction but in such case we shoul raise UnknownInstruction instead
+// So this should signal jsut some QtMips bug.
+class QtMipsExceptionUnknownMemoryControl : public QtMipsExceptionRuntime {
+public:
+    QtMipsExceptionUnknownMemoryControl(QTMIPS_ARGS_COMMON);
+};
+
 // Trying to access address outside of the memory
 // As we are simulating whole 32bit memory address space then this is most probably QtMips bug if raised not program.
 class QtMipsExceptionOutOfMemoryAccess : public QtMipsExceptionRuntime {

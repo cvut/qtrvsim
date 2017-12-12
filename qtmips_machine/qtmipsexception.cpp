@@ -59,6 +59,11 @@ QtMipsExceptionUnalignedJump::QtMipsExceptionUnalignedJump(QTMIPS_ARGS_COMMON)
     return;
 }
 
+QtMipsExceptionUnknownMemoryControl::QtMipsExceptionUnknownMemoryControl(QTMIPS_ARGS_COMMON)
+        : QtMipsExceptionRuntime(reason, ext, file, line) {
+    return;
+}
+
 QtMipsExceptionOutOfMemoryAccess::QtMipsExceptionOutOfMemoryAccess(QTMIPS_ARGS_COMMON)
         : QtMipsExceptionRuntime(reason, ext, file, line) {
     return;
