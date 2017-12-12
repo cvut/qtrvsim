@@ -18,10 +18,22 @@ public:
     std::uint16_t read_hword(std::uint32_t offset);
     std::uint32_t read_word(std::uint32_t offset);
 
+    enum AccessControl {
+        AC_BYTE,
+        AC_HALFWORD,
+        AC_WORD,
+        AC_BYTE_UNSIGNED,
+        AC_HALFWORD_UNSIGNED
+    };
+    void write_ctl(enum AccessControl ctl, std::uint32_t offset, std::uint32_t value);
+    std::uint32_t read_ctl(enum AccessControl ctl, std::uint32_t offset);
+
 signals:
     // TODO trigger
     void byte_change(std::uint32_t address, std::uint32_t value);
 };
+
+Q_DECLARE_METATYPE(MemoryAccess::AccessControl)
 
 class MemorySection : public MemoryAccess {
 public:

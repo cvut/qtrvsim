@@ -55,6 +55,47 @@ std::uint32_t MemoryAccess::read_word(std::uint32_t offset) {
     return dt;
 }
 
+void MemoryAccess::write_ctl(enum MemoryAccess::AccessControl ctl, std::uint32_t offset, std::uint32_t value) {
+    switch (ctl) {
+    case AC_BYTE:
+    case AC_BYTE_UNSIGNED:
+        this->write_byte(offset, value);
+        break;
+    case AC_HALFWORD:
+    case AC_HALFWORD_UNSIGNED:
+        this->write_hword(offset, value);
+        break;
+    case AC_WORD:
+        this->write_word(offset, value);
+        break;
+    default:
+        throw QTMIPS_EXCEPTION(UnknownMemoryControl, "Trying to write to memory with unknown ctl", QString::number(ctl));
+    }
+}
+
+std::uint32_t MemoryAccess::read_ctl(enum MemoryAccess::AccessControl ctl, std::uint32_t offset) {
+    switch (ctl) {
+    case AC_BYTE:
+        {
+        std::uint8_t b = this->read_byte(offset);
+        return ((b & 0x80) << 24) | (b & 0x7F); // Sign extend
+        }
+    case AC_HALFWORD:
+        {
+        std::uint16_t h = this->read_hword(offset);
+        return ((h & 0x8000) << 16) | (h & 0x7FFF); // Sign extend
+        }
+    case AC_WORD:
+        return this->read_word(offset);
+    case AC_BYTE_UNSIGNED:
+        return this->read_byte(offset);
+    case AC_HALFWORD_UNSIGNED:
+        return this->read_hword(offset);
+    default:
+        throw QTMIPS_EXCEPTION(UnknownMemoryControl, "Trying to read from memory with unknown ctl", QString::number(ctl));
+    }
+}
+
 MemorySection::MemorySection(std::uint32_t length) {
     this->len = length;
     this->dt = new std::uint8_t[length];
