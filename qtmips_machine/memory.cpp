@@ -170,7 +170,7 @@ void Memory::write_byte(std::uint32_t address, std::uint8_t value) {
 }
 
 std::uint8_t Memory::read_byte(std::uint32_t address) const {
-    MemorySection *section = this->get_section(address, true);
+    MemorySection *section = this->get_section(address, false);
     if (section == nullptr)
         return 0;
     else
