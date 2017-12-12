@@ -19,6 +19,7 @@ public:
     std::uint32_t read_word(std::uint32_t offset);
 
     enum AccessControl {
+        AC_NONE,
         AC_BYTE,
         AC_HALFWORD,
         AC_WORD,

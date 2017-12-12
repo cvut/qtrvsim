@@ -57,6 +57,8 @@ std::uint32_t MemoryAccess::read_word(std::uint32_t offset) {
 
 void MemoryAccess::write_ctl(enum MemoryAccess::AccessControl ctl, std::uint32_t offset, std::uint32_t value) {
     switch (ctl) {
+    case AC_NONE:
+        break;
     case AC_BYTE:
     case AC_BYTE_UNSIGNED:
         this->write_byte(offset, value);
@@ -75,6 +77,8 @@ void MemoryAccess::write_ctl(enum MemoryAccess::AccessControl ctl, std::uint32_t
 
 std::uint32_t MemoryAccess::read_ctl(enum MemoryAccess::AccessControl ctl, std::uint32_t offset) {
     switch (ctl) {
+    case AC_NONE:
+        return 0;
     case AC_BYTE:
         {
         std::uint8_t b = this->read_byte(offset);
