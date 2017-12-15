@@ -19,7 +19,11 @@ SOURCES += \
         coreview.cpp \
         registersdock.cpp \
         cachestatistics.cpp \
-        cachecontent.cpp
+        cachecontent.cpp \
+        coreview/programcounter.cpp \
+        coreview/multiplexer.cpp \
+        coreview/connection.cpp \
+        coreview/latch.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -27,7 +31,11 @@ HEADERS += \
         coreview.h \
         registersdock.h \
         cachestatistics.h \
-        cachecontent.h
+        cachecontent.h \
+        coreview/programcounter.h \
+        coreview/multiplexer.h \
+        coreview/connection.h \
+        coreview/latch.h
 
 FORMS += \
         NewDialog.ui \

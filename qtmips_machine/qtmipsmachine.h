@@ -32,6 +32,7 @@ public slots:
 
 signals:
     void program_exit();
+    void tick(); // Time tick
 
 private:
     Registers *regs;
@@ -43,6 +44,7 @@ private:
     QTimer *run_t;
 
     std::uint32_t program_end;
+    bool program_ended;
 };
 
 #endif // QTMIPSMACHINE_H

@@ -9,6 +9,7 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) {
 
     program.to_memory(mem);
     program_end = program.end();
+    program_ended = false;
 
     MemoryAccess *coremem;
     switch (cc.cache()) {
@@ -35,6 +36,8 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) {
 
 void QtMipsMachine::set_speed(unsigned val) {
     run_speed = val;
+    if (run_t->isActive())
+        play();
 }
 
 const Registers *QtMipsMachine::registers() {
@@ -54,19 +57,31 @@ const Core *QtMipsMachine::core() {
 }
 
 void QtMipsMachine::play() {
+    if (program_ended)
+        return;
     run_t->start(run_speed);
 }
 
 void QtMipsMachine::pause() {
+    if (program_ended)
+        return;
     run_t->stop();
 }
 
 void QtMipsMachine::step() {
+    if (program_ended) // Ignore if program ended
+        return;
+    emit tick();
     cr->step();
-    if (regs->read_pc() >= program_end)
+    if (regs->read_pc() >= program_end) {
+        program_ended = true;
+        run_t->stop();
         emit program_exit();
+    }
 }
 
 void QtMipsMachine::restart() {
+    if (!program_ended)
+        run_t->stop(); // Stop timer if program is still running
     // TODO
 }

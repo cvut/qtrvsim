@@ -26,7 +26,8 @@ public:
 
 signals:
     void pc_update(std::uint32_t val);
-    // TODO signals
+    void gp_update(std::uint8_t i, std::uint32_t val);
+    void hi_lo_update(bool hi, std::uint32_t val);
 
 private:
     std::uint32_t gp[31]; // general-purpose registers ($0 is intentionally skipped)

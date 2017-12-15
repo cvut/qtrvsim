@@ -2,45 +2,33 @@
 #define COREVIEW_H
 
 #include <QGraphicsView>
-#include <QGraphicsItem>
-#include <QList>
-#include "machineconfig.h"
+#include <QGraphicsScene>
+#include "qtmipsmachine.h"
+#include "coreview/connection.h"
+#include "coreview/programcounter.h"
+#include "coreview/multiplexer.h"
+#include "coreview/latch.h"
 
 class CoreView : public QGraphicsView {
     Q_OBJECT
 public:
-    CoreView(QWidget *parent);
+    CoreView(QWidget *parent, QtMipsMachine *machine);
 
 private:
+    void resizeEvent(QResizeEvent *event);
 
+    QGraphicsScene scene;
+    QtMipsMachine *machine;
+
+    coreview::ProgramCounter *pc;
+    coreview::Multiplexer *pc_multiplexer;
+    coreview::Connection *pc2pc;
+    coreview::Latch *testlatch;
 };
 
-/*
-class CoreViewBlock : public QGraphicsItem {
-    Q_OBJECT
-public:
-    CoreViewBlock();
-};
+#else
 
-class CoreViewLine : public QGraphicsItem {
-    Q_OBJECT
-public:
-    struct point {
-        int x1, y1, x2, y2;
-    };
-
-    CoreViewLine();
-    CoreViewLine(struct point start, struct point end, QList<struct point> axis);
-    ~CoreViewLine();
-
-    void set_start(struct point);
-    void set_end(struct point);
-    void set_axis(QList<struct point>);
-
-protected:
-    struct point start, end;
-    QList<struct point> axis;
-};
-*/
+class CoreView;
+class CoreViewBlock;
 
 #endif // COREVIEW_H

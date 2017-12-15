@@ -44,6 +44,7 @@ void Registers::pc_abs_jmp(std::uint32_t address) {
     if (address % 4)
         throw QTMIPS_EXCEPTION(UnalignedJump, "Trying to jump to unaligned address", QString::number(address, 16));
     this->pc = address;
+    emit pc_update(this->pc);
 }
 
 void Registers::pc_abs_jmp_28(std::uint32_t address) {
@@ -61,6 +62,7 @@ void Registers::write_gp(std::uint8_t i, std::uint32_t value) {
     SANITY_ASSERT(i < 32, QString("Trying to write to register ") + QString(i));
     if (i == 0) // Skip write to $0
         return;
+    emit gp_update(i, value);
     this->gp[i - 1] = value;
 }
 
@@ -76,6 +78,7 @@ void Registers::write_hi_lo(bool hi, std::uint32_t value) {
         this->hi = value;
     else
         this->lo = value;
+    emit hi_lo_update(hi, value);
 }
 
 bool Registers::operator==(const Registers &c) const {
