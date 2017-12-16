@@ -41,7 +41,6 @@ FORMS += \
         NewDialog.ui \
         MainWindow.ui \
         CacheContent.ui \
-        registersdock.ui \
         CacheStatistics.ui
 
 RESOURCES += \
