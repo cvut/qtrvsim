@@ -33,15 +33,16 @@ QRectF Multiplexer::boundingRect() const {
 }
 
 void Multiplexer::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    // Draw pointing line first so it isn't over the border lines
+    const QPointF poly[] = {
+        QPointF(0, 0),
+        QPointF(WIDTH, WIDTH),
+        QPointF(WIDTH, (HEIGHT * size) - WIDTH),
+        QPointF(0, HEIGHT * size)
+    };
+    painter->drawPolygon(poly, sizeof(poly) / sizeof(QPointF));
+
     painter->setPen(QColor(200, 200, 200));
     painter->drawLine(0, (HEIGHT / 2) + (seton * HEIGHT), WIDTH, (HEIGHT * size) / 2);
-
-    painter->setPen(QColor());
-    painter->drawLine(0, 0, 0, (HEIGHT * size)); // (|)
-    painter->drawLine(0, 0, WIDTH, WIDTH); // (\)
-    painter->drawLine(0, (HEIGHT * size), WIDTH, (HEIGHT * size) - WIDTH); // (/)
-    painter->drawLine(WIDTH, WIDTH, WIDTH, (HEIGHT * size) - WIDTH); // (|)
 }
 
 void Multiplexer::setPos(qreal x, qreal y) {

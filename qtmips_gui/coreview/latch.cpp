@@ -24,7 +24,7 @@ void Latch::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
         QPointF(WIDTH/2, WIDTH/2),
         QPointF(WIDTH, 0)
     };
-    painter->drawPolygon(tickPolygon, 3);
+    painter->drawPolygon(tickPolygon, sizeof(tickPolygon) / sizeof(QPointF));
 }
 
 void Latch::setPos(qreal x, qreal y) {
