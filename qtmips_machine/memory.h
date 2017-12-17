@@ -4,7 +4,7 @@
 #include <QObject>
 #include <vector>
 #include <cstdint>
-#include "qtmipsexception.h"
+#include <qtmipsexception.h>
 
 namespace machine {
 

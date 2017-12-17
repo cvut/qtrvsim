@@ -2,11 +2,11 @@
 #define CORE_H
 
 #include <QObject>
-#include "qtmipsexception.h"
-#include "registers.h"
-#include "memory.h"
-#include "instruction.h"
-#include "alu.h"
+#include <qtmipsexception.h>
+#include <registers.h>
+#include <memory.h>
+#include <instruction.h>
+#include <alu.h>
 
 namespace machine {
 

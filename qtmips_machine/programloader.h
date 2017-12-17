@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <qvector.h>
 #include <qstring.h>
-#include "memory.h"
+#include <memory.h>
 
 namespace machine {
 

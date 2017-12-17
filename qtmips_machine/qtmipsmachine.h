@@ -4,12 +4,12 @@
 #include <QObject>
 #include <QTimer>
 #include <cstdint>
-#include "qtmipsexception.h"
-#include "machineconfig.h"
-#include "registers.h"
-#include "memory.h"
-#include "core.h"
-#include "cache.h"
+#include <qtmipsexception.h>
+#include <machineconfig.h>
+#include <registers.h>
+#include <memory.h>
+#include <core.h>
+#include <cache.h>
 
 namespace machine {
 
