@@ -2,6 +2,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace machine;
 
 Tracer::Tracer(QtMipsMachine *machine) {
     this->machine = machine;

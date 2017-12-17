@@ -1,5 +1,7 @@
 #include "memory.h"
 
+using namespace machine;
+
 // Note about endianness: Current memory implementation is expected to be a big endian.
 // But we can be running on little endian so we should do conversion from bytes to word according that.
 
@@ -157,10 +159,12 @@ bool MemorySection::operator!=(const MemorySection &ms) const {
 #error Memory tree have to be higher or in limit equal to two
 #endif
 
+namespace machine {
 union MemoryTree {
     union MemoryTree *mt;
     MemorySection *sec;
 };
+}
 
 Memory::Memory() {
     this->mt_root = allocate_section_tree();

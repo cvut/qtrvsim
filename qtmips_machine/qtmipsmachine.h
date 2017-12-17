@@ -11,6 +11,8 @@
 #include "core.h"
 #include "cache.h"
 
+namespace machine {
+
 class QtMipsMachine : public QObject {
     Q_OBJECT
 public:
@@ -46,5 +48,7 @@ private:
     std::uint32_t program_end;
     bool program_ended;
 };
+
+}
 
 #endif // QTMIPSMACHINE_H

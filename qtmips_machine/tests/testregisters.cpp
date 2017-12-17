@@ -2,6 +2,8 @@
 #include <qtmipsexception.h>
 #include <registers.h>
 
+using namespace machine;
+
 void MachineTests::registers_gp0() {
     Registers r;
     QCOMPARE(r.read_gp(0), (unsigned)0);

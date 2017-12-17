@@ -1,6 +1,8 @@
 #include "tst_machine.h"
 #include "core.h"
 
+using namespace machine;
+
 static void core_regs_data() {
     QTest::addColumn<Instruction>("i");
     QTest::addColumn<Registers>("init");

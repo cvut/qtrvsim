@@ -6,6 +6,8 @@
 #include <QObject>
 #include <registers.h>
 
+namespace machine {
+
 // TODO Any other operations? We seems to be missing a lot of them.
 enum AluOp : std::uint8_t {
     ALU_OP_SLL = 0,
@@ -47,6 +49,8 @@ std::uint32_t alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t
 // Returns string representation of ALU instruction (internally used by Instruction::to_str)
 QString alu_str(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa);
 
-Q_DECLARE_METATYPE(AluOp)
+}
+
+Q_DECLARE_METATYPE(machine::AluOp)
 
 #endif // ALU_H

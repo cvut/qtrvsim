@@ -1,6 +1,8 @@
 #include "qtmipsmachine.h"
 #include "programloader.h"
 
+using namespace machine;
+
 QtMipsMachine::QtMipsMachine(const MachineConfig &cc) {
     ProgramLoader program(cc.elf());
 

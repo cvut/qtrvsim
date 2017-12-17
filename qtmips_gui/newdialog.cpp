@@ -46,14 +46,14 @@ void NewDialog::cancel() {
 void NewDialog::create() {
     MainWindow *prnt = (MainWindow*)parent();
 
-    MachineConfig *mc = new MachineConfig();
+    machine::MachineConfig *mc = new machine::MachineConfig();
     mc->set_elf(ui->elf_file->text());
     mc->set_pipelined(ui->pipelined->isChecked());
     // TODO other settings
 
     try {
         prnt->create_core(mc);
-    } catch (const QtMipsExceptionInput &e) {
+    } catch (const machine::QtMipsExceptionInput &e) {
         QMessageBox msg(this);
         msg.setText(e.msg(false));
         msg.setIcon(QMessageBox::Critical);

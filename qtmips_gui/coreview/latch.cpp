@@ -7,7 +7,7 @@ using namespace coreview;
 #define PENW 1
 //////////////////////
 
-Latch::Latch(QtMipsMachine *machine, qreal height) {
+Latch::Latch(machine::QtMipsMachine *machine, qreal height) {
     this->height = height;
     connect(machine, SIGNAL(tick()), this, SLOT(tick()));
 }

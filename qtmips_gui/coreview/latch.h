@@ -13,7 +13,7 @@ namespace coreview {
 class Latch : public QGraphicsObject {
     Q_OBJECT
 public:
-    Latch(QtMipsMachine *machine, qreal height);
+    Latch(machine::QtMipsMachine *machine, qreal height);
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

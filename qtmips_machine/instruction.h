@@ -4,6 +4,8 @@
 #include <QObject>
 #include <qstring.h>
 
+namespace machine {
+
 class Instruction : public QObject {
     Q_OBJECT
 public:
@@ -34,6 +36,8 @@ private:
     std::uint32_t dt;
 };
 
-Q_DECLARE_METATYPE(Instruction)
+}
+
+Q_DECLARE_METATYPE(machine::Instruction)
 
 #endif // INSTRUCTION_H

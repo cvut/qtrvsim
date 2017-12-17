@@ -3,6 +3,8 @@
 
 #include <QString>
 
+namespace machine {
+
 class MachineConfig {
 public:
     MachineConfig();
@@ -36,5 +38,7 @@ private:
     enum CacheType cache_type;
     QString elf_path;
 };
+
+}
 
 #endif // MACHINECONFIG_H

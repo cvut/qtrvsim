@@ -12,7 +12,7 @@ namespace coreview {
 class ProgramCounter : public QGraphicsObject {
         Q_OBJECT
 public:
-    ProgramCounter(QtMipsMachine *machine);
+    ProgramCounter(machine::QtMipsMachine *machine);
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

@@ -21,7 +21,7 @@ public:
     ~MainWindow();
 
     void start();
-    void create_core(MachineConfig *config);
+    void create_core(machine::MachineConfig *config);
 
 public slots:
     void new_machine();
@@ -48,7 +48,7 @@ private:
 
     QSettings  *settings;
 
-    QtMipsMachine *machine; // Current simulated machine
+    machine::QtMipsMachine *machine; // Current simulated machine
 
     void show_dockwidget(QDockWidget *w);
 };

@@ -48,9 +48,9 @@ void MainWindow::start() {
     ndialog->show();
 }
 
-void MainWindow::create_core(MachineConfig *config) {
+void MainWindow::create_core(machine::MachineConfig *config) {
     // Create machine
-    machine = new QtMipsMachine(config);
+    machine = new machine::QtMipsMachine(config);
     // Create machine view
     coreview = new CoreView(this, machine);
     this->setCentralWidget(coreview);

@@ -1,6 +1,8 @@
 #include "registers.h"
 #include "qtmipsexception.h"
 
+using namespace machine;
+
 // TODO should this be configurable?
 //////////////////////////////////////////////////////////////////////////////
 /// Program counter initial value

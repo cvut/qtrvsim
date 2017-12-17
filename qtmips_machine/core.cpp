@@ -1,6 +1,8 @@
 #include "core.h"
 #include "programloader.h"
 
+using namespace machine;
+
 #define DM_SUPPORTED (1L<<0)
 #define DM_MEMWRITE (1L<<1)
 #define DM_MEMREAD (1L<<2)

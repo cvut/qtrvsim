@@ -1,7 +1,9 @@
 #include "alu.h"
 #include "qtmipsexception.h"
 
-std::uint32_t alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa, Registers *regs) {
+using namespace machine;
+
+std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa, Registers *regs) {
     switch(operation) {
         case ALU_OP_SLL:
             return t << sa;
@@ -67,7 +69,7 @@ std::uint32_t alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t
     }
 }
 
-QString alu_str(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa) {
+QString machine::alu_str(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa) {
     // TODO
     return QString("");
 }

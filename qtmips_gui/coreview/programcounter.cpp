@@ -8,7 +8,7 @@ using namespace coreview;
 #define PENW 1
 //////////////////////
 
-ProgramCounter::ProgramCounter(QtMipsMachine *machine) : QGraphicsObject(nullptr), value(this), name(this) {
+ProgramCounter::ProgramCounter(machine::QtMipsMachine *machine) : QGraphicsObject(nullptr), value(this), name(this) {
     value.setText(QString("0x") + QString::number(machine->registers()->read_pc(), 16));
     value.setPos(0, HEIGHT/2 - value.boundingRect().height()/2);
     name.setText(QString("PC"));

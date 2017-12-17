@@ -1,5 +1,7 @@
 #include "machineconfig.h"
 
+using namespace machine;
+
 MachineConfig::MachineConfig() {
     pipeline = false;
     jumppred = false;

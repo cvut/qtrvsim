@@ -3,6 +3,8 @@
 #include "programloader.h"
 #include "instruction.h"
 
+using namespace machine;
+
 // This is common program start (initial value of program counter)
 #define PC_INIT 0x80020000
 

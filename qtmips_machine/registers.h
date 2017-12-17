@@ -4,6 +4,8 @@
 #include <QObject>
 #include <cstdint>
 
+namespace machine {
+
 class Registers : public QObject {
     Q_OBJECT
 public:
@@ -35,6 +37,8 @@ private:
     std::uint32_t pc; // program counter
 };
 
-Q_DECLARE_METATYPE(Registers)
+}
+
+Q_DECLARE_METATYPE(machine::Registers)
 
 #endif // REGISTERS_H

@@ -8,6 +8,8 @@
 #include "instruction.h"
 #include "alu.h"
 
+namespace machine {
+
 class Core : public QObject {
     Q_OBJECT
 public:
@@ -87,5 +89,7 @@ private:
     struct Core::dtExecute dt_e;
     struct Core::dtMemory dt_m;
 };
+
+}
 
 #endif // CORE_H

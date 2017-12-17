@@ -1,6 +1,8 @@
 #include "instruction.h"
 #include "qtmipsexception.h"
 
+using namespace machine;
+
 struct InstructionMap {
     const char *name;
 };

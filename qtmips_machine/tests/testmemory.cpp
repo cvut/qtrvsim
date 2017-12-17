@@ -1,6 +1,8 @@
 #include "tst_machine.h"
 #include "memory.h"
 
+using namespace machine;
+
 void MachineTests::memory_data() {
     QTest::addColumn<std::uint32_t>("address");
 

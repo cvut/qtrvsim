@@ -1,6 +1,6 @@
 #include "coreview.h"
 
-CoreView::CoreView(QWidget *parent, QtMipsMachine *machine) : QGraphicsView(parent) {
+CoreView::CoreView(QWidget *parent, machine::QtMipsMachine *machine) : QGraphicsView(parent) {
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);

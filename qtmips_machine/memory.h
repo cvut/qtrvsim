@@ -6,6 +6,8 @@
 #include <cstdint>
 #include "qtmipsexception.h"
 
+namespace machine {
+
 // Virtual class for common memory access
 class MemoryAccess : public QObject {
     Q_OBJECT
@@ -33,8 +35,6 @@ signals:
     // TODO trigger
     void byte_change(std::uint32_t address, std::uint32_t value);
 };
-
-Q_DECLARE_METATYPE(MemoryAccess::AccessControl)
 
 class MemorySection : public MemoryAccess {
 public:
@@ -91,6 +91,9 @@ private:
     static union MemoryTree *copy_section_tree(const union MemoryTree*, size_t depth);
 };
 
-Q_DECLARE_METATYPE(Memory)
+}
+
+Q_DECLARE_METATYPE(machine::MemoryAccess::AccessControl)
+Q_DECLARE_METATYPE(machine::Memory)
 
 #endif // MEMORY_H

@@ -6,6 +6,8 @@
 #include <cstring>
 #include "qtmipsexception.h"
 
+using namespace machine;
+
 ProgramLoader::ProgramLoader(const char *file) {
     // Initialize elf library
     if (elf_version(EV_CURRENT) == EV_NONE)

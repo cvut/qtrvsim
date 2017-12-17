@@ -12,13 +12,13 @@
 class CoreView : public QGraphicsView {
     Q_OBJECT
 public:
-    CoreView(QWidget *parent, QtMipsMachine *machine);
+    CoreView(QWidget *parent, machine::QtMipsMachine *machine);
 
 private:
     void resizeEvent(QResizeEvent *event);
 
     QGraphicsScene scene;
-    QtMipsMachine *machine;
+    machine::QtMipsMachine *machine;
 
     coreview::ProgramCounter *pc;
     coreview::Multiplexer *pc_multiplexer;

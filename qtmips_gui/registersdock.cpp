@@ -30,7 +30,7 @@ RegistersDock::~RegistersDock() {
         delete gp[i];
 }
 
-void RegistersDock::setup(QtMipsMachine *machine) {
+void RegistersDock::setup(machine::QtMipsMachine *machine) {
     regs = machine->registers();
     connect(regs, SIGNAL(pc_update(std::uint32_t)), this, SLOT(pc_changed(std::uint32_t)));
     connect(regs, SIGNAL(gp_update(std::uint8_t,std::uint32_t)), this, SLOT(gp_changed(std::uint8_t,std::uint32_t)));

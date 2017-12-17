@@ -2,6 +2,8 @@
 #include "alu.h"
 #include "qtmipsexception.h"
 
+using namespace machine;
+
 void MachineTests::alu_data() {
     QTest::addColumn<AluOp>("op");
     QTest::addColumn<std::uint32_t>("s");

@@ -2,6 +2,8 @@
 #include <iostream>
 #include <cstring>
 
+using namespace machine;
+
 QtMipsException::QtMipsException(QTMIPS_ARGS_COMMON) {
     this->reason = reason;
     this->ext = ext;

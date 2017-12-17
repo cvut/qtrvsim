@@ -3,6 +3,8 @@
 
 #include "memory.h"
 
+namespace machine {
+
 class Cache : public MemoryAccess {
 public:
     Cache(Memory *m);
@@ -14,5 +16,7 @@ public:
 };
 
 // TODO other chaches
+
+}
 
 #endif // CACHE_H

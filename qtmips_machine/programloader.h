@@ -9,6 +9,7 @@
 #include <qstring.h>
 #include "memory.h"
 
+namespace machine {
 
 class ProgramLoader {
 public:
@@ -26,5 +27,7 @@ private:
     Elf32_Phdr *phdrs; // program section headers
     QVector<size_t> map; // external index to phdrs index
 };
+
+}
 
 #endif // PROGRAM_H

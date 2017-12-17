@@ -14,7 +14,7 @@ public:
     RegistersDock(QWidget *parent);
     ~RegistersDock();
 
-    void setup(QtMipsMachine *machine);
+    void setup(machine::QtMipsMachine *machine);
 
 private slots:
     void pc_changed(std::uint32_t val);
@@ -22,7 +22,7 @@ private slots:
     void hi_lo_changed(bool hi, std::uint32_t val);
 
 private:
-    const Registers *regs;
+    const machine::Registers *regs;
 
     QScrollArea *widg;
     QFormLayout *layout;

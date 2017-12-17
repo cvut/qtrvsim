@@ -3,6 +3,8 @@
 #include <iostream>
 #include "tracer.h"
 
+using namespace machine;
+
 void create_parser(QCommandLineParser &p) {
     p.setApplicationDescription("QtMips CLI machine simulator");
     p.addHelpOption();

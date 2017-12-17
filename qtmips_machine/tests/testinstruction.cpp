@@ -1,6 +1,8 @@
 #include "tst_machine.h"
 #include "instruction.h"
 
+using namespace machine;
+
 // Test that we are correctly encoding instructions in constructor
 void MachineTests::instruction() {
     QCOMPARE(Instruction(0x00), Instruction(0,0));

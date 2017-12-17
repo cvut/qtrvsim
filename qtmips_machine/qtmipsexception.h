@@ -4,7 +4,9 @@
 #include <exception>
 #include <qstring.h>
 
-#define QTMIPS_EXCEPTION(TYPE, REASON, EXT) (QtMipsException ## TYPE (QString(REASON), QString(EXT), QString(__FILE__), __LINE__))
+namespace machine {
+
+#define QTMIPS_EXCEPTION(TYPE, REASON, EXT) (machine::QtMipsException ## TYPE (QString(REASON), QString(EXT), QString(__FILE__), __LINE__))
 #define QTMIPS_ARGS_COMMON QString reason, QString ext, QString file, int line
 
 // Base exception for all machine ones
@@ -81,5 +83,7 @@ public:
 };
 
 #define SANITY_ASSERT(COND, MSG) do { if (!(COND)) throw QTMIPS_EXCEPTION(Sanity, "Sanity check failed (" #COND ")", MSG); } while (false)
+
+}
 
 #endif // QTMIPSEXCEPTION_H
