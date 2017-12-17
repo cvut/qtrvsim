@@ -1,5 +1,5 @@
-#ifndef MULTIPLEXER_H
-#define MULTIPLEXER_H
+#ifndef COREVIEW_MULTIPLEXER_H
+#define COREVIEW_MULTIPLEXER_H
 
 #include <QGraphicsItem>
 #include "qtmipsexception.h"
@@ -38,4 +38,4 @@ namespace coreview {
     class Multiplexer;
 }
 
-#endif // MULTIPLEXER_H
+#endif // COREVIEW_MULTIPLEXER_H

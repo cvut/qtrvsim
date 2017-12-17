@@ -1,5 +1,5 @@
-#ifndef LATCH_H
-#define LATCH_H
+#ifndef COREVIEW_LATCH_H
+#define COREVIEW_LATCH_H
 
 #include <QGraphicsObject>
 #include <QList>
@@ -42,4 +42,4 @@ namespace coreview {
     class Latch;
 };
 
-#endif // LATCH_H
+#endif // COREVIEW_LATCH_H

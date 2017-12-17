@@ -1,5 +1,5 @@
-#ifndef CONNECTION_H
-#define CONNECTION_H
+#ifndef COREVIEW_CONNECTION_H
+#define COREVIEW_CONNECTION_H
 
 #include <QGraphicsObject>
 #include <QList>
@@ -57,4 +57,4 @@ namespace coreview {
     class Connection;
 };
 
-#endif // CONNECTION_H
+#endif // COREVIEW_CONNECTION_H

@@ -1,5 +1,5 @@
-#ifndef PROGRAMCOUNTER_H
-#define PROGRAMCOUNTER_H
+#ifndef COREVIEW_PROGRAMCOUNTER_H
+#define COREVIEW_PROGRAMCOUNTER_H
 
 #include <QGraphicsObject>
 #include <QPainter>
@@ -39,4 +39,4 @@ namespace coreview {
     class ProgramCounter;
 };
 
-#endif // PROGRAMCOUNTER_H
+#endif // COREVIEW_PROGRAMCOUNTER_H
