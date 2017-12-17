@@ -8,6 +8,7 @@
 #include "coreview/programcounter.h"
 #include "coreview/multiplexer.h"
 #include "coreview/latch.h"
+#include "coreview/alu.h"
 
 class CoreView : public QGraphicsView {
     Q_OBJECT
@@ -21,6 +22,7 @@ private:
     machine::QtMipsMachine *machine;
 
     coreview::ProgramCounter *pc;
+    coreview::Alu *alu;
     coreview::Multiplexer *pc_multiplexer;
     coreview::Connection *pc2pc;
     coreview::Latch *testlatch;

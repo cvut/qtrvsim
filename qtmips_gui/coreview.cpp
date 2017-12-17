@@ -11,17 +11,20 @@ CoreView::CoreView(QWidget *parent, machine::QtMipsMachine *machine) : QGraphics
     scene.addLine(0, 400, 800, 400);
 
     pc = new coreview::ProgramCounter(machine);
+    alu = new coreview::Alu();
     pc_multiplexer = new coreview::Multiplexer(4);
     testlatch = new coreview::Latch(machine, 300);
 
     pc2pc = new coreview::Connection(pc_multiplexer->connector_out(), pc->connector_in());
 
     scene.addItem(pc);
+    scene.addItem(alu);
     scene.addItem(pc_multiplexer);
     scene.addItem(testlatch);
     scene.addItem(pc2pc);
 
     pc->setPos(100,100);
+    alu->setPos(200, 100);
     pc_multiplexer->setPos(60, 100);
     pc_multiplexer->set(2);
 

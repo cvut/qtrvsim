@@ -23,7 +23,8 @@ SOURCES += \
         coreview/programcounter.cpp \
         coreview/multiplexer.cpp \
         coreview/connection.cpp \
-        coreview/latch.cpp
+        coreview/latch.cpp \
+        coreview/alu.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -35,13 +36,15 @@ HEADERS += \
         coreview/programcounter.h \
         coreview/multiplexer.h \
         coreview/connection.h \
-        coreview/latch.h
+        coreview/latch.h \
+        coreview/alu.h
 
 FORMS += \
         NewDialog.ui \
         MainWindow.ui \
         CacheContent.ui \
-        CacheStatistics.ui
+        CacheStatistics.ui \
+        programmemory.ui
 
 RESOURCES += \
         icons.qrc
