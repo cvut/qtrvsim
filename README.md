@@ -4,7 +4,7 @@ MIPS CPU simulator for education purposes.
 
 Dependencies
 ------------
-* Qt 5 (qtmips\_gui can be compiled with Qt4 but not qtmips\_cli)
+* Qt 5
 * elfutils (libelf works too but you might have problems with it)
 
 Compilation
