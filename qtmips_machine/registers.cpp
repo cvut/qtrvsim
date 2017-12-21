@@ -18,7 +18,7 @@ Registers::Registers() : QObject() {
 
 Registers::Registers(const Registers &orig) : QObject() {
     this->pc = orig.read_pc();
-    for (int i = 0; i < 31; i++)
+    for (std::uint8_t i = 0; i < 31; i++)
         this->gp[i] = orig.read_gp(i + 1);
     this->lo = orig.read_hi_lo(false);
     this->hi = orig.read_hi_lo(true);
@@ -68,25 +68,25 @@ void Registers::write_gp(std::uint8_t i, std::uint32_t value) {
     this->gp[i - 1] = value;
 }
 
-std::uint32_t Registers::read_hi_lo(bool hi) const {
-    if (hi)
-        return this->hi;
+std::uint32_t Registers::read_hi_lo(bool is_hi) const {
+    if (is_hi)
+        return hi;
     else
-        return this->lo;
+        return lo;
 }
 
-void Registers::write_hi_lo(bool hi, std::uint32_t value) {
-    if (hi)
-        this->hi = value;
+void Registers::write_hi_lo(bool is_hi, std::uint32_t value) {
+    if (is_hi)
+        hi = value;
     else
-        this->lo = value;
-    emit hi_lo_update(hi, value);
+        lo = value;
+    emit hi_lo_update(is_hi, value);
 }
 
 bool Registers::operator==(const Registers &c) const {
     if (read_pc() != c.read_pc())
         return false;
-    for (int i = 0; i < 31; i++)
+    for (std::uint8_t i = 0; i < 31; i++)
         if (read_gp(i) != c.read_gp(i))
             return false;
     if (read_hi_lo(false) != c.read_hi_lo(false))

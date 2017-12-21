@@ -27,7 +27,6 @@ protected:
 private:
     Ui::NewDialog *ui;
     QSettings *settings;
-    QFileDialog *elf_dialog;
 
     void load_settings();
     void store_settings();

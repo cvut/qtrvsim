@@ -2,7 +2,7 @@
 #include <exception>
 #include <unistd.h>
 #include <fcntl.h>
-#include <errno.h>
+#include <cerrno>
 #include <cstring>
 #include "qtmipsexception.h"
 
@@ -47,7 +47,7 @@ ProgramLoader::ProgramLoader(const char *file) {
     // We want only LOAD sections so we create map of those sections
     for (unsigned i = 1; i < this->n_secs; i++) {
         // TODO handle endianity
-        if (this->phdrs[i].p_type != PT_LOAD)
+        if (phdrs[i].p_type != PT_LOAD)
             continue;
         this->map.push_back(i);
     }

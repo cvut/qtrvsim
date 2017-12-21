@@ -2,7 +2,6 @@
 #define MEMORY_H
 
 #include <QObject>
-#include <vector>
 #include <cstdint>
 #include <qtmipsexception.h>
 

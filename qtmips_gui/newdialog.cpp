@@ -36,7 +36,6 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
 NewDialog::~NewDialog() {
     delete ui;
     // Settings is freed by parent
-    delete elf_dialog;
 }
 
 void NewDialog::cancel() {
