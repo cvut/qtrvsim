@@ -1,14 +1,23 @@
 #include "coreview.h"
 
-CoreView::CoreView(QWidget *parent, machine::QtMipsMachine *machine) : QGraphicsView(parent) {
+CoreView::CoreView(QWidget *parent) : QGraphicsView(parent) {
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
+    // TODO fitInView doesn't work as I want so reimplement or do something with it
+    //fitInView(0, 0, 201, 201, Qt::KeepAspectRatioByExpanding);
+}
+
+void CoreView::resizeEvent(QResizeEvent *event) {
+    // fitInView(0, 0, 201, 201, Qt::KeepAspectRatioByExpanding);
+}
+
+CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : QGraphicsScene(view) {
     this->machine = machine;
     // Identification cross
-    scene.addLine(400, 0, 400, 800);
-    scene.addLine(0, 400, 800, 400);
+    addLine(400, 0, 400, 800);
+    addLine(0, 400, 800, 400);
 
     pc = new coreview::ProgramCounter(machine);
     alu = new coreview::Alu();
@@ -17,22 +26,19 @@ CoreView::CoreView(QWidget *parent, machine::QtMipsMachine *machine) : QGraphics
 
     pc2pc = new coreview::Connection(pc_multiplexer->connector_out(), pc->connector_in());
 
-    scene.addItem(pc);
-    scene.addItem(alu);
-    scene.addItem(pc_multiplexer);
-    scene.addItem(testlatch);
-    scene.addItem(pc2pc);
+    addItem(pc);
+    addItem(alu);
+    addItem(pc_multiplexer);
+    addItem(testlatch);
+    addItem(pc2pc);
 
     pc->setPos(100,100);
     alu->setPos(200, 100);
     pc_multiplexer->setPos(60, 100);
     pc_multiplexer->set(2);
 
-    setScene(&scene);
-    // TODO fitInView doesn't work as I want so reimplement or do something with it
-    //fitInView(0, 0, 201, 201, Qt::KeepAspectRatioByExpanding);
-}
-
-void CoreView::resizeEvent(QResizeEvent *event) {
-    // fitInView(0, 0, 201, 201, Qt::KeepAspectRatioByExpanding);
+    QGraphicsScene *old_scene = view->scene();
+    view->setScene(this);
+    if (old_scene != nullptr)
+        delete old_scene;
 }

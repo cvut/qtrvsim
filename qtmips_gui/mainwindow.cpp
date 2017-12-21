@@ -1,13 +1,17 @@
 #include "mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+    machine = nullptr;
+    corescene = nullptr;
     settings = new QSettings("CTU", "QtMips");
-    coreview  = nullptr;
 
     ui = new Ui::MainWindow();
     ui->setupUi(this);
     setWindowTitle("QtMips");
 
+    // Prepare empty core view
+    coreview  = new CoreView(this);
+    this->setCentralWidget(coreview);
     // Create/prepare other widgets
     ndialog = new NewDialog(this, settings);
     cache_content = new CacheContentDock(this);
@@ -32,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 MainWindow::~MainWindow() {
     settings->sync();
     delete settings;
+    if (corescene != nullptr)
+        delete corescene;
     if (coreview != nullptr)
         delete coreview;
     delete ndialog;
@@ -49,22 +55,34 @@ void MainWindow::start() {
 }
 
 void MainWindow::create_core(machine::MachineConfig *config) {
+    // Remove old machine
+    if (machine != nullptr)
+        delete machine;
     // Create machine
     machine = new machine::QtMipsMachine(config);
     // Create machine view
-    coreview = new CoreView(this, machine);
-    this->setCentralWidget(coreview);
+    corescene = new CoreViewScene(coreview, machine);
 
-    machine->set_speed(1000); // Set default speed to 1 sec
+    //machine->set_speed(1000); // Set default speed to 1 sec
+    machine->set_speed(0);
 
-    // Connect machine signals
+    // Connect machine signals and slots
     connect(ui->actionRun, SIGNAL(triggered(bool)), machine, SLOT(play()));
     connect(ui->actionPause, SIGNAL(triggered(bool)), machine, SLOT(pause()));
     connect(ui->actionStep, SIGNAL(triggered(bool)), machine, SLOT(step()));
     connect(ui->actionRestart, SIGNAL(triggered(bool)), machine, SLOT(restart()));
+    connect(machine, SIGNAL(status_change(machine::QtMipsMachine::Status)), this, SLOT(machine_status(machine::QtMipsMachine::Status)));
+    connect(machine, SIGNAL(program_exit()), this, SLOT(machine_exit()));
+    connect(machine, SIGNAL(program_trap(machine::QtMipsException&)), this, SLOT(machine_trap(machine::QtMipsException&)));
 
     // Setup docks
     registers->setup(machine);
+    // Set status to ready
+    machine_status(machine::QtMipsMachine::ST_READY);
+}
+
+bool MainWindow::configured() {
+    return (machine != nullptr);
 }
 
 void MainWindow::new_machine() {
@@ -83,15 +101,10 @@ void MainWindow::show_registers() {
     show_dockwidget(registers);
 }
 
-bool MainWindow::configured() {
-    return (machine != nullptr);
-}
-
 void MainWindow::closeEvent(QCloseEvent *event) {
     settings->setValue("windowGeometry", saveGeometry());
     settings->setValue("windowState", saveState());
     settings->sync();
-    QMainWindow::closeEvent(event);
 }
 
 void MainWindow::show_dockwidget(QDockWidget *dw) {
@@ -102,4 +115,54 @@ void MainWindow::show_dockwidget(QDockWidget *dw) {
         dw->raise();
         dw->setFocus();
     }
+}
+
+void MainWindow::machine_status(enum machine::QtMipsMachine::Status st) {
+    QString status;
+    switch (st) {
+    case machine::QtMipsMachine::ST_READY:
+        ui->actionPause->setEnabled(false);
+        ui->actionRun->setEnabled(true);
+        ui->actionStep->setEnabled(true);
+        status = "Ready";
+        break;
+    case machine::QtMipsMachine::ST_RUNNING:
+        ui->actionPause->setEnabled(true);
+        ui->actionRun->setEnabled(false);
+        ui->actionStep->setEnabled(false);
+        status = "Running";
+        break;
+    case machine::QtMipsMachine::ST_BUSY:
+        // Busy is not interesting (in such case we should just be running
+        return;
+    case machine::QtMipsMachine::ST_EXIT:
+        // machine_exit is called so we disable controls in that
+        status = "Exited";
+        break;
+    case machine::QtMipsMachine::ST_TRAPPED:
+        // machine_trap is called so we disable controls in that
+        status = "Trapped";
+        break;
+    default:
+        status = "Unknown";
+        break;
+    }
+    ui->statusBar->showMessage(status);
+}
+
+void MainWindow::machine_exit() {
+    ui->actionPause->setEnabled(false);
+    ui->actionRun->setEnabled(false);
+    ui->actionStep->setEnabled(false);
+}
+
+void MainWindow::machine_trap(machine::QtMipsException &e) {
+    machine_exit();
+
+    QMessageBox msg(this);
+    msg.setText(e.msg(false));
+    msg.setIcon(QMessageBox::Critical);
+    msg.setDetailedText(e.msg(true));
+    msg.setWindowTitle("Machine trapped");
+    msg.exec();
 }

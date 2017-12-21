@@ -3,8 +3,10 @@
 RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
     regs = nullptr;
 
-    widg = new QScrollArea(this);
+    scrollarea = new QScrollArea(this);
+    widg = new QWidget(scrollarea);
     layout = new QFormLayout(widg);
+    layout->setSizeConstraint(QLayout::SetMinAndMaxSize);
 
 #define INIT(X, LABEL) do{ \
         X = new QLabel(widg); \
@@ -17,10 +19,13 @@ RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
         INIT(gp[i], QString("GP") + QString::number(i) + QString(" ($") + QString::number(i) + QString("):"));
     INIT(lo, "LO:");
     INIT(hi, "HI:");
-
 #undef INIT
+    widg->setLayout(layout);
+    scrollarea->setWidget(widg);
 
-    setWidget(widg);
+    setWidget(scrollarea);
+    setObjectName("Registers");
+    setWindowTitle("Registers");
 }
 
 RegistersDock::~RegistersDock() {

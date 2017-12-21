@@ -25,6 +25,16 @@ public:
     const Cache *cache();
     const Core *core();
 
+    enum Status {
+        ST_READY, // Machine is ready to be started or step to be called
+        ST_RUNNING, // Machine is running
+        ST_BUSY, // Machine is calculating step
+        ST_EXIT, // Machine exited
+        ST_TRAPPED // Machine exited with failure
+    };
+    enum Status status();
+    bool exited();
+
 public slots:
     // TODO handle speed
     void play();
@@ -34,19 +44,25 @@ public slots:
 
 signals:
     void program_exit();
+    void program_trap(machine::QtMipsException &e);
+    void status_change(enum machine::QtMipsMachine::Status st);
     void tick(); // Time tick
 
 private:
     Registers *regs;
-    Memory *mem;
+    Memory *mem, *mem_program_only;
     Cache *cch;
     Core *cr;
+
+    bool cr_pipelined;
 
     unsigned run_speed;
     QTimer *run_t;
 
     std::uint32_t program_end;
-    bool program_ended;
+    enum Status stat;
+
+    void set_status(enum Status st);
 };
 
 }

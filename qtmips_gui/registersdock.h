@@ -24,7 +24,8 @@ private slots:
 private:
     const machine::Registers *regs;
 
-    QScrollArea *widg;
+    QWidget *widg;
+    QScrollArea *scrollarea;
     QFormLayout *layout;
 
     QLabel *pc;

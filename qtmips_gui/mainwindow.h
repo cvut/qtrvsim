@@ -23,14 +23,18 @@ public:
     void start();
     void create_core(machine::MachineConfig *config);
 
-public slots:
-    void new_machine();
+    bool configured();
 
+public slots:
+    // Actions signals
+    void new_machine();
     void show_cache_content();
     void show_cache_statictics();
     void show_registers();
-
-    bool configured();
+    // Machine signals
+    void machine_status(enum machine::QtMipsMachine::Status st);
+    void machine_exit();
+    void machine_trap(machine::QtMipsException &e);
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -41,6 +45,7 @@ private:
     NewDialog *ndialog;
 
     CoreView *coreview;
+    CoreViewScene *corescene;
 
     CacheContentDock *cache_content;
     CacheStatisticsDock *cache_statictics;

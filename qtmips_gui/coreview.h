@@ -11,14 +11,19 @@
 #include "coreview/alu.h"
 
 class CoreView : public QGraphicsView {
-    Q_OBJECT
 public:
-    CoreView(QWidget *parent, machine::QtMipsMachine *machine);
+    CoreView(QWidget *parent);
 
 private:
     void resizeEvent(QResizeEvent *event);
+};
 
-    QGraphicsScene scene;
+class CoreViewScene : public QGraphicsScene {
+    Q_OBJECT
+public:
+    CoreViewScene(CoreView *view, machine::QtMipsMachine *machine);
+
+private:
     machine::QtMipsMachine *machine;
 
     coreview::ProgramCounter *pc;
@@ -31,6 +36,6 @@ private:
 #else
 
 class CoreView;
-class CoreViewBlock;
+class CoreViewScene;
 
 #endif // COREVIEW_H

@@ -4,14 +4,15 @@
 using namespace machine;
 
 QtMipsMachine::QtMipsMachine(const MachineConfig &cc) {
+    stat = ST_READY;
+
     ProgramLoader program(cc.elf());
+    mem_program_only = new Memory();
+    program.to_memory(mem_program_only);
+    program_end = program.end();
 
     regs = new Registers();
-    mem = new Memory();
-
-    program.to_memory(mem);
-    program_end = program.end();
-    program_ended = false;
+    mem = new Memory(*mem_program_only);
 
     MemoryAccess *coremem;
     switch (cc.cache()) {
@@ -28,8 +29,11 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) {
         throw QTMIPS_EXCEPTION(Sanity, "Trying to configure unknown cache type", "");
     }
 
-    // TODO pipelined
-    cr = new CoreSingle(regs, coremem);
+    cr_pipelined = cc.pipelined();
+    if (cc.pipelined())
+        cr = new CorePipelined(regs, coremem);
+    else
+        cr = new CoreSingle(regs, coremem);
 
     run_speed = 1;
     run_t = new QTimer(this);
@@ -58,32 +62,59 @@ const Core *QtMipsMachine::core() {
     return cr;
 }
 
+enum QtMipsMachine::Status QtMipsMachine::status() {
+    return stat;
+}
+
+bool QtMipsMachine::exited() {
+    return stat == ST_EXIT || stat == ST_TRAPPED;
+}
+
+// We don't allow to call control methods when machine exited or if it's busy
+// We rather silently fail.
+// TODO wouldn't be error better?
+#define CTL_GUARD do { if (exited() || stat == ST_BUSY) return; } while(false)
+
 void QtMipsMachine::play() {
-    if (program_ended)
-        return;
+    CTL_GUARD;
+    set_status(ST_RUNNING);
     run_t->start(run_speed);
 }
 
 void QtMipsMachine::pause() {
-    if (program_ended)
-        return;
+    CTL_GUARD;
+    set_status(ST_READY);
     run_t->stop();
 }
 
 void QtMipsMachine::step() {
-    if (program_ended) // Ignore if program ended
-        return;
+    CTL_GUARD;
+    enum Status stat_prev = stat;
+    set_status(ST_BUSY);
     emit tick();
-    cr->step();
-    if (regs->read_pc() >= program_end) {
-        program_ended = true;
+    try {
+        cr->step();
+    } catch (QtMipsException e) {
         run_t->stop();
-        emit program_exit();
+        set_status(ST_TRAPPED);
+        emit program_trap(e);
+        return;
     }
+    if (regs->read_pc() >= program_end) {
+        run_t->stop();
+        set_status(ST_EXIT);
+        emit program_exit();
+    } else
+        set_status(stat_prev);
 }
 
 void QtMipsMachine::restart() {
-    if (!program_ended)
-        run_t->stop(); // Stop timer if program is still running
     // TODO
+}
+
+void QtMipsMachine::set_status(enum Status st) {
+    bool change = st != stat;
+    stat = st;
+    if (change)
+        emit status_change(st);
 }
