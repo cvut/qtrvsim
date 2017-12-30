@@ -63,8 +63,7 @@ void MainWindow::create_core(machine::MachineConfig *config) {
     // Create machine view
     corescene = new CoreViewScene(coreview, machine);
 
-    //machine->set_speed(1000); // Set default speed to 1 sec
-    machine->set_speed(0);
+    machine->set_speed(1000); // Set default speed to 1 sec
 
     // Connect machine signals and slots
     connect(ui->actionRun, SIGNAL(triggered(bool)), machine, SLOT(play()));

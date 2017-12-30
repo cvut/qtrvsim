@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>558</width>
-    <height>306</height>
+    <height>254</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -129,48 +129,6 @@
          <property name="text">
           <string>Hazard unit</string>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="flush_jump">
-         <property name="text">
-          <string>Flush pipeline on jump</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="prediction">
-         <property name="title">
-          <string>Jump prediction</string>
-         </property>
-         <property name="flat">
-          <bool>false</bool>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="checked">
-          <bool>false</bool>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <widget class="QRadioButton" name="prediction_static">
-            <property name="text">
-             <string>Static</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="prediction_one_dynamic">
-            <property name="text">
-             <string>One level dynamic</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
         </widget>
        </item>
        <item>

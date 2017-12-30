@@ -18,10 +18,6 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     // Signals on Core tab
     CUSTOM_PRESET(ui->pipelined);
     CUSTOM_PRESET(ui->hazard);
-    CUSTOM_PRESET(ui->flush_jump);
-    CUSTOM_PRESET(ui->prediction);
-    CUSTOM_PRESET(ui->prediction_static);
-    CUSTOM_PRESET(ui->prediction_one_dynamic);
     // Signals on Memory tab
     CUSTOM_PRESET(ui->mem_protec_write);
     CUSTOM_PRESET(ui->mem_protec_exec);
@@ -83,9 +79,6 @@ void NewDialog::preset(bool value) {
         // Core settings
         ui->pipelined->setChecked(pip);
         ui->hazard->setChecked(pip);
-        ui->flush_jump->setChecked(pip);
-        ui->prediction->setChecked(pip);
-        ui->prediction_one_dynamic->setChecked(pip);
         // Memory settings
         ui->mem_protec_write->setChecked(true);
         ui->mem_protec_exec->setChecked(true);
@@ -116,10 +109,6 @@ void NewDialog::load_settings() {
     // Core tab
     LOAD_BUTTON(pipelined, false);
     LOAD_BUTTON(hazard, false);
-    LOAD_BUTTON(flush_jump, false);
-    LOAD_BUTTON(prediction, false);
-    LOAD_BUTTON(prediction_static, true);
-    LOAD_BUTTON(prediction_one_dynamic, false);
     // Memory tab
     LOAD_BUTTON(mem_protec_write, true);
     LOAD_BUTTON(mem_protec_exec, true);
@@ -137,10 +126,6 @@ void NewDialog::store_settings() {
     // Core tab
     STORE_BUTTON(pipelined);
     STORE_BUTTON(hazard);
-    STORE_BUTTON(flush_jump);
-    STORE_BUTTON(prediction);
-    STORE_BUTTON(prediction_static);
-    STORE_BUTTON(prediction_one_dynamic);
     // Memory tab
     STORE_BUTTON(mem_protec_write);
     STORE_BUTTON(mem_protec_exec);
