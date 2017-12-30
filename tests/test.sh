@@ -16,6 +16,37 @@ echo_fail() {
 	exit 1
 }
 
+## Parse script arguments #######################################################
+TOOLCHAIN_SYS=false
+TOOLCHAIN="mips-elf-"
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+		-\?|-h|--help)
+			echo "QtMips test script ($TEST_NAME)"
+			echo "Usage: $0 [OPTION]..."
+			echo
+			echo "Options:"
+			echo "  -s, --system-toolchain"
+			echo "    Don't compile it's own toolchain. Use system toolchain instead"
+			echo "  --toolchain PREFIX"
+			echo "    What toolchain prefix should be used when system toolchain is used."
+			echo "    In default mips-elf- is used."
+			echo "  -h, -?, --help"
+			echo "    Print this help text."
+			exit 0
+			;;
+		-s|--system-toolchain)
+			TOOLCHAIN_SYS=true
+			;;
+		--toolchain)
+			TOOLCHAIN="$2"
+			shift
+			;;
+	esac
+	shift
+done
+
 ## Check and init test ##########################################################
 
 # Check if test name is defined
@@ -62,6 +93,8 @@ BUILD_DIR="$TEST_DIR_ROOT/build"
 # Directory where test should be build and executed
 TEST_DIR="$TEST_DIR_ROOT/$TEST_NAME"
 
+# TODO verify that we really have system toolchain if configured.
+
 ## Helper functions for building and running project ############################
 
 qtmips_make() {
@@ -83,7 +116,8 @@ qtmips_run() {
 
 MIPS_COMPILER="$TEST_DIR_ROOT/mips-qtmips-elf"
 
-mips_compiler() {
+_mips_compiler() {
+	export PATH="$PATH:$MIPS_COMPILER/bin"
 	# Skip if we have compiler already
 	[ ! -d "$MIPS_COMPILER" ] || return 0
 	# Otherwise compile it
@@ -95,7 +129,12 @@ mips_compiler() {
 }
 
 mips_make_test() {
-	mips_compiler
+	local PREFIX="mips-qtmips-elf-"
+	if $TOOLCHAIN_SYS; then
+		PREFIX="$TOOLCHAIN"
+	else
+		_mips_compiler
+	fi
 	mkdir -p "$TEST_DIR"
-	PATH="$PATH:$MIPS_COMPILER/bin" make -C "$TEST_SRC" O="$TEST_DIR" MIPS_PREFIX="mips-qtmips-elf-" "$@"
+	make -C "$TEST_SRC" O="$TEST_DIR" MIPS_PREFIX="$PREFIX" "$@"
 }
