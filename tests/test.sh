@@ -109,7 +109,8 @@ qtmips_make() {
 qtmips_run() {
 	local BIN="$BUILD_DIR/$1"
 	shift
-	LD_LIBRARY_PATH="$BUILD_DIR/qtmips_machine" "$BIN" "$@"
+	LD_LIBRARY_PATH="$BUILD_DIR/qtmips_machine" "$BIN" "$@" || \
+		echo_fail "QtMips execution exited with non-zero code ($?): $@"
 }
 
 ## Mips elf binary compilation ##################################################
