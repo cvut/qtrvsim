@@ -4,7 +4,8 @@
 
 using namespace machine;
 
-QtMipsException::QtMipsException(QTMIPS_ARGS_COMMON) {
+QtMipsException::QtMipsException(QString reason, QString ext, QString file, int line) {
+    this->name = "Exception";
     this->reason = reason;
     this->ext = ext;
     this->file = file;
@@ -20,9 +21,10 @@ const char *QtMipsException::what() const throw() {
 
 QString QtMipsException::msg(bool pos) const {
     QString message;
+    message += name;
     if (pos)
-        message += QString("(") + QString(this->file) + QString(":") + QString::number(this->line) + QString(") ");
-    message += this->reason;
+        message += QString(" (") + QString(this->file) + QString(":") + QString::number(this->line) + QString(")");
+    message += ": " + this->reason;
     if (!this->ext.isEmpty()) {
         message += QString(": ");
         message += this->ext;
@@ -30,30 +32,10 @@ QString QtMipsException::msg(bool pos) const {
     return message;
 }
 
-
-QtMipsExceptionInput::QtMipsExceptionInput(QTMIPS_ARGS_COMMON)
-        : QtMipsException(reason, ext, file, line) { }
-
-QtMipsExceptionRuntime::QtMipsExceptionRuntime(QTMIPS_ARGS_COMMON)
-        : QtMipsException(reason, ext, file, line) { }
-
-QtMipsExceptionUnsupportedInstruction::QtMipsExceptionUnsupportedInstruction(QTMIPS_ARGS_COMMON)
-        : QtMipsExceptionRuntime(reason, ext, file, line) { }
-
-QtMipsExceptionUnsupportedAluOperation::QtMipsExceptionUnsupportedAluOperation(QTMIPS_ARGS_COMMON)
-        : QtMipsExceptionRuntime(reason, ext, file, line) { }
-
-QtMipsExceptionOverflow::QtMipsExceptionOverflow(QTMIPS_ARGS_COMMON)
-        : QtMipsExceptionRuntime(reason, ext, file, line) { }
-
-QtMipsExceptionUnalignedJump::QtMipsExceptionUnalignedJump(QTMIPS_ARGS_COMMON)
-        : QtMipsExceptionRuntime(reason, ext, file, line) { }
-
-QtMipsExceptionUnknownMemoryControl::QtMipsExceptionUnknownMemoryControl(QTMIPS_ARGS_COMMON)
-        : QtMipsExceptionRuntime(reason, ext, file, line) { }
-
-QtMipsExceptionOutOfMemoryAccess::QtMipsExceptionOutOfMemoryAccess(QTMIPS_ARGS_COMMON)
-        : QtMipsExceptionRuntime(reason, ext, file, line) { }
-
-QtMipsExceptionSanity::QtMipsExceptionSanity(QTMIPS_ARGS_COMMON)
-        : QtMipsException(reason, ext, file, line) { }
+#define EXCEPTION(NAME, PARENT) \
+    QtMipsException##NAME::QtMipsException##NAME(QString reason, QString ext, QString file, int line) \
+        : QtMipsException##PARENT(reason, ext, file, line) { \
+        name = #NAME; \
+    }
+QTMIPS_EXCEPTIONS
+#undef EXCEPTION

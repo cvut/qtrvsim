@@ -48,7 +48,7 @@ void Reporter::machine_trap(QtMipsException &e) {
     else if (etype == typeid(QtMipsExceptionUnalignedJump))
         expected = e_fail & FR_J;
 
-    cout << "Machine trapped: " << e.what() << endl;
+    cout << "Machine trapped: " << e.msg(false).toStdString() << endl;
     app->exit(expected ? 0 : 1);
 }
 
