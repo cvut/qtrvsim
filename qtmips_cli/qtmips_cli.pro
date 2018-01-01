@@ -18,7 +18,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        tracer.cpp
+        tracer.cpp \
+        reporter.cpp
 
 HEADERS += \
-        tracer.h
+        tracer.h \
+        reporter.h
