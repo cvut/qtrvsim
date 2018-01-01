@@ -5,10 +5,10 @@ MIPS CPU simulator for education purposes.
 Dependencies
 ------------
 * Qt 5
-* elfutils (libelf works too but you might have problems with it)
+* elfutils (libelf might works too but you can have problems with it)
 
-Compilation
------------
+General compilation
+-------------------
 To compile whole project just run these commands:
 ```
 qmake /path/to/qtmips
@@ -16,13 +16,16 @@ make
 ```
 Where `/path/to/qtmips` is path to this project root.
 
-Running
--------
+(Be sure to use qt5 qmake.)
+
+Compilation for local execution
+-------------------------------
 Because simulator it self is implemented as library you need to have that library
-in common path where loader can found it. Which is not commonly a case, so you can
-also run it using this command (in case of cli version, gui version is the same)
+in path where loader can found it. Which is not commonly a case, so you have to
+compile it with following additional option:
 ```
-LD_LIBRARY_PATH=qtmips_machine qtmips_cli/qtmips_cli
+qmake /path/to/qtmips "QMAKE_RPATHDIR += ../qtmips_machine"
+make
 ```
 
 Tests
