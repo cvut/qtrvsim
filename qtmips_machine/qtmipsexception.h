@@ -6,8 +6,6 @@
 
 namespace machine {
 
-#define QTMIPS_EXCEPTION(TYPE, REASON, EXT) (machine::QtMipsException##TYPE (QString(REASON), QString(EXT), QString(__FILE__), __LINE__))
-
 // Base exception for all machine ones
 class QtMipsException : public std::exception {
 public:
@@ -67,6 +65,11 @@ protected:
 QTMIPS_EXCEPTIONS
 #undef EXCEPTION
 
+
+// This is helper macro for throwing QtMips exceptions
+#define QTMIPS_EXCEPTION(TYPE, REASON, EXT) (machine::QtMipsException##TYPE (QString(REASON), QString(EXT), QString(__FILE__), __LINE__))
+
+// Sanity comparison potentially throwing QtMipsExceptionSanity
 #define SANITY_ASSERT(COND, MSG) do { if (!(COND)) throw QTMIPS_EXCEPTION(Sanity, "Sanity check failed (" #COND ")", MSG); } while (false)
 
 }
