@@ -32,12 +32,6 @@ HEADERS += \
     instruction.h \
     registers.h \
     programloader.h \
-    programmemory.h \
-    instructions/arithmetic.h \
-    instructions/loadstore.h \
-    instructions/shift.h \
-    instructions/nop.h \
-    instructions/jumpbranch.h \
     cache.h \
     alu.h \
     machineconfig.h
