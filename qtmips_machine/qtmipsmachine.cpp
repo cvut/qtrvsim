@@ -94,7 +94,7 @@ void QtMipsMachine::step() {
     emit tick();
     try {
         cr->step();
-    } catch (QtMipsException e) {
+    } catch (QtMipsException &e) {
         run_t->stop();
         set_status(ST_TRAPPED);
         emit program_trap(e);
