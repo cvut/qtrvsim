@@ -24,7 +24,8 @@ SOURCES += \
         coreview/multiplexer.cpp \
         coreview/connection.cpp \
         coreview/latch.cpp \
-        coreview/alu.cpp
+        coreview/alu.cpp \
+        coreview/memory.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -37,7 +38,8 @@ HEADERS += \
         coreview/multiplexer.h \
         coreview/connection.h \
         coreview/latch.h \
-        coreview/alu.h
+        coreview/alu.h \
+        coreview/memory.h
 
 FORMS += \
         NewDialog.ui \
