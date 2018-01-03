@@ -39,7 +39,8 @@ void configure_machine(QCommandLineParser &p, MachineConfig &cc) {
 }
 
 void configure_tracer(QCommandLineParser &p, Tracer &tr) {
-    // TODO trace fetched instruction
+    if (p.isSet("trace-fetch"))
+        tr.fetch();
 
     if (p.isSet("trace-pc"))
         tr.reg_pc();

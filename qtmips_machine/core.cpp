@@ -25,7 +25,7 @@ struct DecodeMap {
 // This is map from opcode to signals.
 static const struct DecodeMap dmap[]  = {
     { .flags = DM_SUPPORTED | DM_REGD | DM_REGWRITE, NOALU, NOMEM }, // Alu operations (aluop is decoded from function explicitly)
-    { .flags = DM_SUPPORTED, NOALU, NOMEM }, // REGIMM (BLTZ, BGEZ, )
+    { .flags = DM_SUPPORTED, NOALU, NOMEM }, // REGIMM (BLTZ, BGEZ)
     { .flags = DM_SUPPORTED, NOALU, NOMEM }, // J
     NOPE, // JAL
     { .flags = DM_SUPPORTED, NOALU, NOMEM }, // BEQ
@@ -96,8 +96,8 @@ Core::Core(Registers *regs, MemoryAccess *mem) {
 }
 
 struct Core::dtFetch Core::fetch() {
-    // TODO signals
     Instruction inst(mem->read_word(regs->read_pc()));
+    emit instruction_fetched(inst);
     return {
         .inst = inst
     };

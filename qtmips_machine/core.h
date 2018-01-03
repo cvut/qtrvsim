@@ -18,6 +18,7 @@ public:
     virtual void step() = 0; // Do single step
 
 signals:
+    void instruction_fetched(machine::Instruction &inst);
 
 protected:
     Registers *regs;

@@ -17,31 +17,39 @@ Tracer::Tracer(QtMipsMachine *machine) {
     con_regs_hi_lo = false;
 }
 
-#define CON(VAR, SIG, SLT) do { \
+#define CON(VAR, FROM, SIG, SLT) do { \
         if (!VAR) { \
-            connect(machine->registers(), SIGNAL(SIG), this, SLOT(SLT)); \
+            connect(FROM, SIGNAL(SIG), this, SLOT(SLT)); \
             VAR = true;\
         }\
     } while(false)
 
+void Tracer::fetch() {
+    CON(con_fetch, machine->core(), instruction_fetched(machine::Instruction&), instruction_fetch(machine::Instruction&));
+}
+
 void Tracer::reg_pc() {
-    CON(con_regs_pc, pc_update(std::uint32_t), regs_pc_update(std::uint32_t));
+    CON(con_regs_pc, machine->registers(), pc_update(std::uint32_t), regs_pc_update(std::uint32_t));
 }
 
 void Tracer::reg_gp(std::uint8_t i) {
     SANITY_ASSERT(i <= 32, "Trying to trace invalid gp.");
-    CON(con_regs_gp, gp_update(std::uint8_t,std::uint32_t), regs_gp_update(std::uint8_t,std::uint32_t));
+    CON(con_regs_gp, machine->registers(), gp_update(std::uint8_t,std::uint32_t), regs_gp_update(std::uint8_t,std::uint32_t));
     gp_regs[i] = true;
 }
 
 void Tracer::reg_lo() {
-    CON(con_regs_hi_lo, hi_lo_update(bool hi, std::uint32_t val), regs_hi_lo_update(bool hi, std::uint32_t val));
+    CON(con_regs_hi_lo, machine->registers(), hi_lo_update(bool hi, std::uint32_t val), regs_hi_lo_update(bool hi, std::uint32_t val));
     r_lo = true;
 }
 
 void Tracer::reg_hi() {
-    CON(con_regs_hi_lo, hi_lo_update(bool hi, std::uint32_t val), regs_hi_lo_update(bool hi, std::uint32_t val));
+    CON(con_regs_hi_lo, machine->registers(), hi_lo_update(bool hi, std::uint32_t val), regs_hi_lo_update(bool hi, std::uint32_t val));
     r_hi = true;
+}
+
+void Tracer::instruction_fetch(Instruction &inst) {
+    cout << inst.to_str().toStdString() << endl;
 }
 
 void Tracer::regs_pc_update(std::uint32_t val) {
