@@ -16,6 +16,8 @@ void create_parser(QCommandLineParser &p) {
     p.addPositionalArgument("FILE", "Input ELF executable file");
 
     p.addOptions({
+        {"pipelined", "Configure CPU to use five stage pipeline."},
+        {"no-delay-slot", "Disable jump delay slot."},
         {{"trace-fetch", "tr-fetch"}, "Trace fetched instruction."},
         {{"trace-pc", "tr-pc"}, "Print program counter register changes."},
         {{"trace-gp", "tr-gp"}, "Print general purpose register changes. You can use * for all registers.", "REG"},
@@ -35,7 +37,8 @@ void configure_machine(QCommandLineParser &p, MachineConfig &cc) {
     }
     cc.set_elf(pa[0]);
 
-    // TODO
+    cc.set_delay_slot(!p.isSet("no-delay-slot"));
+    cc.set_pipelined(p.isSet("pipelined"));
 }
 
 void configure_tracer(QCommandLineParser &p, Tracer &tr) {

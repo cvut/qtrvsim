@@ -12,3 +12,4 @@ mips_make_test
 
 # Run test
 qtmips_run qtmips_cli/qtmips_cli --fail-match O "$TEST_DIR/cpu_trap"
+qtmips_run qtmips_cli/qtmips_cli --pipelined --fail-match O "$TEST_DIR/cpu_trap"
