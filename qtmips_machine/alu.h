@@ -46,9 +46,6 @@ enum AluOp : std::uint8_t {
 // Returned value is commonly saved to rt/rd or any other way passed trough core
 std::uint32_t alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa, Registers *regs);
 
-// Returns string representation of ALU instruction (internally used by Instruction::to_str)
-QString alu_str(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa);
-
 }
 
 Q_DECLARE_METATYPE(machine::AluOp)

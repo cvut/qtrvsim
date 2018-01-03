@@ -6,8 +6,7 @@
 
 namespace machine {
 
-class Instruction : public QObject {
-    Q_OBJECT
+class Instruction {
 public:
     Instruction();
     Instruction(std::uint32_t inst);
@@ -15,8 +14,6 @@ public:
     Instruction(std::uint8_t opcode, std::uint8_t rs, std::uint8_t rt, std::uint16_t immediate); // Type I
     Instruction(std::uint8_t opcode, std::uint32_t address); // Type J
     Instruction(const Instruction&);
-
-    QString to_str();
 
     std::uint8_t opcode() const;
     std::uint8_t rs() const;
@@ -31,6 +28,8 @@ public:
     bool operator==(const Instruction &c) const;
     bool operator!=(const Instruction &c) const;
     Instruction &operator=(const Instruction &c);
+
+    QString to_str();
 
 private:
     std::uint32_t dt;

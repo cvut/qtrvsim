@@ -2,41 +2,6 @@
 #include "qtmipsexception.h"
 
 using namespace machine;
-
-struct InstructionMap {
-    const char *name;
-};
-
-#define IM_UNKNOWN {"UNKNOWN"}
-const struct InstructionMap instruction_map[] = {
-    IM_UNKNOWN,
-    IM_UNKNOWN,
-    IM_UNKNOWN,
-    IM_UNKNOWN,
-    IM_UNKNOWN,
-    IM_UNKNOWN,
-    IM_UNKNOWN,
-    IM_UNKNOWN,
-    {"ADDI"},
-    {"ADDIU"},
-    {"SLTI"},
-    {"SLTIU"},
-    {"ANDI"},
-    {"ORI"},
-    {"XORI"},
-    {"LUI"},
-    IM_UNKNOWN,
-    IM_UNKNOWN,
-    IM_UNKNOWN,
-    IM_UNKNOWN,
-    IM_UNKNOWN,
-    IM_UNKNOWN,
-    IM_UNKNOWN,
-    IM_UNKNOWN,
-    IM_UNKNOWN,
-    IM_UNKNOWN
-};
-
 Instruction::Instruction() {
     this->dt = 0;
 }
@@ -71,12 +36,6 @@ Instruction::Instruction(std::uint8_t opcode, std::uint32_t address) {
 
 Instruction::Instruction(const Instruction &i) {
     this->dt = i.data();
-}
-
-QString Instruction::to_str() {
-    if  (this->opcode() >= sizeof(instruction_map))
-        return QString("UNKNOWN");
-    return QString(instruction_map[this->opcode()].name);
 }
 
 #define MASK(LEN,OFF) ((this->dt >> (OFF)) & ((1 << (LEN)) - 1))
@@ -130,4 +89,171 @@ Instruction &Instruction::operator=(const Instruction &c) {
     if (this != &c)
         this->dt = c.data();
     return *this;
+}
+
+
+enum InstructionType {
+    IT_R,
+    IT_I,
+    IT_J
+};
+
+struct InstructionMap {
+    const char *name;
+    enum InstructionType type;
+};
+
+#define IM_UNKNOWN {"UNKNOWN", IT_R}
+// This table is indexed by opcode
+static const struct InstructionMap instruction_map[] = {
+    {"ALU", IT_R}, // Alu operations
+    {"REGIMM", IT_I}, // REGIMM (BLTZ, BGEZ)
+    {"J", IT_J},
+    {"JAL", IT_J},
+    {"BEQ", IT_I},
+    {"BNE", IT_I},
+    {"BLEZ", IT_I},
+    {"BGTZ", IT_I},
+    {"ADDI", IT_I},
+    {"ADDIU", IT_I},
+    {"SLTI", IT_I},
+    {"SLTIU", IT_I},
+    {"ANDI", IT_I},
+    {"ORI", IT_I},
+    {"XORI", IT_I},
+    {"LUI", IT_I},
+    IM_UNKNOWN, // 16
+    IM_UNKNOWN, // 17
+    IM_UNKNOWN, // 18
+    IM_UNKNOWN, // 19
+    IM_UNKNOWN, // 20
+    IM_UNKNOWN, // 21
+    IM_UNKNOWN, // 22
+    IM_UNKNOWN, // 23
+    IM_UNKNOWN, // 24
+    IM_UNKNOWN, // 25
+    IM_UNKNOWN, // 26
+    IM_UNKNOWN, // 27
+    IM_UNKNOWN, // 28
+    IM_UNKNOWN, // 29
+    IM_UNKNOWN, // 30
+    IM_UNKNOWN, // 31
+    {"LB", IT_I},
+    {"LH", IT_I},
+    {"LWL", IT_I},
+    {"LW", IT_I},
+    {"LBU", IT_I},
+    {"LHU", IT_I},
+    {"LWR", IT_I},
+    IM_UNKNOWN, // 39
+    {"SB", IT_I},
+    {"SH", IT_I},
+    {"SWL", IT_I},
+    {"SW", IT_I},
+    IM_UNKNOWN, // 44
+    IM_UNKNOWN, // 45
+    {"SWR", IT_I},
+    IM_UNKNOWN, // 47
+    IM_UNKNOWN, // 48
+    IM_UNKNOWN, // 49
+    IM_UNKNOWN, // 50
+    IM_UNKNOWN, // 51
+    IM_UNKNOWN, // 52
+    IM_UNKNOWN, // 53
+    IM_UNKNOWN, // 54
+    IM_UNKNOWN, // 55
+    IM_UNKNOWN, // 56
+    IM_UNKNOWN, // 57
+    IM_UNKNOWN, // 58
+    IM_UNKNOWN, // 59
+    IM_UNKNOWN, // 60
+    IM_UNKNOWN, // 61
+    IM_UNKNOWN, // 61
+    IM_UNKNOWN, // 62
+    IM_UNKNOWN // 63
+};
+#undef IM_UNKNOWN
+
+struct AluInstructionMap {
+    const char *name;
+};
+
+#define AIM_UNKNOWN {"UNKNOWN"}
+// This table is indexed by funct
+static const struct AluInstructionMap alu_instruction_map[] = {
+    {"SLL"},
+    AIM_UNKNOWN,
+    {"SRL"},
+    {"SRA"},
+    {"SLLV"},
+    AIM_UNKNOWN,
+    {"SRLV"},
+    {"SRAV"},
+    {"JR"},
+    {"JALR"},
+    {"MOVZ"},
+    {"MOVN"},
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    {"MFHU"},
+    {"MTHI"},
+    {"MFLO"},
+    {"MTLO"},
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    {"ADD"},
+    {"ADDU"},
+    {"SUB"},
+    {"SUBU"},
+    {"AND"},
+    {"OR"},
+    {"XOR"},
+    {"NOR"},
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    {"SLT"},
+    {"SLTU"}
+};
+#undef AIM_UNKNOWN
+
+QString Instruction::to_str() {
+    // TODO there are exception where some fields are zero and such so we should not print them in sych case
+    if  (opcode() >= (sizeof(instruction_map) / sizeof(struct InstructionMap)))
+        return QString("UNKNOWN");
+    const struct InstructionMap &im = instruction_map[opcode()];
+    QString res;
+    switch (im.type) {
+    case IT_I:
+        res += im.name;
+        res += " $" + QString::number(rs()) + ", $" + QString::number(rt()) + ", " + QString::number(immediate());
+        break;
+    case IT_J:
+        res += im.name;
+        // TODO we need to know instruction address to expand address section by it
+        res += " " + QString::number(address(), 16);
+        break;
+    case IT_R:
+        {
+        // Note that all R instructions we support has opcode == 0 and so they are processed by alu table
+        if (funct() >= (sizeof(alu_instruction_map) / sizeof(struct AluInstructionMap)))
+            return QString("UNKNOWN");
+        const struct AluInstructionMap &am = alu_instruction_map[funct()];
+        res += am.name;
+        res += " $" + QString::number(rs()) + ", $" + QString::number(rt()) + ", $" + QString::number(rd());
+        break;
+        }
+    }
+    return res;
 }

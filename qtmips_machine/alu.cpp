@@ -68,8 +68,3 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
             throw QTMIPS_EXCEPTION(UnsupportedAluOperation, "Unknown ALU operation", QString::number(operation, 16));
     }
 }
-
-QString machine::alu_str(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa) {
-    // TODO
-    return QString("");
-}
