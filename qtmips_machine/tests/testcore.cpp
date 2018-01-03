@@ -186,7 +186,7 @@ void MachineTests::singlecore_regs() {
     mem.write_word(res.read_pc(), i.data()); // Store single instruction (anything else should be 0 so NOP effectively)
     Memory mem_used(mem); // Create memory copy
 
-    CoreSingle core(&init, &mem_used);
+    CoreSingle core(&init, &mem_used, true);
     core.step(); // Single step should be enought as this is risc without pipeline
 
     res.pc_inc(); // We did single step	so increment program counter accordingly
@@ -272,7 +272,7 @@ void MachineTests::singlecore_jmp() {
     Memory mem_used(mem);
     Registers regs_used(regs);
 
-    CoreSingle core(&regs_used, &mem_used);
+    CoreSingle core(&regs_used, &mem_used, true);
     core.step();
     QCOMPARE(regs.read_pc() + 4, regs_used.read_pc()); // First execute delay slot
     core.step();
@@ -397,7 +397,7 @@ void MachineTests::singlecore_mem() {
     mem_init.write_word(regs_init.read_pc(), i.data());
     mem_res.write_word(regs_init.read_pc(), i.data());
 
-    CoreSingle core(&regs_init, &mem_init);
+    CoreSingle core(&regs_init, &mem_init, true);
     core.step();
 
     regs_res.pc_inc();

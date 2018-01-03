@@ -70,12 +70,13 @@ protected:
 
 class CoreSingle : public Core {
 public:
-    CoreSingle(Registers *regs, MemoryAccess *mem);
+    CoreSingle(Registers *regs, MemoryAccess *mem, bool jmp_delay_slot);
+    ~CoreSingle();
 
     void step();
 
 private:
-    struct Core::dtDecode jmp_delay_decode;
+    struct Core::dtDecode *jmp_delay_decode;
 };
 
 class CorePipelined : public Core {

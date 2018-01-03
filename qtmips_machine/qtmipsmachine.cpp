@@ -33,7 +33,7 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) {
     if (cc.pipelined())
         cr = new CorePipelined(regs, coremem);
     else
-        cr = new CoreSingle(regs, coremem);
+        cr = new CoreSingle(regs, coremem, cc.delay_slot());
 
     run_speed = 1;
     run_t = new QTimer(this);

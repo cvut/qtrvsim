@@ -20,8 +20,8 @@ public:
     // In default disabled.
     void set_pipelined(bool);
     // Configure if we want to do jump prediction
-    // In default disabled. When enabled it also automatically enables pipelining
-    void set_jump_prediction(bool);
+    // In default enabled. When disabled it also automatically disables pipelining.
+    void set_delay_slot(bool);
     // Configure cache type
     // In default CCT_NONE is used.
     void set_cache(enum CacheType);
@@ -29,12 +29,12 @@ public:
     void set_elf(QString path);
 
     bool pipelined() const;
-    bool jump_prediction() const;
+    bool delay_slot() const;
     enum CacheType cache() const;
     QString elf() const;
 
 private:
-    bool pipeline, jumppred;
+    bool pipeline, delayslot;
     enum CacheType cache_type;
     QString elf_path;
 };
