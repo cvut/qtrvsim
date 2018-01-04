@@ -35,15 +35,13 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) {
     else
         cr = new CoreSingle(regs, coremem, cc.delay_slot());
 
-    run_speed = 1;
     run_t = new QTimer(this);
+    set_speed(0); // In default run as fast as possible
     connect(run_t, SIGNAL(timeout()), this, SLOT(step()));
 }
 
 void QtMipsMachine::set_speed(unsigned val) {
-    run_speed = val;
-    if (run_t->isActive())
-        play();
+    run_t->setInterval(val);
 }
 
 const Registers *QtMipsMachine::registers() {
@@ -78,7 +76,7 @@ bool QtMipsMachine::exited() {
 void QtMipsMachine::play() {
     CTL_GUARD;
     set_status(ST_RUNNING);
-    run_t->start(run_speed);
+    run_t->start();
 }
 
 void QtMipsMachine::pause() {

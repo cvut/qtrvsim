@@ -73,22 +73,14 @@
     <property name="title">
      <string>Machine</string>
     </property>
-    <widget class="QMenu" name="menuSimulation_speed">
-     <property name="title">
-      <string>Simulation speed</string>
-     </property>
-     <addaction name="action1_ips"/>
-     <addaction name="action2_ips"/>
-     <addaction name="action5_ips"/>
-     <addaction name="action10_ips"/>
-     <addaction name="actionOther_ips"/>
-     <addaction name="separator"/>
-     <addaction name="actionUnlimited"/>
-    </widget>
     <addaction name="actionRun"/>
     <addaction name="actionPause"/>
     <addaction name="actionStep"/>
-    <addaction name="menuSimulation_speed"/>
+    <addaction name="separator"/>
+    <addaction name="ips1"/>
+    <addaction name="ips5"/>
+    <addaction name="ips10"/>
+    <addaction name="ipsUnlimited"/>
     <addaction name="separator"/>
     <addaction name="actionRestart"/>
    </widget>
@@ -119,6 +111,10 @@
    <addaction name="actionRun"/>
    <addaction name="actionPause"/>
    <addaction name="actionStep"/>
+   <addaction name="separator"/>
+   <addaction name="ips1"/>
+   <addaction name="ips10"/>
+   <addaction name="ipsUnlimited"/>
   </widget>
   <action name="actionNew">
    <property name="icon">
@@ -188,42 +184,48 @@
     <string>Ctrl+P</string>
    </property>
   </action>
-  <action name="action1_ips">
+  <action name="ips1">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>1 instruction per second</string>
    </property>
-  </action>
-  <action name="action2_ips">
-   <property name="text">
-    <string>2 instructions per second</string>
+   <property name="toolTip">
+    <string>Run CPU in speed of single instruction per second</string>
    </property>
   </action>
-  <action name="action5_ips">
+  <action name="ips5">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>5 instructions per second</string>
    </property>
+   <property name="toolTip">
+    <string>Run CPU in speed of 5 instructions per second</string>
+   </property>
   </action>
-  <action name="action10_ips">
+  <action name="ips10">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>10 instructions per second</string>
    </property>
+   <property name="toolTip">
+    <string>Run CPU in speed of 10 instructions per second</string>
+   </property>
   </action>
-  <action name="actionUnlimited">
+  <action name="ipsUnlimited">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Unlimited</string>
    </property>
-  </action>
-  <action name="actionOther_ips">
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Custom...</string>
-   </property>
-  </action>
-  <action name="actionMachine_control">
-   <property name="text">
-    <string>Machine control</string>
+   <property name="toolTip">
+    <string>Run CPU without any clock constrains</string>
    </property>
   </action>
   <action name="actionMemory">
@@ -249,11 +251,6 @@
   <action name="actionRegisters">
    <property name="text">
     <string>Registers</string>
-   </property>
-  </action>
-  <action name="actionAssembler">
-   <property name="text">
-    <string>Assembler</string>
    </property>
   </action>
   <action name="actionReload">

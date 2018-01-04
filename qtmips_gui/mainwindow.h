@@ -31,6 +31,8 @@ public slots:
     void show_cache_content();
     void show_cache_statictics();
     void show_registers();
+    // Actions - execution speed
+    void set_speed();
     // Machine signals
     void machine_status(enum machine::QtMipsMachine::Status st);
     void machine_exit();
@@ -50,6 +52,8 @@ private:
     CacheContentDock *cache_content;
     CacheStatisticsDock *cache_statictics;
     RegistersDock *registers;
+
+    QActionGroup *speed_group;
 
     QSettings  *settings;
 

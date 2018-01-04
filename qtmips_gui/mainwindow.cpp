@@ -21,12 +21,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     registers = new RegistersDock(this);
     registers->hide();
 
+    // Execution speed actions
+    speed_group = new QActionGroup(this);
+    speed_group->addAction(ui->ips1);
+    speed_group->addAction(ui->ips5);
+    speed_group->addAction(ui->ips10);
+    speed_group->addAction(ui->ipsUnlimited);
+    ui->ips1->setChecked(true);
+
     // Connect signals from menu
     connect(ui->actionExit, SIGNAL(triggered(bool)), this, SLOT(close()));
     connect(ui->actionNew, SIGNAL(triggered(bool)), this, SLOT(new_machine()));
     connect(ui->actionCache, SIGNAL(triggered(bool)), this, SLOT(show_cache_content()));
     connect(ui->actionCache_statistics, SIGNAL(triggered(bool)), this, SLOT(show_cache_statictics()));
     connect(ui->actionRegisters, SIGNAL(triggered(bool)), this, SLOT(show_registers()));
+    connect(ui->ips1, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
+    connect(ui->ips5, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
+    connect(ui->ips10, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
+    connect(ui->ipsUnlimited, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
 
     // Restore application state from settings
     restoreState(settings->value("windowState").toByteArray());
@@ -63,7 +75,7 @@ void MainWindow::create_core(machine::MachineConfig *config) {
     // Create machine view
     corescene = new CoreViewScene(coreview, machine);
 
-    machine->set_speed(1000); // Set default speed to 1 sec
+    set_speed(); // Update machine speed to current settings
 
     // Connect machine signals and slots
     connect(ui->actionRun, SIGNAL(triggered(bool)), machine, SLOT(play()));
@@ -98,6 +110,20 @@ void MainWindow::show_cache_statictics() {
 
 void MainWindow::show_registers() {
     show_dockwidget(registers);
+}
+
+void MainWindow::set_speed() {
+    if (machine == nullptr)
+        return; // just ignore
+
+    if (ui->ips1->isChecked())
+        machine->set_speed(1000);
+    else if (ui->ips5->isChecked())
+        machine->set_speed(500);
+    else if (ui->ips10->isChecked())
+        machine->set_speed(100);
+    else
+        machine->set_speed(0);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
