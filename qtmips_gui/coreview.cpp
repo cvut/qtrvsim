@@ -32,9 +32,14 @@ void CoreView::update_scale() {
 
 CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : QGraphicsScene(view) {
     this->machine = machine;
-    // Identification cross
-    addLine(400, 0, 400, 800);
-    addLine(0, 400, 800, 400);
+
+    // Identification cross (TODO remove)
+    QPen pen;
+    pen.setBrush(QBrush(QColor(220, 220, 220)));
+    addLine(400, 0, 400, 800, pen);
+    addLine(0, 400, 800, 400, pen);
+    addRect(0.5, 0.5, 799.5, 799.5, pen);
+    // TODO remove
 
     pc = new coreview::ProgramCounter(machine);
     alu = new coreview::Alu();
