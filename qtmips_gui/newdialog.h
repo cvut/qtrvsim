@@ -14,15 +14,15 @@ public:
     NewDialog(QWidget *parent, QSettings *settings);
     ~NewDialog();
 
-public slots:
+protected:
+    void closeEvent(QCloseEvent *);
+
+private slots:
     void cancel();
     void create();
     void browse_elf();
     void preset(bool);
     void set_custom_preset();
-
-protected:
-    void closeEvent(QCloseEvent *);
 
 private:
     Ui::NewDialog *ui;

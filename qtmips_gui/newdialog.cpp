@@ -34,6 +34,14 @@ NewDialog::~NewDialog() {
     // Settings is freed by parent
 }
 
+void NewDialog::closeEvent(QCloseEvent *) {
+    load_settings(); // Reset from settings
+    // Close main window if not already configured
+    MainWindow *prnt = (MainWindow*)parent();
+    if (!prnt->configured())
+        prnt->close();
+}
+
 void NewDialog::cancel() {
     this->close();
 }
@@ -86,14 +94,6 @@ void NewDialog::preset(bool value) {
 
 void NewDialog::set_custom_preset() {
     ui->preset_custom->setChecked(true);
-}
-
-void NewDialog::closeEvent(QCloseEvent *) {
-    load_settings(); // Reset from settings
-    // Close main window if not already configured
-    MainWindow *prnt = (MainWindow*)parent();
-    if (!prnt->configured())
-        prnt->close();
 }
 
 #define LOAD_BUTTON(NAME, DEF) ui->NAME->setChecked(settings->value(#NAME, DEF).toBool())
