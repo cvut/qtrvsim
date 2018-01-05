@@ -58,13 +58,13 @@ QRectF Connection::boundingRect() const {
         if (y > points[i+1].y())
             y = points[i+1].y();
         // TODO pen width
-        rect.united(QRectF(x - 0.5, y - 0.5, fabs(points[i].x() - points[i+1].x()) + 1, fabs(points[i].y() - points[i+1].y()) + 1));
+        rect = rect.united(QRectF(x - 0.5, y - 0.5, fabs(points[i].x() - points[i+1].x()) + 1, fabs(points[i].y() - points[i+1].y()) + 1));
     }
     //return rect;
     return QRectF(0, 0, 300, 300);
 }
 
-void Connection::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+void Connection::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
     for (int i = 0; i < (points.size() - 1); i++)
         painter->drawLine(points[i], points[i+1]);
     // TODO meaby use QPath instead?

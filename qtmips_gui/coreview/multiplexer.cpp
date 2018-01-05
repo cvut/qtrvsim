@@ -32,7 +32,7 @@ QRectF Multiplexer::boundingRect() const {
     return QRectF(-PENW / 2, -PENW / 2, WIDTH + PENW, (HEIGHT * size) + PENW);
 }
 
-void Multiplexer::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+void Multiplexer::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
     const QPointF poly[] = {
         QPointF(0, 0),
         QPointF(WIDTH, WIDTH),

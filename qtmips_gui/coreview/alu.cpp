@@ -23,7 +23,7 @@ QRectF coreview::Alu::boundingRect() const {
     return QRectF(-PENW / 2, -PENW / 2, WIDTH + PENW, HEIGHT + PENW);
 }
 
-void coreview::Alu::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+void coreview::Alu::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
     const QPointF poly[] = {
         QPointF(0, 0),
         QPointF(WIDTH, WIDTH),

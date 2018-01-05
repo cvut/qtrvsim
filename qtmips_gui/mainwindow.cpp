@@ -134,7 +134,7 @@ void MainWindow::set_speed() {
         machine->set_speed(0);
 }
 
-void MainWindow::closeEvent(QCloseEvent *event) {
+void MainWindow::closeEvent(QCloseEvent *event __attribute__((unused))) {
     settings->setValue("windowGeometry", saveGeometry());
     settings->setValue("windowState", saveState());
     settings->sync();

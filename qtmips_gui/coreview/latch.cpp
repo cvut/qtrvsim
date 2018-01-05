@@ -16,7 +16,7 @@ QRectF Latch::boundingRect() const {
     return QRectF(-PENW / 2, -PENW / 2, WIDTH + PENW, height + PENW);
 }
 
-void Latch::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+void Latch::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
     painter->drawRect(0, 0, WIDTH, height);
     // Now tick rectangle
     const QPointF tickPolygon[] = {
@@ -29,7 +29,7 @@ void Latch::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
 
 void Latch::setPos(qreal x, qreal y) {
     QGraphicsObject::setPos(x, y);
-    for (unsigned i = 0; i < connectors.size(); i++) {
+    for (int i = 0; i < connectors.size(); i++) {
         connectors[i].in->setPos(x, y + connectors_off[i]);
         connectors[i].out->setPos(x + WIDTH, y + connectors_off[i]);
     }

@@ -9,7 +9,7 @@ CoreView::CoreView(QWidget *parent) : QGraphicsView(parent) {
     //fitInView(0, 0, 201, 201, Qt::KeepAspectRatioByExpanding);
 }
 
-void CoreView::resizeEvent(QResizeEvent *event) {
+void CoreView::resizeEvent(QResizeEvent *event __attribute__((unused))) {
     // fitInView(0, 0, 201, 201, Qt::KeepAspectRatioByExpanding);
 }
 

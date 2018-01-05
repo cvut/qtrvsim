@@ -27,7 +27,9 @@ RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
 }
 
 RegistersDock::~RegistersDock() {
-    delete pc, hi, lo;
+    delete pc;
+    delete hi;
+    delete lo;
     for (int i = 0; i < 32; i++)
         delete gp[i];
     delete layout;

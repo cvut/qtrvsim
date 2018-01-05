@@ -25,7 +25,7 @@ QRectF Memory::boundingRect() const {
     // TODO
 }
 
-void Memory::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+void Memory::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
     // TODO
 }
 
