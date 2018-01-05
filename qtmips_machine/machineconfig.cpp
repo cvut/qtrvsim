@@ -9,7 +9,7 @@ MachineConfig::MachineConfig() {
     elf_path = QString("");
 }
 
-MachineConfig::MachineConfig(MachineConfig *cc) {
+MachineConfig::MachineConfig(const MachineConfig *cc) {
     pipeline = cc->pipelined();
     delayslot = cc->delay_slot();
     cache_type = cc->cache();

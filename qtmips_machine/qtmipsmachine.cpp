@@ -3,7 +3,7 @@
 
 using namespace machine;
 
-QtMipsMachine::QtMipsMachine(const MachineConfig &cc) {
+QtMipsMachine::QtMipsMachine(const MachineConfig &cc) : QObject(), mcnf(&cc) {
     stat = ST_READY;
 
     ProgramLoader program(cc.elf());
@@ -29,7 +29,6 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) {
         throw QTMIPS_EXCEPTION(Sanity, "Trying to configure unknown cache type", "");
     }
 
-    cr_pipelined = cc.pipelined();
     if (cc.pipelined())
         cr = new CorePipelined(regs, coremem);
     else
@@ -38,6 +37,10 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) {
     run_t = new QTimer(this);
     set_speed(0); // In default run as fast as possible
     connect(run_t, SIGNAL(timeout()), this, SLOT(step()));
+}
+
+const MachineConfig &QtMipsMachine::config() {
+    return mcnf;
 }
 
 void QtMipsMachine::set_speed(unsigned val) {

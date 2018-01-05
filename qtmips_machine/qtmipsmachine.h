@@ -18,6 +18,7 @@ class QtMipsMachine : public QObject {
 public:
     QtMipsMachine(const MachineConfig &cc);
 
+    const MachineConfig &config();
     void set_speed(unsigned);
 
     const Registers *registers();
@@ -49,19 +50,17 @@ signals:
     void tick(); // Time tick
 
 private:
+    MachineConfig mcnf;
+
     Registers *regs;
     Memory *mem, *mem_program_only;
     Cache *cch;
     Core *cr;
 
-    bool cr_pipelined;
-
-    unsigned run_speed;
     QTimer *run_t;
 
     std::uint32_t program_end;
     enum Status stat;
-
     void set_status(enum Status st);
 };
 

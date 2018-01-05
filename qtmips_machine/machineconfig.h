@@ -8,7 +8,7 @@ namespace machine {
 class MachineConfig {
 public:
     MachineConfig();
-    MachineConfig(MachineConfig *cc);
+    MachineConfig(const MachineConfig *cc);
 
     enum CacheType {
         CCT_NONE,
