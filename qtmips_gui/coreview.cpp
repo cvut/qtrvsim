@@ -36,9 +36,4 @@ CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : 
     alu->setPos(200, 100);
     pc_multiplexer->setPos(60, 100);
     pc_multiplexer->set(2);
-
-    QGraphicsScene *old_scene = view->scene();
-    view->setScene(this);
-    if (old_scene != nullptr)
-        delete old_scene;
 }

@@ -81,7 +81,10 @@ void MainWindow::create_core(machine::MachineConfig *config) {
     // Create machine
     machine = new machine::QtMipsMachine(config);
     // Create machine view
+    if (corescene != nullptr)
+        delete corescene;
     corescene = new CoreViewScene(coreview, machine);
+    coreview->setScene(corescene);
 
     set_speed(); // Update machine speed to current settings
 
