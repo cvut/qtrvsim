@@ -4,13 +4,13 @@ using namespace coreview;
 
 //////////////////////
 #define WIDTH 80
-#define HEIGHT 100
+#define HEIGHT 50
 #define PENW 1
 //////////////////////
 
 ProgramCounter::ProgramCounter(machine::QtMipsMachine *machine) : QGraphicsObject(nullptr), value(this), name(this) {
     value.setText(QString("0x") + QString::number(machine->registers()->read_pc(), 16));
-    value.setPos(0, HEIGHT/2 - value.boundingRect().height()/2);
+    value.setPos(1, HEIGHT/2 - value.boundingRect().height()/2);
     name.setText(QString("PC"));
     name.setPos(WIDTH/2 - name.boundingRect().width()/2, 0);
 
