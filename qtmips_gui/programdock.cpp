@@ -49,8 +49,8 @@ ProgramDock::ProgramDock(QWidget *parent) : QDockWidget(parent) {
 ProgramDock::~ProgramDock() {
     delete ctlbox_single;
     delete ctlbox_pipelined;
-    delete widg;
     delete widg_layout;
+    delete widg;
 }
 
 void ProgramDock::setup(machine::QtMipsMachine *machine) {
