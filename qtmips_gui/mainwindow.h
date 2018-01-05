@@ -23,13 +23,14 @@ public:
     ~MainWindow();
 
     void start();
-    void create_core(machine::MachineConfig *config);
+    void create_core(const machine::MachineConfig &config);
 
     bool configured();
 
 public slots:
     // Actions signals
     void new_machine();
+    void machine_reload();
     void show_registers();
     void show_program();
     void show_memory();

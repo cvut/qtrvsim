@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     // Connect signals from menu
     connect(ui->actionExit, SIGNAL(triggered(bool)), this, SLOT(close()));
     connect(ui->actionNew, SIGNAL(triggered(bool)), this, SLOT(new_machine()));
+    connect(ui->actionReload, SIGNAL(triggered(bool)), this, SLOT(machine_reload()));
     connect(ui->actionRegisters, SIGNAL(triggered(bool)), this, SLOT(show_registers()));
     connect(ui->actionProgram_memory, SIGNAL(triggered(bool)), this, SLOT(show_program()));
     connect(ui->actionMemory, SIGNAL(triggered(bool)), this, SLOT(show_memory()));
@@ -74,12 +75,15 @@ void MainWindow::start() {
     ndialog->show();
 }
 
-void MainWindow::create_core(machine::MachineConfig *config) {
+void MainWindow::create_core(const machine::MachineConfig &config) {
+    // Create machine
+    machine::QtMipsMachine *new_machine = new machine::QtMipsMachine(&config);
+
     // Remove old machine
     if (machine != nullptr)
         delete machine;
-    // Create machine
-    machine = new machine::QtMipsMachine(config);
+    machine = new_machine;
+
     // Create machine view
     if (corescene != nullptr)
         delete corescene;
@@ -110,6 +114,20 @@ bool MainWindow::configured() {
 
 void MainWindow::new_machine() {
     ndialog->show();
+}
+
+void MainWindow::machine_reload() {
+    machine::MachineConfig cnf(&machine->config()); // We have to make local copy as create_core will delete current machine
+    try {
+        create_core(cnf);
+    } catch (const machine::QtMipsExceptionInput &e) {
+        QMessageBox msg(this);
+        msg.setText(e.msg(false));
+        msg.setIcon(QMessageBox::Critical);
+        msg.setDetailedText(e.msg(true));
+        msg.setWindowTitle("Error while initializing new machine");
+        msg.exec();
+    }
 }
 
 #define SHOW_HANDLER(NAME)  void MainWindow::show_##NAME() { \

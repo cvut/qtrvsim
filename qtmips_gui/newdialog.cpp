@@ -41,9 +41,9 @@ void NewDialog::cancel() {
 void NewDialog::create() {
     MainWindow *prnt = (MainWindow*)parent();
 
-    machine::MachineConfig *mc = new machine::MachineConfig();
-    mc->set_elf(ui->elf_file->text());
-    mc->set_pipelined(ui->pipelined->isChecked());
+    machine::MachineConfig mc;
+    mc.set_elf(ui->elf_file->text());
+    mc.set_pipelined(ui->pipelined->isChecked());
     // TODO other settings
 
     try {
@@ -52,18 +52,15 @@ void NewDialog::create() {
         QMessageBox msg(this);
         msg.setText(e.msg(false));
         msg.setIcon(QMessageBox::Critical);
-        msg.setToolTip("Please check that ELF executable realy exists and is in correct format.");
+        msg.setToolTip("Please check that ELF executable really exists and is in correct format.");
         msg.setDetailedText(e.msg(true));
         msg.setWindowTitle("Error while initializing new machine");
         msg.exec();
-        goto cleanup;
+        return;
     }
 
     store_settings(); // Save to settings
     this->close();
-
-cleanup:
-    delete mc;
 }
 
 void NewDialog::browse_elf() {
