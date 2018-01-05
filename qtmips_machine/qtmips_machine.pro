@@ -34,4 +34,5 @@ HEADERS += \
     programloader.h \
     cache.h \
     alu.h \
-    machineconfig.h
+    machineconfig.h \
+    utils.h
