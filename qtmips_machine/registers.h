@@ -26,6 +26,8 @@ public:
     bool operator ==(const Registers &c) const;
     bool operator !=(const Registers &c) const;
 
+    void reset(); // Reset all values to zero (except pc)
+
 signals:
     void pc_update(std::uint32_t val);
     void gp_update(std::uint8_t i, std::uint32_t val);

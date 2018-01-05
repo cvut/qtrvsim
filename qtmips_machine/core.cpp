@@ -259,11 +259,11 @@ void Core::dtMemoryInit(struct dtMemory &dt) {
 
 CoreSingle::CoreSingle(Registers *regs, MemoryAccess *mem, bool jmp_delay_slot) : \
     Core(regs, mem) {
-    if (jmp_delay_slot) {
+    if (jmp_delay_slot)
         jmp_delay_decode = new struct Core::dtDecode();
-        dtDecodeInit(*jmp_delay_decode);
-    } else
+    else
         jmp_delay_decode = nullptr;
+    reset();
 }
 
 CoreSingle::~CoreSingle() {
@@ -284,20 +284,29 @@ void CoreSingle::step() {
         handle_pc(d);
 }
 
+void CoreSingle::reset() {
+    if (jmp_delay_decode != nullptr)
+        Core::dtDecodeInit(*jmp_delay_decode);
+}
+
 CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem) : \
     Core(regs, mem) {
-    dtFetchInit(dt_f);
-    dtDecodeInit(dt_d);
-    dtExecuteInit(dt_e);
-    dtMemoryInit(dt_m);
+    reset();
 }
 
 void CorePipelined::step() {
-    // TODO implement pipelined
+    // TODO implement forward unit
     writeback(dt_m);
     dt_m =memory(dt_e);
     dt_e = execute(dt_d);
     dt_d = decode(dt_f);
     dt_f = fetch();
     handle_pc(dt_d);
+}
+
+void CorePipelined::reset() {
+    dtFetchInit(dt_f);
+    dtDecodeInit(dt_d);
+    dtExecuteInit(dt_e);
+    dtMemoryInit(dt_m);
 }

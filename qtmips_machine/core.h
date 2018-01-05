@@ -17,6 +17,8 @@ public:
 
     virtual void step() = 0; // Do single step
 
+    virtual void reset() = 0; // Reset core (only core, memory and registers has to be reseted separately)
+
 signals:
     void instruction_fetched(machine::Instruction &inst);
 
@@ -75,6 +77,8 @@ public:
 
     void step();
 
+    void reset();
+
 private:
     struct Core::dtDecode *jmp_delay_decode;
 };
@@ -84,6 +88,8 @@ public:
     CorePipelined(Registers *regs, MemoryAccess *mem);
 
     void step();
+
+    void reset();
 
 private:
     struct Core::dtFetch dt_f;

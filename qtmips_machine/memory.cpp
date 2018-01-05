@@ -178,6 +178,16 @@ Memory::~Memory() {
     free_section_tree(this->mt_root, 0);
 }
 
+void Memory::reset() {
+    free_section_tree(this->mt_root, 0);
+    this->mt_root = allocate_section_tree();
+}
+
+void Memory::reset(const Memory &m) {
+    free_section_tree(this->mt_root, 0);
+    this->mt_root = copy_section_tree(m.get_memorytree_root(), 0);
+}
+
 // Create address mask with section length
 #define ADDRESS_MASK(LEN) ((1 << (LEN)) - 1)
 

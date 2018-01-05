@@ -110,7 +110,12 @@ void QtMipsMachine::step() {
 }
 
 void QtMipsMachine::restart() {
-    // TODO
+    pause();
+    regs->reset();
+    mem->reset(*mem_program_only);
+    // TODO cache
+    cr->reset();
+    set_status(ST_READY);
 }
 
 void QtMipsMachine::set_status(enum Status st) {

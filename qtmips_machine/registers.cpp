@@ -10,10 +10,7 @@ using namespace machine;
 //////////////////////////////////////////////////////////////////////////////
 
 Registers::Registers() : QObject() {
-    this->pc = PC_INIT; // Initialize to beginning program section
-    for (int i = 0; i < 31; i++)
-        this->gp[i] = 0;
-    this->hi = this->lo = 0;
+    reset();
 }
 
 Registers::Registers(const Registers &orig) : QObject() {
@@ -98,4 +95,12 @@ bool Registers::operator==(const Registers &c) const {
 
 bool Registers::operator!=(const Registers &c) const {
     return ! this->operator==(c);
+}
+
+void Registers::reset() {
+    pc_abs_jmp(PC_INIT); // Initialize to beginning program section
+    for (int i = 1; i < 32; i++)
+        write_gp(i, 0);
+    write_hi_lo(false, 0);
+    write_hi_lo(true, 0);
 }

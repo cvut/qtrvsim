@@ -43,6 +43,7 @@ public:
 
     void write_byte(std::uint32_t offset, std::uint8_t value);
     std::uint8_t read_byte(std::uint32_t offset) const;
+    void merge(MemorySection&);
 
     std::uint32_t length() const;
     const std::uint8_t* data() const;
@@ -71,6 +72,8 @@ public:
     Memory();
     Memory(const Memory&);
     ~Memory();
+    void reset(); // Reset whole content of memory (removes old tree and creates new one)
+    void reset(const Memory&);
 
     MemorySection *get_section(std::uint32_t address, bool create) const; // returns section containing given address
     void write_byte(std::uint32_t address, std::uint8_t value);
