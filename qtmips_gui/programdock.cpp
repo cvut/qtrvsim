@@ -43,7 +43,7 @@ ProgramDock::ProgramDock(QWidget *parent) : QDockWidget(parent) {
 
     setWidget(widg);
     setObjectName("Program");
-    setWindowTitle("Program memory");
+    setWindowTitle("Program");
 }
 
 ProgramDock::~ProgramDock() {

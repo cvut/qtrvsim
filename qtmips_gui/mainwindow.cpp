@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     registers->hide();
     program = new ProgramDock(this);
     program->hide();
+    memory = new MemoryDock(this);
+    memory->hide();
     cache_content = new CacheContentDock(this);
     cache_content->hide();
     cache_statictics = new CacheStatisticsDock(this);
@@ -36,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->actionNew, SIGNAL(triggered(bool)), this, SLOT(new_machine()));
     connect(ui->actionRegisters, SIGNAL(triggered(bool)), this, SLOT(show_registers()));
     connect(ui->actionProgram_memory, SIGNAL(triggered(bool)), this, SLOT(show_program()));
+    connect(ui->actionMemory, SIGNAL(triggered(bool)), this, SLOT(show_memory()));
     connect(ui->actionCache, SIGNAL(triggered(bool)), this, SLOT(show_cache_content()));
     connect(ui->actionCache_statistics, SIGNAL(triggered(bool)), this, SLOT(show_cache_statictics()));
     connect(ui->ips1, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
@@ -59,6 +62,8 @@ MainWindow::~MainWindow() {
     delete cache_content;
     delete cache_statictics;
     delete registers;
+    delete program;
+    delete memory;
     delete ui;
     if (machine != nullptr)
         delete machine;
@@ -104,21 +109,16 @@ void MainWindow::new_machine() {
     ndialog->show();
 }
 
-void MainWindow::show_cache_content() {
-    show_dockwidget(cache_content);
-}
+#define SHOW_HANDLER(NAME)  void MainWindow::show_##NAME() { \
+        show_dockwidget(NAME); \
+    } \
 
-void MainWindow::show_cache_statictics() {
-    show_dockwidget(cache_statictics);
-}
-
-void MainWindow::show_registers() {
-    show_dockwidget(registers);
-}
-
-void MainWindow::show_program() {
-    show_dockwidget(program);
-}
+SHOW_HANDLER(registers)
+SHOW_HANDLER(program)
+SHOW_HANDLER(memory)
+SHOW_HANDLER(cache_content)
+SHOW_HANDLER(cache_statictics)
+#undef SHOW_HANDLER
 
 void MainWindow::set_speed() {
     if (machine == nullptr)

@@ -10,6 +10,7 @@
 #include "cachestatistics.h"
 #include "registersdock.h"
 #include "programdock.h"
+#include "memorydock.h"
 
 #include "qtmipsmachine.h"
 #include "machineconfig.h"
@@ -31,6 +32,7 @@ public slots:
     void new_machine();
     void show_registers();
     void show_program();
+    void show_memory();
     void show_cache_content();
     void show_cache_statictics();
     // Actions - execution speed
@@ -53,6 +55,7 @@ private:
 
     RegistersDock *registers;
     ProgramDock *program;
+    MemoryDock *memory;
     // TODO implement cahce docks
     CacheContentDock *cache_content;
     CacheStatisticsDock *cache_statictics;

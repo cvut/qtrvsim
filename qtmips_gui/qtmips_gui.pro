@@ -26,7 +26,8 @@ SOURCES += \
         coreview/latch.cpp \
         coreview/alu.cpp \
         coreview/memory.cpp \
-        programdock.cpp
+        programdock.cpp \
+        memorydock.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -41,7 +42,8 @@ HEADERS += \
         coreview/latch.h \
         coreview/alu.h \
         coreview/memory.h \
-        programdock.h
+        programdock.h \
+        memorydock.h
 
 FORMS += \
         NewDialog.ui \

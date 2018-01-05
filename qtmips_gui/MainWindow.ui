@@ -230,12 +230,18 @@
   </action>
   <action name="actionMemory">
    <property name="text">
-    <string>Data Memory</string>
+    <string>Memory</string>
+   </property>
+   <property name="toolTip">
+    <string>Data memory view</string>
    </property>
   </action>
   <action name="actionProgram_memory">
    <property name="text">
-    <string>Program memory</string>
+    <string>Program</string>
+   </property>
+   <property name="toolTip">
+    <string>Program memory view</string>
    </property>
   </action>
   <action name="actionCache">
