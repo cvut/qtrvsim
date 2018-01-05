@@ -1,8 +1,6 @@
 #include "registersdock.h"
 
 RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
-    regs = nullptr;
-
     scrollarea = new QScrollArea(this);
     widg = new QWidget(scrollarea);
     layout = new QFormLayout(widg);
@@ -29,14 +27,25 @@ RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
 }
 
 RegistersDock::~RegistersDock() {
-    delete layout;
     delete pc, hi, lo;
     for (int i = 0; i < 32; i++)
         delete gp[i];
+    delete layout;
+    delete widg;
+    delete scrollarea;
 }
 
 void RegistersDock::setup(machine::QtMipsMachine *machine) {
-    regs = machine->registers();
+    if (machine == nullptr) {
+        // Reset data
+        pc->setText("");
+        hi->setText("");
+        lo->setText("");
+        for (int i = 0; i < 32; i++)
+            gp[i]->setText("");
+    }
+
+    const machine::Registers *regs = machine->registers();
     connect(regs, SIGNAL(pc_update(std::uint32_t)), this, SLOT(pc_changed(std::uint32_t)));
     connect(regs, SIGNAL(gp_update(std::uint8_t,std::uint32_t)), this, SLOT(gp_changed(std::uint8_t,std::uint32_t)));
     connect(regs, SIGNAL(hi_lo_update(bool,std::uint32_t)), this, SLOT(hi_lo_changed(bool,std::uint32_t)));

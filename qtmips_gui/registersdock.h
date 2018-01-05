@@ -22,8 +22,6 @@ private slots:
     void hi_lo_changed(bool hi, std::uint32_t val);
 
 private:
-    const machine::Registers *regs;
-
     QWidget *widg;
     QScrollArea *scrollarea;
     QFormLayout *layout;
