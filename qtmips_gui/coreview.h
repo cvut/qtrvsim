@@ -14,8 +14,11 @@ class CoreView : public QGraphicsView {
 public:
     CoreView(QWidget *parent);
 
-private:
+protected:
     void resizeEvent(QResizeEvent *event);
+private:
+    const int scene_width = 800, scene_height = 800;
+    void update_scale();
 };
 
 class CoreViewScene : public QGraphicsScene {

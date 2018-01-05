@@ -1,16 +1,33 @@
 #include "coreview.h"
 
 CoreView::CoreView(QWidget *parent) : QGraphicsView(parent) {
-    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
-    // TODO fitInView doesn't work as I want so reimplement or do something with it
-    //fitInView(0, 0, 201, 201, Qt::KeepAspectRatioByExpanding);
+    setSceneRect(0, 0, scene_width, scene_height);
+    update_scale();
 }
 
-void CoreView::resizeEvent(QResizeEvent *event __attribute__((unused))) {
-    // fitInView(0, 0, 201, 201, Qt::KeepAspectRatioByExpanding);
+void CoreView::resizeEvent(QResizeEvent *event) {
+    QGraphicsView::resizeEvent(event);
+    update_scale();
+}
+
+void CoreView::update_scale() {
+    // Note: there is somehow three pixels error when viewing so we have to always compensate
+    const int w = scene_width + 3;
+    const int h = scene_height + 3;
+
+    qreal scale = 1;
+    if (height() > h && width() > w) {
+        if (height() > width()) {
+            scale = (qreal)width() / w;
+        } else {
+            scale = (qreal)height() / h;
+        }
+    }
+    QTransform t;
+    t.scale(scale, scale);
+    setTransform(t, false);
 }
 
 CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : QGraphicsScene(view) {
