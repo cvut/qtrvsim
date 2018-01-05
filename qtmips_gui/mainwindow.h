@@ -9,6 +9,7 @@
 #include "cachecontent.h"
 #include "cachestatistics.h"
 #include "registersdock.h"
+#include "programdock.h"
 
 #include "qtmipsmachine.h"
 #include "machineconfig.h"
@@ -28,9 +29,10 @@ public:
 public slots:
     // Actions signals
     void new_machine();
+    void show_registers();
+    void show_program();
     void show_cache_content();
     void show_cache_statictics();
-    void show_registers();
     // Actions - execution speed
     void set_speed();
     // Machine signals
@@ -49,9 +51,11 @@ private:
     CoreView *coreview;
     CoreViewScene *corescene;
 
+    RegistersDock *registers;
+    ProgramDock *program;
+    // TODO implement cahce docks
     CacheContentDock *cache_content;
     CacheStatisticsDock *cache_statictics;
-    RegistersDock *registers;
 
     QActionGroup *speed_group;
 

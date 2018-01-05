@@ -14,12 +14,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     this->setCentralWidget(coreview);
     // Create/prepare other widgets
     ndialog = new NewDialog(this, settings);
+    registers = new RegistersDock(this);
+    registers->hide();
+    program = new ProgramDock(this);
+    program->hide();
     cache_content = new CacheContentDock(this);
     cache_content->hide();
     cache_statictics = new CacheStatisticsDock(this);
     cache_statictics->hide();
-    registers = new RegistersDock(this);
-    registers->hide();
 
     // Execution speed actions
     speed_group = new QActionGroup(this);
@@ -32,9 +34,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     // Connect signals from menu
     connect(ui->actionExit, SIGNAL(triggered(bool)), this, SLOT(close()));
     connect(ui->actionNew, SIGNAL(triggered(bool)), this, SLOT(new_machine()));
+    connect(ui->actionRegisters, SIGNAL(triggered(bool)), this, SLOT(show_registers()));
+    connect(ui->actionProgram_memory, SIGNAL(triggered(bool)), this, SLOT(show_program()));
     connect(ui->actionCache, SIGNAL(triggered(bool)), this, SLOT(show_cache_content()));
     connect(ui->actionCache_statistics, SIGNAL(triggered(bool)), this, SLOT(show_cache_statictics()));
-    connect(ui->actionRegisters, SIGNAL(triggered(bool)), this, SLOT(show_registers()));
     connect(ui->ips1, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
     connect(ui->ips5, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
     connect(ui->ips10, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
@@ -88,6 +91,7 @@ void MainWindow::create_core(machine::MachineConfig *config) {
 
     // Setup docks
     registers->setup(machine);
+    program->setup(machine);
     // Set status to ready
     machine_status(machine::QtMipsMachine::ST_READY);
 }
@@ -110,6 +114,10 @@ void MainWindow::show_cache_statictics() {
 
 void MainWindow::show_registers() {
     show_dockwidget(registers);
+}
+
+void MainWindow::show_program() {
+    show_dockwidget(program);
 }
 
 void MainWindow::set_speed() {
