@@ -7,8 +7,15 @@ using namespace coreview;
 #define PENW 1
 //////////////////////
 
-Latch::Latch(machine::QtMipsMachine *machine, qreal height) {
+Latch::Latch(machine::QtMipsMachine *machine, qreal height) : QGraphicsObject(nullptr) {
     this->height = height;
+
+    wedge_animation = new QPropertyAnimation(this, "wedge_clr");
+    wedge_animation->setDuration(100);
+    wedge_animation->setStartValue(QColor(0, 0, 0));
+    wedge_animation->setEndValue(QColor(255, 255, 255));
+    wedge_clr = QColor(255, 255, 255);
+
     connect(machine, SIGNAL(tick()), this, SLOT(tick()));
 }
 
@@ -21,10 +28,20 @@ void Latch::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __at
     // Now tick rectangle
     const QPointF tickPolygon[] = {
         QPointF(0, 0),
-        QPointF(WIDTH/2, WIDTH/2),
-        QPointF(WIDTH, 0)
+        QPointF(WIDTH, 0),
+        QPointF(WIDTH/2, WIDTH/2)
     };
+    painter->setBrush(QBrush(wedge_color()));
     painter->drawPolygon(tickPolygon, sizeof(tickPolygon) / sizeof(QPointF));
+}
+
+QColor Latch::wedge_color() {
+    return wedge_clr;
+}
+
+void Latch::set_wedge_color(QColor &c) {
+    wedge_clr = c;
+    update();
 }
 
 void Latch::setPos(qreal x, qreal y) {
@@ -47,5 +64,7 @@ struct Latch::ConnectorPair Latch::new_connector(qreal cy) {
 }
 
 void Latch::tick() {
-    // TODO animate
+    wedge_clr = QColor(0, 0, 0);
+    wedge_animation->start();
+    update();
 }
