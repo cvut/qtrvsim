@@ -3,7 +3,6 @@
 
 #include <QGraphicsItem>
 #include "qtmipsexception.h"
-#include "../coreview.h"
 #include "connection.h"
 
 namespace coreview {
@@ -30,12 +29,6 @@ private:
     Connector *con_ctl, *con_out, **con_in;
 };
 
-}
-
-#else
-
-namespace coreview {
-    class Multiplexer;
 }
 
 #endif // COREVIEW_MULTIPLEXER_H

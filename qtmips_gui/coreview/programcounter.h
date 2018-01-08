@@ -4,7 +4,6 @@
 #include <QGraphicsObject>
 #include <QPainter>
 #include "qtmipsmachine.h"
-#include "../coreview.h"
 #include "connection.h"
 
 namespace coreview {
@@ -25,18 +24,13 @@ private slots:
     void pc_update(std::uint32_t val);
 
 private:
-    QGraphicsSimpleTextItem value;
     QGraphicsSimpleTextItem name;
+    QGraphicsSimpleTextItem value;
 
     Connector *con_in, *con_out;
 };
 
 }
 
-#else
-
-namespace coreview {
-    class ProgramCounter;
-};
 
 #endif // COREVIEW_PROGRAMCOUNTER_H

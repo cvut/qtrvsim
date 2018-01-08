@@ -87,7 +87,11 @@ void MainWindow::create_core(const machine::MachineConfig &config) {
     // Create machine view
     if (corescene != nullptr)
         delete corescene;
-    corescene = new CoreViewScene(coreview, machine);
+    if (config.pipelined()) {
+        corescene = new CoreViewScenePipelined(coreview, machine);
+    } else {
+        corescene = new CoreViewSceneSimple(coreview, machine);
+    }
     coreview->setScene(corescene);
 
     set_speed(); // Update machine speed to current settings
@@ -100,6 +104,10 @@ void MainWindow::create_core(const machine::MachineConfig &config) {
     connect(machine, SIGNAL(status_change(machine::QtMipsMachine::Status)), this, SLOT(machine_status(machine::QtMipsMachine::Status)));
     connect(machine, SIGNAL(program_exit()), this, SLOT(machine_exit()));
     connect(machine, SIGNAL(program_trap(machine::QtMipsException&)), this, SLOT(machine_trap(machine::QtMipsException&)));
+    // Connect scene signals to actions
+    connect(corescene, SIGNAL(request_registers()), this, SLOT(show_registers()));
+    connect(corescene, SIGNAL(request_program_memory()), this, SLOT(show_program()));
+    connect(corescene, SIGNAL(request_data_memory()), this, SLOT(show_memory()));
 
     // Setup docks
     registers->setup(machine);

@@ -2,11 +2,10 @@
 #define COREVIEW_LATCH_H
 
 #include <QGraphicsObject>
-#include <QList>
 #include <QPropertyAnimation>
+#include <QVector>
 #include "qtmipsexception.h"
 #include "qtmipsmachine.h"
-#include "../coreview.h"
 #include "connection.h"
 
 namespace coreview {
@@ -23,6 +22,8 @@ public:
     QColor wedge_color();
     void set_wedge_color(QColor &c);
 
+    void setTitle(const QString &str);
+
     void setPos(qreal x, qreal y);
 
     struct ConnectorPair { Connector *in, *out; };
@@ -37,19 +38,15 @@ private slots:
 
 private:
     qreal height;
-    QList<ConnectorPair> connectors;
-    QList<qreal> connectors_off;
+    QVector<ConnectorPair> connectors;
+    QVector<qreal> connectors_off;
+
+    QGraphicsSimpleTextItem *title;
 
     QPropertyAnimation *wedge_animation;
     QColor wedge_clr;
 };
 
 }
-
-#else
-
-namespace coreview {
-    class Latch;
-};
 
 #endif // COREVIEW_LATCH_H

@@ -1,23 +1,29 @@
 #include "programcounter.h"
+#include <cmath>
 
 using namespace coreview;
 
 //////////////////////
-#define WIDTH 80
-#define HEIGHT 50
+#define WIDTH 72
+#define HEIGHT 25
 #define PENW 1
 //////////////////////
 
-ProgramCounter::ProgramCounter(machine::QtMipsMachine *machine) : QGraphicsObject(nullptr), value(this), name(this) {
-    value.setText(QString("0x") + QString::number(machine->registers()->read_pc(), 16));
-    value.setPos(1, HEIGHT/2 - value.boundingRect().height()/2);
-    name.setText(QString("PC"));
+ProgramCounter::ProgramCounter(machine::QtMipsMachine *machine) : QGraphicsObject(nullptr), name("PC", this), value(this) {
+    QFont font;
+
+    font.setPointSize(7);
     name.setPos(WIDTH/2 - name.boundingRect().width()/2, 0);
+    name.setFont(font);
+    font.setPointSize(8);
+    value.setText(QString("0x") + QString::number(machine->registers()->read_pc(), 16));
+    value.setPos(1, HEIGHT - value.boundingRect().height());
+    value.setFont(font);
 
     connect(machine->registers(), SIGNAL(pc_update(std::uint32_t)), this, SLOT(pc_update(std::uint32_t)));
 
-    con_in = new Connector();
-    con_out = new Connector();
+    con_in = new Connector(M_PI_2);
+    con_out = new Connector(-M_PI_2);
     setPos(x(), y()); // To set initial connectors positions
 }
 
@@ -31,8 +37,8 @@ void ProgramCounter::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
 
 void ProgramCounter::setPos(qreal x, qreal y) {
     QGraphicsObject::setPos(x, y);
-    con_in->setPos(x, y + HEIGHT/2);
-    con_out->setPos(x + WIDTH, y + HEIGHT/2);
+    con_in->setPos(x + WIDTH/2, y);
+    con_out->setPos(x + WIDTH/2, y + HEIGHT);
 }
 
 const Connector *ProgramCounter::connector_in() const {

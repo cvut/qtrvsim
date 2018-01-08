@@ -7,9 +7,11 @@
 #define PENW 1
 //////////////////////
 
-coreview::Alu::Alu() : QGraphicsObject(nullptr), name(this) {
-    name.setText("ALU");
+coreview::Alu::Alu() : QGraphicsItem(nullptr), name("ALU", this) {
     name.setPos(3, 25);
+    QFont font;
+    font.setPointSize(7);
+    name.setFont(font);
 
     con_in_a = new Connector();
     con_in_b = new Connector();
@@ -37,7 +39,8 @@ void coreview::Alu::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
 }
 
 void coreview::Alu::setPos(qreal x, qreal y) {
-    QGraphicsObject::setPos(x, y);
+    QGraphicsItem::setPos(x, y);
+    // TODO fix this (should be relative to x and y)
     qreal off = ((HEIGHT/2) - DENT) / 2;
     con_in_a->setPos(0, off);
     con_in_b->setPos(0, HEIGHT - off);

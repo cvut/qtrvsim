@@ -1,15 +1,17 @@
-#ifndef COREVIEW_ALU_H
-#define COREVIEW_ALU_H
+#ifndef ADDER_H
+#define ADDER_H
 
 #include <QGraphicsItem>
-#include <qtmipsmachine.h>
+#include <QPainter>
+#include <QGraphicsSimpleTextItem>
 #include "connection.h"
 
 namespace coreview {
 
-class Alu : public QGraphicsItem {
+class Adder : public QGraphicsItem {
 public:
-    Alu();
+    Adder();
+    ~Adder();
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -18,13 +20,13 @@ public:
     const Connector *connector_in_a() const;
     const Connector *connector_in_b() const;
     const Connector *connector_out() const;
-    const Connector *connector_ctl() const;
 
 private:
-    QGraphicsSimpleTextItem name;
-    Connector *con_in_a, *con_in_b, *con_out, *con_ctl;
+    QGraphicsSimpleTextItem plus;
+
+    Connector *con_in_a, *con_in_b, *con_out;
 };
 
 }
 
-#endif // COREVIEW_ALU_H
+#endif // ADDER_H

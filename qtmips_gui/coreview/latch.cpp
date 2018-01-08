@@ -1,14 +1,20 @@
 #include "latch.h"
+#include <cmath>
 
 using namespace coreview;
 
 //////////////////////
-#define WIDTH 10
+#define WIDTH 7
 #define PENW 1
 //////////////////////
 
 Latch::Latch(machine::QtMipsMachine *machine, qreal height) : QGraphicsObject(nullptr) {
     this->height = height;
+
+    title = new QGraphicsSimpleTextItem(this);
+    QFont font;
+    font.setPointSize(6);
+    title->setFont(font);
 
     wedge_animation = new QPropertyAnimation(this, "wedge_clr");
     wedge_animation->setDuration(100);
@@ -20,7 +26,9 @@ Latch::Latch(machine::QtMipsMachine *machine, qreal height) : QGraphicsObject(nu
 }
 
 QRectF Latch::boundingRect() const {
-    return QRectF(-PENW / 2, -PENW / 2, WIDTH + PENW, height + PENW);
+    QRectF b(-PENW / 2, -PENW / 2, WIDTH + PENW, height + PENW);
+    b |= title->boundingRect();
+    return b;
 }
 
 void Latch::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
@@ -44,6 +52,12 @@ void Latch::set_wedge_color(QColor &c) {
     update();
 }
 
+void Latch::setTitle(const QString &str) {
+    title->setText(str);
+    QRectF box = title->boundingRect();
+    title->setPos(WIDTH/2 - box.width()/2, - box.height() - 1);
+}
+
 void Latch::setPos(qreal x, qreal y) {
     QGraphicsObject::setPos(x, y);
     for (int i = 0; i < connectors.size(); i++) {
@@ -55,8 +69,8 @@ void Latch::setPos(qreal x, qreal y) {
 struct Latch::ConnectorPair Latch::new_connector(qreal cy) {
     SANITY_ASSERT(cy < height, "Latch: Trying to create connector outside of latch height");
     ConnectorPair cp;
-    cp.in = new Connector();
-    cp.out = new Connector();
+    cp.in = new Connector(0);
+    cp.out = new Connector(M_PI);
     connectors.append(cp);
     connectors_off.append(cy);
     setPos(x(), y()); // Update connectors position

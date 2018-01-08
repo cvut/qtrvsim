@@ -1,9 +1,10 @@
 #include "multiplexer.h"
+#include <cmath>
 
 using namespace coreview;
 
 //////////////////////
-#define WIDTH 20
+#define WIDTH 10
 #define HEIGHT 20
 #define PENW 1
 //////////////////////
@@ -12,11 +13,11 @@ Multiplexer::Multiplexer(unsigned size) {
     this->size = size;
     seton = 0;
     ctlfrom = false;
-    con_ctl = new Connector();
-    con_out = new Connector();
+    con_ctl = new Connector(M_PI_2);
+    con_out = new Connector(M_PI);
     con_in = new Connector*[size];
     for (unsigned i = 0; i < size; i++)
-        con_in[i] = new Connector();
+        con_in[i] = new Connector(0);
     setPos(x(), y()); // Set connectors possitions
 }
 
@@ -33,6 +34,10 @@ QRectF Multiplexer::boundingRect() const {
 }
 
 void Multiplexer::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
+    painter->setPen(QColor(200, 200, 200));
+    painter->drawLine(0, (HEIGHT / 2) + (seton * HEIGHT), WIDTH, (HEIGHT * size) / 2);
+
+    painter->setPen(QColor(0, 0, 0));
     const QPointF poly[] = {
         QPointF(0, 0),
         QPointF(WIDTH, WIDTH),
@@ -40,9 +45,6 @@ void Multiplexer::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
         QPointF(0, HEIGHT * size)
     };
     painter->drawPolygon(poly, sizeof(poly) / sizeof(QPointF));
-
-    painter->setPen(QColor(200, 200, 200));
-    painter->drawLine(0, (HEIGHT / 2) + (seton * HEIGHT), WIDTH, (HEIGHT * size) / 2);
 }
 
 void Multiplexer::setPos(qreal x, qreal y) {

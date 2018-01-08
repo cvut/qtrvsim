@@ -18,6 +18,8 @@ SOURCES += \
         newdialog.cpp \
         coreview.cpp \
         registersdock.cpp \
+        programdock.cpp \
+        memorydock.cpp \
         memoryview.cpp \
         cachestatistics.cpp \
         cachecontent.cpp \
@@ -27,14 +29,19 @@ SOURCES += \
         coreview/latch.cpp \
         coreview/alu.cpp \
         coreview/memory.cpp \
-        programdock.cpp \
-        memorydock.cpp
+        coreview/instructionview.cpp \
+        coreview/registers.cpp \
+        coreview/adder.cpp \
+        coreview/constant.cpp \
+        coreview/junction.cpp
 
 HEADERS += \
         mainwindow.h \
         newdialog.h \
         coreview.h \
         registersdock.h \
+        programdock.h \
+        memorydock.h \
         memoryview.h \
         cachestatistics.h \
         cachecontent.h \
@@ -44,8 +51,11 @@ HEADERS += \
         coreview/latch.h \
         coreview/alu.h \
         coreview/memory.h \
-        programdock.h \
-        memorydock.h
+        coreview/instructionview.h \
+        coreview/registers.h \
+        coreview/adder.h \
+        coreview/constant.h \
+        coreview/junction.h
 
 FORMS += \
         NewDialog.ui \
