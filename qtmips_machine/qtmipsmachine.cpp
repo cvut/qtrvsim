@@ -63,6 +63,14 @@ const Core *QtMipsMachine::core() {
     return cr;
 }
 
+const CoreSingle *QtMipsMachine::core_singe() {
+    return mcnf.pipelined() ? nullptr : (const CoreSingle*)cr;
+}
+
+const CorePipelined *QtMipsMachine::core_pipelined() {
+    return mcnf.pipelined() ? (const CorePipelined*)cr : nullptr;
+}
+
 enum QtMipsMachine::Status QtMipsMachine::status() {
     return stat;
 }

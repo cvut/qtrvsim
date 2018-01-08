@@ -25,6 +25,8 @@ public:
     const Memory *memory();
     const Cache *cache();
     const Core *core();
+    const CoreSingle *core_singe();
+    const CorePipelined *core_pipelined();
 
     enum Status {
         ST_READY, // Machine is ready to be started or step to be called
