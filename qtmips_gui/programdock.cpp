@@ -6,16 +6,8 @@ ProgramDock::ProgramDock(QWidget *parent) : QDockWidget(parent) {
     widg_layout = new QBoxLayout(QBoxLayout::TopToBottom, widg);
     widg_layout->setSizeConstraint(QLayout::SetMinAndMaxSize);
 
-    // TODO memory view
-
-    /*
-    ctlline = new QLineEdit(widg);
-    ctlline->setText("0x00000000");
-    ctlline->setInputMask("\\0\\xHHHHHHHH");
-    ctlline->hide();
-    widg_layout->addWidget(ctlline);
-    connect(ctlline, SIGNAL(returnPressed()), this, SLOT(ctlline_returnPress()));
-    */
+    memory_view = new MemoryView(widg);
+    widg_layout->addWidget(memory_view);
 
     ctlbox_single = new QComboBox(widg);
     ctlbox_single->addItems({
@@ -47,6 +39,7 @@ ProgramDock::ProgramDock(QWidget *parent) : QDockWidget(parent) {
 }
 
 ProgramDock::~ProgramDock() {
+    delete memory_view;
     delete ctlbox_single;
     delete ctlbox_pipelined;
     delete widg_layout;

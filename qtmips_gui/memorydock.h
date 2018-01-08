@@ -3,6 +3,7 @@
 
 #include <QDockWidget>
 #include "qtmipsmachine.h"
+#include "memoryview.h"
 
 class MemoryDock : public QDockWidget  {
     Q_OBJECT
@@ -13,7 +14,7 @@ public:
     void setup(machine::QtMipsMachine *machine);
 
 private:
-    // TODO memory view
+    MemoryView *memory_view;
 };
 
 #endif // MEMORYDOCK_H

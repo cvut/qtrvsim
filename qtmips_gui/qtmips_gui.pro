@@ -18,6 +18,7 @@ SOURCES += \
         newdialog.cpp \
         coreview.cpp \
         registersdock.cpp \
+        memoryview.cpp \
         cachestatistics.cpp \
         cachecontent.cpp \
         coreview/programcounter.cpp \
@@ -34,6 +35,7 @@ HEADERS += \
         newdialog.h \
         coreview.h \
         registersdock.h \
+        memoryview.h \
         cachestatistics.h \
         cachecontent.h \
         coreview/programcounter.h \

@@ -7,6 +7,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include "qtmipsmachine.h"
+#include "memoryview.h"
 
 class ProgramDock : public QDockWidget {
     Q_OBJECT
@@ -24,7 +25,7 @@ private:
     QWidget *widg;
     QBoxLayout *widg_layout;
 
-    //QLineEdit *ctlline;
+    MemoryView *memory_view;
     QComboBox *ctlbox_single;
     QComboBox *ctlbox_pipelined;
 };
