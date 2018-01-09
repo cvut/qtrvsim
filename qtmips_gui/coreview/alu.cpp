@@ -1,4 +1,5 @@
 #include "alu.h"
+#include <cmath>
 
 //////////////////////
 #define WIDTH 40
@@ -13,10 +14,10 @@ coreview::Alu::Alu() : QGraphicsItem(nullptr), name("ALU", this) {
     font.setPointSize(7);
     name.setFont(font);
 
-    con_in_a = new Connector();
-    con_in_b = new Connector();
-    con_out = new Connector();
-    con_ctl = new Connector();
+    con_in_a = new Connector(0);
+    con_in_b = new Connector(0);
+    con_out = new Connector(M_PI);
+    con_ctl = new Connector(-M_PI_2);
 
     setPos(x(), y()); // set connector's position
 }
