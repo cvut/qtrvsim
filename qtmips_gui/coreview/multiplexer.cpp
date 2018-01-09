@@ -6,6 +6,7 @@ using namespace coreview;
 //////////////////////
 #define WIDTH 10
 #define HEIGHT 20
+#define GAP 8
 #define PENW 1
 //////////////////////
 
@@ -29,20 +30,23 @@ Multiplexer::~Multiplexer() {
     delete con_in;
 }
 
+#define C_HEIGHT (HEIGHT + (GAP * (size -1 )))
+
 QRectF Multiplexer::boundingRect() const {
-    return QRectF(-PENW / 2, -PENW / 2, WIDTH + PENW, (HEIGHT * size) + PENW);
+    return QRectF(-PENW / 2, -PENW / 2, WIDTH + PENW, C_HEIGHT + PENW);
 }
 
 void Multiplexer::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
     painter->setPen(QColor(200, 200, 200));
-    painter->drawLine(0, (HEIGHT / 2) + (seton * HEIGHT), WIDTH, (HEIGHT * size) / 2);
+    if (seton > 0 && seton <= size)
+        painter->drawLine(0, (HEIGHT / 2) + ((seton - 1) * GAP), WIDTH, C_HEIGHT / 2);
 
     painter->setPen(QColor(0, 0, 0));
     const QPointF poly[] = {
         QPointF(0, 0),
-        QPointF(WIDTH, WIDTH),
-        QPointF(WIDTH, (HEIGHT * size) - WIDTH),
-        QPointF(0, HEIGHT * size)
+        QPointF(WIDTH, WIDTH / 2),
+        QPointF(WIDTH, C_HEIGHT - (WIDTH / 2)),
+        QPointF(0, C_HEIGHT)
     };
     painter->drawPolygon(poly, sizeof(poly) / sizeof(QPointF));
 }
@@ -50,12 +54,12 @@ void Multiplexer::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
 void Multiplexer::setPos(qreal x, qreal y) {
     QGraphicsItem::setPos(x, y);
     if (ctlfrom)
-        con_ctl->setPos(x + (WIDTH / 2), y + (WIDTH / 2));
+        con_ctl->setPos(x + (WIDTH / 2), y + (WIDTH / 4));
     else
-        con_ctl->setPos(x + (WIDTH / 2), y + (HEIGHT * size) - (WIDTH / 2));
-    con_out->setPos(x + WIDTH, y + ((HEIGHT *size) / 2));
+        con_ctl->setPos(x + (WIDTH / 2), y + C_HEIGHT - (WIDTH / 4));
+    con_out->setPos(x + WIDTH, y + (C_HEIGHT / 2));
     for (unsigned i = 0; i < size; i++)
-        con_in[i]->setPos(x, y + (HEIGHT / 2) + (i * HEIGHT));
+        con_in[i]->setPos(x, y + (HEIGHT / 2) + (i * GAP));
 }
 
 const Connector *Multiplexer::connector_ctl() const {
@@ -73,7 +77,7 @@ const Connector *Multiplexer::connector_in(unsigned i) const {
 
 void Multiplexer::set(unsigned i) {
     seton = i;
-    update(boundingRect());
+    update();
 }
 
 void Multiplexer::setCtl(bool up) {
