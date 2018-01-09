@@ -84,6 +84,8 @@ CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : 
     con->setAxes({CON_AXIS_X(430)});
     con = new_connection(pc.multiplex->connector_out(), pc.pc->connector_in());
     con->setAxes({CON_AXIS_Y(90), CON_AXIS_X(80)});
+    con = new_connection(pc.adder->connector_out(), pc.multiplex->connector_in(3));
+    con->setAxes({CON_AXIS_Y(130), CON_AXIS_X(280), CON_AXIS_Y(55)});
 
     connect(regs, SIGNAL(open_registers()), this, SIGNAL(request_registers()));
     connect(mem, SIGNAL(open_data_mem()), this, SIGNAL(request_data_memory()));
