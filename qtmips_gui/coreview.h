@@ -40,16 +40,21 @@ signals:
     void request_program_memory();
 
 private:
-    coreview::ProgramCounter *pc;
-    coreview::Latch *pc_latch;
-    coreview::Adder *pc_adder;
-    coreview::Constant *pc_adder_4;
-    coreview::Junction *pc_junction;
+    struct {
+        coreview::ProgramCounter *pc;
+        coreview::Latch *latch;
+        coreview::Adder *adder;
+        coreview::Constant *adder_4;
+        coreview::Junction *junction;
+        coreview::Multiplexer *multiplex;
+    } pc;
     coreview::Alu *alu;
     coreview::Memory *mem;
     coreview::Registers *regs;
-    coreview::Multiplexer *pc_multiplexer, *mem_or_reg;
+    coreview::Multiplexer *mem_or_reg;
 
+    QVector<coreview::Connection*> connections;
+    coreview::Connection *new_connection(const coreview::Connector*, const coreview::Connector*);
     coreview::Connection *pc2pc_latch;
     coreview::Connection *pc_latch2pc_joint, *pc_joint2pc_adder, *pc_joint2mem;
     coreview::Connection *pc_multiplexer2pc;

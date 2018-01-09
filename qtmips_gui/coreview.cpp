@@ -53,41 +53,37 @@ CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : 
     addRect(0.5, 0.5, width() - 0.5, height() - 0.5, pen);
     // TODO remove
 
-#define NEW(TYPE, VAR, ...) do { \
+#define NEW_B(TYPE, VAR, ...) do { \
         VAR = new coreview::TYPE(__VA_ARGS__);\
         addItem(VAR);\
     } while(false)
-#define NEW_CON(VAR, ...) NEW(Connection, VAR, __VA_ARGS__)
+#define NEW(TYPE, VAR, X, Y, ...) do { \
+        NEW_B(TYPE, VAR, __VA_ARGS__); \
+        VAR->setPos(X, Y); \
+    } while(false)
 
-    NEW(ProgramCounter, pc, machine);
-    NEW(Latch, pc_latch, machine, 20);
-    NEW(Adder, pc_adder);
-    NEW(Constant, pc_adder_4, pc_adder->connector_in_b(), "4");
-    NEW(Junction, pc_junction);
-    NEW(Alu, alu);
-    NEW(Memory, mem, machine);
-    NEW(Registers, regs);
-    NEW(Multiplexer, pc_multiplexer, 4);
-    NEW(Multiplexer, mem_or_reg, 2);
+    // Elements //
+    NEW(ProgramCounter, pc.pc, 2, 330, machine);
+    NEW(Latch, pc.latch, 50, 370, machine, 20);
+    NEW(Adder, pc.adder, 100, 350);
+    struct coreview::Latch::ConnectorPair pc_latch_pair = pc.latch->new_connector(10);
+    NEW_B(Constant, pc.adder_4, pc.adder->connector_in_b(), "4");
+    NEW(Junction, pc.junction, 80, pc_latch_pair.out->y());
+    NEW(Multiplexer, pc.multiplex, 60, 100, 4);
+    NEW(Alu, alu, 470, 230);
+    NEW(Memory, mem, 20, 510, machine);
+    NEW(Registers, regs, 20, 0);
+    NEW(Multiplexer, mem_or_reg, 570, 180, 2);
 
-    struct coreview::Latch::ConnectorPair pc_latch_pair = pc_latch->new_connector(10);
-    NEW_CON(pc2pc_latch, pc->connector_out(), pc_latch_pair.in);
-    NEW_CON(pc_latch2pc_joint, pc_latch_pair.out, pc_junction->new_connector(0));
-    NEW_CON(pc_joint2pc_adder, pc_junction->new_connector(M_PI_2), pc_adder->connector_in_a());
-    NEW_CON(pc_joint2mem, pc_junction->new_connector(-M_PI_2), mem->connector_pc());
-    pc_joint2mem->setAxes({CON_AXIS_X(430)});
-    NEW_CON(pc_multiplexer2pc, pc_multiplexer->connector_out(), pc->connector_in());
-    pc_multiplexer2pc->setAxes({CON_AXIS_Y(90), CON_AXIS_X(80)});
-
-    pc->setPos(2, 330);
-    pc_latch->setPos(50, 370);
-    pc_adder->setPos(100, 350);
-    pc_junction->setPos(80, pc_latch_pair.out->y());
-    alu->setPos(470, 230);
-    mem->setPos(20, 510);
-    regs->setPos(20, 0);
-    pc_multiplexer->setPos(60, 100);
-    mem_or_reg->setPos(570, 180);
+    // Connections //
+    coreview::Connection *con;
+    new_connection(pc.pc->connector_out(), pc_latch_pair.in);
+    new_connection(pc_latch_pair.out, pc.junction->new_connector(0));
+    new_connection(pc.junction->new_connector(M_PI_2), pc.adder->connector_in_a());
+    con = new_connection(pc.junction->new_connector(-M_PI_2), mem->connector_pc());
+    con->setAxes({CON_AXIS_X(430)});
+    con = new_connection(pc.multiplex->connector_out(), pc.pc->connector_in());
+    con->setAxes({CON_AXIS_Y(90), CON_AXIS_X(80)});
 
     connect(regs, SIGNAL(open_registers()), this, SIGNAL(request_registers()));
     connect(mem, SIGNAL(open_data_mem()), this, SIGNAL(request_data_memory()));
@@ -95,19 +91,26 @@ CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : 
 }
 
 CoreViewScene::~CoreViewScene() {
-    delete pc2pc_latch;
-    delete pc_latch2pc_joint;
-    delete pc_joint2pc_adder;
-    delete pc_joint2mem;
-    delete pc_multiplexer2pc;
+    for (int i = 0; i < connections.size(); i++)
+        delete connections[i];
 
-    delete pc;
-    delete pc_latch;
-    delete pc_adder;
-    delete pc_adder_4;
-    delete pc_junction;
+    delete pc.pc;
+    delete pc.latch;
+    delete pc.adder;
+    delete pc.adder_4;
+    delete pc.junction;
+    delete pc.multiplex;
     delete alu;
-    delete pc_multiplexer;
+    delete mem;
+    delete regs;
+    delete mem_or_reg;
+}
+
+coreview::Connection *CoreViewScene::new_connection(const coreview::Connector *a, const coreview::Connector *b) {
+    coreview::Connection *c = new coreview::Connection(a, b);
+    connections.append(c);
+    addItem(c);
+    return c;
 }
 
 CoreViewSceneSimple::CoreViewSceneSimple(CoreView *view, machine::QtMipsMachine *machine) : CoreViewScene(view, machine) {
