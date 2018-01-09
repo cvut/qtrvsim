@@ -62,6 +62,7 @@ void Connection::setText(QString val) {
 
 void Connection::setAxes(QVector<QLineF> axes) {
     break_axes = axes;
+    recalc_line();
 }
 
 void Connection::moved_start(QPointF p) {
