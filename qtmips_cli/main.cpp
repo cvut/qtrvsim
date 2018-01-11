@@ -18,7 +18,11 @@ void create_parser(QCommandLineParser &p) {
     p.addOptions({
         {"pipelined", "Configure CPU to use five stage pipeline."},
         {"no-delay-slot", "Disable jump delay slot."},
-        {{"trace-fetch", "tr-fetch"}, "Trace fetched instruction."},
+        {{"trace-fetch", "tr-fetch"}, "Trace fetched instruction (for both pipelined and not core)."},
+        {{"trace-decode", "tr-decode"}, "Trace instruction in decode stage. (only for pipelined core)"},
+        {{"trace-execute", "tr-execute"}, "Trace instruction in execute stage. (only for pipelined core)"},
+        {{"trace-memory", "tr-memory"}, "Trace instruction in memory stage. (only for pipelined core)"},
+        {{"trace-writeback", "tr-writeback"}, "Trace instruction in write back stage. (only for pipelined core)"},
         {{"trace-pc", "tr-pc"}, "Print program counter register changes."},
         {{"trace-gp", "tr-gp"}, "Print general purpose register changes. You can use * for all registers.", "REG"},
         {{"trace-lo", "tr-lo"}, "Print LO register changes."},
@@ -44,6 +48,16 @@ void configure_machine(QCommandLineParser &p, MachineConfig &cc) {
 void configure_tracer(QCommandLineParser &p, Tracer &tr) {
     if (p.isSet("trace-fetch"))
         tr.fetch();
+    if (p.isSet("pipelined")) { // Following are added only if we have stages
+        if (p.isSet("trace-decode"))
+            tr.decode();
+        if (p.isSet("trace-execute"))
+            tr.execute();
+        if (p.isSet("trace-memory"))
+            tr.memory();
+        if (p.isSet("trace-writeback"))
+            tr.writeback();
+    }
 
     if (p.isSet("trace-pc"))
         tr.reg_pc();

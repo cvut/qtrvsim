@@ -20,7 +20,11 @@ public:
     virtual void reset() = 0; // Reset core (only core, memory and registers has to be reseted separately)
 
 signals:
-    void instruction_fetched(machine::Instruction &inst);
+    void instruction_fetched(const machine::Instruction &inst);
+    void instruction_decoded(const machine::Instruction &inst);
+    void instruction_executed(const machine::Instruction &inst);
+    void instruction_memory(const machine::Instruction &inst);
+    void instruction_writeback(const machine::Instruction &inst);
 
 protected:
     Registers *regs;
@@ -42,6 +46,7 @@ protected:
         std::uint32_t val_rt; // Value from register rt
     };
     struct dtExecute {
+        Instruction inst;
         bool memread;
         bool memwrite;
         bool regwrite;
@@ -51,17 +56,18 @@ protected:
         std::uint32_t alu_val; // Result of ALU execution
     };
     struct dtMemory {
+        Instruction inst;
         bool regwrite;
         std::uint8_t rwrite;
         std::uint32_t towrite_val;
     };
 
     struct dtFetch fetch();
-    struct dtDecode decode(struct dtFetch);
-    struct dtExecute execute(struct dtDecode);
-    struct dtMemory memory(struct dtExecute);
-    void writeback(struct dtMemory);
-    void handle_pc(struct dtDecode);
+    struct dtDecode decode(const struct dtFetch&);
+    struct dtExecute execute(const struct dtDecode&);
+    struct dtMemory memory(const struct dtExecute&);
+    void writeback(const struct dtMemory&);
+    void handle_pc(const struct dtDecode&);
 
     // Initialize structures to NOPE instruction
     void dtFetchInit(struct dtFetch &dt);

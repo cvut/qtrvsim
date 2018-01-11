@@ -103,8 +103,9 @@ struct Core::dtFetch Core::fetch() {
     };
 }
 
-struct Core::dtDecode Core::decode(struct dtFetch dt) {
-    struct DecodeMap dec = dmap[dt.inst.opcode()];
+struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
+    emit instruction_decoded(dt.inst);
+    const struct DecodeMap &dec = dmap[dt.inst.opcode()];
     if (!(dec.flags & DM_SUPPORTED))
         // TODO message
         throw QTMIPS_EXCEPTION(UnsupportedInstruction, "", "");
@@ -128,8 +129,8 @@ struct Core::dtDecode Core::decode(struct dtFetch dt) {
     // TODO on jump there should be delay slot. Does processor addes it or compiler. And do we care?
 }
 
-struct Core::dtExecute Core::execute(struct dtDecode dt) {
-    // TODO signals
+struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
+    emit instruction_executed(dt.inst);
 
     // Handle conditional move (we have to change regwrite signal if conditional is not met)
     // TODO can't we do this some cleaner way?
@@ -142,6 +143,7 @@ struct Core::dtExecute Core::execute(struct dtDecode dt) {
         alu_sec = ((dt.inst.immediate() & 0x8000) << 16) | (dt.inst.immediate() & 0x7FFF); // Sign extend to 32bit
 
     return {
+        .inst = dt.inst,
         .memread = dt.memread,
         .memwrite = dt.memwrite,
         .regwrite = regwrite,
@@ -152,8 +154,8 @@ struct Core::dtExecute Core::execute(struct dtDecode dt) {
     };
 }
 
-struct Core::dtMemory Core::memory(struct dtExecute dt) {
-    // TODO signals
+struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
+    emit instruction_memory(dt.inst);
     std::uint32_t towrite_val = dt.alu_val;
 
     if (dt.memwrite)
@@ -162,20 +164,20 @@ struct Core::dtMemory Core::memory(struct dtExecute dt) {
         towrite_val = mem->read_ctl(dt.memctl, dt.alu_val);
 
     return {
+        .inst = dt.inst,
         .regwrite = dt.regwrite,
         .rwrite = dt.rwrite,
         .towrite_val = towrite_val,
     };
 }
 
-void Core::writeback(struct dtMemory dt) {
-    if (dt.regwrite) {
+void Core::writeback(const struct dtMemory &dt) {
+    emit instruction_writeback(dt.inst);
+    if (dt.regwrite)
         regs->write_gp(dt.rwrite, dt.towrite_val);
-    }
 }
 
-void Core::handle_pc(struct dtDecode dt) {
-    // TODO signals
+void Core::handle_pc(const struct dtDecode &dt) {
     bool branch = false;
     bool link = false;
     // TODO implement link
@@ -242,6 +244,7 @@ void Core::dtDecodeInit(struct dtDecode &dt) {
 }
 
 void Core::dtExecuteInit(struct dtExecute &dt) {
+    dt.inst = Instruction(0x00);
     dt.memread = false;
     dt.memwrite = false;
     dt.regwrite = false;
@@ -252,6 +255,7 @@ void Core::dtExecuteInit(struct dtExecute &dt) {
 }
 
 void Core::dtMemoryInit(struct dtMemory &dt) {
+    dt.inst = Instruction(0x00);
     dt.regwrite = false;
     dt.rwrite = false;
     dt.towrite_val = 0;
@@ -297,7 +301,7 @@ CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem) : \
 void CorePipelined::step() {
     // TODO implement forward unit
     writeback(dt_m);
-    dt_m =memory(dt_e);
+    dt_m = memory(dt_e);
     dt_e = execute(dt_d);
     dt_d = decode(dt_f);
     dt_f = fetch();

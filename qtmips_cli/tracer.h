@@ -9,8 +9,12 @@ class Tracer : public QObject {
 public:
     Tracer(machine::QtMipsMachine *machine);
 
-    // Trace fetched instruction
+    // Trace instructions in different stages/sections
     void fetch();
+    void decode();
+    void execute();
+    void memory();
+    void writeback();
     // Trace registers
     void reg_pc();
     void reg_gp(std::uint8_t i);
@@ -18,8 +22,12 @@ public:
     void reg_hi();
 
 private slots:
-    void instruction_fetch(machine::Instruction &inst);
-    // TODO fetch
+    void instruction_fetch(const machine::Instruction &inst);
+    void instruction_decode(const machine::Instruction &inst);
+    void instruction_execute(const machine::Instruction &inst);
+    void instruction_memory(const machine::Instruction &inst);
+    void instruction_writeback(const machine::Instruction &inst);
+
     void regs_pc_update(std::uint32_t val);
     void regs_gp_update(std::uint8_t i, std::uint32_t val);
     void regs_hi_lo_update(bool hi, std::uint32_t val);

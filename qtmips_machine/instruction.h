@@ -29,7 +29,7 @@ public:
     bool operator!=(const Instruction &c) const;
     Instruction &operator=(const Instruction &c);
 
-    QString to_str();
+    QString to_str() const;
 
 private:
     std::uint32_t dt;

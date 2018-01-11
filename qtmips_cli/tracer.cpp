@@ -25,7 +25,23 @@ Tracer::Tracer(QtMipsMachine *machine) {
     } while(false)
 
 void Tracer::fetch() {
-    CON(con_fetch, machine->core(), instruction_fetched(machine::Instruction&), instruction_fetch(machine::Instruction&));
+    CON(con_fetch, machine->core(), instruction_fetched(const machine::Instruction&), instruction_fetch(const machine::Instruction&));
+}
+
+void Tracer::decode() {
+    CON(con_fetch, machine->core(), instruction_decoded(const machine::Instruction&), instruction_decode(const machine::Instruction&));
+}
+
+void Tracer::execute() {
+    CON(con_fetch, machine->core(), instruction_executed(const machine::Instruction&), instruction_execute(const machine::Instruction&));
+}
+
+void Tracer::memory() {
+    CON(con_fetch, machine->core(), instruction_memory(const machine::Instruction&), instruction_memory(const machine::Instruction&));
+}
+
+void Tracer::writeback() {
+    CON(con_fetch, machine->core(), instruction_writeback(const machine::Instruction&), instruction_writeback(const machine::Instruction&));
 }
 
 void Tracer::reg_pc() {
@@ -48,8 +64,24 @@ void Tracer::reg_hi() {
     r_hi = true;
 }
 
-void Tracer::instruction_fetch(Instruction &inst) {
-    cout << inst.to_str().toStdString() << endl;
+void Tracer::instruction_fetch(const Instruction &inst) {
+    cout << "Fetch: " << inst.to_str().toStdString() << endl;
+}
+
+void Tracer::instruction_decode(const machine::Instruction &inst) {
+    cout << "Decode: " << inst.to_str().toStdString() << endl;
+}
+
+void Tracer::instruction_execute(const machine::Instruction &inst) {
+    cout << "Execute: " << inst.to_str().toStdString() << endl;
+}
+
+void Tracer::instruction_memory(const machine::Instruction &inst) {
+    cout << "Memory: " << inst.to_str().toStdString() << endl;
+}
+
+void Tracer::instruction_writeback(const machine::Instruction &inst) {
+    cout << "Writeback: " << inst.to_str().toStdString() << endl;
 }
 
 void Tracer::regs_pc_update(std::uint32_t val) {
