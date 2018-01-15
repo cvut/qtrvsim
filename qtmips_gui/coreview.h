@@ -52,6 +52,7 @@ private:
     coreview::Memory *mem;
     coreview::Registers *regs;
     coreview::Multiplexer *mem_or_reg;
+    coreview::InstructionView *instr_fetch;
 
     QVector<coreview::Connection*> connections;
     coreview::Connection *new_connection(const coreview::Connector*, const coreview::Connector*);
@@ -76,6 +77,7 @@ public:
 
 private:
     coreview::Latch *latch_if_id, *latch_id_ex, *latch_ex_mem, *latch_mem_wb;
+    coreview::InstructionView *inst_dec, *inst_exec, *inst_mem, *inst_wrb;
     // TODO forwarding unit
 };
 

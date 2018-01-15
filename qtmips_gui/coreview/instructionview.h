@@ -12,7 +12,7 @@ public:
     InstructionView();
 
 public slots:
-    void instruction_update(machine::Instruction &i);
+    void instruction_update(const machine::Instruction &i);
 };
 
 }

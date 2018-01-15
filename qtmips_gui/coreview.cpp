@@ -42,6 +42,19 @@ void CoreView::update_scale() {
     setTransform(t, false);
 }
 
+#define NEW_B(TYPE, VAR, ...) do { \
+        VAR = new coreview::TYPE(__VA_ARGS__);\
+        addItem(VAR);\
+    } while(false)
+#define NEW(TYPE, VAR, X, Y, ...) do { \
+        NEW_B(TYPE, VAR, __VA_ARGS__); \
+        VAR->setPos(X, Y); \
+    } while(false)
+#define NEW_I(VAR, X, Y, SIG) do { \
+        NEW(InstructionView, VAR, X, Y); \
+        connect(machine->core(), SIGNAL(SIG), VAR, SLOT(instruction_update(const machine::Instruction&))); \
+    } while(false)
+
 CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : QGraphicsScene(view) {
     setSceneRect(0, 0, SC_WIDTH, SC_HEIGHT);
 
@@ -52,15 +65,6 @@ CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : 
     addLine(0, height()/2, width(), height()/2, pen);
     addRect(0.5, 0.5, width() - 0.5, height() - 0.5, pen);
     // TODO remove
-
-#define NEW_B(TYPE, VAR, ...) do { \
-        VAR = new coreview::TYPE(__VA_ARGS__);\
-        addItem(VAR);\
-    } while(false)
-#define NEW(TYPE, VAR, X, Y, ...) do { \
-        NEW_B(TYPE, VAR, __VA_ARGS__); \
-        VAR->setPos(X, Y); \
-    } while(false)
 
     // Elements //
     NEW(ProgramCounter, pc.pc, 2, 330, machine);
@@ -74,6 +78,7 @@ CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : 
     NEW(Memory, mem, 20, 510, machine);
     NEW(Registers, regs, 20, 0);
     NEW(Multiplexer, mem_or_reg, 570, 180, 2);
+    NEW_I(instr_fetch, 100, 50, instruction_fetched(const machine::Instruction&));
 
     // Connections //
     coreview::Connection *con;
@@ -106,6 +111,7 @@ CoreViewScene::~CoreViewScene() {
     delete mem;
     delete regs;
     delete mem_or_reg;
+    delete instr_fetch;
 }
 
 coreview::Connection *CoreViewScene::new_connection(const coreview::Connector *a, const coreview::Connector *b) {
@@ -116,39 +122,36 @@ coreview::Connection *CoreViewScene::new_connection(const coreview::Connector *a
 }
 
 CoreViewSceneSimple::CoreViewSceneSimple(CoreView *view, machine::QtMipsMachine *machine) : CoreViewScene(view, machine) {
-    delay_slot_latch = new coreview::Latch(machine, 150);
-
-    addItem(delay_slot_latch);
-
-    delay_slot_latch->setPos(160, 50);
+    NEW(Latch, delay_slot_latch, 160, 50, machine, 150);
 }
 
 CoreViewSceneSimple::~CoreViewSceneSimple() {
-
+    delete delay_slot_latch;
 }
 
 CoreViewScenePipelined::CoreViewScenePipelined(CoreView *view, machine::QtMipsMachine *machine) : CoreViewScene(view, machine) {
-    latch_if_id = new coreview::Latch(machine, 350);
-    latch_id_ex = new coreview::Latch(machine, 350);
-    latch_ex_mem = new coreview::Latch(machine, 350);
-    latch_mem_wb = new coreview::Latch(machine, 350);
-
+    NEW(Latch, latch_if_id, 158, 90, machine, 350);
     latch_if_id->setTitle("IF/ID");
+    NEW(Latch, latch_id_ex, 392, 90, machine, 350);
     latch_id_ex->setTitle("ID/EX");
+    NEW(Latch, latch_ex_mem, 536, 90, machine, 350);
     latch_ex_mem->setTitle("EX/MEM");
+    NEW(Latch, latch_mem_wb, 680, 90, machine, 350);
     latch_mem_wb->setTitle("MEM/WB");
 
-    addItem(latch_if_id);
-    addItem(latch_id_ex);
-    addItem(latch_ex_mem);
-    addItem(latch_mem_wb);
-
-    latch_if_id->setPos(158, 90);
-    latch_id_ex->setPos(392, 90);
-    latch_ex_mem->setPos(536, 90);
-    latch_mem_wb->setPos(680, 90);
+    NEW_I(inst_dec, 250, 50, instruction_decoded(const machine::Instruction&));
+    NEW_I(inst_exec, 400, 50, instruction_executed(const machine::Instruction&));
+    NEW_I(inst_mem, 540, 50, instruction_memory(const machine::Instruction&));
+    NEW_I(inst_wrb, 670, 50, instruction_writeback(const machine::Instruction&));
 }
 
 CoreViewScenePipelined::~CoreViewScenePipelined() {
-
+    delete latch_if_id;
+    delete latch_id_ex;
+    delete latch_ex_mem;
+    delete latch_mem_wb;
+    delete inst_dec;
+    delete inst_exec;
+    delete inst_mem;
+    delete inst_wrb;
 }
