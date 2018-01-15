@@ -11,13 +11,13 @@ namespace machine {
 class MemoryAccess : public QObject {
     Q_OBJECT
 public:
-    virtual void write_byte(std::uint32_t offset, std::uint8_t value) = 0;
+    void write_byte(std::uint32_t offset, std::uint8_t value);
     void write_hword(std::uint32_t offset, std::uint16_t value);
     void write_word(std::uint32_t offset, std::uint32_t value);
 
-    virtual std::uint8_t read_byte(std::uint32_t offset) const = 0;
-    std::uint16_t read_hword(std::uint32_t offset);
-    std::uint32_t read_word(std::uint32_t offset);
+    std::uint8_t read_byte(std::uint32_t offset) const;
+    std::uint16_t read_hword(std::uint32_t offset) const;
+    std::uint32_t read_word(std::uint32_t offset) const;
 
     enum AccessControl {
         AC_NONE,
@@ -28,11 +28,14 @@ public:
         AC_HALFWORD_UNSIGNED
     };
     void write_ctl(enum AccessControl ctl, std::uint32_t offset, std::uint32_t value);
-    std::uint32_t read_ctl(enum AccessControl ctl, std::uint32_t offset);
+    std::uint32_t read_ctl(enum AccessControl ctl, std::uint32_t offset) const;
 
 signals:
-    // TODO trigger
     void byte_change(std::uint32_t address, std::uint32_t value);
+
+protected:
+    virtual void wbyte(std::uint32_t offset, std::uint8_t value) = 0;
+    virtual std::uint8_t rbyte(std::uint32_t offset) const = 0;
 };
 
 class MemorySection : public MemoryAccess {
@@ -41,8 +44,8 @@ public:
     MemorySection(const MemorySection&);
     ~MemorySection();
 
-    void write_byte(std::uint32_t offset, std::uint8_t value);
-    std::uint8_t read_byte(std::uint32_t offset) const;
+    void wbyte(std::uint32_t offset, std::uint8_t value);
+    std::uint8_t rbyte(std::uint32_t offset) const;
     void merge(MemorySection&);
 
     std::uint32_t length() const;
@@ -76,8 +79,8 @@ public:
     void reset(const Memory&);
 
     MemorySection *get_section(std::uint32_t address, bool create) const; // returns section containing given address
-    void write_byte(std::uint32_t address, std::uint8_t value);
-    std::uint8_t read_byte(std::uint32_t address) const;
+    void wbyte(std::uint32_t address, std::uint8_t value);
+    std::uint8_t rbyte(std::uint32_t address) const;
 
     bool operator==(const Memory&) const;
     bool operator!=(const Memory&) const;

@@ -2,8 +2,10 @@
 
 using namespace machine;
 
-// Note about endianness: Current memory implementation is expected to be a big endian.
-// But we can be running on little endian so we should do conversion from bytes to word according that.
+void MemoryAccess::write_byte(std::uint32_t offset, std::uint8_t value) {
+    emit byte_change(offset, value);
+    wbyte(offset, value);
+}
 
 void MemoryAccess::write_hword(std::uint32_t offset, std::uint16_t value) {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -29,7 +31,11 @@ void MemoryAccess::write_word(std::uint32_t offset, std::uint32_t value) {
 #endif
 }
 
-std::uint16_t MemoryAccess::read_hword(std::uint32_t offset) {
+std::uint8_t MemoryAccess::read_byte(std::uint32_t offset) const {
+    return rbyte(offset);
+}
+
+std::uint16_t MemoryAccess::read_hword(std::uint32_t offset) const {
     std::uint16_t dt = 0;
 #if __BYTE_ORDER == __LITTLE_ENDIAN
     dt |= (this->read_byte(offset++) << 8);
@@ -41,7 +47,7 @@ std::uint16_t MemoryAccess::read_hword(std::uint32_t offset) {
     return dt;
 }
 
-std::uint32_t MemoryAccess::read_word(std::uint32_t offset) {
+std::uint32_t MemoryAccess::read_word(std::uint32_t offset) const {
     std::uint32_t dt = 0;
 #if __BYTE_ORDER == __LITTLE_ENDIAN
     dt |= ((std::uint32_t)this->read_byte(offset++) << 24);
@@ -77,7 +83,7 @@ void MemoryAccess::write_ctl(enum MemoryAccess::AccessControl ctl, std::uint32_t
     }
 }
 
-std::uint32_t MemoryAccess::read_ctl(enum MemoryAccess::AccessControl ctl, std::uint32_t offset) {
+std::uint32_t MemoryAccess::read_ctl(enum MemoryAccess::AccessControl ctl, std::uint32_t offset) const {
     switch (ctl) {
     case AC_NONE:
         return 0;
@@ -116,13 +122,13 @@ MemorySection::~MemorySection() {
     delete this->dt;
 }
 
-void MemorySection::write_byte(std::uint32_t offset, std::uint8_t value) {
+void MemorySection::wbyte(std::uint32_t offset, std::uint8_t value) {
     if (offset >= this->len)
         throw QTMIPS_EXCEPTION(OutOfMemoryAccess, "Trying to write outside of the memory section", QString("Accessing using offset: ") + QString(offset));
     this->dt[offset] = value;
 }
 
-std::uint8_t MemorySection::read_byte(std::uint32_t offset) const {
+std::uint8_t MemorySection::rbyte(std::uint32_t offset) const {
     if (offset >= this->len)
         throw QTMIPS_EXCEPTION(OutOfMemoryAccess, "Trying to read outside of the memory section", QString("Accessing using offset: ") + QString(offset));
     return this->dt[offset];
@@ -223,12 +229,12 @@ MemorySection *Memory::get_section(std::uint32_t address, bool create) const {
 // for section lookup. We do it using (2^BITS - 1).
 #define SECTION_ADDRESS(ADDR) ((ADDR) & ADDRESS_MASK(MEMORY_SECTION_BITS))
 
-void Memory::write_byte(std::uint32_t address, std::uint8_t value) {
+void Memory::wbyte(std::uint32_t address, std::uint8_t value) {
     MemorySection *section = this->get_section(address, true);
     section->write_byte(SECTION_ADDRESS(address), value);
 }
 
-std::uint8_t Memory::read_byte(std::uint32_t address) const {
+std::uint8_t Memory::rbyte(std::uint32_t address) const {
     MemorySection *section = this->get_section(address, false);
     if (section == nullptr)
         return 0;
