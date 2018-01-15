@@ -2,20 +2,14 @@
 #define CACHE_H
 
 #include <memory.h>
+#include <machineconfig.h>
 
 namespace machine {
 
 class Cache : public MemoryAccess {
 public:
-    Cache(Memory *m);
+    Cache(Memory *m, MachineConfigCache *c);
 };
-
-class CacheAssociative : public Cache {
-public:
-    CacheAssociative(Memory *m);
-};
-
-// TODO other chaches
 
 }
 

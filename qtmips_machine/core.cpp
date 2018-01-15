@@ -107,8 +107,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     emit instruction_decoded(dt.inst);
     const struct DecodeMap &dec = dmap[dt.inst.opcode()];
     if (!(dec.flags & DM_SUPPORTED))
-        // TODO message
-        throw QTMIPS_EXCEPTION(UnsupportedInstruction, "", "");
+        throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Instruction with following opcode is not supported", QString::number(dt.inst.opcode(), 16));
 
     return {
         .inst = dt.inst,
@@ -122,16 +121,14 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .val_rs = regs->read_gp(dt.inst.rs()),
         .val_rt = regs->read_gp(dt.inst.rt()),
     };
-    // TODO on jump there should be delay slot. Does processor addes it or compiler. And do we care?
 }
 
 struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
     emit instruction_executed(dt.inst);
 
     // Handle conditional move (we have to change regwrite signal if conditional is not met)
-    // TODO can't we do this some cleaner way?
     bool regwrite = dt.regwrite;
-    if (dt.inst.opcode() == 0 && ((dt.inst.funct() == 10 && dt.val_rt != 0) || (dt.inst.funct() == 11 && dt.val_rt == 0)))
+    if (dt.inst.opcode() == 0 && ((dt.inst.funct() == ALU_OP_MOVZ && dt.val_rt != 0) || (dt.inst.funct() == ALU_OP_MOVN && dt.val_rt == 0)))
         regwrite = false;
 
     std::uint32_t alu_sec = dt.val_rt;

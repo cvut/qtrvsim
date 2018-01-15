@@ -66,7 +66,6 @@ bool QtMipsMachine::exited() {
 
 // We don't allow to call control methods when machine exited or if it's busy
 // We rather silently fail.
-// TODO wouldn't be error better?
 #define CTL_GUARD do { if (exited() || stat == ST_BUSY) return; } while(false)
 
 void QtMipsMachine::play() {

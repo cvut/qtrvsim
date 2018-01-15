@@ -8,7 +8,6 @@
 
 namespace machine {
 
-// TODO Any other operations? We seems to be missing a lot of them.
 enum AluOp : std::uint8_t {
     ALU_OP_SLL = 0,
     ALU_OP_SRL = 2,

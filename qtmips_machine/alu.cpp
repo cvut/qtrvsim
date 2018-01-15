@@ -25,7 +25,7 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
             // Do nothing as we solve this when we are handling program counter in instruction decode (handle_pc)
             return 0;
         case ALU_OP_MOVZ:
-            // We do this just to implement valid alu operation but we have to evaluate comparison way before this to disable register write
+            // We do this just to implement valid alu operation but we have to evaluate comparison outside of this function to disable register write
             return t == 0 ? s : 0;
         case ALU_OP_MOVN:
             // Same note as for MOVZ applies here

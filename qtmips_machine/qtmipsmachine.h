@@ -39,7 +39,6 @@ public:
     bool exited();
 
 public slots:
-    // TODO handle speed
     void play();
     void pause();
     void step();

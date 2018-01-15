@@ -36,7 +36,7 @@ ProgramLoader::ProgramLoader(const char *file) {
         throw QTMIPS_EXCEPTION(Input, "Getting elf class failed", elf_errmsg(-1));
     if (elf_class != ELFCLASS32)
         throw QTMIPS_EXCEPTION(Input, "Only supported architecture is 32bit", "");
-    // TODO check endianity!
+    // TODO We should check in what endianity elf file is coded in
 
     // Get number of program sections in elf file
     if (elf_getphdrnum(this->elf, &this->n_secs))
@@ -46,7 +46,6 @@ ProgramLoader::ProgramLoader(const char *file) {
         throw QTMIPS_EXCEPTION(Input, "Elf program sections get failed", elf_errmsg(-1));
     // We want only LOAD sections so we create map of those sections
     for (unsigned i = 1; i < this->n_secs; i++) {
-        // TODO handle endianity
         if (phdrs[i].p_type != PT_LOAD)
             continue;
         this->map.push_back(i);
@@ -58,8 +57,7 @@ ProgramLoader::ProgramLoader(QString file) : ProgramLoader(file.toStdString().c_
 
 ProgramLoader::~ProgramLoader() {
     // Close elf
-    // TODO fix (this results to segfault, there is probably somethig passed to it on stack or something)
-    //elf_end(this->elf);
+    elf_end(this->elf);
     // Close file
     close(this->fd);
 }

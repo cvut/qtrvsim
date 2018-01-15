@@ -5,10 +5,10 @@ using namespace machine;
 
 // Test that we are correctly encoding instructions in constructor
 void MachineTests::instruction() {
-    QCOMPARE(Instruction(0x00), Instruction(0,0));
+    QCOMPARE(Instruction(0x0), Instruction());
+    QCOMPARE(Instruction(0x4432146), Instruction(1, 2, 3, 4, 5, 6));
+    QCOMPARE(Instruction(0x4430004), Instruction(1, 2, 3, 4));
     QCOMPARE(Instruction(0x4000002), Instruction(1, 2));
-    // QCOMPARE(Instruction(0x4000002), Instruction(1, 2, 3, 4));
-    // TODO other combinations
 }
 
 // Test that we are correctly decoding instruction fields
@@ -25,3 +25,5 @@ void MachineTests::instruction_access() {
     QCOMPARE(i.immediate(), (std::uint16_t) 0xffff);
     QCOMPARE(i.address(), (std::uint32_t) 0x3ffffff);
 }
+
+// TODO test to_str
