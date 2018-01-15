@@ -13,7 +13,49 @@ void MachineTests::alu_data() {
     QTest::addColumn<Registers>("regs_res");
     QTest::addColumn<std::uint32_t>("res");
 
-    // TODO SLL-SRAV
+    QTest::newRow("SLL") << ALU_OP_SLL \
+                         << (std::uint32_t)0 \
+                         << (std::uint32_t)0x80000001 \
+                         << (std::uint8_t)3 \
+                         << Registers() \
+                         << Registers() \
+                         << (std::uint32_t)0x8;
+    QTest::newRow("SRL") << ALU_OP_SRL \
+                         << (std::uint32_t)0 \
+                         << (std::uint32_t)0x80000008 \
+                         << (std::uint8_t)3 \
+                         << Registers() \
+                         << Registers() \
+                         << (std::uint32_t)0x10000001;
+    QTest::newRow("SRA") << ALU_OP_SRA \
+                         << (std::uint32_t)0 \
+                         << (std::uint32_t)0x80000008 \
+                         << (std::uint8_t)3 \
+                         << Registers() \
+                         << Registers() \
+                         << (std::uint32_t)0xF0000001;
+    QTest::newRow("SLLV") << ALU_OP_SLLV \
+                         << (std::uint32_t)3 \
+                         << (std::uint32_t)0x80000001 \
+                         << (std::uint8_t)0 \
+                         << Registers() \
+                         << Registers() \
+                         << (std::uint32_t)0x8;
+    QTest::newRow("SRLV") << ALU_OP_SRLV \
+                         << (std::uint32_t)3 \
+                         << (std::uint32_t)0x80000008 \
+                         << (std::uint8_t)0 \
+                         << Registers() \
+                         << Registers() \
+                         << (std::uint32_t)0x10000001;
+    QTest::newRow("SRAV") << ALU_OP_SRAV \
+                         << (std::uint32_t)3 \
+                         << (std::uint32_t)0x80000008 \
+                         << (std::uint8_t)0 \
+                         << Registers() \
+                         << Registers() \
+                         << (std::uint32_t)0xF0000001;
+    // JR and JALR should have no effect and we test that in core (it really doesn't make sense to test it here)
     QTest::newRow("MOVZ") << ALU_OP_MOVZ \
                          << (std::uint32_t)22 \
                          << (std::uint32_t)0 \

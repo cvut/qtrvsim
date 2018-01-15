@@ -82,7 +82,7 @@ static void core_regs_data() {
     regs_init.write_gp(24, 0x800000f0);
     regs_init.write_gp(25, 3);
     Registers regs_res(regs_init);
-    regs_res.write_gp(26, 0x8000001e);
+    regs_res.write_gp(26, 0xF000001e);
     QTest::newRow("SRA") << Instruction(0, 0, 24, 26, 3, 3) \
                          << regs_init \
                          << regs_res;

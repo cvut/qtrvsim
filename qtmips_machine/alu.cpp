@@ -11,15 +11,15 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
         case ALU_OP_SRL:
             return t >> sa;
         case ALU_OP_SRA:
-            // TODO is this correct implementation? (Should we be masking top most bit?)
-            return ((t & 0x7fffffff) >> sa) | (t & 0x80000000);
+            // Note: This might be broken with some compilers but works with gcc
+            return (std::int32_t)t >> sa;
         case ALU_OP_SLLV:
             return t << s;
         case ALU_OP_SRLV:
             return t >> s;
         case ALU_OP_SRAV:
-            // TODO is this correct implementation? (Should we be masking top most bit?)
-            return ((t & 0x7fffffff) >> s) | (t & 0x80000000);
+            // Note: same note as in case of SRA
+            return (std::int32_t)t >> s;
         case ALU_OP_JR:
         case ALU_OP_JALR:
             // Do nothing as we solve this when we are handling program counter in instruction decode (handle_pc)

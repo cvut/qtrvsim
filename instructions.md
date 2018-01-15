@@ -4,7 +4,6 @@ This is list of all MIPS1 instructions and their implementation status in QtMips
 
 Explanation of checkboxes:
 * [ ] Not tested
-* [?] Somewhat tested but not sure about correctness of implementation
 * [x] Tested
 
 CPU Arithmetic Instruction
@@ -98,8 +97,8 @@ CPU Shift Instructions
 ----------------------
 * [x] SLL
 * [x] SLLV
-* [?] SRA
-* [?] SRAV
+* [x] SRA
+* [x] SRAV
 * [x] SRL
 * [x] SRLV
 
