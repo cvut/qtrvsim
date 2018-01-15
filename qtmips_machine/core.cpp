@@ -110,10 +110,6 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         // TODO message
         throw QTMIPS_EXCEPTION(UnsupportedInstruction, "", "");
 
-    // TODO solve forwarding somehow in here
-    std::uint32_t rs = regs->read_gp(dt.inst.rs());
-    std::uint32_t rt = regs->read_gp(dt.inst.rt());
-
     return {
         .inst = dt.inst,
         .memread = dec.flags & DM_MEMREAD,
@@ -123,8 +119,8 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .regwrite = dec.flags & DM_REGWRITE,
         .aluop = dt.inst.opcode() == 0 ? (enum AluOp)dt.inst.funct() : dec.alu,
         .memctl = dec.mem_ctl,
-        .val_rs = rs,
-        .val_rt = rt,
+        .val_rs = regs->read_gp(dt.inst.rs()),
+        .val_rt = regs->read_gp(dt.inst.rt()),
     };
     // TODO on jump there should be delay slot. Does processor addes it or compiler. And do we care?
 }
@@ -293,19 +289,51 @@ void CoreSingle::reset() {
         Core::dtDecodeInit(*jmp_delay_decode);
 }
 
-CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem) : \
+CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem, enum MachineConfig::HazardUnit hazard_unit) : \
     Core(regs, mem) {
+    this->hazard_unit = hazard_unit;
     reset();
 }
 
 void CorePipelined::step() {
-    // TODO implement forward unit
+    // Process stages
     writeback(dt_m);
     dt_m = memory(dt_e);
     dt_e = execute(dt_d);
     dt_d = decode(dt_f);
-    dt_f = fetch();
-    handle_pc(dt_d);
+
+    // TODO signals
+    bool stall = false;
+    if (hazard_unit != MachineConfig::HU_NONE) {
+        // Note: We make exception with $0 as that has no effect when written and is used in nop instruction
+#define HAZARD(STAGE) ((STAGE).regwrite && (STAGE).rwrite != 0 && ((STAGE).rwrite == dt_d.inst.rs() || (STAGE).rwrite == dt_d.inst.rt())) // Note: We make exception with $0 as that has no effect and is used in nop instruction
+        if (HAZARD(dt_e)) {
+            // Hazard with instruction in execute stage
+            // This always results to stall
+            stall = true;
+        }
+        if (HAZARD(dt_m)) {
+            // Hazard with instruction in memory stage
+            if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
+                // Forward result value
+                if (dt_m.rwrite == dt_d.inst.rs())
+                    dt_d.val_rs = dt_m.towrite_val;
+                if (dt_m.rwrite == dt_d.inst.rt())
+                    dt_d.val_rt = dt_m.towrite_val;
+            } else
+                stall = true;
+        }
+        // Write back stage combinatoricly propagates written instruction to decode stage so nothing has to be done for that stage
+#undef HAZARD
+    }
+
+    // Now process program counter (loop connections from decode stage)
+    if (!stall) {
+        dt_f = fetch();
+        handle_pc(dt_d);
+    } else
+        // clear decode latch (insert nope to execute stage)
+        dtDecodeInit(dt_d);
 }
 
 void CorePipelined::reset() {

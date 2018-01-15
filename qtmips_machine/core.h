@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <qtmipsexception.h>
+#include <machineconfig.h>
 #include <registers.h>
 #include <memory.h>
 #include <instruction.h>
@@ -91,7 +92,7 @@ private:
 
 class CorePipelined : public Core {
 public:
-    CorePipelined(Registers *regs, MemoryAccess *mem);
+    CorePipelined(Registers *regs, MemoryAccess *mem, enum MachineConfig::HazardUnit hazard_unit = MachineConfig::HU_STALL_FORWARD);
 
     void step();
 
@@ -102,6 +103,8 @@ private:
     struct Core::dtDecode dt_d;
     struct Core::dtExecute dt_e;
     struct Core::dtMemory dt_m;
+
+    enum MachineConfig::HazardUnit hazard_unit;
 };
 
 }
