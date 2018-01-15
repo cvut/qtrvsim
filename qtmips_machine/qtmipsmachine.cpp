@@ -14,25 +14,10 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) : QObject(), mcnf(&cc) {
     regs = new Registers();
     mem = new Memory(*mem_program_only);
 
-    MemoryAccess *coremem;
-    switch (cc.cache()) {
-    case MachineConfig::CCT_NONE:
-        cch = nullptr;
-        coremem = mem;
-        break;
-    case MachineConfig::CCT_ASSOCIATIVE:
-        // TODO
-        coremem = mem;
-        //coremem = cch = new CacheAssociative();
-        break;
-    default:
-        throw QTMIPS_EXCEPTION(Sanity, "Trying to configure unknown cache type", "");
-    }
-
     if (cc.pipelined())
-        cr = new CorePipelined(regs, coremem);
+        cr = new CorePipelined(regs, mem);
     else
-        cr = new CoreSingle(regs, coremem, cc.delay_slot());
+        cr = new CoreSingle(regs, mem, cc.delay_slot());
 
     run_t = new QTimer(this);
     set_speed(0); // In default run as fast as possible

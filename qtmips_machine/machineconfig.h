@@ -5,38 +5,60 @@
 
 namespace machine {
 
+class MachineConfigCache {
+public:
+    MachineConfigCache();
+    MachineConfigCache(const MachineConfigCache *cc);
+
+    // TODO
+
+    bool operator ==(const MachineConfigCache &c) const;
+    bool operator !=(const MachineConfigCache &c) const;
+
+private:
+    // TODO
+};
+
 class MachineConfig {
 public:
     MachineConfig();
     MachineConfig(const MachineConfig *cc);
 
-    enum CacheType {
-        CCT_NONE,
-        CCT_ASSOCIATIVE,
-        // TODO
+    enum HazardUnit {
+        HU_NONE,
+        HU_STALL,
+        HU_STALL_FORWARD
     };
 
     // Configure if CPU is pipelined
     // In default disabled.
     void set_pipelined(bool);
-    // Configure if we want to do jump prediction
+    // Configure if cpu should simulate delay slot in non-pipelined core
     // In default enabled. When disabled it also automatically disables pipelining.
     void set_delay_slot(bool);
-    // Configure cache type
-    // In default CCT_NONE is used.
-    void set_cache(enum CacheType);
     // Set path to source elf file. This has to be set before core is initialized.
     void set_elf(QString path);
+    // Configure cache
+    void set_cache_program(const MachineConfigCache&);
+    void set_cache_data(const MachineConfigCache&);
+    // Hazard unit
+    void set_hazard_unit(enum HazardUnit);
 
     bool pipelined() const;
     bool delay_slot() const;
-    enum CacheType cache() const;
     QString elf() const;
+    MachineConfigCache cache_program() const;
+    MachineConfigCache cache_data() const;
+    enum HazardUnit hazard_unit() const;
+
+    bool operator ==(const MachineConfig &c) const;
+    bool operator !=(const MachineConfig &c) const;
 
 private:
     bool pipeline, delayslot;
-    enum CacheType cache_type;
     QString elf_path;
+    MachineConfigCache cch_program, cch_data;
+    enum HazardUnit hunit;
 };
 
 }

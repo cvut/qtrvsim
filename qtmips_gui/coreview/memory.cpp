@@ -18,9 +18,7 @@ Memory::Memory(machine::QtMipsMachine *machine) : QGraphicsObject(nullptr) {
     con_req_write = new Connector(M_PI_2);
     con_req_read = new Connector(M_PI_2);
 
-    if (machine->config().cache()) {
-        // TODO cache?
-    }
+    // TODO cache?
 
     name = new QGraphicsSimpleTextItem("Memory", this);
     QRectF name_box = name->boundingRect();
