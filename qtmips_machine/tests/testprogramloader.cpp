@@ -15,8 +15,7 @@ void MachineTests::program_loader() {
 
     // 	addi $1, $0, 6
     QCOMPARE(Instruction(m.read_word(PC_INIT)), Instruction(8, 0, 1, 6));
-    // j 80020000
-    // TODO wtf to je relativni skok asi tady
-    //QCOMPARE(Instruction(m.read_word(PC_INIT + 4)), Instruction(2, PC_INIT));
+    // j (8)0020000 (only 28 bits are used and they are logically shifted left by 2)
+    QCOMPARE(Instruction(m.read_word(PC_INIT + 4)), Instruction(2, 0x20000 >> 2));
     // TODO add some more code to data and do more compares (for example more sections)
 }
