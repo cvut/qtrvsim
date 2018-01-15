@@ -20,10 +20,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     program->hide();
     memory = new MemoryDock(this);
     memory->hide();
-    cache_content = new CacheContentDock(this);
-    cache_content->hide();
-    cache_statictics = new CacheStatisticsDock(this);
-    cache_statictics->hide();
 
     // Execution speed actions
     speed_group = new QActionGroup(this);
@@ -40,8 +36,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->actionRegisters, SIGNAL(triggered(bool)), this, SLOT(show_registers()));
     connect(ui->actionProgram_memory, SIGNAL(triggered(bool)), this, SLOT(show_program()));
     connect(ui->actionMemory, SIGNAL(triggered(bool)), this, SLOT(show_memory()));
-    connect(ui->actionCache, SIGNAL(triggered(bool)), this, SLOT(show_cache_content()));
-    connect(ui->actionCache_statistics, SIGNAL(triggered(bool)), this, SLOT(show_cache_statictics()));
     connect(ui->ips1, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
     connect(ui->ips5, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
     connect(ui->ips10, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
@@ -60,8 +54,6 @@ MainWindow::~MainWindow() {
     if (coreview != nullptr)
         delete coreview;
     delete ndialog;
-    delete cache_content;
-    delete cache_statictics;
     delete registers;
     delete program;
     delete memory;
@@ -145,8 +137,6 @@ void MainWindow::machine_reload() {
 SHOW_HANDLER(registers)
 SHOW_HANDLER(program)
 SHOW_HANDLER(memory)
-SHOW_HANDLER(cache_content)
-SHOW_HANDLER(cache_statictics)
 #undef SHOW_HANDLER
 
 void MainWindow::set_speed() {

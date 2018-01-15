@@ -6,8 +6,6 @@
 #include "ui_MainWindow.h"
 #include "newdialog.h"
 #include "coreview.h"
-#include "cachecontent.h"
-#include "cachestatistics.h"
 #include "registersdock.h"
 #include "programdock.h"
 #include "memorydock.h"
@@ -34,8 +32,6 @@ public slots:
     void show_registers();
     void show_program();
     void show_memory();
-    void show_cache_content();
-    void show_cache_statictics();
     // Actions - execution speed
     void set_speed();
     // Machine signals
@@ -57,9 +53,7 @@ private:
     RegistersDock *registers;
     ProgramDock *program;
     MemoryDock *memory;
-    // TODO implement cahce docks
-    CacheContentDock *cache_content;
-    CacheStatisticsDock *cache_statictics;
+    // TODO implement cache docks
 
     QActionGroup *speed_group;
 

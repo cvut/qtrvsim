@@ -21,8 +21,6 @@ SOURCES += \
         programdock.cpp \
         memorydock.cpp \
         memoryview.cpp \
-        cachestatistics.cpp \
-        cachecontent.cpp \
         coreview/programcounter.cpp \
         coreview/multiplexer.cpp \
         coreview/connection.cpp \
@@ -43,8 +41,6 @@ HEADERS += \
         programdock.h \
         memorydock.h \
         memoryview.h \
-        cachestatistics.h \
-        cachecontent.h \
         coreview/programcounter.h \
         coreview/multiplexer.h \
         coreview/connection.h \
@@ -59,9 +55,7 @@ HEADERS += \
 
 FORMS += \
         NewDialog.ui \
-        MainWindow.ui \
-        CacheContent.ui \
-        CacheStatistics.ui
+        MainWindow.ui
 
 RESOURCES += \
         icons.qrc
