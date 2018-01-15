@@ -5,7 +5,7 @@ MIPS CPU simulator for education purposes.
 Dependencies
 ------------
 * Qt 5
-* elfutils (libelf might works too but you can have problems with it)
+* elfutils (libelf might works too but there can be some problems)
 
 General compilation
 -------------------
