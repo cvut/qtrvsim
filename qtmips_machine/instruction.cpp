@@ -229,9 +229,11 @@ static const struct AluInstructionMap alu_instruction_map[] = {
 #undef AIM_UNKNOWN
 
 QString Instruction::to_str() const {
-    // TODO there are exception where some fields are zero and such so we should not print them in sych case
+    // TODO there are exception where some fields are zero and such so we should not print them in such case
     if  (opcode() >= (sizeof(instruction_map) / sizeof(struct InstructionMap)))
         return QString("UNKNOWN");
+    if (dt == 0)
+        return QString("NOP");
     const struct InstructionMap &im = instruction_map[opcode()];
     QString res;
     switch (im.type) {
