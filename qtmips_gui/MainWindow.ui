@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>957</width>
-    <height>651</height>
+    <width>900</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -46,8 +46,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>957</width>
-     <height>20</height>
+     <width>900</width>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -63,11 +63,11 @@
     <property name="title">
      <string>Windows</string>
     </property>
+    <addaction name="actionRegisters"/>
     <addaction name="actionMemory"/>
     <addaction name="actionProgram_memory"/>
     <addaction name="actionCache"/>
     <addaction name="actionCache_statistics"/>
-    <addaction name="actionRegisters"/>
    </widget>
    <widget class="QMenu" name="menuMachine">
     <property name="title">
