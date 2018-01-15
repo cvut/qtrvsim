@@ -55,6 +55,7 @@ HEADERS += \
 
 FORMS += \
         NewDialog.ui \
+        NewDialogCache.ui \
         MainWindow.ui
 
 RESOURCES += \

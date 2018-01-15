@@ -125,10 +125,42 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="hazard">
+        <widget class="QCheckBox" name="delay_slot">
          <property name="text">
+          <string>Delay slot</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="hazard_unit">
+         <property name="title">
           <string>Hazard unit</string>
          </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QRadioButton" name="hazard_stall">
+            <property name="text">
+             <string>Stall when hazard is detected</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="hazard_stall_forward">
+            <property name="text">
+             <string>Stall or forward when hazard is detected</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
@@ -166,31 +198,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="cache">
-         <property name="title">
-          <string>Cache (for both program and data)</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="checked">
-          <bool>false</bool>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_7">
-          <item>
-           <widget class="QRadioButton" name="cache_associative">
-            <property name="text">
-             <string>Associative</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
         <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -204,6 +211,16 @@
         </spacer>
        </item>
       </layout>
+     </widget>
+     <widget class="QWidget" name="tab_cache_program">
+      <attribute name="title">
+       <string>Program cache</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tab_cache_data">
+      <attribute name="title">
+       <string>Data cache</string>
+      </attribute>
      </widget>
     </widget>
    </item>

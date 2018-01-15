@@ -6,7 +6,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include "ui_NewDialog.h"
-#include "qtmipsexception.h"
+#include "ui_NewDialogCache.h"
 
 class NewDialog : public QDialog {
     Q_OBJECT
@@ -26,6 +26,7 @@ private slots:
 
 private:
     Ui::NewDialog *ui;
+    Ui::NewDialogCache *ui_cache_p, *ui_cache_d;
     QSettings *settings;
 
     void load_settings();

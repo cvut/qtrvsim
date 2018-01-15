@@ -1,10 +1,17 @@
 #include "newdialog.h"
 #include "mainwindow.h"
+#include "qtmipsexception.h"
 
 NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
+    setWindowTitle("New machine");
+
     ui = new Ui::NewDialog();
     ui->setupUi(this);
-    setWindowTitle("New machine");
+    ui_cache_p = new Ui::NewDialogCache();
+    ui_cache_p->setupUi(ui->tab_cache_program);
+    ui_cache_d = new Ui::NewDialogCache();
+    ui_cache_d->setupUi(ui->tab_cache_data);
+    // TODO setup more? settings and configuration pull
 
     this->settings = settings;
 
@@ -17,12 +24,9 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
 #define CUSTOM_PRESET(UI)  QObject::connect(UI, SIGNAL(clicked(bool)), this, SLOT(set_custom_preset()))
     // Signals on Core tab
     CUSTOM_PRESET(ui->pipelined);
-    CUSTOM_PRESET(ui->hazard);
     // Signals on Memory tab
     CUSTOM_PRESET(ui->mem_protec_write);
     CUSTOM_PRESET(ui->mem_protec_exec);
-    CUSTOM_PRESET(ui->cache);
-    CUSTOM_PRESET(ui->cache_associative);
 #undef CUSTOM_PRESET
 
     // Load setting after signals are configured so that we can have correct settings
@@ -30,6 +34,8 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
 }
 
 NewDialog::~NewDialog() {
+    delete ui_cache_d;
+    delete ui_cache_p;
     delete ui;
     // Settings is freed by parent
 }
@@ -83,12 +89,9 @@ void NewDialog::preset(bool value) {
         bool pip = ui->preset_pipelined->isChecked();
         // Core settings
         ui->pipelined->setChecked(pip);
-        ui->hazard->setChecked(pip);
         // Memory settings
         ui->mem_protec_write->setChecked(true);
         ui->mem_protec_exec->setChecked(true);
-        ui->cache->setChecked(pip);
-        ui->cache_associative->setChecked(true);
     } // Else custom so do no changes
 }
 
@@ -105,12 +108,9 @@ void NewDialog::set_custom_preset() {
 void NewDialog::load_settings() {
     // Core tab
     LOAD_BUTTON(pipelined, false);
-    LOAD_BUTTON(hazard, false);
     // Memory tab
     LOAD_BUTTON(mem_protec_write, true);
     LOAD_BUTTON(mem_protec_exec, true);
-    LOAD_BUTTON(cache, false);
-    LOAD_BUTTON(cache_associative, true);
     // Base tab
     // We are doing this last so presets can reset previous configuration to somethin valid
     LOAD_BUTTON(preset_no_pipeline, true);
@@ -122,12 +122,9 @@ void NewDialog::load_settings() {
 void NewDialog::store_settings() {
     // Core tab
     STORE_BUTTON(pipelined);
-    STORE_BUTTON(hazard);
     // Memory tab
     STORE_BUTTON(mem_protec_write);
     STORE_BUTTON(mem_protec_exec);
-    STORE_BUTTON(cache);
-    STORE_BUTTON(cache_associative);
     // Base tab
     STORE_BUTTON(preset_no_pipeline);
     STORE_BUTTON(preset_pipelined);
