@@ -15,7 +15,7 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) : QObject(), mcnf(&cc) {
     mem = new Memory(*mem_program_only);
 
     if (cc.pipelined())
-        cr = new CorePipelined(regs, mem);
+        cr = new CorePipelined(regs, mem, cc.hazard_unit());
     else
         cr = new CoreSingle(regs, mem, cc.delay_slot());
 
