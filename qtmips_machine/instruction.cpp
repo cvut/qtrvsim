@@ -239,7 +239,7 @@ QString Instruction::to_str() const {
     switch (im.type) {
     case IT_I:
         res += im.name;
-        res += " $" + QString::number(rs()) + ", $" + QString::number(rt()) + ", " + QString::number(immediate());
+        res += " $" + QString::number(rs()) + ", $" + QString::number(rt()) + ", 0x" + QString::number(immediate(), 16);
         break;
     case IT_J:
         res += im.name;
