@@ -27,7 +27,7 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     connect(ui->hazard_unit, SIGNAL(clicked(bool)), this, SLOT(hazard_unit_change()));
     connect(ui->hazard_stall, SIGNAL(clicked(bool)), this, SLOT(hazard_unit_change()));
     connect(ui->hazard_stall_forward, SIGNAL(clicked(bool)), this, SLOT(hazard_unit_change()));
-    connect(ui->mem_protec_exec, SIGNAL(clicked(bool)), this, SIGNAL(mem_protec_exec_change(bool)));
+    connect(ui->mem_protec_exec, SIGNAL(clicked(bool)), this, SLOT(mem_protec_exec_change(bool)));
     connect(ui->mem_protec_write, SIGNAL(clicked(bool)), this, SLOT(mem_protec_write_change(bool)));
 
     connect(ui_cache_p->enabled, SIGNAL(clicked(bool)), this, SLOT(cache_program_change(bool)));
