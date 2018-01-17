@@ -41,12 +41,11 @@ void coreview::Alu::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
 
 void coreview::Alu::setPos(qreal x, qreal y) {
     QGraphicsItem::setPos(x, y);
-    // TODO fix this (should be relative to x and y)
     qreal off = ((HEIGHT/2) - DENT) / 2;
-    con_in_a->setPos(0, off);
-    con_in_b->setPos(0, HEIGHT - off);
-    con_out->setPos(WIDTH, HEIGHT/2);
-    con_ctl->setPos(WIDTH/2, HEIGHT - (WIDTH/2));
+    con_in_a->setPos(x, y + off);
+    con_in_b->setPos(x, y + HEIGHT - off);
+    con_out->setPos(x + WIDTH, y + HEIGHT/2);
+    con_ctl->setPos(x + WIDTH/2, y + HEIGHT - (WIDTH/2));
 }
 
 const coreview::Connector *coreview::Alu::connector_in_a() const {
