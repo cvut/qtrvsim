@@ -149,7 +149,7 @@ void NewDialog::config_gui() {
     ui->delay_slot->setChecked(config->delay_slot());
     ui->hazard_unit->setChecked(config->hazard_unit() != machine::MachineConfig::HU_NONE);
     ui->hazard_stall->setChecked(config->hazard_unit() == machine::MachineConfig::HU_STALL);
-    // ui->hazard_stall_forward is configured automatically according to box exclusivity
+    ui->hazard_stall_forward->setChecked(config->hazard_unit() == machine::MachineConfig::HU_STALL_FORWARD);
     ui->mem_protec_exec->setChecked(config->memory_execute_protection());
     ui->mem_protec_write->setChecked(config->memory_write_protection());
     ui->mem_time_read->setValue(config->memory_access_time_read());
