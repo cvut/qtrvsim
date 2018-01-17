@@ -74,6 +74,8 @@ CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : 
     NEW_B(Constant, pc.adder_4, pc.adder->connector_in_b(), "4");
     NEW(Junction, pc.junction, 80, pc_latch_pair.out->y());
     NEW(Multiplexer, pc.multiplex, 60, 100, 4);
+    NEW(LogicBlock, ctl_block, 300, 100, {"CPU", "Control"});
+    ctl_block->setSize(35, 70);
     NEW(Alu, alu, 470, 230);
     NEW(Memory, mem, 20, 510, machine);
     NEW(Registers, regs, 20, 0);
@@ -107,6 +109,7 @@ CoreViewScene::~CoreViewScene() {
     delete pc.adder_4;
     delete pc.junction;
     delete pc.multiplex;
+    delete ctl_block;
     delete alu;
     delete mem;
     delete regs;

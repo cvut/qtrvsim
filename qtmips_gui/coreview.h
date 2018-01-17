@@ -15,6 +15,7 @@
 #include "coreview/instructionview.h"
 #include "coreview/junction.h"
 #include "coreview/constant.h"
+#include "coreview/logicblock.h"
 
 class CoreView : public QGraphicsView {
 public:
@@ -48,6 +49,7 @@ private:
         coreview::Junction *junction;
         coreview::Multiplexer *multiplex;
     } pc;
+    coreview::LogicBlock *ctl_block;
     coreview::Alu *alu;
     coreview::Memory *mem;
     coreview::Registers *regs;

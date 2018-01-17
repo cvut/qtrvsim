@@ -31,7 +31,8 @@ SOURCES += \
         coreview/registers.cpp \
         coreview/adder.cpp \
         coreview/constant.cpp \
-        coreview/junction.cpp
+        coreview/junction.cpp \
+        coreview/logicblock.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -51,7 +52,8 @@ HEADERS += \
         coreview/registers.h \
         coreview/adder.h \
         coreview/constant.h \
-        coreview/junction.h
+        coreview/junction.h \
+        coreview/logicblock.h
 
 FORMS += \
         NewDialog.ui \
