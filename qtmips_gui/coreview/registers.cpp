@@ -4,12 +4,12 @@
 using namespace coreview;
 
 //////////////////////
-#define WIDTH 680
-#define HEIGHT 30
+#define WIDTH 60
+#define HEIGHT 80
 #define PENW 1
 //////////////////////
 
-Registers::Registers() : QGraphicsObject(nullptr) {
+Registers::Registers() : QGraphicsObject(nullptr), name("Registers", this) {
     con_read1 = new Connector(-M_PI_2);
     con_read1_reg = new Connector(-M_PI_2);
     con_read2 = new Connector(-M_PI_2);
@@ -20,11 +20,12 @@ Registers::Registers() : QGraphicsObject(nullptr) {
 
     // TODO do we want to have any hooks on real registers?
 
-    // TODO add labels for connections
+    QFont font;
+    font.setPointSize(7);
+    name.setFont(font);
 
-    name = new QGraphicsSimpleTextItem("Registers", this);
-    QRectF name_box = name->boundingRect();
-    name->setPos(WIDTH/2 - name_box.width()/2, HEIGHT/2 - name_box.height()/2);
+    QRectF name_box = name.boundingRect();
+    name.setPos(WIDTH/2 - name_box.width()/2, HEIGHT/2 - name_box.height()/2);
 
     setPos(x(), y()); // set connector's position
 }

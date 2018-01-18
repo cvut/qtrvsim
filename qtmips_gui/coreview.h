@@ -40,7 +40,10 @@ signals:
     void request_data_memory();
     void request_program_memory();
 
-private:
+protected:
+    coreview::ProgramMemory *mem_program;
+    coreview::DataMemory *mem_data;
+    coreview::Registers *regs;
     struct {
         coreview::ProgramCounter *pc;
         coreview::Latch *latch;
@@ -48,13 +51,14 @@ private:
         coreview::Constant *adder_4;
         coreview::Junction *junction;
         coreview::Multiplexer *multiplex;
-    } pc;
-    coreview::LogicBlock *ctl_block;
+    } ft;
+    struct {
+        coreview::LogicBlock *ctl_block, *sign_ext, *shift2;
+        coreview::Adder *add;
+        coreview::Junction *j_sign_ext;
+    } dc;
     coreview::Alu *alu;
-    coreview::Memory *mem;
-    coreview::Registers *regs;
     coreview::Multiplexer *mem_or_reg;
-    coreview::InstructionView *instr_fetch;
 
     QVector<coreview::Connection*> connections;
     coreview::Connection *new_connection(const coreview::Connector*, const coreview::Connector*);
@@ -79,8 +83,8 @@ public:
 
 private:
     coreview::Latch *latch_if_id, *latch_id_ex, *latch_ex_mem, *latch_mem_wb;
-    coreview::InstructionView *inst_dec, *inst_exec, *inst_mem, *inst_wrb;
-    // TODO forwarding unit
+    coreview::InstructionView *inst_fetch, *inst_dec, *inst_exec, *inst_mem, *inst_wrb;
+    coreview::LogicBlock *hazard_unit;
 };
 
 #else

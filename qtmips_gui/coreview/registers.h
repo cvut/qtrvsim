@@ -36,7 +36,7 @@ private:
     Connector *con_read1, *con_read1_reg, *con_read2, *con_read2_reg;
     Connector *con_write, *con_write_reg, *con_ctl_write;
 
-    QGraphicsSimpleTextItem *name;
+    QGraphicsSimpleTextItem name;
 };
 
 }

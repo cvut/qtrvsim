@@ -10,9 +10,7 @@ using namespace coreview;
 #define PENW 1
 //////////////////////
 
-LogicBlock::LogicBlock(QString name) {
-    LogicBlock({name});
-}
+LogicBlock::LogicBlock(QString name) : LogicBlock(QVector<QString>({name})) { }
 
 LogicBlock::LogicBlock(QVector<QString> name) : QGraphicsItem(nullptr) {
     QFont font;

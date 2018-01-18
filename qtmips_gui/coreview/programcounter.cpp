@@ -22,8 +22,8 @@ ProgramCounter::ProgramCounter(machine::QtMipsMachine *machine) : QGraphicsObjec
 
     connect(machine->registers(), SIGNAL(pc_update(std::uint32_t)), this, SLOT(pc_update(std::uint32_t)));
 
-    con_in = new Connector(M_PI_2);
-    con_out = new Connector(-M_PI_2);
+    con_in = new Connector(-M_PI_2);
+    con_out = new Connector(M_PI_2);
     setPos(x(), y()); // To set initial connectors positions
 }
 
@@ -37,8 +37,8 @@ void ProgramCounter::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
 
 void ProgramCounter::setPos(qreal x, qreal y) {
     QGraphicsObject::setPos(x, y);
-    con_in->setPos(x + WIDTH/2, y);
-    con_out->setPos(x + WIDTH/2, y + HEIGHT);
+    con_in->setPos(x + WIDTH/2, y + HEIGHT);
+    con_out->setPos(x + WIDTH/2, y);
 }
 
 const Connector *ProgramCounter::connector_in() const {
