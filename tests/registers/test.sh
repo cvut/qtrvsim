@@ -11,5 +11,5 @@ qtmips_make sub-qtmips_cli
 mips_make_test
 
 # Run test
-qtmips_run qtmips_cli/qtmips_cli "$TEST_DIR/registers" \
+qtmips_run qtmips_cli/qtmips_cli --trace-gp '*' "$TEST_DIR/registers" \
 	|| echo_fail "Test $TEST_NAME failed!"
