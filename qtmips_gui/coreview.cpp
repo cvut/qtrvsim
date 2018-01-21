@@ -220,20 +220,20 @@ CoreViewSceneSimple::~CoreViewSceneSimple() {
 }
 
 CoreViewScenePipelined::CoreViewScenePipelined(CoreView *view, machine::QtMipsMachine *machine) : CoreViewScene(view, machine) {
-    NEW(Latch, latch_if_id, 158, 90, machine, 380);
+    NEW(Latch, latch_if_id, 158, 70, machine, 400);
     latch_if_id->setTitle("IF/ID");
-    NEW(Latch, latch_id_ex, 392, 90, machine, 380);
+    NEW(Latch, latch_id_ex, 392, 70, machine, 400);
     latch_id_ex->setTitle("ID/EX");
-    NEW(Latch, latch_ex_mem, 536, 90, machine, 380);
+    NEW(Latch, latch_ex_mem, 536, 70, machine, 400);
     latch_ex_mem->setTitle("EX/MEM");
-    NEW(Latch, latch_mem_wb, 660, 90, machine, 380);
+    NEW(Latch, latch_mem_wb, 660, 70, machine, 400);
     latch_mem_wb->setTitle("MEM/WB");
 
-    NEW_I(inst_fetch, 100, 2, instruction_fetched(const machine::Instruction&));
-    NEW_I(inst_dec, 250, 2, instruction_decoded(const machine::Instruction&));
-    NEW_I(inst_exec, 400, 2, instruction_executed(const machine::Instruction&));
-    NEW_I(inst_mem, 540, 2, instruction_memory(const machine::Instruction&));
-    NEW_I(inst_wrb, 670, 2, instruction_writeback(const machine::Instruction&));
+    NEW_I(inst_fetch, 79, 2, instruction_fetched(const machine::Instruction&));
+    NEW_I(inst_dec, 275, 2, instruction_decoded(const machine::Instruction&));
+    NEW_I(inst_exec, 464, 2, instruction_executed(const machine::Instruction&));
+    NEW_I(inst_mem, 598, 2, instruction_memory(const machine::Instruction&));
+    NEW_I(inst_wrb, 660, 18, instruction_writeback(const machine::Instruction&));
 
     if (machine->config().hazard_unit() != machine::MachineConfig::HU_NONE) {
         NEW(LogicBlock, hazard_unit, SC_WIDTH/2, SC_HEIGHT - 15, "Hazard Unit");
@@ -244,7 +244,7 @@ CoreViewScenePipelined::CoreViewScenePipelined(CoreView *view, machine::QtMipsMa
     // Fetch stage
     struct coreview::Latch::ConnectorPair lp_ft_inst = latch_if_id->new_connector(mem_program->connector_instruction()->y() - latch_if_id->y());
     new_bus(mem_program->connector_instruction(), lp_ft_inst.in);
-    struct coreview::Latch::ConnectorPair lp_ft_pc = latch_if_id->new_connector(370);
+    struct coreview::Latch::ConnectorPair lp_ft_pc = latch_if_id->new_connector(390);
     new_bus(ft.junc_pc_4->new_connector(coreview::Connector::AX_Y), lp_ft_pc.in);
     // Decode stage
     new_bus(lp_ft_inst.out, dc.instr_bus->new_connector(lp_ft_inst.out->point()));
@@ -264,14 +264,14 @@ CoreViewScenePipelined::CoreViewScenePipelined(CoreView *view, machine::QtMipsMa
     con = new_bus(lp_dc_immed.out, ex.mux_imm->connector_in(1));
     con->setAxes({CON_AXIS_Y(440)});
     struct coreview::Latch::ConnectorPair lp_ex_alu = latch_ex_mem->new_connector(alu->connector_out()->y() - latch_ex_mem->y());
-    struct coreview::Latch::ConnectorPair lp_ex_dt = latch_ex_mem->new_connector(270);
+    struct coreview::Latch::ConnectorPair lp_ex_dt = latch_ex_mem->new_connector(290);
     new_bus(alu->connector_out(), lp_ex_alu.in);
     new_bus(ex.j_mux->new_connector(CON_AX_Y), lp_ex_dt.in);
     // Memory
     new_bus(lp_ex_alu.out, mm.j_addr->new_connector(CON_AX_X));
     con = new_bus(lp_ex_dt.out, mem_data->connector_data_in());
     con->setAxes({CON_AXIS_Y(560)});
-    struct coreview::Latch::ConnectorPair lp_mem_alu = latch_mem_wb->new_connector(160);
+    struct coreview::Latch::ConnectorPair lp_mem_alu = latch_mem_wb->new_connector(180);
     struct coreview::Latch::ConnectorPair lp_mem_mem = latch_mem_wb->new_connector(mem_data->connector_data_out()->y() - latch_mem_wb->y());
     new_bus(mm.j_addr->new_connector(CON_AX_Y), lp_mem_alu.in);
     new_bus(mem_data->connector_data_out(), lp_mem_mem.in);
