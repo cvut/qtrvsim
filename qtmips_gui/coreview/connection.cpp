@@ -95,8 +95,8 @@ void Connection::moved_end(QLineF p) {
 QRectF Connection::boundingRect() const {
     QRectF rect;
     for (int i = 0; i < (points.size() - 1); i++) {
-        qreal x = points[i].x() > points[i+1].x() ? points[i].x() : points[i+1].x();
-        qreal y = points[i].y() > points[i+1].y() ? points[i].y() : points[i+1].y();
+        qreal x = points[i].x() > points[i+1].x() ? points[i+1].x() : points[i].x();
+        qreal y = points[i].y() > points[i+1].y() ? points[i+1].y() : points[i].y();
         rect |= QRectF(x - pen_width/2.0, y - pen_width/2.0, fabs(points[i].x() - points[i+1].x()) + pen_width, fabs(points[i].y() - points[i+1].y()) + pen_width);
     }
     return rect;
