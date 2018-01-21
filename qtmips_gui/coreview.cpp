@@ -168,10 +168,11 @@ coreview::Signal *CoreViewScene::new_signal(const coreview::Connector *a, const 
 }
 
 CoreViewSceneSimple::CoreViewSceneSimple(CoreView *view, machine::QtMipsMachine *machine) : CoreViewScene(view, machine) {
-    if (machine->config().delay_slot())
+    NEW_I(instr_prim, 230, 60, instruction_fetched(const machine::Instruction&));
+    if (machine->config().delay_slot()) {
         NEW(Latch, delay_slot_latch, 55, 470, machine, 25);
-    else
-        delay_slot_latch = nullptr;
+        NEW_I(instr_delay, 60, 500, instruction_program_counter(const machine::Instruction&));
+    }
 
     coreview::Connection *con;
     // Fetch stage
@@ -212,11 +213,6 @@ CoreViewSceneSimple::CoreViewSceneSimple(CoreView *view, machine::QtMipsMachine 
         con = new_bus(dc.add->connector_out(), ft.multiplex->connector_in(1));
         con->setAxes({CON_AXIS_Y(360), CON_AXIS_X(480), CON_AXIS_Y(10)});
     }
-}
-
-CoreViewSceneSimple::~CoreViewSceneSimple() {
-    if (delay_slot_latch != nullptr)
-        delete delay_slot_latch;
 }
 
 CoreViewScenePipelined::CoreViewScenePipelined(CoreView *view, machine::QtMipsMachine *machine) : CoreViewScene(view, machine) {
@@ -285,18 +281,4 @@ CoreViewScenePipelined::CoreViewScenePipelined(CoreView *view, machine::QtMipsMa
     con->setAxes({CON_AXIS_Y(365), CON_AXIS_X(490)});
     con = new_bus(dc.add->connector_out(), ft.multiplex->connector_in(1));
     con->setAxes({CON_AXIS_Y(360), CON_AXIS_X(480), CON_AXIS_Y(10)});
-}
-
-CoreViewScenePipelined::~CoreViewScenePipelined() {
-    delete latch_if_id;
-    delete latch_id_ex;
-    delete latch_ex_mem;
-    delete latch_mem_wb;
-    delete inst_fetch;
-    delete inst_dec;
-    delete inst_exec;
-    delete inst_mem;
-    delete inst_wrb;
-    if (hazard_unit != nullptr)
-        delete hazard_unit;
 }

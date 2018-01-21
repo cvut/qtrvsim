@@ -84,16 +84,15 @@ protected:
 class CoreViewSceneSimple : public CoreViewScene {
 public:
     CoreViewSceneSimple(CoreView *view, machine::QtMipsMachine *machine);
-    ~CoreViewSceneSimple();
 
 private:
+    coreview::InstructionView *instr_prim, *instr_delay;
     coreview::Latch *delay_slot_latch;
 };
 
 class CoreViewScenePipelined : public CoreViewScene {
 public:
     CoreViewScenePipelined(CoreView *view, machine::QtMipsMachine *machine);
-    ~CoreViewScenePipelined();
 
 private:
     coreview::Latch *latch_if_id, *latch_id_ex, *latch_ex_mem, *latch_mem_wb;

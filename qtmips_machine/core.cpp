@@ -171,6 +171,8 @@ void Core::writeback(const struct dtMemory &dt) {
 }
 
 void Core::handle_pc(const struct dtDecode &dt) {
+    emit instruction_program_counter(dt.inst);
+
     bool branch = false;
     bool link = false;
     // TODO implement link

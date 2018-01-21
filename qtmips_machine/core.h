@@ -26,6 +26,7 @@ signals:
     void instruction_executed(const machine::Instruction &inst);
     void instruction_memory(const machine::Instruction &inst);
     void instruction_writeback(const machine::Instruction &inst);
+    void instruction_program_counter(const machine::Instruction &inst);
 
 protected:
     Registers *regs;
