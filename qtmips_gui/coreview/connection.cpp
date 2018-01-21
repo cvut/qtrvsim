@@ -1,4 +1,5 @@
 #include "connection.h"
+#include <qtmipsexception.h>
 #include <cmath>
 
 using namespace coreview;
@@ -12,6 +13,10 @@ void Connector::setPos(qreal x, qreal y) {
     qy = y;
     emit updated(point());
     emit updated(vector());
+}
+
+void Connector::setPos(const QPointF &p) {
+    setPos(p.x(), p.y());
 }
 
 enum Connector::Axis Connector::axis() const {
@@ -42,6 +47,7 @@ QLineF Connector::vector() const {
     case AX_MXY:
         return QLineF(p, p + QPoint(1, -1));
     }
+    throw QTMIPS_EXCEPTION(Sanity, "Connection::vector() unknown axes set", QString::number(ax));
 }
 
 Connection::Connection(const Connector *a, const Connector *b) : QGraphicsObject(nullptr) {
@@ -134,18 +140,62 @@ Bus::Bus(const Connector *start, const Connector *end, unsigned width) : Connect
     pen_width = width;
 }
 
+Bus::~Bus() {
+    for (int i = 0; i < conns.size(); i++)
+        delete conns[i].c;
+}
+
+void Bus::setAxes(QVector<QLineF> axes) {
+    Connection::setAxes(axes);
+    conns_update();
+}
+
 const Connector *Bus::new_connector(qreal x, qreal y, enum Connector::Axis axis) {
     Connector *c = new Connector(axis);
     conns.append({
         .c = c,
         .p = QPoint(x, y)
      });
-    // TODO update positions
+    conns_update();
     return c;
 }
 
 const Connector *Bus::new_connector(const QPointF &p, enum Connector::Axis axis) {
     return new_connector(p.x(), p.y(), axis);
+}
+
+// Calculate closes point to given line. We do it by calculating rectangular intersection between given line and imaginary line crossing given point.
+static qreal cu_closest(const QLineF &l, const QPointF &p, QPointF *intersec) {
+    // Closest point is on normal vector
+    QLineF normal = l.normalVector();
+    // Now move normal vector to 0,0 and then to p
+    QLineF nline = normal.translated(-normal.p1()).translated(p);
+    // And now found intersection
+    SANITY_ASSERT(l.intersect(nline, intersec) != QLineF::NoIntersection, "We are calculating intersection with normal vector and that should always have intersection");
+    // Now check if that point belongs to given line
+    // We know that this is intersection so just check if we are not outside of line limits
+    // TODO replace intersec if it's outside of given line with one of corner points
+
+    return (p - *intersec).manhattanLength(); // return length from each other
+}
+
+void Bus::conns_update() {
+    for (int i = 0; i < conns.size(); i++) {
+        QPointF closest;
+        qreal closest_range = 0; // Just to suppress warning. On first check the closest is null so we set it later on
+
+        QPointF inter;
+        qreal range;
+        for (int y = 0; y < (points.size() - 1); y++) {
+            range = cu_closest(QLineF(points[y], points[y+1]), QPointF(conns[i].p), &inter);
+            if (closest.isNull() || closest_range > range) {
+                closest = inter;
+                closest_range = range;
+            }
+        }
+
+        conns[i].c->setPos(closest);
+    }
 }
 
 Signal::Signal(const Connector *start, const Connector *end) : Connection(start, end) {

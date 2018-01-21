@@ -45,6 +45,7 @@ protected:
     coreview::ProgramMemory *mem_program;
     coreview::DataMemory *mem_data;
     coreview::Registers *regs;
+    coreview::Alu *alu;
     struct {
         coreview::ProgramCounter *pc;
         coreview::Latch *latch;
@@ -61,10 +62,17 @@ protected:
         coreview::Junction *j_inst_up, *j_inst_down;
         coreview::Bus *instr_bus;
     } dc;
-    coreview::Alu *alu;
-    coreview::Multiplexer *mem_or_reg;
+    struct {
+        coreview::Junction *j_mux;
+        coreview::Multiplexer *mux_imm;
+    } ex;
+    struct {
+        coreview::Junction *j_addr;
+    } mm;
+    struct {
+        coreview::Multiplexer *mem_or_reg;
+    } wb;
 
-    QVector<coreview::Connection*> connections;
     coreview::Connection *new_connection(const coreview::Connector*, const coreview::Connector*);
     coreview::Bus *new_bus(const coreview::Connector*, const coreview::Connector*, unsigned width = 4);
     coreview::Signal *new_signal(const coreview::Connector*, const coreview::Connector*);

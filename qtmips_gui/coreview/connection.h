@@ -20,6 +20,7 @@ public:
     Connector(enum Axis axis = AX_X);
 
     void setPos(qreal x, qreal y);
+    void setPos(const QPointF&);
 
     enum Axis axis() const;
     qreal x() const;
@@ -48,7 +49,7 @@ public:
     void setHasText(bool has);
     void setText(QString val);
 
-    void setAxes(QVector<QLineF>);
+    virtual void setAxes(QVector<QLineF>);
 
 private slots:
     void moved_start(QLineF);
@@ -71,6 +72,9 @@ protected:
 class Bus : public Connection {
 public:
     Bus(const Connector *start, const Connector *end, unsigned width = 4);
+    ~Bus();
+
+    void setAxes(QVector<QLineF>);
 
     // This creates connector snapped to closes point to x,y that is on bus
     const Connector *new_connector(qreal x, qreal y, enum Connector::Axis = Connector::AX_X);
@@ -82,6 +86,7 @@ protected:
         QPointF p;
     };
     QVector<struct con_pos> conns;
+    void conns_update();
     // TODO because of this we have to overload setAxis function and update that in there
 };
 
@@ -89,6 +94,11 @@ class Signal : public Connection {
 public:
     Signal(const Connector *start, const Connector *end);
 };
+
+#define CON_AX_X (coreview::Connector::AX_X)
+#define CON_AX_Y (coreview::Connector::AX_Y)
+#define CON_AX_XY (coreview::Connector::AX_XY)
+#define CON_AX_MXY (coreview::Connector::AX_MXY)
 
 #define CON_AXIS_X(Y) QLineF(QPointF(0, Y), QPointF(1, Y))
 #define CON_AXIS_Y(X) QLineF(QPointF(X, 0), QPointF(X, 1))

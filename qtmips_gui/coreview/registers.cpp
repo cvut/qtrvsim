@@ -10,12 +10,12 @@ using namespace coreview;
 //////////////////////
 
 Registers::Registers() : QGraphicsObject(nullptr), name("Registers", this) {
-    con_read1 = new Connector(Connector::AX_Y);
-    con_read1_reg = new Connector(Connector::AX_Y);
-    con_read2 = new Connector(Connector::AX_Y);
-    con_read2_reg = new Connector(Connector::AX_Y);
-    con_write = new Connector(Connector::AX_Y);
-    con_write_reg = new Connector(Connector::AX_Y);
+    con_read1 = new Connector(Connector::AX_X);
+    con_read1_reg = new Connector(Connector::AX_X);
+    con_read2 = new Connector(Connector::AX_X);
+    con_read2_reg = new Connector(Connector::AX_X);
+    con_write = new Connector(Connector::AX_X);
+    con_write_reg = new Connector(Connector::AX_X);
     con_ctl_write = new Connector(Connector::AX_Y);
 
     // TODO do we want to have any hooks on real registers?
@@ -52,14 +52,14 @@ void Registers::paint(QPainter *painter, const QStyleOptionGraphicsItem *option 
 void Registers::setPos(qreal x, qreal y) {
     QGraphicsObject::setPos(x, y);
 
-    con_read1_reg->setPos(x + 30, y + HEIGHT);
-    con_read2_reg->setPos(x + 40, y + HEIGHT);
-    con_read1->setPos(x + 60, y + HEIGHT);
-    con_read2->setPos(x + 70, y + HEIGHT);
+    con_read1_reg->setPos(x, y + 10);
+    con_read2_reg->setPos(x, y + 30);
+    con_read1->setPos(x + WIDTH, y + 10);
+    con_read2->setPos(x + WIDTH, y + 30);
 
-    con_write_reg->setPos(x + WIDTH - 40, y + HEIGHT);
-    con_write->setPos(x + WIDTH - 30, y + HEIGHT);
-    con_ctl_write->setPos(x + WIDTH - 20, y + HEIGHT);
+    con_write_reg->setPos(x + WIDTH/2, y);
+    con_write->setPos(x, y + HEIGHT - 10);
+    con_ctl_write->setPos(x, y + HEIGHT - 20);
 }
 
 const Connector *Registers::connector_read1() const {

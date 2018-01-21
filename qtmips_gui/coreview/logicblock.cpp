@@ -91,7 +91,11 @@ const Connector *LogicBlock::new_connector(qreal x, qreal y) {
 
 QPointF LogicBlock::con_pos(qreal x, qreal y) {
     qreal px, py;
-    px = (box.right() - GAP) * x + (GAP * sign(x));
-    py = (box.bottom()/2 - GAP) * (y + 1) + (GAP * sign(y));
+    px = (box.right() - GAP) * x;
+    py = (box.bottom()/2 - GAP) * (y + 1) + GAP;
+    if (fabs(x) == 1)
+        px += GAP * sign(x);
+    if (fabs(y) == 1)
+        py += GAP * sign(y);
     return QPointF(px, py);
 }
