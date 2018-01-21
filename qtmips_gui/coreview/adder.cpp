@@ -17,9 +17,9 @@ Adder::Adder() : QGraphicsItem(nullptr), plus("+", this) {
     QRectF plus_box = plus.boundingRect();
     plus.setPos(DENT + (WIDTH-DENT)/2 - plus_box.width()/2, HEIGHT/2 - plus_box.height()/2);
 
-    con_in_a = new Connector(0);
-    con_in_b = new Connector(0);
-    con_out = new Connector(M_PI);
+    con_in_a = new Connector(Connector::AX_X);
+    con_in_b = new Connector(Connector::AX_X);
+    con_out = new Connector(Connector::AX_X);
 
     setPos(x(), y()); // set connector's position
 }

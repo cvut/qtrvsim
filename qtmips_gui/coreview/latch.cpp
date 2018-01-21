@@ -69,8 +69,8 @@ void Latch::setPos(qreal x, qreal y) {
 struct Latch::ConnectorPair Latch::new_connector(qreal cy) {
     SANITY_ASSERT(cy < height, "Latch: Trying to create connector outside of latch height");
     ConnectorPair cp;
-    cp.in = new Connector(0);
-    cp.out = new Connector(M_PI);
+    cp.in = new Connector(Connector::AX_X);
+    cp.out = new Connector(Connector::AX_X);
     connectors.append(cp);
     connectors_off.append(cy);
     setPos(x(), y()); // Update connectors position

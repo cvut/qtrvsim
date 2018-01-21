@@ -78,7 +78,7 @@ const Connector *LogicBlock::new_connector(qreal x, qreal y) {
         y = sign(y);
 
     // Note: we are using here that 0 and M_PI is same angle but different orientation (but we ignore orientation for now)
-    Connector *c = new Connector(fabs(x) > fabs(y) ? 0 : M_PI_2);
+    Connector *c = new Connector(fabs(x) > fabs(y) ? Connector::AX_X : Connector::AX_Y);
     connectors.append({
         .con = c,
         .x = x,

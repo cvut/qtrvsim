@@ -10,13 +10,13 @@ using namespace coreview;
 //////////////////////
 
 Registers::Registers() : QGraphicsObject(nullptr), name("Registers", this) {
-    con_read1 = new Connector(-M_PI_2);
-    con_read1_reg = new Connector(-M_PI_2);
-    con_read2 = new Connector(-M_PI_2);
-    con_read2_reg = new Connector(-M_PI_2);
-    con_write = new Connector(-M_PI_2);
-    con_write_reg = new Connector(-M_PI_2);
-    con_ctl_write = new Connector(-M_PI_2);
+    con_read1 = new Connector(Connector::AX_Y);
+    con_read1_reg = new Connector(Connector::AX_Y);
+    con_read2 = new Connector(Connector::AX_Y);
+    con_read2_reg = new Connector(Connector::AX_Y);
+    con_write = new Connector(Connector::AX_Y);
+    con_write_reg = new Connector(Connector::AX_Y);
+    con_ctl_write = new Connector(Connector::AX_Y);
 
     // TODO do we want to have any hooks on real registers?
 

@@ -14,10 +14,10 @@ coreview::Alu::Alu() : QGraphicsItem(nullptr), name("ALU", this) {
     font.setPointSize(7);
     name.setFont(font);
 
-    con_in_a = new Connector(0);
-    con_in_b = new Connector(0);
-    con_out = new Connector(M_PI);
-    con_ctl = new Connector(-M_PI_2);
+    con_in_a = new Connector(Connector::AX_X);
+    con_in_b = new Connector(Connector::AX_X);
+    con_out = new Connector(Connector::AX_X);
+    con_ctl = new Connector(Connector::AX_Y);
 
     setPos(x(), y()); // set connector's position
 }

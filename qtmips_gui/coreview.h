@@ -16,6 +16,7 @@
 #include "coreview/junction.h"
 #include "coreview/constant.h"
 #include "coreview/logicblock.h"
+#include "coreview/and.h"
 
 class CoreView : public QGraphicsView {
 public:
@@ -49,19 +50,24 @@ protected:
         coreview::Latch *latch;
         coreview::Adder *adder;
         coreview::Constant *adder_4;
-        coreview::Junction *junction;
+        coreview::Junction *junc_pc, *junc_pc_4;
         coreview::Multiplexer *multiplex;
     } ft;
     struct {
-        coreview::LogicBlock *ctl_block, *sign_ext, *shift2;
+        coreview::LogicBlock *ctl_block, *sign_ext, *shift2, *cmp;
         coreview::Adder *add;
         coreview::Junction *j_sign_ext;
+        coreview::And *and_branch;
+        coreview::Junction *j_inst_up, *j_inst_down;
+        coreview::Bus *instr_bus;
     } dc;
     coreview::Alu *alu;
     coreview::Multiplexer *mem_or_reg;
 
     QVector<coreview::Connection*> connections;
     coreview::Connection *new_connection(const coreview::Connector*, const coreview::Connector*);
+    coreview::Bus *new_bus(const coreview::Connector*, const coreview::Connector*, unsigned width = 4);
+    coreview::Signal *new_signal(const coreview::Connector*, const coreview::Connector*);
     coreview::Connection *pc2pc_latch;
     coreview::Connection *pc_latch2pc_joint, *pc_joint2pc_adder, *pc_joint2mem;
     coreview::Connection *pc_multiplexer2pc;

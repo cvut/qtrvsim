@@ -9,7 +9,7 @@ namespace coreview {
 
 class Multiplexer : public QGraphicsItem {
 public:
-    Multiplexer(unsigned size);
+    Multiplexer(unsigned size, bool ctl_up = false);
     ~Multiplexer();
 
     QRectF boundingRect() const;
@@ -21,7 +21,6 @@ public:
     const Connector *connector_in(unsigned i) const; // Inputs
 
     void set(unsigned i); // Set what value should be set as connected (indexing from  1 where 0 is no line)
-    void setCtl(bool up); // Set if control signal is from up or down (in default down)
 
 private:
     bool ctlfrom;

@@ -2,7 +2,6 @@
 #define COREVIEW_ALU_H
 
 #include <QGraphicsItem>
-#include <qtmipsmachine.h>
 #include "connection.h"
 
 namespace coreview {

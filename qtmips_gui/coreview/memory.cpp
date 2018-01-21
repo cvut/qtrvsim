@@ -53,8 +53,8 @@ ProgramMemory::ProgramMemory(machine::QtMipsMachine *machine) : Memory(machine) 
     cache = machine->config().cache_program().enabled();
     set_type("Program");
 
-    con_address = new Connector(0);
-    con_inst = new Connector(M_PI);
+    con_address = new Connector(Connector::AX_X);
+    con_inst = new Connector(Connector::AX_X);
 }
 
 ProgramMemory::~ProgramMemory() {
@@ -81,11 +81,11 @@ DataMemory::DataMemory(machine::QtMipsMachine *machine) : Memory(machine) {
     cache = machine->config().cache_data().enabled();
     set_type("Data");
 
-    con_address = new Connector(0);
-    con_data_out = new Connector(M_PI);
-    con_data_in	= new Connector(0);
-    con_req_write = new Connector(M_PI_2);
-    con_req_read = new Connector(M_PI_2);
+    con_address = new Connector(Connector::AX_X);
+    con_data_out = new Connector(Connector::AX_X);
+    con_data_in	= new Connector(Connector::AX_X);
+    con_req_write = new Connector(Connector::AX_X);
+    con_req_read = new Connector(Connector::AX_X);
 }
 
 DataMemory::~DataMemory() {

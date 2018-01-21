@@ -12,8 +12,8 @@ Constant::Constant(const Connector *con, const QString &text) : QGraphicsObject(
     font.setPointSize(7);
     this->text.setFont(font);
 
-    con_our = new Connector(M_PI);
-    conn = new Connection(con_our, con);
+    con_our = new Connector(Connector::AX_X);
+    conn = new Bus(con_our, con, 2);
     connect(con, SIGNAL(updated(QPointF)), this, SLOT(ref_con_updated(QPointF)));
     ref_con_updated(con->point()); // update initial connector position
 }

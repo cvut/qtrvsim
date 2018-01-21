@@ -10,15 +10,15 @@ using namespace coreview;
 #define PENW 1
 //////////////////////
 
-Multiplexer::Multiplexer(unsigned size) {
+Multiplexer::Multiplexer(unsigned size, bool ctl_up) {
     this->size = size;
     seton = 0;
-    ctlfrom = false;
-    con_ctl = new Connector(M_PI_2);
-    con_out = new Connector(M_PI);
+    ctlfrom = ctl_up;
+    con_ctl = new Connector(Connector::AX_Y);
+    con_out = new Connector(Connector::AX_X);
     con_in = new Connector*[size];
     for (unsigned i = 0; i < size; i++)
-        con_in[i] = new Connector(0);
+        con_in[i] = new Connector(Connector::AX_X);
     setPos(x(), y()); // Set connectors possitions
 }
 
@@ -80,7 +80,3 @@ void Multiplexer::set(unsigned i) {
     update();
 }
 
-void Multiplexer::setCtl(bool up) {
-    ctlfrom = up;
-    setPos(x(), y()); // Update connectors
-}

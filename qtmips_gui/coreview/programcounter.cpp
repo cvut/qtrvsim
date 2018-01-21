@@ -22,8 +22,8 @@ ProgramCounter::ProgramCounter(machine::QtMipsMachine *machine) : QGraphicsObjec
 
     connect(machine->registers(), SIGNAL(pc_update(std::uint32_t)), this, SLOT(pc_update(std::uint32_t)));
 
-    con_in = new Connector(-M_PI_2);
-    con_out = new Connector(M_PI_2);
+    con_in = new Connector(Connector::AX_Y);
+    con_out = new Connector(Connector::AX_Y);
     setPos(x(), y()); // To set initial connectors positions
 }
 

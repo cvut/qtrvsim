@@ -3,14 +3,19 @@
 
 using namespace coreview;
 
-Connector::Connector(qreal angle) {
-    ang = angle;
+Connector::Connector(enum Axis ax) {
+    this->ax = ax;
 }
 
 void Connector::setPos(qreal x, qreal y) {
     qx = x;
     qy = y;
-    emit updated(QPointF(qx, qy));
+    emit updated(point());
+    emit updated(vector());
+}
+
+enum Connector::Axis Connector::axis() const {
+    return ax;
 }
 
 qreal Connector::x() const {
@@ -21,28 +26,34 @@ qreal Connector::y() const {
     return qy;
 }
 
-QLineF Connector::vector() const {
-    return QLineF(point(), QPointF(x() + cos(ang), y() + sin(ang)));
-}
-
 QPointF Connector::point() const {
     return QPointF(qx, qy);
 }
 
-qreal Connector::angle() const {
-    return ang;
+QLineF Connector::vector() const {
+    QPointF p = point();
+    switch (ax) {
+    case AX_X:
+        return QLineF(p, p + QPointF(1, 0));
+    case AX_Y:
+        return QLineF(p, p + QPointF(0, 1));
+    case AX_XY:
+        return QLineF(p, p + QPointF(1, 1));
+    case AX_MXY:
+        return QLineF(p, p + QPoint(1, -1));
+    }
 }
 
 Connection::Connection(const Connector *a, const Connector *b) : QGraphicsObject(nullptr) {
     pen_width = 1;
 
-    ang_start = a->angle();
-    ang_end = b->angle();
+    ax_start = a->vector();
+    ax_end = a->vector();
 
-    connect(a, SIGNAL(updated(QPointF)), this, SLOT(moved_start(QPointF)));
-    connect(b, SIGNAL(updated(QPointF)), this, SLOT(moved_end(QPointF)));
-    moved_start(a->point());
-    moved_end(b->point());
+    connect(a, SIGNAL(updated(QLineF)), this, SLOT(moved_start(QLineF)));
+    connect(b, SIGNAL(updated(QLineF)), this, SLOT(moved_end(QLineF)));
+    moved_start(a->vector());
+    moved_end(b->vector());
 }
 
 void Connection::setHasText(bool has) {
@@ -65,13 +76,13 @@ void Connection::setAxes(QVector<QLineF> axes) {
     recalc_line();
 }
 
-void Connection::moved_start(QPointF p) {
-    p_start = p;
+void Connection::moved_start(QLineF p) {
+    ax_start = p;
     recalc_line();
 }
 
-void Connection::moved_end(QPointF p) {
-    p_end = p;
+void Connection::moved_end(QLineF p) {
+    ax_end = p;
     recalc_line();
 }
 
@@ -88,7 +99,9 @@ QRectF Connection::boundingRect() const {
 void Connection::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
     QPen pen;
     pen.setWidth(pen_width);
-    // TODO color?
+    pen.setColor(color);
+    pen.setCapStyle(Qt::FlatCap);
+    pen.setJoinStyle(Qt::BevelJoin);
     painter->setPen(pen);
 
     painter->drawPolyline(QPolygonF(points));
@@ -97,20 +110,44 @@ void Connection::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 void Connection::recalc_line() {
     points.clear();
 
-    points.append(p_start);
+    points.append(ax_start.p1());
 
-    QLineF cur_l(p_start, QPointF(p_start.x() + cos(ang_start), p_start.y() + sin(ang_start)));
+    QLineF cur_l = ax_start;
     for (int i = 0; i < break_axes.size(); i++) {
-        recalc_line_add_point(cur_l, break_axes[i]);
-        cur_l = break_axes[i];
+        if (recalc_line_add_point(cur_l, break_axes[i]))
+            cur_l = break_axes[i];
     }
-    recalc_line_add_point(cur_l, QLineF(QPoint(p_end.x() + cos(ang_end), p_end.y() + sin(ang_end)), p_end));
+    recalc_line_add_point(cur_l, ax_end);
 
-    points.append(p_end);
+    points.append(ax_end.p1());
 }
 
-void Connection::recalc_line_add_point(const QLineF &l1, const QLineF &l2) {
+bool Connection::recalc_line_add_point(const QLineF &l1, const QLineF &l2) {
     QPointF intersec;
-    if (l1.intersect(l2, &intersec) != QLineF::NoIntersection)
-        points.append(intersec);
+    if (l1.intersect(l2, &intersec) == QLineF::NoIntersection)
+        return false;
+    points.append(intersec);
+    return true;
+}
+
+Bus::Bus(const Connector *start, const Connector *end, unsigned width) : Connection(start, end) {
+    pen_width = width;
+}
+
+const Connector *Bus::new_connector(qreal x, qreal y, enum Connector::Axis axis) {
+    Connector *c = new Connector(axis);
+    conns.append({
+        .c = c,
+        .p = QPoint(x, y)
+     });
+    // TODO update positions
+    return c;
+}
+
+const Connector *Bus::new_connector(const QPointF &p, enum Connector::Axis axis) {
+    return new_connector(p.x(), p.y(), axis);
+}
+
+Signal::Signal(const Connector *start, const Connector *end) : Connection(start, end) {
+    color = QColor(0, 0, 255);
 }
