@@ -1,5 +1,40 @@
 #include "registersdock.h"
 
+static const QString labels[] = {
+    "zero",
+    "at",
+    "v0",
+    "v1",
+    "a0",
+    "a1",
+    "a2",
+    "a3",
+    "t0",
+    "t1",
+    "t2",
+    "t3",
+    "t4",
+    "t5",
+    "t6",
+    "t7",
+    "s0",
+    "s1",
+    "s2",
+    "s3",
+    "s4",
+    "s5",
+    "s6",
+    "s7",
+    "t8",
+    "t9",
+    "k0",
+    "k1",
+    "gp",
+    "sp",
+    "fp",
+    "ra"
+};
+
 RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
     scrollarea = new QScrollArea(this);
     widg = new QWidget(scrollarea);
@@ -12,11 +47,11 @@ RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
         layout->addRow(LABEL, X); \
     } while(false)
 
-    INIT(pc, "PC:");
+    INIT(pc, "pc:");
     for (int i = 0; i < 32; i++)
-        INIT(gp[i], QString("GP") + QString::number(i) + QString(" ($") + QString::number(i) + QString("):"));
-    INIT(lo, "LO:");
-    INIT(hi, "HI:");
+        INIT(gp[i], QString("$") + QString::number(i) + QString("/") + labels[i] + QString(":"));
+    INIT(lo, "lo:");
+    INIT(hi, "hi:");
 #undef INIT
     widg->setLayout(layout);
     scrollarea->setWidget(widg);
@@ -53,32 +88,30 @@ void RegistersDock::setup(machine::QtMipsMachine *machine) {
     connect(regs, SIGNAL(hi_lo_update(bool,std::uint32_t)), this, SLOT(hi_lo_changed(bool,std::uint32_t)));
 
     // Load values
-    labelVal(pc, regs->read_pc(), false);
-    labelVal(hi, regs->read_hi_lo(true), true);
-    labelVal(lo, regs->read_hi_lo(false), true);
+    labelVal(pc, regs->read_pc());
+    labelVal(hi, regs->read_hi_lo(true));
+    labelVal(lo, regs->read_hi_lo(false));
     for (int i = 0; i < 32; i++)
-        labelVal(gp[i], regs->read_gp(i), true);
+        labelVal(gp[i], regs->read_gp(i));
 }
 
 void RegistersDock::pc_changed(std::uint32_t val) {
-    labelVal(pc, val, false);
+    labelVal(pc, val);
 }
 
 void RegistersDock::gp_changed(std::uint8_t i, std::uint32_t val) {
     SANITY_ASSERT(i < 32, QString("RegistersDock received signal with invalid gp register: ") + QString::number(i));
-    labelVal(gp[i], val, true);
+    labelVal(gp[i], val);
 }
 
 void RegistersDock::hi_lo_changed(bool hi, std::uint32_t val) {
     if (hi)
-        labelVal(this->hi, val, true);
+        labelVal(this->hi, val);
     else
-        labelVal(lo, val, true);
+        labelVal(lo, val);
 }
 
-void RegistersDock::labelVal(QLabel *label, std::uint32_t value, bool dec) {
+void RegistersDock::labelVal(QLabel *label, std::uint32_t value) {
     QString t = QString("0x") + QString::number(value, 16);
-    if (dec)
-        t += QString(" (") + QString::number(value) + QString(")");
     label->setText(t);
 }

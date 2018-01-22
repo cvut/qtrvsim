@@ -31,7 +31,7 @@ private:
     QLabel *lo;
     QLabel *gp[32];
 
-    void labelVal(QLabel *label, std::uint32_t val, bool dec);
+    void labelVal(QLabel *label, std::uint32_t val);
 };
 
 #endif // REGISTERSDOCK_H
