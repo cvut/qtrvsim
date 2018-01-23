@@ -7,6 +7,7 @@
 #include <QScrollArea>
 #include <QPropertyAnimation>
 #include "qtmipsmachine.h"
+#include "statictable.h"
 
 class RegistersDock : public QDockWidget {
     Q_OBJECT
@@ -22,9 +23,8 @@ private slots:
     void hi_lo_changed(bool hi, std::uint32_t val);
 
 private:
-    QWidget *widg;
+    StaticTable *widg;
     QScrollArea *scrollarea;
-    QFormLayout *layout;
 
     QLabel *pc;
     QLabel *hi;

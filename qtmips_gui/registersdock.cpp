@@ -37,23 +37,23 @@ static const QString labels[] = {
 
 RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
     scrollarea = new QScrollArea(this);
-    widg = new QWidget(scrollarea);
-    layout = new QFormLayout(widg);
-    layout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    scrollarea->setWidgetResizable(true);
+    widg = new StaticTable(scrollarea);
 
 #define INIT(X, LABEL) do{ \
-        X = new QLabel(widg); \
+        X = new QLabel("0x00000000", widg); \
+        X->setFixedSize(X->sizeHint()); \
+        X->setText(""); \
         X->setTextInteractionFlags(Qt::TextSelectableByMouse); \
-        layout->addRow(LABEL, X); \
+        widg->addRow({new QLabel(LABEL, widg), X}); \
     } while(false)
 
-    INIT(pc, "pc:");
     for (int i = 0; i < 32; i++)
-        INIT(gp[i], QString("$") + QString::number(i) + QString("/") + labels[i] + QString(":"));
-    INIT(lo, "lo:");
-    INIT(hi, "hi:");
+        INIT(gp[i], QString("$") + QString::number(i) + QString("/") + labels[i]);
+    INIT(pc, "pc");
+    INIT(lo, "lo");
+    INIT(hi, "hi");
 #undef INIT
-    widg->setLayout(layout);
     scrollarea->setWidget(widg);
 
     setWidget(scrollarea);
@@ -67,7 +67,6 @@ RegistersDock::~RegistersDock() {
     delete lo;
     for (int i = 0; i < 32; i++)
         delete gp[i];
-    delete layout;
     delete widg;
     delete scrollarea;
 }

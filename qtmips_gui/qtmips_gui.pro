@@ -33,7 +33,8 @@ SOURCES += \
         coreview/constant.cpp \
         coreview/junction.cpp \
         coreview/logicblock.cpp \
-    coreview/and.cpp
+        coreview/and.cpp \
+        statictable.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -55,7 +56,8 @@ HEADERS += \
         coreview/constant.h \
         coreview/junction.h \
         coreview/logicblock.h \
-    coreview/and.h
+        coreview/and.h \
+        statictable.h
 
 FORMS += \
         NewDialog.ui \
