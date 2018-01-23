@@ -12,6 +12,8 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     ui->setupUi(this);
     ui_cache_p = new Ui::NewDialogCache();
     ui_cache_p->setupUi(ui->tab_cache_program);
+    ui_cache_p->writeback_policy->hide();
+    ui_cache_p->label_writeback->hide();
     ui_cache_d = new Ui::NewDialogCache();
     ui_cache_d->setupUi(ui->tab_cache_data);
 
