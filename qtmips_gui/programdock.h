@@ -16,6 +16,8 @@ public:
 
     void setup(machine::QtMipsMachine*);
 
+    void jump_to_pc(std::uint32_t);
+
 protected:
     QList<QWidget*> row_widget(std::uint32_t address, QWidget *parent);
 
@@ -34,6 +36,9 @@ public:
     ProgramDock(QWidget *parent);
 
     void setup(machine::QtMipsMachine *machine);
+
+public slots:
+    void jump_to_pc(std::uint32_t);
 
 private:
     ProgramView *view;

@@ -10,6 +10,8 @@ using namespace coreview;
 //////////////////////
 
 ProgramCounter::ProgramCounter(machine::QtMipsMachine *machine) : QGraphicsObject(nullptr), name("PC", this), value(this) {
+    registers = machine->registers();
+
     QFont font;
 
     font.setPointSize(7);
@@ -47,6 +49,11 @@ const Connector *ProgramCounter::connector_in() const {
 
 const Connector *ProgramCounter::connector_out() const {
     return con_out;
+}
+
+void ProgramCounter::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event __attribute__((unused))) {
+    emit open_program();
+    emit jump_to_pc(registers->read_pc());
 }
 
 void ProgramCounter::pc_update(std::uint32_t val) {

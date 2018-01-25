@@ -20,10 +20,19 @@ public:
     const Connector *connector_in() const;
     const Connector *connector_out() const;
 
+signals:
+    void open_program();
+    void jump_to_pc(std::uint32_t addr);
+
+protected:
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+
 private slots:
     void pc_update(std::uint32_t val);
 
 private:
+    const machine::Registers *registers;
+
     QGraphicsSimpleTextItem name;
     QGraphicsSimpleTextItem value;
 

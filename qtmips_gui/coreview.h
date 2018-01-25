@@ -40,6 +40,7 @@ signals:
     void request_registers();
     void request_data_memory();
     void request_program_memory();
+    void request_jump_to_program_counter(std::uint32_t addr);
 
 protected:
     coreview::ProgramMemory *mem_program;

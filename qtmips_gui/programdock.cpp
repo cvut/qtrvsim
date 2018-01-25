@@ -45,6 +45,10 @@ void ProgramView::setup(machine::QtMipsMachine *machine) {
         cb_single->setCurrentIndex(cb_pipelined->currentIndex() == 0 ? 0 : 1);
 }
 
+void ProgramView::jump_to_pc(std::uint32_t addr) {
+    set_focus(addr);
+}
+
 QList<QWidget*> ProgramView::row_widget(std::uint32_t address, QWidget *parent) {
     QList<QWidget*> widgs;
     QLabel *l;
@@ -85,4 +89,8 @@ ProgramDock::ProgramDock(QWidget *parent) : QDockWidget(parent) {
 
 void ProgramDock::setup(machine::QtMipsMachine *machine) {
     view->setup(machine);
+}
+
+void ProgramDock::jump_to_pc(std::uint32_t addr) {
+    view->jump_to_pc(addr);
 }

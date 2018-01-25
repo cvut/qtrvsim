@@ -140,6 +140,8 @@ CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : 
     connect(regs, SIGNAL(open_registers()), this, SIGNAL(request_registers()));
     connect(mem_program, SIGNAL(open_mem()), this, SIGNAL(request_program_memory()));
     connect(mem_data, SIGNAL(open_mem()), this, SIGNAL(request_data_memory()));
+    connect(ft.pc, SIGNAL(open_program()), this, SIGNAL(request_program_memory()));
+    connect(ft.pc, SIGNAL(jump_to_pc(std::uint32_t)), this, SIGNAL(request_jump_to_program_counter(std::uint32_t)));
 }
 
 CoreViewScene::~CoreViewScene() {
