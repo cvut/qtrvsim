@@ -2,7 +2,7 @@
 #include "qtmipsexception.h"
 
 ProgramView::ProgramView(QWidget *parent) : MemoryView(parent) {
-    set_center(0x80020000); // Initialize center address to program start
+    set_focus(0x80020000); // Initialize focus address to program start
 
     cb_single = new QComboBox(this);
     cb_single->addItems({
