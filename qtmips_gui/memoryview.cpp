@@ -3,6 +3,8 @@
 ///////////////////////////
 // Minimal reserved range in pixels of scroll area (otherwise 10% of height are used)
 #define MIN_OFF 10
+// Focus point (this is multiplied with height of widget to know position where we want to focus)
+#define FOCUS 0.25
 ///////////////////////////
 
 #include <iostream>
@@ -29,9 +31,11 @@ MemoryView::MemoryView(QWidget *parent) : QWidget(parent) {
     connect(go_edit, SIGNAL(editingFinished()), this, SLOT(go_edit_finish()));
     up = new QToolButton(ctl_widg);
     up->setArrowType(Qt::UpArrow);
+    connect(up, SIGNAL(clicked(bool)), this, SLOT(prev_section()));
     ctl_layout->addWidget(up);
     down = new QToolButton(ctl_widg);
     down->setArrowType(Qt::DownArrow);
+    connect(down, SIGNAL(clicked(bool)), this, SLOT(next_section()));
     ctl_layout->addWidget(down);
 }
 
@@ -41,13 +45,21 @@ void MemoryView::setup(machine::QtMipsMachine *machine) {
 }
 
 void MemoryView::set_focus(std::uint32_t address) {
-    // TODO center
-    // TODO update view
+    if (address < addr_0 || (address - addr_0)/4 > (unsigned)memf->widg->count()) {
+        // This is outside of loaded area so just move it and reload everything
+        addr_0 = address - 4*memf->focussed();
+        reload_content();
+    } else {
+        memf->focus((address - addr_0) / 4);
+    }
 }
 
 std::uint32_t MemoryView::focus() {
-    // TODO
-    return 0;
+    return addr_0 + 4*memf->focussed();
+}
+
+void MemoryView::edit_load_focus() {
+    go_edit->setText(QString("0x%1").arg(focus(), 8, 16, QChar('0')));
 }
 
 void MemoryView::reload_content() {
@@ -90,7 +102,27 @@ void MemoryView::update_content(int count, int shift) {
 }
 
 void MemoryView::go_edit_finish() {
-    // TODO
+    QString hex = go_edit->text();
+    hex.remove(0, 2);
+
+    bool ok;
+    std::uint32_t nw = hex.toUInt(&ok, 16);
+    if (ok) {
+        set_focus(nw);
+    } else
+        edit_load_focus();
+}
+
+void MemoryView::next_section() {
+    if (memory == nullptr)
+        return;
+    set_focus(memory->next_allocated(focus()));
+}
+
+void MemoryView::prev_section() {
+    if (memory == nullptr)
+        return;
+    set_focus(memory->prev_allocated(focus()));
 }
 
 MemoryView::Frame::Frame(MemoryView *parent) : QAbstractScrollArea(parent) {
@@ -107,12 +139,16 @@ MemoryView::Frame::Frame(MemoryView *parent) : QAbstractScrollArea(parent) {
 }
 
 void MemoryView::Frame::focus(unsigned i) {
-    // TODO
+    content_y = (FOCUS*height()) - widg->row_size()*i - widg->row_size()/2;
+    viewport()->move(0, content_y);
+    viewport()->repaint(0, content_y, width(), height());
+    check_update();
 }
 
+// Calculate which row is in focus at the moment
 unsigned MemoryView::Frame::focussed() {
-    // TODO
-    return 0;
+    int h = (FOCUS*height() - content_y) / widg->row_size();
+    return qMax(h, 0);
 }
 
 // This verifies that we are not scrolled too far away down or up and that we have enought height
@@ -135,6 +171,8 @@ void MemoryView::Frame::check_update() {
         content_y -= shift * row_h;
         widg->setGeometry(0, content_y, width(), widg->heightForWidth(width()));
     }
+
+    mv->edit_load_focus();
 }
 
 void MemoryView::Frame::resizeEvent(QResizeEvent *e) {

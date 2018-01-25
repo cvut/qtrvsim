@@ -2,8 +2,6 @@
 #include "qtmipsexception.h"
 
 ProgramView::ProgramView(QWidget *parent) : MemoryView(parent) {
-    set_focus(0x80020000); // Initialize focus address to program start
-
     cb_single = new QComboBox(this);
     cb_single->addItems({
         "Don't follow",

@@ -254,6 +254,16 @@ const union machine::MemoryTree *Memory::get_memorytree_root() const {
     return this->mt_root;
 }
 
+std::uint32_t Memory::next_allocated(std::uint32_t addr) const {
+    // TODO
+    return addr;
+}
+
+std::uint32_t Memory::prev_allocated(std::uint32_t addr) const {
+    // TODO
+    return addr;
+}
+
 union machine::MemoryTree *Memory::allocate_section_tree() {
     union MemoryTree *mt = new union MemoryTree[MEMORY_TREE_LEN];
     for (size_t i = 0; i < MEMORY_TREE_LEN; i++)

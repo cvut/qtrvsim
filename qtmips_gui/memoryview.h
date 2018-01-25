@@ -24,6 +24,8 @@ public:
     void set_focus(std::uint32_t address);
     std::uint32_t focus();
 
+    void edit_load_focus(); // Set current focus to edit field
+
 protected:
     const machine::Memory *memory;
 
@@ -36,6 +38,8 @@ protected:
 
 private slots:
     void go_edit_finish();
+    void next_section();
+    void prev_section();
 
 private:
     unsigned count;

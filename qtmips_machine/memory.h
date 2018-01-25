@@ -87,6 +87,10 @@ public:
 
     const union MemoryTree *get_memorytree_root() const;
 
+    // These functions locate next start or end of next allocated tree leaf
+    std::uint32_t next_allocated(std::uint32_t) const;
+    std::uint32_t prev_allocated(std::uint32_t) const;
+
 private:
     union MemoryTree *mt_root;
     static union MemoryTree *allocate_section_tree();
