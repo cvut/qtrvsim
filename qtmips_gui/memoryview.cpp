@@ -7,9 +7,6 @@
 #define FOCUS 0.25
 ///////////////////////////
 
-#include <iostream>
-using namespace std;
-
 MemoryView::MemoryView(QWidget *parent) : QWidget(parent) {
     memory = nullptr;
     addr_0 = 0;
@@ -81,7 +78,6 @@ void MemoryView::update_content(int count, int shift) {
     int diff = count - memf->widg->count();
     int d_b = shift;
     int d_e = diff - shift;
-    cout << "count:" << memf->widg->count() << " tocount:" << count << " d_b:" << d_b << " d_e:" << d_e << endl;
 
     if (d_b > 0)
         for (int i = 0; i < d_b; i++) {
@@ -158,15 +154,11 @@ void MemoryView::Frame::check_update() {
     int req_height = height() + 2*hpart;
 
     while (!((content_y <= -hpart) && (content_y >= -2*hpart)) || (widg->height() < req_height)) {
-        cout << "widg.h:" << widg->height() << " req_h:" << req_height << endl;
-        cout << "content_y:" << content_y << " hpart:" << hpart << endl;
         int row_h = widg->row_size();
-        cout << "row_h:" << row_h << " columns:" << widg->columns() << endl;
         // Calculate how many we need and how much we need to move and update content accordingly
         int count = (req_height / row_h) + 1;
         int shift = (content_y + hpart + hpart/2)/row_h;
         mv->update_content(count * widg->columns(), shift * widg->columns());
-        cout << "count:" << count << endl;
         // Move and resize widget
         content_y -= shift * row_h;
         widg->setGeometry(0, content_y, width(), widg->heightForWidth(width()));

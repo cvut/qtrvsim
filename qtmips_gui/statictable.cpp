@@ -2,10 +2,6 @@
 #include <QPainter>
 #include <qtmipsexception.h>
 
-#include <iostream>
-#include <QLabel>
-using namespace std;
-
 StaticTableLayout::StaticTableLayout(QWidget *parent, int margin, int horizontal_big_spacing, int horizontal_small_spacing, int vertical_spacing) : QLayout(parent) {
     setContentsMargins(margin, margin, margin, margin);
     bhspace = horizontal_big_spacing;
@@ -159,12 +155,6 @@ int StaticTableLayout::layout_count_approx(const QRect &rect) const {
         w += items[vis][i]->sizeHint().width() + shspace;
     w -= shspace; // subtract lastest spacing
     int width = rect.right() / w; // Note: this always rounds down so this always founds maximal possible count
-
-    cout << "ST: widht:" << rect.right() << " row_w" << w << " so count:" << width << " we have:" << items.count() << " In 0:" << items[vis].count() << " contains:";
-    for (int i = 0; i < items[0].size(); i++)
-        cout << ((QLabel*)items[0][i]->widget())->text().toStdString() << " ";
-    cout << endl;
-
     return width <= 0 ? 1 : width; // We have to fit at least one column
 }
 
@@ -221,7 +211,6 @@ void StaticTableLayout::do_layout(const QRect &rect) {
     QList<QList<int>> row_w;
     int count;
 
-    cout << "Doing layout" << endl;
     QRect reff(rect);
     layout_parms(reff, row_h, row_w, count);
 
@@ -244,7 +233,6 @@ void StaticTableLayout::do_layout(const QRect &rect) {
 }
 
 int StaticTableLayout::layout_height(int width) const {
-    cout << "Quering height" << endl;
     QRect reff(0, 0, width, 0);
     int row_h;
     QList<QList<int>> row_w;
