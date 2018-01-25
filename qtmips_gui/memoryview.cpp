@@ -5,6 +5,8 @@
 #define MIN_OFF 10
 // Focus point (this is multiplied with height of widget to know position where we want to focus)
 #define FOCUS 0.25
+// How angle maps to pixels when and scroll is used
+#define ANGLE_SCROLL 4
 ///////////////////////////
 
 MemoryView::MemoryView(QWidget *parent) : QWidget(parent) {
@@ -178,8 +180,9 @@ void MemoryView::Frame::wheelEvent(QWheelEvent *e) {
     QPoint ang = e->angleDelta();
 
     if (!pix.isNull())
-        content_y += e->pixelDelta().ry();
-    // TODO angle scroll
+        content_y += pix.ry();
+    else if (!ang.isNull())
+        content_y += ang.ry() * ANGLE_SCROLL;
 
     // TODO smooth scroll
     viewport()->move(0, content_y);
