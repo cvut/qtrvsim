@@ -1,26 +1,21 @@
 #include "programdock.h"
 #include "qtmipsexception.h"
 
-ProgramDock::ProgramDock(QWidget *parent) : QDockWidget(parent) {
-    widg = new QWidget(this);
-    widg_layout = new QBoxLayout(QBoxLayout::TopToBottom, widg);
-    widg_layout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+ProgramView::ProgramView(QWidget *parent) : MemoryView(parent) {
+    set_center(0x80020000); // Initialize center address to program start
 
-    memory_view = new MemoryView(widg);
-    widg_layout->addWidget(memory_view);
-
-    ctlbox_single = new QComboBox(widg);
-    ctlbox_single->addItems({
+    cb_single = new QComboBox(this);
+    cb_single->addItems({
         "Don't follow",
         "Follow executing instruction"
     });
-    ctlbox_single->setCurrentIndex(1);
-    ctlbox_single->hide();
-    widg_layout->addWidget(ctlbox_single);
-    connect(ctlbox_single, SIGNAL(currentIndexChanged(int)), this, SLOT(ctlbox_single_changed(int)));
+    cb_single->setCurrentIndex(1);
+    cb_single->hide();
+    layout->addWidget(cb_single);
+    connect(cb_single, SIGNAL(currentIndexChanged(int)), this, SLOT(cb_single_changed(int)));
 
-    ctlbox_pipelined = new QComboBox(widg);
-    ctlbox_pipelined->addItems({
+    cb_pipelined = new QComboBox(this);
+    cb_pipelined->addItems({
         "Don't follow",
         "Follow Instruction fetch stage",
         "Follow Instruction decode stage",
@@ -28,51 +23,68 @@ ProgramDock::ProgramDock(QWidget *parent) : QDockWidget(parent) {
         "Follow Memory access stage",
         "Follow Registers write back stage",
     });
-    ctlbox_pipelined->hide();
-    ctlbox_pipelined->setCurrentIndex(1);
-    widg_layout->addWidget(ctlbox_pipelined);
-    connect(ctlbox_pipelined, SIGNAL(currentIndexChanged(int)), this, SLOT(ctlbox_pipelined_changed(int)));
+    cb_pipelined->hide();
+    cb_pipelined->setCurrentIndex(1);
+    layout->addWidget(cb_pipelined);
+    connect(cb_pipelined, SIGNAL(currentIndexChanged(int)), this, SLOT(cb_pipelined_changed(int)));
+}
 
-    setWidget(widg);
+void ProgramView::setup(machine::QtMipsMachine *machine) {
+    MemoryView::setup(machine);
+    if (machine == nullptr)
+        return;
+
+    bool pipelined = machine->config().pipelined();
+    cb_single->setVisible(!pipelined);
+    cb_pipelined->setVisible(pipelined);
+    // Sync selection somewhat
+    if (pipelined) {
+        if (cb_single->currentIndex() == 0)
+            cb_pipelined->setCurrentIndex(0);
+        else if (cb_pipelined->currentIndex() == 0)
+            cb_pipelined->setCurrentIndex(1);
+    } else
+        cb_single->setCurrentIndex(cb_pipelined->currentIndex() == 0 ? 0 : 1);
+}
+
+QList<QWidget*> ProgramView::row_widget(std::uint32_t address, QWidget *parent) {
+    QList<QWidget*> widgs;
+    QLabel *l;
+
+    l = new QLabel(" ", parent);
+    widgs.append(l);
+
+    l = new QLabel(QString("0x%1").arg(address, 8, 16, QChar('0')), parent);
+    l->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    widgs.append(l);
+
+    l = new QLabel(parent);
+    l->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    if (memory != nullptr)
+        l->setText(machine::Instruction(memory->read_word(address)).to_str());
+    else
+        l->setText("        "); // Just fill it in with some plain text so we don't have just addresses there
+    widgs.append(l);
+
+    return widgs;
+}
+
+void ProgramView::cb_single_changed(int index) {
+    // TODO set memory view
+}
+
+void ProgramView::cb_pipelined_changed(int index) {
+    // TODO set memory view
+}
+
+ProgramDock::ProgramDock(QWidget *parent) : QDockWidget(parent) {
+    view = new ProgramView(this);
+    setWidget(view);
+
     setObjectName("Program");
     setWindowTitle("Program");
 }
 
-ProgramDock::~ProgramDock() {
-    delete memory_view;
-    delete ctlbox_single;
-    delete ctlbox_pipelined;
-    delete widg_layout;
-    delete widg;
-}
-
 void ProgramDock::setup(machine::QtMipsMachine *machine) {
-    if (machine == nullptr) {
-        // TODO zero memory viewer
-        return;
-    }
-
-    // TODO pass to viewer
-
-    bool pipelined = machine->config().pipelined();
-    ctlbox_single->setVisible(!pipelined);
-    ctlbox_pipelined->setVisible(pipelined);
-    // Sync selection somewhat
-    if (pipelined) {
-        if (ctlbox_single->currentIndex() == 0)
-            ctlbox_pipelined->setCurrentIndex(0);
-        else if (ctlbox_pipelined->currentIndex() == 0)
-            ctlbox_pipelined->setCurrentIndex(1);
-    } else
-        ctlbox_single->setCurrentIndex(ctlbox_pipelined->currentIndex() == 0 ? 0 : 1);
-
-    // TODO also update current setting of memory viewer
-}
-
-void ProgramDock::ctlbox_single_changed(int index) {
-    // TODO set memory view
-}
-
-void ProgramDock::ctlbox_pipelined_changed(int index) {
-    // TODO set memory view
+    view->setup(machine);
 }

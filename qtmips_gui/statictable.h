@@ -31,9 +31,13 @@ public:
     int count() const override; // This returns number of item blocks
 
     void addRow(QList<QWidget*>); // This adds row of widgets
+    void insertRow(QList<QWidget*>, int i); // Insert row to given position while shifting all other up
+    void removeRow(int i); // Remove row
+    void clearRows(); // Clear all rows from table
 
     void itemRect(QRect &rect, QVector<int> &separators, int i); // This returns single item rectable (if expad_margin and it's on edge also count in margin)
     int columns();
+    int real_row_height();
 
 protected:
     int shspace, bhspace, vspace;
@@ -47,13 +51,36 @@ protected:
     void layout_parms(QRect &rect, int &row_h, QList<QList<int>> &row_w, int &count) const;
     void do_layout(const QRect &rect);
     int layout_height(int width) const;
+
+    QVector<QLayoutItem*> list2vec(QList<QWidget*>);
+
+    struct {
+        QSize size;
+        int count;
+    } cch_do_layout;
+    mutable struct {
+        int w, count;
+        int width;
+    } cch_heightForWidth;
+    mutable struct {
+        int count;
+        QSize size;
+    } cch_minSize;
+
 };
 
 class StaticTable : public QWidget {
 public:
     StaticTable(QWidget *parent = nullptr);
 
+    int count();
     void addRow(QList<QWidget*>);
+    void insertRow(QList<QWidget*>, int i);
+    void removeRow(int i);
+    void clearRows();
+
+    int columns();
+    int row_size(); // return real row size (height) including spacing
 
 protected:
     void paintEvent(QPaintEvent*);

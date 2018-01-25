@@ -2,35 +2,68 @@
 #define MEMORYVIEW_H
 
 #include <QWidget>
-#include <QFrame>
+#include <QAbstractScrollArea>
 #include <QBoxLayout>
+#include <QGridLayout>
 #include <QLineEdit>
+#include <QToolButton>
+#include <QList>
+#include <QVector>
 #include <cstdint>
+#include <QResizeEvent>
+#include "qtmipsmachine.h"
+#include "statictable.h"
 
 class MemoryView : public QWidget {
+    Q_OBJECT
 public:
     MemoryView(QWidget *parent = nullptr);
-    ~MemoryView();
 
-    void set_center(std::uint32_t address);
-    std::uint32_t center();
+    virtual void setup(machine::QtMipsMachine*);
+
+    void set_focus(std::uint32_t address);
+    std::uint32_t focus();
 
 protected:
-    //virtual QWidget *row_widget(std::uint32_t address) = 0;
+    const machine::Memory *memory;
 
-    void resizeEvent(QResizeEvent *event);
-    void wheelEvent(QWheelEvent *event);
+    virtual QList<QWidget*> row_widget(std::uint32_t address, QWidget *parent) = 0;
 
     QVBoxLayout *layout;
+
+    void reload_content(); // reload displayed data
+    void update_content(int count, int shift); // update content to match given count and shift
 
 private slots:
     void go_edit_finish();
 
 private:
-    std::uint32_t center_addr;
+    unsigned count;
+    std::uint32_t addr_0; // First address in view
 
-    QFrame *frame;
+    class Frame : public QAbstractScrollArea {
+    public:
+        Frame(MemoryView *parent);
+
+        StaticTable *widg;
+        void focus(unsigned i); // Focus on given item in widget
+        unsigned focussed(); // What item is in focus
+        void check_update(); // Update widget size and content if needed
+
+    protected:
+        MemoryView *mv;
+        int content_y;
+
+        bool viewportEvent(QEvent*);
+        void resizeEvent(QResizeEvent*);
+        void wheelEvent(QWheelEvent *event);
+    };
+    Frame *memf;
+
+    QWidget *ctl_widg;
+    QHBoxLayout *ctl_layout;
     QLineEdit *go_edit;
+    QToolButton *up, *down;
 };
 
 #endif // MEMORYVIEW_H

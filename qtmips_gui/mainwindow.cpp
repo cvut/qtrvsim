@@ -104,6 +104,7 @@ void MainWindow::create_core(const machine::MachineConfig &config) {
     // Setup docks
     registers->setup(machine);
     program->setup(machine);
+    memory->setup(machine);
     // Set status to ready
     machine_status(machine::QtMipsMachine::ST_READY);
 }
