@@ -9,6 +9,7 @@ LIBS += -L$$OUT_PWD/../qtmips_machine/ -lqtmips_machine
 INCLUDEPATH += $$PWD/../qtmips_machine
 DEPENDPATH += $$PWD/../qtmips_machine
 QMAKE_CXXFLAGS += -std=c++0x
+QMAKE_CXXFLAGS_DEBUG += -ggdb
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
