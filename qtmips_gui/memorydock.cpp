@@ -6,17 +6,19 @@ QList<QWidget*> DataView::row_widget(std::uint32_t address, QWidget *parent) {
     QList<QWidget*> widgs;
     QLabel *l;
 
-    l = new QLabel(QString("0x%1").arg(address, 8, 16, QChar('0')), parent);
+    QFont f;
+    f.setStyleHint(QFont::Monospace);
+
+    l = new QLabel(QString("0x") + QString("%1").arg(address, 8, 16, QChar('0')).toUpper(), parent);
     l->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    l->setFont(f);
     widgs.append(l);
 
     l = new QLabel(parent);
     l->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    if (memory != nullptr) {
-        l->setText(QString("0x%1").arg(memory->read_word(address), 8, 16, QChar('0')));
-    }
-    else
-        l->setText("        "); // Just fill it in with some plain text so we don't have just addresses there
+    l->setFont(f);
+    if (memory != nullptr)
+        l->setText(QString("0x") + QString("%1").arg(memory->read_word(address), 8, 16, QChar('0')).toUpper());
     widgs.append(l);
 
     return widgs;

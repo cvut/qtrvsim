@@ -155,7 +155,7 @@ void MemoryView::Frame::check_update() {
     int hpart = qMax(height()/10, MIN_OFF);
     int req_height = height() + 2*hpart;
 
-    while (!((content_y <= -hpart) && (content_y >= -2*hpart)) || (widg->height() < req_height)) {
+    while (!((content_y <= -hpart) && (content_y >= -2*hpart)) || (widg->height() <= req_height)) {
         int row_h = widg->row_size();
         // Calculate how many we need and how much we need to move and update content accordingly
         int count = (req_height / row_h) + 1;

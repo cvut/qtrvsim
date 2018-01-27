@@ -17,7 +17,7 @@
    <item>
     <widget class="QGroupBox" name="enabled">
      <property name="title">
-      <string/>
+      <string>Enable cache</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
