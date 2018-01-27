@@ -5,6 +5,8 @@
 using namespace coreview;
 
 Connector::Connector(enum Axis ax) {
+    qx = 0;
+    qy = 0;
     this->ax = ax;
 }
 

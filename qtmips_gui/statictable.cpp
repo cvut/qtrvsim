@@ -8,6 +8,14 @@ StaticTableLayout::StaticTableLayout(QWidget *parent, int margin, int horizontal
     shspace = horizontal_small_spacing;
     vspace = vertical_spacing;
     setSizeConstraint(QLayout::SetMinAndMaxSize);
+
+    cch_do_layout.size = QSize(0, 0);
+    cch_do_layout.count = 0;
+    cch_heightForWidth.w = 0;
+    cch_heightForWidth.count = 0;
+    cch_heightForWidth.width = 0;
+    cch_minSize.count = 0;
+    cch_minSize.size = QSize(0, 0);
 }
 
 StaticTableLayout::~StaticTableLayout() {

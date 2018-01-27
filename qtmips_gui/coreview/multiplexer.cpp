@@ -27,7 +27,7 @@ Multiplexer::~Multiplexer() {
     delete con_out;
     for (unsigned i = 0; i < size; i++)
         delete con_in[i];
-    delete con_in;
+    delete[] con_in;
 }
 
 #define C_HEIGHT (HEIGHT + (GAP * (size -1 )))
