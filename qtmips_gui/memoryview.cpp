@@ -136,7 +136,7 @@ MemoryView::Frame::Frame(MemoryView *parent) : QAbstractScrollArea(parent) {
 }
 
 void MemoryView::Frame::focus(unsigned i) {
-    content_y = (FOCUS*height()) - widg->row_size()*i - widg->row_size()/2;
+    content_y = (FOCUS*height()) - widg->row_size()*i/widg->columns() - widg->row_size()/2;
     viewport()->move(0, content_y);
     viewport()->repaint(0, content_y, width(), height());
     check_update();
@@ -144,7 +144,7 @@ void MemoryView::Frame::focus(unsigned i) {
 
 // Calculate which row is in focus at the moment
 unsigned MemoryView::Frame::focussed() {
-    int h = (FOCUS*height() - content_y) / widg->row_size();
+    int h = (FOCUS*height() - content_y) / widg->row_size() * widg->columns();
     return qMax(h, 0);
 }
 
@@ -172,6 +172,7 @@ void MemoryView::Frame::resizeEvent(QResizeEvent *e) {
     QAbstractScrollArea::resizeEvent(e);
     widg->setGeometry(0, content_y, e->size().width(), widg->heightForWidth(e->size().width()));
     check_update();
+
 }
 
 void MemoryView::Frame::wheelEvent(QWheelEvent *e) {
