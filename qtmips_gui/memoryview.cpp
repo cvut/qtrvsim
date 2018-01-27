@@ -130,8 +130,7 @@ MemoryView::Frame::Frame(MemoryView *parent) : QAbstractScrollArea(parent) {
     widg = new StaticTable(this);
     setViewport(widg);
 
-    setFrameShadow(QFrame::Sunken);
-    setFrameShape(QFrame::StyledPanel);
+    setFrameShape(QFrame::NoFrame);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setContentsMargins(0, 0, 0, 0);
 }
