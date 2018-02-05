@@ -154,16 +154,17 @@ void MemoryView::Frame::check_update() {
     int hpart = qMax(height()/10, MIN_OFF);
     int req_height = height() + 2*hpart;
 
-    while (!((content_y <= -hpart) && (content_y >= -2*hpart)) || (widg->height() <= req_height)) {
-        int row_h = widg->row_size();
-        // Calculate how many we need and how much we need to move and update content accordingly
-        int count = (req_height / row_h) + 1;
-        int shift = (content_y + hpart + hpart/2)/row_h;
-        mv->update_content(count * widg->columns(), shift * widg->columns());
-        // Move and resize widget
-        content_y -= shift * row_h;
-        widg->setGeometry(0, content_y, width(), widg->heightForWidth(width()));
-    }
+    if (((content_y > -hpart) || (content_y < -2*hpart)) && (widg->height() >= req_height))
+        return;
+
+    int row_h = widg->row_size();
+    // Calculate how many we need and how much we need to move and update content accordingly
+    int count = (req_height / row_h) + 1;
+    int shift = (content_y + hpart + hpart/2)/row_h;
+    mv->update_content(count * widg->columns(), shift * widg->columns());
+    // Move and resize widget
+    content_y -= shift * row_h;
+    widg->setGeometry(0, content_y, width(), count * row_h);
 
     mv->edit_load_focus();
 }
@@ -172,7 +173,6 @@ void MemoryView::Frame::resizeEvent(QResizeEvent *e) {
     QAbstractScrollArea::resizeEvent(e);
     widg->setGeometry(0, content_y, e->size().width(), widg->heightForWidth(e->size().width()));
     check_update();
-
 }
 
 void MemoryView::Frame::wheelEvent(QWheelEvent *e) {
