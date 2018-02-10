@@ -154,7 +154,7 @@ void MemoryView::Frame::check_update() {
     int hpart = qMax(height()/10, MIN_OFF);
     int req_height = height() + 2*hpart;
 
-    if (((content_y > -hpart) || (content_y < -2*hpart)) && (widg->height() >= req_height))
+    if ((content_y < -hpart) && (content_y > -2*hpart) && (widg->height() >= req_height))
         return;
 
     int row_h = widg->row_size();
