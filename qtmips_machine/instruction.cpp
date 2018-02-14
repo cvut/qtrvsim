@@ -253,7 +253,7 @@ QString Instruction::to_str() const {
             return QString("UNKNOWN");
         const struct AluInstructionMap &am = alu_instruction_map[funct()];
         res += am.name;
-        res += " $" + QString::number(rs()) + ", $" + QString::number(rt()) + ", $" + QString::number(rd());
+        res += " $" + QString::number(rd()) + ", $" + QString::number(rs()) + ", $" + QString::number(rt());
         break;
         }
     }
