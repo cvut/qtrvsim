@@ -305,11 +305,22 @@ void CorePipelined::step() {
     bool stall = false;
     if (hazard_unit != MachineConfig::HU_NONE) {
         // Note: We make exception with $0 as that has no effect when written and is used in nop instruction
+// TODO rt should be compared onlu if instruction is R or it's S*
 #define HAZARD(STAGE) ((STAGE).regwrite && (STAGE).rwrite != 0 && ((STAGE).rwrite == dt_d.inst.rs() || (STAGE).rwrite == dt_d.inst.rt())) // Note: We make exception with $0 as that has no effect and is used in nop instruction
         if (HAZARD(dt_e)) {
             // Hazard with instruction in execute stage
-            // This always results to stall
-            stall = true;
+            if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
+				if (dt_e.memread)
+					stall = true;
+				else {
+					// Forward result value
+					if (dt_e.rwrite == dt_d.inst.rs())
+						dt_d.val_rs = dt_e.alu_val;
+					if (dt_e.rwrite == dt_d.inst.rt())
+						dt_d.val_rt = dt_e.alu_val;
+				}
+            } else
+                stall = true;
         }
         if (HAZARD(dt_m)) {
             // Hazard with instruction in memory stage
