@@ -45,7 +45,7 @@ ProgramLoader::ProgramLoader(const char *file) {
     if (!(this->phdrs = elf32_getphdr(this->elf)))
         throw QTMIPS_EXCEPTION(Input, "Elf program sections get failed", elf_errmsg(-1));
     // We want only LOAD sections so we create map of those sections
-    for (unsigned i = 1; i < this->n_secs; i++) {
+    for (unsigned i = 0; i < this->n_secs; i++) {
         if (phdrs[i].p_type != PT_LOAD)
             continue;
         this->map.push_back(i);
