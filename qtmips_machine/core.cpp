@@ -133,7 +133,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
 
     std::uint32_t alu_sec = dt.val_rt;
     if (dt.alusrc)
-        alu_sec = ((dt.inst.immediate() & 0x8000) << 16) | (dt.inst.immediate() & 0x7FFF); // Sign extend to 32bit
+        alu_sec = ((dt.inst.immediate() & 0x8000) ? 0xFFFF0000 : 0) | (dt.inst.immediate()); // Sign extend to 32bit
 
     return {
         .inst = dt.inst,
@@ -217,7 +217,7 @@ void Core::handle_pc(const struct dtDecode &dt) {
     }
 
     if (branch)
-        regs->pc_jmp((std::int32_t)(((dt.inst.immediate() & 0x7fff) << 2) | ((dt.inst.immediate() & 0x8000) << 16)));
+        regs->pc_jmp((std::int32_t)(((dt.inst.immediate() & 0x8000) ? 0xFFFF0000 : 0) | (dt.inst.immediate() << 2)));
     else
         regs->pc_inc();
 }

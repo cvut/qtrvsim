@@ -231,6 +231,9 @@ static void core_jmp_data() {
     QTest::newRow("BEQ") << Instruction(4, 14, 16, 61) \
                          << regs \
                          << regs.read_pc() + 4 + (61 << 2);
+    QTest::newRow("BEQ-BACK") << Instruction(4, 14, 16, -4) \
+                         << regs \
+                         << regs.read_pc() + 4 - 16;
     QTest::newRow("BNE") << Instruction(5, 14, 15, 61) \
                          << regs \
                          << regs.read_pc() + 4 + (61 << 2);
