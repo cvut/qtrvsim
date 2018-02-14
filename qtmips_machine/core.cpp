@@ -330,9 +330,12 @@ void CorePipelined::step() {
     if (!stall) {
         dt_f = fetch();
         handle_pc(dt_d);
-    } else
+    } else {
+        // Run fetch stage on empty
+        fetch();
         // clear decode latch (insert nope to execute stage)
         dtDecodeInit(dt_d);
+	}
 }
 
 void CorePipelined::reset() {
