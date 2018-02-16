@@ -2,6 +2,143 @@
 #include "qtmipsexception.h"
 
 using namespace machine;
+
+struct InstructionMap {
+    const char *name;
+    enum Instruction::Type type;
+    bool is_store;
+};
+
+#define IT_R Instruction::T_R
+#define IT_I Instruction::T_I
+#define IT_J Instruction::T_J
+
+#define IM_UNKNOWN {"UNKNOWN", Instruction::T_UNKNOWN, false}
+// This table is indexed by opcode
+static const struct InstructionMap instruction_map[] = {
+    {"ALU", IT_R, false}, // Alu operations
+    {"REGIMM", IT_I, false}, // REGIMM (BLTZ, BGEZ)
+    {"J", IT_J, false},
+    {"JAL", IT_J, false},
+    {"BEQ", IT_I, false},
+    {"BNE", IT_I, false},
+    {"BLEZ", IT_I, false},
+    {"BGTZ", IT_I, false},
+    {"ADDI", IT_I, false},
+    {"ADDIU", IT_I, false},
+    {"SLTI", IT_I, false},
+    {"SLTIU", IT_I, false},
+    {"ANDI", IT_I, false},
+    {"ORI", IT_I, false},
+    {"XORI", IT_I, false},
+    {"LUI", IT_I, false},
+    IM_UNKNOWN, // 16
+    IM_UNKNOWN, // 17
+    IM_UNKNOWN, // 18
+    IM_UNKNOWN, // 19
+    IM_UNKNOWN, // 20
+    IM_UNKNOWN, // 21
+    IM_UNKNOWN, // 22
+    IM_UNKNOWN, // 23
+    IM_UNKNOWN, // 24
+    IM_UNKNOWN, // 25
+    IM_UNKNOWN, // 26
+    IM_UNKNOWN, // 27
+    IM_UNKNOWN, // 28
+    IM_UNKNOWN, // 29
+    IM_UNKNOWN, // 30
+    IM_UNKNOWN, // 31
+    {"LB", IT_I, false},
+    {"LH", IT_I, false},
+    {"LWL", IT_I, false},
+    {"LW", IT_I, false},
+    {"LBU", IT_I, false},
+    {"LHU", IT_I, false},
+    {"LWR", IT_I, false},
+    IM_UNKNOWN, // 39
+    {"SB", IT_I, true},
+    {"SH", IT_I, true},
+    {"SWL", IT_I, true},
+    {"SW", IT_I, true},
+    IM_UNKNOWN, // 44
+    IM_UNKNOWN, // 45
+    {"SWR", IT_I, true},
+    IM_UNKNOWN,
+	// 47
+    IM_UNKNOWN, // 48
+    IM_UNKNOWN, // 49
+    IM_UNKNOWN, // 50
+    IM_UNKNOWN, // 51
+    IM_UNKNOWN, // 52
+    IM_UNKNOWN, // 53
+    IM_UNKNOWN, // 54
+    IM_UNKNOWN, // 55
+    IM_UNKNOWN, // 56
+    IM_UNKNOWN, // 57
+    IM_UNKNOWN, // 58
+    IM_UNKNOWN, // 59
+    IM_UNKNOWN, // 60
+    IM_UNKNOWN, // 61
+    IM_UNKNOWN, // 61
+    IM_UNKNOWN, // 62
+    IM_UNKNOWN // 63
+};
+#undef IM_UNKNOWN
+
+struct AluInstructionMap {
+    const char *name;
+};
+
+#define AIM_UNKNOWN {"UNKNOWN"}
+// This table is indexed by funct
+static const struct AluInstructionMap alu_instruction_map[] = {
+    {"SLL"},
+    AIM_UNKNOWN,
+    {"SRL"},
+    {"SRA"},
+    {"SLLV"},
+    AIM_UNKNOWN,
+    {"SRLV"},
+    {"SRAV"},
+    {"JR"},
+    {"JALR"},
+    {"MOVZ"},
+    {"MOVN"},
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    {"MFHU"},
+    {"MTHI"},
+    {"MFLO"},
+    {"MTLO"},
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    {"ADD"},
+    {"ADDU"},
+    {"SUB"},
+    {"SUBU"},
+    {"AND"},
+    {"OR"},
+    {"XOR"},
+    {"NOR"},
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    {"SLT"},
+    {"SLTU"}
+};
+#undef AIM_UNKNOWN
+
 Instruction::Instruction() {
     this->dt = 0;
 }
@@ -77,6 +214,20 @@ std::uint32_t Instruction::data() const {
     return this->dt;
 }
 
+enum Instruction::Type Instruction::type() const {
+    if  (opcode() >= (sizeof(instruction_map) / sizeof(struct InstructionMap)))
+        return T_UNKNOWN;
+    const struct InstructionMap &im = instruction_map[opcode()];
+    return im.type;
+}
+
+bool Instruction::is_store() const {
+    if  (opcode() >= (sizeof(instruction_map) / sizeof(struct InstructionMap)))
+        return false;
+    const struct InstructionMap &im = instruction_map[opcode()];
+    return im.is_store;
+}
+
 bool Instruction::operator==(const Instruction &c) const {
     return (this->data() == c.data());
 }
@@ -92,142 +243,6 @@ Instruction &Instruction::operator=(const Instruction &c) {
 }
 
 
-enum InstructionType {
-    IT_R,
-    IT_I,
-    IT_J
-};
-
-struct InstructionMap {
-    const char *name;
-    enum InstructionType type;
-};
-
-#define IM_UNKNOWN {"UNKNOWN", IT_R}
-// This table is indexed by opcode
-static const struct InstructionMap instruction_map[] = {
-    {"ALU", IT_R}, // Alu operations
-    {"REGIMM", IT_I}, // REGIMM (BLTZ, BGEZ)
-    {"J", IT_J},
-    {"JAL", IT_J},
-    {"BEQ", IT_I},
-    {"BNE", IT_I},
-    {"BLEZ", IT_I},
-    {"BGTZ", IT_I},
-    {"ADDI", IT_I},
-    {"ADDIU", IT_I},
-    {"SLTI", IT_I},
-    {"SLTIU", IT_I},
-    {"ANDI", IT_I},
-    {"ORI", IT_I},
-    {"XORI", IT_I},
-    {"LUI", IT_I},
-    IM_UNKNOWN, // 16
-    IM_UNKNOWN, // 17
-    IM_UNKNOWN, // 18
-    IM_UNKNOWN, // 19
-    IM_UNKNOWN, // 20
-    IM_UNKNOWN, // 21
-    IM_UNKNOWN, // 22
-    IM_UNKNOWN, // 23
-    IM_UNKNOWN, // 24
-    IM_UNKNOWN, // 25
-    IM_UNKNOWN, // 26
-    IM_UNKNOWN, // 27
-    IM_UNKNOWN, // 28
-    IM_UNKNOWN, // 29
-    IM_UNKNOWN, // 30
-    IM_UNKNOWN, // 31
-    {"LB", IT_I},
-    {"LH", IT_I},
-    {"LWL", IT_I},
-    {"LW", IT_I},
-    {"LBU", IT_I},
-    {"LHU", IT_I},
-    {"LWR", IT_I},
-    IM_UNKNOWN, // 39
-    {"SB", IT_I},
-    {"SH", IT_I},
-    {"SWL", IT_I},
-    {"SW", IT_I},
-    IM_UNKNOWN, // 44
-    IM_UNKNOWN, // 45
-    {"SWR", IT_I},
-    IM_UNKNOWN, // 47
-    IM_UNKNOWN, // 48
-    IM_UNKNOWN, // 49
-    IM_UNKNOWN, // 50
-    IM_UNKNOWN, // 51
-    IM_UNKNOWN, // 52
-    IM_UNKNOWN, // 53
-    IM_UNKNOWN, // 54
-    IM_UNKNOWN, // 55
-    IM_UNKNOWN, // 56
-    IM_UNKNOWN, // 57
-    IM_UNKNOWN, // 58
-    IM_UNKNOWN, // 59
-    IM_UNKNOWN, // 60
-    IM_UNKNOWN, // 61
-    IM_UNKNOWN, // 61
-    IM_UNKNOWN, // 62
-    IM_UNKNOWN // 63
-};
-#undef IM_UNKNOWN
-
-struct AluInstructionMap {
-    const char *name;
-};
-
-#define AIM_UNKNOWN {"UNKNOWN"}
-// This table is indexed by funct
-static const struct AluInstructionMap alu_instruction_map[] = {
-    {"SLL"},
-    AIM_UNKNOWN,
-    {"SRL"},
-    {"SRA"},
-    {"SLLV"},
-    AIM_UNKNOWN,
-    {"SRLV"},
-    {"SRAV"},
-    {"JR"},
-    {"JALR"},
-    {"MOVZ"},
-    {"MOVN"},
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    {"MFHU"},
-    {"MTHI"},
-    {"MFLO"},
-    {"MTLO"},
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    {"ADD"},
-    {"ADDU"},
-    {"SUB"},
-    {"SUBU"},
-    {"AND"},
-    {"OR"},
-    {"XOR"},
-    {"NOR"},
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    {"SLT"},
-    {"SLTU"}
-};
-#undef AIM_UNKNOWN
-
 QString Instruction::to_str() const {
     // TODO there are exception where some fields are zero and such so we should not print them in such case
     if  (opcode() >= (sizeof(instruction_map) / sizeof(struct InstructionMap)))
@@ -237,16 +252,16 @@ QString Instruction::to_str() const {
     const struct InstructionMap &im = instruction_map[opcode()];
     QString res;
     switch (im.type) {
-    case IT_I:
+    case T_I:
         res += im.name;
         res += " $" + QString::number(rt()) + ", $" + QString::number(rs()) + ", 0x" + QString::number(immediate(), 16).toUpper();
         break;
-    case IT_J:
+    case T_J:
         res += im.name;
         // TODO we need to know instruction address to expand address section by it
         res += " " + QString::number(address(), 16).toUpper();
         break;
-    case IT_R:
+    case T_R:
         {
         // Note that all R instructions we support has opcode == 0 and so they are processed by alu table
         if (funct() >= (sizeof(alu_instruction_map) / sizeof(struct AluInstructionMap)))
@@ -256,6 +271,8 @@ QString Instruction::to_str() const {
         res += " $" + QString::number(rd()) + ", $" + QString::number(rs()) + ", $" + QString::number(rt());
         break;
         }
+	case T_UNKNOWN:
+		return QString("UNKNOWN");
     }
     return res;
 }

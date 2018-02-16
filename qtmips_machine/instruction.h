@@ -15,6 +15,13 @@ public:
     Instruction(std::uint8_t opcode, std::uint32_t address); // Type J
     Instruction(const Instruction&);
 
+    enum Type {
+        T_R,
+        T_I,
+        T_J,
+        T_UNKNOWN
+    };
+
     std::uint8_t opcode() const;
     std::uint8_t rs() const;
     std::uint8_t rt() const;
@@ -24,6 +31,8 @@ public:
     std::uint16_t immediate() const;
     std::uint32_t address() const;
     std::uint32_t data() const;
+    enum Type type() const;
+    bool is_store() const; // Store instructions requires some additional handling so identify them
 
     bool operator==(const Instruction &c) const;
     bool operator!=(const Instruction &c) const;
