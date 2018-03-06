@@ -20,8 +20,9 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     connect(ui->pushButton_load, SIGNAL(clicked(bool)), this, SLOT(create()));
     connect(ui->pushButton_cancel, SIGNAL(clicked(bool)), this, SLOT(cancel()));
     connect(ui->pushButton_browse, SIGNAL(clicked(bool)), this, SLOT(browse_elf()));
-    //connect(ui->preset_box, SIGNAL(clicked(bool)), this, SLOT(set_preset()));
     connect(ui->preset_no_pipeline, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
+    connect(ui->preset_pipelined_bare, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
+    connect(ui->preset_pipelined_hazard, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
     connect(ui->preset_pipelined, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
 
     connect(ui->pipelined, SIGNAL(clicked(bool)), this, SLOT(pipelined_change(bool)));
@@ -32,8 +33,8 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     connect(ui->mem_protec_exec, SIGNAL(clicked(bool)), this, SLOT(mem_protec_exec_change(bool)));
     connect(ui->mem_protec_write, SIGNAL(clicked(bool)), this, SLOT(mem_protec_write_change(bool)));
 
-    connect(ui_cache_p->enabled, SIGNAL(clicked(bool)), this, SLOT(cache_program_change(bool)));
-    connect(ui_cache_d->enabled, SIGNAL(clicked(bool)), this, SLOT(cache_data_change(bool)));
+	cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d);
+	cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p);
 
     load_settings(); // Also configures gui
 }
@@ -44,6 +45,11 @@ NewDialog::~NewDialog() {
     delete ui;
     // Settings is freed by parent
     delete config;
+}
+
+void NewDialog::switch2custom() {
+	ui->preset_custom->setChecked(true);
+	config_gui();
 }
 
 void NewDialog::closeEvent(QCloseEvent *) {
@@ -90,77 +96,78 @@ void NewDialog::browse_elf() {
 }
 
 void NewDialog::set_preset() {
-    if (ui->preset_no_pipeline->isChecked())
-        config->preset(machine::CP_SINGLE);
-    else if (ui->preset_pipelined->isChecked())
-        config->preset(machine::CP_PIPE_WITH_CACHE);
-    else
-        // Skip apply configuration as we changed nothing.
-        return;
-    config_gui();
+    unsigned pres_n = preset_number();
+    if (pres_n > 0) {
+        config->preset((enum machine::ConfigPresets)(pres_n - 1));
+        config_gui();
+    }
 }
-
-// Common end section of *_change slots
-#define CHANGE_COMMON do { \
-        ui->preset_custom->setChecked(true); \
-        config_gui(); \
-    } while(false)
 
 void NewDialog::pipelined_change(bool val) {
     config->set_pipelined(val);
-    CHANGE_COMMON;
+	switch2custom();
 }
 
 void NewDialog::delay_slot_change(bool val) {
     config->set_delay_slot(val);
-    CHANGE_COMMON;
+	switch2custom();
 }
 
 void NewDialog::hazard_unit_change() {
-    if (ui->hazard_unit->isChecked())
+    if (ui->hazard_unit->isChecked()) {
         config->set_hazard_unit(ui->hazard_stall->isChecked() ? machine::MachineConfig::HU_STALL : machine::MachineConfig::HU_STALL_FORWARD);
-    else
+	} else {
         config->set_hazard_unit(machine::MachineConfig::HU_NONE);
-    CHANGE_COMMON;
+	}
+	switch2custom();
 }
 
 void NewDialog::mem_protec_exec_change(bool v) {
     config->set_memory_execute_protection(v);
-    CHANGE_COMMON;
+	switch2custom();
 }
 
 void NewDialog::mem_protec_write_change(bool v) {
     config->set_memory_write_protection(v);
-    CHANGE_COMMON;
-}
-
-void NewDialog::cache_data_change(bool v) {
-    config->access_cache_data()->set_enabled(v);
-    CHANGE_COMMON;
-}
-
-void NewDialog::cache_program_change(bool v) {
-    config->access_cache_program()->set_enabled(v);
-    CHANGE_COMMON;
+	switch2custom();
 }
 
 void NewDialog::config_gui() {
-    // Set values
+    // Basic
     ui->elf_file->setText(config->elf());
+    // Core
     ui->pipelined->setChecked(config->pipelined());
     ui->delay_slot->setChecked(config->delay_slot());
     ui->hazard_unit->setChecked(config->hazard_unit() != machine::MachineConfig::HU_NONE);
     ui->hazard_stall->setChecked(config->hazard_unit() == machine::MachineConfig::HU_STALL);
     ui->hazard_stall_forward->setChecked(config->hazard_unit() == machine::MachineConfig::HU_STALL_FORWARD);
+    // Memory
     ui->mem_protec_exec->setChecked(config->memory_execute_protection());
     ui->mem_protec_write->setChecked(config->memory_write_protection());
     ui->mem_time_read->setValue(config->memory_access_time_read());
     ui->mem_time_write->setValue(config->memory_access_time_write());
-    ui_cache_p->enabled->setChecked(config->cache_program().enabled());
-    ui_cache_d->enabled->setChecked(config->cache_data().enabled());
+    // Cache
+	cache_handler_d->config_gui();
+	cache_handler_p->config_gui();
+
     // Disable various sections according to configuration
     ui->delay_slot->setEnabled(!config->pipelined());
     ui->hazard_unit->setEnabled(config->pipelined());
+}
+
+unsigned NewDialog::preset_number() {
+    enum machine::ConfigPresets preset;
+    if (ui->preset_no_pipeline->isChecked())
+        preset = machine::CP_SINGLE;
+    else if (ui->preset_pipelined_bare->isChecked())
+        preset = machine::CP_PIPE_NO_HAZARD;
+    else if (ui->preset_pipelined_hazard->isChecked())
+        preset = machine::CP_PIPE_NO_CACHE;
+    else if (ui->preset_pipelined->isChecked())
+        preset = machine::CP_PIPE_CACHE;
+    else
+        return 0;
+    return (unsigned)preset + 1;
 }
 
 void NewDialog::load_settings() {
@@ -169,22 +176,31 @@ void NewDialog::load_settings() {
 
     // Load config
     config = new machine::MachineConfig(settings);
+	cache_handler_d->set_config(config->access_cache_data());
+	cache_handler_p->set_config(config->access_cache_program());
 
     // Load preset
     unsigned preset = settings->value("Preset", 1).toUInt();
     if (preset != 0) {
-        enum machine::ConfigPresets p = (enum machine::ConfigPresets)(preset - 1);
+        auto p = (enum machine::ConfigPresets)(preset - 1);
         config->preset(p);
         switch (p) {
         case machine::CP_SINGLE:
             ui->preset_no_pipeline->setChecked(true);
             break;
-        case machine::CP_PIPE_WITH_CACHE:
+        case machine::CP_PIPE_NO_HAZARD:
+            ui->preset_pipelined_bare->setChecked(true);
+            break;
+        case machine::CP_PIPE_NO_CACHE:
+            ui->preset_pipelined_hazard->setChecked(true);
+            break;
+        case machine::CP_PIPE_CACHE:
             ui->preset_pipelined->setChecked(true);
             break;
         }
-    } else
+    } else {
         ui->preset_custom->setChecked(true);
+	}
 
     config_gui();
 }
@@ -192,8 +208,65 @@ void NewDialog::load_settings() {
 void NewDialog::store_settings() {
     config->store(settings);
 
-    if (ui->preset_custom->isChecked())
+    // Presets are not stored in settings so we have to store them explicitly
+    if (ui->preset_custom->isChecked()) {
         settings->setValue("Preset", 0);
-    else
-        settings->setValue("Preset", ui->preset_no_pipeline->isChecked() ? machine::CP_SINGLE + 1 : machine::CP_PIPE_WITH_CACHE + 1);
+	} else {
+        settings->setValue("Preset", preset_number());
+	}
+}
+
+NewDialogCacheHandler::NewDialogCacheHandler(NewDialog *nd, Ui::NewDialogCache *cui) {
+	this->nd = nd;
+	this->ui = cui;
+	this->config = nullptr;
+	connect(ui->enabled, SIGNAL(clicked(bool)), this, SLOT(enabled(bool)));
+	connect(ui->number_of_sets, SIGNAL(editingFinished()), this, SLOT(numsets()));
+	connect(ui->block_size, SIGNAL(editingFinished()), this, SLOT(blocksize()));
+	connect(ui->degree_of_associativity, SIGNAL(editingFinished()), this, SLOT(degreeassociativity()));
+	connect(ui->replacement_policy, SIGNAL(activated(int)), this, SLOT(replacement(int)));
+	connect(ui->writeback_policy, SIGNAL(activated(int)), this, SLOT(writeback(int)));
+}
+
+void NewDialogCacheHandler::set_config(machine::MachineConfigCache *config) {
+	this->config = config;
+}
+
+void NewDialogCacheHandler::config_gui() {
+    ui->enabled->setChecked(config->enabled());
+    ui->number_of_sets->setValue(config->sets());
+    ui->block_size->setValue(config->blocks());
+    ui->degree_of_associativity->setValue(config->associativity());
+    ui->replacement_policy->setCurrentIndex((int)config->replacement_policy());
+    ui->writeback_policy->setCurrentIndex((int)config->write_policy());
+}
+
+void NewDialogCacheHandler::enabled(bool val) {
+	config->set_enabled(val);
+	nd->switch2custom();
+}
+
+void NewDialogCacheHandler::numsets() {
+	config->set_sets(ui->number_of_sets->value());
+	nd->switch2custom();
+}
+
+void NewDialogCacheHandler::blocksize() {
+	config->set_blocks(ui->block_size->value());
+	nd->switch2custom();
+}
+
+void NewDialogCacheHandler::degreeassociativity() {
+	config->set_associativity(ui->degree_of_associativity->value());
+	nd->switch2custom();
+}
+
+void NewDialogCacheHandler::replacement(int val) {
+	config->set_replacement_policy((enum machine::MachineConfigCache::ReplacementPolicy)val);
+	nd->switch2custom();
+}
+
+void NewDialogCacheHandler::writeback(int val) {
+	config->set_write_policy((enum machine::MachineConfigCache::WritePolicy)val);
+	nd->switch2custom();
 }

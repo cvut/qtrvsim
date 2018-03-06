@@ -15,36 +15,67 @@ using namespace machine;
 //////////////////////////////////////////////////////////////////////////////
 /// Default config of MachineConfigCache
 #define DFC_EN false
+#define DFC_SETS 1
+#define DFC_BLOCKS 1
+#define DFC_ASSOC 1
+#define DFC_REPLAC RP_RAND
+#define DFC_WRITE WP_TROUGH
 //////////////////////////////////////////////////////////////////////////////
 
 MachineConfigCache::MachineConfigCache() {
     en = DFC_EN;
+    n_sets = DFC_SETS;
+    n_blocks = DFC_BLOCKS;
+    d_associativity = DFC_ASSOC;
+    replac_pol = DFC_REPLAC;
+    write_pol = DFC_WRITE;
 }
 
 MachineConfigCache::MachineConfigCache(const MachineConfigCache *cc) {
     en = cc->enabled();
+    n_sets = cc->sets();
+    n_blocks = cc->blocks();
+    d_associativity = cc->associativity();
+    replac_pol = cc->replacement_policy();
+    write_pol = cc->write_policy();
 }
 
 #define N(STR) (prefix + QString(STR))
 
 MachineConfigCache::MachineConfigCache(const QSettings *sts, const QString &prefix) {
     en = sts->value(N("Enabled"), DFC_EN).toBool();
+    n_sets = sts->value(N("Sets"), DFC_SETS).toUInt();
+    n_blocks = sts->value(N("Blocks"), DFC_BLOCKS).toUInt();
+    d_associativity = sts->value(N("Associativity"), DFC_ASSOC).toUInt();
+    replac_pol = (enum ReplacementPolicy)sts->value(N("Replacement"), DFC_REPLAC).toUInt();
+    write_pol = (enum WritePolicy)sts->value(N("Write"), DFC_WRITE).toUInt();
 }
 
 void MachineConfigCache::store(QSettings *sts, const QString &prefix) {
-    sts->setValue(N("Enabled"), en);
+    sts->setValue(N("Enabled"), enabled());
+    sts->setValue(N("Sets"), sets());
+    sts->setValue(N("Blocks"), blocks());
+    sts->setValue(N("Associativity"), associativity());
+    sts->setValue(N("Replacement"), (unsigned)replacement_policy());
+    sts->setValue(N("Write"), (unsigned)write_policy());
 }
 
 #undef N
 
 void MachineConfigCache::preset(enum ConfigPresets p) {
     switch (p) {
+    case CP_PIPE_CACHE:
+        set_enabled(true);
+        set_sets(3);
+        set_blocks(1);
+        set_associativity(1);
+        set_replacement_policy(RP_RAND);
+        set_write_policy(WP_TROUGH);
+        break;
     case CP_SINGLE:
+    case CP_PIPE_NO_HAZARD:
+    case CP_PIPE_NO_CACHE:
         set_enabled(false);
-        break;
-    case CP_PIPE_WITH_CACHE:
-        set_enabled(false);
-        break;
     }
 }
 
@@ -52,13 +83,60 @@ void MachineConfigCache::set_enabled(bool v) {
     en = v;
 }
 
+void MachineConfigCache::set_sets(unsigned v) {
+    // TODO verify that this is 2^N
+    n_sets = v;
+}
+
+void MachineConfigCache::set_blocks(unsigned v) {
+    // TODO even more verifications for 2^N
+    n_blocks = v;
+}
+
+void MachineConfigCache::set_associativity(unsigned v) {
+    d_associativity = v;
+}
+
+void MachineConfigCache::set_replacement_policy(enum ReplacementPolicy v) {
+    replac_pol = v;
+}
+
+void MachineConfigCache::set_write_policy(enum WritePolicy v) {
+    write_pol = v;
+}
+
 bool MachineConfigCache::enabled() const {
     return en;
 }
 
+unsigned MachineConfigCache::sets() const {
+    return n_sets;
+}
+
+unsigned MachineConfigCache::blocks() const {
+    return n_blocks;
+}
+
+unsigned MachineConfigCache::associativity() const {
+    return d_associativity;
+}
+
+enum MachineConfigCache::ReplacementPolicy MachineConfigCache::replacement_policy() const {
+    return replac_pol;
+}
+
+enum MachineConfigCache::WritePolicy MachineConfigCache::write_policy() const {
+    return write_pol;
+}
+
 bool MachineConfigCache::operator==(const MachineConfigCache &c) const {
 #define CMP(GETTER) (GETTER)() == (c.GETTER)()
-    return CMP(enabled);
+    return CMP(enabled) && \
+            CMP(sets) && \
+            CMP(blocks) && \
+            CMP(associativity) && \
+            CMP(replacement_policy) && \
+            CMP(write_policy);
 #undef CMP
 }
 
@@ -97,7 +175,7 @@ MachineConfig::MachineConfig(const MachineConfig *cc) {
 MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     pipeline = sts->value(N("Pipelined"), DF_PIPELINE).toBool();
     delayslot = sts->value(N("DelaySlot"), DF_DELAYSLOT).toBool();
-    hunit = (enum HazardUnit)sts->value(N("HazardUnit"), DF_HUNIT).toUInt(); // TODO probably rather save as string
+    hunit = (enum HazardUnit)sts->value(N("HazardUnit"), DF_HUNIT).toUInt();
     exec_protect = sts->value(N("MemoryExecuteProtection"), DF_EXEC_PROTEC).toBool();
     write_protect = sts->value(N("MemoryWriteProtection"), DF_WRITE_PROTEC).toBool();
     mem_acc_read = sts->value(N("MemoryRead"), DF_MEM_ACC_READ).toUInt();
@@ -125,7 +203,12 @@ void MachineConfig::preset(enum ConfigPresets p) {
         set_pipelined(false);
         set_delay_slot(true);
         break;
-    case CP_PIPE_WITH_CACHE:
+    case CP_PIPE_NO_HAZARD:
+        set_pipelined(true);
+        set_hazard_unit(MachineConfig::HU_NONE);
+        break;
+    case CP_PIPE_CACHE:
+    case CP_PIPE_NO_CACHE:
         set_pipelined(true);
         set_hazard_unit(MachineConfig::HU_STALL_FORWARD);
         break;

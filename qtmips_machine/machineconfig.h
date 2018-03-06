@@ -7,8 +7,10 @@
 namespace machine {
 
 enum ConfigPresets {
-    CP_SINGLE,
-    CP_PIPE_WITH_CACHE
+    CP_SINGLE, // No pipeline cpu without cache
+    CP_PIPE_NO_HAZARD, // Pipelined cpu without hazard unit
+    CP_PIPE_NO_CACHE, // Pipelined cpu without cache
+    CP_PIPE_CACHE // Full pipelined cpu
 };
 
 class MachineConfigCache {
@@ -21,17 +23,41 @@ public:
 
     void preset(enum ConfigPresets);
 
+    enum ReplacementPolicy {
+        RP_RAND, // Random
+        RP_LRU, // Least recently used
+        RP_LFU, // Least frequently used
+        RP_ARC // Adaptive replacement cache
+    };
+
+    enum WritePolicy {
+        WP_TROUGH, // Write trough
+        WP_BACK // Write back
+    };
+
     // If cache should be used or not
     void set_enabled(bool);
+    void set_sets(unsigned); // Number of sets bits used in cache
+    void set_blocks(unsigned); // Number of blocks
+    void set_associativity(unsigned); // Degree of associativity
+    void set_replacement_policy(enum ReplacementPolicy);
+    void set_write_policy(enum WritePolicy);
 
     bool enabled() const;
+    unsigned sets() const;
+    unsigned blocks() const;
+    unsigned associativity() const;
+    enum ReplacementPolicy replacement_policy() const;
+    enum WritePolicy write_policy() const;
 
     bool operator ==(const MachineConfigCache &c) const;
     bool operator !=(const MachineConfigCache &c) const;
 
 private:
     bool en;
-    // TODO
+    unsigned n_sets, n_blocks, d_associativity;
+    enum ReplacementPolicy replac_pol;
+    enum WritePolicy write_pol;
 };
 
 class MachineConfig {

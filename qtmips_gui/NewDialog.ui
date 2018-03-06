@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>558</width>
-    <height>254</height>
+    <height>316</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -50,9 +50,23 @@
            </widget>
           </item>
           <item>
+           <widget class="QRadioButton" name="preset_pipelined_bare">
+            <property name="text">
+             <string>Pipelined without hazard unit and without cache</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="preset_pipelined_hazard">
+            <property name="text">
+             <string>Pipelined with hazard unit and without cache</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QRadioButton" name="preset_pipelined">
             <property name="text">
-             <string>Pipelined and cache</string>
+             <string>Pipelined with hazard unit and cache</string>
             </property>
            </widget>
           </item>
