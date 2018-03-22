@@ -57,9 +57,9 @@ void Registers::setPos(qreal x, qreal y) {
     con_read1->setPos(x + WIDTH, y + 10);
     con_read2->setPos(x + WIDTH, y + 30);
 
-    con_write_reg->setPos(x + WIDTH/2, y);
-    con_write->setPos(x, y + HEIGHT - 10);
-    con_ctl_write->setPos(x, y + HEIGHT - 20);
+    con_write_reg->setPos(x, y + HEIGHT - 10);
+    con_write->setPos(x, y + HEIGHT - 20);
+    con_ctl_write->setPos(x + WIDTH - 10, y);
 }
 
 const Connector *Registers::connector_read1() const {

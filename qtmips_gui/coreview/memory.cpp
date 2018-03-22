@@ -84,8 +84,8 @@ DataMemory::DataMemory(machine::QtMipsMachine *machine) : Memory(machine) {
     con_address = new Connector(Connector::AX_X);
     con_data_out = new Connector(Connector::AX_X);
     con_data_in	= new Connector(Connector::AX_X);
-    con_req_write = new Connector(Connector::AX_X);
-    con_req_read = new Connector(Connector::AX_X);
+    con_req_write = new Connector(Connector::AX_Y);
+    con_req_read = new Connector(Connector::AX_Y);
 }
 
 DataMemory::~DataMemory() {

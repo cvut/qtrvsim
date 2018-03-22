@@ -58,16 +58,6 @@ void CoreView::update_scale() {
 CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : QGraphicsScene(view) {
     setSceneRect(0, 0, SC_WIDTH, SC_HEIGHT);
 
-    // Identification cross (TODO remove)
-    /*
-    QPen pen;
-    pen.setBrush(QBrush(QColor(220, 220, 220)));
-    addLine(width()/2, 0, width()/2, height(), pen);
-    addLine(0, height()/2, width(), height()/2, pen);
-    addRect(0.5, 0.5, width() - 0.5, height() - 0.5, pen);
-    */
-    // TODO remove
-
     // Elements //
     // Primary points
     NEW(ProgramMemory, mem_program, 90, 240, machine);
@@ -98,11 +88,12 @@ CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : 
     NEW(Junction, dc.j_inst_down, 190, dc_con_sign_ext->y());
     // Execute stage
     NEW(Junction, ex.j_mux, 420, 316);
-    NEW(Multiplexer, ex.mux_imm, 450, 306, 2);
+    NEW(Multiplexer, ex.mux_imm, 450, 306, 2, true);
+    NEW(Multiplexer, ex.mux_regdest, 410, 370, 2, true);
     // Memory
     NEW(Junction, mm.j_addr, 570, mem_data->connector_address()->y());
     // WriteBack stage
-    NEW(Multiplexer, wb.mem_or_reg, 690, 252, 2);
+    NEW(Multiplexer, wb.mem_or_reg, 690, 252, 2, true);
 
     // Connections //
     coreview::Connection *con;
@@ -188,6 +179,7 @@ CoreViewSceneSimple::CoreViewSceneSimple(CoreView *view, machine::QtMipsMachine 
     con->setAxes({CON_AXIS_Y(420)});
     con = new_bus(dc.j_sign_ext->new_connector(coreview::Connector::AX_X), ex.mux_imm->connector_in(1));
     con->setAxes({CON_AXIS_Y(440)});
+	new_signal(dc.ctl_block->new_connector(1, -0.6), regs->connector_ctl_write());
     // Execute
     new_bus(alu->connector_out(), mm.j_addr->new_connector(CON_AX_X));
     con = new_bus(ex.j_mux->new_connector(CON_AX_Y), mem_data->connector_data_in());
@@ -215,6 +207,19 @@ CoreViewSceneSimple::CoreViewSceneSimple(CoreView *view, machine::QtMipsMachine 
         con = new_bus(dc.add->connector_out(), ft.multiplex->connector_in(1));
         con->setAxes({CON_AXIS_Y(360), CON_AXIS_X(480), CON_AXIS_Y(10)});
     }
+	// From decode to execute stage
+	new_signal(dc.ctl_block->new_connector(1, 0.4), ex.mux_imm->connector_ctl());
+	new_signal(dc.ctl_block->new_connector(1, 0.2), alu->connector_ctl());
+    new_bus(dc.instr_bus->new_connector(ex.mux_regdest->connector_in(0)->point()), ex.mux_regdest->connector_in(0), 2);
+    new_bus(dc.instr_bus->new_connector(ex.mux_regdest->connector_in(1)->point()), ex.mux_regdest->connector_in(1), 2);
+	// From decode to memory stage
+	new_signal(dc.ctl_block->new_connector(1, 0.0), mem_data->connector_req_write());
+	new_signal(dc.ctl_block->new_connector(1, -0.2), mem_data->connector_req_read());
+	// From decode to write back stage
+	new_signal(dc.ctl_block->new_connector(1, -0.4), wb.mem_or_reg->connector_ctl());
+    // From execute to decode stage
+    con = new_bus(ex.mux_regdest->connector_out(), regs->connector_write_reg(), 2);
+    con->setAxes({CON_AXIS_Y(430), CON_AXIS_X(500), CON_AXIS_Y(210)});
 }
 
 CoreViewScenePipelined::CoreViewScenePipelined(CoreView *view, machine::QtMipsMachine *machine) : CoreViewScene(view, machine) {

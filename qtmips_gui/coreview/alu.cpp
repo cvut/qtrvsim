@@ -45,7 +45,7 @@ void coreview::Alu::setPos(qreal x, qreal y) {
     con_in_a->setPos(x, y + off);
     con_in_b->setPos(x, y + HEIGHT - off);
     con_out->setPos(x + WIDTH, y + HEIGHT/2);
-    con_ctl->setPos(x + WIDTH/2, y + HEIGHT - (WIDTH/2));
+    con_ctl->setPos(x + WIDTH/2, y + (WIDTH/2));
 }
 
 const coreview::Connector *coreview::Alu::connector_in_a() const {
