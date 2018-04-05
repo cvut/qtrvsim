@@ -28,6 +28,7 @@ ProgramLoader::ProgramLoader(const char *file) {
     if (this->hdr.e_type != ET_EXEC)
         throw QTMIPS_EXCEPTION(Input, "Invalid input file type", "");
     // Check elf file architecture, of course only mips is supported.
+    // Note: This also checks that this is big endian as EM_MIPS is suppose to be: MIPS R3000 big-endian
     if (this->hdr.e_machine != EM_MIPS)
         throw QTMIPS_EXCEPTION(Input, "Invalid input file architecture", "");
     // Check elf file class, only 32bit architecture is supported.
@@ -36,7 +37,6 @@ ProgramLoader::ProgramLoader(const char *file) {
         throw QTMIPS_EXCEPTION(Input, "Getting elf class failed", elf_errmsg(-1));
     if (elf_class != ELFCLASS32)
         throw QTMIPS_EXCEPTION(Input, "Only supported architecture is 32bit", "");
-    // TODO We should check in what endianity elf file is coded in
 
     // Get number of program sections in elf file
     if (elf_getphdrnum(this->elf, &this->n_secs))
