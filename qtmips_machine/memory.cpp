@@ -2,65 +2,42 @@
 
 using namespace machine;
 
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+#define SH_NTH_8(OFFSET) ((3 - ((OFFSET) & 0b11)) * 8)
+#define SH_NTH_16(OFFSET) ((1 - ((OFFSET) & 0b10)) * 16)
+#else
+#define SH_NTH_8(OFFSET) (((OFFSET) & 0b11) * 8)
+#define SH_NTH_16(OFFSET) (((OFFSET) & 0b10) * 16)
+#endif
+
 void MemoryAccess::write_byte(std::uint32_t offset, std::uint8_t value) {
-    emit byte_change(offset, value);
-    wbyte(offset, value);
+    int nth = SH_NTH_8(offset);
+    std::uint32_t mask = 0xff << nth; // Mask for n-th byte
+    wword(offset, (rword(offset) & ~mask) | (((std::uint32_t)value << nth) & mask));
 }
 
 void MemoryAccess::write_hword(std::uint32_t offset, std::uint16_t value) {
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-    this->write_byte(offset++, (std::uint8_t)(value >> 8));
-    this->write_byte(offset, (std::uint8_t)value);
-#else
-    this->write_byte(offset++, (std::uint8_t)value);
-    this->write_byte(offset, (std::uint8_t)(value >> 8));
-#endif
+    int nth = SH_NTH_16(offset & ~0b1);
+    std::uint32_t mask = 0xffff << nth; // Mask for n-th half-word
+    wword(offset, (rword(offset) & ~mask) | (((std::uint32_t)value << nth) & mask));
 }
 
 void MemoryAccess::write_word(std::uint32_t offset, std::uint32_t value) {
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-    this->write_byte(offset++, (std::uint8_t)(value >> 24));
-    this->write_byte(offset++, (std::uint8_t)(value >> 16));
-    this->write_byte(offset++, (std::uint8_t)(value >> 8));
-    this->write_byte(offset, (std::uint8_t)value);
-#else
-    this->write_byte(offset++, (std::uint8_t)value);
-    this->write_byte(offset++, (std::uint8_t)(value >> 8));
-    this->write_byte(offset++, (std::uint8_t)(value >> 16));
-    this->write_byte(offset, (std::uint8_t)(value >> 24));
-#endif
+    wword(offset, value);
 }
 
 std::uint8_t MemoryAccess::read_byte(std::uint32_t offset) const {
-    return rbyte(offset);
+    int nth = SH_NTH_8(offset);
+    return (std::uint8_t)(rword(offset) >> nth);
 }
 
 std::uint16_t MemoryAccess::read_hword(std::uint32_t offset) const {
-    std::uint16_t dt = 0;
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-    dt |= (this->read_byte(offset++) << 8);
-    dt |= this->read_byte(offset);
-#else
-    dt |= this->read_byte(offset++);
-    dt |= (this->read_byte(offset) << 8);
-#endif
-    return dt;
+    int nth = SH_NTH_16(offset & ~0x1);
+    return (std::uint16_t)(rword(offset) >> nth);
 }
 
 std::uint32_t MemoryAccess::read_word(std::uint32_t offset) const {
-    std::uint32_t dt = 0;
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-    dt |= ((std::uint32_t)this->read_byte(offset++) << 24);
-    dt |= ((std::uint32_t)this->read_byte(offset++) << 16);
-    dt |= ((std::uint32_t)this->read_byte(offset++) << 8);
-    dt |= (std::uint32_t)this->read_byte(offset);
-#else
-    dt |= (std::uint32_t)this->read_byte(offset++);
-    dt |= ((std::uint32_t)this->read_byte(offset++) << 8);
-    dt |= ((std::uint32_t)this->read_byte(offset++) << 16);
-    dt |= ((std::uint32_t)this->read_byte(offset) << 24);
-#endif
-    return dt;
+    return rword(offset);
 }
 
 void MemoryAccess::write_ctl(enum MemoryAccess::AccessControl ctl, std::uint32_t offset, std::uint32_t value) {
@@ -110,7 +87,7 @@ std::uint32_t MemoryAccess::read_ctl(enum MemoryAccess::AccessControl ctl, std::
 
 MemorySection::MemorySection(std::uint32_t length) {
     this->len = length;
-    this->dt = new std::uint8_t[length];
+    this->dt = new std::uint32_t[length];
     memset(this->dt, 0, sizeof *this->dt * length);
 }
 
@@ -122,13 +99,15 @@ MemorySection::~MemorySection() {
     delete this->dt;
 }
 
-void MemorySection::wbyte(std::uint32_t offset, std::uint8_t value) {
+void MemorySection::wword(std::uint32_t offset, std::uint32_t value) {
+    offset = offset >> 2;
     if (offset >= this->len)
         throw QTMIPS_EXCEPTION(OutOfMemoryAccess, "Trying to write outside of the memory section", QString("Accessing using offset: ") + QString(offset));
     this->dt[offset] = value;
 }
 
-std::uint8_t MemorySection::rbyte(std::uint32_t offset) const {
+std::uint32_t MemorySection::rword(std::uint32_t offset) const {
+    offset = offset >> 2;
     if (offset >= this->len)
         throw QTMIPS_EXCEPTION(OutOfMemoryAccess, "Trying to read outside of the memory section", QString("Accessing using offset: ") + QString(offset));
     return this->dt[offset];
@@ -138,7 +117,7 @@ std::uint32_t MemorySection::length() const {
     return len;
 }
 
-const std::uint8_t* MemorySection::data() const {
+const std::uint32_t* MemorySection::data() const {
     return this->dt;
 }
 
@@ -150,27 +129,35 @@ bool MemorySection::operator!=(const MemorySection &ms) const {
     return ! this->operator ==(ms);
 }
 
-// Number of bites per row on lookup tree
-#define MEMORY_TREE_ROW ((32 - MEMORY_SECTION_BITS) / MEMORY_TREE_H)
-// Size of row in memory lookup tree
-#define MEMORY_TREE_LEN (1 << MEMORY_TREE_ROW)
+//////////////////////////////////////////////////////////////////////////////
+/// Some optimalization options
+// How big memory sections will be in bits (2^6=64)
+#define MEMORY_SECTION_BITS 6
+// How big one row of lookup tree will be in bits (2^4=16)
+#define MEMORY_TREE_BITS 4
+//////////////////////////////////////////////////////////////////////////////
+// Size of one section
+#define MEMORY_SECTION_SIZE (1 << MEMORY_SECTION_BITS)
+// Size of one memory row
+#define MEMORY_TREE_ROW_SIZE (1 << MEMORY_TREE_BITS)
+// Depth of tree
+#define MEMORY_TREE_DEPTH ((30 - MEMORY_SECTION_BITS) / MEMORY_TREE_BITS)
 // Just do some sanity checks
-#if (MEMORY_TREE_LEN == 0)
-#error Nonzero memory tree row size
+#if (MEMORY_SECTION_SIZE == 0)
+#error Nonzero memory section size is required
 #endif
-#if (((32 - MEMORY_SECTION_BITS) % MEMORY_TREE_H) != 0)
-#error Memory tree is not fully divisible by memory tree height
+#if (MEMORY_TREE_ROW_SIZE == 0)
+#error Nonzero memory tree row size is required
 #endif
-#if (MEMORY_TREE_H < 2)
-#error Memory tree have to be higher or in limit equal to two
+#if (((30 - MEMORY_SECTION_BITS) % MEMORY_TREE_BITS) != 0)
+#error Number of bits in tree row has to be exact division of available number of bits
 #endif
 
-namespace machine {
-union MemoryTree {
-    union MemoryTree *mt;
-    MemorySection *sec;
-};
-} // namespace machine
+// Macro to generate mask of given size with given righ offset
+#define GENMASK(SIZE, OFF) (((1 << (SIZE)) - 1) << (OFF))
+// Get index in row for fiven offset and row number i
+#define TREE_ROW_BIT_OFFSET(I) (30 - MEMORY_TREE_BITS - (I)*MEMORY_TREE_BITS)
+#define TREE_ROW(OFFSET, I) (((OFFSET) & GENMASK(MEMORY_TREE_BITS, TREE_ROW_BIT_OFFSET(I))) >> TREE_ROW_BIT_OFFSET(I))
 
 Memory::Memory() {
     this->mt_root = allocate_section_tree();
@@ -194,52 +181,40 @@ void Memory::reset(const Memory &m) {
     this->mt_root = copy_section_tree(m.get_memorytree_root(), 0);
 }
 
-// Create address mask with section length
-#define ADDRESS_MASK(LEN) ((1 << (LEN)) - 1)
-
-// Get index in tree node from address, length of row and tree depth
-// ADDR is expected to be and address with lowest bites removed (MEMORY_SECTION_BITS)
-#define ADDRESS_TREE_INDEX(DEPTH, ADDR) (((ADDR) >> ((DEPTH) * (MEMORY_TREE_ROW))) & ADDRESS_MASK(MEMORY_TREE_ROW))
-
-
 MemorySection *Memory::get_section(std::uint32_t address, bool create) const {
-    std::uint32_t addr = address >> MEMORY_SECTION_BITS; // drop all bits for addressing inside of the section
     union MemoryTree *w = this->mt_root;
-    size_t ii;
-    for (int i = 0; i < (MEMORY_TREE_H - 1); i++) {
-        ii = ADDRESS_TREE_INDEX(i, addr);
-        if (w[ii].mt == nullptr) { // We don't have this tree so allocate it
+    size_t row_num;
+    for (int i = 0; i < (MEMORY_TREE_DEPTH - 1); i++) {
+        row_num = TREE_ROW(address, i);
+        if (w[row_num].mt == nullptr) { // We don't have this tree so allocate it
             if (!create) // If we shouldn't be creating it than just return null
                 return nullptr;
-            w[ii].mt = allocate_section_tree();
+            w[row_num].mt = allocate_section_tree();
         }
-        w = w[ii].mt;
+        w = w[row_num].mt;
     }
-    // Now expand last level
-    ii = ADDRESS_TREE_INDEX((MEMORY_TREE_H - 1), addr);
-    if (w[ii].sec == nullptr) {
+    row_num = TREE_ROW(address, MEMORY_TREE_DEPTH - 1);
+    if (w[row_num].sec == nullptr) {
         if (!create)
             return nullptr;
-        w[ii].sec = new MemorySection(1 << MEMORY_SECTION_BITS);
+        w[row_num].sec = new MemorySection(MEMORY_SECTION_SIZE);
     }
-    return w[ii].sec;
+    return w[row_num].sec;
 }
 
-// Note about this address magic: we want to mask upper bits in address as those were used
-// for section lookup. We do it using (2^BITS - 1).
-#define SECTION_ADDRESS(ADDR) ((ADDR) & ADDRESS_MASK(MEMORY_SECTION_BITS))
+#define SECTION_OFFSET_MASK(ADDR) (ADDR & GENMASK(MEMORY_SECTION_BITS, 2))
 
-void Memory::wbyte(std::uint32_t address, std::uint8_t value) {
+void Memory::wword(std::uint32_t address, std::uint32_t value) {
     MemorySection *section = this->get_section(address, true);
-    section->write_byte(SECTION_ADDRESS(address), value);
+    section->write_word(SECTION_OFFSET_MASK(address), value);
 }
 
-std::uint8_t Memory::rbyte(std::uint32_t address) const {
+std::uint32_t Memory::rword(std::uint32_t address) const {
     MemorySection *section = this->get_section(address, false);
     if (section == nullptr)
         return 0;
     else
-        return section->read_byte(SECTION_ADDRESS(address));
+        return section->read_word(SECTION_OFFSET_MASK(address));
 }
 
 bool Memory::operator==(const Memory&m) const {
@@ -254,32 +229,32 @@ const union machine::MemoryTree *Memory::get_memorytree_root() const {
     return this->mt_root;
 }
 
-std::uint32_t Memory::next_allocated(std::uint32_t addr) const {
+std::uint32_t Memory::next_allocated(std::uint32_t address) const {
+    address = address >> 2;
     // TODO
-    return addr;
+    return address;
 }
 
-std::uint32_t Memory::prev_allocated(std::uint32_t addr) const {
+std::uint32_t Memory::prev_allocated(std::uint32_t address) const {
+    address = address >> 2;
     // TODO
-    return addr;
+    return address;
 }
 
 union machine::MemoryTree *Memory::allocate_section_tree() {
-    union MemoryTree *mt = new union MemoryTree[MEMORY_TREE_LEN];
-    for (size_t i = 0; i < MEMORY_TREE_LEN; i++)
-        // Note that this also nulls sec pointer as those are both pointers and so they have same size
-        mt[i].mt = nullptr;
+    union MemoryTree *mt = new union MemoryTree[MEMORY_TREE_ROW_SIZE];
+    memset(mt, 0, sizeof *mt * MEMORY_TREE_ROW_SIZE);
     return mt;
 }
 
 void Memory::free_section_tree(union machine::MemoryTree *mt, size_t depth) {
-    if (depth < (MEMORY_TREE_H - 1))  { // Following level is memory tree
-        for (int i = 0; i < MEMORY_TREE_LEN; i++) {
+    if (depth < (MEMORY_TREE_DEPTH - 1))  { // Following level is memory tree
+        for (int i = 0; i < MEMORY_TREE_ROW_SIZE; i++) {
             if (mt[i].mt != nullptr)
                 free_section_tree(mt[i].mt, depth + 1);
         }
     } else { // Following level is memory section
-        for (int i = 0; i < MEMORY_TREE_LEN; i++) {
+        for (int i = 0; i < MEMORY_TREE_ROW_SIZE; i++) {
             if (mt[i].sec != nullptr)
                 delete mt[i].sec;
         }
@@ -287,8 +262,8 @@ void Memory::free_section_tree(union machine::MemoryTree *mt, size_t depth) {
 }
 
 bool Memory::compare_section_tree(const union machine::MemoryTree *mt1, const union machine::MemoryTree *mt2, size_t depth) {
-    if (depth < (MEMORY_TREE_H - 1))  { // Following level is memory tree
-        for (int i = 0; i < MEMORY_TREE_LEN; i++) {
+    if (depth < (MEMORY_TREE_DEPTH - 1))  { // Following level is memory tree
+        for (int i = 0; i < MEMORY_TREE_ROW_SIZE; i++) {
             if (
                 ((mt1[i].mt == nullptr || mt2[i].mt == nullptr) && 	mt1[i].mt != mt2[i].mt)
                     ||
@@ -298,7 +273,7 @@ bool Memory::compare_section_tree(const union machine::MemoryTree *mt1, const un
             }
         }
     } else { // Following level is memory section
-        for (int i = 0; i < MEMORY_TREE_LEN; i++) {
+        for (int i = 0; i < MEMORY_TREE_ROW_SIZE; i++) {
             if (
                 ((mt1[i].sec == nullptr || mt2[i].sec == nullptr) && mt1[i].sec != mt2[i].sec)
                     ||
@@ -313,14 +288,14 @@ bool Memory::compare_section_tree(const union machine::MemoryTree *mt1, const un
 
 union machine::MemoryTree *Memory::copy_section_tree(const union machine::MemoryTree *mt, size_t depth) {
     union MemoryTree *nmt = allocate_section_tree();
-    if (depth < (MEMORY_TREE_H - 1))  { // Following level is memory tree
-        for (int i = 0; i < MEMORY_TREE_LEN; i++) {
+    if (depth < (MEMORY_TREE_DEPTH - 1))  { // Following level is memory tree
+        for (int i = 0; i < MEMORY_TREE_ROW_SIZE; i++) {
             if (mt[i].mt != nullptr) {
                 nmt[i].mt = copy_section_tree(mt[i].mt, depth + 1);
             }
         }
     } else { // Following level is memory section
-        for (int i = 0; i < MEMORY_TREE_LEN; i++) {
+        for (int i = 0; i < MEMORY_TREE_ROW_SIZE; i++) {
             if (mt[i].sec != nullptr)
                 nmt[i].sec = new MemorySection(*mt[i].sec);
         }

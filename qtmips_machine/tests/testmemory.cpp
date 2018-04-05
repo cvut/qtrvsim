@@ -54,9 +54,9 @@ void MachineTests::memory_section() {
     // Write some data to memory
     m.write_byte(address, 0x42);
     // Read it trough section (mask bits outside of the memory section)
-    QCOMPARE(s->read_byte(address & ((1 << MEMORY_SECTION_BITS)  - 1)), (std::uint8_t)0x42);
+    QCOMPARE(s->read_byte(address & 0xFF), (std::uint8_t)0x42);
     // Write some other data trough section
-    s->write_byte(address & ((1 << MEMORY_SECTION_BITS)  - 1), 0x66);
+    s->write_byte(address & 0xFF, 0x66);
     // Read trough memory
     QCOMPARE(m.read_byte(address), (std::uint8_t)0x66);
 }
@@ -64,7 +64,7 @@ void MachineTests::memory_section() {
 void MachineTests::memory_endian() {
     Memory m;
 
-    // Memory should be little endian so write bytes from most significant byte
+    // Memory should be big endian so write bytes from most significant byte
     m.write_byte(0x00, 0x12);
     m.write_byte(0x01, 0x34);
     m.write_byte(0x02, 0x56);
