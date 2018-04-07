@@ -21,7 +21,8 @@ SOURCES += tst_machine.cpp \
     testprogramloader.cpp \
     testinstruction.cpp \
     testalu.cpp \
-    testcore.cpp
+    testcore.cpp \
+    testcache.cpp
 
 HEADERS += tst_machine.h
 

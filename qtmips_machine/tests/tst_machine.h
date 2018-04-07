@@ -46,6 +46,9 @@ private Q_SLOTS:
     void singlecore_mem_data();
     void pipecore_mem();
     void pipecore_mem_data();
+    // Cache
+    void cache_data();
+    void cache();
 };
 
 #endif // TST_MACHINE_H
