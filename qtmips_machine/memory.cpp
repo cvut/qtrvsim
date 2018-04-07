@@ -17,7 +17,7 @@ void MemoryAccess::write_byte(std::uint32_t offset, std::uint8_t value) {
 }
 
 void MemoryAccess::write_hword(std::uint32_t offset, std::uint16_t value) {
-    int nth = SH_NTH_16(offset & ~0b1);
+    int nth = SH_NTH_16(offset);
     std::uint32_t mask = 0xffff << nth; // Mask for n-th half-word
     wword(offset, (rword(offset) & ~mask) | (((std::uint32_t)value << nth) & mask));
 }
@@ -32,7 +32,7 @@ std::uint8_t MemoryAccess::read_byte(std::uint32_t offset) const {
 }
 
 std::uint16_t MemoryAccess::read_hword(std::uint32_t offset) const {
-    int nth = SH_NTH_16(offset & ~0x1);
+    int nth = SH_NTH_16(offset);
     return (std::uint16_t)(rword(offset) >> nth);
 }
 
