@@ -4,6 +4,7 @@
 #include <memory.h>
 #include <machineconfig.h>
 #include <stdint.h>
+#include <time.h>
 
 namespace machine {
 
@@ -20,7 +21,10 @@ public:
     unsigned hit(); // Number of recorded hits
     unsigned miss(); // Number of recorded misses
 
-    // TODO reset
+    void reset(); // Reset whole state of cache
+
+    const MachineConfigCache &config();
+    // TODO getters for cells
 
 private:
     MachineConfigCache cnf;
@@ -33,9 +37,16 @@ private:
     };
     mutable struct cache_data **dt;
 
-    mutable unsigned hitc, missc;
+    union {
+        time_t ** lru; // Access time
+        unsigned **lfu; // Access count
+    } replc; // Data used for replacement policy
+
+    mutable unsigned hitc, missc; // Hit and miss counters
 
     void access(std::uint32_t address, std::uint32_t **data, bool read) const;
+    void kick(unsigned associat_indx, unsigned row) const;
+    std::uint32_t base_address(std::uint32_t tag, unsigned row) const;
 };
 
 }
