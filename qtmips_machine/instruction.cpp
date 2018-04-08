@@ -3,35 +3,39 @@
 
 using namespace machine;
 
+#define IMF_NO_RS (1<<0) // This instruction doesn't have rs field
+#define IMF_MEM (1<<1) // This instruction is memory access instruction
+
 struct InstructionMap {
     const char *name;
     enum Instruction::Type type;
     bool is_store;
+    unsigned flags;
 };
 
 #define IT_R Instruction::T_R
 #define IT_I Instruction::T_I
 #define IT_J Instruction::T_J
 
-#define IM_UNKNOWN {"UNKNOWN", Instruction::T_UNKNOWN, false}
+#define IM_UNKNOWN {"UNKNOWN", Instruction::T_UNKNOWN, false, .flags = 0}
 // This table is indexed by opcode
 static const struct InstructionMap instruction_map[] = {
-    {"ALU", IT_R, false}, // Alu operations
-    {"REGIMM", IT_I, false}, // REGIMM (BLTZ, BGEZ)
-    {"J", IT_J, false},
-    {"JAL", IT_J, false},
-    {"BEQ", IT_I, false},
-    {"BNE", IT_I, false},
-    {"BLEZ", IT_I, false},
-    {"BGTZ", IT_I, false},
-    {"ADDI", IT_I, false},
-    {"ADDIU", IT_I, false},
-    {"SLTI", IT_I, false},
-    {"SLTIU", IT_I, false},
-    {"ANDI", IT_I, false},
-    {"ORI", IT_I, false},
-    {"XORI", IT_I, false},
-    {"LUI", IT_I, false},
+    {"ALU", IT_R, false, .flags = 0}, // Alu operations
+    {"REGIMM", IT_I, false, .flags = 0}, // REGIMM (BLTZ, BGEZ)
+    {"J", IT_J, false, .flags = 0},
+    {"JAL", IT_J, false, .flags = 0},
+    {"BEQ", IT_I, false, .flags = 0},
+    {"BNE", IT_I, false, .flags = 0},
+    {"BLEZ", IT_I, false, .flags = 0},
+    {"BGTZ", IT_I, false, .flags = 0},
+    {"ADDI", IT_I, false, .flags = 0},
+    {"ADDIU", IT_I, false, .flags = 0},
+    {"SLTI", IT_I, false, .flags = 0},
+    {"SLTIU", IT_I, false, .flags = 0},
+    {"ANDI", IT_I, false, .flags = 0},
+    {"ORI", IT_I, false, .flags = 0},
+    {"XORI", IT_I, false, .flags = 0},
+    {"LUI", IT_I, false, .flags = IMF_NO_RS},
     IM_UNKNOWN, // 16
     IM_UNKNOWN, // 17
     IM_UNKNOWN, // 18
@@ -48,23 +52,22 @@ static const struct InstructionMap instruction_map[] = {
     IM_UNKNOWN, // 29
     IM_UNKNOWN, // 30
     IM_UNKNOWN, // 31
-    {"LB", IT_I, false},
-    {"LH", IT_I, false},
-    {"LWL", IT_I, false},
-    {"LW", IT_I, false},
-    {"LBU", IT_I, false},
-    {"LHU", IT_I, false},
-    {"LWR", IT_I, false},
+    {"LB", IT_I, false, .flags = IMF_MEM},
+    {"LH", IT_I, false, .flags = IMF_MEM},
+    {"LWL", IT_I, false, .flags = IMF_MEM},
+    {"LW", IT_I, false, .flags = IMF_MEM},
+    {"LBU", IT_I, false, .flags = IMF_MEM},
+    {"LHU", IT_I, false, .flags = IMF_MEM},
+    {"LWR", IT_I, false, .flags = IMF_MEM},
     IM_UNKNOWN, // 39
-    {"SB", IT_I, true},
-    {"SH", IT_I, true},
-    {"SWL", IT_I, true},
-    {"SW", IT_I, true},
+    {"SB", IT_I, true, .flags = IMF_MEM},
+    {"SH", IT_I, true, .flags = IMF_MEM},
+    {"SWL", IT_I, true, .flags = IMF_MEM},
+    {"SW", IT_I, true, .flags = IMF_MEM},
     IM_UNKNOWN, // 44
     IM_UNKNOWN, // 45
-    {"SWR", IT_I, true},
-    IM_UNKNOWN,
-	// 47
+    {"SWR", IT_I, true, .flags = IMF_MEM},
+    IM_UNKNOWN, // 47
     IM_UNKNOWN, // 48
     IM_UNKNOWN, // 49
     IM_UNKNOWN, // 50
@@ -254,7 +257,15 @@ QString Instruction::to_str() const {
     switch (im.type) {
     case T_I:
         res += im.name;
-        res += " $" + QString::number(rt()) + ", $" + QString::number(rs()) + ", 0x" + QString::number(immediate(), 16).toUpper();
+        if (im.flags & IMF_MEM) {
+            res += " $" + QString::number(rs());
+            res += ", 0x" + QString::number(immediate(), 16).toUpper() + "(" + QString::number(rt()) + ")";
+        } else {
+            res += " $" + QString::number(rt());
+            if (!(im.flags & IMF_NO_RS))
+                res += ", $" + QString::number(rs());
+            res += ", 0x" + QString::number(immediate(), 16).toUpper();
+        }
         break;
     case T_J:
         res += im.name;
