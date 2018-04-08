@@ -33,6 +33,7 @@ enum AluOp : std::uint8_t {
     ALU_OP_NOR,
     ALU_OP_SLT = 42,
     ALU_OP_SLTU,
+    ALU_OP_LUI, // We don't care about exact index for this one
     ALU_OP_LAST = 64 // First impossible operation (just to be sure that we don't overflow)
 };
 

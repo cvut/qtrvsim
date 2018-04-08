@@ -122,6 +122,10 @@ static void core_regs_data() {
     QTest::newRow("NOR") << Instruction(0, 24, 25, 26, 0, 39) \
                          << regs_init \
                          << regs_res;
+    regs_res.write_gp(26, 0xf00f0000);
+    QTest::newRow("LUI") << Instruction(15, 0, 26, 0xf00f) \
+                         << regs_init \
+                         << regs_res;
     }
 
     // Move instructions

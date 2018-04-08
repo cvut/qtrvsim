@@ -76,7 +76,7 @@ CPU Logical Instructions
 ------------------------
 * [x] AND
 * [x] ANDI
-* [ ] LUI
+* [x] LUI
 * [x] NOR
 * [x] OR
 * [x] ORI

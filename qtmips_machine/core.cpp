@@ -39,7 +39,7 @@ static const struct DecodeMap dmap[]  = {
     { .flags = FLAGS_ALU_I, .alu = ALU_OP_AND, NOMEM }, // ANDI
     { .flags = FLAGS_ALU_I, .alu = ALU_OP_OR, NOMEM }, // ORI
     { .flags = FLAGS_ALU_I, .alu = ALU_OP_XOR, NOMEM }, // XORI
-    NOPE, // LUI
+    { .flags = FLAGS_ALU_I, .alu = ALU_OP_LUI, NOMEM}, // LUI
     NOPE, // 16
     NOPE, // 17
     NOPE, // 18
