@@ -90,13 +90,14 @@ static const struct DecodeMap dmap[]  = {
     NOPE // 63
 };
 
-Core::Core(Registers *regs, MemoryAccess *mem) {
+Core::Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data) {
     this->regs = regs;
-    this->mem = mem;
+    this->mem_program = mem_program;
+    this->mem_data = mem_data;
 }
 
 struct Core::dtFetch Core::fetch() {
-    Instruction inst(mem->read_word(regs->read_pc()));
+    Instruction inst(mem_program->read_word(regs->read_pc()));
     emit instruction_fetched(inst);
     return {
         .inst = inst
@@ -152,9 +153,9 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
     std::uint32_t towrite_val = dt.alu_val;
 
     if (dt.memwrite)
-        mem->write_ctl(dt.memctl, dt.alu_val, dt.val_rt);
+        mem_data->write_ctl(dt.memctl, dt.alu_val, dt.val_rt);
     else if (dt.memread)
-        towrite_val = mem->read_ctl(dt.memctl, dt.alu_val);
+        towrite_val = mem_data->read_ctl(dt.memctl, dt.alu_val);
 
     return {
         .inst = dt.inst,
@@ -256,8 +257,8 @@ void Core::dtMemoryInit(struct dtMemory &dt) {
     dt.towrite_val = 0;
 }
 
-CoreSingle::CoreSingle(Registers *regs, MemoryAccess *mem, bool jmp_delay_slot) : \
-    Core(regs, mem) {
+CoreSingle::CoreSingle(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data, bool jmp_delay_slot) : \
+    Core(regs, mem_program, mem_data) {
     if (jmp_delay_slot)
         jmp_delay_decode = new struct Core::dtDecode();
     else
@@ -288,8 +289,8 @@ void CoreSingle::reset() {
         Core::dtDecodeInit(*jmp_delay_decode);
 }
 
-CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem, enum MachineConfig::HazardUnit hazard_unit) : \
-    Core(regs, mem) {
+CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data, enum MachineConfig::HazardUnit hazard_unit) : \
+    Core(regs, mem_program, mem_data) {
     this->hazard_unit = hazard_unit;
     reset();
 }

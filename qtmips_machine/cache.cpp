@@ -2,8 +2,15 @@
 
 using namespace machine;
 
-Cache::Cache(Memory *m, MachineConfigCache *cc) : cnf(cc) {
+Cache::Cache(Memory *m, const MachineConfigCache *cc) : cnf(cc) {
     mem = m;
+    // Zero hit and miss rate
+    hitc = 0;
+    missc = 0;
+    // Skip any other initialization if cache is disabled
+    if (!cc->enabled())
+        return;
+
     // Allocate cache data structure
     dt = new struct cache_data*[cc->associativity()];
     for (unsigned i = 0; i < cc->associativity(); i++) {
@@ -27,12 +34,14 @@ Cache::Cache(Memory *m, MachineConfigCache *cc) : cnf(cc) {
     default:
         break;
     }
-    // Zero hit and miss rate
-    hitc = 0;
-    missc = 0;
 }
 
 void Cache::wword(std::uint32_t address, std::uint32_t value) {
+    if (!cnf.enabled()) {
+        mem->write_word(address, value);
+        return;
+    }
+
     std::uint32_t *data;
     access(address, &data, false);
     *data = value;
@@ -42,27 +51,36 @@ void Cache::wword(std::uint32_t address, std::uint32_t value) {
 }
 
 std::uint32_t Cache::rword(std::uint32_t address) const {
+    if (!cnf.enabled())
+        return mem->read_word(address);
+
     std::uint32_t *data;
     access(address, &data, true);
     return *data;
 }
 
 void Cache::flush() {
+    if (!cnf.enabled())
+        return;
+
     for (unsigned as = 0; as < cnf.associativity(); as++)
         for (unsigned st = 0; st < cnf.sets(); st++)
             if (dt[as][st].valid)
                 kick(as, st);
 }
 
-unsigned Cache::hit() {
+unsigned Cache::hit() const {
     return hitc;
 }
 
-unsigned Cache::miss() {
+unsigned Cache::miss() const {
     return missc;
 }
 
 void Cache::reset() {
+    if (!cnf.enabled())
+        return;
+
     // Set all cells to ne invalid
     for (unsigned as = 0; as < cnf.associativity(); as++)
         for (unsigned st = 0; st < cnf.sets(); st++)
@@ -73,7 +91,7 @@ void Cache::reset() {
     missc = 0;
 }
 
-const MachineConfigCache &Cache::config() {
+const MachineConfigCache &Cache::config() const {
     return cnf;
 }
 

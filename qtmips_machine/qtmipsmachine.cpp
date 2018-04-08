@@ -13,11 +13,13 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) : QObject(), mcnf(&cc) {
 
     regs = new Registers();
     mem = new Memory(*mem_program_only);
+    cch_program = new Cache(mem, &cc.cache_program());
+    cch_data = new Cache(mem, &cc.cache_data());
 
     if (cc.pipelined())
-        cr = new CorePipelined(regs, mem, cc.hazard_unit());
+        cr = new CorePipelined(regs, cch_program, cch_data, cc.hazard_unit());
     else
-        cr = new CoreSingle(regs, mem, cc.delay_slot());
+        cr = new CoreSingle(regs, cch_program, cch_data, cc.delay_slot());
 
     run_t = new QTimer(this);
     set_speed(0); // In default run as fast as possible
@@ -40,8 +42,12 @@ const Memory *QtMipsMachine::memory() {
     return mem;
 }
 
-const Cache *QtMipsMachine::cache() {
-    return cch;
+const Cache *QtMipsMachine::cache_program() {
+    return cch_program;
+}
+
+const Cache *QtMipsMachine::cache_data() {
+    return cch_data;
 }
 
 const Core *QtMipsMachine::core() {
@@ -105,7 +111,8 @@ void QtMipsMachine::restart() {
     pause();
     regs->reset();
     mem->reset(*mem_program_only);
-    // TODO cache
+    cch_program->reset();
+    cch_data->reset();
     cr->reset();
     set_status(ST_READY);
 }

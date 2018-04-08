@@ -23,7 +23,8 @@ public:
 
     const Registers *registers();
     const Memory *memory();
-    const Cache *cache();
+    const Cache *cache_program();
+    const Cache *cache_data();
     const Core *core();
     const CoreSingle *core_singe();
     const CorePipelined *core_pipelined();
@@ -55,7 +56,7 @@ private:
 
     Registers *regs;
     Memory *mem, *mem_program_only;
-    Cache *cch;
+    Cache *cch_program, *cch_data;
     Core *cr;
 
     QTimer *run_t;

@@ -186,7 +186,7 @@ void MachineTests::singlecore_regs() {
     mem.write_word(res.read_pc(), i.data()); // Store single instruction (anything else should be 0 so NOP effectively)
     Memory mem_used(mem); // Create memory copy
 
-    CoreSingle core(&init, &mem_used, true);
+    CoreSingle core(&init, &mem_used, &mem_used, true);
     core.step(); // Single step should be enought as this is risc without pipeline
 
     res.pc_inc(); // We did single step	so increment program counter accordingly
@@ -206,7 +206,7 @@ void MachineTests::pipecore_regs() {
 
     res.pc_jmp(0x14);
 
-    CorePipelined core(&init, &mem_used);
+    CorePipelined core(&init, &mem_used, &mem_used);
     for (int i = 0; i < 5; i++)
         core.step(); // Fire steps for five pipelines stages
 
@@ -275,7 +275,7 @@ void MachineTests::singlecore_jmp() {
     Memory mem_used(mem);
     Registers regs_used(regs);
 
-    CoreSingle core(&regs_used, &mem_used, true);
+    CoreSingle core(&regs_used, &mem_used, &mem_used, true);
     core.step();
     QCOMPARE(regs.read_pc() + 4, regs_used.read_pc()); // First execute delay slot
     core.step();
@@ -296,7 +296,7 @@ void MachineTests::pipecore_jmp() {
     Memory mem_used(mem);
     Registers regs_used(regs);
 
-    CorePipelined core(&regs_used, &mem_used);
+    CorePipelined core(&regs_used, &mem_used, &mem_used);
     core.step();
     QCOMPARE(regs.read_pc() + 4, regs_used.read_pc()); // First just fetch
     core.step();
@@ -400,7 +400,7 @@ void MachineTests::singlecore_mem() {
     mem_init.write_word(regs_init.read_pc(), i.data());
     mem_res.write_word(regs_init.read_pc(), i.data());
 
-    CoreSingle core(&regs_init, &mem_init, true);
+    CoreSingle core(&regs_init, &mem_init, &mem_init, true);
     core.step();
 
     regs_res.pc_inc();
@@ -419,7 +419,7 @@ void MachineTests::pipecore_mem() {
     mem_init.write_word(regs_init.read_pc(), i.data());
     mem_res.write_word(regs_init.read_pc(), i.data());
 
-    CorePipelined core(&regs_init, &mem_init);
+    CorePipelined core(&regs_init, &mem_init, &mem_init);
     for (int i = 0; i < 5; i++)
         core.step(); // Fire steps for five pipelines stages
 

@@ -14,7 +14,7 @@ namespace machine {
 class Core : public QObject {
     Q_OBJECT
 public:
-    Core(Registers *regs, MemoryAccess *mem);
+    Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data);
 
     virtual void step() = 0; // Do single step
 
@@ -30,7 +30,7 @@ signals:
 
 protected:
     Registers *regs;
-    MemoryAccess *mem;
+    MemoryAccess *mem_data, *mem_program;
 
     struct dtFetch {
         Instruction inst; // Loaded instruction
@@ -80,7 +80,7 @@ protected:
 
 class CoreSingle : public Core {
 public:
-    CoreSingle(Registers *regs, MemoryAccess *mem, bool jmp_delay_slot);
+    CoreSingle(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data, bool jmp_delay_slot);
     ~CoreSingle();
 
     void step();
@@ -93,7 +93,7 @@ private:
 
 class CorePipelined : public Core {
 public:
-    CorePipelined(Registers *regs, MemoryAccess *mem, enum MachineConfig::HazardUnit hazard_unit = MachineConfig::HU_STALL_FORWARD);
+    CorePipelined(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data, enum MachineConfig::HazardUnit hazard_unit = MachineConfig::HU_STALL_FORWARD);
 
     void step();
 

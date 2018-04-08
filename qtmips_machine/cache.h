@@ -11,19 +11,19 @@ namespace machine {
 class Cache : public MemoryAccess {
     Q_OBJECT
 public:
-    Cache(Memory *m, MachineConfigCache *c);
+    Cache(Memory *m, const MachineConfigCache *c);
 
     void wword(std::uint32_t address, std::uint32_t value);
     std::uint32_t rword(std::uint32_t address) const;
 
     void flush(); // flush/sync cache
 
-    unsigned hit(); // Number of recorded hits
-    unsigned miss(); // Number of recorded misses
+    unsigned hit() const; // Number of recorded hits
+    unsigned miss() const; // Number of recorded misses
 
     void reset(); // Reset whole state of cache
 
-    const MachineConfigCache &config();
+    const MachineConfigCache &config() const;
     // TODO getters for cells
 
 private:
