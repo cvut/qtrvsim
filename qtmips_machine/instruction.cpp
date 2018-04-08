@@ -258,8 +258,8 @@ QString Instruction::to_str() const {
     case T_I:
         res += im.name;
         if (im.flags & IMF_MEM) {
-            res += " $" + QString::number(rs());
-            res += ", 0x" + QString::number(immediate(), 16).toUpper() + "(" + QString::number(rt()) + ")";
+            res += " $" + QString::number(rt());
+            res += ", 0x" + QString::number(immediate(), 16).toUpper() + "(" + QString::number(rs()) + ")";
         } else {
             res += " $" + QString::number(rt());
             if (!(im.flags & IMF_NO_RS))
@@ -270,7 +270,7 @@ QString Instruction::to_str() const {
     case T_J:
         res += im.name;
         // TODO we need to know instruction address to expand address section by it
-        res += " " + QString::number(address(), 16).toUpper();
+        res += " 0x" + QString::number(address(), 16).toUpper();
         break;
     case T_R:
         {
