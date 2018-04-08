@@ -148,7 +148,7 @@ int StaticTableLayout::real_row_height() {
 }
 
 int StaticTableLayout::layout_count_approx(const QRect &rect) const {
-    if (items.size() <= 0)
+    if (items.size() <= 0 || rect.width() < rect.height())
         return 1;
     // Note: for some reason (probably optimalisation) when qlabel is not visible it reports 0 size. So we have to found at least one that is visible
     int vis = 0;
