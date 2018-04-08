@@ -16,9 +16,10 @@ class Core : public QObject {
 public:
     Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data);
 
-    virtual void step() = 0; // Do single step
+    void step(); // Do single step
+    void reset(); // Reset core (only core, memory and registers has to be reseted separately)
 
-    virtual void reset() = 0; // Reset core (only core, memory and registers has to be reseted separately)
+    unsigned cycles(); // Returns number of executed cycles
 
 signals:
     void instruction_fetched(const machine::Instruction &inst);
@@ -29,6 +30,9 @@ signals:
     void instruction_program_counter(const machine::Instruction &inst);
 
 protected:
+    virtual void do_step() = 0;
+    virtual void do_reset() = 0;
+
     Registers *regs;
     MemoryAccess *mem_data, *mem_program;
 
@@ -76,6 +80,9 @@ protected:
     void dtDecodeInit(struct dtDecode &dt);
     void dtExecuteInit(struct dtExecute &dt);
     void dtMemoryInit(struct dtMemory &dt);
+
+private:
+    unsigned cycle_c;
 };
 
 class CoreSingle : public Core {
@@ -83,9 +90,9 @@ public:
     CoreSingle(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data, bool jmp_delay_slot);
     ~CoreSingle();
 
-    void step();
-
-    void reset();
+protected:
+    void do_step();
+    void do_reset();
 
 private:
     struct Core::dtDecode *jmp_delay_decode;
@@ -95,9 +102,9 @@ class CorePipelined : public Core {
 public:
     CorePipelined(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data, enum MachineConfig::HazardUnit hazard_unit = MachineConfig::HU_STALL_FORWARD);
 
-    void step();
-
-    void reset();
+protected:
+    void do_step();
+    void do_reset();
 
 private:
     struct Core::dtFetch dt_f;

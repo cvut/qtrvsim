@@ -69,6 +69,10 @@ void Cache::flush() {
                 kick(as, st);
 }
 
+void Cache::sync() {
+    flush();
+}
+
 unsigned Cache::hit() const {
     return hitc;
 }

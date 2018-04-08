@@ -91,9 +91,24 @@ static const struct DecodeMap dmap[]  = {
 };
 
 Core::Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data) {
+    cycle_c = 0;
     this->regs = regs;
     this->mem_program = mem_program;
     this->mem_data = mem_data;
+}
+
+void Core::step() {
+    cycle_c++;
+    do_step();
+}
+
+void Core::reset() {
+    cycle_c = 0;
+    do_reset();
+}
+
+unsigned Core::cycles() {
+    return cycle_c;
 }
 
 struct Core::dtFetch Core::fetch() {
@@ -271,7 +286,7 @@ CoreSingle::~CoreSingle() {
         delete jmp_delay_decode;
 }
 
-void CoreSingle::step() {
+void CoreSingle::do_step() {
     struct dtFetch f = fetch();
     struct dtDecode d = decode(f);
     struct dtExecute e = execute(d);
@@ -284,7 +299,7 @@ void CoreSingle::step() {
         handle_pc(d);
 }
 
-void CoreSingle::reset() {
+void CoreSingle::do_reset() {
     if (jmp_delay_decode != nullptr)
         Core::dtDecodeInit(*jmp_delay_decode);
 }
@@ -295,7 +310,7 @@ CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem_program, MemoryA
     reset();
 }
 
-void CorePipelined::step() {
+void CorePipelined::do_step() {
     // Process stages
     writeback(dt_m);
     dt_m = memory(dt_e);
@@ -356,7 +371,7 @@ void CorePipelined::step() {
     }
 }
 
-void CorePipelined::reset() {
+void CorePipelined::do_reset() {
     dtFetchInit(dt_f);
     dtDecodeInit(dt_d);
     dtExecuteInit(dt_e);

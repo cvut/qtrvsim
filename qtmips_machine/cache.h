@@ -16,7 +16,8 @@ public:
     void wword(std::uint32_t address, std::uint32_t value);
     std::uint32_t rword(std::uint32_t address) const;
 
-    void flush(); // flush/sync cache
+    void flush(); // flush cache
+    void sync(); // Same as flush
 
     unsigned hit() const; // Number of recorded hits
     unsigned miss() const; // Number of recorded misses

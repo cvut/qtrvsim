@@ -85,6 +85,8 @@ std::uint32_t MemoryAccess::read_ctl(enum MemoryAccess::AccessControl ctl, std::
     }
 }
 
+void MemoryAccess::sync() { }
+
 MemorySection::MemorySection(std::uint32_t length) {
     this->len = length;
     this->dt = new std::uint32_t[length];

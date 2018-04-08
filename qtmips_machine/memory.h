@@ -31,6 +31,8 @@ public:
     void write_ctl(enum AccessControl ctl, std::uint32_t offset, std::uint32_t value);
     std::uint32_t read_ctl(enum AccessControl ctl, std::uint32_t offset) const;
 
+    virtual void sync();
+
 protected:
     virtual void wword(std::uint32_t offset, std::uint32_t value) = 0;
     virtual std::uint32_t rword(std::uint32_t offset) const = 0;
