@@ -84,17 +84,15 @@ void MachineConfigCache::set_enabled(bool v) {
 }
 
 void MachineConfigCache::set_sets(unsigned v) {
-    // TODO verify that this is 2^N
-    n_sets = v;
+    n_sets = v > 0 ? v : 1;
 }
 
 void MachineConfigCache::set_blocks(unsigned v) {
-    // TODO even more verifications for 2^N
-    n_blocks = v;
+    n_blocks = v > 0 ? v : 1;
 }
 
 void MachineConfigCache::set_associativity(unsigned v) {
-    d_associativity = v;
+    d_associativity = v > 0 ? v : 1;
 }
 
 void MachineConfigCache::set_replacement_policy(enum ReplacementPolicy v) {
