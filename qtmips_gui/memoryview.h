@@ -38,8 +38,6 @@ protected:
 
 private slots:
     void go_edit_finish();
-    void next_section();
-    void prev_section();
 
 private:
     unsigned count;
@@ -65,9 +63,7 @@ private:
     Frame *memf;
 
     QWidget *ctl_widg;
-    QHBoxLayout *ctl_layout;
     QLineEdit *go_edit;
-    QToolButton *up, *down;
 };
 
 #endif // MEMORYVIEW_H

@@ -231,18 +231,6 @@ const union machine::MemoryTree *Memory::get_memorytree_root() const {
     return this->mt_root;
 }
 
-std::uint32_t Memory::next_allocated(std::uint32_t address) const {
-    address = address >> 2;
-    // TODO
-    return address;
-}
-
-std::uint32_t Memory::prev_allocated(std::uint32_t address) const {
-    address = address >> 2;
-    // TODO
-    return address;
-}
-
 union machine::MemoryTree *Memory::allocate_section_tree() {
     union MemoryTree *mt = new union MemoryTree[MEMORY_TREE_ROW_SIZE];
     memset(mt, 0, sizeof *mt * MEMORY_TREE_ROW_SIZE);

@@ -22,20 +22,11 @@ MemoryView::MemoryView(QWidget *parent) : QWidget(parent) {
     ctl_widg = new QWidget(this);
     layout->addWidget(ctl_widg);
 
-    ctl_layout = new QHBoxLayout(ctl_widg);
     go_edit = new QLineEdit(ctl_widg);
     go_edit->setText("0x00000000");
     go_edit->setInputMask("\\0\\xHHHHHHHH");
-    ctl_layout->addWidget(go_edit);
+    layout->addWidget(go_edit);
     connect(go_edit, SIGNAL(editingFinished()), this, SLOT(go_edit_finish()));
-    up = new QToolButton(ctl_widg);
-    up->setArrowType(Qt::UpArrow);
-    connect(up, SIGNAL(clicked(bool)), this, SLOT(prev_section()));
-    ctl_layout->addWidget(up);
-    down = new QToolButton(ctl_widg);
-    down->setArrowType(Qt::DownArrow);
-    connect(down, SIGNAL(clicked(bool)), this, SLOT(next_section()));
-    ctl_layout->addWidget(down);
 }
 
 void MemoryView::setup(machine::QtMipsMachine *machine) {
@@ -109,18 +100,6 @@ void MemoryView::go_edit_finish() {
         set_focus(nw);
     } else
         edit_load_focus();
-}
-
-void MemoryView::next_section() {
-    if (memory == nullptr)
-        return;
-    set_focus(memory->next_allocated(focus()));
-}
-
-void MemoryView::prev_section() {
-    if (memory == nullptr)
-        return;
-    set_focus(memory->prev_allocated(focus()));
 }
 
 MemoryView::Frame::Frame(MemoryView *parent) : QAbstractScrollArea(parent) {
