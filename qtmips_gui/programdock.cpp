@@ -2,6 +2,7 @@
 #include "qtmipsexception.h"
 
 ProgramView::ProgramView(QWidget *parent) : MemoryView(parent) {
+    /*
     cb_single = new QComboBox(this);
     cb_single->addItems({
         "Don't follow",
@@ -25,6 +26,7 @@ ProgramView::ProgramView(QWidget *parent) : MemoryView(parent) {
     cb_pipelined->setCurrentIndex(1);
     layout->addWidget(cb_pipelined);
     connect(cb_pipelined, SIGNAL(currentIndexChanged(int)), this, SLOT(cb_pipelined_changed(int)));
+    */
 }
 
 void ProgramView::setup(machine::QtMipsMachine *machine) {
@@ -32,6 +34,7 @@ void ProgramView::setup(machine::QtMipsMachine *machine) {
     if (machine == nullptr)
         return;
 
+    /*
     bool pipelined = machine->config().pipelined();
     cb_single->setVisible(!pipelined);
     cb_pipelined->setVisible(pipelined);
@@ -43,6 +46,8 @@ void ProgramView::setup(machine::QtMipsMachine *machine) {
             cb_pipelined->setCurrentIndex(1);
     } else
         cb_single->setCurrentIndex(cb_pipelined->currentIndex() == 0 ? 0 : 1);
+    // TODO connect to instructuion hooks
+    */
 }
 
 void ProgramView::jump_to_pc(std::uint32_t addr) {
