@@ -89,7 +89,7 @@ CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : 
     // Execute stage
     NEW(Junction, ex.j_mux, 420, 316);
     NEW(Multiplexer, ex.mux_imm, 450, 306, 2, true);
-    NEW(Multiplexer, ex.mux_regdest, 410, 370, 2, true);
+    NEW(Multiplexer, ex.mux_regdest, 405, 370, 2, true);
     // Memory
     NEW(Junction, mm.j_addr, 570, mem_data->connector_address()->y());
     // WriteBack stage
@@ -112,7 +112,7 @@ CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : 
     new_bus(dc.shift2->new_connector(1, 0), dc.add->connector_in_a());
     con = new_signal(dc.cmp->new_connector(1, 0), dc.and_branch->connector_in(1));
     con->setAxes({CON_AXIS_Y(343)});
-    con = new_signal(dc.ctl_block->new_connector(1, 0.9), dc.and_branch->connector_in(0));
+    con = new_signal(dc.ctl_block->new_connector(1, 0.8), dc.and_branch->connector_in(0));
     con->setAxes({CON_AXIS_Y(343)});
     dc.instr_bus = new_bus(dc.j_inst_up->new_connector(coreview::Connector::AX_Y), dc.j_inst_down->new_connector(coreview::Connector::AX_Y));
     new_bus(dc.j_inst_up->new_connector(coreview::Connector::AX_X), dc.ctl_block->new_connector(-1, 0), 2);
@@ -173,10 +173,13 @@ CoreViewSceneSimple::CoreViewSceneSimple(CoreView *view, machine::QtMipsMachine 
     con = new_bus(ft.junc_pc_4->new_connector(coreview::Connector::AX_Y), dc.add->connector_in_b());
     con->setAxes({CON_AXIS_Y(270)});
     // Decode stage
-    con = new_bus(regs->connector_read1(), alu->connector_in_a());
-    con->setAxes({CON_AXIS_Y(445)});
-    con = new_bus(regs->connector_read2(), ex.mux_imm->connector_in(0));
-    con->setAxes({CON_AXIS_Y(420)});
+    coreview::Bus *regs_bus1 = new_bus(regs->connector_read1(), alu->connector_in_a());
+    const coreview::Connector *regs_bus_con = dc.cmp->new_connector(-0.5, 1);
+    new_bus(regs_bus1->new_connector(regs_bus_con->point(), coreview::Connector::AX_Y), regs_bus_con);
+    coreview::Bus *regs_bus2 = new_bus(regs->connector_read2(), ex.mux_imm->connector_in(0));
+    regs_bus2->setAxes({CON_AXIS_Y(420)});
+    regs_bus_con = dc.cmp->new_connector(0.5, 1);
+    new_bus(regs_bus2->new_connector(regs_bus_con->point(), coreview::Connector::AX_Y), regs_bus_con);
     con = new_bus(dc.j_sign_ext->new_connector(coreview::Connector::AX_X), ex.mux_imm->connector_in(1));
     con->setAxes({CON_AXIS_Y(440)});
 	new_signal(dc.ctl_block->new_connector(1, -0.6), regs->connector_ctl_write());
@@ -195,7 +198,7 @@ CoreViewSceneSimple::CoreViewSceneSimple(CoreView *view, machine::QtMipsMachine 
         struct coreview::Latch::ConnectorPair lp_addr = delay_slot_latch->new_connector(10);
         struct coreview::Latch::ConnectorPair lp_branch = delay_slot_latch->new_connector(20);
         con = new_signal(dc.and_branch->connector_out(), lp_branch.out);
-        con->setAxes({CON_AXIS_Y(365)});
+        con->setAxes({CON_AXIS_Y(370)});
         new_signal(lp_branch.in, ft.multiplex->connector_ctl());
         con = new_bus(dc.add->connector_out(), lp_addr.out);
         con->setAxes({CON_AXIS_Y(360)});
@@ -203,13 +206,14 @@ CoreViewSceneSimple::CoreViewSceneSimple(CoreView *view, machine::QtMipsMachine 
         con->setAxes({CON_AXIS_Y(10)});
     } else {
         con = new_signal(dc.and_branch->connector_out(), ft.multiplex->connector_ctl());
-        con->setAxes({CON_AXIS_Y(365), CON_AXIS_X(490)});
+        con->setAxes({CON_AXIS_Y(370), CON_AXIS_X(490)});
         con = new_bus(dc.add->connector_out(), ft.multiplex->connector_in(1));
         con->setAxes({CON_AXIS_Y(360), CON_AXIS_X(480), CON_AXIS_Y(10)});
     }
-	// From decode to execute stage
+    // From decode to execute stage
 	new_signal(dc.ctl_block->new_connector(1, 0.4), ex.mux_imm->connector_ctl());
 	new_signal(dc.ctl_block->new_connector(1, 0.2), alu->connector_ctl());
+    new_signal(dc.ctl_block->new_connector(1, 0.6), ex.mux_regdest->connector_ctl());
     new_bus(dc.instr_bus->new_connector(ex.mux_regdest->connector_in(0)->point()), ex.mux_regdest->connector_in(0), 2);
     new_bus(dc.instr_bus->new_connector(ex.mux_regdest->connector_in(1)->point()), ex.mux_regdest->connector_in(1), 2);
 	// From decode to memory stage
@@ -255,10 +259,41 @@ CoreViewScenePipelined::CoreViewScenePipelined(CoreView *view, machine::QtMipsMa
     con->setAxes({CON_AXIS_Y(270)});
     struct coreview::Latch::ConnectorPair lp_dc_rs = latch_id_ex->new_connector(regs->connector_read1()->y() - latch_id_ex->y());
     struct coreview::Latch::ConnectorPair lp_dc_rt = latch_id_ex->new_connector(regs->connector_read2()->y() - latch_id_ex->y());
-    new_bus(regs->connector_read1(), lp_dc_rs.in);
-    new_bus(regs->connector_read2(), lp_dc_rt.in);
+    coreview::Bus *regs_bus1 = new_bus(regs->connector_read1(), lp_dc_rs.in);
+    coreview::Bus *regs_bus2 = new_bus(regs->connector_read2(), lp_dc_rt.in);
+    if (machine->config().hazard_unit() == machine::MachineConfig::HU_NONE) {
+        const coreview::Connector *regs_bus_con = dc.cmp->new_connector(-0.5, 1);
+        new_bus(regs_bus1->new_connector(regs_bus_con->point(), coreview::Connector::AX_Y), regs_bus_con);
+        regs_bus_con = dc.cmp->new_connector(0.5, 1);
+        new_bus(regs_bus2->new_connector(regs_bus_con->point(), coreview::Connector::AX_Y), regs_bus_con);
+    } // TODO else
     struct coreview::Latch::ConnectorPair lp_dc_immed = latch_id_ex->new_connector(dc.j_sign_ext->y() - latch_id_ex->y());
     new_bus(dc.j_sign_ext->new_connector(coreview::Connector::AX_X), lp_dc_immed.in);
+    struct coreview::Latch::ConnectorPair regdest_dc_rt = latch_id_ex->new_connector(ex.mux_regdest->connector_in(0)->point().y() - latch_id_ex->y());
+    struct coreview::Latch::ConnectorPair regdest_dc_rd = latch_id_ex->new_connector(ex.mux_regdest->connector_in(1)->point().y() - latch_id_ex->y());
+    new_bus(dc.instr_bus->new_connector(ex.mux_regdest->connector_in(0)->point()), regdest_dc_rt.in, 2);
+    new_bus(dc.instr_bus->new_connector(ex.mux_regdest->connector_in(1)->point()), regdest_dc_rd.in, 2);
+    const coreview::Connector *ctl_cnt = dc.ctl_block->new_connector(1, 0.2);
+    struct coreview::Latch::ConnectorPair ctl_alu_de = latch_id_ex->new_connector(ctl_cnt->point().y() - latch_id_ex->y());
+    new_signal(ctl_cnt, ctl_alu_de.in);
+    ctl_cnt = dc.ctl_block->new_connector(1, 0.4);
+    struct coreview::Latch::ConnectorPair ctl_imm_de = latch_id_ex->new_connector(ctl_cnt->point().y() - latch_id_ex->y());
+    new_signal(ctl_cnt, ctl_imm_de.in);
+    ctl_cnt = dc.ctl_block->new_connector(1, 0.6);
+    struct coreview::Latch::ConnectorPair ctl_regdest_de = latch_id_ex->new_connector(ctl_cnt->point().y() - latch_id_ex->y());
+    new_signal(ctl_cnt, ctl_regdest_de.in);
+    ctl_cnt = dc.ctl_block->new_connector(1, 0.0);
+    struct coreview::Latch::ConnectorPair ctl_memw_de = latch_id_ex->new_connector(ctl_cnt->point().y() - latch_id_ex->y());
+    new_signal(ctl_cnt, ctl_memw_de.in);
+    ctl_cnt = dc.ctl_block->new_connector(1, -0.2);
+    struct coreview::Latch::ConnectorPair ctl_memr_de = latch_id_ex->new_connector(ctl_cnt->point().y() - latch_id_ex->y());
+    new_signal(ctl_cnt, ctl_memr_de.in);
+    ctl_cnt = dc.ctl_block->new_connector(1, -0.4);
+    struct coreview::Latch::ConnectorPair ctl_mr_de = latch_id_ex->new_connector(ctl_cnt->point().y() - latch_id_ex->y());
+    new_signal(ctl_cnt, ctl_mr_de.in);
+    ctl_cnt = dc.ctl_block->new_connector(1, -0.6);
+    struct coreview::Latch::ConnectorPair ctl_rgw_de = latch_id_ex->new_connector(ctl_cnt->point().y() - latch_id_ex->y());
+    new_signal(ctl_cnt, ctl_rgw_de.in);
     // Execute
     con = new_bus(lp_dc_rs.out, alu->connector_in_a());
     con->setAxes({CON_AXIS_Y(445)});
@@ -270,6 +305,21 @@ CoreViewScenePipelined::CoreViewScenePipelined(CoreView *view, machine::QtMipsMa
     struct coreview::Latch::ConnectorPair lp_ex_dt = latch_ex_mem->new_connector(290);
     new_bus(alu->connector_out(), lp_ex_alu.in);
     new_bus(ex.j_mux->new_connector(CON_AX_Y), lp_ex_dt.in);
+    new_bus(regdest_dc_rt.out, ex.mux_regdest->connector_in(0), 2);
+    new_bus(regdest_dc_rd.out, ex.mux_regdest->connector_in(1), 2);
+    struct coreview::Latch::ConnectorPair regdest_ex = latch_ex_mem->new_connector(ex.mux_regdest->connector_out()->point().y() - latch_ex_mem->y());
+    new_bus(ex.mux_regdest->connector_out(), regdest_ex.in, 2);
+    new_signal(ctl_alu_de.out, alu->connector_ctl());
+    new_signal(ctl_imm_de.out, ex.mux_imm->connector_ctl());
+    new_signal(ctl_regdest_de.out, ex.mux_regdest->connector_ctl());
+    struct coreview::Latch::ConnectorPair ctl_memr_ex = latch_ex_mem->new_connector(ctl_memr_de.out->point().y() - latch_id_ex->y());
+    new_signal(ctl_memr_de.out, ctl_memr_ex.in);
+    struct coreview::Latch::ConnectorPair ctl_memw_ex = latch_ex_mem->new_connector(ctl_memw_de.out->point().y() - latch_id_ex->y());
+    new_signal(ctl_memw_de.out, ctl_memw_ex.in);
+    struct coreview::Latch::ConnectorPair ctl_mr_ex = latch_ex_mem->new_connector(ctl_mr_de.out->point().y() - latch_ex_mem->y());
+    new_signal(ctl_mr_de.out, ctl_mr_ex.in);
+    struct coreview::Latch::ConnectorPair ctl_rgw_ex = latch_ex_mem->new_connector(ctl_rgw_de.out->point().y() - latch_ex_mem->y());
+    new_signal(ctl_rgw_de.out, ctl_rgw_ex.in);
     // Memory
     new_bus(lp_ex_alu.out, mm.j_addr->new_connector(CON_AX_X));
     con = new_bus(lp_ex_dt.out, mem_data->connector_data_in());
@@ -278,14 +328,28 @@ CoreViewScenePipelined::CoreViewScenePipelined(CoreView *view, machine::QtMipsMa
     struct coreview::Latch::ConnectorPair lp_mem_mem = latch_mem_wb->new_connector(mem_data->connector_data_out()->y() - latch_mem_wb->y());
     new_bus(mm.j_addr->new_connector(CON_AX_Y), lp_mem_alu.in);
     new_bus(mem_data->connector_data_out(), lp_mem_mem.in);
+    struct coreview::Latch::ConnectorPair regdest_mem = latch_mem_wb->new_connector(ex.mux_regdest->connector_out()->point().y() - latch_mem_wb->y());
+    new_bus(regdest_ex.out, regdest_mem.in, 2);
+    new_signal(ctl_memw_ex.out, mem_data->connector_req_write());
+    new_signal(ctl_memr_ex.out, mem_data->connector_req_read());
+    struct coreview::Latch::ConnectorPair ctl_mr_mem = latch_mem_wb->new_connector(ctl_mr_ex.out->point().y() - latch_mem_wb->y());
+    new_signal(ctl_mr_ex.out, ctl_mr_mem.in);
+    struct coreview::Latch::ConnectorPair ctl_rgw_mem = latch_mem_wb->new_connector(ctl_rgw_ex.out->point().y() - latch_mem_wb->y());
+    new_signal(ctl_rgw_ex.out, ctl_rgw_mem.in);
     // WriteBack
     con = new_bus(lp_mem_alu.out, wb.mem_or_reg->connector_in(0));
     con->setAxes({CON_AXIS_Y(678)});
     con = new_bus(lp_mem_mem.out, wb.mem_or_reg->connector_in(1));
     con->setAxes({CON_AXIS_Y(678)});
+    new_signal(ctl_mr_mem.out, wb.mem_or_reg->connector_ctl());
     // From decode stage to fetch stage
     con = new_signal(dc.and_branch->connector_out(), ft.multiplex->connector_ctl());
-    con->setAxes({CON_AXIS_Y(365), CON_AXIS_X(490)});
+    con->setAxes({CON_AXIS_Y(370), CON_AXIS_X(490)});
     con = new_bus(dc.add->connector_out(), ft.multiplex->connector_in(1));
     con->setAxes({CON_AXIS_Y(360), CON_AXIS_X(480), CON_AXIS_Y(10)});
+    // From writeback to decode
+    con = new_bus(regdest_mem.out, regs->connector_write_reg(), 2);
+    con->setAxes({CON_AXIS_Y(680), CON_AXIS_X(500), CON_AXIS_Y(210)});
+    con = new_signal(ctl_rgw_mem.out, regs->connector_ctl_write());
+    con->setAxes({CON_AXIS_Y(700), CON_AXIS_X(45)});
 }

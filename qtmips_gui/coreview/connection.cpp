@@ -189,6 +189,8 @@ void Bus::conns_update() {
         QPointF inter;
         qreal range;
         for (int y = 0; y < (points.size() - 1); y++) {
+            if (points[y] == points[y+1]) // TODO this is just workaround (for some reason we have lines with multiple points same. It should do no harm in reality but it causes this math to break so skip it here) (well reason is probably missmatch of axis, line comes from x for example but it should come from y so it creates line of zero length)
+                continue;
             range = cu_closest(QLineF(points[y], points[y+1]), QPointF(conns[i].p), &inter);
             if (closest.isNull() || closest_range > range) {
                 closest = inter;
