@@ -36,6 +36,10 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
 	cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d);
 	cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p);
 
+    // TODO remove this block when protections are implemented
+    ui->mem_protec_exec->setVisible(false);
+    ui->mem_protec_write->setVisible(false);
+
     load_settings(); // Also configures gui
 }
 
