@@ -64,17 +64,17 @@ void MachineConfigCache::store(QSettings *sts, const QString &prefix) {
 
 void MachineConfigCache::preset(enum ConfigPresets p) {
     switch (p) {
-    case CP_PIPE_CACHE:
+    case CP_PIPE:
+    case CP_SINGLE_CACHE:
         set_enabled(true);
-        set_sets(3);
-        set_blocks(1);
-        set_associativity(1);
+        set_sets(4);
+        set_blocks(2);
+        set_associativity(2);
         set_replacement_policy(RP_RAND);
         set_write_policy(WP_TROUGH);
         break;
     case CP_SINGLE:
     case CP_PIPE_NO_HAZARD:
-    case CP_PIPE_NO_CACHE:
         set_enabled(false);
     }
 }
@@ -198,6 +198,7 @@ void MachineConfig::preset(enum ConfigPresets p) {
     // Note: we set just a minimal subset to get preset (preserving as much of hidden configuration as possible)
     switch (p) {
     case CP_SINGLE:
+    case CP_SINGLE_CACHE:
         set_pipelined(false);
         set_delay_slot(true);
         break;
@@ -205,8 +206,7 @@ void MachineConfig::preset(enum ConfigPresets p) {
         set_pipelined(true);
         set_hazard_unit(MachineConfig::HU_NONE);
         break;
-    case CP_PIPE_CACHE:
-    case CP_PIPE_NO_CACHE:
+    case CP_PIPE:
         set_pipelined(true);
         set_hazard_unit(MachineConfig::HU_STALL_FORWARD);
         break;

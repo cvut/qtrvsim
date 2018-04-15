@@ -8,9 +8,9 @@ namespace machine {
 
 enum ConfigPresets {
     CP_SINGLE, // No pipeline cpu without cache
-    CP_PIPE_NO_HAZARD, // Pipelined cpu without hazard unit
-    CP_PIPE_NO_CACHE, // Pipelined cpu without cache
-    CP_PIPE_CACHE // Full pipelined cpu
+    CP_SINGLE_CACHE, // No pipeline cpu with cache
+    CP_PIPE_NO_HAZARD, // Pipelined cpu without hazard unit and without cache
+    CP_PIPE // Full pipelined cpu
 };
 
 class MachineConfigCache {

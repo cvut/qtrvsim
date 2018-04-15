@@ -21,8 +21,8 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     connect(ui->pushButton_cancel, SIGNAL(clicked(bool)), this, SLOT(cancel()));
     connect(ui->pushButton_browse, SIGNAL(clicked(bool)), this, SLOT(browse_elf()));
     connect(ui->preset_no_pipeline, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
+    connect(ui->preset_no_pipeline_cache, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
     connect(ui->preset_pipelined_bare, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
-    connect(ui->preset_pipelined_hazard, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
     connect(ui->preset_pipelined, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
 
     connect(ui->pipelined, SIGNAL(clicked(bool)), this, SLOT(pipelined_change(bool)));
@@ -159,12 +159,12 @@ unsigned NewDialog::preset_number() {
     enum machine::ConfigPresets preset;
     if (ui->preset_no_pipeline->isChecked())
         preset = machine::CP_SINGLE;
+    else if (ui->preset_no_pipeline_cache->isChecked())
+        preset = machine::CP_SINGLE_CACHE;
     else if (ui->preset_pipelined_bare->isChecked())
         preset = machine::CP_PIPE_NO_HAZARD;
-    else if (ui->preset_pipelined_hazard->isChecked())
-        preset = machine::CP_PIPE_NO_CACHE;
     else if (ui->preset_pipelined->isChecked())
-        preset = machine::CP_PIPE_CACHE;
+        preset = machine::CP_PIPE;
     else
         return 0;
     return (unsigned)preset + 1;
@@ -188,13 +188,13 @@ void NewDialog::load_settings() {
         case machine::CP_SINGLE:
             ui->preset_no_pipeline->setChecked(true);
             break;
+        case machine::CP_SINGLE_CACHE:
+            ui->preset_no_pipeline_cache->setChecked(true);
+            break;
         case machine::CP_PIPE_NO_HAZARD:
             ui->preset_pipelined_bare->setChecked(true);
             break;
-        case machine::CP_PIPE_NO_CACHE:
-            ui->preset_pipelined_hazard->setChecked(true);
-            break;
-        case machine::CP_PIPE_CACHE:
+        case machine::CP_PIPE:
             ui->preset_pipelined->setChecked(true);
             break;
         }

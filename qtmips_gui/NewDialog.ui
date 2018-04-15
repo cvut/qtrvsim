@@ -50,16 +50,16 @@
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="preset_pipelined_bare">
+           <widget class="QRadioButton" name="preset_no_pipeline_cache">
             <property name="text">
-             <string>Pipelined without hazard unit and without cache</string>
+             <string>No pipeline with cache</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="preset_pipelined_hazard">
+           <widget class="QRadioButton" name="preset_pipelined_bare">
             <property name="text">
-             <string>Pipelined with hazard unit and without cache</string>
+             <string>Pipelined without hazard unit and without cache</string>
             </property>
            </widget>
           </item>
