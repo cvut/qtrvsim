@@ -42,6 +42,7 @@ void MemoryView::set_focus(std::uint32_t address) {
     } else {
         memf->focus((address - addr_0) / 4);
     }
+    edit_load_focus();
 }
 
 std::uint32_t MemoryView::focus() {
