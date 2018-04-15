@@ -13,7 +13,7 @@ namespace coreview {
 class Memory : public QGraphicsObject  {
     Q_OBJECT
 public:
-    Memory(machine::QtMipsMachine *machine);
+    Memory(const machine::Cache *cache);
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -21,6 +21,10 @@ public:
 signals:
     void open_mem();
     void open_cache();
+
+private slots:
+    void cache_hit_update(unsigned);
+    void cache_miss_update(unsigned);
 
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
@@ -31,6 +35,7 @@ protected:
 
 private:
     QGraphicsSimpleTextItem name, type;
+    QGraphicsSimpleTextItem cache_t, cache_hit_t, cache_miss_t;
 };
 
 class ProgramMemory : public Memory {

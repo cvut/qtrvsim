@@ -27,6 +27,10 @@ public:
     const MachineConfigCache &config() const;
     // TODO getters for cells
 
+signals:
+    void hit_update(unsigned) const;
+    void miss_update(unsigned) const;
+
 private:
     MachineConfigCache cnf;
     Memory *mem;

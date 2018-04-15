@@ -93,6 +93,9 @@ void Cache::reset() {
     // Zero hit and miss rate
     hitc = 0;
     missc = 0;
+    // Trigger signals
+    emit hit_update(hitc);
+    emit miss_update(missc);
 }
 
 const MachineConfigCache &Cache::config() const {
@@ -153,8 +156,10 @@ void Cache::access(std::uint32_t address, std::uint32_t **data, bool read) const
     // Update statistics and otherwise read from memory
     if (cd.valid) {
         hitc++;
+        emit hit_update(hitc);
     } else {
         missc++;
+        emit miss_update(missc);
         for (unsigned i = 0; i < cnf.blocks(); i++)
             cd.data[i] = mem->rword(base_address(tag, row) + (4*i));
     }
