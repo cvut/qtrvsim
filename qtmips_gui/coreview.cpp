@@ -7,41 +7,6 @@
 #define SC_HEIGHT 540
 //////////////////////////////////////////////////////////////////////////////
 
-CoreView::CoreView(QWidget *parent) : QGraphicsView(parent) {
-    setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-}
-
-void CoreView::setScene(QGraphicsScene *scene) {
-    QGraphicsView::setScene(scene);
-    update_scale();
-}
-
-void CoreView::resizeEvent(QResizeEvent *event) {
-    QGraphicsView::resizeEvent(event);
-    update_scale();
-}
-
-void CoreView::update_scale() {
-    if (scene() == nullptr)
-        return; // Skip if we have no scene
-
-    // Note: there is somehow three pixels error when viewing so we have to always compensate
-    const int w = scene()->width() + 3;
-    const int h = scene()->height() + 3;
-
-    qreal scale = 1;
-    if (height() > h && width() > w) {
-        if (height() > width()) {
-            scale = (qreal)width() / w;
-        } else {
-            scale = (qreal)height() / h;
-        }
-    }
-    QTransform t;
-    t.scale(scale, scale);
-    setTransform(t, false);
-}
-
 #define NEW_B(TYPE, VAR, ...) do { \
         VAR = new coreview::TYPE(__VA_ARGS__);\
         addItem(VAR);\
@@ -55,7 +20,7 @@ void CoreView::update_scale() {
         connect(machine->core(), SIGNAL(SIG), VAR, SLOT(instruction_update(const machine::Instruction&))); \
     } while(false)
 
-CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : QGraphicsScene(view) {
+CoreViewScene::CoreViewScene(GraphicsView *view, machine::QtMipsMachine *machine) : QGraphicsScene(view) {
     setSceneRect(0, 0, SC_WIDTH, SC_HEIGHT);
 
     // Elements //
@@ -133,6 +98,8 @@ CoreViewScene::CoreViewScene(CoreView *view, machine::QtMipsMachine *machine) : 
     connect(mem_data, SIGNAL(open_mem()), this, SIGNAL(request_data_memory()));
     connect(ft.pc, SIGNAL(open_program()), this, SIGNAL(request_program_memory()));
     connect(ft.pc, SIGNAL(jump_to_pc(std::uint32_t)), this, SIGNAL(request_jump_to_program_counter(std::uint32_t)));
+    connect(mem_program, SIGNAL(open_cache()), this, SIGNAL(request_cache_program()));
+    connect(mem_data, SIGNAL(open_cache()), this, SIGNAL(request_cache_data()));
 }
 
 CoreViewScene::~CoreViewScene() {
@@ -160,7 +127,7 @@ coreview::Signal *CoreViewScene::new_signal(const coreview::Connector *a, const 
     return c;
 }
 
-CoreViewSceneSimple::CoreViewSceneSimple(CoreView *view, machine::QtMipsMachine *machine) : CoreViewScene(view, machine) {
+CoreViewSceneSimple::CoreViewSceneSimple(GraphicsView *view, machine::QtMipsMachine *machine) : CoreViewScene(view, machine) {
     NEW_I(instr_prim, 230, 60, instruction_fetched(const machine::Instruction&));
     if (machine->config().delay_slot()) {
         NEW(Latch, delay_slot_latch, 55, 470, machine, 25);
@@ -226,7 +193,7 @@ CoreViewSceneSimple::CoreViewSceneSimple(CoreView *view, machine::QtMipsMachine 
     con->setAxes({CON_AXIS_Y(430), CON_AXIS_X(500), CON_AXIS_Y(210)});
 }
 
-CoreViewScenePipelined::CoreViewScenePipelined(CoreView *view, machine::QtMipsMachine *machine) : CoreViewScene(view, machine) {
+CoreViewScenePipelined::CoreViewScenePipelined(GraphicsView *view, machine::QtMipsMachine *machine) : CoreViewScene(view, machine) {
     NEW(Latch, latch_if_id, 158, 70, machine, 400);
     latch_if_id->setTitle("IF/ID");
     NEW(Latch, latch_id_ex, 392, 70, machine, 400);

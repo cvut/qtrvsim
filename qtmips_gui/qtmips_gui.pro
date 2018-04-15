@@ -37,6 +37,7 @@ SOURCES += \
         coreview/and.cpp \
         statictable.cpp \
     cachedock.cpp \
+    graphicsview.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -61,6 +62,7 @@ HEADERS += \
         coreview/and.h \
         statictable.h \
     cachedock.h \
+    graphicsview.h
 
 FORMS += \
         NewDialog.ui \

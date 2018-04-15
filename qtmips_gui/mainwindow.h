@@ -50,7 +50,7 @@ private:
 
     NewDialog *ndialog;
 
-    CoreView *coreview;
+    GraphicsView *coreview;
     CoreViewScene *corescene;
 
     RegistersDock *registers;

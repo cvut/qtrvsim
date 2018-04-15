@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setWindowTitle("QtMips");
 
     // Prepare empty core view
-    coreview  = new CoreView(this);
+    coreview  = new GraphicsView(this);
     this->setCentralWidget(coreview);
     // Create/prepare other widgets
     ndialog = new NewDialog(this, settings);

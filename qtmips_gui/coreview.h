@@ -4,6 +4,7 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include "qtmipsmachine.h"
+#include "graphicsview.h"
 #include "coreview/connection.h"
 #include "coreview/programcounter.h"
 #include "coreview/multiplexer.h"
@@ -18,22 +19,10 @@
 #include "coreview/logicblock.h"
 #include "coreview/and.h"
 
-class CoreView : public QGraphicsView {
-public:
-    CoreView(QWidget *parent);
-
-    void setScene(QGraphicsScene *scene);
-
-protected:
-    void resizeEvent(QResizeEvent *event);
-private:
-    void update_scale();
-};
-
 class CoreViewScene : public QGraphicsScene {
     Q_OBJECT
 public:
-    CoreViewScene(CoreView *view, machine::QtMipsMachine *machine);
+    CoreViewScene(GraphicsView *view, machine::QtMipsMachine *machine);
     ~CoreViewScene();
 
 signals:
@@ -86,7 +75,7 @@ protected:
 
 class CoreViewSceneSimple : public CoreViewScene {
 public:
-    CoreViewSceneSimple(CoreView *view, machine::QtMipsMachine *machine);
+    CoreViewSceneSimple(GraphicsView *view, machine::QtMipsMachine *machine);
 
 private:
     coreview::InstructionView *instr_prim, *instr_delay;
@@ -95,7 +84,7 @@ private:
 
 class CoreViewScenePipelined : public CoreViewScene {
 public:
-    CoreViewScenePipelined(CoreView *view, machine::QtMipsMachine *machine);
+    CoreViewScenePipelined(GraphicsView *view, machine::QtMipsMachine *machine);
 
 private:
     coreview::Latch *latch_if_id, *latch_id_ex, *latch_ex_mem, *latch_mem_wb;
@@ -105,7 +94,6 @@ private:
 
 #else
 
-class CoreView;
 class CoreViewScene;
 class CoreViewSceneSimple;
 class CoreViewScenePipelined;
