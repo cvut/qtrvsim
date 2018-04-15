@@ -13,7 +13,7 @@ namespace coreview {
 class Memory : public QGraphicsObject  {
     Q_OBJECT
 public:
-    Memory(const machine::Cache *cache);
+    Memory(bool cache_used, const machine::Cache *cache);
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

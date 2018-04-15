@@ -10,8 +10,8 @@ using namespace coreview;
 #define PENW 1
 //////////////////////
 
-Memory::Memory(const machine::Cache *cch) : QGraphicsObject(nullptr), name("Memory", this), type(this), cache_t("Cache", this), cache_hit_t("Hit: 0", this), cache_miss_t("Miss: 0", this) {
-    cache = false;
+Memory::Memory(bool cache_used, const machine::Cache *cch) : QGraphicsObject(nullptr), name("Memory", this), type(this), cache_t("Cache", this), cache_hit_t("Hit: 0", this), cache_miss_t("Miss: 0", this) {
+    cache = cache_used;
 
     QFont font;
     font.setPointSize(7);
@@ -22,11 +22,17 @@ Memory::Memory(const machine::Cache *cch) : QGraphicsObject(nullptr), name("Memo
     cache_miss_t.setFont(font);
 
     name.setPos(WIDTH/2 - name.boundingRect().width()/2, HEIGHT - (HEIGHT - CACHE_HEIGHT)/2);
-    const QRectF &cache_t_b = cache_t.boundingRect();
-    cache_t.setPos(WIDTH/2 - cache_t_b.width()/2, 1);
-    const QRectF &cache_hit_b = cache_hit_t.boundingRect();
-    cache_hit_t.setPos(WIDTH/2 - cache_hit_b.width()/2, cache_t_b.height() + 2);
-    cache_miss_t.setPos(WIDTH/2 - cache_miss_t.boundingRect().width()/2, cache_t_b.height() + cache_hit_b.height() + 3);
+    if (cache) {
+        const QRectF &cache_t_b = cache_t.boundingRect();
+        cache_t.setPos(WIDTH/2 - cache_t_b.width()/2, 1);
+        const QRectF &cache_hit_b = cache_hit_t.boundingRect();
+        cache_hit_t.setPos(WIDTH/2 - cache_hit_b.width()/2, cache_t_b.height() + 2);
+        cache_miss_t.setPos(WIDTH/2 - cache_miss_t.boundingRect().width()/2, cache_t_b.height() + cache_hit_b.height() + 3);
+    }
+
+    cache_t.setVisible(cache);
+    cache_hit_t.setVisible(cache);
+    cache_miss_t.setVisible(cache);
 
     connect(cch, SIGNAL(hit_update(uint)), this, SLOT(cache_hit_update(uint)));
     connect(cch, SIGNAL(miss_update(uint)), this, SLOT(cache_miss_update(uint)));
@@ -67,8 +73,7 @@ void Memory::set_type(const QString &text) {
     type.setPos(WIDTH/2 - box.width()/2, HEIGHT - (HEIGHT - CACHE_HEIGHT)/2 - box.height());
 }
 
-ProgramMemory::ProgramMemory(machine::QtMipsMachine *machine) : Memory(machine->cache_program()) {
-    cache = machine->config().cache_program().enabled();
+ProgramMemory::ProgramMemory(machine::QtMipsMachine *machine) : Memory(machine->config().cache_program().enabled(), machine->cache_program()) {
     set_type("Program");
 
     con_address = new Connector(Connector::AX_X);
@@ -95,8 +100,7 @@ const Connector *ProgramMemory::connector_instruction() const {
     return con_inst;
 }
 
-DataMemory::DataMemory(machine::QtMipsMachine *machine) : Memory(machine->cache_data()) {
-    cache = machine->config().cache_data().enabled();
+DataMemory::DataMemory(machine::QtMipsMachine *machine) : Memory(machine->config().cache_data().enabled(), machine->cache_data()) {
     set_type("Data");
 
     con_address = new Connector(Connector::AX_X);
