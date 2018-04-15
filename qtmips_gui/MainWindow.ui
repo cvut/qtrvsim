@@ -78,6 +78,7 @@
     <addaction name="actionStep"/>
     <addaction name="separator"/>
     <addaction name="ips1"/>
+    <addaction name="ips2"/>
     <addaction name="ips5"/>
     <addaction name="ips10"/>
     <addaction name="ipsUnlimited"/>
@@ -113,6 +114,7 @@
    <addaction name="actionStep"/>
    <addaction name="separator"/>
    <addaction name="ips1"/>
+   <addaction name="ips2"/>
    <addaction name="ips5"/>
    <addaction name="ips10"/>
   </widget>
@@ -305,6 +307,23 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+M</string>
+   </property>
+  </action>
+  <action name="ips2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>2 instructions per second</string>
+   </property>
+   <property name="iconText">
+    <string>2x</string>
+   </property>
+   <property name="toolTip">
+    <string>Run CPU in speed of two instructions per second</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+2</string>
    </property>
   </action>
  </widget>

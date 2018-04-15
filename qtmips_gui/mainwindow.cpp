@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     // Execution speed actions
     speed_group = new QActionGroup(this);
     speed_group->addAction(ui->ips1);
+    speed_group->addAction(ui->ips2);
     speed_group->addAction(ui->ips5);
     speed_group->addAction(ui->ips10);
     speed_group->addAction(ui->ipsUnlimited);
@@ -43,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->actionProgram_Cache, SIGNAL(triggered(bool)), this, SLOT(show_cache_program()));
     connect(ui->actionData_Cache, SIGNAL(triggered(bool)), this, SLOT(show_cache_data()));
     connect(ui->ips1, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
+    connect(ui->ips2, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
     connect(ui->ips5, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
     connect(ui->ips10, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
     connect(ui->ipsUnlimited, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
@@ -161,8 +163,10 @@ void MainWindow::set_speed() {
 
     if (ui->ips1->isChecked())
         machine->set_speed(1000);
-    else if (ui->ips5->isChecked())
+    else if (ui->ips2->isChecked())
         machine->set_speed(500);
+    else if (ui->ips5->isChecked())
+        machine->set_speed(200);
     else if (ui->ips10->isChecked())
         machine->set_speed(100);
     else
