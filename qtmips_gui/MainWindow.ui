@@ -64,10 +64,10 @@
      <string>Windows</string>
     </property>
     <addaction name="actionRegisters"/>
-    <addaction name="actionMemory"/>
     <addaction name="actionProgram_memory"/>
-    <addaction name="actionCache"/>
-    <addaction name="actionCache_statistics"/>
+    <addaction name="actionMemory"/>
+    <addaction name="actionProgram_Cache"/>
+    <addaction name="actionData_Cache"/>
    </widget>
    <widget class="QMenu" name="menuMachine">
     <property name="title">
@@ -271,16 +271,6 @@
     <string>Ctrl+P</string>
    </property>
   </action>
-  <action name="actionCache">
-   <property name="text">
-    <string>Cache content</string>
-   </property>
-  </action>
-  <action name="actionCache_statistics">
-   <property name="text">
-    <string>Cache statistics</string>
-   </property>
-  </action>
   <action name="actionRegisters">
    <property name="text">
     <string>Registers</string>
@@ -299,6 +289,22 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+R</string>
+   </property>
+  </action>
+  <action name="actionProgram_Cache">
+   <property name="text">
+    <string>Program Cache</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+P</string>
+   </property>
+  </action>
+  <action name="actionData_Cache">
+   <property name="text">
+    <string>Data Cache</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+M</string>
    </property>
   </action>
  </widget>

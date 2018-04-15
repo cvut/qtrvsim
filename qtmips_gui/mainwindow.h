@@ -9,6 +9,7 @@
 #include "registersdock.h"
 #include "programdock.h"
 #include "memorydock.h"
+#include "cachedock.h"
 
 #include "qtmipsmachine.h"
 #include "machineconfig.h"
@@ -32,6 +33,8 @@ public slots:
     void show_registers();
     void show_program();
     void show_memory();
+    void show_cache_data();
+    void show_cache_program();
     // Actions - execution speed
     void set_speed();
     // Machine signals
@@ -53,7 +56,7 @@ private:
     RegistersDock *registers;
     ProgramDock *program;
     MemoryDock *memory;
-    // TODO implement cache docks
+    CacheDock *cache_program, *cache_data;
 
     QActionGroup *speed_group;
 

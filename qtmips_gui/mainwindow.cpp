@@ -20,6 +20,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     program->hide();
     memory = new MemoryDock(this);
     memory->hide();
+    cache_program = new CacheDock(this, "Program");
+    cache_program->hide();
+    cache_data = new CacheDock(this, "Data");
+    cache_data->hide();
 
     // Execution speed actions
     speed_group = new QActionGroup(this);
@@ -36,6 +40,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->actionRegisters, SIGNAL(triggered(bool)), this, SLOT(show_registers()));
     connect(ui->actionProgram_memory, SIGNAL(triggered(bool)), this, SLOT(show_program()));
     connect(ui->actionMemory, SIGNAL(triggered(bool)), this, SLOT(show_memory()));
+    connect(ui->actionProgram_Cache, SIGNAL(triggered(bool)), this, SLOT(show_cache_program()));
+    connect(ui->actionData_Cache, SIGNAL(triggered(bool)), this, SLOT(show_cache_data()));
     connect(ui->ips1, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
     connect(ui->ips5, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
     connect(ui->ips10, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
@@ -57,6 +63,8 @@ MainWindow::~MainWindow() {
     delete registers;
     delete program;
     delete memory;
+    delete cache_program;
+    delete cache_data;
     delete ui;
     if (machine != nullptr)
         delete machine;
@@ -101,11 +109,15 @@ void MainWindow::create_core(const machine::MachineConfig &config) {
     connect(corescene, SIGNAL(request_program_memory()), this, SLOT(show_program()));
     connect(corescene, SIGNAL(request_data_memory()), this, SLOT(show_memory()));
     connect(corescene, SIGNAL(request_jump_to_program_counter(std::uint32_t)), program, SLOT(jump_to_pc(std::uint32_t)));
+    connect(corescene, SIGNAL(request_cache_program()), this, SLOT(show_cache_program()));
+    connect(corescene, SIGNAL(request_cache_data()), this, SLOT(show_cache_data()));
 
     // Setup docks
     registers->setup(machine);
     program->setup(machine);
     memory->setup(machine);
+    cache_program->setup(machine->config().cache_program().enabled() ? machine->cache_program() : nullptr);
+    cache_data->setup(machine->config().cache_data().enabled() ? machine->cache_data() : nullptr);
     // Set status to ready
     machine_status(machine::QtMipsMachine::ST_READY);
 }
@@ -139,6 +151,8 @@ void MainWindow::machine_reload() {
 SHOW_HANDLER(registers)
 SHOW_HANDLER(program)
 SHOW_HANDLER(memory)
+SHOW_HANDLER(cache_program)
+SHOW_HANDLER(cache_data)
 #undef SHOW_HANDLER
 
 void MainWindow::set_speed() {

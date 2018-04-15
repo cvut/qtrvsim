@@ -35,7 +35,8 @@ SOURCES += \
         coreview/junction.cpp \
         coreview/logicblock.cpp \
         coreview/and.cpp \
-        statictable.cpp
+        statictable.cpp \
+    cachedock.cpp \
 
 HEADERS += \
         mainwindow.h \
@@ -58,7 +59,8 @@ HEADERS += \
         coreview/junction.h \
         coreview/logicblock.h \
         coreview/and.h \
-        statictable.h
+        statictable.h \
+    cachedock.h \
 
 FORMS += \
         NewDialog.ui \
