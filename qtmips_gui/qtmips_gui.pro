@@ -36,6 +36,7 @@ SOURCES += \
         coreview/logicblock.cpp \
         coreview/and.cpp \
         statictable.cpp \
+    cacheview.cpp \
     cachedock.cpp \
     graphicsview.cpp
 
@@ -61,6 +62,7 @@ HEADERS += \
         coreview/logicblock.h \
         coreview/and.h \
         statictable.h \
+    cacheview.h \
     cachedock.h \
     graphicsview.h
 

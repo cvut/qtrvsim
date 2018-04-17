@@ -42,9 +42,8 @@ void Cache::wword(std::uint32_t address, std::uint32_t value) {
         return;
     }
 
-    std::uint32_t *data;
-    access(address, &data, false);
-    *data = value;
+    std::uint32_t data;
+    access(address, &data, true, value);
 
     if (cnf.write_policy() == MachineConfigCache::WP_TROUGH)
         mem->wword(address, value);
@@ -54,9 +53,9 @@ std::uint32_t Cache::rword(std::uint32_t address) const {
     if (!cnf.enabled())
         return mem->read_word(address);
 
-    std::uint32_t *data;
-    access(address, &data, true);
-    return *data;
+    std::uint32_t data;
+    access(address, &data, false);
+    return data;
 }
 
 void Cache::flush() {
@@ -96,13 +95,16 @@ void Cache::reset() {
     // Trigger signals
     emit hit_update(hitc);
     emit miss_update(missc);
+    for (unsigned as = 0; as < cnf.associativity(); as++)
+        for (unsigned st = 0; st < cnf.sets(); st++)
+            emit cache_update(as, st, false, false, 0, 0);
 }
 
 const MachineConfigCache &Cache::config() const {
     return cnf;
 }
 
-void Cache::access(std::uint32_t address, std::uint32_t **data, bool read) const {
+void Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::uint32_t value) const {
     address = address >> 2;
     unsigned ssize = cnf.blocks() * cnf.sets();
     std::uint32_t tag = address / ssize;
@@ -177,9 +179,14 @@ void Cache::access(std::uint32_t address, std::uint32_t **data, bool read) const
     }
 
     cd.valid = true; // We either write to it or we read from memory. Either way it's valid when we leave Cache class
-    cd.dirty = cd.dirty || !read;
+    cd.dirty = cd.dirty || !write;
     cd.tag = tag;
-    *data = &cd.data[col];
+    *data = cd.data[col];
+
+    if (write)
+        cd.data[col] = value;
+
+    emit cache_update(indx, row, cd.valid, cd.dirty, cd.tag, cd.data);
 }
 
 void Cache::kick(unsigned associat_indx, unsigned row) const {

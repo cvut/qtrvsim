@@ -25,11 +25,11 @@ public:
     void reset(); // Reset whole state of cache
 
     const MachineConfigCache &config() const;
-    // TODO getters for cells
 
 signals:
     void hit_update(unsigned) const;
     void miss_update(unsigned) const;
+    void cache_update(unsigned associat, unsigned set, bool valid, bool dirty, std::uint32_t tag, const std::uint32_t *data) const;
 
 private:
     MachineConfigCache cnf;
@@ -49,7 +49,7 @@ private:
 
     mutable unsigned hitc, missc; // Hit and miss counters
 
-    void access(std::uint32_t address, std::uint32_t **data, bool read) const;
+    void access(std::uint32_t address, std::uint32_t *data, bool write, std::uint32_t value = 0) const;
     void kick(unsigned associat_indx, unsigned row) const;
     std::uint32_t base_address(std::uint32_t tag, unsigned row) const;
 };

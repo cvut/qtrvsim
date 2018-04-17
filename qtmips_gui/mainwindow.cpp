@@ -118,8 +118,8 @@ void MainWindow::create_core(const machine::MachineConfig &config) {
     registers->setup(machine);
     program->setup(machine);
     memory->setup(machine);
-    cache_program->setup(machine->config().cache_program().enabled() ? machine->cache_program() : nullptr);
-    cache_data->setup(machine->config().cache_data().enabled() ? machine->cache_data() : nullptr);
+    cache_program->setup(machine->cache_program());
+    cache_data->setup(machine->cache_data());
     // Set status to ready
     machine_status(machine::QtMipsMachine::ST_READY);
 }
