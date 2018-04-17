@@ -1,7 +1,8 @@
 #include "programdock.h"
 #include "qtmipsexception.h"
 
-ProgramView::ProgramView(QWidget *parent) : MemoryView(parent) {
+ProgramView::ProgramView(QWidget *parent, QSettings *settings) : MemoryView(parent, settings->value("ProgramViewAddr0", 0x8001FF80).toULongLong()) {
+    this->settings = settings;
     /*
     cb_single = new QComboBox(this);
     cb_single->addItems({
@@ -81,6 +82,10 @@ QList<QWidget*> ProgramView::row_widget(std::uint32_t address, QWidget *parent) 
     return widgs;
 }
 
+void ProgramView::addr0_save_change(std::uint32_t val) {
+    settings->setValue("ProgramViewAddr0", val);
+}
+
 void ProgramView::cb_single_changed(int index) {
     // TODO set memory view
 }
@@ -89,8 +94,8 @@ void ProgramView::cb_pipelined_changed(int index) {
     // TODO set memory view
 }
 
-ProgramDock::ProgramDock(QWidget *parent) : QDockWidget(parent) {
-    view = new ProgramView(this);
+ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : QDockWidget(parent) {
+    view = new ProgramView(this, settings);
     setWidget(view);
 
     setObjectName("Program");

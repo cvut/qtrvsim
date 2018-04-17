@@ -12,7 +12,7 @@
 class ProgramView : public MemoryView {
     Q_OBJECT
 public:
-    ProgramView(QWidget *parent);
+    ProgramView(QWidget *parent, QSettings *settings);
 
     void setup(machine::QtMipsMachine*);
 
@@ -21,6 +21,8 @@ public:
 protected:
     QList<QWidget*> row_widget(std::uint32_t address, QWidget *parent);
 
+    void addr0_save_change(std::uint32_t val);
+
 private slots:
     void cb_single_changed(int index);
     void cb_pipelined_changed(int index);
@@ -28,12 +30,13 @@ private slots:
 private:
     QComboBox *cb_single;
     QComboBox *cb_pipelined;
+    QSettings *settings;
 };
 
 class ProgramDock : public QDockWidget {
     Q_OBJECT
 public:
-    ProgramDock(QWidget *parent);
+    ProgramDock(QWidget *parent, QSettings *settings);
 
     void setup(machine::QtMipsMachine *machine);
 

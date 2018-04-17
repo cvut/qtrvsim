@@ -17,12 +17,13 @@
 class MemoryView : public QWidget {
     Q_OBJECT
 public:
-    MemoryView(QWidget *parent = nullptr);
+    MemoryView(QWidget *parent = nullptr, std::uint32_t addr0 = 0);
 
     virtual void setup(machine::QtMipsMachine*);
 
     void set_focus(std::uint32_t address);
-    std::uint32_t focus();
+    std::uint32_t focus() const;
+    std::uint32_t addr0() const;
 
     void edit_load_focus(); // Set current focus to edit field
 
@@ -35,6 +36,8 @@ protected:
 
     void reload_content(); // reload displayed data
     void update_content(int count, int shift); // update content to match given count and shift
+
+    virtual void addr0_save_change(std::uint32_t val);
 
 private slots:
     void go_edit_finish();

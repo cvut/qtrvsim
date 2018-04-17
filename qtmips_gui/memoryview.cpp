@@ -9,9 +9,9 @@
 #define ANGLE_SCROLL 4
 ///////////////////////////
 
-MemoryView::MemoryView(QWidget *parent) : QWidget(parent) {
+MemoryView::MemoryView(QWidget *parent, std::uint32_t addr0) : QWidget(parent) {
     memory = nullptr;
-    addr_0 = 0;
+    addr_0 = addr0;
 
     layout = new QVBoxLayout(this);
 
@@ -38,6 +38,7 @@ void MemoryView::set_focus(std::uint32_t address) {
     if (address < addr_0 || (address - addr_0)/4 > (unsigned)memf->widg->count()) {
         // This is outside of loaded area so just move it and reload everything
         addr_0 = address - 4*memf->focussed();
+        addr0_save_change(addr_0);
         reload_content();
     } else {
         memf->focus((address - addr_0) / 4);
@@ -45,8 +46,12 @@ void MemoryView::set_focus(std::uint32_t address) {
     edit_load_focus();
 }
 
-std::uint32_t MemoryView::focus() {
+std::uint32_t MemoryView::focus() const {
     return addr_0 + 4*memf->focussed();
+}
+
+std::uint32_t MemoryView::addr0() const {
+    return addr_0;
 }
 
 void MemoryView::edit_load_focus() {
@@ -89,7 +94,10 @@ void MemoryView::update_content(int count, int shift) {
     else
         for (int i = 0; i > d_e; i--)
             memf->widg->removeRow(memf->widg->count() - 1);
+    addr0_save_change(addr_0);
 }
+
+void MemoryView::addr0_save_change(std::uint32_t val) { /* ignore */ }
 
 void MemoryView::go_edit_finish() {
     QString hex = go_edit->text();

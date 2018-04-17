@@ -1,6 +1,8 @@
 #include "memorydock.h"
 
-DataView::DataView(QWidget *parent) : MemoryView(parent) { }
+DataView::DataView(QWidget *parent, QSettings *settings) : MemoryView(parent, settings->value("DataViewAddr0", 0).toULongLong()) {
+    this->settings = settings;
+}
 
 QList<QWidget*> DataView::row_widget(std::uint32_t address, QWidget *parent) {
     QList<QWidget*> widgs;
@@ -24,8 +26,12 @@ QList<QWidget*> DataView::row_widget(std::uint32_t address, QWidget *parent) {
     return widgs;
 }
 
-MemoryDock::MemoryDock(QWidget *parent) : QDockWidget(parent) {
-    view = new DataView(this);
+void DataView::addr0_save_change(std::uint32_t val) {
+    settings->setValue("DataViewAddr0", val);
+}
+
+MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : QDockWidget(parent) {
+    view = new DataView(this, settings);
     setWidget(view);
 
     setObjectName("Memory");

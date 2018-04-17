@@ -16,9 +16,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     ndialog = new NewDialog(this, settings);
     registers = new RegistersDock(this);
     registers->hide();
-    program = new ProgramDock(this);
+    program = new ProgramDock(this, settings);
     program->hide();
-    memory = new MemoryDock(this);
+    memory = new MemoryDock(this, settings);
     memory->hide();
     cache_program = new CacheDock(this, "Program");
     cache_program->hide();
@@ -55,8 +55,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 }
 
 MainWindow::~MainWindow() {
-    settings->sync();
-    delete settings;
     if (corescene != nullptr)
         delete corescene;
     if (coreview != nullptr)
@@ -70,6 +68,8 @@ MainWindow::~MainWindow() {
     delete ui;
     if (machine != nullptr)
         delete machine;
+    settings->sync();
+    delete settings;
 }
 
 void MainWindow::start() {
