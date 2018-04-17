@@ -6,7 +6,7 @@
 // Focus point (this is multiplied with height of widget to know position where we want to focus)
 #define FOCUS 0.25
 // How angle maps to pixels when and scroll is used
-#define ANGLE_SCROLL 4
+#define ANGLE_SCROLL 1
 ///////////////////////////
 
 MemoryView::MemoryView(QWidget *parent, std::uint32_t addr0) : QWidget(parent) {
