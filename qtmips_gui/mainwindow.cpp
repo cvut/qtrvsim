@@ -90,9 +90,9 @@ void MainWindow::create_core(const machine::MachineConfig &config) {
     if (corescene != nullptr)
         delete corescene;
     if (config.pipelined()) {
-        corescene = new CoreViewScenePipelined(coreview, machine);
+        corescene = new CoreViewScenePipelined(machine);
     } else {
-        corescene = new CoreViewSceneSimple(coreview, machine);
+        corescene = new CoreViewSceneSimple(machine);
     }
     coreview->setScene(corescene);
 

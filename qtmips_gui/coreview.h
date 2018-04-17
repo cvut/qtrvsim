@@ -22,7 +22,7 @@
 class CoreViewScene : public QGraphicsScene {
     Q_OBJECT
 public:
-    CoreViewScene(GraphicsView *view, machine::QtMipsMachine *machine);
+    CoreViewScene(machine::QtMipsMachine *machine);
     ~CoreViewScene();
 
 signals:
@@ -75,7 +75,7 @@ protected:
 
 class CoreViewSceneSimple : public CoreViewScene {
 public:
-    CoreViewSceneSimple(GraphicsView *view, machine::QtMipsMachine *machine);
+    CoreViewSceneSimple(machine::QtMipsMachine *machine);
 
 private:
     coreview::InstructionView *instr_prim, *instr_delay;
@@ -84,7 +84,7 @@ private:
 
 class CoreViewScenePipelined : public CoreViewScene {
 public:
-    CoreViewScenePipelined(GraphicsView *view, machine::QtMipsMachine *machine);
+    CoreViewScenePipelined(machine::QtMipsMachine *machine);
 
 private:
     coreview::Latch *latch_if_id, *latch_id_ex, *latch_ex_mem, *latch_mem_wb;

@@ -20,7 +20,7 @@
         connect(machine->core(), SIGNAL(SIG), VAR, SLOT(instruction_update(const machine::Instruction&))); \
     } while(false)
 
-CoreViewScene::CoreViewScene(GraphicsView *view, machine::QtMipsMachine *machine) : QGraphicsScene(view) {
+CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene() {
     setSceneRect(0, 0, SC_WIDTH, SC_HEIGHT);
 
     // Elements //
@@ -127,7 +127,7 @@ coreview::Signal *CoreViewScene::new_signal(const coreview::Connector *a, const 
     return c;
 }
 
-CoreViewSceneSimple::CoreViewSceneSimple(GraphicsView *view, machine::QtMipsMachine *machine) : CoreViewScene(view, machine) {
+CoreViewSceneSimple::CoreViewSceneSimple(machine::QtMipsMachine *machine) : CoreViewScene(machine) {
     NEW_I(instr_prim, 230, 60, instruction_fetched(const machine::Instruction&));
     if (machine->config().delay_slot()) {
         NEW(Latch, delay_slot_latch, 55, 470, machine, 25);
@@ -193,7 +193,7 @@ CoreViewSceneSimple::CoreViewSceneSimple(GraphicsView *view, machine::QtMipsMach
     con->setAxes({CON_AXIS_Y(430), CON_AXIS_X(500), CON_AXIS_Y(210)});
 }
 
-CoreViewScenePipelined::CoreViewScenePipelined(GraphicsView *view, machine::QtMipsMachine *machine) : CoreViewScene(view, machine) {
+CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) : CoreViewScene(machine) {
     NEW(Latch, latch_if_id, 158, 70, machine, 400);
     latch_if_id->setTitle("IF/ID");
     NEW(Latch, latch_id_ex, 392, 70, machine, 400);
