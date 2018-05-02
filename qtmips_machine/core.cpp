@@ -56,18 +56,18 @@ static const struct DecodeMap dmap[]  = {
     NOPE, // 29
     NOPE, // 30
     NOPE, // 31
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_MEMREAD, .alu = ALU_OP_ADD, .mem_ctl = MemoryAccess::AC_BYTE }, // LB
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_MEMREAD, .alu = ALU_OP_ADD, .mem_ctl = MemoryAccess::AC_HALFWORD }, // LH
+    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_MEMREAD, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_BYTE }, // LB
+    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_MEMREAD, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_HALFWORD }, // LH
     NOPE, // LWL
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_MEMREAD, .alu = ALU_OP_ADD, .mem_ctl = MemoryAccess::AC_WORD }, // LW
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_MEMREAD, .alu = ALU_OP_ADD, .mem_ctl = MemoryAccess::AC_BYTE_UNSIGNED }, // LBU
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_MEMREAD, .alu = ALU_OP_ADD, .mem_ctl = MemoryAccess::AC_HALFWORD_UNSIGNED }, // LHU
+    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_MEMREAD, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_WORD }, // LW
+    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_MEMREAD, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_BYTE_UNSIGNED }, // LBU
+    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_MEMREAD, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_HALFWORD_UNSIGNED }, // LHU
     NOPE, // LWR
     NOPE, // 39
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_MEMWRITE, .alu = ALU_OP_ADD, .mem_ctl = MemoryAccess::AC_BYTE }, // SB
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_MEMWRITE, .alu = ALU_OP_ADD, .mem_ctl = MemoryAccess::AC_HALFWORD }, // SH
+    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_MEMWRITE, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_BYTE }, // SB
+    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_MEMWRITE, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_HALFWORD }, // SH
     NOPE, // SWL
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_MEMWRITE, .alu = ALU_OP_ADD, .mem_ctl = MemoryAccess::AC_WORD }, // SW
+    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_MEMWRITE, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_WORD }, // SW
     NOPE, // 44
     NOPE, // 45
     NOPE, // SWR
