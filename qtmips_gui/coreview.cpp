@@ -228,12 +228,12 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
     struct coreview::Latch::ConnectorPair lp_dc_rt = latch_id_ex->new_connector(regs->connector_read2()->y() - latch_id_ex->y());
     coreview::Bus *regs_bus1 = new_bus(regs->connector_read1(), lp_dc_rs.in);
     coreview::Bus *regs_bus2 = new_bus(regs->connector_read2(), lp_dc_rt.in);
-    if (machine->config().hazard_unit() == machine::MachineConfig::HU_NONE) {
+    //if (machine->config().hazard_unit() == machine::MachineConfig::HU_NONE) {
         const coreview::Connector *regs_bus_con = dc.cmp->new_connector(-0.5, 1);
         new_bus(regs_bus1->new_connector(regs_bus_con->point(), coreview::Connector::AX_Y), regs_bus_con);
         regs_bus_con = dc.cmp->new_connector(0.5, 1);
         new_bus(regs_bus2->new_connector(regs_bus_con->point(), coreview::Connector::AX_Y), regs_bus_con);
-    } // TODO else
+    //} // TODO else
     struct coreview::Latch::ConnectorPair lp_dc_immed = latch_id_ex->new_connector(dc.j_sign_ext->y() - latch_id_ex->y());
     new_bus(dc.j_sign_ext->new_connector(coreview::Connector::AX_X), lp_dc_immed.in);
     struct coreview::Latch::ConnectorPair regdest_dc_rt = latch_id_ex->new_connector(ex.mux_regdest->connector_in(0)->point().y() - latch_id_ex->y());
