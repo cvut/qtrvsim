@@ -13,8 +13,8 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) : QObject(), mcnf(&cc) {
 
     regs = new Registers();
     mem = new Memory(*mem_program_only);
-    cch_program = new Cache(mem, &cc.cache_program());
-    cch_data = new Cache(mem, &cc.cache_data());
+    cch_program = new Cache(mem, &cc.cache_program(), cc.memory_access_time_read(), cc.memory_access_time_write());
+    cch_data = new Cache(mem, &cc.cache_data(), cc.memory_access_time_read(), cc.memory_access_time_write());
 
     if (cc.pipelined())
         cr = new CorePipelined(regs, cch_program, cch_data, cc.hazard_unit());

@@ -284,11 +284,11 @@ bool MachineConfig::memory_write_protection() const {
 }
 
 unsigned MachineConfig::memory_access_time_read() const {
-    return mem_acc_read;
+    return mem_acc_read > 1 ? mem_acc_read : 1;
 }
 
 unsigned MachineConfig::memory_access_time_write() const {
-    return mem_acc_write;
+    return mem_acc_write > 1 ? mem_acc_write : 1;
 }
 
 QString MachineConfig::elf() const {

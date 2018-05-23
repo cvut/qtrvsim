@@ -2,11 +2,15 @@
 
 using namespace machine;
 
-Cache::Cache(Memory *m, const MachineConfigCache *cc) : cnf(cc) {
+Cache::Cache(Memory *m, const MachineConfigCache *cc, unsigned memory_access_penalty_r, unsigned memory_access_penalty_w) : cnf(cc) {
     mem = m;
+    access_pen_r = memory_access_penalty_r;
+    access_pen_w = memory_access_penalty_w;
     // Zero hit and miss rate
-    hitc = 0;
-    missc = 0;
+    hit_read = 0;
+    hit_write = 0;
+    miss_read = 0;
+    miss_write = 0;
     // Skip any other initialization if cache is disabled
     if (!cc->enabled())
         return;
@@ -73,11 +77,31 @@ void Cache::sync() {
 }
 
 unsigned Cache::hit() const {
-    return hitc;
+    return hit_read + hit_write;
 }
 
 unsigned Cache::miss() const {
-    return missc;
+    return miss_read + miss_write;
+}
+
+unsigned Cache::stalled_cycles() const {
+    return miss_read * (access_pen_r - 1) + miss_write * (access_pen_w - 1);
+}
+
+double Cache::speed_improvement() const {
+    unsigned comp = hit_read + hit_write + miss_read + miss_write;
+    if (comp == 0)
+        return 100.0;
+    return (double)((miss_read + hit_read) * access_pen_r + (miss_write + hit_write) * access_pen_w) \
+            / (double)(hit_write + hit_read + miss_read * access_pen_r + miss_write * access_pen_w) \
+            * 100;
+}
+
+double Cache::usage_efficiency() const {
+    unsigned comp = hit_read + hit_write + miss_read + miss_write;
+    if (comp == 0)
+        return 0.0;
+    return (double)(hit_read + hit_write) / (double)comp * 100.0;
 }
 
 void Cache::reset() {
@@ -90,11 +114,14 @@ void Cache::reset() {
             dt[as][st].valid = false;
     // Note: we don't have to zero replacement policy data as those are zeroed when first used on invalid cell
     // Zero hit and miss rate
-    hitc = 0;
-    missc = 0;
+    hit_read = 0;
+    hit_write = 0;
+    miss_read = 0;
+    miss_write = 0;
     // Trigger signals
-    emit hit_update(hitc);
-    emit miss_update(missc);
+    emit hit_update(hit());
+    emit miss_update(miss());
+    update_statistics();
     for (unsigned as = 0; as < cnf.associativity(); as++)
         for (unsigned st = 0; st < cnf.sets(); st++)
             emit cache_update(as, st, false, false, 0, 0);
@@ -157,11 +184,19 @@ void Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
 
     // Update statistics and otherwise read from memory
     if (cd.valid) {
-        hitc++;
-        emit hit_update(hitc);
+        if (write)
+            hit_write++;
+        else
+            hit_read++;
+        emit hit_update(hit());
+        update_statistics();
     } else {
-        missc++;
-        emit miss_update(missc);
+        if (write)
+            miss_write++;
+        else
+            miss_read++;
+        emit miss_update(miss());
+        update_statistics();
         for (unsigned i = 0; i < cnf.blocks(); i++)
             cd.data[i] = mem->rword(base_address(tag, row) + (4*i));
     }
@@ -208,4 +243,8 @@ void Cache::kick(unsigned associat_indx, unsigned row) const {
 
 std::uint32_t Cache::base_address(std::uint32_t tag, unsigned row) const {
     return ((tag * cnf.blocks() * cnf.sets()) + (row * cnf.blocks())) << 2;
+}
+
+void Cache::update_statistics() const {
+    emit statistics_update(stalled_cycles(), speed_improvement(), usage_efficiency());
 }

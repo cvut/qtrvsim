@@ -18,12 +18,13 @@ public:
 private slots:
     void hit_update(unsigned);
     void miss_update(unsigned);
+    void statistics_update(unsigned stalled_cycles, double speed_improv, double usage_effic);
 
 private:
     QVBoxLayout *layout_box;
     QWidget *top_widget, *top_form;
     QFormLayout *layout_top_form;
-    QLabel *l_hit, *l_miss, *no_cache;
+    QLabel *l_hit, *l_miss, *l_stalled, *l_speed, *l_usage, *no_cache;
     GraphicsView *graphicsview;
     CacheViewScene *cachescene;
 };
