@@ -22,7 +22,8 @@ SOURCES += \
     programloader.cpp \
     cache.cpp \
     alu.cpp \
-    machineconfig.cpp
+    machineconfig.cpp \
+    utils.cpp
 
 HEADERS += \
     qtmipsmachine.h \

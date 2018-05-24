@@ -18,6 +18,7 @@
 #include "coreview/constant.h"
 #include "coreview/logicblock.h"
 #include "coreview/and.h"
+#include "coreview/value.h"
 
 class CoreViewScene : public QGraphicsScene {
     Q_OBJECT

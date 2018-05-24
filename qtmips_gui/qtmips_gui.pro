@@ -38,7 +38,8 @@ SOURCES += \
         statictable.cpp \
     cacheview.cpp \
     cachedock.cpp \
-    graphicsview.cpp
+    graphicsview.cpp \
+    coreview/value.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -64,7 +65,8 @@ HEADERS += \
         statictable.h \
     cacheview.h \
     cachedock.h \
-    graphicsview.h
+    graphicsview.h \
+    coreview/value.h
 
 FORMS += \
         NewDialog.ui \

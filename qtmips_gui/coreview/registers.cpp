@@ -46,7 +46,6 @@ QRectF Registers::boundingRect() const {
 
 void Registers::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute((unused)), QWidget *widget __attribute((unused))) {
     painter->drawRect(0, 0, WIDTH, HEIGHT);
-    // TODO anything else?
 }
 
 void Registers::setPos(qreal x, qreal y) {

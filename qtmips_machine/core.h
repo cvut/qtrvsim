@@ -29,6 +29,19 @@ signals:
     void instruction_writeback(const machine::Instruction &inst);
     void instruction_program_counter(const machine::Instruction &inst);
 
+    void decode_instruction_value(std::uint32_t);
+    void decode_reg1_value(std::uint32_t);
+    void decode_reg2_value(std::uint32_t);
+    void decode_immediate_value(std::uint32_t);
+    void execute_alu_value(std::uint32_t);
+    void execute_reg1_value(std::uint32_t);
+    void execute_reg2_value(std::uint32_t);
+    void execute_immediate_value(std::uint32_t);
+    void memory_alu_value(std::uint32_t);
+    void memory_rt_value(std::uint32_t);
+    void memory_mem_value(std::uint32_t);
+    void writeback_value(std::uint32_t);
+
 protected:
     virtual void do_step() = 0;
     virtual void do_reset() = 0;

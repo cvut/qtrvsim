@@ -1,5 +1,6 @@
 #include "core.h"
 #include "programloader.h"
+#include "utils.h"
 
 using namespace machine;
 
@@ -125,6 +126,14 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     if (!(dec.flags & DM_SUPPORTED))
         throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Instruction with following opcode is not supported", QString::number(dt.inst.opcode(), 16));
 
+    std::uint32_t val_rs = regs->read_gp(dt.inst.rs());
+    std::uint32_t val_rt = regs->read_gp(dt.inst.rt());
+
+    emit decode_instruction_value(dt.inst.data());
+    emit decode_reg1_value(val_rs);
+    emit decode_reg2_value(val_rt);
+    emit decode_immediate_value(sign_extend(dt.inst.immediate()));
+
     return {
         .inst = dt.inst,
         .memread = dec.flags & DM_MEMREAD,
@@ -134,8 +143,8 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .regwrite = dec.flags & DM_REGWRITE,
         .aluop = dt.inst.opcode() == 0 ? (enum AluOp)dt.inst.funct() : dec.alu,
         .memctl = dec.mem_ctl,
-        .val_rs = regs->read_gp(dt.inst.rs()),
-        .val_rt = regs->read_gp(dt.inst.rt()),
+        .val_rs = val_rs,
+        .val_rt = val_rt,
     };
 }
 
@@ -149,7 +158,14 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
 
     std::uint32_t alu_sec = dt.val_rt;
     if (dt.alusrc)
-        alu_sec = ((dt.inst.immediate() & 0x8000) ? 0xFFFF0000 : 0) | (dt.inst.immediate()); // Sign extend to 32bit
+        alu_sec = sign_extend(dt.inst.immediate()); // Sign extend to 32bit
+
+    std::uint32_t alu_val = alu_operate(dt.aluop, dt.val_rs, alu_sec, dt.inst.shamt(), regs);
+
+    emit execute_alu_value(alu_val);
+    emit execute_reg1_value(dt.val_rs);
+    emit execute_reg2_value(dt.val_rt);
+    emit execute_immediate_value(sign_extend(dt.inst.immediate()));
 
     return {
         .inst = dt.inst,
@@ -159,7 +175,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
         .memctl = dt.memctl,
         .val_rt = dt.val_rt,
         .rwrite = dt.regd ? dt.inst.rd() : dt.inst.rt(),
-        .alu_val = alu_operate(dt.aluop, dt.val_rs, alu_sec, dt.inst.shamt(), regs),
+        .alu_val = alu_val,
     };
 }
 
@@ -172,6 +188,10 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
     else if (dt.memread)
         towrite_val = mem_data->read_ctl(dt.memctl, dt.alu_val);
 
+    emit memory_alu_value(dt.alu_val);
+    emit memory_rt_value(dt.val_rt);
+    emit memory_mem_value(dt.memread ? towrite_val : 0);
+
     return {
         .inst = dt.inst,
         .regwrite = dt.regwrite,
@@ -182,6 +202,7 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
 
 void Core::writeback(const struct dtMemory &dt) {
     emit instruction_writeback(dt.inst);
+    emit writeback_value(dt.towrite_val);
     if (dt.regwrite)
         regs->write_gp(dt.rwrite, dt.towrite_val);
 }

@@ -19,9 +19,12 @@
         NEW(InstructionView, VAR, X, Y); \
         connect(machine->core(), SIGNAL(SIG), VAR, SLOT(instruction_update(const machine::Instruction&))); \
     } while(false)
+#define NEW_V(X, Y, ...) NEW(Value, val, X, Y, __VA_ARGS__)
 
 CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene() {
     setSceneRect(0, 0, SC_WIDTH, SC_HEIGHT);
+
+    coreview::Value *val;
 
     // Elements //
     // Primary points
@@ -92,6 +95,36 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     // From write back stage to decode stage
     con = new_bus(wb.mem_or_reg->connector_out(), regs->connector_write());
     con->setAxes({CON_AXIS_Y(710), CON_AXIS_X(510), CON_AXIS_Y(172)});
+
+    // Decode stage values
+    NEW_V(200, 200); // Instruction
+    connect(machine->core(), SIGNAL(decode_instruction_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
+    NEW_V(360, 250); // Register output 1
+    connect(machine->core(), SIGNAL(decode_reg1_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
+    NEW_V(360, 270); // Register output 2
+    connect(machine->core(), SIGNAL(decode_reg2_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
+    NEW_V(335, 415); // Sign extended immediate value
+    connect(machine->core(), SIGNAL(decode_immediate_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
+    // Execute stage
+    NEW_V(430, 250); // Register 1
+    connect(machine->core(), SIGNAL(execute_reg1_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
+    NEW_V(420, 310, true); // Register 2
+    connect(machine->core(), SIGNAL(execute_reg2_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
+    NEW_V(520, 280, true); // Alu output
+    connect(machine->core(), SIGNAL(execute_alu_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
+    NEW_V(430, 415); // Immediate value
+    connect(machine->core(), SIGNAL(execute_immediate_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
+    // Memory stage
+    NEW_V(560, 275, true); // Alu output
+    connect(machine->core(), SIGNAL(memory_alu_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
+    NEW_V(560, 345, true); // rt
+    connect(machine->core(), SIGNAL(memory_rt_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
+    NEW_V(650, 290, true); // Memory output
+    connect(machine->core(), SIGNAL(memory_mem_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
+    // Write back stage
+    NEW_V(710, 330, true); // Write back value
+    connect(machine->core(), SIGNAL(writeback_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
+
 
     connect(regs, SIGNAL(open_registers()), this, SIGNAL(request_registers()));
     connect(mem_program, SIGNAL(open_mem()), this, SIGNAL(request_program_memory()));
