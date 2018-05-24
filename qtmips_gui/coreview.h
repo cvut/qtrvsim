@@ -69,6 +69,7 @@ protected:
     coreview::Connection *new_connection(const coreview::Connector*, const coreview::Connector*);
     coreview::Bus *new_bus(const coreview::Connector*, const coreview::Connector*, unsigned width = 4);
     coreview::Signal *new_signal(const coreview::Connector*, const coreview::Connector*);
+    QGraphicsSimpleTextItem *new_label(const QString &str, qreal x, qreal y);
     coreview::Connection *pc2pc_latch;
     coreview::Connection *pc_latch2pc_joint, *pc_joint2pc_adder, *pc_joint2mem;
     coreview::Connection *pc_multiplexer2pc;

@@ -96,6 +96,16 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     con = new_bus(wb.mem_or_reg->connector_out(), regs->connector_write());
     con->setAxes({CON_AXIS_Y(710), CON_AXIS_X(510), CON_AXIS_Y(172)});
 
+    // Control unit labels
+    new_label("RegWrite", 300, 99);
+    new_label("MemToReg", 300, 106);
+    new_label("MemWrite", 300, 112);
+    new_label("MemRead", 300, 119);
+    new_label("AluCtrl", 300, 125);
+    new_label("AluSrc", 300, 132);
+    new_label("RegDest", 300, 138);
+    new_label("Branch", 300, 145);
+
     // Decode stage values
     NEW_V(200, 200); // Instruction
     connect(machine->core(), SIGNAL(decode_instruction_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
@@ -158,6 +168,16 @@ coreview::Signal *CoreViewScene::new_signal(const coreview::Connector *a, const 
     addItem(c);
     c->setZValue(-3); // hide connections under neath the items
     return c;
+}
+
+QGraphicsSimpleTextItem *CoreViewScene::new_label(const QString &str, qreal x, qreal y) {
+    QGraphicsSimpleTextItem *i= new QGraphicsSimpleTextItem(str);
+    QFont f;
+    f.setPointSize(5);
+    i->setFont(f);
+    addItem(i);
+    i->setPos(x, y);
+    return i;
 }
 
 CoreViewSceneSimple::CoreViewSceneSimple(machine::QtMipsMachine *machine) : CoreViewScene(machine) {
