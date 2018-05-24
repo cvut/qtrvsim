@@ -133,6 +133,12 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     emit decode_reg1_value(val_rs);
     emit decode_reg2_value(val_rt);
     emit decode_immediate_value(sign_extend(dt.inst.immediate()));
+    emit decode_regw_value((bool)(dec.flags & DM_REGWRITE));
+    emit decode_memtoreg_value((bool)(dec.flags & DM_MEMREAD));
+    emit decode_memwrite_value((bool)(dec.flags & DM_MEMWRITE));
+    emit decode_memread_value((bool)(dec.flags & DM_MEMREAD));
+    emit decode_alusrc_value((bool)(dec.flags & DM_ALUSRC));
+    emit decode_regdest_value((bool)(dec.flags & DM_REGD));
 
     return {
         .inst = dt.inst,
@@ -166,6 +172,12 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
     emit execute_reg1_value(dt.val_rs);
     emit execute_reg2_value(dt.val_rt);
     emit execute_immediate_value(sign_extend(dt.inst.immediate()));
+    emit execute_regw_value(dt.regwrite);
+    emit execute_memtoreg_value(dt.memread);
+    emit execute_memread_value(dt.memread);
+    emit execute_memwrite_value(dt.memwrite);
+    emit execute_alusrc_value(dt.alusrc);
+    emit execute_regdest_value(dt.regd);
 
     return {
         .inst = dt.inst,
@@ -191,6 +203,10 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
     emit memory_alu_value(dt.alu_val);
     emit memory_rt_value(dt.val_rt);
     emit memory_mem_value(dt.memread ? towrite_val : 0);
+    emit memory_regw_value(dt.regwrite);
+    emit memory_memtoreg_value(dt.memread);
+    emit memory_memread_value(dt.memread);
+    emit memory_memwrite_value(dt.memwrite);
 
     return {
         .inst = dt.inst,
@@ -203,6 +219,7 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
 void Core::writeback(const struct dtMemory &dt) {
     emit instruction_writeback(dt.inst);
     emit writeback_value(dt.towrite_val);
+    emit writeback_regw_value(dt.regwrite);
     if (dt.regwrite)
         regs->write_gp(dt.rwrite, dt.towrite_val);
 }
@@ -218,6 +235,7 @@ void Core::handle_pc(const struct dtDecode &dt) {
     case 0: // JR (JALR)
         if (dt.inst.funct() == ALU_OP_JR || dt.inst.funct() == ALU_OP_JALR) {
             regs->pc_abs_jmp(dt.val_rs);
+            emit fetch_branch_value(true);
             return;
         }
         break;
@@ -238,6 +256,7 @@ void Core::handle_pc(const struct dtDecode &dt) {
     case 2: // J
     case 3: // JAL
         regs->pc_abs_jmp_28(dt.inst.address() << 2);
+        emit fetch_branch_value(true);
         return;
     case 4: // BEQ
         branch = dt.val_rs == dt.val_rt;
@@ -252,6 +271,8 @@ void Core::handle_pc(const struct dtDecode &dt) {
         branch = (std::int32_t)dt.val_rs > 0;
         break;
     }
+
+    emit fetch_branch_value(branch);
 
     if (branch)
         regs->pc_jmp((std::int32_t)(((dt.inst.immediate() & 0x8000) ? 0xFFFF0000 : 0) | (dt.inst.immediate() << 2)));

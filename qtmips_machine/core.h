@@ -29,18 +29,36 @@ signals:
     void instruction_writeback(const machine::Instruction &inst);
     void instruction_program_counter(const machine::Instruction &inst);
 
+    void fetch_branch_value(std::uint32_t);
     void decode_instruction_value(std::uint32_t);
     void decode_reg1_value(std::uint32_t);
     void decode_reg2_value(std::uint32_t);
     void decode_immediate_value(std::uint32_t);
+    void decode_regw_value(std::uint32_t);
+    void decode_memtoreg_value(std::uint32_t);
+    void decode_memwrite_value(std::uint32_t);
+    void decode_memread_value(std::uint32_t);
+    void decode_alusrc_value(std::uint32_t);
+    void decode_regdest_value(std::uint32_t);
     void execute_alu_value(std::uint32_t);
     void execute_reg1_value(std::uint32_t);
     void execute_reg2_value(std::uint32_t);
     void execute_immediate_value(std::uint32_t);
+    void execute_regw_value(std::uint32_t);
+    void execute_memtoreg_value(std::uint32_t);
+    void execute_memwrite_value(std::uint32_t);
+    void execute_memread_value(std::uint32_t);
+    void execute_alusrc_value(std::uint32_t);
+    void execute_regdest_value(std::uint32_t);
     void memory_alu_value(std::uint32_t);
     void memory_rt_value(std::uint32_t);
     void memory_mem_value(std::uint32_t);
+    void memory_regw_value(std::uint32_t);
+    void memory_memtoreg_value(std::uint32_t);
+    void memory_memwrite_value(std::uint32_t);
+    void memory_memread_value(std::uint32_t);
     void writeback_value(std::uint32_t);
+    void writeback_regw_value(std::uint32_t);
 
 protected:
     virtual void do_step() = 0;

@@ -19,7 +19,10 @@
         NEW(InstructionView, VAR, X, Y); \
         connect(machine->core(), SIGNAL(SIG), VAR, SLOT(instruction_update(const machine::Instruction&))); \
     } while(false)
-#define NEW_V(X, Y, ...) NEW(Value, val, X, Y, __VA_ARGS__)
+#define NEW_V(X, Y, SIG, ...) do { \
+        NEW(Value, val, X, Y, __VA_ARGS__); \
+        connect(machine->core(), SIGNAL(SIG(std::uint32_t)), val, SLOT(value_update(std::uint32_t))); \
+    } while(false)
 
 CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene() {
     setSceneRect(0, 0, SC_WIDTH, SC_HEIGHT);
@@ -106,34 +109,42 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     new_label("RegDest", 300, 138);
     new_label("Branch", 300, 145);
 
+    // Fetch stage values
+    NEW_V(25, 440, fetch_branch_value, false, 1);
     // Decode stage values
-    NEW_V(200, 200); // Instruction
-    connect(machine->core(), SIGNAL(decode_instruction_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
-    NEW_V(360, 250); // Register output 1
-    connect(machine->core(), SIGNAL(decode_reg1_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
-    NEW_V(360, 270); // Register output 2
-    connect(machine->core(), SIGNAL(decode_reg2_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
-    NEW_V(335, 415); // Sign extended immediate value
-    connect(machine->core(), SIGNAL(decode_immediate_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
+    NEW_V(200, 200, decode_instruction_value); // Instruction
+    NEW_V(360, 250, decode_reg1_value); // Register output 1
+    NEW_V(360, 270, decode_reg2_value); // Register output 2
+    NEW_V(335, 415, decode_immediate_value); // Sign extended immediate value
+    NEW_V(360, 105, decode_regw_value, false, 1); // RegWrite
+    NEW_V(370, 113, decode_memtoreg_value, false, 1);
+    NEW_V(360, 120, decode_memwrite_value, false, 1);
+    NEW_V(370, 127, decode_memread_value, false, 1);
+    NEW_V(360, 140, decode_alusrc_value, false, 1);
+    NEW_V(370, 148, decode_regdest_value, false, 1);
     // Execute stage
-    NEW_V(430, 250); // Register 1
-    connect(machine->core(), SIGNAL(execute_reg1_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
-    NEW_V(420, 310, true); // Register 2
-    connect(machine->core(), SIGNAL(execute_reg2_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
-    NEW_V(520, 280, true); // Alu output
-    connect(machine->core(), SIGNAL(execute_alu_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
-    NEW_V(430, 415); // Immediate value
-    connect(machine->core(), SIGNAL(execute_immediate_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
+    NEW_V(430, 250, execute_reg1_value); // Register 1
+    NEW_V(420, 310, execute_reg2_value, true); // Register 2
+    NEW_V(520, 280, execute_alu_value, true); // Alu output
+    NEW_V(430, 415, execute_immediate_value); // Immediate value
+    NEW_V(460, 105, execute_regw_value, false, 1); // RegWrite
+    NEW_V(470, 113, execute_memtoreg_value, false, 1);
+    NEW_V(460, 120, execute_memwrite_value, false, 1);
+    NEW_V(470, 127, execute_memread_value, false, 1);
+    NEW_V(470, 127, execute_memread_value, false, 1);
+    NEW_V(455, 290, execute_alusrc_value, false, 1);
+    NEW_V(410, 190, execute_regdest_value, false, 1);
     // Memory stage
-    NEW_V(560, 275, true); // Alu output
-    connect(machine->core(), SIGNAL(memory_alu_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
-    NEW_V(560, 345, true); // rt
-    connect(machine->core(), SIGNAL(memory_rt_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
-    NEW_V(650, 290, true); // Memory output
-    connect(machine->core(), SIGNAL(memory_mem_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
+    NEW_V(560, 275,  memory_alu_value, true); // Alu output
+    NEW_V(560, 345, memory_rt_value, true); // rt
+    NEW_V(650, 290, memory_mem_value, true); // Memory output
+    NEW_V(560, 105, execute_regw_value, false, 1); // RegWrite
+    NEW_V(570, 113, execute_memtoreg_value, false, 1);
+    NEW_V(630, 220, memory_memwrite_value, false, 1);
+    NEW_V(620, 220, memory_memread_value, false, 1);
     // Write back stage
-    NEW_V(710, 330, true); // Write back value
-    connect(machine->core(), SIGNAL(writeback_value(std::uint32_t)), val, SLOT(value_update(std::uint32_t)));
+    NEW_V(710, 330, writeback_value, true); // Write back value
+    NEW_V(460, 45, writeback_regw_value, false, 1);
 
 
     connect(regs, SIGNAL(open_registers()), this, SIGNAL(request_registers()));
