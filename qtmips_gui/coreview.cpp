@@ -27,8 +27,6 @@
 CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene() {
     setSceneRect(0, 0, SC_WIDTH, SC_HEIGHT);
 
-    coreview::Value *val;
-
     // Elements //
     // Primary points
     NEW(ProgramMemory, mem_program, 90, 240, machine);
@@ -109,6 +107,7 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     new_label("RegDest", 300, 138);
     new_label("Branch", 300, 145);
 
+    coreview::Value *val;
     // Fetch stage values
     NEW_V(25, 440, fetch_branch_value, false, 1);
     // Decode stage values
@@ -144,7 +143,6 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     NEW_V(620, 220, memory_memread_value, false, 1);
     // Write back stage
     NEW_V(710, 330, writeback_value, true); // Write back value
-    NEW_V(460, 45, writeback_regw_value, false, 1);
 
 
     connect(regs, SIGNAL(open_registers()), this, SIGNAL(request_registers()));
@@ -255,6 +253,10 @@ CoreViewSceneSimple::CoreViewSceneSimple(machine::QtMipsMachine *machine) : Core
     // From execute to decode stage
     con = new_bus(ex.mux_regdest->connector_out(), regs->connector_write_reg(), 2);
     con->setAxes({CON_AXIS_Y(430), CON_AXIS_X(500), CON_AXIS_Y(210)});
+
+    coreview::Value *val;
+    // Label for write back stage
+    NEW_V(280, 200, writeback_regw_value, false, 1);
 }
 
 CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) : CoreViewScene(machine) {
@@ -383,4 +385,8 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
     con->setAxes({CON_AXIS_Y(680), CON_AXIS_X(500), CON_AXIS_Y(210)});
     con = new_signal(ctl_rgw_mem.out, regs->connector_ctl_write());
     con->setAxes({CON_AXIS_Y(700), CON_AXIS_X(45)});
+
+    coreview::Value *val;
+    // Label for write back stage
+    NEW_V(460, 45, writeback_regw_value, false, 1);
 }
