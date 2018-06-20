@@ -98,7 +98,6 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     con->setAxes({CON_AXIS_Y(710), CON_AXIS_X(510), CON_AXIS_Y(172)});
 
     // Control unit labels
-    new_label("RegWrite", 300, 99);
     new_label("MemToReg", 300, 106);
     new_label("MemWrite", 300, 112);
     new_label("MemRead", 300, 119);
@@ -115,7 +114,6 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     NEW_V(360, 250, decode_reg1_value); // Register output 1
     NEW_V(360, 270, decode_reg2_value); // Register output 2
     NEW_V(335, 415, decode_immediate_value); // Sign extended immediate value
-    NEW_V(360, 105, decode_regw_value, false, 1); // RegWrite
     NEW_V(370, 113, decode_memtoreg_value, false, 1);
     NEW_V(360, 120, decode_memwrite_value, false, 1);
     NEW_V(370, 127, decode_memread_value, false, 1);
@@ -126,7 +124,6 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     NEW_V(420, 310, execute_reg2_value, true); // Register 2
     NEW_V(520, 280, execute_alu_value, true); // Alu output
     NEW_V(430, 415, execute_immediate_value); // Immediate value
-    NEW_V(460, 105, execute_regw_value, false, 1); // RegWrite
     NEW_V(470, 113, execute_memtoreg_value, false, 1);
     NEW_V(460, 120, execute_memwrite_value, false, 1);
     NEW_V(470, 127, execute_memread_value, false, 1);
@@ -137,13 +134,11 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     NEW_V(560, 275,  memory_alu_value, true); // Alu output
     NEW_V(560, 345, memory_rt_value, true); // rt
     NEW_V(650, 290, memory_mem_value, true); // Memory output
-    NEW_V(560, 105, execute_regw_value, false, 1); // RegWrite
     NEW_V(570, 113, execute_memtoreg_value, false, 1);
     NEW_V(630, 220, memory_memwrite_value, false, 1);
     NEW_V(620, 220, memory_memread_value, false, 1);
     // Write back stage
     NEW_V(710, 330, writeback_value, true); // Write back value
-
 
     connect(regs, SIGNAL(open_registers()), this, SIGNAL(request_registers()));
     connect(mem_program, SIGNAL(open_mem()), this, SIGNAL(request_program_memory()));
@@ -253,6 +248,9 @@ CoreViewSceneSimple::CoreViewSceneSimple(machine::QtMipsMachine *machine) : Core
     // From execute to decode stage
     con = new_bus(ex.mux_regdest->connector_out(), regs->connector_write_reg(), 2);
     con->setAxes({CON_AXIS_Y(430), CON_AXIS_X(500), CON_AXIS_Y(210)});
+
+    // Control unit labels
+    new_label("RegWrite", 260, 99);
 
     coreview::Value *val;
     // Label for write back stage
@@ -386,7 +384,13 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
     con = new_signal(ctl_rgw_mem.out, regs->connector_ctl_write());
     con->setAxes({CON_AXIS_Y(700), CON_AXIS_X(45)});
 
+    // Control unit labels
+    new_label("RegWrite", 300, 99);
+
     coreview::Value *val;
     // Label for write back stage
     NEW_V(460, 45, writeback_regw_value, false, 1);
+    NEW_V(360, 105, decode_regw_value, false, 1);
+    NEW_V(460, 105, execute_regw_value, false, 1);
+    NEW_V(560, 105, execute_regw_value, false, 1);
 }
