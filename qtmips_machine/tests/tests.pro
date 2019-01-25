@@ -14,7 +14,7 @@ DOLAR=$
 
 unix: LIBS += \
         -Wl,-rpath,\'$${DOLAR}$${DOLAR}ORIGIN/../lib\' \
-        --enable-new-dtags \
+        # --enable-new-dtags \
 
 INCLUDEPATH += $$PWD/..
 DEPENDPATH += $$PWD/..
