@@ -377,7 +377,7 @@ void CorePipelined::do_step() {
 #define HAZARD(STAGE) ( \
         (STAGE).regwrite && (STAGE).rwrite != 0 && \
         ((STAGE).rwrite == dt_d.inst.rs() || ( \
-            (dt_d.inst.type() == Instruction::T_R || (STAGE).inst.is_store()) && \
+            (dt_d.inst.type() == Instruction::T_R || dt_d.inst.is_store()) && \
             (STAGE).rwrite == dt_d.inst.rt()) \
         )) // Note: We make exception with $0 as that has no effect and is used in nop instruction
 
@@ -389,7 +389,8 @@ void CorePipelined::do_step() {
                     dt_d.val_rs = dt_m.towrite_val;
                     dt_d.ff_rs = FORWARD_FROM_M;
                 }
-                if (dt_m.rwrite == dt_d.inst.rt()) {
+                if ((dt_d.inst.type() == Instruction::T_R || dt_d.inst.is_store()) &&
+                    (dt_m.rwrite == dt_d.inst.rt())) {
                     dt_d.val_rt = dt_m.towrite_val;
                     dt_d.ff_rt = FORWARD_FROM_M;
                 }
@@ -407,7 +408,8 @@ void CorePipelined::do_step() {
                         dt_d.val_rs = dt_e.alu_val;
                         dt_d.ff_rs = FORWARD_FROM_W;
                      }
-                    if (dt_e.rwrite == dt_d.inst.rt()) {
+                    if ((dt_d.inst.type() == Instruction::T_R || dt_d.inst.is_store()) &&
+                        (dt_e.rwrite == dt_d.inst.rt())) {
                         dt_d.val_rt = dt_e.alu_val;
                         dt_d.ff_rt = FORWARD_FROM_W;
                     }
