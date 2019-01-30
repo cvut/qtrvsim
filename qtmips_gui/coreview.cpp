@@ -393,4 +393,9 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
     NEW_V(360, 105, decode_regw_value, false, 1);
     NEW_V(460, 105, execute_regw_value, false, 1);
     NEW_V(560, 105, execute_regw_value, false, 1);
+
+    if (machine->config().hazard_unit() == machine::MachineConfig::HU_STALL_FORWARD) {
+        NEW_V(448, 460, execute_reg1_ff_value, false, 1); // Register 1 forward
+        NEW_V(462, 460, execute_reg2_ff_value, false, 1); // Register 1 forward
+    }
 }

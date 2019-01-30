@@ -21,6 +21,12 @@ public:
 
     unsigned cycles(); // Returns number of executed cycles
 
+    enum ForwardFrom {
+        FORWARD_NONE   = 0b00,
+        FORWARD_FROM_W = 0b01,
+        FORWARD_FROM_M = 0b10,
+    };
+
 signals:
     void instruction_fetched(const machine::Instruction &inst);
     void instruction_decoded(const machine::Instruction &inst);
@@ -43,6 +49,8 @@ signals:
     void execute_alu_value(std::uint32_t);
     void execute_reg1_value(std::uint32_t);
     void execute_reg2_value(std::uint32_t);
+    void execute_reg1_ff_value(std::uint32_t);
+    void execute_reg2_ff_value(std::uint32_t);
     void execute_immediate_value(std::uint32_t);
     void execute_regw_value(std::uint32_t);
     void execute_memtoreg_value(std::uint32_t);
@@ -81,6 +89,8 @@ protected:
         enum MemoryAccess::AccessControl memctl; // Decoded memory access type
         std::uint32_t val_rs; // Value from register rs
         std::uint32_t val_rt; // Value from register rt
+        ForwardFrom ff_rs;
+        ForwardFrom ff_rt;
     };
     struct dtExecute {
         Instruction inst;

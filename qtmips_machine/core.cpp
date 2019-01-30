@@ -151,6 +151,8 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .memctl = dec.mem_ctl,
         .val_rs = val_rs,
         .val_rt = val_rt,
+        .ff_rs = FORWARD_NONE,
+        .ff_rt = FORWARD_NONE,
     };
 }
 
@@ -171,6 +173,8 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
     emit execute_alu_value(alu_val);
     emit execute_reg1_value(dt.val_rs);
     emit execute_reg2_value(dt.val_rt);
+    emit execute_reg1_ff_value(dt.ff_rs);
+    emit execute_reg2_ff_value(dt.ff_rt);
     emit execute_immediate_value(sign_extend(dt.inst.immediate()));
     emit execute_regw_value(dt.regwrite);
     emit execute_memtoreg_value(dt.memread);
@@ -294,6 +298,8 @@ void Core::dtDecodeInit(struct dtDecode &dt) {
     dt.aluop = ALU_OP_SLL;
     dt.val_rs = 0;
     dt.val_rt = 0;
+    dt.ff_rs = FORWARD_NONE;
+    dt.ff_rt = FORWARD_NONE;
 }
 
 void Core::dtExecuteInit(struct dtExecute &dt) {
@@ -361,6 +367,10 @@ void CorePipelined::do_step() {
 
     // TODO signals
     bool stall = false;
+
+    dt_d.ff_rs = FORWARD_NONE;
+    dt_d.ff_rt = FORWARD_NONE;
+
     if (hazard_unit != MachineConfig::HU_NONE) {
         // Note: We make exception with $0 as that has no effect when written and is used in nop instruction
 
@@ -377,9 +387,11 @@ void CorePipelined::do_step() {
                 // Forward result value
                 if (dt_m.rwrite == dt_d.inst.rs()) {
                     dt_d.val_rs = dt_m.towrite_val;
+                    dt_d.ff_rs = FORWARD_FROM_M;
                 }
                 if (dt_m.rwrite == dt_d.inst.rt()) {
                     dt_d.val_rt = dt_m.towrite_val;
+                    dt_d.ff_rt = FORWARD_FROM_M;
                 }
             } else
                 stall = true;
@@ -393,9 +405,11 @@ void CorePipelined::do_step() {
                     // Forward result value
                     if (dt_e.rwrite == dt_d.inst.rs()) {
                         dt_d.val_rs = dt_e.alu_val;
+                        dt_d.ff_rs = FORWARD_FROM_W;
                      }
                     if (dt_e.rwrite == dt_d.inst.rt()) {
                         dt_d.val_rt = dt_e.alu_val;
+                        dt_d.ff_rt = FORWARD_FROM_W;
                     }
                 }
             } else
