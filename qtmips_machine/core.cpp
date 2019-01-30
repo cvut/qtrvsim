@@ -367,10 +367,23 @@ void CorePipelined::do_step() {
 #define HAZARD(STAGE) ( \
         (STAGE).regwrite && (STAGE).rwrite != 0 && \
         ((STAGE).rwrite == dt_d.inst.rs() || ( \
-            ((STAGE).inst.type() == Instruction::T_R || (STAGE).inst.is_store()) && \
+            (dt_d.inst.type() == Instruction::T_R || (STAGE).inst.is_store()) && \
             (STAGE).rwrite == dt_d.inst.rt()) \
         )) // Note: We make exception with $0 as that has no effect and is used in nop instruction
 
+        if (HAZARD(dt_m)) {
+            // Hazard with instruction in memory stage
+            if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
+                // Forward result value
+                if (dt_m.rwrite == dt_d.inst.rs()) {
+                    dt_d.val_rs = dt_m.towrite_val;
+                }
+                if (dt_m.rwrite == dt_d.inst.rt()) {
+                    dt_d.val_rt = dt_m.towrite_val;
+                }
+            } else
+                stall = true;
+        }
         if (HAZARD(dt_e)) {
             // Hazard with instruction in execute stage
             if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
@@ -378,28 +391,24 @@ void CorePipelined::do_step() {
                     stall = true;
                 else {
                     // Forward result value
-                    if (dt_e.rwrite == dt_d.inst.rs())
+                    if (dt_e.rwrite == dt_d.inst.rs()) {
                         dt_d.val_rs = dt_e.alu_val;
-                    if (dt_e.rwrite == dt_d.inst.rt())
+                     }
+                    if (dt_e.rwrite == dt_d.inst.rt()) {
                         dt_d.val_rt = dt_e.alu_val;
+                    }
                 }
-            } else
-                stall = true;
-        }
-        if (HAZARD(dt_m)) {
-            // Hazard with instruction in memory stage
-            if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
-                // Forward result value
-                if (dt_m.rwrite == dt_d.inst.rs())
-                    dt_d.val_rs = dt_m.towrite_val;
-                if (dt_m.rwrite == dt_d.inst.rt())
-                    dt_d.val_rt = dt_m.towrite_val;
             } else
                 stall = true;
         }
         // Write back stage combinatoricly propagates written instruction to decode stage so nothing has to be done for that stage
 #undef HAZARD
     }
+
+#if 0
+    printf("M: regwrite %d inst.type %d rwrite [%d] E: regwrite %d inst.type %d  rwrite [%d] D: inst.type %d dt_d.inst.rs [%d] dt_d.inst.rt [%d] dt_d.ff_rs %d dt_d.ff_rt %d\n",
+            dt_m.regwrite,  dt_m.inst.type(), dt_m.rwrite, dt_e.regwrite, dt_e.inst.type(), dt_e.rwrite, dt_d.inst.type(), dt_d.inst.rs(), dt_d.inst.rt(), dt_d.ff_rs, dt_d.ff_rt);
+#endif
 
     // Now process program counter (loop connections from decode stage)
     if (!stall) {
