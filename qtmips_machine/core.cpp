@@ -10,6 +10,7 @@ using namespace machine;
 #define DM_ALUSRC (1L<<3)
 #define DM_REGD (1L<<4)
 #define DM_REGWRITE (1L<<5)
+#define DM_ZERO_EXTEND (1L<<6)
 
 struct DecodeMap {
     long flags;
@@ -22,6 +23,7 @@ struct DecodeMap {
 #define NOPE { .flags = 0, NOALU, NOMEM }
 
 #define FLAGS_ALU_I (DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE)
+#define FLAGS_ALU_I_ZE (DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_ZERO_EXTEND)
 
 // This is map from opcode to signals.
 static const struct DecodeMap dmap[]  = {
@@ -37,9 +39,9 @@ static const struct DecodeMap dmap[]  = {
     { .flags = FLAGS_ALU_I, .alu = ALU_OP_ADDU, NOMEM }, // ADDIU
     { .flags = FLAGS_ALU_I, .alu = ALU_OP_SLT, NOMEM }, // SLTI
     { .flags = FLAGS_ALU_I, .alu = ALU_OP_SLTU, NOMEM }, // SLTIU
-    { .flags = FLAGS_ALU_I, .alu = ALU_OP_AND, NOMEM }, // ANDI
-    { .flags = FLAGS_ALU_I, .alu = ALU_OP_OR, NOMEM }, // ORI
-    { .flags = FLAGS_ALU_I, .alu = ALU_OP_XOR, NOMEM }, // XORI
+    { .flags = FLAGS_ALU_I_ZE, .alu = ALU_OP_AND, NOMEM }, // ANDI
+    { .flags = FLAGS_ALU_I_ZE, .alu = ALU_OP_OR, NOMEM }, // ORI
+    { .flags = FLAGS_ALU_I_ZE, .alu = ALU_OP_XOR, NOMEM }, // XORI
     { .flags = FLAGS_ALU_I, .alu = ALU_OP_LUI, NOMEM}, // LUI
     NOPE, // 16
     NOPE, // 17
@@ -128,11 +130,17 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
 
     std::uint32_t val_rs = regs->read_gp(dt.inst.rs());
     std::uint32_t val_rt = regs->read_gp(dt.inst.rt());
+    std::uint32_t immediate_val;
+
+    if (dec.flags & DM_ZERO_EXTEND)
+        immediate_val = dt.inst.immediate();
+    else
+        immediate_val = sign_extend(dt.inst.immediate());
 
     emit decode_instruction_value(dt.inst.data());
     emit decode_reg1_value(val_rs);
     emit decode_reg2_value(val_rt);
-    emit decode_immediate_value(sign_extend(dt.inst.immediate()));
+    emit decode_immediate_value(immediate_val);
     emit decode_regw_value((bool)(dec.flags & DM_REGWRITE));
     emit decode_memtoreg_value((bool)(dec.flags & DM_MEMREAD));
     emit decode_memwrite_value((bool)(dec.flags & DM_MEMWRITE));
@@ -151,6 +159,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .memctl = dec.mem_ctl,
         .val_rs = val_rs,
         .val_rt = val_rt,
+        .immediate_val = immediate_val,
         .ff_rs = FORWARD_NONE,
         .ff_rt = FORWARD_NONE,
     };
@@ -166,7 +175,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
 
     std::uint32_t alu_sec = dt.val_rt;
     if (dt.alusrc)
-        alu_sec = sign_extend(dt.inst.immediate()); // Sign extend to 32bit
+        alu_sec = dt.immediate_val; // Sign or zero extend immediate value
 
     std::uint32_t alu_val = alu_operate(dt.aluop, dt.val_rs, alu_sec, dt.inst.shamt(), regs);
 
@@ -175,7 +184,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
     emit execute_reg2_value(dt.val_rt);
     emit execute_reg1_ff_value(dt.ff_rs);
     emit execute_reg2_ff_value(dt.ff_rt);
-    emit execute_immediate_value(sign_extend(dt.inst.immediate()));
+    emit execute_immediate_value(dt.immediate_val);
     emit execute_regw_value(dt.regwrite);
     emit execute_memtoreg_value(dt.memread);
     emit execute_memread_value(dt.memread);
@@ -298,6 +307,7 @@ void Core::dtDecodeInit(struct dtDecode &dt) {
     dt.aluop = ALU_OP_SLL;
     dt.val_rs = 0;
     dt.val_rt = 0;
+    dt.immediate_val = 0;
     dt.ff_rs = FORWARD_NONE;
     dt.ff_rt = FORWARD_NONE;
 }

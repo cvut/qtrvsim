@@ -89,6 +89,7 @@ protected:
         enum MemoryAccess::AccessControl memctl; // Decoded memory access type
         std::uint32_t val_rs; // Value from register rs
         std::uint32_t val_rt; // Value from register rt
+        std::uint32_t immediate_val; // zero or sign-extended immediate value
         ForwardFrom ff_rs;
         ForwardFrom ff_rt;
     };
