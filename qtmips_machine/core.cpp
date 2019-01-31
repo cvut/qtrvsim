@@ -11,6 +11,7 @@ using namespace machine;
 #define DM_REGD (1L<<4)
 #define DM_REGWRITE (1L<<5)
 #define DM_ZERO_EXTEND (1L<<6)
+#define DM_PC_TO_R31 (1L<<7)
 
 struct DecodeMap {
     long flags;
@@ -30,7 +31,7 @@ static const struct DecodeMap dmap[]  = {
     { .flags = DM_SUPPORTED | DM_REGD | DM_REGWRITE, NOALU, NOMEM }, // Alu operations (aluop is decoded from function explicitly)
     { .flags = DM_SUPPORTED, NOALU, NOMEM }, // REGIMM (BLTZ, BGEZ)
     { .flags = DM_SUPPORTED, NOALU, NOMEM }, // J
-    NOPE, // JAL
+    { .flags = DM_SUPPORTED | DM_PC_TO_R31 | DM_REGWRITE, .alu = ALU_OP_PASS_S, NOMEM }, // JAL
     { .flags = DM_SUPPORTED, NOALU, NOMEM }, // BEQ
     { .flags = DM_SUPPORTED, NOALU, NOMEM }, // BNE
     { .flags = DM_SUPPORTED, NOALU, NOMEM }, // BLEZ
@@ -115,10 +116,12 @@ unsigned Core::cycles() {
 }
 
 struct Core::dtFetch Core::fetch() {
-    Instruction inst(mem_program->read_word(regs->read_pc()));
+    std::uint32_t inst_addr = regs->read_pc();
+    Instruction inst(mem_program->read_word(inst_addr));
     emit instruction_fetched(inst);
     return {
-        .inst = inst
+        .inst = inst,
+        .inst_addr = inst_addr,
     };
 }
 
@@ -150,6 +153,11 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     emit decode_rs_num_value(dt.inst.rs());
     emit decode_rt_num_value(dt.inst.rt());
     emit decode_rd_num_value(dt.inst.rd());
+    emit decode_regd31_value((bool)(dec.flags & DM_PC_TO_R31));
+
+    if (dec.flags & DM_PC_TO_R31) {
+        val_rs = dt.inst_addr + 8;
+    }
 
     return {
         .inst = dt.inst,
@@ -157,6 +165,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .memwrite = dec.flags & DM_MEMWRITE,
         .alusrc = dec.flags & DM_ALUSRC,
         .regd = dec.flags & DM_REGD,
+        .regd31 = dec.flags & DM_PC_TO_R31,
         .regwrite = dec.flags & DM_REGWRITE,
         .aluop = dt.inst.opcode() == 0 ? (enum AluOp)dt.inst.funct() : dec.alu,
         .memctl = dec.mem_ctl,
@@ -181,7 +190,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
         alu_sec = dt.immediate_val; // Sign or zero extend immediate value
 
     std::uint32_t alu_val = alu_operate(dt.aluop, dt.val_rs, alu_sec, dt.inst.shamt(), regs);
-    std::uint8_t  rwrite = dt.regd ? dt.inst.rd() : dt.inst.rt();
+    std::uint8_t  rwrite = dt.regd31 ? 31: dt.regd ? dt.inst.rd() : dt.inst.rt();
 
     emit execute_alu_value(alu_val);
     emit execute_reg1_value(dt.val_rs);

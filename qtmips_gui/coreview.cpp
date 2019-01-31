@@ -98,6 +98,7 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     con->setAxes({CON_AXIS_Y(710), CON_AXIS_X(510), CON_AXIS_Y(172)});
 
     // Control unit labels
+    new_label("JalPcToR31", 300, 92);
     new_label("MemToReg", 300, 106);
     new_label("MemWrite", 300, 112);
     new_label("MemRead", 300, 119);
@@ -114,6 +115,7 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     NEW_V(360, 250, decode_reg1_value); // Register output 1
     NEW_V(360, 270, decode_reg2_value); // Register output 2
     NEW_V(335, 415, decode_immediate_value); // Sign extended immediate value
+    NEW_V(370, 99,  decode_regd31_value, false, 1);
     NEW_V(370, 113, decode_memtoreg_value, false, 1);
     NEW_V(360, 120, decode_memwrite_value, false, 1);
     NEW_V(370, 127, decode_memread_value, false, 1);
