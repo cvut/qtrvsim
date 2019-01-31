@@ -134,6 +134,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     std::uint32_t val_rs = regs->read_gp(dt.inst.rs());
     std::uint32_t val_rt = regs->read_gp(dt.inst.rt());
     std::uint32_t immediate_val;
+    bool regd31 = dec.flags & DM_PC_TO_R31;
 
     if (dec.flags & DM_ZERO_EXTEND)
         immediate_val = dt.inst.immediate();
@@ -153,10 +154,14 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     emit decode_rs_num_value(dt.inst.rs());
     emit decode_rt_num_value(dt.inst.rt());
     emit decode_rd_num_value(dt.inst.rd());
-    emit decode_regd31_value((bool)(dec.flags & DM_PC_TO_R31));
+    emit decode_regd31_value(regd31);
 
-    if (dec.flags & DM_PC_TO_R31) {
+    if (regd31) {
         val_rs = dt.inst_addr + 8;
+    }
+
+    if ((dt.inst.opcode() == 0 &&  dt.inst.funct() == ALU_OP_JALR)) {
+        val_rt = dt.inst_addr + 8;
     }
 
     return {
@@ -165,7 +170,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .memwrite = dec.flags & DM_MEMWRITE,
         .alusrc = dec.flags & DM_ALUSRC,
         .regd = dec.flags & DM_REGD,
-        .regd31 = dec.flags & DM_PC_TO_R31,
+        .regd31 = regd31,
         .regwrite = dec.flags & DM_REGWRITE,
         .aluop = dt.inst.opcode() == 0 ? (enum AluOp)dt.inst.funct() : dec.alu,
         .memctl = dec.mem_ctl,

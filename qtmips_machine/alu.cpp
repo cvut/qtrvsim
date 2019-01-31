@@ -21,9 +21,11 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
             // Note: same note as in case of SRA
             return (std::int32_t)t >> s;
         case ALU_OP_JR:
-        case ALU_OP_JALR:
             // Do nothing as we solve this when we are handling program counter in instruction decode (handle_pc)
             return 0;
+        case ALU_OP_JALR:
+            // Pass return value in rt to save PC after isntruction, program counter is handled in handle_pc
+            return t;
         case ALU_OP_MOVZ:
             // We do this just to implement valid alu operation but we have to evaluate comparison outside of this function to disable register write
             return t == 0 ? s : 0;
