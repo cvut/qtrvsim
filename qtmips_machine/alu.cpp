@@ -41,13 +41,17 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
             regs->write_hi_lo(false, s);
             return 0x0;
         case ALU_OP_ADD:
-            if (s > (0xFFFFFFFF - t))
+            /* s(31) ^ ~t(31) ... same signs on input  */
+            /* (s + t)(31) ^ s(31)  ... different sign on output */
+            if (((s ^ ~t) & ((s + t) ^ s)) & 0x80000000)
                 throw QTMIPS_EXCEPTION(Overflow, "ADD operation overflow/underflow", QString::number(s) + QString(" + ") + QString::number(t));
             FALLTROUGH
         case ALU_OP_ADDU:
             return s + t;
         case ALU_OP_SUB:
-            if (s < t)
+            /* s(31) ^ t(31) ... differnt signd on input */
+            /* (s - t)(31) ^ ~s(31)  <> 0 ... otput sign differs from s  */
+            if (((s ^ t) & ((s - t) ^ s)) & 0x80000000)
                 throw QTMIPS_EXCEPTION(Overflow, "SUB operation overflow/underflow", QString::number(s) + QString(" - ") + QString::number(t));
             FALLTROUGH
         case ALU_OP_SUBU:
