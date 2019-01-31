@@ -147,6 +147,9 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     emit decode_memread_value((bool)(dec.flags & DM_MEMREAD));
     emit decode_alusrc_value((bool)(dec.flags & DM_ALUSRC));
     emit decode_regdest_value((bool)(dec.flags & DM_REGD));
+    emit decode_rs_num_value(dt.inst.rs());
+    emit decode_rt_num_value(dt.inst.rt());
+    emit decode_rd_num_value(dt.inst.rd());
 
     return {
         .inst = dt.inst,
@@ -178,6 +181,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
         alu_sec = dt.immediate_val; // Sign or zero extend immediate value
 
     std::uint32_t alu_val = alu_operate(dt.aluop, dt.val_rs, alu_sec, dt.inst.shamt(), regs);
+    std::uint8_t  rwrite = dt.regd ? dt.inst.rd() : dt.inst.rt();
 
     emit execute_alu_value(alu_val);
     emit execute_reg1_value(dt.val_rs);
@@ -191,6 +195,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
     emit execute_memwrite_value(dt.memwrite);
     emit execute_alusrc_value(dt.alusrc);
     emit execute_regdest_value(dt.regd);
+    emit execute_regw_num_value(rwrite);
 
     return {
         .inst = dt.inst,
@@ -199,7 +204,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
         .regwrite = regwrite,
         .memctl = dt.memctl,
         .val_rt = dt.val_rt,
-        .rwrite = dt.regd ? dt.inst.rd() : dt.inst.rt(),
+        .rwrite = rwrite,
         .alu_val = alu_val,
     };
 }
@@ -220,6 +225,7 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
     emit memory_memtoreg_value(dt.memread);
     emit memory_memread_value(dt.memread);
     emit memory_memwrite_value(dt.memwrite);
+    emit memory_regw_num_value(dt.rwrite);
 
     return {
         .inst = dt.inst,
@@ -233,6 +239,7 @@ void Core::writeback(const struct dtMemory &dt) {
     emit instruction_writeback(dt.inst);
     emit writeback_value(dt.towrite_val);
     emit writeback_regw_value(dt.regwrite);
+    emit writeback_regw_num_value(dt.rwrite);
     if (dt.regwrite)
         regs->write_gp(dt.rwrite, dt.towrite_val);
 }
