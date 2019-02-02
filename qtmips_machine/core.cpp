@@ -12,6 +12,8 @@ using namespace machine;
 #define DM_REGWRITE (1L<<5)
 #define DM_ZERO_EXTEND (1L<<6)
 #define DM_PC_TO_R31 (1L<<7)
+#define DM_BJR_REQ_RS (1L<<8)
+#define DM_BJR_REQ_RT (1L<<9)
 
 struct DecodeMap {
     long flags;
@@ -29,13 +31,13 @@ struct DecodeMap {
 // This is map from opcode to signals.
 static const struct DecodeMap dmap[]  = {
     { .flags = DM_SUPPORTED | DM_REGD | DM_REGWRITE, NOALU, NOMEM }, // Alu operations (aluop is decoded from function explicitly)
-    { .flags = DM_SUPPORTED, NOALU, NOMEM }, // REGIMM (BLTZ, BGEZ)
+    { .flags = DM_SUPPORTED | DM_BJR_REQ_RS, NOALU, NOMEM }, // REGIMM (BLTZ, BGEZ)
     { .flags = DM_SUPPORTED, NOALU, NOMEM }, // J
     { .flags = DM_SUPPORTED | DM_PC_TO_R31 | DM_REGWRITE, .alu = ALU_OP_PASS_S, NOMEM }, // JAL
-    { .flags = DM_SUPPORTED, NOALU, NOMEM }, // BEQ
-    { .flags = DM_SUPPORTED, NOALU, NOMEM }, // BNE
-    { .flags = DM_SUPPORTED, NOALU, NOMEM }, // BLEZ
-    { .flags = DM_SUPPORTED, NOALU, NOMEM }, // BGTZ
+    { .flags = DM_SUPPORTED | DM_BJR_REQ_RS | DM_BJR_REQ_RT, NOALU, NOMEM }, // BEQ
+    { .flags = DM_SUPPORTED | DM_BJR_REQ_RS | DM_BJR_REQ_RT, NOALU, NOMEM }, // BNE
+    { .flags = DM_SUPPORTED | DM_BJR_REQ_RS, NOALU, NOMEM }, // BLEZ
+    { .flags = DM_SUPPORTED | DM_BJR_REQ_RS, NOALU, NOMEM }, // BGTZ
     { .flags = FLAGS_ALU_I, .alu = ALU_OP_ADD, NOMEM }, // ADDI
     { .flags = FLAGS_ALU_I, .alu = ALU_OP_ADDU, NOMEM }, // ADDIU
     { .flags = FLAGS_ALU_I, .alu = ALU_OP_SLT, NOMEM }, // SLTI
@@ -126,15 +128,27 @@ struct Core::dtFetch Core::fetch() {
 }
 
 struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
+    uint8_t rwrite;
     emit instruction_decoded(dt.inst);
     const struct DecodeMap &dec = dmap[dt.inst.opcode()];
+
     if (!(dec.flags & DM_SUPPORTED))
         throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Instruction with following opcode is not supported", QString::number(dt.inst.opcode(), 16));
 
     std::uint32_t val_rs = regs->read_gp(dt.inst.rs());
     std::uint32_t val_rt = regs->read_gp(dt.inst.rt());
     std::uint32_t immediate_val;
+    bool regd = dec.flags & DM_REGD;
     bool regd31 = dec.flags & DM_PC_TO_R31;
+
+    // requires rs for beq, bne, blez, bgtz, jr nad jalr
+    bool bjr_req_rs = dec.flags & DM_BJR_REQ_RS;
+    if (dt.inst.opcode() == 0 && ((dt.inst.funct() == ALU_OP_JR) ||
+                                  (dt.inst.funct() == ALU_OP_JALR))) {
+        bjr_req_rs = true;
+    }
+    // requires rt for beq, bne
+    bool bjr_req_rt = dec.flags & DM_BJR_REQ_RT;
 
     if (dec.flags & DM_ZERO_EXTEND)
         immediate_val = dt.inst.immediate();
@@ -164,19 +178,26 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         val_rt = dt.inst_addr + 8;
     }
 
+    rwrite = regd31 ? 31: regd ? dt.inst.rd() : dt.inst.rt();
+
     return {
         .inst = dt.inst,
         .memread = dec.flags & DM_MEMREAD,
         .memwrite = dec.flags & DM_MEMWRITE,
         .alusrc = dec.flags & DM_ALUSRC,
-        .regd = dec.flags & DM_REGD,
+        .regd = regd,
         .regd31 = regd31,
         .regwrite = dec.flags & DM_REGWRITE,
+        .bjr_req_rs = bjr_req_rs,
+        .bjr_req_rt = bjr_req_rt,
+        .forward_m_d_rs = false,
+        .forward_m_d_rt = false,
         .aluop = dt.inst.opcode() == 0 ? (enum AluOp)dt.inst.funct() : dec.alu,
         .memctl = dec.mem_ctl,
         .val_rs = val_rs,
         .val_rt = val_rt,
         .immediate_val = immediate_val,
+        .rwrite = rwrite,
         .ff_rs = FORWARD_NONE,
         .ff_rt = FORWARD_NONE,
     };
@@ -195,7 +216,6 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
         alu_sec = dt.immediate_val; // Sign or zero extend immediate value
 
     std::uint32_t alu_val = alu_operate(dt.aluop, dt.val_rs, alu_sec, dt.inst.shamt(), regs);
-    std::uint8_t  rwrite = dt.regd31 ? 31: dt.regd ? dt.inst.rd() : dt.inst.rt();
 
     emit execute_alu_value(alu_val);
     emit execute_reg1_value(dt.val_rs);
@@ -209,7 +229,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
     emit execute_memwrite_value(dt.memwrite);
     emit execute_alusrc_value(dt.alusrc);
     emit execute_regdest_value(dt.regd);
-    emit execute_regw_num_value(rwrite);
+    emit execute_regw_num_value(dt.rwrite);
 
     return {
         .inst = dt.inst,
@@ -218,7 +238,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
         .regwrite = regwrite,
         .memctl = dt.memctl,
         .val_rt = dt.val_rt,
-        .rwrite = rwrite,
+        .rwrite = dt.rwrite,
         .alu_val = alu_val,
     };
 }
@@ -325,9 +345,14 @@ void Core::dtDecodeInit(struct dtDecode &dt) {
     dt.alusrc = false;
     dt.regd = false;
     dt.regwrite = false;
+    dt.bjr_req_rs = false; // requires rs for beq, bne, blez, bgtz, jr nad jalr
+    dt.bjr_req_rt = false; // requires rt for beq, bne
+    dt.forward_m_d_rs = false;
+    dt.forward_m_d_rt = false;
     dt.aluop = ALU_OP_SLL;
     dt.val_rs = 0;
     dt.val_rt = 0;
+    dt.rwrite = 0;
     dt.immediate_val = 0;
     dt.ff_rs = FORWARD_NONE;
     dt.ff_rt = FORWARD_NONE;
@@ -340,7 +365,7 @@ void Core::dtExecuteInit(struct dtExecute &dt) {
     dt.regwrite = false;
     dt.memctl = MemoryAccess::AC_NONE;
     dt.val_rt = 0;
-    dt.rwrite = false;
+    dt.rwrite = 0;
     dt.alu_val = 0;
 }
 
@@ -412,6 +437,7 @@ void CorePipelined::do_step() {
             (STAGE).rwrite == dt_d.inst.rt()) \
         )) // Note: We make exception with $0 as that has no effect and is used in nop instruction
 
+        // Write back stage combinatoricly propagates written instruction to decode stage so nothing has to be done for that stage
         if (HAZARD(dt_m)) {
             // Hazard with instruction in memory stage
             if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
@@ -448,13 +474,43 @@ void CorePipelined::do_step() {
             } else
                 stall = true;
         }
-        // Write back stage combinatoricly propagates written instruction to decode stage so nothing has to be done for that stage
 #undef HAZARD
+        if (dt_e.rwrite != 0 && dt_e.regwrite &&
+            ((dt_d.bjr_req_rs && dt_d.inst.rs() == dt_e.rwrite) ||
+             (dt_d.bjr_req_rt && dt_d.inst.rt() == dt_e.rwrite))) {
+            stall = true;
+        } else {
+            if (hazard_unit != MachineConfig::HU_STALL_FORWARD) {
+                if (dt_m.rwrite != 0 && dt_m.regwrite &&
+                    ((dt_d.bjr_req_rs && dt_d.inst.rs() == dt_m.rwrite) ||
+                     (dt_d.bjr_req_rt && dt_d.inst.rt() == dt_m.rwrite)))
+                    stall = true;
+            } else {
+                if (dt_m.rwrite != 0 && dt_m.regwrite &&
+                    dt_d.bjr_req_rs && dt_d.inst.rs() == dt_m.rwrite) {
+                    dt_d.val_rs = dt_m.towrite_val;
+                    dt_d.forward_m_d_rs = true;
+                }
+                if (dt_m.rwrite != 0 && dt_m.regwrite &&
+                    dt_d.bjr_req_rt && dt_d.inst.rt() == dt_m.rwrite) {
+                    dt_d.val_rt = dt_m.towrite_val;
+                    dt_d.forward_m_d_rt = true;
+                }
+            }
+        }
+        emit forward_m_d_rs_value(dt_d.forward_m_d_rs);
+        emit forward_m_d_rt_value(dt_d.forward_m_d_rt);
     }
-
 #if 0
-    printf("M: regwrite %d inst.type %d rwrite [%d] E: regwrite %d inst.type %d  rwrite [%d] D: inst.type %d dt_d.inst.rs [%d] dt_d.inst.rt [%d] dt_d.ff_rs %d dt_d.ff_rt %d\n",
-            dt_m.regwrite,  dt_m.inst.type(), dt_m.rwrite, dt_e.regwrite, dt_e.inst.type(), dt_e.rwrite, dt_d.inst.type(), dt_d.inst.rs(), dt_d.inst.rt(), dt_d.ff_rs, dt_d.ff_rt);
+    if (stall)
+        printf("STALL\n");
+    else if(dt_d.forward_m_d_rs || dt_d.forward_m_d_rt)
+        printf("f_m_d_rs %d f_m_d_rt %d\n", (int)dt_d.forward_m_d_rs, (int)dt_d.forward_m_d_rt);
+    printf("D: %s inst.type %d dt_d.inst.rs [%d] dt_d.inst.rt [%d] dt_d.ff_rs %d dt_d.ff_rt %d E: regwrite %d inst.type %d  rwrite [%d] M: regwrite %d inst.type %d rwrite [%d] \n",
+            dt_d.inst.to_str().toLocal8Bit().data(),
+            dt_d.inst.type(), dt_d.inst.rs(), dt_d.inst.rt(), dt_d.ff_rs, dt_d.ff_rt,
+            dt_e.regwrite, dt_e.inst.type(), dt_e.rwrite,
+            dt_m.regwrite,  dt_m.inst.type(), dt_m.rwrite);
 #endif
 
     // Now process program counter (loop connections from decode stage)

@@ -50,6 +50,8 @@ signals:
     void decode_rt_num_value(std::uint32_t);
     void decode_rd_num_value(std::uint32_t);
     void decode_regd31_value(std::uint32_t);
+    void forward_m_d_rs_value(std::uint32_t);
+    void forward_m_d_rt_value(std::uint32_t);
     void execute_alu_value(std::uint32_t);
     void execute_reg1_value(std::uint32_t);
     void execute_reg2_value(std::uint32_t);
@@ -94,11 +96,16 @@ protected:
         bool regd; // If rd is used (otherwise rt is used for write target)
         bool regd31; // Use R31 as destionation for JAL
         bool regwrite; // If output should be written back to register (which one depends on regd)
+        bool bjr_req_rs; // requires rs for beq, bne, blez, bgtz, jr nad jalr
+        bool bjr_req_rt; // requires rt for beq, bne
+        bool forward_m_d_rs; // forwarding required for beq, bne, blez, bgtz, jr nad jalr
+        bool forward_m_d_rt; // forwarding required for beq, bne
         enum AluOp aluop; // Decoded ALU operation
         enum MemoryAccess::AccessControl memctl; // Decoded memory access type
         std::uint32_t val_rs; // Value from register rs
         std::uint32_t val_rt; // Value from register rt
         std::uint32_t immediate_val; // zero or sign-extended immediate value
+        std::uint8_t rwrite; // Writeback register (multiplexed between rt and rd according to regd)
         ForwardFrom ff_rs;
         ForwardFrom ff_rt;
     };

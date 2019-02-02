@@ -407,7 +407,10 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
     NEW_V(610, 385, memory_regw_num_value, false, 2);
 
     if (machine->config().hazard_unit() == machine::MachineConfig::HU_STALL_FORWARD) {
-        NEW_V(448, 460, execute_reg1_ff_value, false, 1); // Register 1 forward
-        NEW_V(462, 460, execute_reg2_ff_value, false, 1); // Register 1 forward
-    }
+        NEW_V(448, 460, execute_reg1_ff_value, false, 1); // Register 1 forward to ALU
+        NEW_V(462, 460, execute_reg2_ff_value, false, 1); // Register 2 forward to ALU
+
+        NEW_V(310, 290, forward_m_d_rs_value, false, 1); // Register 1 forward for bxx and jr, jalr
+        NEW_V(325, 290, forward_m_d_rt_value, false, 1); // Register 2 forward for beq, bne
+     }
 }
