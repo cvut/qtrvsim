@@ -202,7 +202,7 @@ void MachineTests::alu_except_data() {
                          << (std::uint32_t)0x8fffffff \
                          << (std::uint32_t)0x90000000;
     QTest::newRow("SUB") << (std::uint8_t)ALU_OP_SUB \
-                         << (std::uint32_t)3 \
+                         << (std::uint32_t)0x80000003 \
                          << (std::uint32_t)4;
     // Just test that we can throw unsupported ALU operation
     QTest::newRow("?") << (std::uint8_t)ALU_OP_LAST \
