@@ -458,6 +458,7 @@ static void core_alu_forward_data() {
             0x00000000, // nop
         };
         Registers regs_init;
+        regs_init.pc_abs_jmp(0x80020000);
         Registers regs_res(regs_init);
         regs_res.write_gp(1, 0x2222);
         regs_res.write_gp(2, 3);
@@ -465,7 +466,62 @@ static void core_alu_forward_data() {
         regs_res.write_gp(4, 0x2223);
         regs_res.write_gp(5, 0x2225);
         regs_res.write_gp(6, 0x2225);
+        regs_res.pc_abs_jmp(regs_init.read_pc() + 4 * code.length());
         QTest::newRow("alu_forward_1") << code << regs_init << regs_res;
+    }
+
+
+    // Test forwarding of ALU operands
+    {
+        QVector<uint32_t> code{
+            // start: = 0x80020000
+            0x3c041111, // lui     a0,0x1111
+            0x3c052222, // lui     a1,0x2222
+            0x0c008012, // jal     80020048 <fnc_add3>
+            0x3c063333, // lui     a2,0x3333
+            0x00021820, // add     v1,zero,v0
+            0x0800800a, // j       80020028 <skip>
+            0x20107777, // addi    s0,zero, 0x7777
+            0x20128888, // addi    s2,zero, 0x8888
+            0x20139999, // addi    s3,zero, 0x9999
+            0x2014aaaa, // addi    s4,zero, 0xaaaa
+            // skip:
+            0x3c088002, // lui     t0,0x8002
+            0x25080058, // addiu   t0,t0,88
+            0x0100f809, // jalr    t0
+            0x2004abcd, // addi    a0,zero, 0xabcd
+            0x20040000, // addi    a0,zero,0
+            0x20510000, // addi    s1,v0,0
+            0x08008018, // j       80020060 <loop>
+            0x00000000, // nop
+            // fnc_add3:
+            0x00851020, // add     v0,a0,a1
+            0x00461020, // add     v0,v0,a2
+            0x03e00008, // jr      ra
+            0x00000000, // nop
+            // fnc_short:
+            0x03e00008, // jr      ra
+            0x20820000, // addi    v0,a0,0
+            // loop:
+            0x1000ffff, // b       80020060 <loop>
+            0x00000000, // nop
+        };
+        Registers regs_init;
+        regs_init.pc_abs_jmp(0x80020000);
+        Registers regs_res(regs_init);
+        regs_res.write_gp(1, 0x00000000);
+        regs_res.write_gp(2, 0xffffabcd);
+        regs_res.write_gp(3, 0x66660000);
+        regs_res.write_gp(4, 0x00000000);
+        regs_res.write_gp(5, 0x22220000);
+        regs_res.write_gp(6, 0x33330000);
+        regs_res.write_gp(7, 0x00000000);
+        regs_res.write_gp(8, 0x80020058);
+        regs_res.write_gp(16, 0x00007777);
+        regs_res.write_gp(17, 0xffffabcd);
+        regs_res.write_gp(31, 0x80020038);
+        regs_res.pc_abs_jmp(0x80020060);
+        QTest::newRow("j_jal_jalr") << code << regs_init << regs_res;
     }
 }
 
@@ -495,10 +551,12 @@ void MachineTests::singlecore_alu_forward() {
     Memory mem_used(mem); // Create memory copy
 
     CoreSingle core(&init, &mem_used, &mem_used, true);
-    for (int k = 0; k < code.length() + 5 ; k++)
+    for (int k = 1000; k ; k--) {
         core.step(); // Single step should be enought as this is risc without pipeline
-
-    res.pc_abs_jmp(init.pc_inc()); // We do not compare result pc
+        if (init.read_pc() == res.read_pc() && k > 6) // reached end of the code fragment
+            k = 6; // add some cycles to finish processing
+    }
+    res.pc_abs_jmp(init.read_pc()); // We do not compare result pc
     QCOMPARE(init, res); // After doing changes from initial state this should be same state as in case of passed expected result
     QCOMPARE(mem, mem_used); // There should be no change in memory
 }
@@ -517,10 +575,12 @@ void MachineTests::pipecore_alu_forward() {
     Memory mem_used(mem); // Create memory copy
 
     CorePipelined core(&init, &mem_used, &mem_used, MachineConfig::HU_STALL_FORWARD);
-    for (int k = 0; k < code.length() + 5 ; k++)
+    for (int k = 1000; k ; k--) {
         core.step(); // Single step should be enought as this is risc without pipeline
-
-    res.pc_abs_jmp(init.pc_inc()); // We do not compare result pc
+        if (init.read_pc() == res.read_pc() && k > 6) // reached end of the code fragment
+            k = 6; // add some cycles to finish processing
+    }
+    res.pc_abs_jmp(init.read_pc()); // We do not compare result pc
     QCOMPARE(init, res); // After doing changes from initial state this should be same state as in case of passed expected result
     QCOMPARE(mem, mem_used); // There should be no change in memory
 }
@@ -539,10 +599,12 @@ void MachineTests::pipecorestall_alu_forward() {
     Memory mem_used(mem); // Create memory copy
 
     CorePipelined core(&init, &mem_used, &mem_used, MachineConfig::HU_STALL);
-    for (int k = 0; k < code.length() * 3 + 5 ; k++)
+    for (int k = 1000; k ; k--) {
         core.step(); // Single step should be enought as this is risc without pipeline
-
-    res.pc_abs_jmp(init.pc_inc()); // We do not compare result pc
+        if (init.read_pc() == res.read_pc() && k > 6) // reached end of the code fragment
+            k = 6; // add some cycles to finish processing
+    }
+    res.pc_abs_jmp(init.read_pc()); // We do not compare result pc
     QCOMPARE(init, res); // After doing changes from initial state this should be same state as in case of passed expected result
     QCOMPARE(mem, mem_used); // There should be no change in memory
 }
