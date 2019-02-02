@@ -46,6 +46,12 @@ private Q_SLOTS:
     void singlecore_mem_data();
     void pipecore_mem();
     void pipecore_mem_data();
+    void singlecore_alu_forward();
+    void singlecore_alu_forward_data();
+    void pipecore_alu_forward();
+    void pipecore_alu_forward_data();
+    void pipecorestall_alu_forward();
+    void pipecorestall_alu_forward_data();
     // Cache
     void cache_data();
     void cache();
