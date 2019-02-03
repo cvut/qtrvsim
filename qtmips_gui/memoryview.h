@@ -27,6 +27,9 @@ public:
 
     void edit_load_focus(); // Set current focus to edit field
 
+public slots:
+    void check_for_updates();
+
 protected:
     const machine::Memory *memory;
 
@@ -43,6 +46,7 @@ private slots:
     void go_edit_finish();
 
 private:
+    std::uint32_t change_counter;
     unsigned count;
     std::uint32_t addr_0; // First address in view
 

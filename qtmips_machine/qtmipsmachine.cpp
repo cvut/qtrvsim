@@ -108,6 +108,7 @@ void QtMipsMachine::step() {
         if (stat == ST_BUSY)
             set_status(stat_prev);
     }
+    emit post_tick();
 }
 
 void QtMipsMachine::restart() {

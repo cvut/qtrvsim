@@ -13,7 +13,7 @@ class Cache : public MemoryAccess {
 public:
     Cache(Memory *m, const MachineConfigCache *c, unsigned memory_access_penalty_r = 1, unsigned memory_access_penalty_w = 1);
 
-    void wword(std::uint32_t address, std::uint32_t value);
+    bool wword(std::uint32_t address, std::uint32_t value);
     std::uint32_t rword(std::uint32_t address) const;
 
     void flush(); // flush cache
@@ -54,7 +54,7 @@ private:
 
     mutable unsigned hit_read, miss_read, hit_write, miss_write; // Hit and miss counters
 
-    void access(std::uint32_t address, std::uint32_t *data, bool write, std::uint32_t value = 0) const;
+    bool access(std::uint32_t address, std::uint32_t *data, bool write, std::uint32_t value = 0) const;
     void kick(unsigned associat_indx, unsigned row) const;
     std::uint32_t base_address(std::uint32_t tag, unsigned row) const;
     void update_statistics() const;

@@ -12,9 +12,9 @@ class MemoryAccess : public QObject {
     Q_OBJECT
 public:
     // Note: hword and word methods are throwing away lowest bits so unaligned access is ignored without error.
-    void write_byte(std::uint32_t offset, std::uint8_t value);
-    void write_hword(std::uint32_t offset, std::uint16_t value);
-    void write_word(std::uint32_t offset, std::uint32_t value);
+    bool write_byte(std::uint32_t offset, std::uint8_t value);
+    bool write_hword(std::uint32_t offset, std::uint16_t value);
+    bool write_word(std::uint32_t offset, std::uint32_t value);
 
     std::uint8_t read_byte(std::uint32_t offset) const;
     std::uint16_t read_hword(std::uint32_t offset) const;
@@ -34,7 +34,7 @@ public:
     virtual void sync();
 
 protected:
-    virtual void wword(std::uint32_t offset, std::uint32_t value) = 0;
+    virtual bool wword(std::uint32_t offset, std::uint32_t value) = 0;
     virtual std::uint32_t rword(std::uint32_t offset) const = 0;
 
 private:
@@ -47,7 +47,7 @@ public:
     MemorySection(const MemorySection&);
     ~MemorySection();
 
-    void wword(std::uint32_t offset, std::uint32_t value);
+    bool wword(std::uint32_t offset, std::uint32_t value);
     std::uint32_t rword(std::uint32_t offset) const;
     void merge(MemorySection&);
 
@@ -77,7 +77,7 @@ public:
     void reset(const Memory&);
 
     MemorySection *get_section(std::uint32_t address, bool create) const; // returns section containing given address
-    void wword(std::uint32_t address, std::uint32_t value);
+    bool wword(std::uint32_t address, std::uint32_t value);
     std::uint32_t rword(std::uint32_t address) const;
 
     bool operator==(const Memory&) const;
@@ -85,8 +85,14 @@ public:
 
     const union MemoryTree *get_memorytree_root() const;
 
+    inline std::uint32_t get_change_counter() const {
+        return change_counter;
+    }
+
 private:
     union MemoryTree *mt_root;
+    std::uint32_t change_counter;
+    std::uint32_t write_counter;
     static union MemoryTree *allocate_section_tree();
     static void free_section_tree(union MemoryTree*, size_t depth);
     static bool compare_section_tree(const union MemoryTree*, const union MemoryTree*, size_t depth);

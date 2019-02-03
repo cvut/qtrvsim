@@ -10,20 +10,20 @@ using namespace machine;
 #define SH_NTH_16(OFFSET) (((OFFSET) & 0b10) * 16)
 #endif
 
-void MemoryAccess::write_byte(std::uint32_t offset, std::uint8_t value) {
+bool MemoryAccess::write_byte(std::uint32_t offset, std::uint8_t value) {
     int nth = SH_NTH_8(offset);
     std::uint32_t mask = 0xff << nth; // Mask for n-th byte
-    wword(offset, (rword(offset) & ~mask) | (((std::uint32_t)value << nth) & mask));
+    return wword(offset, (rword(offset) & ~mask) | (((std::uint32_t)value << nth) & mask));
 }
 
-void MemoryAccess::write_hword(std::uint32_t offset, std::uint16_t value) {
+bool MemoryAccess::write_hword(std::uint32_t offset, std::uint16_t value) {
     int nth = SH_NTH_16(offset);
     std::uint32_t mask = 0xffff << nth; // Mask for n-th half-word
-    wword(offset, (rword(offset) & ~mask) | (((std::uint32_t)value << nth) & mask));
+    return wword(offset, (rword(offset) & ~mask) | (((std::uint32_t)value << nth) & mask));
 }
 
-void MemoryAccess::write_word(std::uint32_t offset, std::uint32_t value) {
-    wword(offset, value);
+bool MemoryAccess::write_word(std::uint32_t offset, std::uint32_t value) {
+    return wword(offset, value);
 }
 
 std::uint8_t MemoryAccess::read_byte(std::uint32_t offset) const {
@@ -101,11 +101,14 @@ MemorySection::~MemorySection() {
     delete this->dt;
 }
 
-void MemorySection::wword(std::uint32_t offset, std::uint32_t value) {
+bool MemorySection::wword(std::uint32_t offset, std::uint32_t value) {
+    bool changed;
     offset = offset >> 2;
     if (offset >= this->len)
         throw QTMIPS_EXCEPTION(OutOfMemoryAccess, "Trying to write outside of the memory section", QString("Accessing using offset: ") + QString(offset));
+    changed = this->dt[offset] != value;
     this->dt[offset] = value;
+    return changed;
 }
 
 std::uint32_t MemorySection::rword(std::uint32_t offset) const {
@@ -206,9 +209,14 @@ MemorySection *Memory::get_section(std::uint32_t address, bool create) const {
 
 #define SECTION_OFFSET_MASK(ADDR) (ADDR & GENMASK(MEMORY_SECTION_BITS, 2))
 
-void Memory::wword(std::uint32_t address, std::uint32_t value) {
+bool Memory::wword(std::uint32_t address, std::uint32_t value) {
+    bool changed;
     MemorySection *section = this->get_section(address, true);
-    section->write_word(SECTION_OFFSET_MASK(address), value);
+    changed = section->write_word(SECTION_OFFSET_MASK(address), value);
+    write_counter++;
+    if (changed)
+        change_counter++;
+    return changed;
 }
 
 std::uint32_t Memory::rword(std::uint32_t address) const {

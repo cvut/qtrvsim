@@ -50,6 +50,7 @@ signals:
     void program_trap(machine::QtMipsException &e);
     void status_change(enum machine::QtMipsMachine::Status st);
     void tick(); // Time tick
+    void post_tick(); // Emitted after tick to allow updates
 
 private:
     MachineConfig mcnf;

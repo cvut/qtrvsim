@@ -40,17 +40,18 @@ Cache::Cache(Memory *m, const MachineConfigCache *cc, unsigned memory_access_pen
     }
 }
 
-void Cache::wword(std::uint32_t address, std::uint32_t value) {
+bool Cache::wword(std::uint32_t address, std::uint32_t value) {
+    bool changed;
     if (!cnf.enabled()) {
-        mem->write_word(address, value);
-        return;
+        return mem->write_word(address, value);
     }
 
     std::uint32_t data;
-    access(address, &data, true, value);
+    changed = access(address, &data, true, value);
 
     if (cnf.write_policy() == MachineConfigCache::WP_TROUGH)
-        mem->wword(address, value);
+        return mem->wword(address, value);
+    return changed;
 }
 
 std::uint32_t Cache::rword(std::uint32_t address) const {
@@ -131,7 +132,8 @@ const MachineConfigCache &Cache::config() const {
     return cnf;
 }
 
-void Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::uint32_t value) const {
+bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::uint32_t value) const {
+    bool changed = false;
     address = address >> 2;
     unsigned ssize = cnf.blocks() * cnf.sets();
     std::uint32_t tag = address / ssize;
@@ -218,10 +220,13 @@ void Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
     cd.tag = tag;
     *data = cd.data[col];
 
-    if (write)
+    if (write) {
+        changed = cd.data[col] != value;
         cd.data[col] = value;
+    }
 
     emit cache_update(indx, row, cd.valid, cd.dirty, cd.tag, cd.data);
+    return changed;
 }
 
 void Cache::kick(unsigned associat_indx, unsigned row) const {

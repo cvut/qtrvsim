@@ -31,6 +31,8 @@ MemoryView::MemoryView(QWidget *parent, std::uint32_t addr0) : QWidget(parent) {
 
 void MemoryView::setup(machine::QtMipsMachine *machine) {
     memory = (machine == nullptr) ? nullptr : machine->memory();
+    if (machine != nullptr)
+        connect(machine, SIGNAL(post_tick()), this, SLOT(check_for_updates()));
     reload_content();
 }
 
@@ -58,9 +60,18 @@ void MemoryView::edit_load_focus() {
     go_edit->setText(QString("0x%1").arg(focus(), 8, 16, QChar('0')));
 }
 
+void MemoryView::check_for_updates() {
+    if (memory != nullptr) {
+         if (change_counter != memory->get_change_counter())
+             reload_content();
+    }
+}
+
 void MemoryView::reload_content() {
     int count = memf->widg->count();
     memf->widg->clearRows();
+    if (memory != nullptr)
+        change_counter = memory->get_change_counter();
     update_content(count, 0);
 }
 
