@@ -93,7 +93,7 @@ static const struct DecodeMap dmap[]  = {
     NOPE, // 60
     NOPE, // 61
     NOPE, // 62
-    NOPE // 63
+    NOPE  // 63
 };
 
 Core::Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data) {
@@ -138,14 +138,36 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     std::uint32_t val_rs = regs->read_gp(dt.inst.rs());
     std::uint32_t val_rt = regs->read_gp(dt.inst.rt());
     std::uint32_t immediate_val;
+    bool regwrite = dec.flags & DM_REGWRITE;
     bool regd = dec.flags & DM_REGD;
     bool regd31 = dec.flags & DM_PC_TO_R31;
 
     // requires rs for beq, bne, blez, bgtz, jr nad jalr
     bool bjr_req_rs = dec.flags & DM_BJR_REQ_RS;
-    if (dt.inst.opcode() == 0 && ((dt.inst.funct() == ALU_OP_JR) ||
-                                  (dt.inst.funct() == ALU_OP_JALR))) {
-        bjr_req_rs = true;
+    if (dt.inst.opcode() == 0) {
+        switch (dt.inst.funct()) {
+            case ALU_OP_MTHI:
+                FALLTROUGH
+            case ALU_OP_MTLO:
+                FALLTROUGH
+            case ALU_OP_MULT:
+                FALLTROUGH
+            case ALU_OP_MULTU:
+                FALLTROUGH
+            case ALU_OP_DIV:
+                FALLTROUGH
+            case ALU_OP_DIVU:
+                regwrite = false;
+                break;
+            case ALU_OP_JR:
+                regwrite = false;
+                bjr_req_rs = true;
+                break;
+            case ALU_OP_JALR:
+                val_rt = dt.inst_addr + 8;
+                bjr_req_rs = true;
+                break;
+        }
     }
     // requires rt for beq, bne
     bool bjr_req_rt = dec.flags & DM_BJR_REQ_RT;
@@ -174,10 +196,6 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         val_rs = dt.inst_addr + 8;
     }
 
-    if ((dt.inst.opcode() == 0 &&  dt.inst.funct() == ALU_OP_JALR)) {
-        val_rt = dt.inst_addr + 8;
-    }
-
     rwrite = regd31 ? 31: regd ? dt.inst.rd() : dt.inst.rt();
 
     return {
@@ -187,7 +205,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .alusrc = dec.flags & DM_ALUSRC,
         .regd = regd,
         .regd31 = regd31,
-        .regwrite = dec.flags & DM_REGWRITE,
+        .regwrite = regwrite,
         .bjr_req_rs = bjr_req_rs,
         .bjr_req_rt = bjr_req_rt,
         .forward_m_d_rs = false,

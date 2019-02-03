@@ -471,7 +471,7 @@ static void core_alu_forward_data() {
     }
 
 
-    // Test forwarding of ALU operands
+    // Test forwarding in JR and JALR
     {
         QVector<uint32_t> code{
             // start: = 0x80020000
@@ -522,6 +522,55 @@ static void core_alu_forward_data() {
         regs_res.write_gp(31, 0x80020038);
         regs_res.pc_abs_jmp(0x80020060);
         QTest::newRow("j_jal_jalr") << code << regs_init << regs_res;
+    }
+
+    // Test multiplication and division
+    {
+        QVector<uint32_t> code{
+            // start:
+            0x3c021234, // lui     v0,0x1234
+            0x34425678, // ori     v0,v0,0x5678
+            0x3c03abcd, // lui     v1,0xabcd
+            0x3463ef01, // ori     v1,v1,0xef01
+            0x00430018, // mult    v0,v1
+            0x00008012, // mflo    s0
+            0x00008810, // mfhi    s1
+            0x00430019, // multu   v0,v1
+            0x00009012, // mflo    s2
+            0x00009810, // mfhi    s3
+            0x0062001a, // div     zero,v1,v0
+            0x0000a012, // mflo    s4
+            0x0000a810, // mfhi    s5
+            0x0062001b, // divu    zero,v1,v0
+            0x0000b012, // mflo    s6
+            0x0000b810, // mfhi    s7
+            // loop:
+            0x1000ffff, // b       80020070 <loop>
+            0x00000000, // nop
+        };
+        Registers regs_init;
+        regs_init.pc_abs_jmp(0x80020000);
+        Registers regs_res(regs_init);
+        std::uint32_t val_a = 0x12345678;
+        std::uint32_t val_b = 0xabcdef01;
+        std::uint64_t val_u64;
+        std::int64_t val_s64;
+        regs_res.write_gp(2, val_a);
+        regs_res.write_gp(3, val_b);
+        val_s64 = (std::int64_t)(std::int32_t)val_a * (std::int32_t)val_b;
+        regs_res.write_gp(16, (std::uint32_t)(val_s64 & 0xffffffff));
+        regs_res.write_gp(17, (std::uint32_t)(val_s64 >> 32));
+        val_u64 = (std::uint64_t)val_a * val_b;
+        regs_res.write_gp(18, (std::uint32_t)(val_u64 & 0xffffffff));
+        regs_res.write_gp(19, (std::uint32_t)(val_u64 >> 32));
+        regs_res.write_gp(20, (std::uint32_t)((std::int32_t)val_b / (std::int32_t)val_a));
+        regs_res.write_gp(21, (std::uint32_t)((std::int32_t)val_b % (std::int32_t)val_a));
+        regs_res.write_gp(22, val_b / val_a);
+        regs_res.write_gp(23, val_b % val_a);
+        regs_res.write_hi_lo(false, regs_res.read_gp(22));
+        regs_res.write_hi_lo(true, regs_res.read_gp(23));
+        regs_res.pc_abs_jmp(regs_init.read_pc() + 4 * code.length());
+        QTest::newRow("mul-div") << code << regs_init << regs_res;
     }
 }
 

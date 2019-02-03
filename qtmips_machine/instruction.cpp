@@ -111,7 +111,7 @@ static const struct AluInstructionMap alu_instruction_map[] = {
     AIM_UNKNOWN,
     AIM_UNKNOWN,
     AIM_UNKNOWN,
-    {"MFHU"},
+    {"MFHI"},
     {"MTHI"},
     {"MFLO"},
     {"MTLO"},
@@ -119,15 +119,15 @@ static const struct AluInstructionMap alu_instruction_map[] = {
     AIM_UNKNOWN,
     AIM_UNKNOWN,
     AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    {"ADD"},
+    {"MULT"},    // 24
+    {"MULTU"},   // 25
+    {"DIV"},     // 26
+    {"DIVU"},    // 27
+    AIM_UNKNOWN, // 28
+    AIM_UNKNOWN, // 29
+    AIM_UNKNOWN, // 30
+    AIM_UNKNOWN, // 31
+    {"ADD"},     // 32
     {"ADDU"},
     {"SUB"},
     {"SUBU"},

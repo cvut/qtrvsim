@@ -5,6 +5,9 @@
 using namespace machine;
 
 std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa, Registers *regs) {
+    std::int64_t s64_val;
+    std::uint64_t u64_val;
+
     switch(operation) {
         case ALU_OP_SLL:
             return t << sa;
@@ -41,6 +44,24 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
             return regs->read_hi_lo(false);
         case ALU_OP_MTLO:
             regs->write_hi_lo(false, s);
+            return 0x0;
+        case ALU_OP_MULT:
+            s64_val = (std::int64_t)(std::int32_t)s * (std::int32_t)t;
+            regs->write_hi_lo(false, (std::uint32_t)(s64_val & 0xffffffff));
+            regs->write_hi_lo(true,  (std::uint32_t)(s64_val >> 32));
+            return 0x0;
+        case ALU_OP_MULTU:
+            u64_val = (std::uint64_t)s * t;
+            regs->write_hi_lo(false, (std::uint32_t)(u64_val & 0xffffffff));
+            regs->write_hi_lo(true,  (std::uint32_t)(u64_val >> 32));
+            return 0x0;
+        case ALU_OP_DIV:
+            regs->write_hi_lo(false, (std::uint32_t)((std::int32_t)s / (std::int32_t)t));
+            regs->write_hi_lo(true,  (std::uint32_t)((std::int32_t)s % (std::int32_t)t));
+            return 0x0;
+        case ALU_OP_DIVU:
+            regs->write_hi_lo(false, s / t);
+            regs->write_hi_lo(true, s % t);
             return 0x0;
         case ALU_OP_ADD:
             /* s(31) ^ ~t(31) ... same signs on input  */
