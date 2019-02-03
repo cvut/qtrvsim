@@ -81,7 +81,8 @@ void QtMipsMachine::play() {
 }
 
 void QtMipsMachine::pause() {
-    CTL_GUARD;
+    if (stat != ST_BUSY)
+        CTL_GUARD;
     set_status(ST_READY);
     run_t->stop();
 }
@@ -103,8 +104,10 @@ void QtMipsMachine::step() {
         run_t->stop();
         set_status(ST_EXIT);
         emit program_exit();
-    } else
-        set_status(stat_prev);
+    } else {
+        if (stat == ST_BUSY)
+            set_status(stat_prev);
+    }
 }
 
 void QtMipsMachine::restart() {

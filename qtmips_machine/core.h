@@ -73,6 +73,7 @@ signals:
     void memory_memwrite_value(std::uint32_t);
     void memory_memread_value(std::uint32_t);
     void memory_regw_num_value(std::uint32_t);
+    void memory_break_reached();
     void writeback_value(std::uint32_t);
     void writeback_regw_value(std::uint32_t);
     void writeback_regw_num_value(std::uint32_t);

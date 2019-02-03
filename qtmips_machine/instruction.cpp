@@ -1,4 +1,5 @@
 #include "instruction.h"
+#include "alu.h"
 #include "qtmipsexception.h"
 
 using namespace machine;
@@ -108,7 +109,7 @@ static const struct AluInstructionMap alu_instruction_map[] = {
     {"MOVZ"},
     {"MOVN"},
     AIM_UNKNOWN,
-    AIM_UNKNOWN,
+    {"BREAK"},
     AIM_UNKNOWN,
     AIM_UNKNOWN,
     {"MFHI"},
@@ -229,6 +230,10 @@ bool Instruction::is_store() const {
         return false;
     const struct InstructionMap &im = instruction_map[opcode()];
     return im.is_store;
+}
+
+bool Instruction::is_break() const {
+    return opcode() == 0 && funct() == ALU_OP_BREAK;
 }
 
 bool Instruction::operator==(const Instruction &c) const {

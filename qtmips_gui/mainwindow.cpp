@@ -113,6 +113,8 @@ void MainWindow::create_core(const machine::MachineConfig &config) {
     connect(corescene, SIGNAL(request_jump_to_program_counter(std::uint32_t)), program, SLOT(jump_to_pc(std::uint32_t)));
     connect(corescene, SIGNAL(request_cache_program()), this, SLOT(show_cache_program()));
     connect(corescene, SIGNAL(request_cache_data()), this, SLOT(show_cache_data()));
+    // Connect signal from break to machine pause
+    connect(machine->core(), SIGNAL(memory_break_reached()), machine, SLOT(pause()));
 
     // Setup docks
     registers->setup(machine);

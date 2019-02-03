@@ -146,6 +146,8 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     bool bjr_req_rs = dec.flags & DM_BJR_REQ_RS;
     if (dt.inst.opcode() == 0) {
         switch (dt.inst.funct()) {
+            case ALU_OP_BREAK:
+                FALLTROUGH
             case ALU_OP_MTHI:
                 FALLTROUGH
             case ALU_OP_MTLO:
@@ -278,6 +280,9 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
     emit memory_memread_value(dt.memread);
     emit memory_memwrite_value(dt.memwrite);
     emit memory_regw_num_value(dt.rwrite);
+
+    if (dt.inst.is_break())
+        emit memory_break_reached();
 
     return {
         .inst = dt.inst,

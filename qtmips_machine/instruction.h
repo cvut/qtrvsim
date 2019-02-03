@@ -33,6 +33,7 @@ public:
     std::uint32_t data() const;
     enum Type type() const;
     bool is_store() const; // Store instructions requires some additional handling so identify them
+    bool is_break() const;
 
     bool operator==(const Instruction &c) const;
     bool operator!=(const Instruction &c) const;

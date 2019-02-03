@@ -35,6 +35,8 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
         case ALU_OP_MOVN:
             // Same note as for MOVZ applies here
             return t != 0 ? s : 0;
+        case ALU_OP_BREAK:
+             return 0;
         case ALU_OP_MFHI:
             return regs->read_hi_lo(true);
         case ALU_OP_MTHI:
