@@ -216,7 +216,7 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
     }
 
     cd.valid = true; // We either write to it or we read from memory. Either way it's valid when we leave Cache class
-    cd.dirty = cd.dirty || !write;
+    cd.dirty = cd.dirty || write;
     cd.tag = tag;
     *data = cd.data[col];
 
@@ -233,7 +233,7 @@ void Cache::kick(unsigned associat_indx, unsigned row) const {
     struct cache_data &cd = dt[associat_indx][row];
     if (cd.dirty && cnf.write_policy() == MachineConfigCache::WP_BACK)
         for (unsigned i = 0; i < cnf.blocks(); i++)
-        mem->wword(base_address(associat_indx, row) + (4*i), cd.data[i]);
+            mem->wword(base_address(cd.tag, row) + (4*i), cd.data[i]);
     cd.valid = false;
     cd.dirty = false;
 
