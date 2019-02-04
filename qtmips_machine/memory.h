@@ -39,6 +39,7 @@
 #include <QObject>
 #include <cstdint>
 #include <qtmipsexception.h>
+#include "machinedefs.h"
 
 namespace machine {
 
@@ -55,15 +56,6 @@ public:
     std::uint16_t read_hword(std::uint32_t offset) const;
     std::uint32_t read_word(std::uint32_t offset) const;
 
-    enum AccessControl {
-        AC_NONE,
-        AC_BYTE,
-        AC_HALFWORD,
-        AC_WORD,
-        AC_BYTE_UNSIGNED,
-        AC_HALFWORD_UNSIGNED,
-        AC_CACHE_OP,
-    };
     void write_ctl(enum AccessControl ctl, std::uint32_t offset, std::uint32_t value);
     std::uint32_t read_ctl(enum AccessControl ctl, std::uint32_t offset) const;
 
@@ -138,7 +130,7 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(machine::MemoryAccess::AccessControl)
+Q_DECLARE_METATYPE(machine::AccessControl)
 Q_DECLARE_METATYPE(machine::Memory)
 
 #endif // MEMORY_H

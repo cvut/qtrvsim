@@ -35,43 +35,73 @@
 
 #include "instruction.h"
 #include "alu.h"
+#include "memory.h"
 #include "qtmipsexception.h"
 
 using namespace machine;
 
-#define IMF_NO_RS (1<<0) // This instruction doesn't have rs field
-#define IMF_MEM (1<<1) // This instruction is memory access instruction
+#define FLAGS_ALU_I (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE)
+#define FLAGS_ALU_I_ZE (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_ZERO_EXTEND)
+
+#define FLAGS_ALU_T_R (IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE)
+#define FLAGS_ALU_T_R_STD (IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE \
+                         | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
+#define FLAGS_ALU_T_R_ST (IMF_SUPPORTED | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
+#define FLAGS_ALU_T_R_S (IMF_SUPPORTED |  IMF_ALU_REQ_RS)
+#define FLAGS_ALU_T_R_D (IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE )
+#define FLAGS_ALU_T_R_SD (IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE | IMF_ALU_REQ_RS)
+
+#define NOALU .alu = ALU_OP_SLL
+#define NOMEM .mem_ctl = AC_NONE
+
+#define IM_UNKNOWN {"UNKNOWN", Instruction::T_UNKNOWN, NOALU, NOMEM, .flags = 0}
 
 struct InstructionMap {
     const char *name;
     enum Instruction::Type type;
-    bool is_store;
-    unsigned flags;
+    enum AluOp alu;
+    enum AccessControl mem_ctl;
+    unsigned int flags;
 };
 
 #define IT_R Instruction::T_R
 #define IT_I Instruction::T_I
 #define IT_J Instruction::T_J
 
-#define IM_UNKNOWN {"UNKNOWN", Instruction::T_UNKNOWN, false, .flags = 0}
 // This table is indexed by opcode
 static const struct InstructionMap instruction_map[] = {
-    {"ALU", IT_R, false, .flags = 0}, // Alu operations
-    {"REGIMM", IT_I, false, .flags = 0}, // REGIMM (BLTZ, BGEZ)
-    {"J", IT_J, false, .flags = 0},
-    {"JAL", IT_J, false, .flags = 0},
-    {"BEQ", IT_I, false, .flags = 0},
-    {"BNE", IT_I, false, .flags = 0},
-    {"BLEZ", IT_I, false, .flags = 0},
-    {"BGTZ", IT_I, false, .flags = 0},
-    {"ADDI", IT_I, false, .flags = 0},
-    {"ADDIU", IT_I, false, .flags = 0},
-    {"SLTI", IT_I, false, .flags = 0},
-    {"SLTIU", IT_I, false, .flags = 0},
-    {"ANDI", IT_I, false, .flags = 0},
-    {"ORI", IT_I, false, .flags = 0},
-    {"XORI", IT_I, false, .flags = 0},
-    {"LUI", IT_I, false, .flags = IMF_NO_RS},
+    {"ALU",    IT_R, NOALU, NOMEM,         // Alu operations
+     .flags = 0},
+    {"REGIMM", IT_I, NOALU, NOMEM,         // REGIMM (BLTZ, BGEZ)
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS},
+    {"J",      IT_J, NOALU, NOMEM,         // J
+     .flags = IMF_SUPPORTED},
+    {"JAL",    IT_J, ALU_OP_PASS_S, NOMEM, // JAL
+     .flags = IMF_SUPPORTED | IMF_PC_TO_R31 | IMF_REGWRITE},
+    {"BEQ",    IT_I, NOALU, NOMEM,        // BEQ
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BJR_REQ_RT},
+    {"BNE",    IT_I, NOALU, NOMEM,         // BNE
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BJR_REQ_RT},
+    {"BLEZ",   IT_I, NOALU, NOMEM,         // BLEZ
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS},
+    {"BGTZ",   IT_I, NOALU, NOMEM,         // BGTZ
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS},
+    {"ADDI",   IT_I, ALU_OP_ADD, NOMEM,    // ADDI
+     .flags = FLAGS_ALU_I},
+    {"ADDIU",  IT_I, ALU_OP_ADDU, NOMEM,   // ADDIU
+     .flags = FLAGS_ALU_I},
+    {"SLTI",   IT_I, ALU_OP_SLT, NOMEM,    // SLTI
+     .flags = FLAGS_ALU_I},
+    {"SLTIU",  IT_I, ALU_OP_SLTU, NOMEM,   // SLTIU
+     .flags = FLAGS_ALU_I},
+    {"ANDI",   IT_I, ALU_OP_AND, NOMEM,    // ANDI
+     .flags = FLAGS_ALU_I_ZE},
+    {"ORI",    IT_I, ALU_OP_OR, NOMEM,     // ORI
+     .flags = FLAGS_ALU_I_ZE},
+    {"XORI",   IT_I, ALU_OP_XOR, NOMEM,    // XORI
+     .flags = FLAGS_ALU_I_ZE},
+    {"LUI",    IT_I, ALU_OP_LUI, NOMEM,    // LUI
+     .flags = FLAGS_ALU_I},
     IM_UNKNOWN, // 16
     IM_UNKNOWN, // 17
     IM_UNKNOWN, // 18
@@ -88,22 +118,35 @@ static const struct InstructionMap instruction_map[] = {
     IM_UNKNOWN, // 29
     IM_UNKNOWN, // 30
     IM_UNKNOWN, // 31
-    {"LB", IT_I, false, .flags = IMF_MEM},
-    {"LH", IT_I, false, .flags = IMF_MEM},
-    {"LWL", IT_I, false, .flags = IMF_MEM},
-    {"LW", IT_I, false, .flags = IMF_MEM},
-    {"LBU", IT_I, false, .flags = IMF_MEM},
-    {"LHU", IT_I, false, .flags = IMF_MEM},
-    {"LWR", IT_I, false, .flags = IMF_MEM},
+    {"LB",     IT_I, ALU_OP_ADDU, AC_BYTE, // LB
+     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM},
+    {"LH",     IT_I, ALU_OP_ADDU, AC_HALFWORD, // LH
+     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM},
+    {"LWL",    IT_I, ALU_OP_ADDU, NOMEM, // LWL - unsupported
+     .flags = IMF_MEM},
+    {"LW",     IT_I, ALU_OP_ADDU, AC_WORD, // LW
+     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM},
+    {"LBU",    IT_I, ALU_OP_ADDU, AC_BYTE_UNSIGNED, // LBU
+     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM },
+    {"LHU",    IT_I, ALU_OP_ADDU, AC_HALFWORD_UNSIGNED,  // LHU
+     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM,},
+    {"LWR",    IT_I, ALU_OP_ADDU, NOMEM, // LWR - unsupported
+     .flags = IMF_MEM},
     IM_UNKNOWN, // 39
-    {"SB", IT_I, true, .flags = IMF_MEM},
-    {"SH", IT_I, true, .flags = IMF_MEM},
-    {"SWL", IT_I, true, .flags = IMF_MEM},
-    {"SW", IT_I, true, .flags = IMF_MEM},
-    IM_UNKNOWN, // 44
-    IM_UNKNOWN, // 45
-    {"SWR", IT_I, true, .flags = IMF_MEM},
-    {"CACHE", IT_I, true, .flags = IMF_MEM}, // 47
+    {"SB",     IT_I, ALU_OP_ADDU, AC_BYTE,  // SB
+     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | IMF_MEM | IMF_MEM_STORE},
+    {"SH",     IT_I, ALU_OP_ADDU, AC_HALFWORD,  // SH
+     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | IMF_MEM | IMF_MEM_STORE},
+    {"SWL",    IT_I, ALU_OP_ADDU, NOMEM, // SWL
+     .flags = IMF_MEM | IMF_MEM_STORE},
+    {"SW",     IT_I, ALU_OP_ADDU, AC_WORD, // SW
+     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | IMF_MEM | IMF_MEM_STORE},
+    IM_UNKNOWN, // 44,NOPE, // 44
+    IM_UNKNOWN, // 45,NOPE, // 45
+    {"SWR",    IT_I, ALU_OP_ADDU, NOMEM, // SWR
+     .flags = IMF_MEM | IMF_MEM_STORE},
+    {"CACHE", IT_I, ALU_OP_ADDU, AC_CACHE_OP, // CACHE
+     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_MEM| IMF_MEM_STORE},
     IM_UNKNOWN, // 48
     IM_UNKNOWN, // 49
     IM_UNKNOWN, // 50
@@ -118,63 +161,63 @@ static const struct InstructionMap instruction_map[] = {
     IM_UNKNOWN, // 59
     IM_UNKNOWN, // 60
     IM_UNKNOWN, // 61
-    IM_UNKNOWN, // 61
     IM_UNKNOWN, // 62
-    IM_UNKNOWN // 63
+    IM_UNKNOWN, // 63
 };
 #undef IM_UNKNOWN
 
 struct AluInstructionMap {
     const char *name;
+    unsigned int flags;
 };
 
 #define AIM_UNKNOWN {"UNKNOWN"}
 // This table is indexed by funct
 static const struct AluInstructionMap alu_instruction_map[] = {
-    {"SLL"},
+    {"SLL", FLAGS_ALU_T_R_STD},
     AIM_UNKNOWN,
-    {"SRL"},
-    {"SRA"},
-    {"SLLV"},
+    {"SRL",   FLAGS_ALU_T_R_SD},
+    {"SRA",   FLAGS_ALU_T_R_SD},
+    {"SLLV",  FLAGS_ALU_T_R_STD},
     AIM_UNKNOWN,
-    {"SRLV"},
-    {"SRAV"},
-    {"JR"},
-    {"JALR"},
-    {"MOVZ"},
-    {"MOVN"},
+    {"SRLV",  FLAGS_ALU_T_R_STD},
+    {"SRAV",  FLAGS_ALU_T_R_STD},
+    {"JR",    FLAGS_ALU_T_R_S},
+    {"JALR",  FLAGS_ALU_T_R_SD},
+    {"MOVZ",  FLAGS_ALU_T_R_STD},
+    {"MOVN",  FLAGS_ALU_T_R_STD},
     AIM_UNKNOWN,
-    {"BREAK"},
-    AIM_UNKNOWN,
-    AIM_UNKNOWN,
-    {"MFHI"},
-    {"MTHI"},
-    {"MFLO"},
-    {"MTLO"},
+    {"BREAK", IMF_SUPPORTED},
     AIM_UNKNOWN,
     AIM_UNKNOWN,
+    {"MFHI",  FLAGS_ALU_T_R_D | IMF_READ_HILO},
+    {"MTHI",  FLAGS_ALU_T_R_S | IMF_WRITE_HILO},
+    {"MFLO",  FLAGS_ALU_T_R_D | IMF_READ_HILO},
+    {"MTLO",  FLAGS_ALU_T_R_S | IMF_WRITE_HILO},
     AIM_UNKNOWN,
     AIM_UNKNOWN,
-    {"MULT"},    // 24
-    {"MULTU"},   // 25
-    {"DIV"},     // 26
-    {"DIVU"},    // 27
+    AIM_UNKNOWN,
+    AIM_UNKNOWN,
+    {"MULT",  FLAGS_ALU_T_R_ST | IMF_WRITE_HILO},    // 24
+    {"MULTU", FLAGS_ALU_T_R_ST | IMF_WRITE_HILO},   // 25
+    {"DIV",   FLAGS_ALU_T_R_ST | IMF_WRITE_HILO},     // 26
+    {"DIVU",  FLAGS_ALU_T_R_ST | IMF_WRITE_HILO},    // 27
     AIM_UNKNOWN, // 28
     AIM_UNKNOWN, // 29
     AIM_UNKNOWN, // 30
     AIM_UNKNOWN, // 31
-    {"ADD"},     // 32
-    {"ADDU"},
-    {"SUB"},
-    {"SUBU"},
-    {"AND"},
-    {"OR"},
-    {"XOR"},
-    {"NOR"},
+    {"ADD",   FLAGS_ALU_T_R_STD},     // 32
+    {"ADDU",  FLAGS_ALU_T_R_STD},
+    {"SUB",   FLAGS_ALU_T_R_STD},
+    {"SUBU",  FLAGS_ALU_T_R_STD},
+    {"AND",   FLAGS_ALU_T_R_STD},
+    {"OR",    FLAGS_ALU_T_R_STD},
+    {"XOR",   FLAGS_ALU_T_R_STD},
+    {"NOR",   FLAGS_ALU_T_R_STD},
     AIM_UNKNOWN,
     AIM_UNKNOWN,
-    {"SLT"},
-    {"SLTU"}
+    {"SLT",   FLAGS_ALU_T_R_STD},
+    {"SLTU",  FLAGS_ALU_T_R_STD}
 };
 #undef AIM_UNKNOWN
 
@@ -260,11 +303,33 @@ enum Instruction::Type Instruction::type() const {
     return im.type;
 }
 
+enum InstructionFlags Instruction::flags() const {
+    if  (opcode() >= (sizeof(instruction_map) / sizeof(struct InstructionMap)))
+        return (enum InstructionFlags)0;
+    if (opcode() == 0) {
+         return (enum InstructionFlags)alu_instruction_map[funct()].flags;
+    }
+    const struct InstructionMap &im = instruction_map[opcode()];
+    return (enum InstructionFlags)im.flags;
+}
+enum AluOp Instruction::alu_op() const {
+    if  (opcode() >= (sizeof(instruction_map) / sizeof(struct InstructionMap)))
+        return ALU_OP_UNKNOWN;
+    const struct InstructionMap &im = instruction_map[opcode()];
+    return im.alu;
+}
+enum AccessControl Instruction::mem_ctl() const {
+    if  (opcode() >= (sizeof(instruction_map) / sizeof(struct InstructionMap)))
+        return AC_NONE;
+    const struct InstructionMap &im = instruction_map[opcode()];
+    return im.mem_ctl;
+}
+
 bool Instruction::is_store() const {
     if  (opcode() >= (sizeof(instruction_map) / sizeof(struct InstructionMap)))
         return false;
     const struct InstructionMap &im = instruction_map[opcode()];
-    return im.is_store;
+    return im.flags & IMF_MEM_STORE;
 }
 
 bool Instruction::is_break() const {
@@ -284,7 +349,6 @@ Instruction &Instruction::operator=(const Instruction &c) {
         this->dt = c.data();
     return *this;
 }
-
 
 QString Instruction::to_str() const {
     // TODO there are exception where some fields are zero and such so we should not print them in such case

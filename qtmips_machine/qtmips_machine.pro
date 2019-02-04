@@ -36,4 +36,5 @@ HEADERS += \
     cache.h \
     alu.h \
     machineconfig.h \
-    utils.h
+    utils.h \
+    machinedefs.h

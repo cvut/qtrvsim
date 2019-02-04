@@ -137,7 +137,7 @@ protected:
         bool forward_m_d_rs; // forwarding required for beq, bne, blez, bgtz, jr nad jalr
         bool forward_m_d_rt; // forwarding required for beq, bne
         enum AluOp aluop; // Decoded ALU operation
-        enum MemoryAccess::AccessControl memctl; // Decoded memory access type
+        enum AccessControl memctl; // Decoded memory access type
         std::uint32_t val_rs; // Value from register rs
         std::uint32_t val_rt; // Value from register rt
         std::uint32_t immediate_val; // zero or sign-extended immediate value
@@ -150,7 +150,7 @@ protected:
         bool memread;
         bool memwrite;
         bool regwrite;
-        enum MemoryAccess::AccessControl memctl;
+        enum AccessControl memctl;
         std::uint32_t val_rt;
         std::uint8_t rwrite; // Writeback register (multiplexed between rt and rd according to regd)
         std::uint32_t alu_val; // Result of ALU execution

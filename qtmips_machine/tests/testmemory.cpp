@@ -142,29 +142,29 @@ void MachineTests::memory_compare() {
 }
 
 void MachineTests::memory_write_ctl_data() {
-    QTest::addColumn<MemoryAccess::AccessControl>("ctl");
+    QTest::addColumn<AccessControl>("ctl");
     QTest::addColumn<Memory>("result");
 
     Memory mem;
-    QTest::newRow("none") << MemoryAccess::AC_NONE \
+    QTest::newRow("none") << AC_NONE \
                           << mem;
     mem.write_byte(0x20, 0x26);
-    QTest::newRow("byte") << MemoryAccess::AC_BYTE \
+    QTest::newRow("byte") << AC_BYTE \
                           << mem;
-    QTest::newRow("byte-unsigned") << MemoryAccess::AC_BYTE_UNSIGNED \
+    QTest::newRow("byte-unsigned") << AC_BYTE_UNSIGNED \
                           << mem;
     mem.write_hword(0x20, 0x2526);
-    QTest::newRow("halfword") << MemoryAccess::AC_HALFWORD \
+    QTest::newRow("halfword") << AC_HALFWORD \
                           << mem;
-    QTest::newRow("haldword-unsigned") << MemoryAccess::AC_HALFWORD_UNSIGNED \
+    QTest::newRow("haldword-unsigned") << AC_HALFWORD_UNSIGNED \
                           << mem;
     mem.write_word(0x20, 0x23242526);
-    QTest::newRow("word") << MemoryAccess::AC_WORD \
+    QTest::newRow("word") << AC_WORD \
                           << mem;
 }
 
 void MachineTests::memory_write_ctl() {
-    QFETCH(MemoryAccess::AccessControl, ctl);
+    QFETCH(AccessControl, ctl);
     QFETCH(Memory, result);
 
     Memory mem;
@@ -173,25 +173,25 @@ void MachineTests::memory_write_ctl() {
 }
 
 void MachineTests::memory_read_ctl_data() {
-    QTest::addColumn<MemoryAccess::AccessControl>("ctl");
+    QTest::addColumn<AccessControl>("ctl");
     QTest::addColumn<std::uint32_t>("result");
 
-    QTest::newRow("none") << MemoryAccess::AC_NONE \
+    QTest::newRow("none") << AC_NONE \
                           << (std::uint32_t)0;
-    QTest::newRow("byte") << MemoryAccess::AC_BYTE \
+    QTest::newRow("byte") << AC_BYTE \
                           << (std::uint32_t)0x80000023;
-    QTest::newRow("halfword") << MemoryAccess::AC_HALFWORD \
+    QTest::newRow("halfword") << AC_HALFWORD \
                           << (std::uint32_t)0x80002324;
-    QTest::newRow("word") << MemoryAccess::AC_WORD \
+    QTest::newRow("word") << AC_WORD \
                           << (std::uint32_t)0xA3242526;
-    QTest::newRow("byte-unsigned") << MemoryAccess::AC_BYTE_UNSIGNED \
+    QTest::newRow("byte-unsigned") << AC_BYTE_UNSIGNED \
                           << (std::uint32_t)0xA3;
-    QTest::newRow("halfword-unsigned") << MemoryAccess::AC_HALFWORD_UNSIGNED \
+    QTest::newRow("halfword-unsigned") << AC_HALFWORD_UNSIGNED \
                           << (std::uint32_t)0xA324;
 }
 
 void MachineTests::memory_read_ctl() {
-    QFETCH(MemoryAccess::AccessControl, ctl);
+    QFETCH(AccessControl, ctl);
     QFETCH(std::uint32_t, result);
 
     Memory mem;

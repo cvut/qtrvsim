@@ -39,98 +39,6 @@
 
 using namespace machine;
 
-#define DM_SUPPORTED (1L<<0)
-#define DM_MEMWRITE (1L<<1)
-#define DM_MEMREAD (1L<<2)
-#define DM_ALUSRC (1L<<3)
-#define DM_REGD (1L<<4)
-#define DM_REGWRITE (1L<<5)
-#define DM_ZERO_EXTEND (1L<<6)
-#define DM_PC_TO_R31 (1L<<7)
-#define DM_BJR_REQ_RS (1L<<8)
-#define DM_BJR_REQ_RT (1L<<9)
-
-struct DecodeMap {
-    long flags;
-    enum AluOp alu;
-    enum MemoryAccess::AccessControl mem_ctl;
-};
-
-#define NOALU .alu = ALU_OP_SLL
-#define NOMEM .mem_ctl = MemoryAccess::AC_NONE
-#define NOPE { .flags = 0, NOALU, NOMEM }
-
-#define FLAGS_ALU_I (DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE)
-#define FLAGS_ALU_I_ZE (DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_ZERO_EXTEND)
-
-// This is map from opcode to signals.
-static const struct DecodeMap dmap[]  = {
-    { .flags = DM_SUPPORTED | DM_REGD | DM_REGWRITE, NOALU, NOMEM }, // Alu operations (aluop is decoded from function explicitly)
-    { .flags = DM_SUPPORTED | DM_BJR_REQ_RS, NOALU, NOMEM }, // REGIMM (BLTZ, BGEZ)
-    { .flags = DM_SUPPORTED, NOALU, NOMEM }, // J
-    { .flags = DM_SUPPORTED | DM_PC_TO_R31 | DM_REGWRITE, .alu = ALU_OP_PASS_S, NOMEM }, // JAL
-    { .flags = DM_SUPPORTED | DM_BJR_REQ_RS | DM_BJR_REQ_RT, NOALU, NOMEM }, // BEQ
-    { .flags = DM_SUPPORTED | DM_BJR_REQ_RS | DM_BJR_REQ_RT, NOALU, NOMEM }, // BNE
-    { .flags = DM_SUPPORTED | DM_BJR_REQ_RS, NOALU, NOMEM }, // BLEZ
-    { .flags = DM_SUPPORTED | DM_BJR_REQ_RS, NOALU, NOMEM }, // BGTZ
-    { .flags = FLAGS_ALU_I, .alu = ALU_OP_ADD, NOMEM }, // ADDI
-    { .flags = FLAGS_ALU_I, .alu = ALU_OP_ADDU, NOMEM }, // ADDIU
-    { .flags = FLAGS_ALU_I, .alu = ALU_OP_SLT, NOMEM }, // SLTI
-    { .flags = FLAGS_ALU_I, .alu = ALU_OP_SLTU, NOMEM }, // SLTIU
-    { .flags = FLAGS_ALU_I_ZE, .alu = ALU_OP_AND, NOMEM }, // ANDI
-    { .flags = FLAGS_ALU_I_ZE, .alu = ALU_OP_OR, NOMEM }, // ORI
-    { .flags = FLAGS_ALU_I_ZE, .alu = ALU_OP_XOR, NOMEM }, // XORI
-    { .flags = FLAGS_ALU_I, .alu = ALU_OP_LUI, NOMEM}, // LUI
-    NOPE, // 16
-    NOPE, // 17
-    NOPE, // 18
-    NOPE, // 19
-    NOPE, // 20
-    NOPE, // 21
-    NOPE, // 22
-    NOPE, // 23
-    NOPE, // 24
-    NOPE, // 25
-    NOPE, // 26
-    NOPE, // 27
-    NOPE, // 28
-    NOPE, // 29
-    NOPE, // 30
-    NOPE, // 31
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_MEMREAD, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_BYTE }, // LB
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_MEMREAD, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_HALFWORD }, // LH
-    NOPE, // LWL
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_MEMREAD, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_WORD }, // LW
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_MEMREAD, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_BYTE_UNSIGNED }, // LBU
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_REGWRITE | DM_MEMREAD, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_HALFWORD_UNSIGNED }, // LHU
-    NOPE, // LWR
-    NOPE, // 39
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_MEMWRITE, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_BYTE }, // SB
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_MEMWRITE, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_HALFWORD }, // SH
-    NOPE, // SWL
-    { .flags = DM_SUPPORTED | DM_ALUSRC | DM_MEMWRITE, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_WORD }, // SW
-    NOPE, // 44
-    NOPE, // 45
-    NOPE, // SWR
-    { .flags = DM_SUPPORTED | DM_ALUSRC, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_CACHE_OP }, // CACHE
-    NOPE, // 48
-    NOPE, // 49
-    NOPE, // 50
-    NOPE, // 51
-    NOPE, // 52
-    NOPE, // 53
-    NOPE, // 54
-    NOPE, // 55
-    NOPE, // 56
-    NOPE, // 57
-    NOPE, // 58
-    NOPE, // 59
-    NOPE, // 60
-    NOPE, // 61
-    NOPE, // 62
-    NOPE  // 63
-};
-
 Core::Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data) {
     cycle_c = 0;
     this->regs = regs;
@@ -165,20 +73,22 @@ struct Core::dtFetch Core::fetch() {
 struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     uint8_t rwrite;
     emit instruction_decoded(dt.inst);
-    const struct DecodeMap &dec = dmap[dt.inst.opcode()];
+    enum InstructionFlags flags = dt.inst.flags();
+    enum AluOp alu_op =  dt.inst.alu_op();
+    enum AccessControl mem_ctl = dt.inst.mem_ctl();
 
-    if (!(dec.flags & DM_SUPPORTED))
+    if (!(flags & IMF_SUPPORTED))
         throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Instruction with following opcode is not supported", QString::number(dt.inst.opcode(), 16));
 
     std::uint32_t val_rs = regs->read_gp(dt.inst.rs());
     std::uint32_t val_rt = regs->read_gp(dt.inst.rt());
     std::uint32_t immediate_val;
-    bool regwrite = dec.flags & DM_REGWRITE;
-    bool regd = dec.flags & DM_REGD;
-    bool regd31 = dec.flags & DM_PC_TO_R31;
+    bool regwrite = flags & IMF_REGWRITE;
+    bool regd = flags & IMF_REGD;
+    bool regd31 = flags & IMF_PC_TO_R31;
 
     // requires rs for beq, bne, blez, bgtz, jr nad jalr
-    bool bjr_req_rs = dec.flags & DM_BJR_REQ_RS;
+    bool bjr_req_rs = flags & IMF_BJR_REQ_RS;
     if (dt.inst.opcode() == 0) {
         switch (dt.inst.funct()) {
             case ALU_OP_BREAK:
@@ -207,9 +117,9 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         }
     }
     // requires rt for beq, bne
-    bool bjr_req_rt = dec.flags & DM_BJR_REQ_RT;
+    bool bjr_req_rt = flags & IMF_BJR_REQ_RT;
 
-    if (dec.flags & DM_ZERO_EXTEND)
+    if (flags & IMF_ZERO_EXTEND)
         immediate_val = dt.inst.immediate();
     else
         immediate_val = sign_extend(dt.inst.immediate());
@@ -218,12 +128,12 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     emit decode_reg1_value(val_rs);
     emit decode_reg2_value(val_rt);
     emit decode_immediate_value(immediate_val);
-    emit decode_regw_value((bool)(dec.flags & DM_REGWRITE));
-    emit decode_memtoreg_value((bool)(dec.flags & DM_MEMREAD));
-    emit decode_memwrite_value((bool)(dec.flags & DM_MEMWRITE));
-    emit decode_memread_value((bool)(dec.flags & DM_MEMREAD));
-    emit decode_alusrc_value((bool)(dec.flags & DM_ALUSRC));
-    emit decode_regdest_value((bool)(dec.flags & DM_REGD));
+    emit decode_regw_value((bool)(flags & IMF_REGWRITE));
+    emit decode_memtoreg_value((bool)(flags & IMF_MEMREAD));
+    emit decode_memwrite_value((bool)(flags & IMF_MEMWRITE));
+    emit decode_memread_value((bool)(flags & IMF_MEMREAD));
+    emit decode_alusrc_value((bool)(flags & IMF_ALUSRC));
+    emit decode_regdest_value((bool)(flags & IMF_REGD));
     emit decode_rs_num_value(dt.inst.rs());
     emit decode_rt_num_value(dt.inst.rt());
     emit decode_rd_num_value(dt.inst.rd());
@@ -237,9 +147,9 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
 
     return {
         .inst = dt.inst,
-        .memread = dec.flags & DM_MEMREAD,
-        .memwrite = dec.flags & DM_MEMWRITE,
-        .alusrc = dec.flags & DM_ALUSRC,
+        .memread = flags & IMF_MEMREAD,
+        .memwrite = flags & IMF_MEMWRITE,
+        .alusrc = flags & IMF_ALUSRC,
         .regd = regd,
         .regd31 = regd31,
         .regwrite = regwrite,
@@ -247,8 +157,8 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .bjr_req_rt = bjr_req_rt,
         .forward_m_d_rs = false,
         .forward_m_d_rt = false,
-        .aluop = dt.inst.opcode() == 0 ? (enum AluOp)dt.inst.funct() : dec.alu,
-        .memctl = dec.mem_ctl,
+        .aluop = dt.inst.opcode() == 0 ? (enum AluOp)dt.inst.funct() : alu_op,
+        .memctl = mem_ctl,
         .val_rs = val_rs,
         .val_rt = val_rt,
         .immediate_val = immediate_val,
@@ -302,7 +212,7 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
     emit instruction_memory(dt.inst);
     std::uint32_t towrite_val = dt.alu_val;
 
-    if (dt.memctl == MemoryAccess::AC_CACHE_OP)
+    if (dt.memctl == AC_CACHE_OP)
         mem_data->sync();
     else if (dt.memwrite)
         mem_data->write_ctl(dt.memctl, dt.alu_val, dt.val_rt);
@@ -423,7 +333,7 @@ void Core::dtExecuteInit(struct dtExecute &dt) {
     dt.memread = false;
     dt.memwrite = false;
     dt.regwrite = false;
-    dt.memctl = MemoryAccess::AC_NONE;
+    dt.memctl = AC_NONE;
     dt.val_rt = 0;
     dt.rwrite = 0;
     dt.alu_val = 0;

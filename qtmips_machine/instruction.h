@@ -39,7 +39,29 @@
 #include <QObject>
 #include <qstring.h>
 
+#include "machinedefs.h"
+
 namespace machine {
+
+enum InstructionFlags {
+    IMF_SUPPORTED  = 1L<<0,
+    IMF_MEMWRITE   = 1L<<1,
+    IMF_MEMREAD    = 1L<<2,
+    IMF_ALUSRC     = 1L<<3,
+    IMF_REGD       = 1L<<4,
+    IMF_REGWRITE   = 1L<<5,
+    IMF_ZERO_EXTEND= 1L<<6,
+    IMF_PC_TO_R31  = 1L<<7,
+    IMF_BJR_REQ_RS = 1L<<8,
+    IMF_BJR_REQ_RT = 1L<<9,
+    IMF_NO_RS      = 1L<<10, // This instruction doesn't have rs field,
+    IMF_MEM        = 1L<<11, // This instruction is memory access instruction,
+    IMF_MEM_STORE  = 1L<<12,
+    IMF_ALU_REQ_RS = 1L<<13,
+    IMF_ALU_REQ_RT = 1L<<14,
+    IMF_READ_HILO  = 1L<<15,
+    IMF_WRITE_HILO = 1L<<16,
+};
 
 class Instruction {
 public:
@@ -67,6 +89,10 @@ public:
     std::uint32_t address() const;
     std::uint32_t data() const;
     enum Type type() const;
+    enum InstructionFlags flags() const;
+    enum AluOp alu_op() const;
+    enum AccessControl mem_ctl() const;
+
     bool is_store() const; // Store instructions requires some additional handling so identify them
     bool is_break() const;
 

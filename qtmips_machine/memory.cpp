@@ -75,7 +75,7 @@ std::uint32_t MemoryAccess::read_word(std::uint32_t offset) const {
     return rword(offset);
 }
 
-void MemoryAccess::write_ctl(enum MemoryAccess::AccessControl ctl, std::uint32_t offset, std::uint32_t value) {
+void MemoryAccess::write_ctl(enum AccessControl ctl, std::uint32_t offset, std::uint32_t value) {
     switch (ctl) {
     case AC_NONE:
         break;
@@ -95,7 +95,7 @@ void MemoryAccess::write_ctl(enum MemoryAccess::AccessControl ctl, std::uint32_t
     }
 }
 
-std::uint32_t MemoryAccess::read_ctl(enum MemoryAccess::AccessControl ctl, std::uint32_t offset) const {
+std::uint32_t MemoryAccess::read_ctl(enum AccessControl ctl, std::uint32_t offset) const {
     switch (ctl) {
     case AC_NONE:
         return 0;
