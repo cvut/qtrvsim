@@ -40,6 +40,7 @@
 
 using namespace machine;
 
+#define FLAGS_ALU_I_NO_RS (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE)
 #define FLAGS_ALU_I (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_ALU_REQ_RS)
 #define FLAGS_ALU_I_ZE (FLAGS_ALU_I | IMF_ZERO_EXTEND)
 
@@ -190,7 +191,7 @@ static const struct InstructionMap instruction_map[] = {
     {"XORI",   IT_I, ALU_OP_XOR, NOMEM, nullptr,     // XORI
      .flags = FLAGS_ALU_I_ZE},
     {"LUI",    IT_I, ALU_OP_LUI, NOMEM, nullptr,     // LUI
-     .flags = FLAGS_ALU_I},
+     .flags = FLAGS_ALU_I_NO_RS},
     IM_UNKNOWN,  // 16
     IM_UNKNOWN,  // 17
     IM_UNKNOWN,  // 18
@@ -391,13 +392,12 @@ Instruction &Instruction::operator=(const Instruction &c) {
 }
 
 QString Instruction::to_str() const {
+    const InstructionMap &im = InstructionMapFind(dt);
     // TODO there are exception where some fields are zero and such so we should not print them in such case
-    if  (opcode() >= (sizeof(instruction_map) / sizeof(struct InstructionMap)))
-        return QString("UNKNOWN");
     if (dt == 0)
         return QString("NOP");
-    const struct InstructionMap &im = instruction_map[opcode()];
     QString res;
+    QString next_delim = " ";
     switch (im.type) {
     case T_I:
         res += im.name;
@@ -405,10 +405,15 @@ QString Instruction::to_str() const {
             res += " $" + QString::number(rt());
             res += ", 0x" + QString::number(immediate(), 16).toUpper() + "(" + QString::number(rs()) + ")";
         } else {
-            res += " $" + QString::number(rt());
-            if (!(im.flags & IMF_NO_RS))
-                res += ", $" + QString::number(rs());
-            res += ", 0x" + QString::number(immediate(), 16).toUpper();
+            if (im.flags & (IMF_BJR_REQ_RT | IMF_ALU_REQ_RT | IMF_REGWRITE)) {
+                res += next_delim + "$" + QString::number(rt());
+                next_delim = ", ";
+            }
+            if (im.flags & (IMF_BJR_REQ_RS | IMF_ALU_REQ_RS)) {
+                res += next_delim + "$" + QString::number(rs());
+                next_delim = ", ";
+            }
+            res += next_delim + "0x" + QString::number(immediate(), 16).toUpper();
         }
         break;
     case T_J:
@@ -418,12 +423,19 @@ QString Instruction::to_str() const {
         break;
     case T_R:
         {
-        // Note that all R instructions we support has opcode == 0 and so they are processed by alu table
-        if (funct() >= (sizeof(alu_instruction_map) / sizeof(*alu_instruction_map)))
-            return QString("UNKNOWN");
-        const struct InstructionMap &am = alu_instruction_map[funct()];
-        res += am.name;
-        res += " $" + QString::number(rd()) + ", $" + QString::number(rs()) + ", $" + QString::number(rt());
+        res += im.name;
+        if (im.flags & IMF_REGD) {
+            res += next_delim + "$" + QString::number(rd());
+            next_delim = ", ";
+        }
+        if (im.flags & (IMF_BJR_REQ_RS | IMF_ALU_REQ_RS)) {
+            res += next_delim + "$" + QString::number(rs());
+            next_delim = ", ";
+        }
+        if (im.flags & (IMF_BJR_REQ_RT | IMF_ALU_REQ_RT)) {
+            res += next_delim + "$" + QString::number(rt());
+            next_delim = ", ";
+        }
         break;
         }
 	case T_UNKNOWN:

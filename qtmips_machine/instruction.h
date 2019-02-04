@@ -55,7 +55,6 @@ enum InstructionFlags {
     IMF_PC_TO_R31  = 1L<<7,
     IMF_BJR_REQ_RS = 1L<<8,
     IMF_BJR_REQ_RT = 1L<<9,
-    IMF_NO_RS      = 1L<<10, // This instruction doesn't have rs field,
     IMF_MEM        = 1L<<11, // This instruction is memory access instruction,
     IMF_MEM_STORE  = 1L<<12,
     IMF_ALU_REQ_RS = 1L<<13,
