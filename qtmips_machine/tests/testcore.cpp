@@ -36,6 +36,8 @@
 #include <QVector>
 #include "tst_machine.h"
 #include "core.h"
+#include "cache.h"
+#include "machineconfig.h"
 
 using namespace machine;
 
@@ -604,7 +606,7 @@ static void core_alu_forward_data() {
         regs_res.write_gp(23, val_b % val_a);
         regs_res.write_hi_lo(false, regs_res.read_gp(22));
         regs_res.write_hi_lo(true, regs_res.read_gp(23));
-        regs_res.pc_abs_jmp(regs_init.read_pc() + 4 * code.length());
+        regs_res.pc_abs_jmp(regs_init.read_pc() + 4 * code.length() - 4);
         QTest::newRow("mul-div") << code << regs_init << regs_res;
     }
 }
@@ -631,7 +633,7 @@ static void run_code_fragment(Core &core, Registers &reg_init, Registers &reg_re
         addr += 4;
     }
 
-    for (int k = 1000; k ; k--) {
+    for (int k = 10000; k ; k--) {
         core.step(); // Single step should be enought as this is risc without pipeline
         if (reg_init.read_pc() == reg_res.read_pc() && k > 6) // reached end of the code fragment
             k = 6; // add some cycles to finish processing
@@ -668,5 +670,169 @@ void MachineTests::pipecorestall_alu_forward() {
     Memory mem_init;
     Memory mem_res;
     CorePipelined core(&reg_init, &mem_init, &mem_init, MachineConfig::HU_STALL);
+    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
+}
+
+/*======================================================================*/
+
+static void core_memory_tests_data() {
+    QTest::addColumn<QVector<uint32_t>>("code");
+    QTest::addColumn<Registers>("reg_init");
+    QTest::addColumn<Registers>("reg_res");
+    QTest::addColumn<Memory>("mem_init");
+    QTest::addColumn<Memory>("mem_res");
+
+    // Test
+    {
+        QVector<uint32_t> code{
+            // objdump -d to src: ^[^ \t]+[ \t]+([^ \t]+)[ \t]+([^ \t].*)$
+
+            // _start:
+            0x20100000, // addi    s0,zero,0
+            0x2011003c, // addi    s1,zero,60
+            0x00109020, // add     s2,zero,s0
+            // main_loop:
+            0x1211001d, // beq     s0,s1,80020084 <main_loop_end>
+            0x00000000, // nop
+            0x3c140000, // lui     s4,0x0
+            0x0290a021, // addu    s4,s4,s0
+            0x8e941000, // lw      s4,4096(s4)
+            0x02009820, // add     s3,s0,zero
+            0x02009020, // add     s2,s0,zero
+            // inner_loop:
+            0x1251000b, // beq     s2,s1,80020058 <inner_loop_end>
+            0x00000000, // nop
+            0x3c150000, // lui     s5,0x0
+            0x02b2a821, // addu    s5,s5,s2
+            0x8eb51000, // lw      s5,4096(s5)
+            0x0295082a, // slt     at,s4,s5
+            0x14200003, // bnez    at,80020050 <not_a_min>
+            0x00000000, // nop
+            0x22530000, // addi    s3,s2,0
+            0x22b40000, // addi    s4,s5,0
+            // not_a_min:
+            0x0800800a, // j       80020028 <inner_loop>
+            0x22520004, // addi    s2,s2,4
+            // inner_loop_end:
+            0x3c150000, // lui     s5,0x0
+            0x02b0a821, // addu    s5,s5,s0
+            0x8eb51000, // lw      s5,4096(s5)
+            0x3c010000, // lui     at,0x0
+            0x00300821, // addu    at,at,s0
+            0xac341000, // sw      s4,4096(at)
+            0x3c010000, // lui     at,0x0
+            0x00330821, // addu    at,at,s3
+            0xac351000, // sw      s5,4096(at)
+            0x08008003, // j       8002000c <main_loop>
+            0x22100004, // addi    s0,s0,4
+            // main_loop_end:
+            0x20080000, // addi    t0,zero,0
+            0xbd090000, // cache   0x9,0(t0)
+            // end_loop:
+            0x08008023, // j       8002008c <end_loop>
+            0x00000000, // nop
+        };
+        QVector<uint32_t> data_init{5, 3, 4, 1, 15, 8, 9, 2, 10, 6, 11, 1, 6, 9, 12};
+        QVector<uint32_t> data_res{ 1, 1, 2, 3, 4, 5, 6, 6, 8, 9, 9, 10, 11, 12, 15};
+        Registers regs_init;
+        regs_init.pc_abs_jmp(0x80020000);
+        Registers regs_res(regs_init);
+        regs_res.write_gp(1, 0x38);
+        regs_res.write_gp(16, 0x3c);
+        regs_res.write_gp(17, 0x3c);
+        regs_res.write_gp(18, 0x3c);
+        regs_res.write_gp(19, 0x38);
+        regs_res.write_gp(20, 0xf);
+        regs_res.write_gp(21, 0xf);
+        regs_res.pc_abs_jmp(regs_init.read_pc() + 4 * code.length() - 4);
+        std::uint32_t addr;
+        Memory mem_init;
+        addr = 0x1000;
+        foreach (uint32_t i, data_init) {
+            mem_init.write_word(addr, i);
+            addr += 4;
+        }
+        Memory mem_res;
+        addr = 0x1000;
+        foreach (uint32_t i, data_res) {
+            mem_res.write_word(addr, i);
+            addr += 4;
+        }
+        QTest::newRow("cache_insert_sort") << code << regs_init << regs_res << mem_init << mem_res;
+    }
+
+}
+
+void MachineTests::singlecore_memory_tests_data() {
+    core_memory_tests_data();
+}
+
+void MachineTests::pipecore_nc_memory_tests_data() {
+    core_memory_tests_data();
+}
+
+void MachineTests::pipecore_wt_memory_tests_data() {
+    core_memory_tests_data();
+}
+
+void MachineTests::pipecore_wb_memory_tests_data() {
+    core_memory_tests_data();
+}
+
+void MachineTests::singlecore_memory_tests() {
+    QFETCH(QVector<uint32_t>, code);
+    QFETCH(Registers, reg_init);
+    QFETCH(Registers, reg_res);
+    QFETCH(Memory, mem_init);
+    QFETCH(Memory, mem_res);
+    CoreSingle core(&reg_init, &mem_init, &mem_init, true);
+    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
+}
+
+void MachineTests::pipecore_nc_memory_tests() {
+    QFETCH(QVector<uint32_t>, code);
+    QFETCH(Registers, reg_init);
+    QFETCH(Registers, reg_res);
+    QFETCH(Memory, mem_init);
+    QFETCH(Memory, mem_res);
+    CorePipelined core(&reg_init, &mem_init, &mem_init, MachineConfig::HU_STALL_FORWARD);
+    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
+}
+
+void MachineTests::pipecore_wt_memory_tests() {
+    QFETCH(QVector<uint32_t>, code);
+    QFETCH(Registers, reg_init);
+    QFETCH(Registers, reg_res);
+    QFETCH(Memory, mem_init);
+    QFETCH(Memory, mem_res);
+    MachineConfigCache cache_conf;
+    cache_conf.set_enabled(true);
+    cache_conf.set_sets(2); // Number of sets
+    cache_conf.set_blocks(1); // Number of blocks
+    cache_conf.set_associativity(2); // Degree of associativity
+    cache_conf.set_replacement_policy(MachineConfigCache::RP_LRU);
+    cache_conf.set_write_policy(MachineConfigCache::WP_TROUGH);
+    Cache i_cache(&mem_init, &cache_conf);
+    Cache d_cache(&mem_init, &cache_conf);
+    CorePipelined core(&reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD);
+    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
+}
+
+void MachineTests::pipecore_wb_memory_tests() {
+    QFETCH(QVector<uint32_t>, code);
+    QFETCH(Registers, reg_init);
+    QFETCH(Registers, reg_res);
+    QFETCH(Memory, mem_init);
+    QFETCH(Memory, mem_res);
+    MachineConfigCache cache_conf;
+    cache_conf.set_enabled(true);
+    cache_conf.set_sets(4); // Number of sets
+    cache_conf.set_blocks(2); // Number of blocks
+    cache_conf.set_associativity(2); // Degree of associativity
+    cache_conf.set_replacement_policy(MachineConfigCache::RP_LRU);
+    cache_conf.set_write_policy(MachineConfigCache::WP_BACK);
+    Cache i_cache(&mem_init, &cache_conf);
+    Cache d_cache(&mem_init, &cache_conf);
+    CorePipelined core(&reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }

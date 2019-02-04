@@ -87,6 +87,14 @@ private Q_SLOTS:
     void pipecore_alu_forward_data();
     void pipecorestall_alu_forward();
     void pipecorestall_alu_forward_data();
+    void singlecore_memory_tests_data();
+    void pipecore_nc_memory_tests_data();
+    void pipecore_wt_memory_tests_data();
+    void pipecore_wb_memory_tests_data();
+    void singlecore_memory_tests();
+    void pipecore_nc_memory_tests();
+    void pipecore_wt_memory_tests();
+    void pipecore_wb_memory_tests();
     // Cache
     void cache_data();
     void cache();
