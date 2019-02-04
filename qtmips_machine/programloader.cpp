@@ -44,6 +44,7 @@
 using namespace machine;
 
 ProgramLoader::ProgramLoader(const char *file) {
+    const GElf_Ehdr *elf_ehdr;
     // Initialize elf library
     if (elf_version(EV_CURRENT) == EV_NONE)
         throw QTMIPS_EXCEPTION(Input, "Elf library initialization failed", elf_errmsg(-1));
@@ -57,8 +58,10 @@ ProgramLoader::ProgramLoader(const char *file) {
     if (elf_kind(this->elf) != ELF_K_ELF)
         throw QTMIPS_EXCEPTION(Input, "Invalid input file elf format, plain elf file expected", "");
 
-    if (!gelf_getehdr(this->elf, &this->hdr))
+    elf_ehdr = gelf_getehdr(this->elf, &this->hdr);
+    if (!elf_ehdr)
         throw QTMIPS_EXCEPTION(Input, "Getting elf file header failed", elf_errmsg(-1));
+    executable_entry = elf_ehdr->e_entry;
     // Check elf file format, executable expected, nothing else.
     if (this->hdr.e_type != ET_EXEC)
         throw QTMIPS_EXCEPTION(Input, "Invalid input file type", "");
@@ -118,4 +121,8 @@ std::uint32_t ProgramLoader::end() {
             last = phdr->p_vaddr + phdr->p_filesz;
     }
     return last + 0x10; // We add offset so we are sure that also pipeline is empty
+}
+
+std::uint32_t ProgramLoader::get_executable_entry() {
+    return executable_entry;
 }

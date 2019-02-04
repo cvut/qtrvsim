@@ -45,8 +45,9 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) : QObject(), mcnf(&cc) {
     mem_program_only = new Memory();
     program.to_memory(mem_program_only);
     program_end = program.end();
-
     regs = new Registers();
+    if (program.get_executable_entry())
+        regs->pc_abs_jmp(program.get_executable_entry());
     mem = new Memory(*mem_program_only);
     cch_program = new Cache(mem, &cc.cache_program(), cc.memory_access_time_read(), cc.memory_access_time_write());
     cch_data = new Cache(mem, &cc.cache_data(), cc.memory_access_time_read(), cc.memory_access_time_write());

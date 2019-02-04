@@ -54,6 +54,7 @@ public:
 
     void to_memory(Memory *mem); // Writes all loaded sections to memory
     std::uint32_t end(); // Return address after which there is no more code for sure
+    std::uint32_t get_executable_entry();
 private:
     int fd;
     Elf *elf;
@@ -61,6 +62,7 @@ private:
     size_t n_secs; // number of sections in elf program header
     Elf32_Phdr *phdrs; // program section headers
     QVector<size_t> map; // external index to phdrs index
+    std::uint32_t executable_entry;
 };
 
 }
