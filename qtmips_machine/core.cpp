@@ -112,7 +112,7 @@ static const struct DecodeMap dmap[]  = {
     NOPE, // 44
     NOPE, // 45
     NOPE, // SWR
-    NOPE, // 47
+    { .flags = DM_SUPPORTED | DM_ALUSRC, .alu = ALU_OP_ADDU, .mem_ctl = MemoryAccess::AC_CACHE_OP }, // CACHE
     NOPE, // 48
     NOPE, // 49
     NOPE, // 50
@@ -302,7 +302,9 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
     emit instruction_memory(dt.inst);
     std::uint32_t towrite_val = dt.alu_val;
 
-    if (dt.memwrite)
+    if (dt.memctl == MemoryAccess::AC_CACHE_OP)
+        mem_data->sync();
+    else if (dt.memwrite)
         mem_data->write_ctl(dt.memctl, dt.alu_val, dt.val_rt);
     else if (dt.memread)
         towrite_val = mem_data->read_ctl(dt.memctl, dt.alu_val);

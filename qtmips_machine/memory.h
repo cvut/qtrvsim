@@ -61,7 +61,8 @@ public:
         AC_HALFWORD,
         AC_WORD,
         AC_BYTE_UNSIGNED,
-        AC_HALFWORD_UNSIGNED
+        AC_HALFWORD_UNSIGNED,
+        AC_CACHE_OP,
     };
     void write_ctl(enum AccessControl ctl, std::uint32_t offset, std::uint32_t value);
     std::uint32_t read_ctl(enum AccessControl ctl, std::uint32_t offset) const;

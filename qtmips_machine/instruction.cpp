@@ -103,7 +103,7 @@ static const struct InstructionMap instruction_map[] = {
     IM_UNKNOWN, // 44
     IM_UNKNOWN, // 45
     {"SWR", IT_I, true, .flags = IMF_MEM},
-    IM_UNKNOWN, // 47
+    {"CACHE", IT_I, true, .flags = IMF_MEM}, // 47
     IM_UNKNOWN, // 48
     IM_UNKNOWN, // 49
     IM_UNKNOWN, // 50
