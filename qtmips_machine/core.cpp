@@ -89,33 +89,8 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
 
     // requires rs for beq, bne, blez, bgtz, jr nad jalr
     bool bjr_req_rs = flags & IMF_BJR_REQ_RS;
-    if (dt.inst.opcode() == 0) {
-        switch (dt.inst.funct()) {
-            case ALU_OP_BREAK:
-                FALLTROUGH
-            case ALU_OP_MTHI:
-                FALLTROUGH
-            case ALU_OP_MTLO:
-                FALLTROUGH
-            case ALU_OP_MULT:
-                FALLTROUGH
-            case ALU_OP_MULTU:
-                FALLTROUGH
-            case ALU_OP_DIV:
-                FALLTROUGH
-            case ALU_OP_DIVU:
-                regwrite = false;
-                break;
-            case ALU_OP_JR:
-                regwrite = false;
-                bjr_req_rs = true;
-                break;
-            case ALU_OP_JALR:
-                val_rt = dt.inst_addr + 8;
-                bjr_req_rs = true;
-                break;
-        }
-    }
+    if (flags & IMF_PC8_TO_RT)
+        val_rt = dt.inst_addr + 8;
     // requires rt for beq, bne
     bool bjr_req_rt = flags & IMF_BJR_REQ_RT;
 
@@ -159,7 +134,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .bjr_req_rt = bjr_req_rt,
         .forward_m_d_rs = false,
         .forward_m_d_rt = false,
-        .aluop = dt.inst.opcode() == 0 ? (enum AluOp)dt.inst.funct() : alu_op,
+        .aluop = alu_op,
         .memctl = mem_ctl,
         .val_rs = val_rs,
         .val_rt = val_rt,

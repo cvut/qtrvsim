@@ -176,7 +176,7 @@ struct AluInstructionMap {
     unsigned int flags;
 };
 
-#define AIM_UNKNOWN {"UNKNOWN"}
+#define AIM_UNKNOWN {"UNKNOWN", IMF_NONE}
 // This table is indexed by funct
 static const struct AluInstructionMap alu_instruction_map[] = {
     {"SLL", FLAGS_ALU_T_R_STD},
@@ -187,8 +187,8 @@ static const struct AluInstructionMap alu_instruction_map[] = {
     AIM_UNKNOWN,
     {"SRLV",  FLAGS_ALU_T_R_STD},
     {"SRAV",  FLAGS_ALU_T_R_STD},
-    {"JR",    FLAGS_ALU_T_R_S},
-    {"JALR",  FLAGS_ALU_T_R_SD},
+    {"JR",    IMF_SUPPORTED | IMF_BJR_REQ_RS},
+    {"JALR",  IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE | IMF_BJR_REQ_RS | IMF_PC8_TO_RT},
     {"MOVZ",  FLAGS_ALU_T_R_STD},
     {"MOVN",  FLAGS_ALU_T_R_STD},
     AIM_UNKNOWN,
@@ -321,20 +321,13 @@ enum AluOp Instruction::alu_op() const {
     if  (opcode() >= (sizeof(instruction_map) / sizeof(struct InstructionMap)))
         return ALU_OP_UNKNOWN;
     const struct InstructionMap &im = instruction_map[opcode()];
-    return im.alu;
+    return opcode() == 0? (enum AluOp)funct(): im.alu;
 }
 enum AccessControl Instruction::mem_ctl() const {
     if  (opcode() >= (sizeof(instruction_map) / sizeof(struct InstructionMap)))
         return AC_NONE;
     const struct InstructionMap &im = instruction_map[opcode()];
     return im.mem_ctl;
-}
-
-bool Instruction::is_store() const {
-    if  (opcode() >= (sizeof(instruction_map) / sizeof(struct InstructionMap)))
-        return false;
-    const struct InstructionMap &im = instruction_map[opcode()];
-    return im.flags & IMF_MEM_STORE;
 }
 
 bool Instruction::is_break() const {

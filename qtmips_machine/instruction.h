@@ -44,6 +44,7 @@
 namespace machine {
 
 enum InstructionFlags {
+    IMF_NONE       = 0,
     IMF_SUPPORTED  = 1L<<0,
     IMF_MEMWRITE   = 1L<<1,
     IMF_MEMREAD    = 1L<<2,
@@ -61,6 +62,7 @@ enum InstructionFlags {
     IMF_ALU_REQ_RT = 1L<<14,
     IMF_READ_HILO  = 1L<<15,
     IMF_WRITE_HILO = 1L<<16,
+    IMF_PC8_TO_RT  = 1L<<17,
 };
 
 class Instruction {
@@ -93,7 +95,6 @@ public:
     enum AluOp alu_op() const;
     enum AccessControl mem_ctl() const;
 
-    bool is_store() const; // Store instructions requires some additional handling so identify them
     bool is_break() const;
 
     bool operator==(const Instruction &c) const;
