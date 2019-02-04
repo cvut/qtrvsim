@@ -472,8 +472,8 @@ void MachineTests::pipecore_mem() {
 
 static void core_alu_forward_data() {
     QTest::addColumn<QVector<uint32_t>>("code");
-    QTest::addColumn<Registers>("init");
-    QTest::addColumn<Registers>("res");
+    QTest::addColumn<Registers>("reg_init");
+    QTest::addColumn<Registers>("reg_res");
     // Note that we shouldn't be touching program counter as that is handled automatically and differs if we use pipelining
 
     // Test forwarding of ALU operands
@@ -621,74 +621,52 @@ void MachineTests::pipecorestall_alu_forward_data() {
     core_alu_forward_data();
 }
 
-void MachineTests::singlecore_alu_forward() {
-    QFETCH(QVector<uint32_t>, code);
-    QFETCH(Registers, init);
-    QFETCH(Registers, res);
-    uint32_t addr = init.read_pc();
+static void run_code_fragment(Core &core, Registers &reg_init, Registers &reg_res,
+                              Memory &mem_init, Memory &mem_res, QVector<uint32_t> &code) {
+    std::uint32_t addr = reg_init.read_pc();
 
-    Memory mem; // Just memory (it shouldn't be used here except instruction)
     foreach (uint32_t i, code) {
-        mem.write_word(addr, i);
+        mem_init.write_word(addr, i);
+        mem_res.write_word(addr, i);
         addr += 4;
     }
-    Memory mem_used(mem); // Create memory copy
 
-    CoreSingle core(&init, &mem_used, &mem_used, true);
     for (int k = 1000; k ; k--) {
         core.step(); // Single step should be enought as this is risc without pipeline
-        if (init.read_pc() == res.read_pc() && k > 6) // reached end of the code fragment
+        if (reg_init.read_pc() == reg_res.read_pc() && k > 6) // reached end of the code fragment
             k = 6; // add some cycles to finish processing
     }
-    res.pc_abs_jmp(init.read_pc()); // We do not compare result pc
-    QCOMPARE(init, res); // After doing changes from initial state this should be same state as in case of passed expected result
-    QCOMPARE(mem, mem_used); // There should be no change in memory
+    reg_res.pc_abs_jmp(reg_init.read_pc()); // We do not compare result pc
+    QCOMPARE(reg_init, reg_res); // After doing changes from initial state this should be same state as in case of passed expected result
+    QCOMPARE(mem_init, mem_res); // There should be no change in memory
+}
+
+void MachineTests::singlecore_alu_forward() {
+    QFETCH(QVector<uint32_t>, code);
+    QFETCH(Registers, reg_init);
+    QFETCH(Registers, reg_res);
+    Memory mem_init;
+    Memory mem_res;
+    CoreSingle core(&reg_init, &mem_init, &mem_init, true);
+    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
 void MachineTests::pipecore_alu_forward() {
     QFETCH(QVector<uint32_t>, code);
-    QFETCH(Registers, init);
-    QFETCH(Registers, res);
-    uint32_t addr = init.read_pc();
-
-    Memory mem; // Just memory (it shouldn't be used here except instruction)
-    foreach (uint32_t i, code) {
-        mem.write_word(addr, i);
-        addr += 4;
-    }
-    Memory mem_used(mem); // Create memory copy
-
-    CorePipelined core(&init, &mem_used, &mem_used, MachineConfig::HU_STALL_FORWARD);
-    for (int k = 1000; k ; k--) {
-        core.step(); // Single step should be enought as this is risc without pipeline
-        if (init.read_pc() == res.read_pc() && k > 6) // reached end of the code fragment
-            k = 6; // add some cycles to finish processing
-    }
-    res.pc_abs_jmp(init.read_pc()); // We do not compare result pc
-    QCOMPARE(init, res); // After doing changes from initial state this should be same state as in case of passed expected result
-    QCOMPARE(mem, mem_used); // There should be no change in memory
+    QFETCH(Registers, reg_init);
+    QFETCH(Registers, reg_res);
+    Memory mem_init;
+    Memory mem_res;
+    CorePipelined core(&reg_init, &mem_init, &mem_init, MachineConfig::HU_STALL_FORWARD);
+    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
 void MachineTests::pipecorestall_alu_forward() {
     QFETCH(QVector<uint32_t>, code);
-    QFETCH(Registers, init);
-    QFETCH(Registers, res);
-    uint32_t addr = init.read_pc();
-
-    Memory mem; // Just memory (it shouldn't be used here except instruction)
-    foreach (uint32_t i, code) {
-        mem.write_word(addr, i);
-        addr += 4;
-    }
-    Memory mem_used(mem); // Create memory copy
-
-    CorePipelined core(&init, &mem_used, &mem_used, MachineConfig::HU_STALL);
-    for (int k = 1000; k ; k--) {
-        core.step(); // Single step should be enought as this is risc without pipeline
-        if (init.read_pc() == res.read_pc() && k > 6) // reached end of the code fragment
-            k = 6; // add some cycles to finish processing
-    }
-    res.pc_abs_jmp(init.read_pc()); // We do not compare result pc
-    QCOMPARE(init, res); // After doing changes from initial state this should be same state as in case of passed expected result
-    QCOMPARE(mem, mem_used); // There should be no change in memory
+    QFETCH(Registers, reg_init);
+    QFETCH(Registers, reg_res);
+    Memory mem_init;
+    Memory mem_res;
+    CorePipelined core(&reg_init, &mem_init, &mem_init, MachineConfig::HU_STALL);
+    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
