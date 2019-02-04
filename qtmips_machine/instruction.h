@@ -95,6 +95,9 @@ public:
     enum AluOp alu_op() const;
     enum AccessControl mem_ctl() const;
 
+    void flags_alu_op_mem_ctl(enum InstructionFlags &flags,
+                  enum AluOp &alu_op, enum AccessControl &mem_ctl) const;
+
     bool is_break() const;
 
     bool operator==(const Instruction &c) const;

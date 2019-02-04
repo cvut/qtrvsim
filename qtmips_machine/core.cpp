@@ -73,9 +73,11 @@ struct Core::dtFetch Core::fetch() {
 struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     uint8_t rwrite;
     emit instruction_decoded(dt.inst);
-    enum InstructionFlags flags = dt.inst.flags();
-    enum AluOp alu_op =  dt.inst.alu_op();
-    enum AccessControl mem_ctl = dt.inst.mem_ctl();
+    enum InstructionFlags flags;
+    enum AluOp alu_op;
+    enum AccessControl mem_ctl;
+
+    dt.inst.flags_alu_op_mem_ctl(flags, alu_op, mem_ctl);
 
     if (!(flags & IMF_SUPPORTED))
         throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Instruction with following opcode is not supported", QString::number(dt.inst.opcode(), 16));
