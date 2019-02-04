@@ -74,6 +74,8 @@ private:
     MachineConfigCache cnf;
     Memory *mem;
     unsigned access_pen_r, access_pen_w;
+    std::uint32_t uncached_start;
+    std::uint32_t uncached_last;
 
     struct cache_data {
         bool valid, dirty;

@@ -41,6 +41,8 @@ Cache::Cache(Memory *m, const MachineConfigCache *cc, unsigned memory_access_pen
     mem = m;
     access_pen_r = memory_access_penalty_r;
     access_pen_w = memory_access_penalty_w;
+    uncached_start = 0xf0000000;
+    uncached_last = 0xffffffff;
     // Zero hit and miss rate
     hit_read = 0;
     hit_write = 0;
@@ -77,7 +79,9 @@ Cache::Cache(Memory *m, const MachineConfigCache *cc, unsigned memory_access_pen
 
 bool Cache::wword(std::uint32_t address, std::uint32_t value) {
     bool changed;
-    if (!cnf.enabled()) {
+
+    if (!cnf.enabled() ||
+        (address >= uncached_start && address <= uncached_last)) {
         return mem->write_word(address, value);
     }
 
@@ -90,8 +94,10 @@ bool Cache::wword(std::uint32_t address, std::uint32_t value) {
 }
 
 std::uint32_t Cache::rword(std::uint32_t address) const {
-    if (!cnf.enabled())
+    if (!cnf.enabled() ||
+        (address >= uncached_start && address <= uncached_last)) {
         return mem->read_word(address);
+    }
 
     std::uint32_t data;
     access(address, &data, false);
