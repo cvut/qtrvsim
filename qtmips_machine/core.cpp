@@ -153,6 +153,8 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .regd = regd,
         .regd31 = regd31,
         .regwrite = regwrite,
+        .alu_req_rs = flags & IMF_ALU_REQ_RS,
+        .alu_req_rt = flags & IMF_ALU_REQ_RT,
         .bjr_req_rs = bjr_req_rs,
         .bjr_req_rt = bjr_req_rt,
         .forward_m_d_rs = false,
@@ -401,23 +403,21 @@ void CorePipelined::do_step() {
         // Note: We make exception with $0 as that has no effect when written and is used in nop instruction
 
 #define HAZARD(STAGE) ( \
-        (STAGE).regwrite && (STAGE).rwrite != 0 && \
-        ((STAGE).rwrite == dt_d.inst.rs() || ( \
-            (dt_d.inst.type() == Instruction::T_R || dt_d.inst.is_store()) && \
-            (STAGE).rwrite == dt_d.inst.rt()) \
-        )) // Note: We make exception with $0 as that has no effect and is used in nop instruction
+            (STAGE).regwrite && (STAGE).rwrite != 0 && \
+            ((dt_d.alu_req_rs && (STAGE).rwrite == dt_d.inst.rs()) ||  \
+             (dt_d.alu_req_rt && (STAGE).rwrite == dt_d.inst.rt())) \
+        ) // Note: We make exception with $0 as that has no effect and is used in nop instruction
 
         // Write back stage combinatoricly propagates written instruction to decode stage so nothing has to be done for that stage
         if (HAZARD(dt_m)) {
             // Hazard with instruction in memory stage
             if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
                 // Forward result value
-                if (dt_m.rwrite == dt_d.inst.rs()) {
+                if (dt_d.alu_req_rs && dt_m.rwrite == dt_d.inst.rs()) {
                     dt_d.val_rs = dt_m.towrite_val;
                     dt_d.ff_rs = FORWARD_FROM_M;
                 }
-                if ((dt_d.inst.type() == Instruction::T_R || dt_d.inst.is_store()) &&
-                    (dt_m.rwrite == dt_d.inst.rt())) {
+                if (dt_d.alu_req_rt && dt_m.rwrite == dt_d.inst.rt()) {
                     dt_d.val_rt = dt_m.towrite_val;
                     dt_d.ff_rt = FORWARD_FROM_M;
                 }
@@ -431,12 +431,11 @@ void CorePipelined::do_step() {
                     stall = true;
                 else {
                     // Forward result value
-                    if (dt_e.rwrite == dt_d.inst.rs()) {
+                    if (dt_d.alu_req_rs && dt_e.rwrite == dt_d.inst.rs()) {
                         dt_d.val_rs = dt_e.alu_val;
                         dt_d.ff_rs = FORWARD_FROM_W;
                      }
-                    if ((dt_d.inst.type() == Instruction::T_R || dt_d.inst.is_store()) &&
-                        (dt_e.rwrite == dt_d.inst.rt())) {
+                    if (dt_d.alu_req_rt && dt_e.rwrite == dt_d.inst.rt()) {
                         dt_d.val_rt = dt_e.alu_val;
                         dt_d.ff_rt = FORWARD_FROM_W;
                     }

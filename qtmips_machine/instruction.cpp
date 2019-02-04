@@ -40,8 +40,13 @@
 
 using namespace machine;
 
-#define FLAGS_ALU_I (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE)
-#define FLAGS_ALU_I_ZE (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_ZERO_EXTEND)
+#define FLAGS_ALU_I (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_ALU_REQ_RS)
+#define FLAGS_ALU_I_ZE (FLAGS_ALU_I | IMF_ZERO_EXTEND)
+
+#define FLAGS_ALU_I_LOAD (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | \
+                          IMF_MEMREAD | IMF_MEM | IMF_ALU_REQ_RS)
+#define FLAGS_ALU_I_STORE (IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | \
+                          IMF_MEM | IMF_MEM_STORE | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
 
 #define FLAGS_ALU_T_R (IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE)
 #define FLAGS_ALU_T_R_STD (IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE \
@@ -119,28 +124,28 @@ static const struct InstructionMap instruction_map[] = {
     IM_UNKNOWN, // 30
     IM_UNKNOWN, // 31
     {"LB",     IT_I, ALU_OP_ADDU, AC_BYTE, // LB
-     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM},
+     .flags = FLAGS_ALU_I_LOAD},
     {"LH",     IT_I, ALU_OP_ADDU, AC_HALFWORD, // LH
-     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM},
+     .flags = FLAGS_ALU_I_LOAD},
     {"LWL",    IT_I, ALU_OP_ADDU, NOMEM, // LWL - unsupported
      .flags = IMF_MEM},
     {"LW",     IT_I, ALU_OP_ADDU, AC_WORD, // LW
-     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM},
+     .flags = FLAGS_ALU_I_LOAD},
     {"LBU",    IT_I, ALU_OP_ADDU, AC_BYTE_UNSIGNED, // LBU
-     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM },
+     .flags = FLAGS_ALU_I_LOAD},
     {"LHU",    IT_I, ALU_OP_ADDU, AC_HALFWORD_UNSIGNED,  // LHU
-     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM,},
+     .flags = FLAGS_ALU_I_LOAD},
     {"LWR",    IT_I, ALU_OP_ADDU, NOMEM, // LWR - unsupported
      .flags = IMF_MEM},
     IM_UNKNOWN, // 39
     {"SB",     IT_I, ALU_OP_ADDU, AC_BYTE,  // SB
-     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | IMF_MEM | IMF_MEM_STORE},
+     .flags = FLAGS_ALU_I_STORE},
     {"SH",     IT_I, ALU_OP_ADDU, AC_HALFWORD,  // SH
-     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | IMF_MEM | IMF_MEM_STORE},
+     .flags = FLAGS_ALU_I_STORE},
     {"SWL",    IT_I, ALU_OP_ADDU, NOMEM, // SWL
      .flags = IMF_MEM | IMF_MEM_STORE},
     {"SW",     IT_I, ALU_OP_ADDU, AC_WORD, // SW
-     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | IMF_MEM | IMF_MEM_STORE},
+     .flags = FLAGS_ALU_I_STORE},
     IM_UNKNOWN, // 44,NOPE, // 44
     IM_UNKNOWN, // 45,NOPE, // 45
     {"SWR",    IT_I, ALU_OP_ADDU, NOMEM, // SWR

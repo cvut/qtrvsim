@@ -132,6 +132,8 @@ protected:
         bool regd; // If rd is used (otherwise rt is used for write target)
         bool regd31; // Use R31 as destionation for JAL
         bool regwrite; // If output should be written back to register (which one depends on regd)
+        bool alu_req_rs; // requires rs value for ALU
+        bool alu_req_rt; // requires rt value for ALU or SW
         bool bjr_req_rs; // requires rs for beq, bne, blez, bgtz, jr nad jalr
         bool bjr_req_rt; // requires rt for beq, bne
         bool forward_m_d_rs; // forwarding required for beq, bne, blez, bgtz, jr nad jalr
