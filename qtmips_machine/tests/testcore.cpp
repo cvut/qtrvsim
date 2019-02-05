@@ -609,6 +609,70 @@ static void core_alu_forward_data() {
         regs_res.pc_abs_jmp(regs_init.read_pc() + 4 * code.length() - 4);
         QTest::newRow("mul-div") << code << regs_init << regs_res;
     }
+
+    // branches
+    {
+        QVector<uint32_t> code{
+            // start:
+            0x2001ffff, // addi    at,zero,-1
+            0x20020001, // addi    v0,zero,1
+            0x20030000, // addi    v1,zero,0
+            0x20040002, // addi    a0,zero,2
+            // test_branch:
+            0x20050001, // addi    a1,zero,1
+            0x04200004, // bltz    at,80020028 <test_branch+0x18>
+            0x00000000, // nop
+            0x20050000, // addi    a1,zero,0
+            0x20631000, // addi    v1,v1,4096
+            0x00611820, // add     v1,v1,at
+            0x20050001, // addi    a1,zero,1
+            0x18200004, // blez    at,80020040 <test_branch+0x30>
+            0x00000000, // nop
+            0x20050000, // addi    a1,zero,0
+            0x20630100, // addi    v1,v1,256
+            0x00611820, // add     v1,v1,at
+            0x20050001, // addi    a1,zero,1
+            0x04210004, // bgez    at,80020058 <test_branch+0x48>
+            0x00000000, // nop
+            0x20050000, // addi    a1,zero,0
+            0x20632000, // addi    v1,v1,8192
+            0x00611820, // add     v1,v1,at
+            0x20050001, // addi    a1,zero,1
+            0x1c200004, // bgtz    at,80020070 <test_branch+0x60>
+            0x00000000, // nop
+            0x20050000, // addi    a1,zero,0
+            0x20630200, // addi    v1,v1,512
+            0x00611820, // add     v1,v1,at
+            0x20050001, // addi    a1,zero,1
+            0x14220004, // bne     at,v0,80020088 <test_branch+0x78>
+            0x00000000, // nop
+            0x20050000, // addi    a1,zero,0
+            0x20634000, // addi    v1,v1,16384
+            0x00611820, // add     v1,v1,at
+            0x20050001, // addi    a1,zero,1
+            0x10220004, // beq     at,v0,800200a0 <test_branch+0x90>
+            0x00000000, // nop
+            0x20050000, // addi    a1,zero,0
+            0x20630400, // addi    v1,v1,1024
+            0x00611820, // add     v1,v1,at
+            0x20210001, // addi    at,at,1
+            0x1424ffda, // bne     at,a0,80020010 <test_branch>
+            0x00000000, // nop
+            // loop:
+            0x1000ffff, // b       800200ac <loop>
+            0x00000000, // nop
+        };
+        Registers regs_init;
+        regs_init.pc_abs_jmp(0x80020000);
+        Registers regs_res(regs_init);
+        regs_res.write_gp(1, 2);
+        regs_res.write_gp(2, 1);
+        regs_res.write_gp(3, 0x8d00);
+        regs_res.write_gp(4, 2);
+        regs_res.write_gp(5, 1);
+        regs_res.pc_abs_jmp(regs_init.read_pc() + 4 * code.length());
+        QTest::newRow("branch_conditions_test") << code << regs_init << regs_res;
+    }
 }
 
 void MachineTests::singlecore_alu_forward_data() {
