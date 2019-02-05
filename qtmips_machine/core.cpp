@@ -149,17 +149,18 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
 
 struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
     emit instruction_executed(dt.inst);
+    bool discard;
 
     // Handle conditional move (we have to change regwrite signal if conditional is not met)
     bool regwrite = dt.regwrite;
-    if (dt.inst.opcode() == 0 && ((dt.inst.funct() == ALU_OP_MOVZ && dt.val_rt != 0) || (dt.inst.funct() == ALU_OP_MOVN && dt.val_rt == 0)))
-        regwrite = false;
 
     std::uint32_t alu_sec = dt.val_rt;
     if (dt.alusrc)
         alu_sec = dt.immediate_val; // Sign or zero extend immediate value
 
-    std::uint32_t alu_val = alu_operate(dt.aluop, dt.val_rs, alu_sec, dt.inst.shamt(), regs);
+    std::uint32_t alu_val = alu_operate(dt.aluop, dt.val_rs, alu_sec, dt.inst.shamt(), regs, discard);
+    if (discard)
+        regwrite = false;
 
     emit execute_alu_value(alu_val);
     emit execute_reg1_value(dt.val_rs);

@@ -215,6 +215,7 @@ void MachineTests::alu_data() {
 }
 
 void MachineTests::alu() {
+    bool discard;
     QFETCH(AluOp, op);
     QFETCH(std::uint32_t, s);
     QFETCH(std::uint32_t, t);
@@ -223,7 +224,7 @@ void MachineTests::alu() {
     QFETCH(Registers, regs_res);
     QFETCH(std::uint32_t, res);
 
-    QCOMPARE(alu_operate(op, s , t, sa, &regs_init), res);
+    QCOMPARE(alu_operate(op, s , t, sa, &regs_init, discard), res);
     QCOMPARE(regs_res, regs_init);
 }
 
@@ -246,11 +247,12 @@ void MachineTests::alu_except_data() {
 }
 
 void MachineTests::alu_except() {
+    bool discard;
     QFETCH(std::uint8_t, op);
     QFETCH(std::uint32_t, s);
     QFETCH(std::uint32_t, t);
     Registers regs;
 
     // Only runtime exception is expected as any other exception is a bug
-    QVERIFY_EXCEPTION_THROWN(alu_operate((enum AluOp)op, s , t, 0, &regs), QtMipsExceptionRuntime);
+    QVERIFY_EXCEPTION_THROWN(alu_operate((enum AluOp)op, s , t, 0, &regs, discard), QtMipsExceptionRuntime);
 }

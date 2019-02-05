@@ -52,7 +52,7 @@ namespace machine {
 // sa: This is value directly from instruction it self (sa section) used for shift operations
 // regs: Registers used. We need direct access to lo and hi registers (those are not accessed from core it self but from alu directly
 // Returned value is commonly saved to rt/rd or any other way passed trough core
-std::uint32_t alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa, Registers *regs);
+std::uint32_t alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa, Registers *regs, bool &discard);
 
 }
 

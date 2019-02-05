@@ -39,9 +39,10 @@
 
 using namespace machine;
 
-std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa, Registers *regs) {
+std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t, std::uint8_t sa, Registers *regs, bool &discard) {
     std::int64_t s64_val;
     std::uint64_t u64_val;
+    discard = false;
 
     switch(operation) {
         case ALU_OP_SLL:
@@ -65,11 +66,13 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
             // Pass return value in rt to save PC after isntruction, program counter is handled in handle_pc
             return t;
         case ALU_OP_MOVZ:
-            // We do this just to implement valid alu operation but we have to evaluate comparison outside of this function to disable register write
-            return t == 0 ? s : 0;
+            // Signal discard of result when condition is not true
+            discard = t != 0;
+            return discard ? 0: s;
         case ALU_OP_MOVN:
             // Same note as for MOVZ applies here
-            return t != 0 ? s : 0;
+            discard = t == 0;
+            return discard ? 0: s;
         case ALU_OP_BREAK:
              return 0;
         case ALU_OP_MFHI:

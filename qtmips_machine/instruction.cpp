@@ -49,13 +49,14 @@ using namespace machine;
 #define FLAGS_ALU_I_STORE (IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | \
                           IMF_MEM | IMF_MEM_STORE | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
 
-#define FLAGS_ALU_T_R (IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE)
-#define FLAGS_ALU_T_R_STD (IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE \
-                         | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
-#define FLAGS_ALU_T_R_ST (IMF_SUPPORTED | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
+#define FLAGS_ALU_T_R_D (IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE)
+#define FLAGS_ALU_T_R_STD (FLAGS_ALU_T_R_D | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
+#define FLAGS_ALU_T_R_STD_SHV (FLAGS_ALU_T_R_STD | IMF_ALU_SHIFT)
+#define FLAGS_ALU_T_R_TD (FLAGS_ALU_T_R_D | IMF_ALU_REQ_RT)
+#define FLAGS_ALU_T_R_TD_SHAMT (FLAGS_ALU_T_R_TD | IMF_ALU_SHIFT)
 #define FLAGS_ALU_T_R_S (IMF_SUPPORTED |  IMF_ALU_REQ_RS)
-#define FLAGS_ALU_T_R_D (IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE )
-#define FLAGS_ALU_T_R_SD (IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE | IMF_ALU_REQ_RS)
+#define FLAGS_ALU_T_R_SD (FLAGS_ALU_T_R_D | IMF_ALU_REQ_RS)
+#define FLAGS_ALU_T_R_ST (IMF_SUPPORTED | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
 
 #define NOALU .alu = ALU_OP_SLL
 #define NOMEM .mem_ctl = AC_NONE
@@ -82,19 +83,19 @@ struct InstructionMap {
 // This table is indexed by funct
 static const struct InstructionMap  alu_instruction_map[] = {
     {"SLL",    IT_R, ALU_OP_SLL, NOMEM, nullptr,
-     .flags = FLAGS_ALU_T_R_STD},
+     .flags = FLAGS_ALU_T_R_TD_SHAMT},
     IM_UNKNOWN,
     {"SRL",    IT_R, ALU_OP_SRL, NOMEM, nullptr,
-     .flags = FLAGS_ALU_T_R_SD},
+     .flags = FLAGS_ALU_T_R_TD_SHAMT},
     {"SRA",    IT_R, ALU_OP_SRA, NOMEM, nullptr,
-     .flags = FLAGS_ALU_T_R_SD},
+     .flags = FLAGS_ALU_T_R_TD_SHAMT},
     {"SLLV",   IT_R, ALU_OP_SLLV, NOMEM, nullptr,
-     .flags = FLAGS_ALU_T_R_STD},
+     .flags = FLAGS_ALU_T_R_STD_SHV},
     IM_UNKNOWN,
     {"SRLV",   IT_R, ALU_OP_SRLV, NOMEM, nullptr,
-     .flags = FLAGS_ALU_T_R_STD},
+     .flags = FLAGS_ALU_T_R_STD_SHV},
     {"SRAV",   IT_R, ALU_OP_SRAV, NOMEM, nullptr,
-     .flags = FLAGS_ALU_T_R_STD},
+     .flags = FLAGS_ALU_T_R_STD_SHV},
     {"JR",     IT_R, ALU_OP_JR, NOMEM, nullptr,
      .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS},
     {"JALR",   IT_R, ALU_OP_JALR, NOMEM, nullptr,
@@ -428,13 +429,24 @@ QString Instruction::to_str() const {
             res += next_delim + "$" + QString::number(rd());
             next_delim = ", ";
         }
-        if (im.flags & (IMF_BJR_REQ_RS | IMF_ALU_REQ_RS)) {
-            res += next_delim + "$" + QString::number(rs());
-            next_delim = ", ";
+        if (!(im.flags & IMF_ALU_SHIFT)) {
+            if (im.flags & (IMF_BJR_REQ_RS | IMF_ALU_REQ_RS)) {
+                res += next_delim + "$" + QString::number(rs());
+                next_delim = ", ";
+            }
         }
         if (im.flags & (IMF_BJR_REQ_RT | IMF_ALU_REQ_RT)) {
             res += next_delim + "$" + QString::number(rt());
             next_delim = ", ";
+        }
+        if (im.flags & IMF_ALU_SHIFT) {
+            if (im.flags & (IMF_BJR_REQ_RS | IMF_ALU_REQ_RS)) {
+                res += next_delim + "$" + QString::number(rs());
+                next_delim = ", ";
+            } else {
+                res += next_delim + QString::number(shamt());
+                next_delim = ", ";
+            }
         }
         break;
         }
