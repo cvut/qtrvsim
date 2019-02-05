@@ -63,6 +63,10 @@ enum InstructionFlags {
     IMF_READ_HILO  = 1L<<15,
     IMF_WRITE_HILO = 1L<<16,
     IMF_PC8_TO_RT  = 1L<<17,
+    IMF_BRANCH     = 1L<<18,
+    IMF_JUMP       = 1L<<19,
+    IMF_BJ_NOT     = 1L<<20,
+    IMF_BGTZ_BLEZ  = 1L<<21,
 };
 
 class Instruction {

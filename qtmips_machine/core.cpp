@@ -117,7 +117,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     emit decode_regd31_value(regd31);
 
     if (regd31) {
-        val_rs = dt.inst_addr + 8;
+        val_rt = dt.inst_addr + 8;
     }
 
     rwrite = regd31 ? 31: regd ? dt.inst.rd() : dt.inst.rt();
@@ -134,6 +134,10 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .alu_req_rt = flags & IMF_ALU_REQ_RT,
         .bjr_req_rs = bjr_req_rs,
         .bjr_req_rt = bjr_req_rt,
+        .branch = flags & IMF_BRANCH,
+        .jump = flags & IMF_JUMP,
+        .bj_not = flags & IMF_BJ_NOT,
+        .bgt_blez = flags & IMF_BGTZ_BLEZ,
         .forward_m_d_rs = false,
         .forward_m_d_rt = false,
         .aluop = alu_op,
@@ -229,53 +233,38 @@ void Core::writeback(const struct dtMemory &dt) {
 }
 
 void Core::handle_pc(const struct dtDecode &dt) {
+    bool branch;
     emit instruction_program_counter(dt.inst);
 
-    bool branch = false;
-    bool link = false;
-    // TODO implement link
-
-    switch (dt.inst.opcode()) {
-    case 0: // JR (JALR)
-        if (dt.inst.funct() == ALU_OP_JR || dt.inst.funct() == ALU_OP_JALR) {
+    if (dt.jump) {
+        if (!dt.bjr_req_rs) {
+            regs->pc_abs_jmp_28(dt.inst.address() << 2);
+            emit fetch_jump_value(true);
+            emit fetch_jump_reg_value(false);
+        } else {
             regs->pc_abs_jmp(dt.val_rs);
-            emit fetch_branch_value(true);
-            return;
+            emit fetch_jump_value(false);
+            emit fetch_jump_reg_value(true);
         }
-        break;
-    case 1: // REGIMM instruction
-        //switch (dt.inst.rt() & 0xF) { // Should be used when linking is supported
-        switch (dt.inst.rt()) {
-        case 0: // BLTZ(AL)
-            branch = (std::int32_t)dt.val_rs < 0;
-            break;
-        case 1: // BGEZ(AL)
-            branch = (std::int32_t)dt.val_rs >= 0;
-            break;
-        default:
-            throw QTMIPS_EXCEPTION(UnsupportedInstruction, "REGIMM instruction with unknown rt code", QString::number(dt.inst.rt(), 16));
-        }
-        link = dt.inst.rs() & 0x10;
-        break;
-    case 2: // J
-    case 3: // JAL
-        regs->pc_abs_jmp_28(dt.inst.address() << 2);
-        emit fetch_branch_value(true);
+        emit fetch_branch_value(false);
         return;
-    case 4: // BEQ
-        branch = dt.val_rs == dt.val_rt;
-        break;
-    case 5: // BNE
-        branch = dt.val_rs != dt.val_rt;
-        break;
-    case 6: // BLEZ
-        branch = (std::int32_t)dt.val_rs <= 0;
-        break;
-    case 7: // BGTZ
-        branch = (std::int32_t)dt.val_rs > 0;
-        break;
     }
 
+    if (dt.branch) {
+        if (dt.bjr_req_rt) {
+            branch = dt.val_rs == dt.val_rt;
+        } else if (!dt.bgt_blez) {
+            branch = (std::int32_t)dt.val_rs < 0;
+        } else {
+            branch = (std::int32_t)dt.val_rs <= 0;
+        }
+
+        if (dt.bj_not)
+            branch = !branch;
+    }
+
+    emit fetch_jump_value(false);
+    emit fetch_jump_reg_value(false);
     emit fetch_branch_value(branch);
 
     if (branch)

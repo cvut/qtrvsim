@@ -58,6 +58,8 @@ using namespace machine;
 #define FLAGS_ALU_T_R_SD (FLAGS_ALU_T_R_D | IMF_ALU_REQ_RS)
 #define FLAGS_ALU_T_R_ST (IMF_SUPPORTED | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
 
+#define FLAGS_J_B_PC_TO_R31 (IMF_SUPPORTED | IMF_PC_TO_R31 | IMF_REGWRITE)
+
 #define NOALU .alu = ALU_OP_SLL
 #define NOMEM .mem_ctl = AC_NONE
 
@@ -97,9 +99,9 @@ static const struct InstructionMap  alu_instruction_map[] = {
     {"SRAV",   IT_R, ALU_OP_SRAV, NOMEM, nullptr,
      .flags = FLAGS_ALU_T_R_STD_SHV},
     {"JR",     IT_R, ALU_OP_JR, NOMEM, nullptr,
-     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS},
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_JUMP},
     {"JALR",   IT_R, ALU_OP_JALR, NOMEM, nullptr,
-     .flags = IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE | IMF_BJR_REQ_RS | IMF_PC8_TO_RT},
+     .flags = IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE | IMF_BJR_REQ_RS | IMF_PC8_TO_RT | IMF_JUMP},
     {"MOVZ",   IT_R, ALU_OP_MOVZ, NOMEM, nullptr,
      .flags = FLAGS_ALU_T_R_STD},
     {"MOVN",   IT_R, ALU_OP_MOVN, NOMEM, nullptr,
@@ -157,26 +159,76 @@ static const struct InstructionMap  alu_instruction_map[] = {
      .flags = FLAGS_ALU_T_R_STD},
 };
 
+static const struct InstructionMap  regimm_instruction_map[] = {
+    {"BLTZ", IT_I, NOALU, NOMEM, nullptr,       // BLTZ
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BRANCH},
+    {"BGEZ", IT_I, NOALU, NOMEM, nullptr,       // BGEZ
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BRANCH | IMF_BJ_NOT},
+    {"BLTZL", IT_I, NOALU, NOMEM, nullptr,       // BLTZL
+     .flags = IMF_BJR_REQ_RS},
+    {"BGEZL", IT_I, NOALU, NOMEM, nullptr,       // BGEZL
+     .flags = IMF_BJR_REQ_RS | IMF_BJ_NOT},
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    {"TGEI", IT_I, NOALU, NOMEM, nullptr,       // TGEI
+     .flags = IMF_BJR_REQ_RS},
+    {"TGEIU", IT_I, NOALU, NOMEM, nullptr,       // TGEIU
+     .flags = IMF_BJR_REQ_RS},
+    {"TLTI", IT_I, NOALU, NOMEM, nullptr,       // TLTI
+     .flags = IMF_BJR_REQ_RS},
+    {"TLTIU", IT_I, NOALU, NOMEM, nullptr,       // TLTIU
+     .flags = IMF_BJR_REQ_RS},
+    {"TEQI", IT_I, NOALU, NOMEM, nullptr,       // TEQI
+     .flags = IMF_BJR_REQ_RS},
+    IM_UNKNOWN,
+    {"TNEI", IT_I, NOALU, NOMEM, nullptr,       // TNEI
+     .flags = IMF_BJR_REQ_RS},
+    IM_UNKNOWN,
+    {"BLTZAL", IT_I, NOALU, NOMEM, nullptr,       // BLTZAL
+     .flags = FLAGS_J_B_PC_TO_R31 | IMF_BJR_REQ_RS | IMF_BRANCH},
+    {"BGEZAL", IT_I, NOALU, NOMEM, nullptr,       // BGEZAL
+     .flags = FLAGS_J_B_PC_TO_R31 | IMF_BJR_REQ_RS | IMF_BRANCH | IMF_BJ_NOT},
+    {"BLTZALL", IT_I, NOALU, NOMEM, nullptr,       // BLTZALL
+     .flags = IMF_BJR_REQ_RS},
+    {"BGEZALL", IT_I, NOALU, NOMEM, nullptr,       // BGEZALL
+     .flags = IMF_BJR_REQ_RS | IMF_BJ_NOT},
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    {"SYNCI", IT_I, NOALU, NOMEM, nullptr,       // SYNCI
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS},
+};
+
 const std::int32_t instruction_map_opcode_field = IMF_SUB_ENCODE(6, 26);
 
 // This table is indexed by opcode
 static const struct InstructionMap instruction_map[] = {
     {"ALU",    IT_R, NOALU, NOMEM, alu_instruction_map,          // Alu operations
      .flags = IMF_SUB_ENCODE(6, 0)},
-    {"REGIMM", IT_I, NOALU, NOMEM, nullptr,          // REGIMM (BLTZ, BGEZ)
-     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS},
+    {"REGIMM", IT_I, NOALU, NOMEM, regimm_instruction_map,       // REGIMM (BLTZ, BGEZ)
+     .flags = IMF_SUB_ENCODE(5, 16)},
     {"J",      IT_J, NOALU, NOMEM, nullptr,          // J
-     .flags = IMF_SUPPORTED},
-    {"JAL",    IT_J, ALU_OP_PASS_S, NOMEM, nullptr,  // JAL
-     .flags = IMF_SUPPORTED | IMF_PC_TO_R31 | IMF_REGWRITE},
+     .flags = IMF_SUPPORTED | IMF_JUMP},
+    {"JAL",    IT_J, ALU_OP_PASS_T, NOMEM, nullptr,  // JAL
+     .flags = FLAGS_J_B_PC_TO_R31 | IMF_JUMP},
     {"BEQ",    IT_I, NOALU, NOMEM, nullptr,         // BEQ
-     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BJR_REQ_RT},
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BJR_REQ_RT | IMF_BRANCH},
     {"BNE",    IT_I, NOALU, NOMEM, nullptr,          // BNE
-     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BJR_REQ_RT},
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BJR_REQ_RT | IMF_BRANCH | IMF_BJ_NOT},
     {"BLEZ",   IT_I, NOALU, NOMEM, nullptr,          // BLEZ
-     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS},
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BRANCH | IMF_BGTZ_BLEZ},
     {"BGTZ",   IT_I, NOALU, NOMEM, nullptr,          // BGTZ
-     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS},
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BRANCH | IMF_BGTZ_BLEZ | IMF_BJ_NOT},
     {"ADDI",   IT_I, ALU_OP_ADD, NOMEM, nullptr,     // ADDI
      .flags = FLAGS_ALU_I},
     {"ADDIU",  IT_I, ALU_OP_ADDU, NOMEM, nullptr,    // ADDIU

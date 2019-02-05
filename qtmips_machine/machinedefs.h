@@ -81,8 +81,8 @@ enum AluOp : std::uint8_t {
     ALU_OP_SLT = 42,
     ALU_OP_SLTU,
     ALU_OP_LUI = 64, // We don't care about exact index for this one
-    ALU_OP_PASS_S, // Pass s argument without change for JAL
-    ALU_OP_UNKNOWN, // Pass s argument without change for JAL
+    ALU_OP_PASS_T, // Pass t argument without change for JAL
+    ALU_OP_UNKNOWN,
     ALU_OP_LAST // First impossible operation (just to be sure that we don't overflow)
 };
 

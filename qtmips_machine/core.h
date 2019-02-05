@@ -70,6 +70,8 @@ signals:
     void instruction_writeback(const machine::Instruction &inst);
     void instruction_program_counter(const machine::Instruction &inst);
 
+    void fetch_jump_reg_value(std::uint32_t);
+    void fetch_jump_value(std::uint32_t);
     void fetch_branch_value(std::uint32_t);
     void decode_instruction_value(std::uint32_t);
     void decode_reg1_value(std::uint32_t);
@@ -136,6 +138,10 @@ protected:
         bool alu_req_rt; // requires rt value for ALU or SW
         bool bjr_req_rs; // requires rs for beq, bne, blez, bgtz, jr nad jalr
         bool bjr_req_rt; // requires rt for beq, bne
+        bool branch;     // branch instruction
+        bool jump;       // jump
+        bool bj_not;     // negate branch condition
+        bool bgt_blez;   // BGTZ/BLEZ instead of BGEZ/BLTZ
         bool forward_m_d_rs; // forwarding required for beq, bne, blez, bgtz, jr nad jalr
         bool forward_m_d_rt; // forwarding required for beq, bne
         enum AluOp aluop; // Decoded ALU operation
