@@ -458,12 +458,16 @@ QString Instruction::to_str() const {
             res += " $" + QString::number(rt());
             res += ", 0x" + QString::number(immediate(), 16).toUpper() + "(" + QString::number(rs()) + ")";
         } else {
-            if (im.flags & (IMF_BJR_REQ_RT | IMF_ALU_REQ_RT | IMF_REGWRITE)) {
+            if (im.flags & IMF_REGWRITE) {
                 res += next_delim + "$" + QString::number(rt());
                 next_delim = ", ";
             }
             if (im.flags & (IMF_BJR_REQ_RS | IMF_ALU_REQ_RS)) {
                 res += next_delim + "$" + QString::number(rs());
+                next_delim = ", ";
+            }
+            if (im.flags & (IMF_BJR_REQ_RT | IMF_ALU_REQ_RT) && !(im.flags & IMF_REGWRITE)) {
+                res += next_delim + "$" + QString::number(rt());
                 next_delim = ", ";
             }
             res += next_delim + "0x" + QString::number(immediate(), 16).toUpper();
