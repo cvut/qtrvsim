@@ -54,6 +54,7 @@ class QtMipsMachine : public QObject {
     Q_OBJECT
 public:
     QtMipsMachine(const MachineConfig &cc);
+    ~QtMipsMachine();
 
     const MachineConfig &config();
     void set_speed(unsigned);

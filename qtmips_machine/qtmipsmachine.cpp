@@ -55,7 +55,7 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) : QObject(), mcnf(&cc) {
     physaddrspace = new PhysAddrSpace();
     physaddrspace->insert_range(mem, 0x00000000, 0xefffffff, false);
     MemoryAccess *periph = new SimplePeripheral();
-    physaddrspace->insert_range(periph, 0xffffc000, 0xffffcfff, false);
+    physaddrspace->insert_range(periph, 0xffffc000, 0xffffcfff, true);
     cpu_mem = physaddrspace;
 #endif
     cch_program = new Cache(cpu_mem, &cc.cache_program(), cc.memory_access_time_read(), cc.memory_access_time_write());
@@ -69,6 +69,33 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) : QObject(), mcnf(&cc) {
     run_t = new QTimer(this);
     set_speed(0); // In default run as fast as possible
     connect(run_t, SIGNAL(timeout()), this, SLOT(step()));
+}
+
+QtMipsMachine::~QtMipsMachine() {
+    if (run_t != nullptr)
+        delete run_t;
+    run_t = nullptr;
+    if (cr != nullptr)
+        delete cr;
+    cr = nullptr;
+    if (regs != nullptr)
+        delete regs;
+    regs = nullptr;
+    if (mem != nullptr)
+        delete mem;
+    mem = nullptr;
+    if (cch_program != nullptr)
+        delete cch_program;
+    cch_program = nullptr;
+    if (cch_data != nullptr)
+        delete cch_data;
+    cch_data = nullptr;
+    if (physaddrspace != nullptr)
+        delete physaddrspace;
+    physaddrspace = nullptr;
+    if (mem_program_only != nullptr)
+        delete mem_program_only;
+    mem_program_only = nullptr;
 }
 
 const MachineConfig &QtMipsMachine::config() {
