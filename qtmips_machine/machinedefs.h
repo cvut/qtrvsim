@@ -50,6 +50,12 @@ enum AccessControl {
     AC_CACHE_OP,
 };
 
+enum ExceptionCause {
+    EXCAUSE_NONE,
+    EXCAUSE_BREAK,
+    EXCAUSE_SYSCALL,
+};
+
 enum AluOp : std::uint8_t {
     ALU_OP_SLL = 0,
     ALU_OP_SRL = 2,
@@ -82,6 +88,7 @@ enum AluOp : std::uint8_t {
     ALU_OP_SLTU,
     ALU_OP_LUI = 64, // We don't care about exact index for this one
     ALU_OP_PASS_T, // Pass t argument without change for JAL
+    ALU_OP_SYSCALL,
     ALU_OP_UNKNOWN,
     ALU_OP_LAST // First impossible operation (just to be sure that we don't overflow)
 };

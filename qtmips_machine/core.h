@@ -125,6 +125,7 @@ protected:
     struct dtFetch {
         Instruction inst; // Loaded instruction
         uint32_t inst_addr; // Address of instruction
+        enum ExceptionCause excause;
     };
     struct dtDecode {
         Instruction inst;
@@ -152,6 +153,8 @@ protected:
         std::uint8_t rwrite; // Writeback register (multiplexed between rt and rd according to regd)
         ForwardFrom ff_rs;
         ForwardFrom ff_rt;
+        uint32_t inst_addr; // Address of instruction
+        enum ExceptionCause excause;
     };
     struct dtExecute {
         Instruction inst;
@@ -162,12 +165,16 @@ protected:
         std::uint32_t val_rt;
         std::uint8_t rwrite; // Writeback register (multiplexed between rt and rd according to regd)
         std::uint32_t alu_val; // Result of ALU execution
+        uint32_t inst_addr; // Address of instruction
+        enum ExceptionCause excause;
     };
     struct dtMemory {
         Instruction inst;
         bool regwrite;
         std::uint8_t rwrite;
         std::uint32_t towrite_val;
+        uint32_t inst_addr; // Address of instruction
+        enum ExceptionCause excause;
     };
 
     struct dtFetch fetch();

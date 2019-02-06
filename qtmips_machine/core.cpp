@@ -67,6 +67,7 @@ struct Core::dtFetch Core::fetch() {
     return {
         .inst = inst,
         .inst_addr = inst_addr,
+        .excause = EXCAUSE_NONE,
     };
 }
 
@@ -76,6 +77,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     enum InstructionFlags flags;
     enum AluOp alu_op;
     enum AccessControl mem_ctl;
+    enum ExceptionCause excause = dt.excause;
 
     dt.inst.flags_alu_op_mem_ctl(flags, alu_op, mem_ctl);
 
@@ -100,6 +102,10 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         immediate_val = dt.inst.immediate();
     else
         immediate_val = sign_extend(dt.inst.immediate());
+
+     if ((flags & IMF_EXCEPTION) && (excause == EXCAUSE_NONE)) {
+         excause = dt.inst.encoded_exception();
+     }
 
     emit decode_instruction_value(dt.inst.data());
     emit decode_reg1_value(val_rs);
@@ -148,6 +154,8 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .rwrite = rwrite,
         .ff_rs = FORWARD_NONE,
         .ff_rt = FORWARD_NONE,
+        .inst_addr = dt.inst_addr,
+        .excause = excause,
     };
 }
 
@@ -189,37 +197,50 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
         .val_rt = dt.val_rt,
         .rwrite = dt.rwrite,
         .alu_val = alu_val,
+        .inst_addr = dt.inst_addr,
+        .excause = dt.excause,
     };
 }
 
 struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
     emit instruction_memory(dt.inst);
     std::uint32_t towrite_val = dt.alu_val;
+    bool memread = dt.memread;
+    bool memwrite = dt.memwrite;
+    bool regwrite = dt.regwrite;
 
-    if (dt.memctl == AC_CACHE_OP)
-        mem_data->sync();
-    else if (dt.memwrite)
-        mem_data->write_ctl(dt.memctl, dt.alu_val, dt.val_rt);
-    else if (dt.memread)
-        towrite_val = mem_data->read_ctl(dt.memctl, dt.alu_val);
+    if (dt.excause != EXCAUSE_NONE) {
+        memread = false;
+        memwrite = false;
+        regwrite = false;
+    } else {
+        if (dt.memctl == AC_CACHE_OP)
+             mem_data->sync();
+        else if (memwrite)
+             mem_data->write_ctl(dt.memctl, dt.alu_val, dt.val_rt);
+        else if (memread)
+             towrite_val = mem_data->read_ctl(dt.memctl, dt.alu_val);
+    }
 
     emit memory_alu_value(dt.alu_val);
     emit memory_rt_value(dt.val_rt);
-    emit memory_mem_value(dt.memread ? towrite_val : 0);
-    emit memory_regw_value(dt.regwrite);
+    emit memory_mem_value(memread ? towrite_val : 0);
+    emit memory_regw_value(regwrite);
     emit memory_memtoreg_value(dt.memread);
     emit memory_memread_value(dt.memread);
-    emit memory_memwrite_value(dt.memwrite);
+    emit memory_memwrite_value(memwrite);
     emit memory_regw_num_value(dt.rwrite);
 
-    if (dt.inst.is_break())
+    if (dt.excause == EXCAUSE_BREAK)
         emit memory_break_reached();
 
     return {
         .inst = dt.inst,
-        .regwrite = dt.regwrite,
+        .regwrite = regwrite,
         .rwrite = dt.rwrite,
         .towrite_val = towrite_val,
+        .inst_addr = dt.inst_addr,
+        .excause = dt.excause,
     };
 }
 
@@ -275,6 +296,7 @@ void Core::handle_pc(const struct dtDecode &dt) {
 
 void Core::dtFetchInit(struct dtFetch &dt) {
     dt.inst = Instruction(0x00);
+    dt.excause = EXCAUSE_NONE;
 }
 
 void Core::dtDecodeInit(struct dtDecode &dt) {
@@ -296,6 +318,8 @@ void Core::dtDecodeInit(struct dtDecode &dt) {
     dt.immediate_val = 0;
     dt.ff_rs = FORWARD_NONE;
     dt.ff_rt = FORWARD_NONE;
+    dt.inst_addr = 0;
+    dt.excause = EXCAUSE_NONE;
 }
 
 void Core::dtExecuteInit(struct dtExecute &dt) {
@@ -307,6 +331,8 @@ void Core::dtExecuteInit(struct dtExecute &dt) {
     dt.val_rt = 0;
     dt.rwrite = 0;
     dt.alu_val = 0;
+    dt.inst_addr = 0;
+    dt.excause = EXCAUSE_NONE;
 }
 
 void Core::dtMemoryInit(struct dtMemory &dt) {
@@ -314,6 +340,8 @@ void Core::dtMemoryInit(struct dtMemory &dt) {
     dt.regwrite = false;
     dt.rwrite = false;
     dt.towrite_val = 0;
+    dt.inst_addr = 0;
+    dt.excause = EXCAUSE_NONE;
 }
 
 CoreSingle::CoreSingle(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data, bool jmp_delay_slot) : \
@@ -335,7 +363,16 @@ void CoreSingle::do_step() {
     struct dtDecode d = decode(f);
     struct dtExecute e = execute(d);
     struct dtMemory m = memory(e);
+
+    if (m.excause != EXCAUSE_NONE) {
+        regs->pc_abs_jmp(m.inst_addr + 4);
+        if (jmp_delay_decode != nullptr)
+            dtDecodeInit(*jmp_delay_decode);
+        return;
+    }
+
     writeback(m);
+
     if (jmp_delay_decode != nullptr) {
         handle_pc(*jmp_delay_decode);
         *jmp_delay_decode = d; // Copy current decode
@@ -355,14 +392,30 @@ CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem_program, MemoryA
 }
 
 void CorePipelined::do_step() {
+    bool stall = false;
+    bool excpt_in_progress = false;
+
     // Process stages
     writeback(dt_m);
     dt_m = memory(dt_e);
     dt_e = execute(dt_d);
     dt_d = decode(dt_f);
 
-    // TODO signals
-    bool stall = false;
+    // Resolve exceptions
+    excpt_in_progress = dt_m.excause != EXCAUSE_NONE;
+    if (excpt_in_progress)
+        dtExecuteInit(dt_e);
+    excpt_in_progress = excpt_in_progress || dt_e.excause != EXCAUSE_NONE;
+    if (excpt_in_progress)
+        dtDecodeInit(dt_d);
+    excpt_in_progress = excpt_in_progress || dt_e.excause != EXCAUSE_NONE;
+    if (excpt_in_progress) {
+        dtFetchInit(dt_f);
+        if (dt_m.excause != EXCAUSE_NONE) {
+            regs->pc_abs_jmp(dt_m.inst_addr + 4);
+        }
+        return;
+    }
 
     dt_d.ff_rs = FORWARD_NONE;
     dt_d.ff_rt = FORWARD_NONE;

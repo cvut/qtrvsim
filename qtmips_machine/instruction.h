@@ -67,6 +67,7 @@ enum InstructionFlags {
     IMF_JUMP       = 1L<<19,
     IMF_BJ_NOT     = 1L<<20,
     IMF_BGTZ_BLEZ  = 1L<<21,
+    IMF_EXCEPTION  = 1L<<22,
 };
 
 class Instruction {
@@ -98,6 +99,7 @@ public:
     enum InstructionFlags flags() const;
     enum AluOp alu_op() const;
     enum AccessControl mem_ctl() const;
+    enum ExceptionCause encoded_exception() const;
 
     void flags_alu_op_mem_ctl(enum InstructionFlags &flags,
                   enum AluOp &alu_op, enum AccessControl &mem_ctl) const;
