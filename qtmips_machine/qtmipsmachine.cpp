@@ -39,6 +39,7 @@
 using namespace machine;
 
 QtMipsMachine::QtMipsMachine(const MachineConfig &cc) : QObject(), mcnf(&cc) {
+    MemoryAccess *cpu_mem;
     stat = ST_READY;
 
     ProgramLoader program(cc.elf());
@@ -49,8 +50,16 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) : QObject(), mcnf(&cc) {
     if (program.get_executable_entry())
         regs->pc_abs_jmp(program.get_executable_entry());
     mem = new Memory(*mem_program_only);
-    cch_program = new Cache(mem, &cc.cache_program(), cc.memory_access_time_read(), cc.memory_access_time_write());
-    cch_data = new Cache(mem, &cc.cache_data(), cc.memory_access_time_read(), cc.memory_access_time_write());
+    cpu_mem = mem;
+#if 1
+    physaddrspace = new PhysAddrSpace();
+    physaddrspace->insert_range(mem, 0x00000000, 0xefffffff, false);
+    MemoryAccess *periph = new SimplePeripheral();
+    physaddrspace->insert_range(periph, 0xffffc000, 0xffffcfff, false);
+    cpu_mem = physaddrspace;
+#endif
+    cch_program = new Cache(cpu_mem, &cc.cache_program(), cc.memory_access_time_read(), cc.memory_access_time_write());
+    cch_data = new Cache(cpu_mem, &cc.cache_data(), cc.memory_access_time_read(), cc.memory_access_time_write());
 
     if (cc.pipelined())
         cr = new CorePipelined(regs, cch_program, cch_data, cc.hazard_unit());

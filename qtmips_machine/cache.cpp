@@ -37,7 +37,7 @@
 
 using namespace machine;
 
-Cache::Cache(Memory *m, const MachineConfigCache *cc, unsigned memory_access_penalty_r, unsigned memory_access_penalty_w) : cnf(cc) {
+Cache::Cache(MemoryAccess  *m, const MachineConfigCache *cc, unsigned memory_access_penalty_r, unsigned memory_access_penalty_w) : cnf(cc) {
     mem = m;
     access_pen_r = memory_access_penalty_r;
     access_pen_w = memory_access_penalty_w;
@@ -89,7 +89,7 @@ bool Cache::wword(std::uint32_t address, std::uint32_t value) {
     changed = access(address, &data, true, value);
 
     if (cnf.write_policy() == MachineConfigCache::WP_TROUGH)
-        return mem->wword(address, value);
+        return mem->write_word(address, value);
     return changed;
 }
 
@@ -241,7 +241,7 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
         emit miss_update(miss());
         update_statistics();
         for (unsigned i = 0; i < cnf.blocks(); i++)
-            cd.data[i] = mem->rword(base_address(tag, row) + (4*i));
+            cd.data[i] = mem->read_word(base_address(tag, row) + (4*i));
     }
 
     // Update replc
@@ -274,7 +274,7 @@ void Cache::kick(unsigned associat_indx, unsigned row) const {
     struct cache_data &cd = dt[associat_indx][row];
     if (cd.dirty && cnf.write_policy() == MachineConfigCache::WP_BACK)
         for (unsigned i = 0; i < cnf.blocks(); i++)
-            mem->wword(base_address(cd.tag, row) + (4*i), cd.data[i]);
+            mem->write_word(base_address(cd.tag, row) + (4*i), cd.data[i]);
     cd.valid = false;
     cd.dirty = false;
 

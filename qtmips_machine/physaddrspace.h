@@ -33,78 +33,44 @@
  *
  ******************************************************************************/
 
-#ifndef QTMIPSMACHINE_H
-#define QTMIPSMACHINE_H
+#ifndef PHYSADDRSPACE_H
+#define PHYSADDRSPACE_H
 
 #include <QObject>
-#include <QTimer>
+#include <QMap>
 #include <cstdint>
 #include <qtmipsexception.h>
-#include <machineconfig.h>
-#include <registers.h>
-#include <memory.h>
-#include <core.h>
-#include <cache.h>
-#include <physaddrspace.h>
-#include <peripheral.h>
+#include "machinedefs.h"
+#include "memory.h"
 
 namespace machine {
 
-class QtMipsMachine : public QObject {
+class PhysAddrSpace : public MemoryAccess {
     Q_OBJECT
 public:
-    QtMipsMachine(const MachineConfig &cc);
+    PhysAddrSpace();
+    ~PhysAddrSpace();
 
-    const MachineConfig &config();
-    void set_speed(unsigned);
+    bool wword(std::uint32_t address, std::uint32_t value);
+    std::uint32_t rword(std::uint32_t address) const;
 
-    const Registers *registers();
-    const Memory *memory();
-    const Cache *cache_program();
-    const Cache *cache_data();
-    const Core *core();
-    const CoreSingle *core_singe();
-    const CorePipelined *core_pipelined();
-
-    enum Status {
-        ST_READY, // Machine is ready to be started or step to be called
-        ST_RUNNING, // Machine is running
-        ST_BUSY, // Machine is calculating step
-        ST_EXIT, // Machine exited
-        ST_TRAPPED // Machine exited with failure
-    };
-    enum Status status();
-    bool exited();
-
-public slots:
-    void play();
-    void pause();
-    void step();
-    void restart();
-
-signals:
-    void program_exit();
-    void program_trap(machine::QtMipsException &e);
-    void status_change(enum machine::QtMipsMachine::Status st);
-    void tick(); // Time tick
-    void post_tick(); // Emitted after tick to allow updates
-
+    bool insert_range(MemoryAccess *mem_acces, std::uint32_t start_addr, std::uint32_t last_addr, bool move_ownership);
+    bool remove_range(MemoryAccess *mem_acces);
+    void clean_range(std::uint32_t start_addr, std::uint32_t last_addr);
 private:
-    MachineConfig mcnf;
-
-    Registers *regs;
-    Memory *mem, *mem_program_only;
-    PhysAddrSpace *physaddrspace;
-    Cache *cch_program, *cch_data;
-    Core *cr;
-
-    QTimer *run_t;
-
-    std::uint32_t program_end;
-    enum Status stat;
-    void set_status(enum Status st);
+    class RangeDesc {
+    public:
+         RangeDesc(MemoryAccess *mem_acces, std::uint32_t start_addr, std::uint32_t last_addr, bool owned);
+         std::uint32_t start_addr;
+         std::uint32_t last_addr;
+         MemoryAccess *mem_acces;
+         bool owned;
+    };
+    QMap<std::uint32_t, RangeDesc *> ranges_by_addr;
+    QMap<MemoryAccess *, RangeDesc *> ranges_by_access;
+    RangeDesc *find_range(std::uint32_t address) const;
 };
 
 }
 
-#endif // QTMIPSMACHINE_H
+#endif // PHYSADDRSPACE_H

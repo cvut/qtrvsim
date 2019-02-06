@@ -46,7 +46,7 @@ namespace machine {
 class Cache : public MemoryAccess {
     Q_OBJECT
 public:
-    Cache(Memory *m, const MachineConfigCache *c, unsigned memory_access_penalty_r = 1, unsigned memory_access_penalty_w = 1);
+    Cache(MemoryAccess *m, const MachineConfigCache *c, unsigned memory_access_penalty_r = 1, unsigned memory_access_penalty_w = 1);
 
     bool wword(std::uint32_t address, std::uint32_t value);
     std::uint32_t rword(std::uint32_t address) const;
@@ -72,7 +72,7 @@ signals:
 
 private:
     MachineConfigCache cnf;
-    Memory *mem;
+    MemoryAccess *mem;
     unsigned access_pen_r, access_pen_w;
     std::uint32_t uncached_start;
     std::uint32_t uncached_last;

@@ -23,7 +23,9 @@ SOURCES += \
     cache.cpp \
     alu.cpp \
     machineconfig.cpp \
-    utils.cpp
+    utils.cpp \
+    physaddrspace.cpp \
+    peripheral.cpp
 
 HEADERS += \
     qtmipsmachine.h \
@@ -37,4 +39,6 @@ HEADERS += \
     alu.h \
     machineconfig.h \
     utils.h \
-    machinedefs.h
+    machinedefs.h \
+    physaddrspace.h \
+    peripheral.h
