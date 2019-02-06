@@ -100,7 +100,7 @@ static const struct InstructionMap  alu_instruction_map[] = {
      .flags = FLAGS_ALU_T_R_STD_SHV},
     {"JR",     IT_R, ALU_OP_JR, NOMEM, nullptr,
      .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_JUMP},
-    {"JALR",   IT_R, ALU_OP_JALR, NOMEM, nullptr,
+    {"JALR",   IT_R, ALU_OP_PASS_T, NOMEM, nullptr,
      .flags = IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE | IMF_BJR_REQ_RS | IMF_PC8_TO_RT | IMF_JUMP},
     {"MOVZ",   IT_R, ALU_OP_MOVZ, NOMEM, nullptr,
      .flags = FLAGS_ALU_T_R_STD},
@@ -187,9 +187,9 @@ static const struct InstructionMap  regimm_instruction_map[] = {
     {"TNEI", IT_I, NOALU, NOMEM, nullptr,       // TNEI
      .flags = IMF_BJR_REQ_RS},
     IM_UNKNOWN,
-    {"BLTZAL", IT_I, NOALU, NOMEM, nullptr,       // BLTZAL
+    {"BLTZAL", IT_I, ALU_OP_PASS_T, NOMEM, nullptr,       // BLTZAL
      .flags = FLAGS_J_B_PC_TO_R31 | IMF_BJR_REQ_RS | IMF_BRANCH},
-    {"BGEZAL", IT_I, NOALU, NOMEM, nullptr,       // BGEZAL
+    {"BGEZAL", IT_I, ALU_OP_PASS_T, NOMEM, nullptr,       // BGEZAL
      .flags = FLAGS_J_B_PC_TO_R31 | IMF_BJR_REQ_RS | IMF_BRANCH | IMF_BJ_NOT},
     {"BLTZALL", IT_I, NOALU, NOMEM, nullptr,       // BLTZALL
      .flags = IMF_BJR_REQ_RS},
