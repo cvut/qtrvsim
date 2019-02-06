@@ -233,7 +233,7 @@ void Core::writeback(const struct dtMemory &dt) {
 }
 
 void Core::handle_pc(const struct dtDecode &dt) {
-    bool branch;
+    bool branch = false;
     emit instruction_program_counter(dt.inst);
 
     if (dt.jump) {
@@ -289,6 +289,7 @@ void Core::dtDecodeInit(struct dtDecode &dt) {
     dt.forward_m_d_rs = false;
     dt.forward_m_d_rt = false;
     dt.aluop = ALU_OP_SLL;
+    dt.memctl = AC_NONE;
     dt.val_rs = 0;
     dt.val_rt = 0;
     dt.rwrite = 0;

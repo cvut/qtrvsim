@@ -47,6 +47,7 @@ class Cache : public MemoryAccess {
     Q_OBJECT
 public:
     Cache(MemoryAccess *m, const MachineConfigCache *c, unsigned memory_access_penalty_r = 1, unsigned memory_access_penalty_w = 1);
+    ~Cache();
 
     bool wword(std::uint32_t address, std::uint32_t value);
     std::uint32_t rword(std::uint32_t address) const;

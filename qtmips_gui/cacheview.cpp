@@ -210,11 +210,12 @@ CacheViewBlock::CacheViewBlock(const machine::Cache *cache, unsigned block , boo
 }
 
 CacheViewBlock::~CacheViewBlock() {
-    delete validity;
-    delete dirty;
-    delete tag;
+    delete[] validity;
+    if (dirty != nullptr)
+        delete[] dirty;
+    delete[] tag;
     for (unsigned y = 0; y < rows; y++)
-        delete data[y];
+        delete[] data[y];
     delete data;
 }
 

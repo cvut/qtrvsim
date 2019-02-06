@@ -133,7 +133,7 @@ MemorySection::MemorySection(const MemorySection &ms) : MemorySection(ms.length(
 }
 
 MemorySection::~MemorySection() {
-    delete this->dt;
+    delete[] this->dt;
 }
 
 bool MemorySection::wword(std::uint32_t offset, std::uint32_t value) {
@@ -205,14 +205,18 @@ Memory::Memory() {
 
 Memory::Memory(const Memory &m) {
     this->mt_root = copy_section_tree(m.get_memorytree_root(), 0);
+    change_counter = 0;
+    write_counter = 0;
 }
 
 Memory::~Memory() {
     free_section_tree(this->mt_root, 0);
+    delete[] this->mt_root;
 }
 
 void Memory::reset() {
     free_section_tree(this->mt_root, 0);
+    delete[] this->mt_root;
     this->mt_root = allocate_section_tree();
 }
 
@@ -283,8 +287,10 @@ union machine::MemoryTree *Memory::allocate_section_tree() {
 void Memory::free_section_tree(union machine::MemoryTree *mt, size_t depth) {
     if (depth < (MEMORY_TREE_DEPTH - 1))  { // Following level is memory tree
         for (int i = 0; i < MEMORY_TREE_ROW_SIZE; i++) {
-            if (mt[i].mt != nullptr)
+            if (mt[i].mt != nullptr) {
                 free_section_tree(mt[i].mt, depth + 1);
+                delete[] mt[i].mt;
+            }
         }
     } else { // Following level is memory section
         for (int i = 0; i < MEMORY_TREE_ROW_SIZE; i++) {

@@ -48,6 +48,10 @@ Cache::Cache(MemoryAccess  *m, const MachineConfigCache *cc, unsigned memory_acc
     hit_write = 0;
     miss_read = 0;
     miss_write = 0;
+    dt = nullptr;
+    replc.lfu = nullptr;
+    replc.lru = nullptr;
+
     // Skip any other initialization if cache is disabled
     if (!cc->enabled())
         return;
@@ -58,6 +62,7 @@ Cache::Cache(MemoryAccess  *m, const MachineConfigCache *cc, unsigned memory_acc
         dt[i] = new cache_data[cc->sets()];
         for (unsigned y = 0; y < cc->sets(); y++) {
             dt[i][y].valid = false;
+            dt[i][y].dirty = false;
             dt[i][y].data = new std::uint32_t[cc->blocks()];
         }
     }
@@ -65,17 +70,55 @@ Cache::Cache(MemoryAccess  *m, const MachineConfigCache *cc, unsigned memory_acc
     switch (cnf.replacement_policy()) {
     case MachineConfigCache::RP_LFU:
         replc.lfu = new unsigned *[cnf.sets()];
-        for (unsigned row = 0; row < cnf.sets(); row++)
+        for (unsigned row = 0; row < cnf.sets(); row++) {
             replc.lfu[row] = new unsigned[cnf.associativity()];
+	    for (int i = 0; i < cnf.associativity(); i++)
+	        replc.lfu[row][i] = 0;
+	}
         break;
     case MachineConfigCache::RP_LRU:
         replc.lru = new time_t*[cnf.sets()];
-        for (unsigned row = 0; row < cnf.sets(); row++)
+        for (unsigned row = 0; row < cnf.sets(); row++) {
             replc.lru[row] = new time_t[cnf.associativity()];
+	    for (int i = 0; i < cnf.associativity(); i++)
+	        replc.lru[row][i] = 0;
+	}
     default:
         break;
     }
 }
+
+Cache::~Cache(){
+    if (dt != nullptr) {
+        for (unsigned i = 0; i < cnf.associativity(); i++) {
+	    if (dt[i]) {
+                for (unsigned y = 0; y < cnf.sets(); y++)
+                    if (dt[i][y].data != nullptr)
+                        delete[] dt[i][y].data;
+                delete[] dt[i];
+            }
+	}
+        delete[] dt;
+    }
+    switch (cnf.replacement_policy()) {
+    case MachineConfigCache::RP_LFU:
+        if (replc.lfu == nullptr)
+            break;
+        for (unsigned row = 0; row < cnf.sets(); row++)
+            delete[] replc.lfu[row];
+        delete [] replc.lfu;
+        break;
+    case MachineConfigCache::RP_LRU:
+        if (replc.lru == nullptr)
+            break;
+        for (unsigned row = 0; row < cnf.sets(); row++)
+            delete[] replc.lru[row];
+        delete[] replc.lru;
+    default:
+        break;
+    }
+}
+
 
 bool Cache::wword(std::uint32_t address, std::uint32_t value) {
     bool changed;
@@ -222,7 +265,7 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
     struct cache_data &cd = dt[indx][row];
 
     // Verify if we are not replacing
-    if (cd.tag != tag && cd.valid)
+    if (cd.valid && cd.tag != tag)
         kick(indx, row);
 
     // Update statistics and otherwise read from memory

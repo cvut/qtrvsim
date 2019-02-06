@@ -47,6 +47,7 @@
 MemoryView::MemoryView(QWidget *parent, std::uint32_t addr0) : QWidget(parent) {
     memory = nullptr;
     addr_0 = addr0;
+    change_counter = 0;
 
     layout = new QVBoxLayout(this);
 
