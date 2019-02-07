@@ -225,13 +225,15 @@ enum LocationStatus Cache::location_status(std::uint32_t address) const {
     std::uint32_t index = address % ssize;
     std::uint32_t row = index / cnf.blocks();
 
-    for (unsigned indx = 0; indx < cnf.associativity(); indx++) {
-        if (dt[indx][row].valid && dt[indx][row].tag == tag) {
-            if (dt[indx][row].dirty &&
-                cnf.write_policy() == MachineConfigCache::WP_BACK)
-                return (enum LocationStatus)(LOCSTAT_CACHED | LOCSTAT_DIRTY);
-            else
-                return (enum LocationStatus)LOCSTAT_CACHED;
+    if (cnf.enabled()) {
+        for (unsigned indx = 0; indx < cnf.associativity(); indx++) {
+            if (dt[indx][row].valid && dt[indx][row].tag == tag) {
+                if (dt[indx][row].dirty &&
+                    cnf.write_policy() == MachineConfigCache::WP_BACK)
+                    return (enum LocationStatus)(LOCSTAT_CACHED | LOCSTAT_DIRTY);
+                else
+                    return (enum LocationStatus)LOCSTAT_CACHED;
+            }
         }
     }
     return mem->location_status(address);
