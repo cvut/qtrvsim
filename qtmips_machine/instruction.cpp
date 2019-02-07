@@ -160,6 +160,75 @@ static const struct InstructionMap  alu_instruction_map[] = {
      .flags = FLAGS_ALU_T_R_STD},
 };
 
+static const struct InstructionMap  special3_instruction_map[] = {
+    IM_UNKNOWN,	//	0
+    IM_UNKNOWN,	//	1
+    IM_UNKNOWN,	//	2
+    IM_UNKNOWN,	//	3
+    IM_UNKNOWN,	//	4
+    IM_UNKNOWN,	//	5
+    IM_UNKNOWN,	//	6
+    IM_UNKNOWN,	//	7
+    IM_UNKNOWN,	//	8
+    IM_UNKNOWN,	//	9
+    IM_UNKNOWN,	//	10
+    IM_UNKNOWN,	//	11
+    IM_UNKNOWN,	//	12
+    IM_UNKNOWN,	//	13
+    IM_UNKNOWN,	//	14
+    IM_UNKNOWN,	//	15
+    IM_UNKNOWN,	//	16
+    IM_UNKNOWN,	//	17
+    IM_UNKNOWN,	//	18
+    IM_UNKNOWN,	//	19
+    IM_UNKNOWN,	//	20
+    IM_UNKNOWN,	//	21
+    IM_UNKNOWN,	//	22
+    IM_UNKNOWN,	//	23
+    IM_UNKNOWN,	//	24
+    IM_UNKNOWN,	//	25
+    IM_UNKNOWN,	//	26
+    IM_UNKNOWN,	//	27
+    IM_UNKNOWN,	//	28
+    IM_UNKNOWN,	//	29
+    IM_UNKNOWN,	//	30
+    IM_UNKNOWN,	//	31
+    {"BSHFL", IT_R, ALU_OP_BSHFL, NOMEM, nullptr,
+     .flags = FLAGS_ALU_T_R_TD},
+    IM_UNKNOWN,	//	33
+    IM_UNKNOWN,	//	34
+    IM_UNKNOWN,	//	35
+    IM_UNKNOWN,	//	36
+    IM_UNKNOWN,	//	37
+    IM_UNKNOWN,	//	38
+    IM_UNKNOWN,	//	39
+    IM_UNKNOWN,	//	40
+    IM_UNKNOWN,	//	41
+    IM_UNKNOWN,	//	42
+    IM_UNKNOWN,	//	43
+    IM_UNKNOWN,	//	44
+    IM_UNKNOWN,	//	45
+    IM_UNKNOWN,	//	46
+    IM_UNKNOWN,	//	47
+    IM_UNKNOWN,	//	48
+    IM_UNKNOWN,	//	49
+    IM_UNKNOWN,	//	50
+    IM_UNKNOWN,	//	51
+    IM_UNKNOWN,	//	52
+    IM_UNKNOWN,	//	53
+    IM_UNKNOWN,	//	54
+    IM_UNKNOWN,	//	55
+    IM_UNKNOWN,	//	56
+    IM_UNKNOWN,	//	57
+    IM_UNKNOWN,	//	58
+    {"RDHWR", IT_R, ALU_OP_NOP, NOMEM, nullptr,
+     .flags = FLAGS_ALU_T_R_TD},
+    IM_UNKNOWN,	//	60
+    IM_UNKNOWN,	//	61
+    IM_UNKNOWN,	//	62
+    IM_UNKNOWN,	//	63
+};
+
 static const struct InstructionMap  regimm_instruction_map[] = {
     {"BLTZ", IT_I, NOALU, NOMEM, nullptr,       // BLTZ
      .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BRANCH},
@@ -261,7 +330,8 @@ static const struct InstructionMap instruction_map[] = {
     IM_UNKNOWN,  // 28
     IM_UNKNOWN,  // 29
     IM_UNKNOWN,  // 30
-    IM_UNKNOWN,  // 31
+    {"SPECIAL3", IT_R, NOALU, NOMEM, special3_instruction_map, //
+    .flags = IMF_SUB_ENCODE(6, 0)},
     {"LB",     IT_I, ALU_OP_ADDU, AC_BYTE, nullptr,  // LB
      .flags = FLAGS_ALU_I_LOAD},
     {"LH",     IT_I, ALU_OP_ADDU, AC_HALFWORD, nullptr,  // LH

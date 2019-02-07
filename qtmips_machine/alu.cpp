@@ -128,6 +128,8 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
             return (s < t) ? 1 : 0;
         case ALU_OP_LUI:
             return t << 16;
+        case ALU_OP_BSHFL:
+            return (uint32_t)(int32_t)(int8_t)t;
         case  ALU_OP_PASS_T: // Pass s argument without change for JAL
             return t;
         case ALU_OP_BREAK:

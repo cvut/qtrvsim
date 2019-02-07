@@ -84,7 +84,8 @@ enum AluOp : std::uint8_t {
     ALU_OP_NOR,
     ALU_OP_SLT,
     ALU_OP_SLTU,
-    ALU_OP_LUI, // We don't care about exact index for this one
+    ALU_OP_LUI,
+    ALU_OP_BSHFL,
     ALU_OP_PASS_T, // Pass t argument without change for JAL
     ALU_OP_BREAK,
     ALU_OP_SYSCALL,
