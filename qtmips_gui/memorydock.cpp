@@ -54,8 +54,19 @@ QList<QWidget*> DataView::row_widget(std::uint32_t address, QWidget *parent) {
     l = new QLabel(parent);
     l->setTextInteractionFlags(Qt::TextSelectableByMouse);
     l->setFont(f);
-    if (memory != nullptr)
-        l->setText(QString("0x") + QString("%1").arg(memory->read_word(address), 8, 16, QChar('0')).toUpper());
+    if (memory != nullptr) {
+        machine::LocationStatus loc_stat = machine::LOCSTAT_NONE;
+        QString val;
+        val = QString("0x") + QString("%1").arg(memory->read_word(address), 8, 16, QChar('0')).toUpper();
+        if (cache_data != nullptr) {
+            loc_stat = cache_data->location_status(address);
+            if (loc_stat & machine::LOCSTAT_DIRTY)
+                val += " D";
+            else if (loc_stat & machine::LOCSTAT_CACHED)
+                val += " C";
+        }
+        l->setText(val);
+    }
     widgs.append(l);
 
     return widgs;

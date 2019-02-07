@@ -51,6 +51,7 @@ Cache::Cache(MemoryAccess  *m, const MachineConfigCache *cc, unsigned memory_acc
     dt = nullptr;
     replc.lfu = nullptr;
     replc.lru = nullptr;
+    p_change_counter = new std::uint32_t(0);
 
     // Skip any other initialization if cache is disabled
     if (!cc->enabled())
@@ -89,6 +90,7 @@ Cache::Cache(MemoryAccess  *m, const MachineConfigCache *cc, unsigned memory_acc
 }
 
 Cache::~Cache(){
+    delete p_change_counter;
     if (dt != nullptr) {
         for (unsigned i = 0; i < cnf.associativity(); i++) {
 	    if (dt[i]) {
@@ -216,15 +218,17 @@ const MachineConfigCache &Cache::config() const {
     return cnf;
 }
 
-enum LocationStatus Cache::location_status(std::uint32_t address) {
+enum LocationStatus Cache::location_status(std::uint32_t address) const {
+    address = address >> 2;
     unsigned ssize = cnf.blocks() * cnf.sets();
     std::uint32_t tag = address / ssize;
     std::uint32_t index = address % ssize;
     std::uint32_t row = index / cnf.blocks();
 
     for (unsigned indx = 0; indx < cnf.associativity(); indx++) {
-        if (dt[indx][row].valid && dt[indx][row].tag != tag) {
-            if (dt[indx][row].dirty)
+        if (dt[indx][row].valid && dt[indx][row].tag == tag) {
+            if (dt[indx][row].dirty &&
+                cnf.write_policy() == MachineConfigCache::WP_BACK)
                 return (enum LocationStatus)(LOCSTAT_CACHED | LOCSTAT_DIRTY);
             else
                 return (enum LocationStatus)LOCSTAT_CACHED;
@@ -282,8 +286,10 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
     struct cache_data &cd = dt[indx][row];
 
     // Verify if we are not replacing
-    if (cd.valid && cd.tag != tag)
+    if (cd.valid && cd.tag != tag) {
         kick(indx, row);
+        (*p_change_counter)++;
+    }
 
     // Update statistics and otherwise read from memory
     if (cd.valid) {
@@ -300,8 +306,10 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
             miss_read++;
         emit miss_update(miss());
         update_statistics();
-        for (unsigned i = 0; i < cnf.blocks(); i++)
+        for (unsigned i = 0; i < cnf.blocks(); i++) {
             cd.data[i] = mem->read_word(base_address(tag, row) + (4*i));
+            (*p_change_counter)++;
+        }
     }
 
     // Update replc
@@ -327,6 +335,8 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
     }
 
     emit cache_update(indx, row, cd.valid, cd.dirty, cd.tag, cd.data);
+    if (changed)
+        (*p_change_counter)++;
     return changed;
 }
 

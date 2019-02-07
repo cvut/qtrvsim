@@ -64,7 +64,11 @@ public:
     void reset(); // Reset whole state of cache
 
     const MachineConfigCache &config() const;
-    enum LocationStatus location_status(std::uint32_t address);
+    enum LocationStatus location_status(std::uint32_t address) const;
+
+    inline std::uint32_t get_change_counter() const {
+        return *p_change_counter;
+    }
 signals:
     void hit_update(unsigned) const;
     void miss_update(unsigned) const;
@@ -72,6 +76,7 @@ signals:
     void cache_update(unsigned associat, unsigned set, bool valid, bool dirty, std::uint32_t tag, const std::uint32_t *data) const;
 
 private:
+    std::uint32_t* p_change_counter;
     MachineConfigCache cnf;
     MemoryAccess *mem;
     unsigned access_pen_r, access_pen_w;

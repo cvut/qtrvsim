@@ -60,7 +60,7 @@ public:
     std::uint32_t read_ctl(enum AccessControl ctl, std::uint32_t offset) const;
 
     virtual void sync();
-    virtual enum LocationStatus location_status(std::uint32_t offset);
+    virtual enum LocationStatus location_status(std::uint32_t offset) const;
 
 protected:
     virtual bool wword(std::uint32_t offset, std::uint32_t value) = 0;

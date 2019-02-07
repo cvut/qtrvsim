@@ -48,6 +48,7 @@ MemoryView::MemoryView(QWidget *parent, std::uint32_t addr0) : QWidget(parent) {
     memory = nullptr;
     addr_0 = addr0;
     change_counter = 0;
+    cache_data_change_counter = 0;
 
     layout = new QVBoxLayout(this);
 
@@ -67,6 +68,7 @@ MemoryView::MemoryView(QWidget *parent, std::uint32_t addr0) : QWidget(parent) {
 
 void MemoryView::setup(machine::QtMipsMachine *machine) {
     memory = (machine == nullptr) ? nullptr : machine->memory();
+    cache_data = (machine == nullptr) ? nullptr : machine->cache_data();
     if (machine != nullptr)
         connect(machine, SIGNAL(post_tick()), this, SLOT(check_for_updates()));
     reload_content();
@@ -97,10 +99,17 @@ void MemoryView::edit_load_focus() {
 }
 
 void MemoryView::check_for_updates() {
+    bool need_update = false;
     if (memory != nullptr) {
          if (change_counter != memory->get_change_counter())
-             reload_content();
+             need_update = true;
     }
+    if (cache_data != nullptr) {
+         if (cache_data_change_counter != cache_data->get_change_counter())
+             need_update = true;
+    }
+    if (need_update)
+        reload_content();
 }
 
 void MemoryView::reload_content() {
@@ -108,6 +117,8 @@ void MemoryView::reload_content() {
     memf->widg->clearRows();
     if (memory != nullptr)
         change_counter = memory->get_change_counter();
+    if (cache_data != nullptr)
+        cache_data_change_counter = cache_data->get_change_counter();
     update_content(count, 0);
 }
 

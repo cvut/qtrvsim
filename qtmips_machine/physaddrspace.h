@@ -57,7 +57,7 @@ public:
     bool insert_range(MemoryAccess *mem_acces, std::uint32_t start_addr, std::uint32_t last_addr, bool move_ownership);
     bool remove_range(MemoryAccess *mem_acces);
     void clean_range(std::uint32_t start_addr, std::uint32_t last_addr);
-    enum LocationStatus location_status(std::uint32_t offset);
+    enum LocationStatus location_status(std::uint32_t offset) const;
 private:
     class RangeDesc {
     public:

@@ -122,7 +122,7 @@ std::uint32_t MemoryAccess::read_ctl(enum AccessControl ctl, std::uint32_t offse
 
 void MemoryAccess::sync() { }
 
-enum LocationStatus MemoryAccess::location_status(std::uint32_t address) {
+enum LocationStatus MemoryAccess::location_status(std::uint32_t address) const {
     return LOCSTAT_NONE;
 }
 

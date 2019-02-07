@@ -67,6 +67,7 @@ public slots:
 
 protected:
     const machine::Memory *memory;
+    const machine::Cache *cache_data;
 
     virtual QList<QWidget*> row_widget(std::uint32_t address, QWidget *parent) = 0;
 
@@ -82,6 +83,7 @@ private slots:
 
 private:
     std::uint32_t change_counter;
+    std::uint32_t cache_data_change_counter;
     unsigned count;
     std::uint32_t addr_0; // First address in view
 
