@@ -216,6 +216,23 @@ const MachineConfigCache &Cache::config() const {
     return cnf;
 }
 
+enum LocationStatus Cache::location_status(std::uint32_t address) {
+    unsigned ssize = cnf.blocks() * cnf.sets();
+    std::uint32_t tag = address / ssize;
+    std::uint32_t index = address % ssize;
+    std::uint32_t row = index / cnf.blocks();
+
+    for (unsigned indx = 0; indx < cnf.associativity(); indx++) {
+        if (dt[indx][row].valid && dt[indx][row].tag != tag) {
+            if (dt[indx][row].dirty)
+                return (enum LocationStatus)(LOCSTAT_CACHED | LOCSTAT_DIRTY);
+            else
+                return (enum LocationStatus)LOCSTAT_CACHED;
+        }
+    }
+    return mem->location_status(address);
+}
+
 bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::uint32_t value) const {
     bool changed = false;
     address = address >> 2;

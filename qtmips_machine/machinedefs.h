@@ -93,6 +93,14 @@ enum AluOp : std::uint8_t {
     ALU_OP_LAST // First impossible operation (just to be sure that we don't overflow)
 };
 
+enum LocationStatus {
+    LOCSTAT_NONE      = 0,
+    LOCSTAT_CACHED    = 1 << 0,
+    LOCSTAT_DIRTY     = 1 << 1,
+    LOCSTAT_READ_ONLY = 1 << 2,
+    LOCSTAT_ILLEGAL   = 1 << 3,
+};
+
 }
 
 #endif // MACHINEDEFS_H

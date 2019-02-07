@@ -64,7 +64,7 @@ public:
     void reset(); // Reset whole state of cache
 
     const MachineConfigCache &config() const;
-
+    enum LocationStatus location_status(std::uint32_t address);
 signals:
     void hit_update(unsigned) const;
     void miss_update(unsigned) const;

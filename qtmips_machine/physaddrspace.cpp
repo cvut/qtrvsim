@@ -66,6 +66,13 @@ std::uint32_t PhysAddrSpace::rword(std::uint32_t address) const {
     return p_range->mem_acces->read_word(address - p_range->start_addr);
 }
 
+enum LocationStatus PhysAddrSpace::location_status(std::uint32_t address) {
+    const RangeDesc *p_range = find_range(address);
+    if (p_range == nullptr)
+        return LOCSTAT_ILLEGAL;
+    return p_range->mem_acces->location_status(address - p_range->start_addr);
+}
+
 PhysAddrSpace::RangeDesc *PhysAddrSpace::find_range(std::uint32_t address) const {
     PhysAddrSpace::RangeDesc *p_range;
     auto i = ranges_by_addr.lowerBound(address);

@@ -122,6 +122,10 @@ std::uint32_t MemoryAccess::read_ctl(enum AccessControl ctl, std::uint32_t offse
 
 void MemoryAccess::sync() { }
 
+enum LocationStatus MemoryAccess::location_status(std::uint32_t address) {
+    return LOCSTAT_NONE;
+}
+
 MemorySection::MemorySection(std::uint32_t length) {
     this->len = length;
     this->dt = new std::uint32_t[length];
