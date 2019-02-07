@@ -39,11 +39,13 @@
 
 using namespace machine;
 
-Core::Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data) {
+Core::Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data) :
+          ex_handlers() {
     cycle_c = 0;
     this->regs = regs;
     this->mem_program = mem_program;
     this->mem_data = mem_data;
+    ex_default_handler = new StopExceptionHandler();
 }
 
 void Core::step() {
@@ -58,6 +60,43 @@ void Core::reset() {
 
 unsigned Core::cycles() {
     return cycle_c;
+}
+
+Registers *Core::get_regs() {
+    return regs;
+}
+
+MemoryAccess *Core::get_mem_data() {
+    return mem_data;
+}
+
+MemoryAccess *Core::get_mem_program() {
+    return mem_program;
+}
+
+void Core::register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler)
+{
+    if (excause == EXCAUSE_NONE ) {
+        if (ex_default_handler != nullptr)
+            delete ex_default_handler;
+        ex_default_handler = exhandler;
+    } else {
+        ExceptionHandler *old = ex_handlers.take(excause);
+        delete old;
+        ex_handlers.insert(excause, exhandler);
+    }
+}
+
+bool Core::handle_exception(Core *core, Registers *regs, ExceptionCause excause,
+                      std::uint32_t inst_addr, std::uint32_t next_addr,
+                      uint32_t mem_ref_addr)
+{
+    ExceptionHandler *exhandler = ex_handlers.value(excause);
+    if (exhandler != nullptr)
+        return exhandler->handle_exception(core, regs, excause, inst_addr, next_addr, mem_ref_addr);
+    if (ex_default_handler != nullptr)
+        return ex_default_handler->handle_exception(core, regs, excause, inst_addr, next_addr, mem_ref_addr);
+    return false;
 }
 
 struct Core::dtFetch Core::fetch() {
@@ -205,6 +244,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
 struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
     emit instruction_memory(dt.inst);
     std::uint32_t towrite_val = dt.alu_val;
+    std::uint32_t mem_addr = dt.alu_val;
     bool memread = dt.memread;
     bool memwrite = dt.memwrite;
     bool regwrite = dt.regwrite;
@@ -217,9 +257,9 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
         if (dt.memctl == AC_CACHE_OP)
              mem_data->sync();
         else if (memwrite)
-             mem_data->write_ctl(dt.memctl, dt.alu_val, dt.val_rt);
+             mem_data->write_ctl(dt.memctl, mem_addr, dt.val_rt);
         else if (memread)
-             towrite_val = mem_data->read_ctl(dt.memctl, dt.alu_val);
+             towrite_val = mem_data->read_ctl(dt.memctl, mem_addr);
     }
 
     emit memory_alu_value(dt.alu_val);
@@ -231,14 +271,12 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
     emit memory_memwrite_value(memwrite);
     emit memory_regw_num_value(dt.rwrite);
 
-    if ((dt.excause == EXCAUSE_BREAK) || (dt.excause == EXCAUSE_SYSCALL))
-        emit memory_break_reached();
-
     return {
         .inst = dt.inst,
         .regwrite = regwrite,
         .rwrite = dt.rwrite,
         .towrite_val = towrite_val,
+         .mem_addr = mem_addr,
         .inst_addr = dt.inst_addr,
         .excause = dt.excause,
     };
@@ -318,7 +356,6 @@ void Core::dtDecodeInit(struct dtDecode &dt) {
     dt.immediate_val = 0;
     dt.ff_rs = FORWARD_NONE;
     dt.ff_rt = FORWARD_NONE;
-    dt.inst_addr = 0;
     dt.excause = EXCAUSE_NONE;
 }
 
@@ -331,7 +368,6 @@ void Core::dtExecuteInit(struct dtExecute &dt) {
     dt.val_rt = 0;
     dt.rwrite = 0;
     dt.alu_val = 0;
-    dt.inst_addr = 0;
     dt.excause = EXCAUSE_NONE;
 }
 
@@ -340,7 +376,7 @@ void Core::dtMemoryInit(struct dtMemory &dt) {
     dt.regwrite = false;
     dt.rwrite = false;
     dt.towrite_val = 0;
-    dt.inst_addr = 0;
+    dt.mem_addr = 0;
     dt.excause = EXCAUSE_NONE;
 }
 
@@ -363,14 +399,6 @@ void CoreSingle::do_step() {
     struct dtDecode d = decode(f);
     struct dtExecute e = execute(d);
     struct dtMemory m = memory(e);
-
-    if (m.excause != EXCAUSE_NONE) {
-        regs->pc_abs_jmp(m.inst_addr + 4);
-        if (jmp_delay_decode != nullptr)
-            dtDecodeInit(*jmp_delay_decode);
-        return;
-    }
-
     writeback(m);
 
     if (jmp_delay_decode != nullptr) {
@@ -378,11 +406,20 @@ void CoreSingle::do_step() {
         *jmp_delay_decode = d; // Copy current decode
     } else
         handle_pc(d);
+
+    if (m.excause != EXCAUSE_NONE) {
+        if (jmp_delay_decode != nullptr)
+            dtDecodeInit(*jmp_delay_decode);
+        handle_exception(this, regs, m.excause, m.inst_addr, regs->read_pc(), m.mem_addr);
+        return;
+    }
 }
 
 void CoreSingle::do_reset() {
-    if (jmp_delay_decode != nullptr)
+    if (jmp_delay_decode != nullptr) {
         Core::dtDecodeInit(*jmp_delay_decode);
+        jmp_delay_decode->inst_addr = 0;
+    }
 }
 
 CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data, enum MachineConfig::HazardUnit hazard_unit) : \
@@ -412,7 +449,8 @@ void CorePipelined::do_step() {
     if (excpt_in_progress) {
         dtFetchInit(dt_f);
         if (dt_m.excause != EXCAUSE_NONE) {
-            regs->pc_abs_jmp(dt_m.inst_addr + 4);
+            regs->pc_abs_jmp(dt_e.inst_addr);
+            handle_exception(this, regs, dt_m.excause, dt_m.inst_addr, dt_e.inst_addr, dt_m.mem_addr);
         }
         return;
     }
@@ -517,7 +555,26 @@ void CorePipelined::do_step() {
 
 void CorePipelined::do_reset() {
     dtFetchInit(dt_f);
+    dt_f.inst_addr = 0;
     dtDecodeInit(dt_d);
+    dt_d.inst_addr = 0;
     dtExecuteInit(dt_e);
+    dt_e.inst_addr = 0;
     dtMemoryInit(dt_m);
+    dt_m.inst_addr = 0;
 }
+
+bool StopExceptionHandler::handle_exception(Core *core, Registers *regs,
+     ExceptionCause excause, std::uint32_t inst_addr, std::uint32_t next_addr,
+     std::uint32_t mem_ref_addr) {
+
+#if 0
+    printf("Exception cause %d instruction PC 0x%08lx next PC 0x%08lx registers PC 0x%08lx mem ref 0x%08lx\n",
+           excause, (unsigned long)inst_addr, (unsigned long)next_addr,
+           (unsigned long)regs->read_pc(), (unsigned long)mem_ref_addr);
+#else
+    (void)excause; (void)inst_addr; (void)next_addr; (void)mem_ref_addr;
+#endif
+    emit core->stop_on_exception_reached();
+    return true;
+};

@@ -46,6 +46,24 @@
 
 namespace machine {
 
+class Core;
+
+class ExceptionHandler : public QObject {
+    Q_OBJECT
+public:
+    virtual bool handle_exception(Core *core, Registers *regs, ExceptionCause excause,
+                                 std::uint32_t inst_addr, std::uint32_t next_addr,
+                                 std::uint32_t mem_ref_addr) =  0;
+};
+
+class StopExceptionHandler : public ExceptionHandler {
+    Q_OBJECT
+public:
+    bool handle_exception(Core *core, Registers *regs, ExceptionCause excause,
+                                 std::uint32_t inst_addr, std::uint32_t next_addr,
+                                 std::uint32_t mem_ref_addr);
+};
+
 class Core : public QObject {
     Q_OBJECT
 public:
@@ -55,6 +73,11 @@ public:
     void reset(); // Reset core (only core, memory and registers has to be reseted separately)
 
     unsigned cycles(); // Returns number of executed cycles
+
+    Registers *get_regs();
+    MemoryAccess *get_mem_data();
+    MemoryAccess *get_mem_program();
+    void register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler);
 
     enum ForwardFrom {
         FORWARD_NONE   = 0b00,
@@ -110,17 +133,24 @@ signals:
     void memory_memwrite_value(std::uint32_t);
     void memory_memread_value(std::uint32_t);
     void memory_regw_num_value(std::uint32_t);
-    void memory_break_reached();
     void writeback_value(std::uint32_t);
     void writeback_regw_value(std::uint32_t);
     void writeback_regw_num_value(std::uint32_t);
+
+    void stop_on_exception_reached();
 
 protected:
     virtual void do_step() = 0;
     virtual void do_reset() = 0;
 
+    bool handle_exception(Core *core, Registers *regs, ExceptionCause excause,
+                          std::uint32_t inst_addr, std::uint32_t next_addr,
+                          std::uint32_t mem_ref_addr);
+
     Registers *regs;
     MemoryAccess *mem_data, *mem_program;
+    QMap<ExceptionCause, ExceptionHandler *> ex_handlers;
+    ExceptionHandler *ex_default_handler;
 
     struct dtFetch {
         Instruction inst; // Loaded instruction
@@ -173,6 +203,7 @@ protected:
         bool regwrite;
         std::uint8_t rwrite;
         std::uint32_t towrite_val;
+        std::uint32_t mem_addr; // Address used to access memory
         uint32_t inst_addr; // Address of instruction
         enum ExceptionCause excause;
     };
