@@ -86,12 +86,12 @@ public:
     };
 
 signals:
-    void instruction_fetched(const machine::Instruction &inst);
-    void instruction_decoded(const machine::Instruction &inst);
-    void instruction_executed(const machine::Instruction &inst);
-    void instruction_memory(const machine::Instruction &inst);
-    void instruction_writeback(const machine::Instruction &inst);
-    void instruction_program_counter(const machine::Instruction &inst);
+    void instruction_fetched(const machine::Instruction &inst, std::uint32_t inst_addr);
+    void instruction_decoded(const machine::Instruction &inst, std::uint32_t inst_addr);
+    void instruction_executed(const machine::Instruction &inst, std::uint32_t inst_addr);
+    void instruction_memory(const machine::Instruction &inst, std::uint32_t inst_addr);
+    void instruction_writeback(const machine::Instruction &inst, std::uint32_t inst_addr);
+    void instruction_program_counter(const machine::Instruction &inst, std::uint32_t inst_addr);
 
     void fetch_jump_reg_value(std::uint32_t);
     void fetch_jump_value(std::uint32_t);

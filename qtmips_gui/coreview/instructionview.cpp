@@ -52,7 +52,7 @@ InstructionView::InstructionView() : QGraphicsObject(nullptr), text(this) {
     f.setPointSize(6);
     text.setFont(f);
 
-    instruction_update(machine::Instruction()); // Initialize to NOP
+    instruction_update(machine::Instruction(), 0); // Initialize to NOP
 }
 
 QRectF InstructionView::boundingRect() const {
@@ -65,7 +65,7 @@ void InstructionView::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
     painter->drawRoundRect(-WIDTH/2, 0, WIDTH, HEIGHT, ROUND, ROUND);
 }
 
-void InstructionView::instruction_update(const machine::Instruction &i) {
+void InstructionView::instruction_update(const machine::Instruction &i, std::uint32_t inst_addr) {
     QRectF prev_box = boundingRect();
     text.setText(i.to_str());
     QRectF box = text.boundingRect();

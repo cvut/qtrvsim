@@ -102,7 +102,7 @@ bool Core::handle_exception(Core *core, Registers *regs, ExceptionCause excause,
 struct Core::dtFetch Core::fetch() {
     std::uint32_t inst_addr = regs->read_pc();
     Instruction inst(mem_program->read_word(inst_addr));
-    emit instruction_fetched(inst);
+    emit instruction_fetched(inst, inst_addr);
     return {
         .inst = inst,
         .inst_addr = inst_addr,
@@ -112,7 +112,7 @@ struct Core::dtFetch Core::fetch() {
 
 struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     uint8_t rwrite;
-    emit instruction_decoded(dt.inst);
+    emit instruction_decoded(dt.inst, dt.inst_addr);
     enum InstructionFlags flags;
     enum AluOp alu_op;
     enum AccessControl mem_ctl;
@@ -199,7 +199,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
 }
 
 struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
-    emit instruction_executed(dt.inst);
+    emit instruction_executed(dt.inst, dt.inst_addr);
     bool discard;
 
     // Handle conditional move (we have to change regwrite signal if conditional is not met)
@@ -242,7 +242,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
 }
 
 struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
-    emit instruction_memory(dt.inst);
+    emit instruction_memory(dt.inst, dt.inst_addr);
     std::uint32_t towrite_val = dt.alu_val;
     std::uint32_t mem_addr = dt.alu_val;
     bool memread = dt.memread;
@@ -283,7 +283,7 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
 }
 
 void Core::writeback(const struct dtMemory &dt) {
-    emit instruction_writeback(dt.inst);
+    emit instruction_writeback(dt.inst, dt.inst_addr);
     emit writeback_value(dt.towrite_val);
     emit writeback_regw_value(dt.regwrite);
     emit writeback_regw_num_value(dt.rwrite);
@@ -293,7 +293,7 @@ void Core::writeback(const struct dtMemory &dt) {
 
 void Core::handle_pc(const struct dtDecode &dt) {
     bool branch = false;
-    emit instruction_program_counter(dt.inst);
+    emit instruction_program_counter(dt.inst, dt.inst_addr);
 
     if (dt.jump) {
         if (!dt.bjr_req_rs) {
@@ -573,7 +573,7 @@ bool StopExceptionHandler::handle_exception(Core *core, Registers *regs,
            excause, (unsigned long)inst_addr, (unsigned long)next_addr,
            (unsigned long)regs->read_pc(), (unsigned long)mem_ref_addr);
 #else
-    (void)excause; (void)inst_addr; (void)next_addr; (void)mem_ref_addr;
+    (void)excause; (void)inst_addr; (void)next_addr; (void)mem_ref_addr; (void)regs;
 #endif
     emit core->stop_on_exception_reached();
     return true;

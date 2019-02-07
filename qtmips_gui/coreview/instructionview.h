@@ -51,7 +51,7 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 public slots:
-    void instruction_update(const machine::Instruction &i);
+    void instruction_update(const machine::Instruction &i, std::uint32_t inst_addr);
 
 private:
     QGraphicsSimpleTextItem text;

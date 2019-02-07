@@ -52,7 +52,8 @@
     } while(false)
 #define NEW_I(VAR, X, Y, SIG) do { \
         NEW(InstructionView, VAR, X, Y); \
-        connect(machine->core(), SIGNAL(SIG), VAR, SLOT(instruction_update(const machine::Instruction&))); \
+        connect(machine->core(), &machine::Core::SIG, \
+                VAR, &coreview::InstructionView::instruction_update); \
     } while(false)
 #define NEW_V(X, Y, SIG, ...) do { \
         NEW(Value, val, X, Y, __VA_ARGS__); \
@@ -229,10 +230,10 @@ QGraphicsSimpleTextItem *CoreViewScene::new_label(const QString &str, qreal x, q
 }
 
 CoreViewSceneSimple::CoreViewSceneSimple(machine::QtMipsMachine *machine) : CoreViewScene(machine) {
-    NEW_I(instr_prim, 230, 60, instruction_fetched(const machine::Instruction&));
+    NEW_I(instr_prim, 230, 60, instruction_fetched);
     if (machine->config().delay_slot()) {
         NEW(Latch, delay_slot_latch, 55, 470, machine, 25);
-        NEW_I(instr_delay, 60, 500, instruction_program_counter(const machine::Instruction&));
+        NEW_I(instr_delay, 60, 500, instruction_program_counter);
     }
 
     coreview::Connection *con;
@@ -311,11 +312,11 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
     NEW(Latch, latch_mem_wb, 660, 70, machine, 400);
     latch_mem_wb->setTitle("MEM/WB");
 
-    NEW_I(inst_fetch, 79, 2, instruction_fetched(const machine::Instruction&));
-    NEW_I(inst_dec, 275, 2, instruction_decoded(const machine::Instruction&));
-    NEW_I(inst_exec, 464, 2, instruction_executed(const machine::Instruction&));
-    NEW_I(inst_mem, 598, 2, instruction_memory(const machine::Instruction&));
-    NEW_I(inst_wrb, 660, 18, instruction_writeback(const machine::Instruction&));
+    NEW_I(inst_fetch, 79, 2, instruction_fetched);
+    NEW_I(inst_dec, 275, 2, instruction_decoded);
+    NEW_I(inst_exec, 464, 2, instruction_executed);
+    NEW_I(inst_mem, 598, 2, instruction_memory);
+    NEW_I(inst_wrb, 660, 18, instruction_writeback);
 
     if (machine->config().hazard_unit() != machine::MachineConfig::HU_NONE) {
         NEW(LogicBlock, hazard_unit, SC_WIDTH/2, SC_HEIGHT - 15, "Hazard Unit");
