@@ -110,7 +110,7 @@ public:
     bool operator!=(const Instruction &c) const;
     Instruction &operator=(const Instruction &c);
 
-    QString to_str() const;
+    QString to_str(std::int32_t inst_addr = 0) const;
 
 private:
     std::uint32_t dt;

@@ -111,7 +111,7 @@ QList<QWidget*> ProgramView::row_widget(std::uint32_t address, QWidget *parent) 
     l->setFont(f);
     l->setMinimumWidth(60);
     if (memory != nullptr)
-        l->setText(machine::Instruction(memory->read_word(address)).to_str());
+        l->setText(machine::Instruction(memory->read_word(address)).to_str(address));
     widgs.append(l);
 
     return widgs;

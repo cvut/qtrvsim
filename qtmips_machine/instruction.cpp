@@ -530,7 +530,7 @@ Instruction &Instruction::operator=(const Instruction &c) {
     return *this;
 }
 
-QString Instruction::to_str() const {
+QString Instruction::to_str(std::int32_t inst_addr) const {
     const InstructionMap &im = InstructionMapFind(dt);
     // TODO there are exception where some fields are zero and such so we should not print them in such case
     if (dt == 0)
@@ -542,7 +542,7 @@ QString Instruction::to_str() const {
         res += im.name;
         if (im.flags & IMF_MEM) {
             res += " $" + QString::number(rt());
-            res += ", 0x" + QString::number(immediate(), 16).toUpper() + "(" + QString::number(rs()) + ")";
+            res += ", 0x" + QString::number(immediate(), 16).toUpper() + "($" + QString::number(rs()) + ")";
         } else {
             if (im.flags & IMF_REGWRITE) {
                 res += next_delim + "$" + QString::number(rt());
@@ -556,13 +556,22 @@ QString Instruction::to_str() const {
                 res += next_delim + "$" + QString::number(rt());
                 next_delim = ", ";
             }
-            res += next_delim + "0x" + QString::number(immediate(), 16).toUpper();
+            if (im.flags & IMF_BRANCH) {
+                std::uint32_t target = inst_addr + ((int16_t)immediate() << 2) + 4;
+                res += next_delim + "0x" + QString::number(target, 16).toUpper();
+            } else if (im.flags & IMF_ZERO_EXTEND) {
+                res += next_delim + "0x" + QString::number(immediate(), 16).toUpper();
+            } else {
+                res += next_delim + QString::number((std::int16_t)immediate(), 10).toUpper();
+            }
         }
         break;
     case T_J:
         res += im.name;
-        // TODO we need to know instruction address to expand address section by it
-        res += " 0x" + QString::number(address(), 16).toUpper();
+        {
+            std::uint32_t target = (inst_addr & 0xF0000000) | (address() << 2);
+            res += " 0x" + QString::number(target, 16).toUpper();
+        }
         break;
     case T_R:
         {

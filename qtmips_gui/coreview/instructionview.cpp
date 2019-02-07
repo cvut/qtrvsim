@@ -67,7 +67,7 @@ void InstructionView::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
 
 void InstructionView::instruction_update(const machine::Instruction &i, std::uint32_t inst_addr) {
     QRectF prev_box = boundingRect();
-    text.setText(i.to_str());
+    text.setText(i.to_str(inst_addr));
     QRectF box = text.boundingRect();
     text.setPos(-box.width()/2, GAP);
     update(prev_box.united(boundingRect()));
