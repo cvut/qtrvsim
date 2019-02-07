@@ -89,13 +89,18 @@ void Core::register_exception_handler(ExceptionCause excause, ExceptionHandler *
 
 bool Core::handle_exception(Core *core, Registers *regs, ExceptionCause excause,
                       std::uint32_t inst_addr, std::uint32_t next_addr,
-                      uint32_t mem_ref_addr)
+                      std::uint32_t jump_branch_pc, bool in_delay_slot,
+                      std::uint32_t mem_ref_addr)
 {
     ExceptionHandler *exhandler = ex_handlers.value(excause);
     if (exhandler != nullptr)
-        return exhandler->handle_exception(core, regs, excause, inst_addr, next_addr, mem_ref_addr);
+        return exhandler->handle_exception(core, regs, excause, inst_addr,
+                                           next_addr, jump_branch_pc, in_delay_slot,
+                                           mem_ref_addr);
     if (ex_default_handler != nullptr)
-        return ex_default_handler->handle_exception(core, regs, excause, inst_addr, next_addr, mem_ref_addr);
+        return ex_default_handler->handle_exception(core, regs, excause, inst_addr,
+                                                    next_addr, jump_branch_pc, in_delay_slot,
+                                                    mem_ref_addr);
     return false;
 }
 
@@ -107,6 +112,7 @@ struct Core::dtFetch Core::fetch() {
         .inst = inst,
         .inst_addr = inst_addr,
         .excause = EXCAUSE_NONE,
+        .in_delay_slot = false,
     };
 }
 
@@ -195,6 +201,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .ff_rt = FORWARD_NONE,
         .inst_addr = dt.inst_addr,
         .excause = excause,
+        .in_delay_slot = dt.in_delay_slot,
     };
 }
 
@@ -238,6 +245,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
         .alu_val = alu_val,
         .inst_addr = dt.inst_addr,
         .excause = dt.excause,
+        .in_delay_slot = dt.in_delay_slot,
     };
 }
 
@@ -279,6 +287,7 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
          .mem_addr = mem_addr,
         .inst_addr = dt.inst_addr,
         .excause = dt.excause,
+        .in_delay_slot = dt.in_delay_slot,
     };
 }
 
@@ -291,7 +300,7 @@ void Core::writeback(const struct dtMemory &dt) {
         regs->write_gp(dt.rwrite, dt.towrite_val);
 }
 
-void Core::handle_pc(const struct dtDecode &dt) {
+bool Core::handle_pc(const struct dtDecode &dt) {
     bool branch = false;
     emit instruction_program_counter(dt.inst, dt.inst_addr);
 
@@ -306,7 +315,7 @@ void Core::handle_pc(const struct dtDecode &dt) {
             emit fetch_jump_reg_value(true);
         }
         emit fetch_branch_value(false);
-        return;
+        return true;
     }
 
     if (dt.branch) {
@@ -330,11 +339,13 @@ void Core::handle_pc(const struct dtDecode &dt) {
         regs->pc_jmp((std::int32_t)(((dt.inst.immediate() & 0x8000) ? 0xFFFF0000 : 0) | (dt.inst.immediate() << 2)));
     else
         regs->pc_inc();
+    return branch;
 }
 
 void Core::dtFetchInit(struct dtFetch &dt) {
     dt.inst = Instruction(0x00);
     dt.excause = EXCAUSE_NONE;
+    dt.in_delay_slot = false;
 }
 
 void Core::dtDecodeInit(struct dtDecode &dt) {
@@ -357,6 +368,7 @@ void Core::dtDecodeInit(struct dtDecode &dt) {
     dt.ff_rs = FORWARD_NONE;
     dt.ff_rt = FORWARD_NONE;
     dt.excause = EXCAUSE_NONE;
+    dt.in_delay_slot = false;
 }
 
 void Core::dtExecuteInit(struct dtExecute &dt) {
@@ -369,6 +381,7 @@ void Core::dtExecuteInit(struct dtExecute &dt) {
     dt.rwrite = 0;
     dt.alu_val = 0;
     dt.excause = EXCAUSE_NONE;
+    dt.in_delay_slot = false;
 }
 
 void Core::dtMemoryInit(struct dtMemory &dt) {
@@ -378,6 +391,7 @@ void Core::dtMemoryInit(struct dtMemory &dt) {
     dt.towrite_val = 0;
     dt.mem_addr = 0;
     dt.excause = EXCAUSE_NONE;
+    dt.in_delay_slot = false;
 }
 
 CoreSingle::CoreSingle(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data, bool jmp_delay_slot) : \
@@ -395,6 +409,9 @@ CoreSingle::~CoreSingle() {
 }
 
 void CoreSingle::do_step() {
+    bool in_delay_slot = false;
+    std::uint32_t jump_branch_pc;
+
     struct dtFetch f = fetch();
     struct dtDecode d = decode(f);
     struct dtExecute e = execute(d);
@@ -402,7 +419,8 @@ void CoreSingle::do_step() {
     writeback(m);
 
     if (jmp_delay_decode != nullptr) {
-        handle_pc(*jmp_delay_decode);
+        in_delay_slot = handle_pc(*jmp_delay_decode);
+        jump_branch_pc = jmp_delay_decode->inst_addr;
         *jmp_delay_decode = d; // Copy current decode
     } else
         handle_pc(d);
@@ -410,7 +428,8 @@ void CoreSingle::do_step() {
     if (m.excause != EXCAUSE_NONE) {
         if (jmp_delay_decode != nullptr)
             dtDecodeInit(*jmp_delay_decode);
-        handle_exception(this, regs, m.excause, m.inst_addr, regs->read_pc(), m.mem_addr);
+        handle_exception(this, regs, m.excause, m.inst_addr, regs->read_pc(),
+                         jump_branch_pc, in_delay_slot, m.mem_addr);
         return;
     }
 }
@@ -431,6 +450,7 @@ CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem_program, MemoryA
 void CorePipelined::do_step() {
     bool stall = false;
     bool excpt_in_progress = false;
+    std::uint32_t jump_branch_pc = dt_m.inst_addr;
 
     // Process stages
     writeback(dt_m);
@@ -450,7 +470,9 @@ void CorePipelined::do_step() {
         dtFetchInit(dt_f);
         if (dt_m.excause != EXCAUSE_NONE) {
             regs->pc_abs_jmp(dt_e.inst_addr);
-            handle_exception(this, regs, dt_m.excause, dt_m.inst_addr, dt_e.inst_addr, dt_m.mem_addr);
+            handle_exception(this, regs, dt_m.excause, dt_m.inst_addr,
+                             dt_e.inst_addr, jump_branch_pc,
+                             dt_m.in_delay_slot, dt_m.mem_addr);
         }
         return;
     }
@@ -544,7 +566,8 @@ void CorePipelined::do_step() {
     // Now process program counter (loop connections from decode stage)
     if (!stall) {
         dt_f = fetch();
-        handle_pc(dt_d);
+        if (handle_pc(dt_d))
+            dt_f.in_delay_slot = true;
     } else {
         // Run fetch stage on empty
         fetch();
@@ -565,15 +588,18 @@ void CorePipelined::do_reset() {
 }
 
 bool StopExceptionHandler::handle_exception(Core *core, Registers *regs,
-     ExceptionCause excause, std::uint32_t inst_addr, std::uint32_t next_addr,
-     std::uint32_t mem_ref_addr) {
-
+                            ExceptionCause excause, std::uint32_t inst_addr,
+                            std::uint32_t next_addr, std::uint32_t jump_branch_pc,
+                            bool in_delay_slot, std::uint32_t mem_ref_addr) {
 #if 0
-    printf("Exception cause %d instruction PC 0x%08lx next PC 0x%08lx registers PC 0x%08lx mem ref 0x%08lx\n",
+    printf("Exception cause %d instruction PC 0x%08lx next PC 0x%08lx jump branch PC 0x%08lx "
+           "in_delay_slot %d registers PC 0x%08lx mem ref 0x%08lx\n",
            excause, (unsigned long)inst_addr, (unsigned long)next_addr,
+           (unsigned long)jump_branch_pc, (int)in_delay_slot,
            (unsigned long)regs->read_pc(), (unsigned long)mem_ref_addr);
 #else
     (void)excause; (void)inst_addr; (void)next_addr; (void)mem_ref_addr; (void)regs;
+    (void)jump_branch_pc; (void)in_delay_slot;
 #endif
     emit core->stop_on_exception_reached();
     return true;

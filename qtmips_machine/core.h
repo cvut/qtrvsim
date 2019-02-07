@@ -51,17 +51,19 @@ class Core;
 class ExceptionHandler : public QObject {
     Q_OBJECT
 public:
-    virtual bool handle_exception(Core *core, Registers *regs, ExceptionCause excause,
-                                 std::uint32_t inst_addr, std::uint32_t next_addr,
-                                 std::uint32_t mem_ref_addr) =  0;
+    virtual bool handle_exception(Core *core, Registers *regs,
+                          ExceptionCause excause, std::uint32_t inst_addr,
+                          std::uint32_t next_addr, std::uint32_t jump_branch_pc,
+                          bool in_delay_slot, std::uint32_t mem_ref_addr) =  0;
 };
 
 class StopExceptionHandler : public ExceptionHandler {
     Q_OBJECT
 public:
-    bool handle_exception(Core *core, Registers *regs, ExceptionCause excause,
-                                 std::uint32_t inst_addr, std::uint32_t next_addr,
-                                 std::uint32_t mem_ref_addr);
+    bool handle_exception(Core *core, Registers *regs,
+                          ExceptionCause excause, std::uint32_t inst_addr,
+                          std::uint32_t next_addr, std::uint32_t jump_branch_pc,
+                          bool in_delay_slot, std::uint32_t mem_ref_addr);
 };
 
 class Core : public QObject {
@@ -143,9 +145,10 @@ protected:
     virtual void do_step() = 0;
     virtual void do_reset() = 0;
 
-    bool handle_exception(Core *core, Registers *regs, ExceptionCause excause,
-                          std::uint32_t inst_addr, std::uint32_t next_addr,
-                          std::uint32_t mem_ref_addr);
+    bool handle_exception(Core *core, Registers *regs,
+                     ExceptionCause excause, std::uint32_t inst_addr,
+                     std::uint32_t next_addr, std::uint32_t jump_branch_pc,
+                     bool in_delay_slot, std::uint32_t mem_ref_addr);
 
     Registers *regs;
     MemoryAccess *mem_data, *mem_program;
@@ -156,6 +159,7 @@ protected:
         Instruction inst; // Loaded instruction
         uint32_t inst_addr; // Address of instruction
         enum ExceptionCause excause;
+        bool in_delay_slot;
     };
     struct dtDecode {
         Instruction inst;
@@ -185,6 +189,7 @@ protected:
         ForwardFrom ff_rt;
         uint32_t inst_addr; // Address of instruction
         enum ExceptionCause excause;
+        bool in_delay_slot;
     };
     struct dtExecute {
         Instruction inst;
@@ -197,6 +202,7 @@ protected:
         std::uint32_t alu_val; // Result of ALU execution
         uint32_t inst_addr; // Address of instruction
         enum ExceptionCause excause;
+        bool in_delay_slot;
     };
     struct dtMemory {
         Instruction inst;
@@ -206,6 +212,7 @@ protected:
         std::uint32_t mem_addr; // Address used to access memory
         uint32_t inst_addr; // Address of instruction
         enum ExceptionCause excause;
+        bool in_delay_slot;
     };
 
     struct dtFetch fetch();
@@ -213,7 +220,7 @@ protected:
     struct dtExecute execute(const struct dtDecode&);
     struct dtMemory memory(const struct dtExecute&);
     void writeback(const struct dtMemory&);
-    void handle_pc(const struct dtDecode&);
+    bool handle_pc(const struct dtDecode&);
 
     // Initialize structures to NOPE instruction
     void dtFetchInit(struct dtFetch &dt);
