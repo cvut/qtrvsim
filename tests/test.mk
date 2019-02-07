@@ -1,4 +1,5 @@
 MAKEFLAGS += --no-builtin-rules
+MIPS_PREFIX = mips-elf-
 
 # Output path
 O ?= .

@@ -98,7 +98,7 @@ static const struct InstructionMap  alu_instruction_map[] = {
      .flags = FLAGS_ALU_T_R_STD_SHV},
     {"SRAV",   IT_R, ALU_OP_SRAV, NOMEM, nullptr,
      .flags = FLAGS_ALU_T_R_STD_SHV},
-    {"JR",     IT_R, ALU_OP_JR, NOMEM, nullptr,
+    {"JR",     IT_R, ALU_OP_NOP, NOMEM, nullptr,
      .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_JUMP},
     {"JALR",   IT_R, ALU_OP_PASS_T, NOMEM, nullptr,
      .flags = IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE | IMF_BJR_REQ_RS | IMF_PC8_TO_RT | IMF_JUMP},

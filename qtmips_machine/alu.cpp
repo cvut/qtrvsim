@@ -45,6 +45,8 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
     discard = false;
 
     switch(operation) {
+        case ALU_OP_NOP:
+            return 0;
         case ALU_OP_SLL:
             return t << sa;
         case ALU_OP_SRL:
@@ -59,12 +61,6 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
         case ALU_OP_SRAV:
             // Note: same note as in case of SRA
             return (std::int32_t)t >> s;
-        case ALU_OP_JR:
-            // Do nothing as we solve this when we are handling program counter in instruction decode (handle_pc)
-            return 0;
-        case ALU_OP_JALR:
-            // Pass return value in rt to save PC after isntruction, program counter is handled in handle_pc
-            return t;
         case ALU_OP_MOVZ:
             // Signal discard of result when condition is not true
             discard = t != 0;
@@ -73,8 +69,6 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
             // Same note as for MOVZ applies here
             discard = t == 0;
             return discard ? 0: s;
-        case ALU_OP_BREAK:
-             return 0;
         case ALU_OP_MFHI:
             return regs->read_hi_lo(true);
         case ALU_OP_MTHI:
@@ -136,6 +130,10 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
             return t << 16;
         case  ALU_OP_PASS_T: // Pass s argument without change for JAL
             return t;
+        case ALU_OP_BREAK:
+            return 0;
+        case  ALU_OP_SYSCALL: // Pass s argument without change for JAL
+            return 0;
         default:
             throw QTMIPS_EXCEPTION(UnsupportedAluOperation, "Unknown ALU operation", QString::number(operation, 16));
     }

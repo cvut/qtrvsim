@@ -231,7 +231,7 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
     emit memory_memwrite_value(memwrite);
     emit memory_regw_num_value(dt.rwrite);
 
-    if (dt.excause == EXCAUSE_BREAK)
+    if ((dt.excause == EXCAUSE_BREAK) || (dt.excause == EXCAUSE_SYSCALL))
         emit memory_break_reached();
 
     return {
