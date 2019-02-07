@@ -44,7 +44,8 @@ namespace coreview {
 class Value : public QGraphicsObject {
     Q_OBJECT
 public:
-    Value(bool vertical = false, unsigned width = 8, unsigned init_val = 0); // width is for number of character to be shown from number
+    Value(bool vertical = false, unsigned width = 8,
+          unsigned init_val = 0, unsigned base = 16); // width is for number of character to be shown from number
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -57,6 +58,7 @@ protected:
 
 private:
     unsigned wid;
+    unsigned base;
     bool vertical;
 };
 

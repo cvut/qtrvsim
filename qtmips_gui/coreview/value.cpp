@@ -41,9 +41,11 @@ using namespace coreview;
 #define LETWIDTH 7
 
 // TODO orientation
-Value::Value(bool vertical, unsigned width, std::uint32_t init_val) : QGraphicsObject(nullptr) {
+Value::Value(bool vertical, unsigned width, std::uint32_t init_val,
+             unsigned a_base) : QGraphicsObject(nullptr) {
     wid = width;
     val = init_val;
+    base = a_base;
     this->vertical = vertical;
 }
 
@@ -68,7 +70,7 @@ void Value::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __at
     painter->setBackgroundMode(Qt::OpaqueMode);
     painter->drawRect(rect);
     painter->setBackgroundMode(Qt::TransparentMode);
-    QString str = QString("%1").arg(val, wid, 16, QChar('0'));
+    QString str = QString("%1").arg(val, wid, base, QChar('0'));
     if (vertical) {
         rect.setHeight(HEIGHT + 1);
         for (unsigned i = 0; i < wid; i++) {

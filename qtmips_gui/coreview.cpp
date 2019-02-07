@@ -178,12 +178,12 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     // Write back stage
     NEW_V(710, 330, writeback_value, true); // Write back value
 
-    NEW_V(205, 250, decode_rs_num_value, false, 2);
-    NEW_V(205, 270, decode_rt_num_value, false, 2);
+    NEW_V(205, 250, decode_rs_num_value, false, 2, 0, 10);
+    NEW_V(205, 270, decode_rt_num_value, false, 2, 0, 10);
 
-    NEW_V(320, 380, decode_rt_num_value, false, 2);
-    NEW_V(320, 390, decode_rd_num_value, false, 2);
-    NEW_V(320, 500, writeback_regw_num_value, false, 2);
+    NEW_V(320, 380, decode_rt_num_value, false, 2, 0, 10);
+    NEW_V(320, 390, decode_rd_num_value, false, 2, 0, 10);
+    NEW_V(320, 500, writeback_regw_num_value, false, 2, 0, 10);
 
     connect(regs, SIGNAL(open_registers()), this, SIGNAL(request_registers()));
     connect(mem_program, SIGNAL(open_mem()), this, SIGNAL(request_program_memory()));
@@ -439,8 +439,8 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
     NEW_V(460, 105, execute_regw_value, false, 1);
     NEW_V(560, 105, memory_regw_value, false, 1);
 
-    NEW_V(500, 385, execute_regw_num_value, false, 2);
-    NEW_V(610, 385, memory_regw_num_value, false, 2);
+    NEW_V(500, 385, execute_regw_num_value, false, 2, 0, 10);
+    NEW_V(610, 385, memory_regw_num_value, false, 2, 0, 10);
 
     if (machine->config().hazard_unit() == machine::MachineConfig::HU_STALL_FORWARD) {
         NEW_V(448, 460, execute_reg1_ff_value, false, 1); // Register 1 forward to ALU
