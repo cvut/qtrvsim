@@ -101,6 +101,15 @@ private:
     void kick(unsigned associat_indx, unsigned row) const;
     std::uint32_t base_address(std::uint32_t tag, unsigned row) const;
     void update_statistics() const;
+    inline void compute_row_col_tag(std::uint32_t &row, std::uint32_t &col,
+                               std::uint32_t &tag, std::uint32_t address) const {
+        address = address >> 2;
+        std::uint32_t ssize = cnf.blocks() * cnf.sets();
+        tag = address / ssize;
+        std::uint32_t index = address % ssize;
+        row = index / cnf.blocks();
+        col = index % cnf.blocks();
+    }
 };
 
 }

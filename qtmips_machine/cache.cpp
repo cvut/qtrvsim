@@ -71,18 +71,18 @@ Cache::Cache(MemoryAccess  *m, const MachineConfigCache *cc, unsigned memory_acc
     switch (cnf.replacement_policy()) {
     case MachineConfigCache::RP_LFU:
         replc.lfu = new unsigned *[cnf.sets()];
-        for (unsigned row = 0; row < cnf.sets(); row++) {
+        for (unsigned int row = 0; row < cnf.sets(); row++) {
             replc.lfu[row] = new unsigned[cnf.associativity()];
-	    for (int i = 0; i < cnf.associativity(); i++)
-	        replc.lfu[row][i] = 0;
+            for (unsigned int  i = 0; i < cnf.associativity(); i++)
+                 replc.lfu[row][i] = 0;
 	}
         break;
     case MachineConfigCache::RP_LRU:
         replc.lru = new time_t*[cnf.sets()];
-        for (unsigned row = 0; row < cnf.sets(); row++) {
+        for (unsigned int row = 0; row < cnf.sets(); row++) {
             replc.lru[row] = new time_t[cnf.associativity()];
-	    for (int i = 0; i < cnf.associativity(); i++)
-	        replc.lru[row][i] = 0;
+            for (unsigned int i = 0; i < cnf.associativity(); i++)
+                replc.lru[row][i] = 0;
 	}
     default:
         break;
@@ -219,11 +219,8 @@ const MachineConfigCache &Cache::config() const {
 }
 
 enum LocationStatus Cache::location_status(std::uint32_t address) const {
-    address = address >> 2;
-    unsigned ssize = cnf.blocks() * cnf.sets();
-    std::uint32_t tag = address / ssize;
-    std::uint32_t index = address % ssize;
-    std::uint32_t row = index / cnf.blocks();
+    std::uint32_t row, col, tag;
+    compute_row_col_tag(row, col, tag, address);
 
     if (cnf.enabled()) {
         for (unsigned indx = 0; indx < cnf.associativity(); indx++) {
@@ -241,12 +238,8 @@ enum LocationStatus Cache::location_status(std::uint32_t address) const {
 
 bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::uint32_t value) const {
     bool changed = false;
-    address = address >> 2;
-    unsigned ssize = cnf.blocks() * cnf.sets();
-    std::uint32_t tag = address / ssize;
-    std::uint32_t index = address % ssize;
-    std::uint32_t row = index / cnf.blocks();
-    std::uint32_t col = index % cnf.blocks();
+    std::uint32_t row, col, tag;
+    compute_row_col_tag(row, col, tag, address);
 
     unsigned indx = 0;
     // Try to locate exact block or some unused one
