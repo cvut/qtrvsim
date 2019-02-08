@@ -199,3 +199,9 @@ void QtMipsMachine::set_status(enum Status st) {
     if (change)
         emit status_change(st);
 }
+
+void QtMipsMachine::register_exception_handler(ExceptionCause excause,
+                                               ExceptionHandler *exhandler) {
+    if (cr != nullptr)
+        cr->register_exception_handler(excause, exhandler);
+}

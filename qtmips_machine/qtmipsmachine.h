@@ -77,6 +77,8 @@ public:
     enum Status status();
     bool exited();
 
+    void register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler);
+
 public slots:
     void play();
     void pause();
