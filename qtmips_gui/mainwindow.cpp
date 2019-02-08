@@ -35,6 +35,7 @@
 
 #include "mainwindow.h"
 #include "aboutdialog.h"
+#include "ossyscall.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     machine = nullptr;
@@ -145,6 +146,11 @@ void MainWindow::create_core(const machine::MachineConfig &config) {
     coreview->setScene(corescene);
 
     set_speed(); // Update machine speed to current settings
+
+#if 1
+    machine->register_exception_handler(machine::EXCAUSE_SYSCALL,
+                                        new osemu::OsSyscallExceptionHandler);
+#endif
 
     // Connect machine signals and slots
     connect(ui->actionRun, SIGNAL(triggered(bool)), machine, SLOT(play()));

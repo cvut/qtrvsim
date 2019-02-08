@@ -5,6 +5,7 @@ CONFIG += c++11
 
 TEMPLATE = app
 
+LIBS += -L$$OUT_PWD/../qtmips_osemu/  -lqtmips_osemu
 LIBS += -L$$OUT_PWD/../qtmips_machine/ -lqtmips_machine -lelf
 
 DOLAR=$
@@ -13,8 +14,8 @@ unix: LIBS += \
         -Wl,-rpath,\'$${DOLAR}$${DOLAR}ORIGIN/../lib\' \
         # --enable-new-dtags \
 
-INCLUDEPATH += $$PWD/../qtmips_machine
-DEPENDPATH += $$PWD/../qtmips_machine
+INCLUDEPATH += $$PWD/../qtmips_machine $$PWD/../qtmips_osemu
+DEPENDPATH += $$PWD/../qtmips_machine $$PWD/../qtmips_osemu
 QMAKE_CXXFLAGS += -std=c++0x
 QMAKE_CXXFLAGS_DEBUG += -ggdb
 
