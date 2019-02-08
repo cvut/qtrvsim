@@ -177,6 +177,7 @@ protected:
         bool jump;       // jump
         bool bj_not;     // negate branch condition
         bool bgt_blez;   // BGTZ/BLEZ instead of BGEZ/BLTZ
+        bool nb_skip_ds; // Skip delay slot if branch is not taken
         bool forward_m_d_rs; // forwarding required for beq, bne, blez, bgtz, jr nad jalr
         bool forward_m_d_rt; // forwarding required for beq, bne
         enum AluOp aluop; // Decoded ALU operation

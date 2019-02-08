@@ -189,6 +189,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .jump = flags & IMF_JUMP,
         .bj_not = flags & IMF_BJ_NOT,
         .bgt_blez = flags & IMF_BGTZ_BLEZ,
+        .nb_skip_ds = flags & IMF_NB_SKIP_DS,
         .forward_m_d_rs = false,
         .forward_m_d_rt = false,
         .aluop = alu_op,
@@ -366,6 +367,10 @@ void Core::dtDecodeInit(struct dtDecode &dt) {
     dt.regwrite = false;
     dt.bjr_req_rs = false; // requires rs for beq, bne, blez, bgtz, jr nad jalr
     dt.bjr_req_rt = false; // requires rt for beq, bne
+    dt.jump = false;
+    dt.bj_not = false;
+    dt.bgt_blez = false;
+    dt.nb_skip_ds = false;
     dt.forward_m_d_rs = false;
     dt.forward_m_d_rt = false;
     dt.aluop = ALU_OP_SLL;
@@ -423,16 +428,23 @@ void CoreSingle::do_step() {
 
     struct dtFetch f = fetch();
     struct dtDecode d = decode(f);
-    struct dtExecute e = execute(d);
-    struct dtMemory m = memory(e);
-    writeback(m);
 
+    // Handle PC before instruction following jump leaves decode stage
     if (jmp_delay_decode != nullptr) {
         in_delay_slot = handle_pc(*jmp_delay_decode);
+        if (jmp_delay_decode->nb_skip_ds && !in_delay_slot) {
+            // Discard processing of instruction in delay slot
+            // for BEQL, BNEL, BLEZL, BGTZL, BLTZL, BGEZL, BLTZALL, BGEZALL
+            dtDecodeInit(d);
+        }
         jump_branch_pc = jmp_delay_decode->inst_addr;
         *jmp_delay_decode = d; // Copy current decode
     } else
         handle_pc(d);
+
+    struct dtExecute e = execute(d);
+    struct dtMemory m = memory(e);
+    writeback(m);
 
     if (m.excause != EXCAUSE_NONE) {
         if (jmp_delay_decode != nullptr)
@@ -575,8 +587,12 @@ void CorePipelined::do_step() {
     // Now process program counter (loop connections from decode stage)
     if (!stall) {
         dt_f = fetch();
-        if (handle_pc(dt_d))
+        if (handle_pc(dt_d)) {
             dt_f.in_delay_slot = true;
+        } else {
+            if (dt_d.nb_skip_ds)
+                dtFetchInit(dt_f);
+        }
     } else {
         // Run fetch stage on empty
         fetch();

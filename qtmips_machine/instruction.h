@@ -67,7 +67,8 @@ enum InstructionFlags {
     IMF_JUMP       = 1L<<19,
     IMF_BJ_NOT     = 1L<<20,
     IMF_BGTZ_BLEZ  = 1L<<21,
-    IMF_EXCEPTION  = 1L<<22,
+    IMF_NB_SKIP_DS = 1L<<22, // Skip instruction in delay slot if branch not taken
+    IMF_EXCEPTION  = 1L<<23,
 };
 
 class Instruction {

@@ -235,9 +235,9 @@ static const struct InstructionMap  regimm_instruction_map[] = {
     {"BGEZ", IT_I, NOALU, NOMEM, nullptr,       // BGEZ
      .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BRANCH | IMF_BJ_NOT},
     {"BLTZL", IT_I, NOALU, NOMEM, nullptr,       // BLTZL
-     .flags = IMF_BJR_REQ_RS},
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BRANCH | IMF_NB_SKIP_DS},
     {"BGEZL", IT_I, NOALU, NOMEM, nullptr,       // BGEZL
-     .flags = IMF_BJR_REQ_RS | IMF_BJ_NOT},
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BRANCH | IMF_NB_SKIP_DS | IMF_BJ_NOT},
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
@@ -256,14 +256,14 @@ static const struct InstructionMap  regimm_instruction_map[] = {
     {"TNEI", IT_I, NOALU, NOMEM, nullptr,       // TNEI
      .flags = IMF_BJR_REQ_RS},
     IM_UNKNOWN,
-    {"BLTZAL", IT_I, ALU_OP_PASS_T, NOMEM, nullptr,       // BLTZAL
+    {"BLTZAL", IT_I, ALU_OP_PASS_T, NOMEM, nullptr, // BLTZAL
      .flags = FLAGS_J_B_PC_TO_R31 | IMF_BJR_REQ_RS | IMF_BRANCH},
-    {"BGEZAL", IT_I, ALU_OP_PASS_T, NOMEM, nullptr,       // BGEZAL
+    {"BGEZAL", IT_I, ALU_OP_PASS_T, NOMEM, nullptr, // BGEZAL
      .flags = FLAGS_J_B_PC_TO_R31 | IMF_BJR_REQ_RS | IMF_BRANCH | IMF_BJ_NOT},
-    {"BLTZALL", IT_I, NOALU, NOMEM, nullptr,       // BLTZALL
-     .flags = IMF_BJR_REQ_RS},
-    {"BGEZALL", IT_I, NOALU, NOMEM, nullptr,       // BGEZALL
-     .flags = IMF_BJR_REQ_RS | IMF_BJ_NOT},
+    {"BLTZALL", IT_I, ALU_OP_PASS_T, NOMEM, nullptr, // BLTZALL
+     .flags = FLAGS_J_B_PC_TO_R31 | IMF_BJR_REQ_RS | IMF_BRANCH | IMF_NB_SKIP_DS },
+    {"BGEZALL", IT_I, ALU_OP_PASS_T, NOMEM, nullptr, // BGEZALL
+     .flags = FLAGS_J_B_PC_TO_R31 | IMF_BJR_REQ_RS | IMF_BRANCH | IMF_NB_SKIP_DS | IMF_BJ_NOT},
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
@@ -319,10 +319,14 @@ static const struct InstructionMap instruction_map[] = {
     IM_UNKNOWN,  // 17
     IM_UNKNOWN,  // 18
     IM_UNKNOWN,  // 19
-    IM_UNKNOWN,  // 20
-    IM_UNKNOWN,  // 21
-    IM_UNKNOWN,  // 22
-    IM_UNKNOWN,  // 23
+    {"BEQL",    IT_I, NOALU, NOMEM, nullptr,         // BEQL
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BJR_REQ_RT | IMF_BRANCH | IMF_NB_SKIP_DS},
+    {"BNEL",    IT_I, NOALU, NOMEM, nullptr,         // BNEL
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BJR_REQ_RT | IMF_BRANCH | IMF_NB_SKIP_DS | IMF_BJ_NOT},
+    {"BLEZL",   IT_I, NOALU, NOMEM, nullptr,         // BLEZL
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BRANCH | IMF_NB_SKIP_DS | IMF_BGTZ_BLEZ},
+    {"BGTZL",   IT_I, NOALU, NOMEM, nullptr,         // BGTZL
+     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS | IMF_BRANCH | IMF_NB_SKIP_DS | IMF_BGTZ_BLEZ | IMF_BJ_NOT},
     IM_UNKNOWN,  // 24
     IM_UNKNOWN,  // 25
     IM_UNKNOWN,  // 26
