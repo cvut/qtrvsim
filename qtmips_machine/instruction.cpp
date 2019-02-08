@@ -111,7 +111,8 @@ static const struct InstructionMap  alu_instruction_map[] = {
     {"BREAK",  IT_R, ALU_OP_BREAK, NOMEM, nullptr,
      .flags = IMF_SUPPORTED | IMF_EXCEPTION},
     IM_UNKNOWN,
-    IM_UNKNOWN,
+    {"SYNC", IT_I, NOALU, NOMEM, nullptr,       // SYNC
+     .flags = IMF_SUPPORTE},
     {"MFHI",   IT_R, ALU_OP_MFHI, NOMEM, nullptr,
      .flags = FLAGS_ALU_T_R_D | IMF_READ_HILO},
     {"MTHI",   IT_R, ALU_OP_MTHI, NOMEM, nullptr,
@@ -276,7 +277,7 @@ static const struct InstructionMap  regimm_instruction_map[] = {
     IM_UNKNOWN,
     IM_UNKNOWN,
     {"SYNCI", IT_I, NOALU, NOMEM, nullptr,       // SYNCI
-     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS},
+     .flags = IMF_SUPPORTE},
 };
 
 const std::int32_t instruction_map_opcode_field = IMF_SUB_ENCODE(6, 26);

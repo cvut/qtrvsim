@@ -263,9 +263,10 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
         memwrite = false;
         regwrite = false;
     } else {
-        if (dt.memctl == AC_CACHE_OP)
+        if (dt.memctl == AC_CACHE_OP) {
              mem_data->sync();
-        else if (memwrite) {
+             mem_program->sync();
+        } else if (memwrite) {
             if (dt.memctl == AC_STORE_CONDITIONAL) {
                 mem_data->write_ctl(AC_WORD, mem_addr, dt.val_rt);
                 towrite_val = 1;
@@ -582,6 +583,9 @@ void CorePipelined::do_step() {
             dt_d.inst.type(), dt_d.inst.rs(), dt_d.inst.rt(), dt_d.ff_rs, dt_d.ff_rt,
             dt_e.regwrite, dt_e.inst.type(), dt_e.rwrite,
             dt_m.regwrite,  dt_m.inst.type(), dt_m.rwrite);
+#endif
+#if 1
+    printf("PC 0x%08lx\n", (unsigned long)dt_f.inst_addr);
 #endif
 
     // Now process program counter (loop connections from decode stage)
