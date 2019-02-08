@@ -361,7 +361,8 @@ static const struct InstructionMap instruction_map[] = {
      .flags = IMF_MEM | IMF_MEM_STORE},
     {"CACHE",  IT_I, ALU_OP_ADDU, AC_CACHE_OP, nullptr, // CACHE
      .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_MEM| IMF_MEM_STORE},
-    IM_UNKNOWN,  // 48
+    {"LL",     IT_I, ALU_OP_ADDU, AC_LOAD_LINKED, nullptr,  // LL
+     .flags = FLAGS_ALU_I_LOAD},
     IM_UNKNOWN,  // 49
     IM_UNKNOWN,  // 50
     IM_UNKNOWN,  // 51
@@ -369,7 +370,8 @@ static const struct InstructionMap instruction_map[] = {
     IM_UNKNOWN,  // 53
     IM_UNKNOWN,  // 54
     IM_UNKNOWN,  // 55
-    IM_UNKNOWN,  // 56
+    {"SC",     IT_I, ALU_OP_ADDU, AC_STORE_CONDITIONAL, nullptr,  // SW
+     .flags = FLAGS_ALU_I_STORE | IMF_MEMREAD | IMF_REGWRITE},
     IM_UNKNOWN,  // 57
     IM_UNKNOWN,  // 58
     IM_UNKNOWN,  // 59

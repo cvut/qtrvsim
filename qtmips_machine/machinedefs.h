@@ -47,6 +47,8 @@ enum AccessControl {
     AC_WORD,
     AC_BYTE_UNSIGNED,
     AC_HALFWORD_UNSIGNED,
+    AC_LOAD_LINKED,
+    AC_STORE_CONDITIONAL,
     AC_CACHE_OP,
 };
 

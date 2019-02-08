@@ -264,10 +264,19 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
     } else {
         if (dt.memctl == AC_CACHE_OP)
              mem_data->sync();
-        else if (memwrite)
-             mem_data->write_ctl(dt.memctl, mem_addr, dt.val_rt);
-        else if (memread)
-             towrite_val = mem_data->read_ctl(dt.memctl, mem_addr);
+        else if (memwrite) {
+            if (dt.memctl == AC_STORE_CONDITIONAL) {
+                mem_data->write_ctl(AC_WORD, mem_addr, dt.val_rt);
+                towrite_val = 1;
+            } else {
+                mem_data->write_ctl(dt.memctl, mem_addr, dt.val_rt);
+            }
+        } else if (memread) {
+            if (dt.memctl == AC_LOAD_LINKED)
+                towrite_val = mem_data->read_ctl(AC_WORD, mem_addr);
+            else
+                towrite_val = mem_data->read_ctl(dt.memctl, mem_addr);
+        }
     }
 
     emit memory_alu_value(dt.alu_val);
