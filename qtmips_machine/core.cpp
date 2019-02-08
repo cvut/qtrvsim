@@ -584,7 +584,7 @@ void CorePipelined::do_step() {
             dt_e.regwrite, dt_e.inst.type(), dt_e.rwrite,
             dt_m.regwrite,  dt_m.inst.type(), dt_m.rwrite);
 #endif
-#if 1
+#if 0
     printf("PC 0x%08lx\n", (unsigned long)dt_f.inst_addr);
 #endif
 
