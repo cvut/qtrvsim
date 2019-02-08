@@ -47,7 +47,7 @@ using namespace machine;
 #define FLAGS_ALU_I_LOAD (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | \
                           IMF_MEMREAD | IMF_MEM | IMF_ALU_REQ_RS)
 #define FLAGS_ALU_I_STORE (IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | \
-                          IMF_MEM | IMF_MEM_STORE | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
+                          IMF_MEM | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
 
 #define FLAGS_ALU_T_R_D (IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE)
 #define FLAGS_ALU_T_R_STD (FLAGS_ALU_T_R_D | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
@@ -356,15 +356,15 @@ static const struct InstructionMap instruction_map[] = {
     {"SH",     IT_I, ALU_OP_ADDU, AC_HALFWORD, nullptr,   // SH
      .flags = FLAGS_ALU_I_STORE},
     {"SWL",    IT_I, ALU_OP_ADDU, NOMEM, nullptr,    // SWL
-     .flags = IMF_MEM | IMF_MEM_STORE},
+     .flags = IMF_MEM | IMF_MEMWRITE},
     {"SW",     IT_I, ALU_OP_ADDU, AC_WORD, nullptr,  // SW
      .flags = FLAGS_ALU_I_STORE},
     IM_UNKNOWN,  // 44
     IM_UNKNOWN,  // 45
     {"SWR",    IT_I, ALU_OP_ADDU, NOMEM, nullptr,    // SWR
-     .flags = IMF_MEM | IMF_MEM_STORE},
+     .flags = IMF_MEM | IMF_MEMWRITE},
     {"CACHE",  IT_I, ALU_OP_ADDU, AC_CACHE_OP, nullptr, // CACHE
-     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_MEM| IMF_MEM_STORE},
+     .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_MEM},
     {"LL",     IT_I, ALU_OP_ADDU, AC_LOAD_LINKED, nullptr,  // LL
      .flags = FLAGS_ALU_I_LOAD},
     IM_UNKNOWN,  // 49
