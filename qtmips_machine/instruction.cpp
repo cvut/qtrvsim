@@ -223,7 +223,7 @@ static const struct InstructionMap  special3_instruction_map[] = {
     IM_UNKNOWN,	//	57
     IM_UNKNOWN,	//	58
     {"RDHWR", IT_R, ALU_OP_NOP, NOMEM, nullptr,
-     .flags = FLAGS_ALU_T_R_TD},
+     .flags = IMF_SUPPORTED | IMF_REGWRITE},
     IM_UNKNOWN,	//	60
     IM_UNKNOWN,	//	61
     IM_UNKNOWN,	//	62
@@ -605,6 +605,10 @@ QString Instruction::to_str(std::int32_t inst_addr) const {
                 res += next_delim + QString::number(shamt());
                 next_delim = ", ";
             }
+        }
+        if ((im.flags & IMF_REGWRITE) && !(im.flags & IMF_REGD)) {
+            res += next_delim + "$" + QString::number(rd());
+            next_delim = ", ";
         }
         break;
         }

@@ -69,7 +69,8 @@ public:
 class Core : public QObject {
     Q_OBJECT
 public:
-    Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data);
+    Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
+         unsigned int min_cache_row_size = 1);
 
     void step(); // Do single step
     void reset(); // Reset core (only core, memory and registers has to be reseted separately)
@@ -230,7 +231,9 @@ protected:
     void dtMemoryInit(struct dtMemory &dt);
 
 private:
-    unsigned cycle_c;
+    unsigned int cycle_c;
+    unsigned int min_cache_row_size;
+    std::uint32_t hwr_user_local;
 };
 
 class CoreSingle : public Core {

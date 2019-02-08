@@ -134,7 +134,9 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
             return t;
         case ALU_OP_BREAK:
             return 0;
-        case  ALU_OP_SYSCALL: // Pass s argument without change for JAL
+        case  ALU_OP_SYSCALL:
+            return 0;
+        case  ALU_OP_RDHWR:
             return 0;
         default:
             throw QTMIPS_EXCEPTION(UnsupportedAluOperation, "Unknown ALU operation", QString::number(operation, 16));

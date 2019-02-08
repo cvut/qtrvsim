@@ -39,13 +39,15 @@
 
 using namespace machine;
 
-Core::Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data) :
-          ex_handlers() {
+Core::Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
+           unsigned int min_cache_row_size) : ex_handlers() {
     cycle_c = 0;
     this->regs = regs;
     this->mem_program = mem_program;
     this->mem_data = mem_data;
-    ex_default_handler = new StopExceptionHandler();
+    this->ex_default_handler = new StopExceptionHandler();
+    this->min_cache_row_size = min_cache_row_size;
+    this->hwr_user_local = 0xe0000000;
 }
 
 void Core::step() {
@@ -220,6 +222,28 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
     std::uint32_t alu_val = alu_operate(dt.aluop, dt.val_rs, alu_sec, dt.inst.shamt(), regs, discard);
     if (discard)
         regwrite = false;
+
+    if (dt.aluop == ALU_OP_RDHWR) {
+        switch (dt.inst.rd()) {
+        case 0: // CPUNum
+            alu_val = 0;
+            break;
+        case 1: // SYNCI_Step
+            alu_val = min_cache_row_size;
+            break;
+        case 2: // CC
+            alu_val = cycle_c;
+            break;
+        case 3: // CCRes
+            alu_val = 1;
+            break;
+        case 29: // UserLocal
+            alu_val = hwr_user_local;
+            break;
+        default:
+            alu_val = 0;
+        }
+    }
 
     emit execute_alu_value(alu_val);
     emit execute_reg1_value(dt.val_rs);

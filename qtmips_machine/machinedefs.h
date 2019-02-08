@@ -91,6 +91,7 @@ enum AluOp : std::uint8_t {
     ALU_OP_PASS_T, // Pass t argument without change for JAL
     ALU_OP_BREAK,
     ALU_OP_SYSCALL,
+    ALU_OP_RDHWR,
     ALU_OP_UNKNOWN,
     ALU_OP_LAST // First impossible operation (just to be sure that we don't overflow)
 };
