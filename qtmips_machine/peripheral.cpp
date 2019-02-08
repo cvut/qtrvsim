@@ -50,13 +50,19 @@ bool SimplePeripheral::wword(std::uint32_t address, std::uint32_t value) {
     printf("SimplePeripheral::wword address 0x%08lx data 0x%08lx\n",
            (unsigned long)address, (unsigned long)value);
 #endif
+    emit write_notification(address, value);
+
     return true;
 }
 
 std::uint32_t SimplePeripheral::rword(std::uint32_t address) const {
+    std::uint32_t value = 0x12345678;
 #if 0
     printf("SimplePeripheral::rword address 0x%08lx\n",
            (unsigned long)address);
 #endif
-    return 0x12345678;
+
+    emit read_notification(address, &value);
+
+    return value;
 }

@@ -51,6 +51,11 @@ public:
     SimplePeripheral();
     ~SimplePeripheral();
 
+signals:
+    void write_notification(std::uint32_t address, std::uint32_t value);
+    void read_notification(std::uint32_t address, std::uint32_t *value) const;
+
+public:
     bool wword(std::uint32_t address, std::uint32_t value);
     std::uint32_t rword(std::uint32_t address) const;
 };

@@ -90,7 +90,8 @@ protected:
     EXCEPTION(UnalignedJump, Runtime) \
     EXCEPTION(UnknownMemoryControl, Runtime) \
     EXCEPTION(OutOfMemoryAccess, Runtime) \
-    EXCEPTION(Sanity,)
+    EXCEPTION(Sanity,) \
+    EXCEPTION(SyscallUnknown, Runtime) \
 
 #define EXCEPTION(NAME, PARENT) \
     class QtMipsException##NAME : public QtMipsException##PARENT { \
