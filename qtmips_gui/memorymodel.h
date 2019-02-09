@@ -41,6 +41,8 @@
 class MemoryModel : public QAbstractTableModel
 {
     Q_OBJECT
+
+    using Super = QAbstractTableModel;
 public:
     enum MemoryCellSize {
         CELLSIZE_BYTE,
@@ -51,10 +53,10 @@ public:
     MemoryModel(QObject *parent);
     int rowCount(const QModelIndex &parent = QModelIndex()) const override ;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 private:
-    void updateHeaderLabels();
-    inline unsigned int cellSizeBytes() {
+    inline unsigned int cellSizeBytes() const {
         switch (cell_size) {
         case CELLSIZE_BYTE:
             return 1;

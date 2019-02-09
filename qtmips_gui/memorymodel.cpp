@@ -40,25 +40,32 @@ MemoryModel::MemoryModel(QObject *parent)
     cell_size = CELLSIZE_WORD;
     cells_per_row = 1;
     index0_offset = 0;
-    updateHeaderLabels();
-}
-
-void MemoryModel::updateHeaderLabels() {
-    setHeaderData(0, Qt::Horizontal, QString("Address"));
-    for (unsigned int i = 0; i < cells_per_row; i++) {
-        std::uint32_t addr = i * cellSizeBytes();
-        setHeaderData(i + 1, Qt::Horizontal, QString("+0x") +
-                      QString::number(addr, 16));
-    }
 }
 
 int MemoryModel::rowCount(const QModelIndex & /*parent*/) const {
-   std::uint64_t rows = (0x10000000 + cells_per_row - 1) / cells_per_row;
+   std::uint64_t rows = (0x100 + cells_per_row - 1) / cells_per_row;
    return rows;
 }
 
 int MemoryModel::columnCount(const QModelIndex & /*parent*/) const {
     return 2;
+}
+
+QVariant MemoryModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if(orientation == Qt::Horizontal) {
+        if(role == Qt::DisplayRole) {
+            if(section == 0) {
+                return tr("Address");
+            }
+            else {
+                std::uint32_t addr = (section - 1) * cellSizeBytes();
+                QString ret = "+0x" + QString::number(addr, 16);
+                return ret;
+            }
+        }
+    }
+    return Super::headerData(section, orientation, role);
 }
 
 QVariant MemoryModel::data(const QModelIndex &index, int role) const {
