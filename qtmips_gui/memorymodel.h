@@ -33,25 +33,43 @@
  *
  ******************************************************************************/
 
-#ifndef MEMORYDOCK_H
-#define MEMORYDOCK_H
+#ifndef MEMORYMODEL_H
+#define MEMORYMODEL_H
 
-#include <QDockWidget>
-#include <QLabel>
-#include <QComboBox>
-#include "memorymodel.h"
-#include "qtmipsmachine.h"
+#include <QAbstractTableModel>
 
-class MemoryDock : public QDockWidget  {
+class MemoryModel : public QAbstractTableModel
+{
     Q_OBJECT
-
 public:
-    MemoryDock(QWidget *parent, QSettings *settings);
+    enum MemoryCellSize {
+        CELLSIZE_BYTE,
+        CELLSIZE_HWORD,
+        CELLSIZE_WORD,
+    };
 
-    void setup(machine::QtMipsMachine *machine);
-
+    MemoryModel(QObject *parent);
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override ;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 private:
+    void updateHeaderLabels();
+    inline unsigned int cellSizeBytes() {
+        switch (cell_size) {
+        case CELLSIZE_BYTE:
+            return 1;
+        case CELLSIZE_HWORD:
+            return 2;
+        case CELLSIZE_WORD:
+            return 4;
+        }
+        return 0;
+    }
 
+    enum MemoryCellSize cell_size;
+    unsigned int cells_per_row;
+    std::uint32_t index0_offset;
 };
 
-#endif // MEMORYDOCK_H
+
+#endif // MEMORYMODEL_H

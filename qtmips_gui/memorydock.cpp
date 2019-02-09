@@ -33,57 +33,50 @@
  *
  ******************************************************************************/
 
+#include <QWidget>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QTableView>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QHeaderView>
 #include "memorydock.h"
 
-DataView::DataView(QWidget *parent, QSettings *settings) : MemoryView(parent, settings->value("DataViewAddr0", 0).toULongLong()) {
-    this->settings = settings;
-}
 
-QList<QWidget*> DataView::row_widget(std::uint32_t address, QWidget *parent) {
-    QList<QWidget*> widgs;
-    QLabel *l;
-
-    QFont f;
-    f.setStyleHint(QFont::Monospace);
-
-    l = new QLabel(QString("0x") + QString("%1").arg(address, 8, 16, QChar('0')).toUpper(), parent);
-    l->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    l->setFont(f);
-    widgs.append(l);
-
-    l = new QLabel(parent);
-    l->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    l->setFont(f);
-    if (memory != nullptr) {
-        machine::LocationStatus loc_stat = machine::LOCSTAT_NONE;
-        QString val;
-        val = QString("0x") + QString("%1").arg(memory->read_word(address), 8, 16, QChar('0')).toUpper();
-        if (cache_data != nullptr) {
-            loc_stat = cache_data->location_status(address);
-            if (loc_stat & machine::LOCSTAT_DIRTY)
-                val += " D";
-            else if (loc_stat & machine::LOCSTAT_CACHED)
-                val += " C";
-        }
-        l->setText(val);
-    }
-    widgs.append(l);
-
-    return widgs;
-}
-
-void DataView::addr0_save_change(std::uint32_t val) {
-    settings->setValue("DataViewAddr0", val);
-}
 
 MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : QDockWidget(parent) {
-    view = new DataView(this, settings);
-    setWidget(view);
-
     setObjectName("Memory");
     setWindowTitle("Memory");
+
+    QWidget *content = new QWidget();
+
+    QComboBox *cell_size = new QComboBox();
+    cell_size->addItem("Word", MemoryModel::CELLSIZE_WORD);
+    cell_size->addItem("Half-word", MemoryModel::CELLSIZE_HWORD);
+    cell_size->addItem("Byte", MemoryModel::CELLSIZE_BYTE);
+
+    QTableView *memory_content = new QTableView();
+    // memory_content->setSizePolicy();
+    MemoryModel *memory_model = new MemoryModel(0);
+    memory_content->setModel(memory_model);
+    memory_content->verticalHeader()->hide();
+    //memory_content->setHorizontalHeader(memory_model->);
+
+    QLineEdit *go_edit = new QLineEdit();
+    go_edit->setText("0x00000000");
+    go_edit->setInputMask("\\0\\xHhhhhhhh");
+
+    QVBoxLayout *layout = new QVBoxLayout;
+    layout->addWidget(cell_size);
+    layout->addWidget(memory_content);
+    layout->addWidget(go_edit);
+    layout->addWidget(go_edit);
+
+    content->setLayout(layout);
+
+    setWidget(content);
 }
 
 void MemoryDock::setup(machine::QtMipsMachine *machine) {
-    view->setup(machine);
+
 }

@@ -33,25 +33,40 @@
  *
  ******************************************************************************/
 
-#ifndef MEMORYDOCK_H
-#define MEMORYDOCK_H
-
-#include <QDockWidget>
-#include <QLabel>
-#include <QComboBox>
 #include "memorymodel.h"
-#include "qtmipsmachine.h"
 
-class MemoryDock : public QDockWidget  {
-    Q_OBJECT
+MemoryModel::MemoryModel(QObject *parent)
+    :QAbstractTableModel(parent) {
+    cell_size = CELLSIZE_WORD;
+    cells_per_row = 1;
+    index0_offset = 0;
+    updateHeaderLabels();
+}
 
-public:
-    MemoryDock(QWidget *parent, QSettings *settings);
+void MemoryModel::updateHeaderLabels() {
+    setHeaderData(0, Qt::Horizontal, QString("Address"));
+    for (unsigned int i = 0; i < cells_per_row; i++) {
+        std::uint32_t addr = i * cellSizeBytes();
+        setHeaderData(i + 1, Qt::Horizontal, QString("+0x") +
+                      QString::number(addr, 16));
+    }
+}
 
-    void setup(machine::QtMipsMachine *machine);
+int MemoryModel::rowCount(const QModelIndex & /*parent*/) const {
+   std::uint64_t rows = (0x10000000 + cells_per_row - 1) / cells_per_row;
+   return rows;
+}
 
-private:
+int MemoryModel::columnCount(const QModelIndex & /*parent*/) const {
+    return 2;
+}
 
-};
-
-#endif // MEMORYDOCK_H
+QVariant MemoryModel::data(const QModelIndex &index, int role) const {
+    if (role == Qt::DisplayRole)
+    {
+       return QString("Row%1, Column%2")
+                   .arg(index.row() + 1)
+                   .arg(index.column() +1);
+    }
+    return QVariant();
+}

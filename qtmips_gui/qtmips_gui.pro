@@ -46,7 +46,8 @@ SOURCES += \
     cacheview.cpp \
     cachedock.cpp \
     graphicsview.cpp \
-    coreview/value.cpp
+    coreview/value.cpp \
+    memorymodel.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -73,7 +74,8 @@ HEADERS += \
     cacheview.h \
     cachedock.h \
     graphicsview.h \
-    coreview/value.h
+    coreview/value.h \
+    memorymodel.h
 
 FORMS += \
         NewDialog.ui \
