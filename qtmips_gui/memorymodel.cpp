@@ -42,10 +42,12 @@ MemoryModel::MemoryModel(QObject *parent)
     index0_offset = 0;
     data_font.setStyleHint(QFont::TypeWriter);
     machine = nullptr;
+    memory_change_counter = 0;
+    cache_data_change_counter = 0;
 }
 
 int MemoryModel::rowCount(const QModelIndex & /*parent*/) const {
-   std::uint64_t rows = (0x100 + cells_per_row - 1) / cells_per_row;
+   std::uint64_t rows = (0x2000 + cells_per_row - 1) / cells_per_row;
    return rows;
 }
 
@@ -76,8 +78,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
         QString s, t;
         std::uint32_t address;
         std::uint32_t data;
-        address = index0_offset + (index.row() * cells_per_row * cellSizeBytes());
-        if (address < index0_offset)
+        if (!get_row_address(address, index.row()))
             return QString("");
         if (index.column() == 0) {
             t = QString::number(address, 16);
@@ -124,6 +125,8 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
 
 void MemoryModel::setup(machine::QtMipsMachine *machine) {
     this->machine = machine;
+    if (machine != nullptr)
+        connect(machine, SIGNAL(post_tick()), this, SLOT(check_for_updates()));
 }
 
 void MemoryModel::setCellsPerRow(unsigned int cells) {
@@ -135,5 +138,25 @@ void MemoryModel::setCellsPerRow(unsigned int cells) {
 void MemoryModel::set_cell_size(int index) {
     beginResetModel();
     cell_size = (enum MemoryCellSize)index;
+    index0_offset -= index0_offset % cellSizeBytes();
     endResetModel();
+    emit cell_size_changed();
+}
+
+void MemoryModel::check_for_updates() {
+    bool need_update = false;
+    if (machine == nullptr)
+        return;
+    if (machine->memory() == nullptr)
+        return;
+
+    if (memory_change_counter != machine->memory()->get_change_counter())
+        need_update = true;
+    if (machine->cache_data() != nullptr) {
+        if (cache_data_change_counter != machine->cache_data()->get_change_counter())
+            need_update = true;
+    }
+    if (!need_update)
+        return;
+    emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
 }

@@ -42,8 +42,7 @@ MemoryTableView::MemoryTableView(QWidget *parent) : Super(parent) {
 
 }
 
-void MemoryTableView::resizeEvent(QResizeEvent *event) {
-    Super::resizeEvent(event);
+void MemoryTableView::adjustColumnCount() {
     MemoryModel *m = dynamic_cast<MemoryModel*>(model());
 
     if (horizontalHeader()->count() >= 2 && m != nullptr) {
@@ -76,4 +75,13 @@ void MemoryTableView::resizeEvent(QResizeEvent *event) {
             horizontalHeader()->resizeSection(i, width1);
         }
     }
+}
+
+void MemoryTableView::adap_to_cell_size() {
+    adjustColumnCount();
+}
+
+void MemoryTableView::resizeEvent(QResizeEvent *event) {
+    Super::resizeEvent(event);
+    adjustColumnCount();
 }

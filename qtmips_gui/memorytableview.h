@@ -51,7 +51,11 @@ public:
 
     void resizeEvent(QResizeEvent *event) override;
 
+public slots:
+    void adap_to_cell_size();
+
 private:
+    void adjustColumnCount();
 
 };
 

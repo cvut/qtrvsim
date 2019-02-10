@@ -39,7 +39,6 @@
 #include <QDockWidget>
 #include <QLabel>
 #include <QComboBox>
-#include "memorymodel.h"
 #include "qtmipsmachine.h"
 
 class MemoryDock : public QDockWidget  {

@@ -79,9 +79,18 @@ public:
         }
         return 0;
     }
+    inline bool get_row_address(std::uint32_t &address, int row) const {
+        address = index0_offset + (row * cells_per_row * cellSizeBytes());
+        return address >= index0_offset;
+    }
+
 public slots:
     void setup(machine::QtMipsMachine *machine);
     void set_cell_size(int index);
+    void check_for_updates();
+
+signals:
+    void cell_size_changed();
 
 private:
     enum MemoryCellSize cell_size;
@@ -89,6 +98,8 @@ private:
     std::uint32_t index0_offset;
     QFont data_font;
     machine::QtMipsMachine *machine;
+    std::uint32_t memory_change_counter;
+    std::uint32_t cache_data_change_counter;
 };
 
 

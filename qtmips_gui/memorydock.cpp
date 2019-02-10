@@ -41,6 +41,7 @@
 #include <QLineEdit>
 #include <QHeaderView>
 #include "memorydock.h"
+#include "memorymodel.h"
 #include "memorytableview.h"
 
 
@@ -81,6 +82,8 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : QDockWidget(paren
     connect(this, &MemoryDock::machine_setup, memory_model, &MemoryModel::setup);
     connect(cell_size, QOverload<int>::of(&QComboBox::currentIndexChanged),
             memory_model, &MemoryModel::set_cell_size);
+    connect(memory_model, SIGNAL(cell_size_changed()),
+            memory_content, SLOT(adap_to_cell_size()));
 }
 
 void MemoryDock::setup(machine::QtMipsMachine *machine) {
