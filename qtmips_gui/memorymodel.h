@@ -37,6 +37,8 @@
 #define MEMORYMODEL_H
 
 #include <QAbstractTableModel>
+#include <QFont>
+#include "qtmipsmachine.h"
 
 class MemoryModel : public QAbstractTableModel
 {
@@ -55,7 +57,17 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-private:
+
+    void setCellsPerRow(unsigned int cells);
+
+    inline unsigned int cellsPerRow() {
+        return cells_per_row;
+    }
+
+    inline const QFont *getFont() const {
+        return &data_font;
+    }
+
     inline unsigned int cellSizeBytes() const {
         switch (cell_size) {
         case CELLSIZE_BYTE:
@@ -67,10 +79,16 @@ private:
         }
         return 0;
     }
+public slots:
+    void setup(machine::QtMipsMachine *machine);
+    void set_cell_size(int index);
 
+private:
     enum MemoryCellSize cell_size;
     unsigned int cells_per_row;
     std::uint32_t index0_offset;
+    QFont data_font;
+    machine::QtMipsMachine *machine;
 };
 
 

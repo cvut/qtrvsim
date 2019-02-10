@@ -33,28 +33,47 @@
  *
  ******************************************************************************/
 
-#ifndef MEMORYDOCK_H
-#define MEMORYDOCK_H
-
-#include <QDockWidget>
-#include <QLabel>
-#include <QComboBox>
+#include <QHeaderView>
+#include <QFontMetrics>
+#include "memorytableview.h"
 #include "memorymodel.h"
-#include "qtmipsmachine.h"
 
-class MemoryDock : public QDockWidget  {
-    Q_OBJECT
+MemoryTableView::MemoryTableView(QWidget *parent) : Super(parent) {
 
-public:
-    MemoryDock(QWidget *parent, QSettings *settings);
+}
 
-    void setup(machine::QtMipsMachine *machine);
+void MemoryTableView::resizeEvent(QResizeEvent *event) {
+    Super::resizeEvent(event);
+    MemoryModel *m = dynamic_cast<MemoryModel*>(model());
 
-signals:
-    void machine_setup(machine::QtMipsMachine *machine);
+    if (horizontalHeader()->count() >= 2 && m != nullptr) {
+        QFontMetrics fm(*m->getFont());
+        int width0 = fm.width("0x00000000");
+        horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
+        horizontalHeader()->resizeSection(0, width0);
 
-private:
+        QString t = "";
+        t.fill(QChar('0'), m->cellSizeBytes() * 2);
+        int width1 = fm.width(t + " C");
+        horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
+        horizontalHeader()->resizeSection(1, width1);
 
-};
-
-#endif // MEMORYDOCK_H
+        int w = verticalHeader()->width() + 8;
+        int cells;
+        width0 = columnWidth(0);
+        width1 = columnWidth(1);
+        w = width() - w - width0;
+        if (w < width1) {
+            cells = 1;
+        } else {
+            cells = w / width1;
+        }
+        if (cells != m->cellsPerRow()) {
+            m->setCellsPerRow(cells);
+        }
+        for (int i = 1; i < m->cellsPerRow() + 1; i++) {
+            horizontalHeader()->setSectionResizeMode(i, QHeaderView::Fixed);
+            horizontalHeader()->resizeSection(i, width1);
+        }
+    }
+}

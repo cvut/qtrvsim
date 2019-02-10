@@ -33,28 +33,26 @@
  *
  ******************************************************************************/
 
-#ifndef MEMORYDOCK_H
-#define MEMORYDOCK_H
+#ifndef MEMORYTABLEVIEW_H
+#define MEMORYTABLEVIEW_H
 
-#include <QDockWidget>
-#include <QLabel>
-#include <QComboBox>
-#include "memorymodel.h"
-#include "qtmipsmachine.h"
+#include <QObject>
+#include <QTableView>
+#include <QSharedPointer>
 
-class MemoryDock : public QDockWidget  {
+class MemoryTableView : public QTableView
+{
     Q_OBJECT
 
+    using Super = QTableView;
+
 public:
-    MemoryDock(QWidget *parent, QSettings *settings);
+    MemoryTableView(QWidget *parent);
 
-    void setup(machine::QtMipsMachine *machine);
-
-signals:
-    void machine_setup(machine::QtMipsMachine *machine);
+    void resizeEvent(QResizeEvent *event) override;
 
 private:
 
 };
 
-#endif // MEMORYDOCK_H
+#endif // MEMORYTABLEVIEW_H

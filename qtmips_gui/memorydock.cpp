@@ -41,6 +41,7 @@
 #include <QLineEdit>
 #include <QHeaderView>
 #include "memorydock.h"
+#include "memorytableview.h"
 
 
 
@@ -51,11 +52,12 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : QDockWidget(paren
     QWidget *content = new QWidget();
 
     QComboBox *cell_size = new QComboBox();
-    cell_size->addItem("Word", MemoryModel::CELLSIZE_WORD);
-    cell_size->addItem("Half-word", MemoryModel::CELLSIZE_HWORD);
     cell_size->addItem("Byte", MemoryModel::CELLSIZE_BYTE);
+    cell_size->addItem("Half-word", MemoryModel::CELLSIZE_HWORD);
+    cell_size->addItem("Word", MemoryModel::CELLSIZE_WORD);
+    cell_size->setCurrentIndex(MemoryModel::CELLSIZE_WORD);
 
-    QTableView *memory_content = new QTableView();
+    QTableView *memory_content = new MemoryTableView(0);
     // memory_content->setSizePolicy();
     MemoryModel *memory_model = new MemoryModel(0);
     memory_content->setModel(memory_model);
@@ -75,8 +77,12 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : QDockWidget(paren
     content->setLayout(layout);
 
     setWidget(content);
+
+    connect(this, &MemoryDock::machine_setup, memory_model, &MemoryModel::setup);
+    connect(cell_size, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            memory_model, &MemoryModel::set_cell_size);
 }
 
 void MemoryDock::setup(machine::QtMipsMachine *machine) {
-
+    emit machine_setup(machine);
 }
