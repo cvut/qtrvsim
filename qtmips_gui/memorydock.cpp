@@ -80,10 +80,12 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : QDockWidget(paren
     setWidget(content);
 
     connect(this, &MemoryDock::machine_setup, memory_model, &MemoryModel::setup);
-    connect(cell_size, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            memory_model, &MemoryModel::set_cell_size);
-    connect(memory_model, SIGNAL(cell_size_changed()),
-            memory_content, SLOT(adap_to_cell_size()));
+    connect(cell_size, SIGNAL(currentIndexChanged(int)),
+            memory_content, SLOT(set_cell_size(int)));
+    connect(go_edit, SIGNAL(textEdited(QString)),
+            memory_content, SLOT(go_to_edit_text(QString)));
+    connect(memory_content, SIGNAL(set_go_edit_text(QString)),
+            go_edit, SLOT(setText(QString)));
 }
 
 void MemoryDock::setup(machine::QtMipsMachine *machine) {

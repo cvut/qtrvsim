@@ -50,10 +50,13 @@ public:
     MemoryTableView(QWidget *parent);
 
     void resizeEvent(QResizeEvent *event) override;
-
+signals:
+    void set_go_edit_text(QString text);
 public slots:
-    void adap_to_cell_size();
-
+    void set_cell_size(int index);
+    void go_to_edit_text(QString text);
+private slots:
+    void adjust_scroll_pos();
 private:
     void adjustColumnCount();
 

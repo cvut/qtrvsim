@@ -57,6 +57,8 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    bool adjustRowAndOffset(int &row, int optimal_row, std::uint32_t address);
+    void update_all();
 
     void setCellsPerRow(unsigned int cells);
 
@@ -66,6 +68,10 @@ public:
 
     inline const QFont *getFont() const {
         return &data_font;
+    }
+
+    inline const std::uint32_t getIndex0Offset() const {
+        return index0_offset;
     }
 
     inline unsigned int cellSizeBytes() const {
@@ -82,6 +88,18 @@ public:
     inline bool get_row_address(std::uint32_t &address, int row) const {
         address = index0_offset + (row * cells_per_row * cellSizeBytes());
         return address >= index0_offset;
+    }
+    inline bool get_row_for_address(int &row, std::uint32_t address) const {
+        if (address < index0_offset) {
+            row = -1;
+            return false;
+        }
+        row = (address - index0_offset) / (cells_per_row * cellSizeBytes());
+        if ((address - index0_offset > 0x80000000) || row > rowCount()) {
+            row = rowCount();
+            return false;
+        }
+        return true;
     }
 
 public slots:

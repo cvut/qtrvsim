@@ -35,11 +35,13 @@
 
 #include <QHeaderView>
 #include <QFontMetrics>
+#include <QScrollBar>
 #include "memorytableview.h"
 #include "memorymodel.h"
 
 MemoryTableView::MemoryTableView(QWidget *parent) : Super(parent) {
-
+    connect(verticalScrollBar() , SIGNAL(valueChanged(int)),
+            this, SLOT(adjust_scroll_pos()));
 }
 
 void MemoryTableView::adjustColumnCount() {
@@ -58,7 +60,7 @@ void MemoryTableView::adjustColumnCount() {
         horizontalHeader()->resizeSection(1, width1);
 
         int w = verticalHeader()->width() + 8;
-        int cells;
+        unsigned int cells;
         width0 = columnWidth(0);
         width1 = columnWidth(1);
         w = width() - w - width0;
@@ -70,18 +72,82 @@ void MemoryTableView::adjustColumnCount() {
         if (cells != m->cellsPerRow()) {
             m->setCellsPerRow(cells);
         }
-        for (int i = 1; i < m->cellsPerRow() + 1; i++) {
+        for (unsigned int i = 1; i < m->cellsPerRow() + 1; i++) {
             horizontalHeader()->setSectionResizeMode(i, QHeaderView::Fixed);
             horizontalHeader()->resizeSection(i, width1);
         }
     }
 }
 
-void MemoryTableView::adap_to_cell_size() {
+void MemoryTableView::set_cell_size(int index) {
+    std::uint32_t address;
+    int row;
+    bool keep_row0 = false;
+    MemoryModel *m = dynamic_cast<MemoryModel*>(model());
+    if (m != nullptr) {
+        keep_row0 = m->get_row_address(address, rowAt(0));
+        m->set_cell_size(index);
+    }
     adjustColumnCount();
+    if (keep_row0) {
+        m->adjustRowAndOffset(row, m->rowCount() / 2, address);
+        scrollTo(m->index(row, 0),
+                 QAbstractItemView::PositionAtTop);
+    }
+}
+
+void MemoryTableView:: adjust_scroll_pos() {
+    std::uint32_t address;
+    MemoryModel *m = dynamic_cast<MemoryModel*>(model());
+    if (m == nullptr)
+        return;
+    std::uint32_t row_bytes = m->cellSizeBytes() * m->cellsPerRow();
+    std::uint32_t index0_offset = m->getIndex0Offset();
+
+    do {
+        int row = rowAt(0);
+        if (row < m->rowCount() / 8) {
+            if ((row == 0) && (index0_offset < row_bytes) && (index0_offset != 0)) {
+                m->adjustRowAndOffset(row, 0, 0);
+            } else if (index0_offset > row_bytes) {
+                m->get_row_address(address, row);
+                m->adjustRowAndOffset(row, m->rowCount() / 7, address);
+            } else {
+                break;
+            }
+        } else if (row > m->rowCount() - m->rowCount() / 8) {
+            m->get_row_address(address, row);
+            m->adjustRowAndOffset(row, m->rowCount() - m->rowCount() / 7, address);
+        } else {
+            break;
+        }
+        scrollTo(m->index(row, 0),
+             QAbstractItemView::PositionAtTop);
+         emit m->update_all();
+    } while(0);
+    m->get_row_address(address, rowAt(0));
+    QString s, t;
+    s = QString::number(address, 16).toUpper();
+    t.fill('0', 8 - s.count());
+    emit set_go_edit_text("0x" + t + s);
 }
 
 void MemoryTableView::resizeEvent(QResizeEvent *event) {
     Super::resizeEvent(event);
     adjustColumnCount();
+}
+
+void MemoryTableView::go_to_edit_text(QString text) {
+    MemoryModel *m = dynamic_cast<MemoryModel*>(model());
+    int row;
+    if (m == nullptr)
+        return;
+    bool convertOK = true;
+    std::int32_t address = text.toULong(&convertOK, 0);
+    if (!convertOK)
+        return;
+    m->adjustRowAndOffset(row, m->rowCount() / 2, address);
+    scrollTo(m->index(row, 0),
+         QAbstractItemView::PositionAtTop);
+    emit m->update_all();
 }

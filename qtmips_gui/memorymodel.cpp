@@ -47,8 +47,8 @@ MemoryModel::MemoryModel(QObject *parent)
 }
 
 int MemoryModel::rowCount(const QModelIndex & /*parent*/) const {
-   std::uint64_t rows = (0x2000 + cells_per_row - 1) / cells_per_row;
-   return rows;
+   // std::uint64_t rows = (0x2000 + cells_per_row - 1) / cells_per_row;
+   return 2000;
 }
 
 int MemoryModel::columnCount(const QModelIndex & /*parent*/) const {
@@ -143,6 +143,10 @@ void MemoryModel::set_cell_size(int index) {
     emit cell_size_changed();
 }
 
+void MemoryModel::update_all() {
+    emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+}
+
 void MemoryModel::check_for_updates() {
     bool need_update = false;
     if (machine == nullptr)
@@ -158,5 +162,27 @@ void MemoryModel::check_for_updates() {
     }
     if (!need_update)
         return;
-    emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+    update_all();
+}
+
+bool MemoryModel::adjustRowAndOffset(int &row, int optimal_row, std::uint32_t address) {
+    if (optimal_row < rowCount() / 8)
+        optimal_row = rowCount() / 8;
+    if (optimal_row >= rowCount() - rowCount() / 8)
+        optimal_row = rowCount() - rowCount() / 8;
+    row = rowCount() / 2;
+    address -= address % cellSizeBytes();
+    std::uint32_t row_bytes = cells_per_row * cellSizeBytes();
+    std::uint32_t diff = row * row_bytes;
+    if (diff > address) {
+        row = address / row_bytes;
+        if (row == 0) {
+            index0_offset = 0;
+        } else {
+           index0_offset = address - row * row_bytes;
+        }
+    } else {
+        index0_offset = address - diff;
+    }
+    return get_row_for_address(row, address);
 }
