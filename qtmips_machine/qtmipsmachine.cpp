@@ -68,7 +68,7 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) : QObject(), mcnf(&cc) {
 
     run_t = new QTimer(this);
     set_speed(0); // In default run as fast as possible
-    connect(run_t, SIGNAL(timeout()), this, SLOT(step()));
+    connect(run_t, SIGNAL(timeout()), this, SLOT(step_timer()));
 }
 
 QtMipsMachine::~QtMipsMachine() {
@@ -150,6 +150,7 @@ void QtMipsMachine::play() {
     CTL_GUARD;
     set_status(ST_RUNNING);
     run_t->start();
+    step_internal(true);
 }
 
 void QtMipsMachine::pause() {
@@ -159,13 +160,13 @@ void QtMipsMachine::pause() {
     run_t->stop();
 }
 
-void QtMipsMachine::step() {
+void QtMipsMachine::step_internal(bool skip_break) {
     CTL_GUARD;
     enum Status stat_prev = stat;
     set_status(ST_BUSY);
     emit tick();
     try {
-        cr->step();
+        cr->step(skip_break);
     } catch (QtMipsException &e) {
         run_t->stop();
         set_status(ST_TRAPPED);
@@ -181,6 +182,14 @@ void QtMipsMachine::step() {
             set_status(stat_prev);
     }
     emit post_tick();
+}
+
+void QtMipsMachine::step() {
+    step_internal(true);
+}
+
+void QtMipsMachine::step_timer() {
+    step_internal();
 }
 
 void QtMipsMachine::restart() {

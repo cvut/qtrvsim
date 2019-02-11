@@ -72,7 +72,7 @@ public:
     Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
          unsigned int min_cache_row_size = 1);
 
-    void step(); // Do single step
+    void step(bool skip_break = false); // Do single step
     void reset(); // Reset core (only core, memory and registers has to be reseted separately)
 
     unsigned cycles(); // Returns number of executed cycles
@@ -92,12 +92,12 @@ public:
     };
 
 signals:
-    void instruction_fetched(const machine::Instruction &inst, std::uint32_t inst_addr);
-    void instruction_decoded(const machine::Instruction &inst, std::uint32_t inst_addr);
-    void instruction_executed(const machine::Instruction &inst, std::uint32_t inst_addr);
-    void instruction_memory(const machine::Instruction &inst, std::uint32_t inst_addr);
-    void instruction_writeback(const machine::Instruction &inst, std::uint32_t inst_addr);
-    void instruction_program_counter(const machine::Instruction &inst, std::uint32_t inst_addr);
+    void instruction_fetched(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause);
+    void instruction_decoded(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause);
+    void instruction_executed(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause);
+    void instruction_memory(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause);
+    void instruction_writeback(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause);
+    void instruction_program_counter(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause);
 
     void fetch_inst_addr_value(std::uint32_t);
     void fetch_jump_reg_value(std::uint32_t);
@@ -151,7 +151,7 @@ signals:
     void stop_on_exception_reached();
 
 protected:
-    virtual void do_step() = 0;
+    virtual void do_step(bool skip_break = false) = 0;
     virtual void do_reset() = 0;
 
     bool handle_exception(Core *core, Registers *regs,
@@ -225,7 +225,7 @@ protected:
         bool in_delay_slot;
     };
 
-    struct dtFetch fetch();
+    struct dtFetch fetch(bool skip_break = false);
     struct dtDecode decode(const struct dtFetch&);
     struct dtExecute execute(const struct dtDecode&);
     struct dtMemory memory(const struct dtExecute&);
@@ -257,7 +257,7 @@ public:
     ~CoreSingle();
 
 protected:
-    void do_step();
+    void do_step(bool skip_break = false);
     void do_reset();
 
 private:
@@ -269,7 +269,7 @@ public:
     CorePipelined(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data, enum MachineConfig::HazardUnit hazard_unit = MachineConfig::HU_STALL_FORWARD);
 
 protected:
-    void do_step();
+    void do_step(bool skip_break = false);
     void do_reset();
 
 private:

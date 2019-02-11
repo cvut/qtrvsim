@@ -51,10 +51,12 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 public slots:
-    void instruction_update(const machine::Instruction &i, std::uint32_t inst_addr);
+    void instruction_update(const machine::Instruction &i, std::uint32_t inst_addr,
+                            machine::ExceptionCause excause);
 
 private:
     QGraphicsSimpleTextItem text;
+    machine::ExceptionCause excause;
 };
 
 }

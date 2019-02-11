@@ -95,7 +95,11 @@ signals:
     void tick(); // Time tick
     void post_tick(); // Emitted after tick to allow updates
 
+private slots:
+    void step_timer();
+
 private:
+    void step_internal(bool skip_break = false);
     MachineConfig mcnf;
 
     Registers *regs;

@@ -50,9 +50,9 @@ Core::Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
     this->hwr_user_local = 0xe0000000;
 }
 
-void Core::step() {
+void Core::step(bool skip_break) {
     cycle_c++;
-    do_step();
+    do_step(skip_break);
 }
 
 void Core::reset() {
@@ -135,17 +135,19 @@ bool Core::handle_exception(Core *core, Registers *regs, ExceptionCause excause,
     return false;
 }
 
-struct Core::dtFetch Core::fetch() {
+struct Core::dtFetch Core::fetch(bool skip_break) {
     enum ExceptionCause excause = EXCAUSE_NONE;
     std::uint32_t inst_addr = regs->read_pc();
-    emit fetch_inst_addr_value(inst_addr);
     Instruction inst(mem_program->read_word(inst_addr));
 
-    emit instruction_fetched(inst, inst_addr);
-    hwBreak *brk = hw_breaks.value(inst_addr);
-    if (brk != nullptr) {
-        excause = EXCAUSE_HWBREAK;
+    if (!skip_break) {
+        hwBreak *brk = hw_breaks.value(inst_addr);
+        if (brk != nullptr) {
+            excause = EXCAUSE_HWBREAK;
+        }
     }
+    emit fetch_inst_addr_value(inst_addr);
+    emit instruction_fetched(inst, inst_addr, excause);
     return {
         .inst = inst,
         .inst_addr = inst_addr,
@@ -156,8 +158,6 @@ struct Core::dtFetch Core::fetch() {
 
 struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     uint8_t rwrite;
-    emit decode_inst_addr_value(dt.inst_addr);
-    emit instruction_decoded(dt.inst, dt.inst_addr);
     enum InstructionFlags flags;
     enum AluOp alu_op;
     enum AccessControl mem_ctl;
@@ -191,6 +191,8 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         excause = dt.inst.encoded_exception();
     }
 
+    emit decode_inst_addr_value(dt.inst_addr);
+    emit instruction_decoded(dt.inst, dt.inst_addr, excause);
     emit decode_instruction_value(dt.inst.data());
     emit decode_reg1_value(val_rs);
     emit decode_reg2_value(val_rt);
@@ -246,8 +248,6 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
 }
 
 struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
-    emit execute_inst_addr_value(dt.inst_addr);
-    emit instruction_executed(dt.inst, dt.inst_addr);
     bool discard;
 
     // Handle conditional move (we have to change regwrite signal if conditional is not met)
@@ -283,6 +283,8 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
         }
     }
 
+    emit execute_inst_addr_value(dt.inst_addr);
+    emit instruction_executed(dt.inst, dt.inst_addr, dt.excause);
     emit execute_alu_value(alu_val);
     emit execute_reg1_value(dt.val_rs);
     emit execute_reg2_value(dt.val_rt);
@@ -313,8 +315,6 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
 }
 
 struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
-    emit memory_inst_addr_value(dt.inst_addr);
-    emit instruction_memory(dt.inst, dt.inst_addr);
     std::uint32_t towrite_val = dt.alu_val;
     std::uint32_t mem_addr = dt.alu_val;
     bool memread = dt.memread;
@@ -344,6 +344,8 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
         }
     }
 
+    emit memory_inst_addr_value(dt.inst_addr);
+    emit instruction_memory(dt.inst, dt.inst_addr, dt.excause);
     emit memory_alu_value(dt.alu_val);
     emit memory_rt_value(dt.val_rt);
     emit memory_mem_value(memread ? towrite_val : 0);
@@ -367,7 +369,7 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
 
 void Core::writeback(const struct dtMemory &dt) {
     emit writeback_inst_addr_value(dt.inst_addr);
-    emit instruction_writeback(dt.inst, dt.inst_addr);
+    emit instruction_writeback(dt.inst, dt.inst_addr, dt.excause);
     emit writeback_value(dt.towrite_val);
     emit writeback_regw_value(dt.regwrite);
     emit writeback_regw_num_value(dt.rwrite);
@@ -377,7 +379,7 @@ void Core::writeback(const struct dtMemory &dt) {
 
 bool Core::handle_pc(const struct dtDecode &dt) {
     bool branch = false;
-    emit instruction_program_counter(dt.inst, dt.inst_addr);
+    emit instruction_program_counter(dt.inst, dt.inst_addr, EXCAUSE_NONE);
 
     if (dt.jump) {
         if (!dt.bjr_req_rs) {
@@ -487,11 +489,11 @@ CoreSingle::~CoreSingle() {
         delete jmp_delay_decode;
 }
 
-void CoreSingle::do_step() {
+void CoreSingle::do_step(bool skip_break) {
     bool in_delay_slot = false;
     std::uint32_t jump_branch_pc;
 
-    struct dtFetch f = fetch();
+    struct dtFetch f = fetch(skip_break);
     struct dtDecode d = decode(f);
 
     // Handle PC before instruction following jump leaves decode stage
@@ -535,7 +537,7 @@ CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem_program, MemoryA
     reset();
 }
 
-void CorePipelined::do_step() {
+void CorePipelined::do_step(bool skip_break) {
     bool stall = false;
     bool excpt_in_progress = false;
     std::uint32_t jump_branch_pc = dt_m.inst_addr;
@@ -548,14 +550,19 @@ void CorePipelined::do_step() {
 
     // Resolve exceptions
     excpt_in_progress = dt_m.excause != EXCAUSE_NONE;
-    if (excpt_in_progress)
+    if (excpt_in_progress) {
         dtExecuteInit(dt_e);
+        emit instruction_executed(dt_e.inst, dt_e.inst_addr, dt_e.excause);
+    }
     excpt_in_progress = excpt_in_progress || dt_e.excause != EXCAUSE_NONE;
-    if (excpt_in_progress)
+    if (excpt_in_progress) {
         dtDecodeInit(dt_d);
+        emit instruction_decoded(dt_d.inst, dt_d.inst_addr, dt_d.excause);
+    }
     excpt_in_progress = excpt_in_progress || dt_e.excause != EXCAUSE_NONE;
     if (excpt_in_progress) {
         dtFetchInit(dt_f);
+        emit instruction_fetched(dt_f.inst, dt_f.inst_addr, dt_f.excause);
         if (dt_m.excause != EXCAUSE_NONE) {
             regs->pc_abs_jmp(dt_e.inst_addr);
             handle_exception(this, regs, dt_m.excause, dt_m.inst_addr,
@@ -656,18 +663,21 @@ void CorePipelined::do_step() {
 
     // Now process program counter (loop connections from decode stage)
     if (!stall) {
-        dt_f = fetch();
+        dt_f = fetch(skip_break);
         if (handle_pc(dt_d)) {
             dt_f.in_delay_slot = true;
         } else {
-            if (dt_d.nb_skip_ds)
+            if (dt_d.nb_skip_ds) {
                 dtFetchInit(dt_f);
+                emit instruction_fetched(dt_f.inst, dt_f.inst_addr, dt_f.excause);
+            }
         }
     } else {
         // Run fetch stage on empty
-        fetch();
+        fetch(skip_break);
         // clear decode latch (insert nope to execute stage)
         dtDecodeInit(dt_d);
+        emit instruction_decoded(dt_d.inst, dt_d.inst_addr, dt_d.excause);
     }
 }
 
