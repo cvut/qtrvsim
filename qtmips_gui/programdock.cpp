@@ -97,6 +97,8 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
             this, SLOT(set_follow_inst(int)));
     connect(this, SIGNAL(focus_addr(std::uint32_t)),
             program_content, SLOT(focus_address(std::uint32_t)));
+    connect(program_content, SIGNAL(doubleClicked(QModelIndex)),
+            program_model, SLOT(toggle_hw_break(QModelIndex)));
 }
 
 void ProgramDock::setup(machine::QtMipsMachine *machine) {

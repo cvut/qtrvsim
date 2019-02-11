@@ -83,7 +83,7 @@ Core::hwBreak::hwBreak(std::uint32_t addr) {
     count = 0;
 }
 
-void Core::inser_hwbreak(std::uint32_t address) {
+void Core::insert_hwbreak(std::uint32_t address) {
     hw_breaks.insert(address, new hwBreak(address));
 }
 
@@ -118,9 +118,9 @@ bool Core::handle_exception(Core *core, Registers *regs, ExceptionCause excause,
 {
     if (excause == EXCAUSE_HWBREAK) {
         if (in_delay_slot)
-            regs->pc_abs_jmp(inst_addr);
-        else
             regs->pc_abs_jmp(jump_branch_pc);
+        else
+            regs->pc_abs_jmp(inst_addr);
     }
 
     ExceptionHandler *exhandler = ex_handlers.value(excause);

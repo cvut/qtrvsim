@@ -78,7 +78,7 @@ public:
     bool exited();
 
     void register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler);
-    void inser_hwbreak(std::uint32_t address);
+    void insert_hwbreak(std::uint32_t address);
     void remove_hwbreak(std::uint32_t address);
     bool is_hwbreak(std::uint32_t address);
 

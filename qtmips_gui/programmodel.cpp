@@ -113,15 +113,18 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
     if (role == Qt::BackgroundRole) {
         std::uint32_t address;
         if (!get_row_address(address, index.row()) ||
-            machine == nullptr || index.column() != 2)
+            machine == nullptr)
             return QVariant();
-        if (machine->cache_program() != nullptr) {
+        if (index.column() == 2 && machine->cache_program() != nullptr) {
             machine::LocationStatus loc_stat;
             loc_stat = machine->cache_program()->location_status(address);
             if (loc_stat & machine::LOCSTAT_CACHED) {
                 QBrush bgd(Qt::lightGray);
                 return bgd;
             }
+        } else if (index.column() == 0 && machine->is_hwbreak(address)) {
+            QBrush bgd(Qt::red);
+            return bgd;
         }
         return QVariant();
     }
@@ -184,4 +187,19 @@ bool ProgramModel::adjustRowAndOffset(int &row, int optimal_row, std::uint32_t a
         index0_offset = address - diff;
     }
     return get_row_for_address(row, address);
+}
+
+void ProgramModel::toggle_hw_break(const QModelIndex & index) {
+    std::uint32_t address;
+    if (index.column() != 0 || machine == nullptr)
+        return;
+
+    if (!get_row_address(address, index.row()))
+        return;
+
+    if (machine->is_hwbreak(address))
+        machine->remove_hwbreak(address);
+    else
+        machine->insert_hwbreak(address);
+    update_all();
 }

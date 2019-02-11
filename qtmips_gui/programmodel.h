@@ -85,6 +85,7 @@ public:
 public slots:
     void setup(machine::QtMipsMachine *machine);
     void check_for_updates();
+    void toggle_hw_break(const QModelIndex & index);
 
 private:
     std::uint32_t index0_offset;
