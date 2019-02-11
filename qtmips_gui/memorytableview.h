@@ -37,6 +37,7 @@
 #define MEMORYTABLEVIEW_H
 
 #include <QObject>
+#include <QSettings>
 #include <QTableView>
 #include <QSharedPointer>
 
@@ -47,19 +48,22 @@ class MemoryTableView : public QTableView
     using Super = QTableView;
 
 public:
-    MemoryTableView(QWidget *parent);
+    MemoryTableView(QWidget *parent, QSettings *settings);
 
     void resizeEvent(QResizeEvent *event) override;
 signals:
-    void set_go_edit_text(QString text);
+    void address_changed(std::int32_t address);
 public slots:
     void set_cell_size(int index);
-    void go_to_edit_text(QString text);
+    void go_to_address(std::int32_t address);
 private slots:
     void adjust_scroll_pos();
 private:
+    void addr0_save_change(std::uint32_t val);
     void adjustColumnCount();
+    QSettings *settings;
 
+    std::uint32_t initial_address;
 };
 
 #endif // MEMORYTABLEVIEW_H

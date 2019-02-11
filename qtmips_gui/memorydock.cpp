@@ -38,15 +38,15 @@
 #include <QVBoxLayout>
 #include <QTableView>
 #include <QComboBox>
-#include <QLineEdit>
 #include <QHeaderView>
 #include "memorydock.h"
 #include "memorymodel.h"
 #include "memorytableview.h"
+#include "hexlineedit.h"
 
 
 
-MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : QDockWidget(parent) {
+MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     setObjectName("Memory");
     setWindowTitle("Memory");
 
@@ -58,16 +58,14 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : QDockWidget(paren
     cell_size->addItem("Word", MemoryModel::CELLSIZE_WORD);
     cell_size->setCurrentIndex(MemoryModel::CELLSIZE_WORD);
 
-    QTableView *memory_content = new MemoryTableView(0);
+    QTableView *memory_content = new MemoryTableView(0, settings);
     // memory_content->setSizePolicy();
     MemoryModel *memory_model = new MemoryModel(0);
     memory_content->setModel(memory_model);
     memory_content->verticalHeader()->hide();
     //memory_content->setHorizontalHeader(memory_model->);
 
-    QLineEdit *go_edit = new QLineEdit();
-    go_edit->setText("0x00000000");
-    go_edit->setInputMask("\\0\\xHhhhhhhh");
+    QLineEdit *go_edit = new HexLineEdit(0, 8, 16, "0x");
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(cell_size);
@@ -82,10 +80,10 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : QDockWidget(paren
     connect(this, &MemoryDock::machine_setup, memory_model, &MemoryModel::setup);
     connect(cell_size, SIGNAL(currentIndexChanged(int)),
             memory_content, SLOT(set_cell_size(int)));
-    connect(go_edit, SIGNAL(textEdited(QString)),
-            memory_content, SLOT(go_to_edit_text(QString)));
-    connect(memory_content, SIGNAL(set_go_edit_text(QString)),
-            go_edit, SLOT(setText(QString)));
+    connect(go_edit, SIGNAL(value_edit_finished(std::int32_t)),
+            memory_content, SLOT(go_to_address(std::int32_t)));
+    connect(memory_content, SIGNAL(address_changed(std::int32_t)),
+            go_edit, SLOT(set_value(std::int32_t)));
 }
 
 void MemoryDock::setup(machine::QtMipsMachine *machine) {

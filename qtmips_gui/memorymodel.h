@@ -70,7 +70,7 @@ public:
         return &data_font;
     }
 
-    inline const std::uint32_t getIndex0Offset() const {
+    inline std::uint32_t getIndex0Offset() const {
         return index0_offset;
     }
 

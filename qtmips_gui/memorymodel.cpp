@@ -33,10 +33,12 @@
  *
  ******************************************************************************/
 
+#include <QBrush>
+
 #include "memorymodel.h"
 
 MemoryModel::MemoryModel(QObject *parent)
-    :QAbstractTableModel(parent), data_font("Monospace") {
+    : Super(parent), data_font("Monospace") {
     cell_size = CELLSIZE_WORD;
     cells_per_row = 1;
     index0_offset = 0;
@@ -48,7 +50,7 @@ MemoryModel::MemoryModel(QObject *parent)
 
 int MemoryModel::rowCount(const QModelIndex & /*parent*/) const {
    // std::uint64_t rows = (0x2000 + cells_per_row - 1) / cells_per_row;
-   return 2000;
+   return 750;
 }
 
 int MemoryModel::columnCount(const QModelIndex & /*parent*/) const {
@@ -64,7 +66,7 @@ QVariant MemoryModel::headerData(int section, Qt::Orientation orientation, int r
             }
             else {
                 std::uint32_t addr = (section - 1) * cellSizeBytes();
-                QString ret = "+0x" + QString::number(addr, 16);
+                QString ret = "+" + QString::number(addr, 10);
                 return ret;
             }
         }
@@ -106,8 +108,8 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
 
         t = QString::number(data, 16);
         s.fill('0', cellSizeBytes() * 2 - t.count());
-        t = s + t;
-
+        t = s + t.toUpper();
+#if 0
         machine::LocationStatus loc_stat = machine::LOCSTAT_NONE;
         if (machine->cache_data() != nullptr) {
             loc_stat = machine->cache_data()->location_status(address);
@@ -116,7 +118,27 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
             else if (loc_stat & machine::LOCSTAT_CACHED)
                 t += " C";
         }
+#endif
         return t;
+    }
+    if (role == Qt::BackgroundRole) {
+        std::uint32_t address;
+        if (!get_row_address(address, index.row()) ||
+            machine == nullptr || index.column() == 0)
+            return QVariant();
+        address += cellSizeBytes() * (index.column() - 1);
+        if (machine->cache_data() != nullptr) {
+            machine::LocationStatus loc_stat;
+            loc_stat = machine->cache_data()->location_status(address);
+            if (loc_stat & machine::LOCSTAT_DIRTY) {
+                QBrush bgd(Qt::yellow);
+                return bgd;
+            } else if (loc_stat & machine::LOCSTAT_CACHED) {
+                QBrush bgd(Qt::lightGray);
+                return bgd;
+            }
+        }
+        return QVariant();
     }
     if (role==Qt::FontRole)
             return data_font;
@@ -127,6 +149,7 @@ void MemoryModel::setup(machine::QtMipsMachine *machine) {
     this->machine = machine;
     if (machine != nullptr)
         connect(machine, SIGNAL(post_tick()), this, SLOT(check_for_updates()));
+    emit update_all();
 }
 
 void MemoryModel::setCellsPerRow(unsigned int cells) {

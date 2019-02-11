@@ -48,7 +48,8 @@ SOURCES += \
     graphicsview.cpp \
     coreview/value.cpp \
     memorymodel.cpp \
-    memorytableview.cpp
+    memorytableview.cpp \
+    hexlineedit.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -77,7 +78,8 @@ HEADERS += \
     graphicsview.h \
     coreview/value.h \
     memorymodel.h \
-    memorytableview.h
+    memorytableview.h \
+    hexlineedit.h
 
 FORMS += \
         NewDialog.ui \

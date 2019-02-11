@@ -33,29 +33,66 @@
  *
  ******************************************************************************/
 
-#ifndef MEMORYDOCK_H
-#define MEMORYDOCK_H
+#include "hexlineedit.h"
 
-#include <QDockWidget>
-#include <QLabel>
-#include <QComboBox>
-#include "qtmipsmachine.h"
+HexLineEdit::HexLineEdit(QWidget *parent, int digits, int base, QString prefix):
+    Super(parent) {
+    this->base = base;
+    this->digits = digits;
+    this->prefix = prefix;
+    last_set = 0;
+    QChar dmask;
+    QString t = "";
+    QString mask = "";
 
-class MemoryDock : public QDockWidget  {
-    Q_OBJECT
+    for (int i = 0; i <prefix.count(); i++)
+        mask += "\\" + QString(prefix.at(i));
+    switch (base) {
+    case 10:
+        mask += "D";
+        dmask = 'd';
+        break;
+    case 2:
+        mask += "B";
+        dmask = 'b';
+        break;
+    case 16:
+    case 0:
+    default:
+        mask += "H";
+        dmask = 'h';
+        break;
+    }
+    if (digits > 1)
+        t.fill(dmask, digits  - 1);
 
-    using Super = QDockWidget;
+    mask += t;
 
-public:
-    MemoryDock(QWidget *parent, QSettings *settings);
+    setInputMask(mask);
 
-    void setup(machine::QtMipsMachine *machine);
+    connect(this, SIGNAL(editingFinished()), this, SLOT(on_edit_finished()));
 
-signals:
-    void machine_setup(machine::QtMipsMachine *machine);
+    set_value(0);
+}
 
-private:
+void HexLineEdit::set_value(std::int32_t value) {
+    QString s, t = "";
+    last_set = value;
+    s = QString::number(value, base);
+    if (s.count() < digits)
+        t.fill('0', digits - s.count());
+    setText(prefix + t +s);
 
-};
+}
 
-#endif // MEMORYDOCK_H
+void HexLineEdit::on_edit_finished() {
+    bool ok;
+    std::uint32_t val;
+    val = text().toLong(&ok, 16);
+    if (!ok) {
+        set_value(last_set);
+        return;
+    }
+    last_set = val;
+    emit value_edit_finished(val);
+}

@@ -33,29 +33,36 @@
  *
  ******************************************************************************/
 
-#ifndef MEMORYDOCK_H
-#define MEMORYDOCK_H
+#ifndef HEXLINEEDIT_H
+#define HEXLINEEDIT_H
 
-#include <QDockWidget>
-#include <QLabel>
-#include <QComboBox>
-#include "qtmipsmachine.h"
+#include <QLineEdit>
+#include <QObject>
 
-class MemoryDock : public QDockWidget  {
+class HexLineEdit : public QLineEdit
+{
     Q_OBJECT
 
-    using Super = QDockWidget;
+    using Super = QLineEdit;
 
 public:
-    MemoryDock(QWidget *parent, QSettings *settings);
+    HexLineEdit(QWidget *parent = nullptr, int digits = 8, int base = 0,
+                QString prefix = "0x");
 
-    void setup(machine::QtMipsMachine *machine);
+public slots:
+    void set_value(std::int32_t value);
 
 signals:
-    void machine_setup(machine::QtMipsMachine *machine);
+    void value_edit_finished(std::int32_t value);
+
+private slots:
+    void on_edit_finished();
 
 private:
-
+    int base;
+    int digits;
+    QString prefix;
+    std::uint32_t last_set;
 };
 
-#endif // MEMORYDOCK_H
+#endif // HEXLINEEDIT_H
