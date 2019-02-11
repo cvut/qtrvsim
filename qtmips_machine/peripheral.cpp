@@ -55,7 +55,8 @@ bool SimplePeripheral::wword(std::uint32_t address, std::uint32_t value) {
     return true;
 }
 
-std::uint32_t SimplePeripheral::rword(std::uint32_t address) const {
+std::uint32_t SimplePeripheral::rword(std::uint32_t address, bool debug_access) const {
+    (void)debug_access;
     std::uint32_t value = 0x12345678;
 #if 0
     printf("SimplePeripheral::rword address 0x%08lx\n",

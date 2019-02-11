@@ -106,6 +106,7 @@ public slots:
     void setup(machine::QtMipsMachine *machine);
     void set_cell_size(int index);
     void check_for_updates();
+    void cached_access(int cached);
 
 signals:
     void cell_size_changed();
@@ -118,6 +119,7 @@ private:
     machine::QtMipsMachine *machine;
     std::uint32_t memory_change_counter;
     std::uint32_t cache_data_change_counter;
+    int access_through_cache;
 };
 
 

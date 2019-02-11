@@ -46,6 +46,7 @@ MemoryModel::MemoryModel(QObject *parent)
     machine = nullptr;
     memory_change_counter = 0;
     cache_data_change_counter = 0;
+    access_through_cache = 0;
 }
 
 int MemoryModel::rowCount(const QModelIndex & /*parent*/) const {
@@ -80,6 +81,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
         QString s, t;
         std::uint32_t address;
         std::uint32_t data;
+        const machine::MemoryAccess *mem;
         if (!get_row_address(address, index.row()))
             return QString("");
         if (index.column() == 0) {
@@ -89,21 +91,24 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
         }
         if (machine == nullptr)
             return QString("");
-        if (machine->memory() == nullptr)
+        mem = machine->memory();
+        if (mem == nullptr)
             return QString("");
+        if ((access_through_cache > 0) && (machine->cache_data() != nullptr))
+            mem = machine->cache_data();
         address += cellSizeBytes() * (index.column() - 1);
         if (address < index0_offset)
             return QString("");
         switch (cell_size) {
         case CELLSIZE_BYTE:
-            data = machine->memory()->read_byte(address);
+            data = mem->read_byte(address, true);
             break;
         case CELLSIZE_HWORD:
-            data = machine->memory()->read_hword(address);
+            data = mem->read_hword(address, true);
             break;
         default:
         case CELLSIZE_WORD:
-            data = machine->memory()->read_word(address);
+            data = mem->read_word(address, true);
             break;
         }
 
@@ -214,4 +219,9 @@ bool MemoryModel::adjustRowAndOffset(int &row, int optimal_row, std::uint32_t ad
         index0_offset = address - diff;
     }
     return get_row_for_address(row, address);
+}
+
+void MemoryModel::cached_access(int cached) {
+    access_through_cache = cached;
+    update_all();
 }

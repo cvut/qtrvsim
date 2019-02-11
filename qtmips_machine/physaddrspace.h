@@ -52,7 +52,7 @@ public:
     ~PhysAddrSpace();
 
     bool wword(std::uint32_t address, std::uint32_t value);
-    std::uint32_t rword(std::uint32_t address) const;
+    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
 
     bool insert_range(MemoryAccess *mem_acces, std::uint32_t start_addr, std::uint32_t last_addr, bool move_ownership);
     bool remove_range(MemoryAccess *mem_acces);

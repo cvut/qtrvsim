@@ -75,15 +75,17 @@ Cache::Cache(MemoryAccess  *m, const MachineConfigCache *cc, unsigned memory_acc
             replc.lfu[row] = new unsigned[cnf.associativity()];
             for (unsigned int  i = 0; i < cnf.associativity(); i++)
                  replc.lfu[row][i] = 0;
-	}
+        }
         break;
     case MachineConfigCache::RP_LRU:
-        replc.lru = new time_t*[cnf.sets()];
+        replc.lru = new unsigned int*[cnf.sets()];
         for (unsigned int row = 0; row < cnf.sets(); row++) {
-            replc.lru[row] = new time_t[cnf.associativity()];
+            replc.lru[row] = new unsigned int[cnf.associativity()];
             for (unsigned int i = 0; i < cnf.associativity(); i++)
                 replc.lru[row][i] = 0;
-	}
+        }
+        break;
+    case MachineConfigCache::RP_RAND:
     default:
         break;
     }
@@ -138,12 +140,17 @@ bool Cache::wword(std::uint32_t address, std::uint32_t value) {
     return changed;
 }
 
-std::uint32_t Cache::rword(std::uint32_t address) const {
+std::uint32_t Cache::rword(std::uint32_t address, bool debug_access) const {
     if (!cnf.enabled() ||
         (address >= uncached_start && address <= uncached_last)) {
-        return mem->read_word(address);
+        return mem->read_word(address, debug_access);
     }
 
+    if (debug_access) {
+        if (!(location_status(address) & LOCSTAT_CACHED))
+            return mem->read_word(address, debug_access);
+        return debug_rword(address);
+    }
     std::uint32_t data;
     access(address, &data, false);
     return data;
@@ -236,16 +243,25 @@ enum LocationStatus Cache::location_status(std::uint32_t address) const {
     return mem->location_status(address);
 }
 
+std::uint32_t Cache::debug_rword(std::uint32_t address) const {
+    std::uint32_t row, col, tag;
+    compute_row_col_tag(row, col, tag, address);
+    for (unsigned indx = 0; indx < cnf.associativity(); indx++)
+        if (dt[indx][row].valid && dt[indx][row].tag == tag)
+            return dt[indx][row].data[col];
+    return 0;
+}
+
 bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::uint32_t value) const {
     bool changed = false;
     std::uint32_t row, col, tag;
     compute_row_col_tag(row, col, tag, address);
 
     unsigned indx = 0;
-    // Try to locate exact block or some unused one
-    while (indx < cnf.associativity() && dt[indx][row].valid && dt[indx][row].tag != tag)
+    // Try to locate exact block
+    while (indx < cnf.associativity() && (!dt[indx][row].valid || dt[indx][row].tag != tag))
         indx++;
-    // Replace block
+    // Need to find new block
     if (indx >= cnf.associativity()) {
         // We have to kick something
         switch (cnf.replacement_policy()) {
@@ -254,26 +270,37 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
             break;
         case MachineConfigCache::RP_LFU:
             {
-            unsigned lowest = replc.lfu[row][0];
-            indx = 0;
-            for (unsigned i = 1; i < cnf.associativity(); i++)
-                if (lowest > replc.lfu[row][i]) {
-                    lowest = replc.lfu[row][i];
-                    indx = i;
+                unsigned lowest = replc.lfu[row][0];
+                indx = 0;
+                for (unsigned i = 1; i < cnf.associativity(); i++) {
+                    if (!dt[i][row].valid) {
+                        indx = i;
+                        break;
+                    }
+                    if (lowest > replc.lfu[row][i]) {
+                        lowest = replc.lfu[row][i];
+                        indx = i;
+                    }
                 }
+                break;
             }
-            break;
         case MachineConfigCache::RP_LRU:
             {
-            time_t lowest = replc.lru[row][0];
-            indx = 0;
-            for (unsigned i = 1; i < cnf.associativity(); i++)
-                if (lowest > replc.lru[row][i]) {
-                    lowest = replc.lru[row][i];
-                    indx = i;
+                unsigned int least = 0xffff;
+                indx = 0;
+                for (unsigned i = 0; i < cnf.associativity(); i++) {
+                    if (!dt[i][row].valid) {
+                        // found free one, use it directly
+                        indx = i;
+                        break;
+                    }
+                    if (least < replc.lru[row][i]) {
+                        least = replc.lru[row][i];
+                        indx = i;
+                    }
                 }
+                break;
             }
-            break;
         }
     }
     SANITY_ASSERT(indx < cnf.associativity(), "Probably unimplemented replacement policy");
@@ -307,13 +334,17 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
         }
     }
 
-    // Update replc
+    // Update replcement data
     switch (cnf.replacement_policy()) {
     case MachineConfigCache::RP_LFU:
-        replc.lru[row][indx]++;
+        if (cd.valid && replc.lru[row][indx] == 0)
+            break;
+        for (unsigned i = 1; i < cnf.associativity(); i++)
+            replc.lru[row][i]++;
+        replc.lru[row][indx] = 0;
         break;
     case MachineConfigCache::RP_LRU:
-        replc.lfu[row][indx] = time(NULL);
+        replc.lfu[row][indx]++;
         break;
     default:
         break;
@@ -345,7 +376,6 @@ void Cache::kick(unsigned associat_indx, unsigned row) const {
 
     switch (cnf.replacement_policy()) {
     case MachineConfigCache::RP_LFU:
-        replc.lru[row][associat_indx] = 0;
         break;
     default:
         break;

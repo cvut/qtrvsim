@@ -44,8 +44,6 @@
 #include "memorytableview.h"
 #include "hexlineedit.h"
 
-
-
 MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     setObjectName("Memory");
     setWindowTitle("Memory");
@@ -58,6 +56,10 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     cell_size->addItem("Word", MemoryModel::CELLSIZE_WORD);
     cell_size->setCurrentIndex(MemoryModel::CELLSIZE_WORD);
 
+    QComboBox *cached_access = new QComboBox();
+    cached_access->addItem("Direct", 0);
+    cached_access->addItem("Cached", 1);
+
     QTableView *memory_content = new MemoryTableView(0, settings);
     // memory_content->setSizePolicy();
     MemoryModel *memory_model = new MemoryModel(0);
@@ -67,8 +69,12 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
 
     QLineEdit *go_edit = new HexLineEdit(0, 8, 16, "0x");
 
+    QHBoxLayout *layout_top = new QHBoxLayout;
+    layout_top->addWidget(cell_size);
+    layout_top->addWidget(cached_access);
+
     QVBoxLayout *layout = new QVBoxLayout;
-    layout->addWidget(cell_size);
+    layout->addLayout(layout_top);
     layout->addWidget(memory_content);
     layout->addWidget(go_edit);
 
@@ -79,6 +85,8 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     connect(this, &MemoryDock::machine_setup, memory_model, &MemoryModel::setup);
     connect(cell_size, SIGNAL(currentIndexChanged(int)),
             memory_content, SLOT(set_cell_size(int)));
+    connect(cached_access, SIGNAL(currentIndexChanged(int)),
+            memory_model, SLOT(cached_access(int)));
     connect(go_edit, SIGNAL(value_edit_finished(std::uint32_t)),
             memory_content, SLOT(go_to_address(std::uint32_t)));
     connect(memory_content, SIGNAL(address_changed(std::uint32_t)),

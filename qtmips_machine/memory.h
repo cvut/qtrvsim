@@ -52,9 +52,9 @@ public:
     bool write_hword(std::uint32_t offset, std::uint16_t value);
     bool write_word(std::uint32_t offset, std::uint32_t value);
 
-    std::uint8_t read_byte(std::uint32_t offset) const;
-    std::uint16_t read_hword(std::uint32_t offset) const;
-    std::uint32_t read_word(std::uint32_t offset) const;
+    std::uint8_t read_byte(std::uint32_t offset, bool debug_access = false) const;
+    std::uint16_t read_hword(std::uint32_t offset, bool debug_access = false) const;
+    std::uint32_t read_word(std::uint32_t offset, bool debug_access = false) const;
 
     void write_ctl(enum AccessControl ctl, std::uint32_t offset, std::uint32_t value);
     std::uint32_t read_ctl(enum AccessControl ctl, std::uint32_t offset) const;
@@ -64,7 +64,7 @@ public:
 
 protected:
     virtual bool wword(std::uint32_t offset, std::uint32_t value) = 0;
-    virtual std::uint32_t rword(std::uint32_t offset) const = 0;
+    virtual std::uint32_t rword(std::uint32_t offset, bool debug_access = false) const = 0;
 
 private:
     static int sh_nth(std::uint32_t offset);
@@ -77,7 +77,7 @@ public:
     ~MemorySection();
 
     bool wword(std::uint32_t offset, std::uint32_t value);
-    std::uint32_t rword(std::uint32_t offset) const;
+    std::uint32_t rword(std::uint32_t offsetbool, bool debug_access = false) const;
     void merge(MemorySection&);
 
     std::uint32_t length() const;
@@ -107,7 +107,7 @@ public:
 
     MemorySection *get_section(std::uint32_t address, bool create) const; // returns section containing given address
     bool wword(std::uint32_t address, std::uint32_t value);
-    std::uint32_t rword(std::uint32_t address) const;
+    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
 
     bool operator==(const Memory&) const;
     bool operator!=(const Memory&) const;

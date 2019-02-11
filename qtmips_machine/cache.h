@@ -50,7 +50,7 @@ public:
     ~Cache();
 
     bool wword(std::uint32_t address, std::uint32_t value);
-    std::uint32_t rword(std::uint32_t address) const;
+    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
 
     void flush(); // flush cache
     void sync(); // Same as flush
@@ -91,12 +91,13 @@ private:
     mutable struct cache_data **dt;
 
     union {
-        time_t ** lru; // Access time
+        unsigned int ** lru; // Access time
         unsigned **lfu; // Access count
     } replc; // Data used for replacement policy
 
     mutable unsigned hit_read, miss_read, hit_write, miss_write; // Hit and miss counters
 
+    std::uint32_t debug_rword(std::uint32_t address) const;
     bool access(std::uint32_t address, std::uint32_t *data, bool write, std::uint32_t value = 0) const;
     void kick(unsigned associat_indx, unsigned row) const;
     std::uint32_t base_address(std::uint32_t tag, unsigned row) const;

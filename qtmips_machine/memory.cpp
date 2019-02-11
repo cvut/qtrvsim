@@ -61,18 +61,18 @@ bool MemoryAccess::write_word(std::uint32_t offset, std::uint32_t value) {
     return wword(offset, value);
 }
 
-std::uint8_t MemoryAccess::read_byte(std::uint32_t offset) const {
+std::uint8_t MemoryAccess::read_byte(std::uint32_t offset, bool debug_access) const {
     int nth = SH_NTH_8(offset);
-    return (std::uint8_t)(rword(offset) >> nth);
+    return (std::uint8_t)(rword(offset, debug_access) >> nth);
 }
 
-std::uint16_t MemoryAccess::read_hword(std::uint32_t offset) const {
+std::uint16_t MemoryAccess::read_hword(std::uint32_t offset, bool debug_access) const {
     int nth = SH_NTH_16(offset);
-    return (std::uint16_t)(rword(offset) >> nth);
+    return (std::uint16_t)(rword(offset, debug_access) >> nth);
 }
 
-std::uint32_t MemoryAccess::read_word(std::uint32_t offset) const {
-    return rword(offset);
+std::uint32_t MemoryAccess::read_word(std::uint32_t offset, bool debug_access) const {
+    return rword(offset, debug_access);
 }
 
 void MemoryAccess::write_ctl(enum AccessControl ctl, std::uint32_t offset, std::uint32_t value) {
@@ -151,7 +151,8 @@ bool MemorySection::wword(std::uint32_t offset, std::uint32_t value) {
     return changed;
 }
 
-std::uint32_t MemorySection::rword(std::uint32_t offset) const {
+std::uint32_t MemorySection::rword(std::uint32_t offset, bool debug_access) const {
+    (void)debug_access;
     offset = offset >> 2;
     if (offset >= this->len)
         throw QTMIPS_EXCEPTION(OutOfMemoryAccess, "Trying to read outside of the memory section", QString("Accessing using offset: ") + QString(offset));
@@ -263,12 +264,12 @@ bool Memory::wword(std::uint32_t address, std::uint32_t value) {
     return changed;
 }
 
-std::uint32_t Memory::rword(std::uint32_t address) const {
+std::uint32_t Memory::rword(std::uint32_t address, bool debug_access) const {
     MemorySection *section = this->get_section(address, false);
     if (section == nullptr)
         return 0;
     else
-        return section->read_word(SECTION_OFFSET_MASK(address));
+        return section->read_word(SECTION_OFFSET_MASK(address), debug_access);
 }
 
 bool Memory::operator==(const Memory&m) const {

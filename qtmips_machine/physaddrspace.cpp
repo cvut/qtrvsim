@@ -59,11 +59,11 @@ bool PhysAddrSpace::wword(std::uint32_t address, std::uint32_t value) {
     return p_range->mem_acces->write_word(address - p_range->start_addr, value);
 }
 
-std::uint32_t PhysAddrSpace::rword(std::uint32_t address) const {
+std::uint32_t PhysAddrSpace::rword(std::uint32_t address, bool debug_access) const {
     const RangeDesc *p_range = find_range(address);
     if (p_range == nullptr)
         return 0x00000000;
-    return p_range->mem_acces->read_word(address - p_range->start_addr);
+    return p_range->mem_acces->read_word(address - p_range->start_addr, debug_access);
 }
 
 enum LocationStatus PhysAddrSpace::location_status(std::uint32_t address) const {
