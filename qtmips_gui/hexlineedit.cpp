@@ -75,13 +75,13 @@ HexLineEdit::HexLineEdit(QWidget *parent, int digits, int base, QString prefix):
     set_value(0);
 }
 
-void HexLineEdit::set_value(std::int32_t value) {
+void HexLineEdit::set_value(std::uint32_t value) {
     QString s, t = "";
     last_set = value;
     s = QString::number(value, base);
     if (s.count() < digits)
         t.fill('0', digits - s.count());
-    setText(prefix + t +s);
+    setText(prefix + t +s.toUpper());
 
 }
 

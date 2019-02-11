@@ -36,87 +36,61 @@
 #include <QHeaderView>
 #include <QFontMetrics>
 #include <QScrollBar>
-#include "memorytableview.h"
-#include "memorymodel.h"
+#include "programtableview.h"
+#include "programmodel.h"
 
-MemoryTableView::MemoryTableView(QWidget *parent, QSettings *settings) : Super(parent) {
+ProgramTableView::ProgramTableView(QWidget *parent, QSettings *settings) : Super(parent) {
     connect(verticalScrollBar() , SIGNAL(valueChanged(int)),
             this, SLOT(adjust_scroll_pos()));
     this->settings = settings;
-    initial_address = settings->value("DataViewAddr0", 0).toULongLong();
+    initial_address = settings->value("ProgramViewAddr0", 0).toULongLong();
 }
 
-void MemoryTableView::addr0_save_change(std::uint32_t val) {
-   settings->setValue("DataViewAddr0", val);
+void ProgramTableView::addr0_save_change(std::uint32_t val) {
+   settings->setValue("ProgramViewAddr0", val);
 }
 
-void MemoryTableView::adjustColumnCount() {
-    MemoryModel *m = dynamic_cast<MemoryModel*>(model());
+void ProgramTableView::adjustColumnCount() {
+    int cwidth;
+    int totwidth;
+    ProgramModel *m = dynamic_cast<ProgramModel*>(model());
 
-    if (horizontalHeader()->count() >= 2 && m != nullptr) {
-        QFontMetrics fm(*m->getFont());
-        int width0 = fm.width("0x00000000");
-        horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
-        horizontalHeader()->resizeSection(0, width0);
+    if (m == nullptr)
+        return;
 
-        QString t = "";
-        t.fill(QChar('0'), m->cellSizeBytes() * 2);
-        /* t + = " C"; */
-        int width1 = fm.width(t);
-        if (width1 < fm.width("+99"))
-            width1 = fm.width("+99");
-        horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
-        horizontalHeader()->resizeSection(1, width1);
+    QFontMetrics fm(*m->getFont());
+    cwidth = fm.width("Bp");
+    totwidth = cwidth;
+    horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
+    horizontalHeader()->resizeSection(0, cwidth);
+    cwidth = fm.width("0x00000000");
+    totwidth += cwidth;
+    horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
+    horizontalHeader()->resizeSection(1, cwidth);
+    totwidth += cwidth;
+    cwidth = fm.width("00000000");
+    horizontalHeader()->setSectionResizeMode(2, QHeaderView::Fixed);
+    horizontalHeader()->resizeSection(2, cwidth);
+    horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
+    totwidth += fm.width("BEQ $18, $17, 0x80020058");
+    totwidth += verticalHeader()->width();
+    setColumnHidden(2, totwidth > width());
 
-        int w = verticalHeader()->width() + 4;
-        unsigned int cells;
-        width0 = columnWidth(0);
-        width1 = columnWidth(1);
-        w = width() - w - width0;
-        if (w < width1 + 2) {
-            cells = 1;
-        } else {
-            cells = w / (width1 + 2);
-        }
-        if (cells != m->cellsPerRow()) {
-            m->setCellsPerRow(cells);
-        }
-        for (unsigned int i = 1; i < m->cellsPerRow() + 1; i++) {
-            horizontalHeader()->setSectionResizeMode(i, QHeaderView::Fixed);
-            horizontalHeader()->resizeSection(i, width1);
-        }
-        if (initial_address != 0) {
-            go_to_address(initial_address);
-            initial_address = 0;
-        }
+    if (initial_address != 0) {
+        go_to_address(initial_address);
+        initial_address = 0;
     }
 }
 
-void MemoryTableView::set_cell_size(int index) {
+
+void ProgramTableView:: adjust_scroll_pos() {
     std::uint32_t address;
-    int row;
-    bool keep_row0 = false;
-    MemoryModel *m = dynamic_cast<MemoryModel*>(model());
-    if (m != nullptr) {
-        keep_row0 = m->get_row_address(address, rowAt(0));
-        m->set_cell_size(index);
-    }
-    adjustColumnCount();
-    if (keep_row0) {
-        m->adjustRowAndOffset(row, m->rowCount() / 2, address);
-        scrollTo(m->index(row, 0),
-                 QAbstractItemView::PositionAtTop);
-    }
-}
-
-void MemoryTableView:: adjust_scroll_pos() {
-    std::uint32_t address;
-    MemoryModel *m = dynamic_cast<MemoryModel*>(model());
+    ProgramModel *m = dynamic_cast<ProgramModel*>(model());
     if (m == nullptr)
         return;
 
     QModelIndex prev_index = currentIndex();
-    std::uint32_t row_bytes = m->cellSizeBytes() * m->cellsPerRow();
+    std::uint32_t row_bytes = m->cellSizeBytes();
     std::uint32_t index0_offset = m->getIndex0Offset();
 
     do {
@@ -147,8 +121,8 @@ void MemoryTableView:: adjust_scroll_pos() {
     emit address_changed(address);
 }
 
-void MemoryTableView::resizeEvent(QResizeEvent *event) {
-    MemoryModel *m = dynamic_cast<MemoryModel*>(model());
+void ProgramTableView::resizeEvent(QResizeEvent *event) {
+    ProgramModel *m = dynamic_cast<ProgramModel*>(model());
     std::uint32_t address;
     bool keep_row0 = false;
 
@@ -167,8 +141,8 @@ void MemoryTableView::resizeEvent(QResizeEvent *event) {
     }
 }
 
-void MemoryTableView:: go_to_address(std::uint32_t address) {
-    MemoryModel *m = dynamic_cast<MemoryModel*>(model());
+void ProgramTableView:: go_to_address(std::uint32_t address) {
+    ProgramModel *m = dynamic_cast<ProgramModel*>(model());
     int row;
     if (m == nullptr)
         return;

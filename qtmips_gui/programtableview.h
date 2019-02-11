@@ -33,30 +33,36 @@
  *
  ******************************************************************************/
 
-#ifndef PROGRAMDOCK_H
-#define PROGRAMDOCK_H
+#ifndef PROGRAMTABLEVIEW_H
+#define PROGRAMTABLEVIEW_H
 
-#include <QDockWidget>
-#include <QLabel>
-#include <QComboBox>
-#include "qtmipsmachine.h"
+#include <QObject>
+#include <QSettings>
+#include <QTableView>
+#include <QSharedPointer>
 
-class ProgramDock : public QDockWidget  {
+class ProgramTableView : public QTableView
+{
     Q_OBJECT
 
-    using Super = QDockWidget;
+    using Super = QTableView;
 
 public:
-    ProgramDock(QWidget *parent, QSettings *settings);
+    ProgramTableView(QWidget *parent, QSettings *settings);
 
-    void setup(machine::QtMipsMachine *machine);
-
+    void resizeEvent(QResizeEvent *event) override;
 signals:
-    void machine_setup(machine::QtMipsMachine *machine);
-    void jump_to_pc(std::uint32_t);
-
+    void address_changed(std::uint32_t address);
+public slots:
+    void go_to_address(std::uint32_t address);
+private slots:
+    void adjust_scroll_pos();
 private:
+    void addr0_save_change(std::uint32_t val);
+    void adjustColumnCount();
+    QSettings *settings;
 
+    std::uint32_t initial_address;
 };
 
-#endif // PROGRAMDOCK_H
+#endif // PROGRAMTABLEVIEW_H

@@ -28,7 +28,6 @@ SOURCES += \
         registersdock.cpp \
         programdock.cpp \
         memorydock.cpp \
-        memoryview.cpp \
         coreview/programcounter.cpp \
         coreview/multiplexer.cpp \
         coreview/connection.cpp \
@@ -49,7 +48,9 @@ SOURCES += \
     coreview/value.cpp \
     memorymodel.cpp \
     memorytableview.cpp \
-    hexlineedit.cpp
+    hexlineedit.cpp \
+    programmodel.cpp \
+    programtableview.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -58,7 +59,6 @@ HEADERS += \
         registersdock.h \
         programdock.h \
         memorydock.h \
-        memoryview.h \
         coreview/programcounter.h \
         coreview/multiplexer.h \
         coreview/connection.h \
@@ -79,7 +79,9 @@ HEADERS += \
     coreview/value.h \
     memorymodel.h \
     memorytableview.h \
-    hexlineedit.h
+    hexlineedit.h \
+    programmodel.h \
+    programtableview.h
 
 FORMS += \
         NewDialog.ui \

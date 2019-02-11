@@ -50,10 +50,10 @@ public:
                 QString prefix = "0x");
 
 public slots:
-    void set_value(std::int32_t value);
+    void set_value(std::uint32_t value);
 
 signals:
-    void value_edit_finished(std::int32_t value);
+    void value_edit_finished(std::uint32_t value);
 
 private slots:
     void on_edit_finished();

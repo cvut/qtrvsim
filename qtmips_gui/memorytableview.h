@@ -52,10 +52,10 @@ public:
 
     void resizeEvent(QResizeEvent *event) override;
 signals:
-    void address_changed(std::int32_t address);
+    void address_changed(std::uint32_t address);
 public slots:
     void set_cell_size(int index);
-    void go_to_address(std::int32_t address);
+    void go_to_address(std::uint32_t address);
 private slots:
     void adjust_scroll_pos();
 private:

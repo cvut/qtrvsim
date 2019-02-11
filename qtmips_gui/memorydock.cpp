@@ -71,7 +71,6 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     layout->addWidget(cell_size);
     layout->addWidget(memory_content);
     layout->addWidget(go_edit);
-    layout->addWidget(go_edit);
 
     content->setLayout(layout);
 
@@ -80,10 +79,10 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     connect(this, &MemoryDock::machine_setup, memory_model, &MemoryModel::setup);
     connect(cell_size, SIGNAL(currentIndexChanged(int)),
             memory_content, SLOT(set_cell_size(int)));
-    connect(go_edit, SIGNAL(value_edit_finished(std::int32_t)),
-            memory_content, SLOT(go_to_address(std::int32_t)));
-    connect(memory_content, SIGNAL(address_changed(std::int32_t)),
-            go_edit, SLOT(set_value(std::int32_t)));
+    connect(go_edit, SIGNAL(value_edit_finished(std::uint32_t)),
+            memory_content, SLOT(go_to_address(std::uint32_t)));
+    connect(memory_content, SIGNAL(address_changed(std::uint32_t)),
+            go_edit, SLOT(set_value(std::uint32_t)));
 }
 
 void MemoryDock::setup(machine::QtMipsMachine *machine) {
