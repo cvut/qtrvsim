@@ -80,7 +80,6 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
     {
         QString s, t;
         std::uint32_t address;
-        std::uint32_t data;
         if (!get_row_address(address, index.row()))
             return QString("");
 
@@ -99,7 +98,10 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
 
         switch (index.column()) {
         case 0:
-            return QString(" ");
+            if (machine->is_hwbreak(address))
+                return QString("B");
+            else
+                return QString(" ");
         case 2:
             t = QString::number(inst.data(), 16);
             s.fill('0', 8 - t.count());

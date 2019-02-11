@@ -101,6 +101,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
         case CELLSIZE_HWORD:
             data = machine->memory()->read_hword(address);
             break;
+        default:
         case CELLSIZE_WORD:
             data = machine->memory()->read_word(address);
             break;

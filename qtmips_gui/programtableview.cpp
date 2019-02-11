@@ -153,3 +153,15 @@ void ProgramTableView:: go_to_address(std::uint32_t address) {
     addr0_save_change(address);
     emit m->update_all();
 }
+
+void ProgramTableView::focus_address(std::uint32_t address) {
+    int row;
+    ProgramModel *m = dynamic_cast<ProgramModel*>(model());
+    if (m == nullptr)
+        return;
+    if (!m->get_row_for_address(row, address))
+        go_to_address(address);
+    if (!m->get_row_for_address(row, address))
+        return;
+    setCurrentIndex(m->index(row, 3));
+}

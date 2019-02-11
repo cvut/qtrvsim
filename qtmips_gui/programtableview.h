@@ -55,6 +55,7 @@ signals:
     void address_changed(std::uint32_t address);
 public slots:
     void go_to_address(std::uint32_t address);
+    void focus_address(std::uint32_t address);
 private slots:
     void adjust_scroll_pos();
 private:

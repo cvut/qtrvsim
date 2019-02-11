@@ -50,11 +50,23 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
     setObjectName("Program");
     setWindowTitle("Program");
 
+    this->settings = settings;
+    follow_source = (enum FollowSource)
+            settings->value("ProgramViewFollowSource", 0).toInt();
+
+    for (int i = 0; i < FOLLOWSRC_COUNT; i++)
+        follow_addr[i] = 0;
+
     QWidget *content = new QWidget();
 
     QComboBox *follow_inst = new QComboBox();
-    follow_inst->addItem("Follow - none");
-    follow_inst->addItem("Follow - fetch");
+    follow_inst->addItem("Follow none");
+    follow_inst->addItem("Follow fetch");
+    follow_inst->addItem("Follow decode");
+    follow_inst->addItem("Follow execute");
+    follow_inst->addItem("Follow memory");
+    follow_inst->addItem("Follow writeback");
+    follow_inst->setCurrentIndex((int)follow_source);
 
     QTableView *program_content = new ProgramTableView(0, settings);
     // program_content->setSizePolicy();
@@ -81,8 +93,60 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
             go_edit, SLOT(set_value(std::uint32_t)));
     connect(this, SIGNAL(jump_to_pc(std::uint32_t)),
             program_content, SLOT(go_to_address(std::uint32_t)));
+    connect(follow_inst, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(set_follow_inst(int)));
+    connect(this, SIGNAL(focus_addr(std::uint32_t)),
+            program_content, SLOT(focus_address(std::uint32_t)));
 }
 
 void ProgramDock::setup(machine::QtMipsMachine *machine) {
+    std::uint32_t pc;
     emit machine_setup(machine);
+    if (machine == nullptr)
+        return;
+    pc = machine->registers()->read_pc();
+    for (int i = 0; i < FOLLOWSRC_COUNT; i++)
+        follow_addr[i] = pc;
+    update_follow_position();
+}
+
+void ProgramDock::set_follow_inst(int follow) {
+    follow_source = (enum FollowSource)follow;
+    settings->setValue("ProgramViewFollowSource", (int)follow_source);
+    update_follow_position();
+}
+
+void ProgramDock::fetch_inst_addr(std::uint32_t addr) {
+    follow_addr[FOLLOWSRC_FETCH] = addr;
+    if (follow_source == FOLLOWSRC_FETCH)
+        update_follow_position();
+}
+
+void ProgramDock::decode_inst_addr(std::uint32_t addr) {
+    follow_addr[FOLLOWSRC_DECODE] = addr;
+    if (follow_source == FOLLOWSRC_DECODE)
+        update_follow_position();
+}
+
+void ProgramDock::execute_inst_addr(std::uint32_t addr) {
+    follow_addr[FOLLOWSRC_EXECUTE] = addr;
+    if (follow_source == FOLLOWSRC_EXECUTE)
+        update_follow_position();
+}
+
+void ProgramDock::memory_inst_addr(std::uint32_t addr) {
+    follow_addr[FOLLOWSRC_MEMORY] = addr;
+    if (follow_source == FOLLOWSRC_MEMORY)
+        update_follow_position();
+}
+
+void ProgramDock::writeback_inst_addr(std::uint32_t addr) {
+    follow_addr[FOLLOWSRC_WRITEBACK] = addr;
+    if (follow_source == FOLLOWSRC_WRITEBACK)
+        update_follow_position();
+}
+
+void ProgramDock::update_follow_position() {
+    if (follow_source != FOLLOWSRC_NONE)
+        emit focus_addr(follow_addr[follow_source]);
 }

@@ -54,9 +54,29 @@ public:
 signals:
     void machine_setup(machine::QtMipsMachine *machine);
     void jump_to_pc(std::uint32_t);
-
+    void focus_addr(std::uint32_t);
+public slots:
+    void set_follow_inst(int);
+    void fetch_inst_addr(std::uint32_t addr);
+    void decode_inst_addr(std::uint32_t addr);
+    void execute_inst_addr(std::uint32_t addr);
+    void memory_inst_addr(std::uint32_t addr);
+    void writeback_inst_addr(std::uint32_t addr);
 private:
+    enum FollowSource {
+        FOLLOWSRC_NONE,
+        FOLLOWSRC_FETCH,
+        FOLLOWSRC_DECODE,
+        FOLLOWSRC_EXECUTE,
+        FOLLOWSRC_MEMORY,
+        FOLLOWSRC_WRITEBACK,
+        FOLLOWSRC_COUNT,
+    };
 
+    void update_follow_position();
+    enum FollowSource follow_source;
+    std::uint32_t follow_addr[FOLLOWSRC_COUNT];
+    QSettings *settings;
 };
 
 #endif // PROGRAMDOCK_H

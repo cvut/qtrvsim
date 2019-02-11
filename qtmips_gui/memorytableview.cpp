@@ -167,7 +167,7 @@ void MemoryTableView::resizeEvent(QResizeEvent *event) {
     }
 }
 
-void MemoryTableView:: go_to_address(std::uint32_t address) {
+void MemoryTableView::go_to_address(std::uint32_t address) {
     MemoryModel *m = dynamic_cast<MemoryModel*>(model());
     int row;
     if (m == nullptr)
@@ -178,4 +178,16 @@ void MemoryTableView:: go_to_address(std::uint32_t address) {
     setCurrentIndex(m->index(row, 1));
     addr0_save_change(address);
     emit m->update_all();
+}
+
+void MemoryTableView::focus_address(std::uint32_t address) {
+    int row;
+    MemoryModel *m = dynamic_cast<MemoryModel*>(model());
+    if (m == nullptr)
+        return;
+    if (!m->get_row_for_address(row, address))
+        go_to_address(address);
+    if (!m->get_row_for_address(row, address))
+        return;
+    setCurrentIndex(m->index(row, 1));
 }

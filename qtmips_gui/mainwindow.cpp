@@ -151,12 +151,26 @@ void MainWindow::create_core(const machine::MachineConfig &config) {
     // Connect signal from break to machine pause
     connect(machine->core(), SIGNAL(stop_on_exception_reached()), machine, SLOT(pause()));
 
+
     // Setup docks
     registers->setup(machine);
     program->setup(machine);
     memory->setup(machine);
     cache_program->setup(machine->cache_program());
     cache_data->setup(machine->cache_data());
+
+    // Connect signals for instruction address followup
+    connect(machine->core(), SIGNAL(fetch_inst_addr_value(std::uint32_t)),
+            program, SLOT(fetch_inst_addr(std::uint32_t)));
+    connect(machine->core(), SIGNAL(decode_inst_addr_value(std::uint32_t)),
+            program, SLOT(decode_inst_addr(std::uint32_t)));
+    connect(machine->core(), SIGNAL(execute_inst_addr_value(std::uint32_t)),
+            program, SLOT(execute_inst_addr(std::uint32_t)));
+    connect(machine->core(), SIGNAL(memory_inst_addr_value(std::uint32_t)),
+            program, SLOT(memory_inst_addr(std::uint32_t)));
+    connect(machine->core(), SIGNAL(writeback_inst_addr_value(std::uint32_t)),
+            program, SLOT(writeback_inst_addr(std::uint32_t)));
+
     // Set status to ready
     machine_status(machine::QtMipsMachine::ST_READY);
 }
