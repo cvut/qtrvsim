@@ -205,3 +205,19 @@ void QtMipsMachine::register_exception_handler(ExceptionCause excause,
     if (cr != nullptr)
         cr->register_exception_handler(excause, exhandler);
 }
+
+void QtMipsMachine::inser_hwbreak(std::uint32_t address) {
+    if (cr != nullptr)
+        cr->inser_hwbreak(address);
+}
+
+void QtMipsMachine::remove_hwbreak(std::uint32_t address) {
+    if (cr != nullptr)
+        cr->remove_hwbreak(address);
+}
+
+bool QtMipsMachine::is_hwbreak(std::uint32_t address) {
+    if (cr != nullptr)
+        return cr->is_hwbreak(address);
+    return false;
+}

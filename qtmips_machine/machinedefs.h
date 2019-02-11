@@ -56,6 +56,7 @@ enum ExceptionCause {
     EXCAUSE_NONE,
     EXCAUSE_BREAK,
     EXCAUSE_SYSCALL,
+    EXCAUSE_HWBREAK,
 };
 
 enum AluOp : std::uint8_t {

@@ -40,7 +40,7 @@
 using namespace machine;
 
 Core::Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
-           unsigned int min_cache_row_size) : ex_handlers() {
+           unsigned int min_cache_row_size) : ex_handlers(), hw_breaks() {
     cycle_c = 0;
     this->regs = regs;
     this->mem_program = mem_program;
@@ -76,6 +76,28 @@ MemoryAccess *Core::get_mem_program() {
     return mem_program;
 }
 
+
+Core::hwBreak::hwBreak(std::uint32_t addr) {
+    this->addr = addr;
+    flags = 0;
+    count = 0;
+}
+
+void Core::inser_hwbreak(std::uint32_t address) {
+    hw_breaks.insert(address, new hwBreak(address));
+}
+
+void Core::remove_hwbreak(std::uint32_t address) {
+    hwBreak* hwbrk = hw_breaks.take(address);
+    if (hwbrk != nullptr)
+        delete hwbrk;
+}
+
+bool Core::is_hwbreak(std::uint32_t address) {
+    hwBreak* hwbrk = hw_breaks.value(address);
+    return hwbrk != nullptr;
+}
+
 void Core::register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler)
 {
     if (excause == EXCAUSE_NONE ) {
@@ -94,6 +116,13 @@ bool Core::handle_exception(Core *core, Registers *regs, ExceptionCause excause,
                       std::uint32_t jump_branch_pc, bool in_delay_slot,
                       std::uint32_t mem_ref_addr)
 {
+    if (excause == EXCAUSE_HWBREAK) {
+        if (in_delay_slot)
+            regs->pc_abs_jmp(inst_addr);
+        else
+            regs->pc_abs_jmp(jump_branch_pc);
+    }
+
     ExceptionHandler *exhandler = ex_handlers.value(excause);
     if (exhandler != nullptr)
         return exhandler->handle_exception(core, regs, excause, inst_addr,
@@ -107,19 +136,27 @@ bool Core::handle_exception(Core *core, Registers *regs, ExceptionCause excause,
 }
 
 struct Core::dtFetch Core::fetch() {
+    enum ExceptionCause excause = EXCAUSE_NONE;
     std::uint32_t inst_addr = regs->read_pc();
+    emit fetch_inst_addr_value(inst_addr);
     Instruction inst(mem_program->read_word(inst_addr));
+
     emit instruction_fetched(inst, inst_addr);
+    hwBreak *brk = hw_breaks.value(inst_addr);
+    if (brk != nullptr) {
+        excause = EXCAUSE_HWBREAK;
+    }
     return {
         .inst = inst,
         .inst_addr = inst_addr,
-        .excause = EXCAUSE_NONE,
+        .excause = excause,
         .in_delay_slot = false,
     };
 }
 
 struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     uint8_t rwrite;
+    emit decode_inst_addr_value(dt.inst_addr);
     emit instruction_decoded(dt.inst, dt.inst_addr);
     enum InstructionFlags flags;
     enum AluOp alu_op;
@@ -150,9 +187,9 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     else
         immediate_val = sign_extend(dt.inst.immediate());
 
-     if ((flags & IMF_EXCEPTION) && (excause == EXCAUSE_NONE)) {
-         excause = dt.inst.encoded_exception();
-     }
+    if ((flags & IMF_EXCEPTION) && (excause == EXCAUSE_NONE)) {
+        excause = dt.inst.encoded_exception();
+    }
 
     emit decode_instruction_value(dt.inst.data());
     emit decode_reg1_value(val_rs);
@@ -209,6 +246,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
 }
 
 struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
+    emit execute_inst_addr_value(dt.inst_addr);
     emit instruction_executed(dt.inst, dt.inst_addr);
     bool discard;
 
@@ -275,6 +313,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
 }
 
 struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
+    emit memory_inst_addr_value(dt.inst_addr);
     emit instruction_memory(dt.inst, dt.inst_addr);
     std::uint32_t towrite_val = dt.alu_val;
     std::uint32_t mem_addr = dt.alu_val;
@@ -319,7 +358,7 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
         .regwrite = regwrite,
         .rwrite = dt.rwrite,
         .towrite_val = towrite_val,
-         .mem_addr = mem_addr,
+        .mem_addr = mem_addr,
         .inst_addr = dt.inst_addr,
         .excause = dt.excause,
         .in_delay_slot = dt.in_delay_slot,
@@ -327,6 +366,7 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
 }
 
 void Core::writeback(const struct dtMemory &dt) {
+    emit writeback_inst_addr_value(dt.inst_addr);
     emit instruction_writeback(dt.inst, dt.inst_addr);
     emit writeback_value(dt.towrite_val);
     emit writeback_regw_value(dt.regwrite);
@@ -464,8 +504,10 @@ void CoreSingle::do_step() {
         }
         jump_branch_pc = jmp_delay_decode->inst_addr;
         *jmp_delay_decode = d; // Copy current decode
-    } else
+    } else {
         handle_pc(d);
+        jump_branch_pc = d.inst_addr;
+    }
 
     struct dtExecute e = execute(d);
     struct dtMemory m = memory(e);

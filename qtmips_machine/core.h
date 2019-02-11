@@ -81,6 +81,9 @@ public:
     MemoryAccess *get_mem_data();
     MemoryAccess *get_mem_program();
     void register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler);
+    void inser_hwbreak(std::uint32_t address);
+    void remove_hwbreak(std::uint32_t address);
+    bool is_hwbreak(std::uint32_t address);
 
     enum ForwardFrom {
         FORWARD_NONE   = 0b00,
@@ -96,9 +99,11 @@ signals:
     void instruction_writeback(const machine::Instruction &inst, std::uint32_t inst_addr);
     void instruction_program_counter(const machine::Instruction &inst, std::uint32_t inst_addr);
 
+    void fetch_inst_addr_value(std::uint32_t);
     void fetch_jump_reg_value(std::uint32_t);
     void fetch_jump_value(std::uint32_t);
     void fetch_branch_value(std::uint32_t);
+    void decode_inst_addr_value(std::uint32_t);
     void decode_instruction_value(std::uint32_t);
     void decode_reg1_value(std::uint32_t);
     void decode_reg2_value(std::uint32_t);
@@ -115,6 +120,7 @@ signals:
     void decode_regd31_value(std::uint32_t);
     void forward_m_d_rs_value(std::uint32_t);
     void forward_m_d_rt_value(std::uint32_t);
+    void execute_inst_addr_value(std::uint32_t);
     void execute_alu_value(std::uint32_t);
     void execute_reg1_value(std::uint32_t);
     void execute_reg2_value(std::uint32_t);
@@ -128,6 +134,7 @@ signals:
     void execute_alusrc_value(std::uint32_t);
     void execute_regdest_value(std::uint32_t);
     void execute_regw_num_value(std::uint32_t);
+    void memory_inst_addr_value(std::uint32_t);
     void memory_alu_value(std::uint32_t);
     void memory_rt_value(std::uint32_t);
     void memory_mem_value(std::uint32_t);
@@ -136,6 +143,7 @@ signals:
     void memory_memwrite_value(std::uint32_t);
     void memory_memread_value(std::uint32_t);
     void memory_regw_num_value(std::uint32_t);
+    void writeback_inst_addr_value(std::uint32_t);
     void writeback_value(std::uint32_t);
     void writeback_regw_value(std::uint32_t);
     void writeback_regw_num_value(std::uint32_t);
@@ -231,9 +239,16 @@ protected:
     void dtMemoryInit(struct dtMemory &dt);
 
 private:
+    struct hwBreak{
+        hwBreak(std::uint32_t addr);
+        std::uint32_t addr;
+        unsigned int flags;
+        unsigned int count;
+    };
     unsigned int cycle_c;
     unsigned int min_cache_row_size;
     std::uint32_t hwr_user_local;
+    QMap<std::uint32_t, hwBreak *> hw_breaks;
 };
 
 class CoreSingle : public Core {
