@@ -67,7 +67,7 @@ public:
     enum LocationStatus location_status(std::uint32_t address) const;
 
     inline std::uint32_t get_change_counter() const {
-        return *p_change_counter;
+        return change_counter;
     }
 signals:
     void hit_update(unsigned) const;
@@ -76,7 +76,6 @@ signals:
     void cache_update(unsigned associat, unsigned set, bool valid, bool dirty, std::uint32_t tag, const std::uint32_t *data) const;
 
 private:
-    std::uint32_t* p_change_counter;
     MachineConfigCache cnf;
     MemoryAccess *mem;
     unsigned access_pen_r, access_pen_w;
@@ -96,6 +95,7 @@ private:
     } replc; // Data used for replacement policy
 
     mutable unsigned hit_read, miss_read, hit_write, miss_write; // Hit and miss counters
+    mutable std::uint32_t change_counter;
 
     std::uint32_t debug_rword(std::uint32_t address) const;
     bool access(std::uint32_t address, std::uint32_t *data, bool write, std::uint32_t value = 0) const;

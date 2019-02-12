@@ -51,7 +51,7 @@ Cache::Cache(MemoryAccess  *m, const MachineConfigCache *cc, unsigned memory_acc
     dt = nullptr;
     replc.lfu = nullptr;
     replc.lru = nullptr;
-    p_change_counter = new std::uint32_t(0);
+    change_counter = 0;
 
     // Skip any other initialization if cache is disabled
     if (!cc->enabled())
@@ -82,7 +82,7 @@ Cache::Cache(MemoryAccess  *m, const MachineConfigCache *cc, unsigned memory_acc
         for (unsigned int row = 0; row < cnf.sets(); row++) {
             replc.lru[row] = new unsigned int[cnf.associativity()];
             for (unsigned int i = 0; i < cnf.associativity(); i++)
-                replc.lru[row][i] = 0;
+                replc.lru[row][i] = i;
         }
         break;
     case MachineConfigCache::RP_RAND:
@@ -92,7 +92,6 @@ Cache::Cache(MemoryAccess  *m, const MachineConfigCache *cc, unsigned memory_acc
 }
 
 Cache::~Cache(){
-    delete p_change_counter;
     if (dt != nullptr) {
         for (unsigned i = 0; i < cnf.associativity(); i++) {
 	    if (dt[i]) {
@@ -160,7 +159,7 @@ void Cache::flush() {
     if (!cnf.enabled())
         return;
 
-    for (unsigned as = 0; as < cnf.associativity(); as++)
+    for (unsigned as = cnf.associativity(); as-- > 0 ; )
         for (unsigned st = 0; st < cnf.sets(); st++)
             if (dt[as][st].valid)
                 kick(as, st);
@@ -268,6 +267,11 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
         case MachineConfigCache::RP_RAND:
             indx = rand() % cnf.associativity();
             break;
+        case MachineConfigCache::RP_LRU:
+            {
+                indx = replc.lru[row][0];
+                break;
+            }
         case MachineConfigCache::RP_LFU:
             {
                 unsigned lowest = replc.lfu[row][0];
@@ -284,23 +288,6 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
                 }
                 break;
             }
-        case MachineConfigCache::RP_LRU:
-            {
-                unsigned int least = 0xffff;
-                indx = 0;
-                for (unsigned i = 0; i < cnf.associativity(); i++) {
-                    if (!dt[i][row].valid) {
-                        // found free one, use it directly
-                        indx = i;
-                        break;
-                    }
-                    if (least < replc.lru[row][i]) {
-                        least = replc.lru[row][i];
-                        indx = i;
-                    }
-                }
-                break;
-            }
         }
     }
     SANITY_ASSERT(indx < cnf.associativity(), "Probably unimplemented replacement policy");
@@ -310,7 +297,7 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
     // Verify if we are not replacing
     if (cd.valid && cd.tag != tag) {
         kick(indx, row);
-        (*p_change_counter)++;
+        change_counter++;
     }
 
     // Update statistics and otherwise read from memory
@@ -330,20 +317,27 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
         update_statistics();
         for (unsigned i = 0; i < cnf.blocks(); i++) {
             cd.data[i] = mem->read_word(base_address(tag, row) + (4*i));
-            (*p_change_counter)++;
+            change_counter++;
         }
     }
 
     // Update replcement data
     switch (cnf.replacement_policy()) {
-    case MachineConfigCache::RP_LFU:
-        if (cd.valid && replc.lru[row][indx] == 0)
-            break;
-        for (unsigned i = 1; i < cnf.associativity(); i++)
-            replc.lru[row][i]++;
-        replc.lru[row][indx] = 0;
-        break;
     case MachineConfigCache::RP_LRU:
+    {
+        unsigned next_asi = indx;
+        int i = cnf.associativity() - 1;
+        unsigned tmp_asi = replc.lru[row][i];
+        while (tmp_asi != indx) {
+            SANITY_ASSERT(i >= 0, "LRU lost the way from priority queue - access");
+            tmp_asi = replc.lru[row][i];
+            replc.lru[row][i] = next_asi;
+            next_asi = tmp_asi;
+            i--;
+        }
+        break;
+    }
+    case MachineConfigCache::RP_LFU:
         replc.lfu[row][indx]++;
         break;
     default:
@@ -362,7 +356,7 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
 
     emit cache_update(indx, row, cd.valid, cd.dirty, cd.tag, cd.data);
     if (changed)
-        (*p_change_counter)++;
+        change_counter++;
     return changed;
 }
 
@@ -375,6 +369,20 @@ void Cache::kick(unsigned associat_indx, unsigned row) const {
     cd.dirty = false;
 
     switch (cnf.replacement_policy()) {
+    case MachineConfigCache::RP_LRU:
+    {
+        unsigned next_asi = associat_indx;
+        unsigned tmp_asi = replc.lru[row][0];
+        int i = 1;
+        while (tmp_asi != associat_indx) {
+            SANITY_ASSERT(i < (int)cnf.associativity(), "LRU lost the way from priority queue - kick");
+            tmp_asi = replc.lru[row][i];
+            replc.lru[row][i] = next_asi;
+            next_asi = tmp_asi;
+            i++;
+        }
+        break;
+    }
     case MachineConfigCache::RP_LFU:
         break;
     default:
