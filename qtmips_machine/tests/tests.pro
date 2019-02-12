@@ -8,7 +8,7 @@ CONFIG += c++11
 
 TEMPLATE = app
 
-LIBS += -L$$OUT_PWD/../ -lqtmips_machine
+LIBS += -L$$OUT_PWD/../ -lqtmips_machine -lelf
 
 DOLAR=$
 
