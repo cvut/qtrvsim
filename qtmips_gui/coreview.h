@@ -104,6 +104,7 @@ protected:
     struct {
         coreview::Multiplexer *mux_alu_reg_a;
         coreview::Multiplexer *mux_alu_reg_b;
+        coreview::Junction *j_alu_out;
     } hu;
 
     coreview::Connection *new_connection(const coreview::Connector*, const coreview::Connector*);

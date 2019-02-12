@@ -450,6 +450,7 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
     if (machine->config().hazard_unit() == machine::MachineConfig::HU_STALL_FORWARD) {
         NEW(Multiplexer, hu.mux_alu_reg_a, 430, 232, 3, false);
         NEW(Multiplexer, hu.mux_alu_reg_b, 430, 285, 3, false);
+        NEW(Junction, hu.j_alu_out, 420, 490);
 
         con = new_bus(lp_dc_rs.out, hu.mux_alu_reg_a->connector_in(0));
         con->setAxes({CON_AXIS_Y(403)});
@@ -461,16 +462,20 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
         con = new_bus(wb.j_reg_write_val->new_connector(coreview::Connector::AX_Y), hu.mux_alu_reg_a->connector_in(1));
         con = new_bus(wb.j_reg_write_val->new_connector(coreview::Connector::AX_Y), hu.mux_alu_reg_b->connector_in(1));
 
-        con = new_bus(mm.j_addr->new_connector(CON_AX_Y), hu.mux_alu_reg_a->connector_in(2));
-        con->setAxes({CON_AXIS_X(490), CON_AXIS_Y(420)});
-        con = new_bus(mm.j_addr->new_connector(CON_AX_Y), hu.mux_alu_reg_b->connector_in(2));
-        con->setAxes({CON_AXIS_X(490), CON_AXIS_Y(420)});
+        con = new_bus(mm.j_addr->new_connector(CON_AX_Y), hu.j_alu_out->new_connector(CON_AX_X));
+        con = new_bus(hu.j_alu_out->new_connector(CON_AX_Y), hu.mux_alu_reg_a->connector_in(2));
+        con = new_bus(hu.j_alu_out->new_connector(CON_AX_Y), hu.mux_alu_reg_b->connector_in(2));
+
+        con = new_bus(hu.j_alu_out->new_connector(CON_AX_X), dc.cmp->new_connector(-0.5, 1));
+        con->setAxes({CON_AXIS_Y(380), CON_AXIS_X(330)});
+        con = new_bus(hu.j_alu_out->new_connector(CON_AX_X), dc.cmp->new_connector(0.5, 1));
+        con->setAxes({CON_AXIS_Y(380), CON_AXIS_X(330)});
 
         NEW_V(434, 250, execute_reg1_ff_value, false, 1); // Register 1 forward to ALU
         NEW_V(434, 303, execute_reg2_ff_value, false, 1); // Register 2 forward to ALU
 
-        NEW_V(310, 290, forward_m_d_rs_value, false, 1); // Register 1 forward for bxx and jr, jalr
-        NEW_V(325, 290, forward_m_d_rt_value, false, 1); // Register 2 forward for beq, bne
+        NEW_V(312, 290, forward_m_d_rs_value, false, 1); // Register 1 forward for bxx and jr, jalr
+        NEW_V(327, 290, forward_m_d_rt_value, false, 1); // Register 2 forward for beq, bne
 
     }
 }
