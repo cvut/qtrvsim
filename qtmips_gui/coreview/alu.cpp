@@ -37,8 +37,8 @@
 #include <cmath>
 
 //////////////////////
-#define WIDTH 40
-#define HEIGHT 120
+#define WIDTH 25
+#define HEIGHT 90
 #define DENT 10
 #define PENW 1
 //////////////////////

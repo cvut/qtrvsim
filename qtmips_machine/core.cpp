@@ -591,11 +591,11 @@ void CorePipelined::do_step(bool skip_break) {
                 // Forward result value
                 if (dt_d.alu_req_rs && dt_m.rwrite == dt_d.inst.rs()) {
                     dt_d.val_rs = dt_m.towrite_val;
-                    dt_d.ff_rs = FORWARD_FROM_M;
+                    dt_d.ff_rs = FORWARD_FROM_W;
                 }
                 if (dt_d.alu_req_rt && dt_m.rwrite == dt_d.inst.rt()) {
                     dt_d.val_rt = dt_m.towrite_val;
-                    dt_d.ff_rt = FORWARD_FROM_M;
+                    dt_d.ff_rt = FORWARD_FROM_W;
                 }
             } else
                 stall = true;
@@ -609,11 +609,11 @@ void CorePipelined::do_step(bool skip_break) {
                     // Forward result value
                     if (dt_d.alu_req_rs && dt_e.rwrite == dt_d.inst.rs()) {
                         dt_d.val_rs = dt_e.alu_val;
-                        dt_d.ff_rs = FORWARD_FROM_W;
+                        dt_d.ff_rs = FORWARD_FROM_M;
                      }
                     if (dt_d.alu_req_rt && dt_e.rwrite == dt_d.inst.rt()) {
                         dt_d.val_rt = dt_e.alu_val;
-                        dt_d.ff_rt = FORWARD_FROM_W;
+                        dt_d.ff_rt = FORWARD_FROM_M;
                     }
                 }
             } else

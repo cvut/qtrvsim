@@ -99,7 +99,12 @@ protected:
     } mm;
     struct {
         coreview::Multiplexer *mem_or_reg;
+        coreview::Junction *j_reg_write_val;
     } wb;
+    struct {
+        coreview::Multiplexer *mux_alu_reg_a;
+        coreview::Multiplexer *mux_alu_reg_b;
+    } hu;
 
     coreview::Connection *new_connection(const coreview::Connector*, const coreview::Connector*);
     coreview::Bus *new_bus(const coreview::Connector*, const coreview::Connector*, unsigned width = 4);
