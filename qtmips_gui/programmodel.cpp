@@ -203,3 +203,44 @@ void ProgramModel::toggle_hw_break(const QModelIndex & index) {
         machine->insert_hwbreak(address);
     update_all();
 }
+
+Qt::ItemFlags ProgramModel::flags(const QModelIndex &index) const {
+    if (index.column() != 2 && index.column() != 3)
+        return QAbstractTableModel::flags(index);
+    else
+        return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
+}
+
+bool ProgramModel::setData(const QModelIndex & index, const QVariant & value, int role) {
+    if (role == Qt::EditRole)
+    {
+        bool ok;
+        std::uint32_t address;
+        std::uint32_t data;
+        machine::MemoryAccess *mem;
+        if (!get_row_address(address, index.row()))
+            return false;
+        if (index.column() == 0 || machine == nullptr)
+            return false;
+        mem = machine->memory_rw();
+        if (mem == nullptr)
+            return false;
+        switch (index.column()) {
+        case 2:
+            data = value.toString().toULong(&ok, 16);
+            if (!ok)
+                return false;
+            mem->write_word(address, data);
+            break;
+        case 3:
+            data = machine::Instruction::from_string(value.toString(), &ok).data();
+            if (!ok)
+                return false;
+            mem->write_word(address, data);
+            break;
+        default:
+            return false;
+        }
+    }
+    return true;
+}

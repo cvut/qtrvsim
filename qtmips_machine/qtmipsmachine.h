@@ -61,8 +61,10 @@ public:
 
     const Registers *registers();
     const Memory *memory();
+    Memory *memory_rw();
     const Cache *cache_program();
     const Cache *cache_data();
+    Cache *cache_data_rw();
     const Core *core();
     const CoreSingle *core_singe();
     const CorePipelined *core_pipelined();

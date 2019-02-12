@@ -33,6 +33,8 @@
  *
  ******************************************************************************/
 
+#include <QMultiMap>
+#include <QVector>
 #include "instruction.h"
 #include "alu.h"
 #include "memory.h"
@@ -440,24 +442,29 @@ Instruction::Instruction(const Instruction &i) {
 
 #define MASK(LEN,OFF) ((this->dt >> (OFF)) & ((1 << (LEN)) - 1))
 
+#define RS_SHIFT 21
+#define RT_SHIFT 16
+#define RD_SHIFT 11
+#define SHAMT_SHIFT 6
+
 std::uint8_t Instruction::opcode() const {
     return (std::uint8_t) MASK(6, 26);
 }
 
 std::uint8_t Instruction::rs() const {
-    return (std::uint8_t) MASK(5, 21);
+    return (std::uint8_t) MASK(5, RS_SHIFT);
 }
 
 std::uint8_t Instruction::rt() const {
-    return (std::uint8_t) MASK(5, 16);
+    return (std::uint8_t) MASK(5, RT_SHIFT);
 }
 
 std::uint8_t Instruction::rd() const {
-    return (std::uint8_t) MASK(5, 11);
+    return (std::uint8_t) MASK(5, RD_SHIFT);
 }
 
 std::uint8_t Instruction::shamt() const {
-    return (std::uint8_t) MASK(5, 6);
+    return (std::uint8_t) MASK(5, SHAMT_SHIFT);
 
 }
 
@@ -616,4 +623,247 @@ QString Instruction::to_str(std::int32_t inst_addr) const {
 		return QString("UNKNOWN");
     }
     return res;
+}
+
+QMultiMap<QString, std::uint32_t> str_to_instruction_code_map;
+
+void instruction_from_string_build_base(const InstructionMap *im = nullptr,
+                    unsigned int flags = 0, std::uint32_t base_code = 0) {
+    std::uint32_t code;
+
+    if (im == nullptr) {
+        im = instruction_map;
+        flags = instruction_map_opcode_field;
+        base_code = 0;
+    }
+    unsigned int bits = IMF_SUB_GET_BITS(flags);
+    unsigned int shift = IMF_SUB_GET_SHIFT(flags);
+
+    for (unsigned int i = 0; i < 1U << bits; i++, im++) {
+        code = base_code | (i << shift);
+        if (im->subclass) {
+            instruction_from_string_build_base(im->subclass, im->flags, code);
+            continue;
+        }
+        if (!(im->flags & IMF_SUPPORTED))
+            continue;
+        str_to_instruction_code_map.insert(im->name, code);
+    }
+}
+
+static int parse_reg_from_string(QString str)
+{
+    bool ok;
+    int res;
+    if (str.count() < 2 || str.at(0) != '$')
+        return -1;
+    str = str.mid(1, str.count() - 1);
+    res = str.toULong(&ok, 10);
+    if (!ok)
+        return -1;
+    if (res > 31)
+        return -1;
+    return res;
+}
+
+Instruction Instruction::from_string(QString str, bool *pok) {
+    std::uint32_t code;
+    int val;
+    bool ok = false;
+
+    if (str_to_instruction_code_map.isEmpty())
+        instruction_from_string_build_base();
+
+    str = str.toUpper();
+
+    QString inst_base = "";
+    QVector<QString> inst_fields(0);
+    bool prev_white = true;
+    bool act_white;
+    bool comma = false;
+    bool next_comma = false;
+    int field = 0;
+    bool error = false;
+
+    for (int k = 0, l = 0; k < str.count() + 1; k++, prev_white = act_white) {
+        if (next_comma)
+            comma = true;
+        next_comma = false;
+        if (k >= str.count()) {
+            act_white = true;
+        } else {
+            act_white = str.at(k).isSpace();
+            if (str.at(k) == ',')
+                next_comma = act_white = true;
+        }
+
+        if (prev_white and !act_white)
+            l = k;
+        if (!prev_white and act_white) {
+            if (inst_base.count() == 0) {
+                if (comma) {
+                    error = true;
+                    break;
+                }
+                inst_base = str.mid(l, k - l);
+            } else {
+                if ((field && !comma) || (!field && comma)) {
+                    error = true;
+                    break;
+                }
+                inst_fields.append(str.mid(l, k - l));
+                comma = false;
+                field++;
+            }
+            l = k;
+        }
+    }
+
+    if (error) {
+        if (pok != nullptr)
+            *pok = true;
+        return Instruction(0);
+    }
+
+    auto i = str_to_instruction_code_map.lowerBound(inst_base);
+    for (; ; i++) {
+        if (i == str_to_instruction_code_map.end())
+            break;
+        if (i.key() != inst_base)
+            break;
+        code = i.value();
+        const InstructionMap &im = InstructionMapFind(code);
+
+        field = 0;
+        switch (im.type) {
+        case T_I:
+            if (im.flags & IMF_MEM) {
+                if (field >= inst_fields.count())
+                    continue;
+                if ((val = parse_reg_from_string(inst_fields.at(field++))) < 0)
+                    continue;
+                code |= val << RT_SHIFT;
+                if (field >= inst_fields.count())
+                    continue;
+                int lpar = inst_fields.at(field).indexOf('(');
+                int rpar = inst_fields.at(field).indexOf(')');
+                if (lpar == -1  || rpar == -1)
+                    continue;
+                if ((val = parse_reg_from_string(inst_fields.
+                    at(field).mid(lpar+1, rpar - lpar - 1))) < 0)
+                    continue;
+                code |= val << RS_SHIFT;
+
+                val = inst_fields.at(field).mid(0, lpar).toLong(&ok, 0);
+                if (!ok)
+                    continue;
+                ok = false;
+                code |= val & 0xffff;
+                field ++;
+            } else {
+                if (im.flags & IMF_REGWRITE) {
+                    if (field >= inst_fields.count())
+                        continue;
+                    if ((val = parse_reg_from_string(inst_fields.at(field++))) < 0)
+                        continue;
+                    code |= val << RT_SHIFT;
+                }
+                if (im.flags & (IMF_BJR_REQ_RS | IMF_ALU_REQ_RS)) {
+                    if (field >= inst_fields.count())
+                        continue;
+                    if ((val = parse_reg_from_string(inst_fields.at(field++))) < 0)
+                        continue;
+                    code |= val << RS_SHIFT;
+                }
+                if (im.flags & (IMF_BJR_REQ_RT | IMF_ALU_REQ_RT) && !(im.flags & IMF_REGWRITE)) {
+                    if (field >= inst_fields.count())
+                        continue;
+                    if ((val = parse_reg_from_string(inst_fields.at(field++))) < 0)
+                        continue;
+                    code |= val << RT_SHIFT;
+                }
+                if (field >= inst_fields.count())
+                    continue;
+                val = inst_fields.at(field++).toLong(&ok, 0);
+                if (!ok)
+                    continue;
+                ok = false;
+                code |= val & 0xffff;
+            }
+            break;
+        case T_J:
+            if (field >= inst_fields.count())
+                continue;
+            val = inst_fields.at(field++).toLong(&ok, 0);
+            code |= (val >> 2) & ~0xF0000000;
+            break;
+        case T_R:
+            if (im.flags & IMF_REGD) {
+                if (field >= inst_fields.count())
+                    continue;
+                if ((val = parse_reg_from_string(inst_fields.at(field++))) < 0)
+                    continue;
+                code |= val << RD_SHIFT;
+            }
+            if (!(im.flags & IMF_ALU_SHIFT)) {
+                if (im.flags & (IMF_BJR_REQ_RS | IMF_ALU_REQ_RS)) {
+                    if (field >= inst_fields.count())
+                        continue;
+                    if ((val = parse_reg_from_string(inst_fields.at(field++))) < 0)
+                        continue;
+                    code |= val << RS_SHIFT;
+                }
+            }
+            if (im.flags & (IMF_BJR_REQ_RT | IMF_ALU_REQ_RT)) {
+                if (field >= inst_fields.count())
+                    continue;
+                if ((val = parse_reg_from_string(inst_fields.at(field++))) < 0)
+                    continue;
+                code |= val << RT_SHIFT;
+            }
+            if (im.flags & IMF_ALU_SHIFT) {
+                if (im.flags & (IMF_BJR_REQ_RS | IMF_ALU_REQ_RS)) {
+                    if (field >= inst_fields.count())
+                        continue;
+                    if ((val = parse_reg_from_string(inst_fields.at(field++))) < 0)
+                        continue;
+                    code |= val << RS_SHIFT;
+                } else {
+                    if (field >= inst_fields.count())
+                        continue;
+                    val = inst_fields.at(field++).toLong(&ok, 0);
+                    if (!ok)
+                        continue;
+                    ok = false;
+                    code |= val << (SHAMT_SHIFT & 0x1f);
+                }
+            }
+            if ((im.flags & IMF_REGWRITE) && !(im.flags & IMF_REGD)) {
+                if (field >= inst_fields.count())
+                    continue;
+                if ((val = parse_reg_from_string(inst_fields.at(field++))) < 0)
+                    continue;
+                code |= val << RD_SHIFT;
+            }
+            break;
+        case T_UNKNOWN:
+            break;
+        }
+
+        if (field != inst_fields.count())
+            continue;
+
+        if (pok != nullptr)
+            *pok = true;
+
+        return Instruction(code);
+    }
+
+    printf("not found\n");
+
+    if (str == "NOP")
+        ok = true;
+    if (pok != nullptr)
+        *pok = ok;
+    return Instruction(0);
 }

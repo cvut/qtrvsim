@@ -225,3 +225,45 @@ void MemoryModel::cached_access(int cached) {
     access_through_cache = cached;
     update_all();
 }
+
+Qt::ItemFlags MemoryModel::flags(const QModelIndex &index) const {
+    if (index.column() == 0)
+        return QAbstractTableModel::flags(index);
+    else
+        return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
+}
+
+bool MemoryModel::setData(const QModelIndex & index, const QVariant & value, int role) {
+    if (role == Qt::EditRole)
+    {
+        bool ok;
+        std::uint32_t address;
+        std::uint32_t data = value.toString().toULong(&ok, 16);
+        if (!ok)
+            return false;
+        machine::MemoryAccess *mem;
+        if (!get_row_address(address, index.row()))
+            return false;
+        if (index.column() == 0 || machine == nullptr)
+            return false;
+        mem = machine->memory_rw();
+        if (mem == nullptr)
+            return false;
+        if ((access_through_cache > 0) && (machine->cache_data_rw() != nullptr))
+            mem = machine->cache_data_rw();
+        address += cellSizeBytes() * (index.column() - 1);
+        switch (cell_size) {
+        case CELLSIZE_BYTE:
+            mem->write_byte(address, data);
+            break;
+        case CELLSIZE_HWORD:
+            mem->write_hword(address, data);
+            break;
+        default:
+        case CELLSIZE_WORD:
+            mem->write_word(address, data);
+            break;
+        }
+    }
+    return true;
+}

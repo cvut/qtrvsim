@@ -115,6 +115,7 @@ public:
 
     QString to_str(std::int32_t inst_addr = 0) const;
 
+    static Instruction from_string(QString str, bool *pok = nullptr);
 private:
     std::uint32_t dt;
 };

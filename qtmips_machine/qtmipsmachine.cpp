@@ -114,11 +114,19 @@ const Memory *QtMipsMachine::memory() {
     return mem;
 }
 
+Memory *QtMipsMachine::memory_rw() {
+    return mem;
+}
+
 const Cache *QtMipsMachine::cache_program() {
     return cch_program;
 }
 
 const Cache *QtMipsMachine::cache_data() {
+    return cch_data;
+}
+
+Cache *QtMipsMachine::cache_data_rw() {
     return cch_data;
 }
 
