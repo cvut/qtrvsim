@@ -68,6 +68,8 @@
     <addaction name="actionMemory"/>
     <addaction name="actionProgram_Cache"/>
     <addaction name="actionData_Cache"/>
+    <addaction name="actionPeripherals"/>
+    <addaction name="actionTerminal"/>
    </widget>
    <widget class="QMenu" name="menuMachine">
     <property name="title">
@@ -82,12 +84,21 @@
     <addaction name="ips5"/>
     <addaction name="ips10"/>
     <addaction name="ipsUnlimited"/>
+    <addaction name="ipsMax"/>
     <addaction name="separator"/>
     <addaction name="actionRestart"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+    <addaction name="actionAboutQt"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuMachine"/>
    <addaction name="menuWindows"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="toolBar">
@@ -327,6 +338,11 @@
     <string>Ctrl+2</string>
    </property>
   </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>&amp;About Qt Mips</string>
+   </property>
+  </action>
   <action name="ipsMax">
    <property name="checkable">
     <bool>true</bool>
@@ -339,6 +355,21 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+M</string>
+   </property>
+  </action>
+  <action name="actionAboutQt">
+   <property name="text">
+    <string>About Qt</string>
+   </property>
+  </action>
+  <action name="actionPeripherals">
+   <property name="text">
+    <string>Peripherals</string>
+   </property>
+  </action>
+  <action name="actionTerminal">
+   <property name="text">
+    <string>Terminal</string>
    </property>
   </action>
  </widget>

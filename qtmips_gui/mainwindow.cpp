@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "mainwindow.h"
+#include "aboutdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     machine = nullptr;
@@ -79,6 +80,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->actionMemory, SIGNAL(triggered(bool)), this, SLOT(show_memory()));
     connect(ui->actionProgram_Cache, SIGNAL(triggered(bool)), this, SLOT(show_cache_program()));
     connect(ui->actionData_Cache, SIGNAL(triggered(bool)), this, SLOT(show_cache_data()));
+    connect(ui->actionAbout, SIGNAL(triggered(bool)), this, SLOT(about_qtmips()));
+    connect(ui->actionAboutQt, SIGNAL(triggered(bool)), this, SLOT(about_qt()));
     connect(ui->ips1, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
     connect(ui->ips2, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
     connect(ui->ips5, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
@@ -209,6 +212,17 @@ SHOW_HANDLER(memory)
 SHOW_HANDLER(cache_program)
 SHOW_HANDLER(cache_data)
 #undef SHOW_HANDLER
+
+void MainWindow::about_qtmips()
+{
+    AboutDialog *aboutdialog = new AboutDialog(this);
+    aboutdialog->exec();
+}
+
+void MainWindow::about_qt()
+{
+    QMessageBox::aboutQt(this);
+}
 
 void MainWindow::set_speed() {
     if (machine == nullptr)

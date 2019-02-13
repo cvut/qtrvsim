@@ -70,6 +70,9 @@ public slots:
     void show_memory();
     void show_cache_data();
     void show_cache_program();
+    // Actions - help menu
+    void about_qtmips();
+    void about_qt();
     // Actions - execution speed
     void set_speed();
     // Machine signals
