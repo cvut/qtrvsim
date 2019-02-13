@@ -126,6 +126,8 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
             return ((std::int32_t)s < (std::int32_t)t) ? 1 : 0;
         case ALU_OP_SLTU:
             return (s < t) ? 1 : 0;
+        case ALU_OP_MUL:
+            return (std::uint32_t)((std::int32_t)s * (std::int32_t)t);
         case ALU_OP_LUI:
             return t << 16;
         case ALU_OP_BSHFL:

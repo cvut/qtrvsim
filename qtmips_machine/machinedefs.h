@@ -87,6 +87,7 @@ enum AluOp : std::uint8_t {
     ALU_OP_NOR,
     ALU_OP_SLT,
     ALU_OP_SLTU,
+    ALU_OP_MUL,
     ALU_OP_LUI,
     ALU_OP_BSHFL,
     ALU_OP_PASS_T, // Pass t argument without change for JAL
