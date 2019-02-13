@@ -47,7 +47,7 @@ Core::Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
     this->mem_data = mem_data;
     this->ex_default_handler = new StopExceptionHandler();
     this->min_cache_row_size = min_cache_row_size;
-    this->hwr_user_local = 0xe0000000;
+    this->hwr_userlocal = 0xe0000000;
 }
 
 void Core::step(bool skip_break) {
@@ -133,6 +133,10 @@ bool Core::handle_exception(Core *core, Registers *regs, ExceptionCause excause,
                                                     next_addr, jump_branch_pc, in_delay_slot,
                                                     mem_ref_addr);
     return false;
+}
+
+void Core::set_c0_userlocal(std::uint32_t address) {
+    hwr_userlocal = address;
 }
 
 struct Core::dtFetch Core::fetch(bool skip_break) {
@@ -276,7 +280,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
             alu_val = 1;
             break;
         case 29: // UserLocal
-            alu_val = hwr_user_local;
+            alu_val = hwr_userlocal;
             break;
         default:
             alu_val = 0;

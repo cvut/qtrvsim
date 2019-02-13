@@ -85,6 +85,8 @@ public:
     void remove_hwbreak(std::uint32_t address);
     bool is_hwbreak(std::uint32_t address);
 
+    void set_c0_userlocal(std::uint32_t address);
+
     enum ForwardFrom {
         FORWARD_NONE   = 0b00,
         FORWARD_FROM_W = 0b01,
@@ -247,7 +249,7 @@ private:
     };
     unsigned int cycle_c;
     unsigned int min_cache_row_size;
-    std::uint32_t hwr_user_local;
+    std::uint32_t hwr_userlocal;
     QMap<std::uint32_t, hwBreak *> hw_breaks;
 };
 
