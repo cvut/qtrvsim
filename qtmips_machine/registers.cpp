@@ -42,6 +42,7 @@ using namespace machine;
 //////////////////////////////////////////////////////////////////////////////
 /// Program counter initial value
 #define PC_INIT 0x80020000
+#define SP_INIT 0xbfffff00
 //////////////////////////////////////////////////////////////////////////////
 
 Registers::Registers() : QObject() {
@@ -136,6 +137,7 @@ void Registers::reset() {
     pc_abs_jmp(PC_INIT); // Initialize to beginning program section
     for (int i = 1; i < 32; i++)
         write_gp(i, 0);
+    write_gp(29, SP_INIT); // initialize to safe RAM area - corresponds to Linux
     write_hi_lo(false, 0);
     write_hi_lo(true, 0);
 }
