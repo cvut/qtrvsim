@@ -205,7 +205,7 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
         MIPS_SYS(sys_flock      , 2, syscall_default_handler)
         MIPS_SYS(sys_msync      , 3, syscall_default_handler)
         MIPS_SYS(sys_readv      , 3, syscall_default_handler)    /* 4145 */
-        MIPS_SYS(sys_writev     , 3, syscall_default_handler)
+        MIPS_SYS(sys_writev     , 3, do_sys_writev)
         MIPS_SYS(sys_cacheflush , 3, syscall_default_handler)
         MIPS_SYS(sys_cachectl   , 3, syscall_default_handler)
         MIPS_SYS(sys_sysmips    , 4, syscall_default_handler)
@@ -342,7 +342,7 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
         MIPS_SYS(sys_add_key    , 5, syscall_default_handler)
         MIPS_SYS(sys_request_key, 4, syscall_default_handler)
         MIPS_SYS(sys_keyctl     , 5, syscall_default_handler)
-        MIPS_SYS(sys_set_thread_area, 1, syscall_default_handler)
+        MIPS_SYS(sys_set_thread_area, 1, do_sys_set_thread_area)
         MIPS_SYS(sys_inotify_init, 0, syscall_default_handler)
         MIPS_SYS(sys_inotify_add_watch, 3, syscall_default_handler) /* 4285 */
         MIPS_SYS(sys_inotify_rm_watch, 2, syscall_default_handler)
@@ -514,7 +514,50 @@ int OsSyscallExceptionHandler::syscall_default_handler(std::uint32_t &result, Co
            (unsigned long)a3, (unsigned long)a4);
 
 #endif
+    (void)core; (void)syscall_num;
     (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
     result = 0;
+    return 0;
+}
+
+int OsSyscallExceptionHandler::do_sys_set_thread_area(std::uint32_t &result, Core *core,
+               std::uint32_t syscall_num,
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
+               std::uint32_t a7, std::uint32_t a8) {
+    (void)core; (void)syscall_num;
+    (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
+    core->set_c0_userlocal(a1);
+    result = 0;
+    return 0;
+}
+
+// ssize_t writev(int fd, const struct iovec *iov, int iovcnt);
+int OsSyscallExceptionHandler::do_sys_writev(std::uint32_t &result, Core *core,
+               std::uint32_t syscall_num,
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
+               std::uint32_t a7, std::uint32_t a8) {
+    (void)core; (void)syscall_num;
+    (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
+
+    result = 0;
+    int fd = a1;
+    std::uint32_t iov = a2;
+    int iovcnt = a3;
+    MemoryAccess *mem = core->get_mem_data();
+
+    printf("sys_writev to fd %d\n", fd);
+
+    while (iovcnt-- > 0) {
+        std::uint32_t iov_base = mem->read_word(iov);
+        std::uint32_t iov_len = mem->read_word(iov + 4);
+        iov += 8;
+        for (std::uint32_t i = 0; i < iov_len; i++) {
+            printf("%c", mem->read_byte(iov_base++));
+        }
+        result += iov_len;
+    }
+
     return 0;
 }

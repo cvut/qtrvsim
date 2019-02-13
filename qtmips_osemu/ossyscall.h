@@ -47,6 +47,13 @@
 
 namespace osemu {
 
+#define OSSYCALL_HANDLER_DECLARE(name) \
+int name(std::uint32_t &result, machine::Core *core, \
+               std::uint32_t syscall_num, \
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3, \
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6, \
+               std::uint32_t a7, std::uint32_t a8)
+
 class OsSyscallExceptionHandler : public machine::ExceptionHandler {
     Q_OBJECT
 public:
@@ -54,13 +61,12 @@ public:
                           machine::ExceptionCause excause, std::uint32_t inst_addr,
                           std::uint32_t next_addr, std::uint32_t jump_branch_pc,
                           bool in_delay_slot, std::uint32_t mem_ref_addr);
-    int syscall_default_handler(std::uint32_t &result, machine::Core *core,
-                   std::uint32_t syscall_num,
-                   std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
-                   std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
-                   std::uint32_t a7, std::uint32_t a8);
-
+    OSSYCALL_HANDLER_DECLARE(syscall_default_handler);
+    OSSYCALL_HANDLER_DECLARE(do_sys_set_thread_area);
+    OSSYCALL_HANDLER_DECLARE(do_sys_writev);
 };
+
+#undef OSSYCALL_HANDLER_DECLARE
 
 }
 
