@@ -190,7 +190,7 @@ void QtMipsMachine::step_internal(bool skip_break) {
         QTime start_time = QTime::currentTime();
         do {
             cr->step(skip_break);
-        } while(time_chunk != 0 && stat == ST_BUSY &&
+        } while(time_chunk != 0 && stat == ST_BUSY && skip_break == false &&
                 start_time.msecsTo(QTime::currentTime()) < (int)time_chunk);
     } catch (QtMipsException &e) {
         run_t->stop();
