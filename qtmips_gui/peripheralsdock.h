@@ -39,6 +39,8 @@
 #include <QDockWidget>
 #include <QLabel>
 #include <QFormLayout>
+#include <peripheralsview.h>
+#include "peripspiled.h"
 #include "peripheral.h"
 #include "qtmipsmachine.h"
 
@@ -47,12 +49,13 @@ class PeripheralsDock : public QDockWidget {
 public:
     PeripheralsDock(QWidget *parent, QSettings *settings);
 
-    void setup(const machine::QtMipsMachine *machine);
+    void setup(const machine::PeripSpiLed *perip_spi_led);
 
 private:
     QVBoxLayout *layout_box;
     QWidget *top_widget, *top_form;
     QFormLayout *layout_top_form;
+    PeripheralsView *periph_view;
 };
 
 #endif // PERIPHERALSDOCK_H

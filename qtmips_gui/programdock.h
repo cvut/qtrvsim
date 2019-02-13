@@ -39,6 +39,7 @@
 #include <QDockWidget>
 #include <QLabel>
 #include <QComboBox>
+#include "peripheralsview.h"
 #include "qtmipsmachine.h"
 
 class ProgramDock : public QDockWidget  {

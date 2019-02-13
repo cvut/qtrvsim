@@ -33,19 +33,50 @@
  *
  ******************************************************************************/
 
-#include "peripheralsdock.h"
+#ifndef PERIPSPILED_H
+#define PERIPSPILED_H
 
-PeripheralsDock::PeripheralsDock(QWidget *parent, QSettings *settings) : QDockWidget(parent) {
-    top_widget = new QWidget(this);
-    setWidget(top_widget);
-    layout_box = new QVBoxLayout(top_widget);
-    periph_view = new PeripheralsView(0);
-    layout_box->addWidget(periph_view);
+#include <QObject>
+#include <QMap>
+#include <cstdint>
+#include <qtmipsexception.h>
+#include "machinedefs.h"
+#include "memory.h"
 
-    setObjectName("Peripherals");
-    setWindowTitle("Peripherals");
+namespace machine {
+
+class PeripSpiLed : public MemoryAccess {
+    Q_OBJECT
+public:
+    PeripSpiLed();
+    ~PeripSpiLed();
+
+signals:
+    void write_notification(std::uint32_t address, std::uint32_t value);
+    void read_notification(std::uint32_t address, std::uint32_t *value) const;
+
+    void led_line_changed(uint val) const;
+    void led_rgb1_changed(int val) const;
+    void led_rgb2_changed(int val) const;
+
+public slots:
+    void red_knob_update(int val);
+    void green_knob_update(int val);
+    void blue_knob_update(int val);
+
+public:
+    bool wword(std::uint32_t address, std::uint32_t value);
+    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
+private:
+    std::uint32_t spiled_reg_led_line;
+    std::uint32_t spiled_reg_led_rgb1;
+    std::uint32_t spiled_reg_led_rgb2;
+    std::uint32_t spiled_reg_led_kbdwr_direct;
+
+    std::uint32_t spiled_reg_kbdrd_knobs_direct;
+    std::uint32_t spiled_reg_knobs_8bit;
+};
+
 }
 
-void PeripheralsDock::setup(const machine::PeripSpiLed *perip_spi_led) {
-    periph_view->setup(perip_spi_led);
-}
+#endif // PERIPSPILED_H

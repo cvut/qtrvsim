@@ -48,6 +48,7 @@
 #include <physaddrspace.h>
 #include <peripheral.h>
 #include <serialport.h>
+#include <peripspiled.h>
 
 namespace machine {
 
@@ -67,6 +68,7 @@ public:
     const Cache *cache_data();
     Cache *cache_data_rw();
     SerialPort *serial_port();
+    PeripSpiLed *peripheral_spi_led();
     const Core *core();
     const CoreSingle *core_singe();
     const CorePipelined *core_pipelined();
@@ -113,6 +115,7 @@ private:
     Memory *mem, *mem_program_only;
     PhysAddrSpace *physaddrspace;
     SerialPort *ser_port;
+    PeripSpiLed *perip_spi_led;
     Cache *cch_program, *cch_data;
     Core *cr;
 

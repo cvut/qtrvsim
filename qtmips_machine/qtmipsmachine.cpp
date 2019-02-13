@@ -59,6 +59,9 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) : QObject(), mcnf(&cc) {
     ser_port = new SerialPort();
     addressapce_insert_range(ser_port, 0xffffc000, 0xffffc0ff, true);
 
+    perip_spi_led = new PeripSpiLed();
+    addressapce_insert_range(perip_spi_led, 0xffffc100, 0xffffc1ff, true);
+
     cch_program = new Cache(cpu_mem, &cc.cache_program(), cc.memory_access_time_read(), cc.memory_access_time_write());
     cch_data = new Cache(cpu_mem, &cc.cache_data(), cc.memory_access_time_read(), cc.memory_access_time_write());
 
@@ -134,6 +137,10 @@ Cache *QtMipsMachine::cache_data_rw() {
 
 SerialPort *QtMipsMachine::serial_port() {
     return ser_port;
+}
+
+PeripSpiLed *QtMipsMachine::peripheral_spi_led() {
+    return perip_spi_led;
 }
 
 const Core *QtMipsMachine::core() {

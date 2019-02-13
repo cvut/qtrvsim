@@ -53,7 +53,8 @@ SOURCES += \
     programtableview.cpp \
     aboutdialog.cpp \
     peripheralsdock.cpp \
-    terminaldock.cpp
+    terminaldock.cpp \
+    peripheralsview.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -87,12 +88,14 @@ HEADERS += \
     programtableview.h \
     aboutdialog.h \
     peripheralsdock.h \
-    terminaldock.h
+    terminaldock.h \
+    peripheralsview.h
 
 FORMS += \
         NewDialog.ui \
         NewDialogCache.ui \
-        MainWindow.ui
+        MainWindow.ui \
+    peripheralsview.ui
 
 RESOURCES += \
         icons.qrc

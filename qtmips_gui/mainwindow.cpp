@@ -174,6 +174,7 @@ void MainWindow::create_core(const machine::MachineConfig &config) {
     cache_program->setup(machine->cache_program());
     cache_data->setup(machine->cache_data());
     terminal->setup(machine->serial_port());
+    peripherals->setup(machine->peripheral_spi_led());
 
     // Connect signals for instruction address followup
     connect(machine->core(), SIGNAL(fetch_inst_addr_value(std::uint32_t)),

@@ -26,7 +26,8 @@ SOURCES += \
     utils.cpp \
     physaddrspace.cpp \
     peripheral.cpp \
-    serialport.cpp
+    serialport.cpp \
+    peripspiled.cpp
 
 HEADERS += \
     qtmipsmachine.h \
@@ -43,4 +44,5 @@ HEADERS += \
     machinedefs.h \
     physaddrspace.h \
     peripheral.h \
-    serialport.h
+    serialport.h \
+    peripspiled.h
