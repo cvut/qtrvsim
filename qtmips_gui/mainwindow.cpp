@@ -67,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     speed_group->addAction(ui->ips5);
     speed_group->addAction(ui->ips10);
     speed_group->addAction(ui->ipsUnlimited);
+    speed_group->addAction(ui->ipsMax);
     ui->ips1->setChecked(true);
 
     // Connect signals from menu
@@ -83,6 +84,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->ips5, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
     connect(ui->ips10, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
     connect(ui->ipsUnlimited, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
+    connect(ui->ipsMax, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
 
     // Restore application state from settings
     restoreState(settings->value("windowState").toByteArray());
@@ -220,6 +222,8 @@ void MainWindow::set_speed() {
         machine->set_speed(200);
     else if (ui->ips10->isChecked())
         machine->set_speed(100);
+    else if (ui->ipsMax->isChecked())
+        machine->set_speed(0, 100);
     else
         machine->set_speed(0);
 }

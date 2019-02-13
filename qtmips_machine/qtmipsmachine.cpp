@@ -33,6 +33,7 @@
  *
  ******************************************************************************/
 
+#include <QTime>
 #include "qtmipsmachine.h"
 #include "programloader.h"
 
@@ -102,8 +103,9 @@ const MachineConfig &QtMipsMachine::config() {
     return mcnf;
 }
 
-void QtMipsMachine::set_speed(unsigned val) {
-    run_t->setInterval(val);
+void QtMipsMachine::set_speed(unsigned int ips, unsigned int time_chunk) {
+    this->time_chunk = time_chunk;
+    run_t->setInterval(ips);
 }
 
 const Registers *QtMipsMachine::registers() {
@@ -174,7 +176,11 @@ void QtMipsMachine::step_internal(bool skip_break) {
     set_status(ST_BUSY);
     emit tick();
     try {
-        cr->step(skip_break);
+        QTime start_time = QTime::currentTime();
+        do {
+            cr->step(skip_break);
+        } while(time_chunk != 0 && stat == ST_BUSY &&
+                start_time.msecsTo(QTime::currentTime()) < time_chunk);
     } catch (QtMipsException &e) {
         run_t->stop();
         set_status(ST_TRAPPED);

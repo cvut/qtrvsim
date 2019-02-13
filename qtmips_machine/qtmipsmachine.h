@@ -57,7 +57,7 @@ public:
     ~QtMipsMachine();
 
     const MachineConfig &config();
-    void set_speed(unsigned);
+    void set_speed(unsigned int ips, unsigned int time_chunk = 0);
 
     const Registers *registers();
     const Memory *memory();
@@ -111,6 +111,7 @@ private:
     Core *cr;
 
     QTimer *run_t;
+    unsigned int time_chunk;
 
     std::uint32_t program_end;
     enum Status stat;

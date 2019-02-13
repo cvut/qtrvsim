@@ -117,6 +117,7 @@
    <addaction name="ips2"/>
    <addaction name="ips5"/>
    <addaction name="ips10"/>
+   <addaction name="ipsMax"/>
   </widget>
   <action name="actionNew">
    <property name="icon">
@@ -324,6 +325,20 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+2</string>
+   </property>
+  </action>
+  <action name="ipsMax">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Max</string>
+   </property>
+   <property name="toolTip">
+    <string>Run at maximal speed, skip visualization for 100 msec</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
    </property>
   </action>
  </widget>
