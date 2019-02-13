@@ -51,14 +51,14 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) : QObject(), mcnf(&cc) {
     if (program.get_executable_entry())
         regs->pc_abs_jmp(program.get_executable_entry());
     mem = new Memory(*mem_program_only);
-    cpu_mem = mem;
-#if 1
+
     physaddrspace = new PhysAddrSpace();
     physaddrspace->insert_range(mem, 0x00000000, 0xefffffff, false);
-    MemoryAccess *periph = new SimplePeripheral();
-    physaddrspace->insert_range(periph, 0xffffc000, 0xffffcfff, true);
     cpu_mem = physaddrspace;
-#endif
+
+    ser_port = new SerialPort();
+    addressapce_insert_range(ser_port, 0xffffc000, 0xffffc0ff, true);
+
     cch_program = new Cache(cpu_mem, &cc.cache_program(), cc.memory_access_time_read(), cc.memory_access_time_write());
     cch_data = new Cache(cpu_mem, &cc.cache_data(), cc.memory_access_time_read(), cc.memory_access_time_write());
 
@@ -132,6 +132,10 @@ Cache *QtMipsMachine::cache_data_rw() {
     return cch_data;
 }
 
+SerialPort *QtMipsMachine::serial_port() {
+    return ser_port;
+}
+
 const Core *QtMipsMachine::core() {
     return cr;
 }
@@ -180,7 +184,7 @@ void QtMipsMachine::step_internal(bool skip_break) {
         do {
             cr->step(skip_break);
         } while(time_chunk != 0 && stat == ST_BUSY &&
-                start_time.msecsTo(QTime::currentTime()) < time_chunk);
+                start_time.msecsTo(QTime::currentTime()) < (int)time_chunk);
     } catch (QtMipsException &e) {
         run_t->stop();
         set_status(ST_TRAPPED);
@@ -227,6 +231,15 @@ void QtMipsMachine::register_exception_handler(ExceptionCause excause,
                                                ExceptionHandler *exhandler) {
     if (cr != nullptr)
         cr->register_exception_handler(excause, exhandler);
+}
+
+bool QtMipsMachine::addressapce_insert_range(MemoryAccess *mem_acces,
+                        std::uint32_t start_addr, std::uint32_t last_addr,
+                        bool move_ownership) {
+    if (physaddrspace == nullptr)
+        return false;
+    return physaddrspace->insert_range(mem_acces, start_addr, last_addr,
+                                       move_ownership);
 }
 
 void QtMipsMachine::insert_hwbreak(std::uint32_t address) {

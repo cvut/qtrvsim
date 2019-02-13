@@ -69,6 +69,8 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     NEW(DataMemory, mem_data, 580, 258, machine);
     NEW(Registers, regs, 230, 240);
     NEW(Alu, alu, 490, 233);
+    NEW(LogicBlock, peripherals, 610, 350, "Peripherals");
+    NEW(LogicBlock, terminal, 610, 400, "Terminal");
     // Fetch stage
     NEW(ProgramCounter, ft.pc, 2, 280, machine);
     NEW(Latch, ft.latch, 55, 250, machine, 20);
@@ -195,6 +197,8 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     connect(ft.pc, SIGNAL(jump_to_pc(std::uint32_t)), this, SIGNAL(request_jump_to_program_counter(std::uint32_t)));
     connect(mem_program, SIGNAL(open_cache()), this, SIGNAL(request_cache_program()));
     connect(mem_data, SIGNAL(open_cache()), this, SIGNAL(request_cache_data()));
+    connect(peripherals, SIGNAL(open_block()), this, SIGNAL(request_peripherals()));
+    connect(terminal, SIGNAL(open_block()), this, SIGNAL(request_terminal()));
 }
 
 CoreViewScene::~CoreViewScene() {

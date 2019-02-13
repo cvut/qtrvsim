@@ -33,55 +33,33 @@
  *
  ******************************************************************************/
 
-#ifndef LOGICBLOCK_H
-#define LOGICBLOCK_H
+#ifndef SERIALPORT_H
+#define SERIALPORT_H
 
-#include <QGraphicsObject>
-#include <QPainter>
-#include <QGraphicsSimpleTextItem>
-#include <QVector>
 #include <QObject>
-#include "connection.h"
+#include <QMap>
+#include <cstdint>
+#include <qtmipsexception.h>
+#include "peripheral.h"
 
-namespace coreview {
+namespace machine {
 
-class LogicBlock : public QGraphicsObject {
+class SerialPort : public MemoryAccess {
     Q_OBJECT
 public:
-    LogicBlock(QString name);
-    LogicBlock(QVector<QString> name);
-    ~LogicBlock();
-
-    QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-
-    void setPos(qreal x, qreal y);
-    void setSize(qreal width, qreal height);
-
-    // This creates new connector
-    // Position is determined by x and y in 0 to 1 range and is mapped to real size of this block
-    // Using x=y and x=-y coordinates is not supported
-    const Connector *new_connector(qreal x, qreal y);
+    SerialPort();
+    ~SerialPort();
 
 signals:
-    void open_block();
+    void tx_byte(unsigned int data);
+    void write_notification(std::uint32_t address, std::uint32_t value);
+    void read_notification(std::uint32_t address, std::uint32_t *value) const;
 
-private:
-    QVector<QGraphicsSimpleTextItem*> text;
-    QRectF box;
-
-    struct Con {
-        Connector *con;
-        qreal x, y;
-        QPointF p;
-    };
-    QVector<struct Con> connectors;
-    QPointF con_pos(qreal x, qreal y);
-
-protected:
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+public:
+    bool wword(std::uint32_t address, std::uint32_t value);
+    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
 };
 
 }
 
-#endif // LOGICBLOCK_H
+#endif // SERIALPORT_H

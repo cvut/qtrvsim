@@ -603,7 +603,7 @@ void CorePipelined::do_step(bool skip_break) {
         if (HAZARD(dt_e)) {
             // Hazard with instruction in execute stage
             if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
-                if (dt_e.memread) // TODO extend by branch instructions
+                if (dt_e.memread)
                     stall = true;
                 else {
                     // Forward result value

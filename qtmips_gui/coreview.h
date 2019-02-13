@@ -68,12 +68,16 @@ signals:
     void request_jump_to_program_counter(std::uint32_t addr);
     void request_cache_program();
     void request_cache_data();
+    void request_peripherals();
+    void request_terminal();
 
 protected:
     coreview::ProgramMemory *mem_program;
     coreview::DataMemory *mem_data;
     coreview::Registers *regs;
     coreview::Alu *alu;
+    coreview::LogicBlock *peripherals;
+    coreview::LogicBlock *terminal;
     struct {
         coreview::ProgramCounter *pc;
         coreview::Latch *latch;

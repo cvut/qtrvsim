@@ -47,6 +47,7 @@
 #include <cache.h>
 #include <physaddrspace.h>
 #include <peripheral.h>
+#include <serialport.h>
 
 namespace machine {
 
@@ -65,6 +66,7 @@ public:
     const Cache *cache_program();
     const Cache *cache_data();
     Cache *cache_data_rw();
+    SerialPort *serial_port();
     const Core *core();
     const CoreSingle *core_singe();
     const CorePipelined *core_pipelined();
@@ -80,6 +82,9 @@ public:
     bool exited();
 
     void register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler);
+    bool addressapce_insert_range(MemoryAccess *mem_acces, std::uint32_t start_addr,
+                                  std::uint32_t last_addr, bool move_ownership);
+
     void insert_hwbreak(std::uint32_t address);
     void remove_hwbreak(std::uint32_t address);
     bool is_hwbreak(std::uint32_t address);
@@ -107,6 +112,7 @@ private:
     Registers *regs;
     Memory *mem, *mem_program_only;
     PhysAddrSpace *physaddrspace;
+    SerialPort *ser_port;
     Cache *cch_program, *cch_data;
     Core *cr;
 

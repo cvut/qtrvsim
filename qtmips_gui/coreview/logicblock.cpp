@@ -47,7 +47,7 @@ using namespace coreview;
 
 LogicBlock::LogicBlock(QString name) : LogicBlock(QVector<QString>({name})) { }
 
-LogicBlock::LogicBlock(QVector<QString> name) : QGraphicsItem(nullptr) {
+LogicBlock::LogicBlock(QVector<QString> name) : QGraphicsObject(nullptr) {
     QFont font;
     font.setPointSize(7);
 
@@ -82,7 +82,7 @@ void LogicBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
 }
 
 void LogicBlock::setPos(qreal x, qreal y) {
-    QGraphicsItem::setPos(x, y);
+    QGraphicsObject::setPos(x, y);
     for (int i = 0; i < connectors.size(); i++) {
         struct Con &c = connectors[i];
         c.con->setPos(x + c.p.x(), y + c.p.y());
@@ -133,4 +133,9 @@ QPointF LogicBlock::con_pos(qreal x, qreal y) {
     if (fabs(y) == 1)
         py += GAP * sign(y);
     return QPointF(px, py);
+}
+
+void LogicBlock::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) {
+    QGraphicsObject::mouseDoubleClickEvent(event);
+    emit open_block();
 }

@@ -33,55 +33,40 @@
  *
  ******************************************************************************/
 
-#ifndef LOGICBLOCK_H
-#define LOGICBLOCK_H
+#include <QString>
+#include <QTextBlock>
+#include <QTextCursor>
 
-#include <QGraphicsObject>
-#include <QPainter>
-#include <QGraphicsSimpleTextItem>
-#include <QVector>
-#include <QObject>
-#include "connection.h"
+#include "serialport.h"
+#include "terminaldock.h"
 
-namespace coreview {
+TerminalDock::TerminalDock(QWidget *parent, QSettings *settings) : QDockWidget(parent) {
+    top_widget = new QWidget(this);
+    setWidget(top_widget);
+    layout_box = new QVBoxLayout(top_widget);
 
-class LogicBlock : public QGraphicsObject {
-    Q_OBJECT
-public:
-    LogicBlock(QString name);
-    LogicBlock(QVector<QString> name);
-    ~LogicBlock();
+    terminal_text = new QTextEdit(top_widget);
+    terminal_text->setMinimumSize(30, 30);
+    layout_box->addWidget(terminal_text);
+    append_cursor = new QTextCursor(terminal_text->document());
 
-    QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-
-    void setPos(qreal x, qreal y);
-    void setSize(qreal width, qreal height);
-
-    // This creates new connector
-    // Position is determined by x and y in 0 to 1 range and is mapped to real size of this block
-    // Using x=y and x=-y coordinates is not supported
-    const Connector *new_connector(qreal x, qreal y);
-
-signals:
-    void open_block();
-
-private:
-    QVector<QGraphicsSimpleTextItem*> text;
-    QRectF box;
-
-    struct Con {
-        Connector *con;
-        qreal x, y;
-        QPointF p;
-    };
-    QVector<struct Con> connectors;
-    QPointF con_pos(qreal x, qreal y);
-
-protected:
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
-};
-
+    setObjectName("Terminal");
+    setWindowTitle("Terminal");
 }
 
-#endif // LOGICBLOCK_H
+TerminalDock::~TerminalDock() {
+    delete append_cursor;
+}
+
+void TerminalDock::setup(const machine::SerialPort *ser_port) {
+    if (ser_port == nullptr)
+        return;
+    connect(ser_port, SIGNAL(tx_byte(uint)), this, SLOT(tx_byte(uint)));
+}
+
+void TerminalDock::tx_byte(unsigned int data) {
+    if (data == '\n')
+        append_cursor->insertBlock();
+    else
+        append_cursor->insertText(QString(QChar(data)));
+}

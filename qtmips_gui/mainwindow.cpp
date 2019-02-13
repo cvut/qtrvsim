@@ -60,6 +60,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     cache_program->hide();
     cache_data = new CacheDock(this, "Data");
     cache_data->hide();
+    peripherals = new PeripheralsDock(this, settings);
+    peripherals->hide();
+    terminal = new TerminalDock(this, settings);
+    terminal->hide();
 
     // Execution speed actions
     speed_group = new QActionGroup(this);
@@ -80,6 +84,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->actionMemory, SIGNAL(triggered(bool)), this, SLOT(show_memory()));
     connect(ui->actionProgram_Cache, SIGNAL(triggered(bool)), this, SLOT(show_cache_program()));
     connect(ui->actionData_Cache, SIGNAL(triggered(bool)), this, SLOT(show_cache_data()));
+    connect(ui->actionPeripherals, SIGNAL(triggered(bool)), this, SLOT(show_peripherals()));
+    connect(ui->actionTerminal, SIGNAL(triggered(bool)), this, SLOT(show_terminal()));
     connect(ui->actionAbout, SIGNAL(triggered(bool)), this, SLOT(about_qtmips()));
     connect(ui->actionAboutQt, SIGNAL(triggered(bool)), this, SLOT(about_qt()));
     connect(ui->ips1, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
@@ -105,6 +111,8 @@ MainWindow::~MainWindow() {
     delete memory;
     delete cache_program;
     delete cache_data;
+    delete peripherals;
+    delete terminal;
     delete ui;
     if (machine != nullptr)
         delete machine;
@@ -153,6 +161,8 @@ void MainWindow::create_core(const machine::MachineConfig &config) {
     connect(corescene, SIGNAL(request_jump_to_program_counter(std::uint32_t)), program, SIGNAL(jump_to_pc(std::uint32_t)));
     connect(corescene, SIGNAL(request_cache_program()), this, SLOT(show_cache_program()));
     connect(corescene, SIGNAL(request_cache_data()), this, SLOT(show_cache_data()));
+    connect(corescene, SIGNAL(request_peripherals()), this, SLOT(show_peripherals()));
+    connect(corescene, SIGNAL(request_terminal()), this, SLOT(show_terminal()));
     // Connect signal from break to machine pause
     connect(machine->core(), SIGNAL(stop_on_exception_reached()), machine, SLOT(pause()));
 
@@ -163,6 +173,7 @@ void MainWindow::create_core(const machine::MachineConfig &config) {
     memory->setup(machine);
     cache_program->setup(machine->cache_program());
     cache_data->setup(machine->cache_data());
+    terminal->setup(machine->serial_port());
 
     // Connect signals for instruction address followup
     connect(machine->core(), SIGNAL(fetch_inst_addr_value(std::uint32_t)),
@@ -211,6 +222,8 @@ SHOW_HANDLER(program)
 SHOW_HANDLER(memory)
 SHOW_HANDLER(cache_program)
 SHOW_HANDLER(cache_data)
+SHOW_HANDLER(peripherals)
+SHOW_HANDLER(terminal)
 #undef SHOW_HANDLER
 
 void MainWindow::about_qtmips()

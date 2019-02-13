@@ -51,7 +51,9 @@ SOURCES += \
     hexlineedit.cpp \
     programmodel.cpp \
     programtableview.cpp \
-    aboutdialog.cpp
+    aboutdialog.cpp \
+    peripheralsdock.cpp \
+    terminaldock.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -83,7 +85,9 @@ HEADERS += \
     hexlineedit.h \
     programmodel.h \
     programtableview.h \
-    aboutdialog.h
+    aboutdialog.h \
+    peripheralsdock.h \
+    terminaldock.h
 
 FORMS += \
         NewDialog.ui \

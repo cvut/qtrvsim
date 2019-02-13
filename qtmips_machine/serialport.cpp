@@ -33,55 +33,40 @@
  *
  ******************************************************************************/
 
-#ifndef LOGICBLOCK_H
-#define LOGICBLOCK_H
+#include "serialport.h"
 
-#include <QGraphicsObject>
-#include <QPainter>
-#include <QGraphicsSimpleTextItem>
-#include <QVector>
-#include <QObject>
-#include "connection.h"
+using namespace machine;
 
-namespace coreview {
-
-class LogicBlock : public QGraphicsObject {
-    Q_OBJECT
-public:
-    LogicBlock(QString name);
-    LogicBlock(QVector<QString> name);
-    ~LogicBlock();
-
-    QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-
-    void setPos(qreal x, qreal y);
-    void setSize(qreal width, qreal height);
-
-    // This creates new connector
-    // Position is determined by x and y in 0 to 1 range and is mapped to real size of this block
-    // Using x=y and x=-y coordinates is not supported
-    const Connector *new_connector(qreal x, qreal y);
-
-signals:
-    void open_block();
-
-private:
-    QVector<QGraphicsSimpleTextItem*> text;
-    QRectF box;
-
-    struct Con {
-        Connector *con;
-        qreal x, y;
-        QPointF p;
-    };
-    QVector<struct Con> connectors;
-    QPointF con_pos(qreal x, qreal y);
-
-protected:
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
-};
+SerialPort::SerialPort() {
 
 }
 
-#endif // LOGICBLOCK_H
+SerialPort::~SerialPort() {
+
+}
+
+bool SerialPort::wword(std::uint32_t address, std::uint32_t value) {
+#if 0
+    printf("SerialPort::wword address 0x%08lx data 0x%08lx\n",
+           (unsigned long)address, (unsigned long)value);
+#endif
+    emit write_notification(address, value);
+
+    if (address == 0x04)
+        emit tx_byte(value & 0xff);
+
+    return true;
+}
+
+std::uint32_t SerialPort::rword(std::uint32_t address, bool debug_access) const {
+    (void)debug_access;
+    std::uint32_t value = 0x00000000;
+#if 0
+    printf("SerialPort::rword address 0x%08lx\n",
+           (unsigned long)address);
+#endif
+
+    emit read_notification(address, &value);
+
+    return value;
+}
