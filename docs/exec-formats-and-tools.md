@@ -9,7 +9,7 @@ architecture and the use of plain mips-elf GCC toolchain.
 Then the next simple template can be used to compile
 assembly source codes.
 
-'''
+```
 #define zero	$0
 #define at	$1
 #define v0 	$2
@@ -61,7 +61,7 @@ loop:	break
 
 .end _start
 
-'''
+```
 
 
 The simulator recognizes 'break' instruction
@@ -90,10 +90,10 @@ is not a good idea to set up breakpoint to address of an instruction
 in the delay slot.
 
 To compile simple assembly code programs invoke GCC with next options.
-'''
+```
 mips-elf-gcc -ggdb -c program.S -o program.o
 mips-elf-gcc -ggdb -nostdlib -nodefaultlibs -nostartfiles program.o -o program
-'''
+```
 
 Compile Executables with 'mips-linux-gnu' Toolchain
 ---------------------------------------------------
@@ -110,7 +110,7 @@ and 't9' register value.  The startup code which conforms
 these requirements to call 'main()' function looks like this:
 
 
-'''
+```
 /* file crt0local.S - replacement of C library complete startup machinery */
 .globl main
 .globl __start
@@ -141,7 +141,7 @@ loop:   break
         nop
 
 .end __start
-'''
+```
 
 The sequence of relative jump and link to next
 instruction setups return address register 'ra'
@@ -152,7 +152,7 @@ offset into global data area from actual instruction
 address and stores result in the 'gp'
 
 
-'''
+```
 00400500 <__start>:
   400500:       04110001        bal     400508 <next>
   400504:       00000000        nop
@@ -174,7 +174,7 @@ address and stores result in the 'gp'
   400534:       0000000d        break
   400538:       1000fffe        b       400534 <loop>
   40053c:       00000000        nop
-'''
+```
 
 It can be seen that assembler not only expands '.cpload'
 but even marks 'jalr    t9' instruction as a target for
@@ -187,7 +187,7 @@ Then simple main function which outputs string to the
 serial port provided by QtMisp emulator can be implemented
 as:
 
-'''
+```
 /* serial-port-test.c */
 #include <stdint.h>
 
@@ -222,21 +222,21 @@ int main(void)
 
   return 0;
 }
-'''
+```
 
 Compilation:
 
 
-'''
+```
 mips-linux-gnu-gcc -ggdb -fno-lto -c crt0local.S -o crt0local.o
 mips-linux-gnu-gcc -ggdb -O3 -fno-lto  -c serial-port-test.c -o serial-port-test.o
 mips-linux-gnu-gcc -ggdb -nostartfiles -static -fno-lto crt0local.o serial-port-test.o -o serial-port-test
-'''
+```
 
 The simulator implements 'rdhwr $rd, userlocal' instrcution
 and allows code compiled agains musl C library to start as well.
 
-'''
+```
 mips-linux-gnu-gcc -ggdb -O1 -march=mips2 -static -specs=/opt/musl/mips-linux-gnu/lib/musl-gcc.specs  -c program.c -o program.o
 mips-linux-gnu-gcc -ggdb -march=mips2 -static -specs=/opt/musl/mips-linux-gnu/lib/musl-gcc.specs programo -o program
-'''
+```
