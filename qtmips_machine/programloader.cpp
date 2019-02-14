@@ -41,6 +41,10 @@
 #include <cstring>
 #include "qtmipsexception.h"
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 using namespace machine;
 
 ProgramLoader::ProgramLoader(const char *file) {
@@ -49,7 +53,7 @@ ProgramLoader::ProgramLoader(const char *file) {
     if (elf_version(EV_CURRENT) == EV_NONE)
         throw QTMIPS_EXCEPTION(Input, "Elf library initialization failed", elf_errmsg(-1));
     // Open source file
-    if ((this->fd = open(file, O_RDONLY, 0)) < 0)
+    if ((this->fd = open(file, O_RDONLY | O_BINARY, 0)) < 0)
         throw QTMIPS_EXCEPTION(Input, QString("Can't open input elf file for reading (") + QString(file) + QString(")"), std::strerror(errno));
     // Initialize elf
     if (!(this->elf = elf_begin(this->fd, ELF_C_READ, NULL)))
