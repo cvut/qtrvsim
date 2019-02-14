@@ -52,17 +52,17 @@ make
 
 Or compile the application with static libraries
 
-'''
+```
 mkdir QtMips-build
 cd QtMips-build
 qmake CONFIG+=static" "CONFIG+=staticlib" -recursive ../QtMips/qtmips.pro
-'''
+```
 
 Alternativelly, you can setup
 
-'''
+```
 LD_LIBRARY_PATH=/path_to_QtMips/qtmips_machine /path_to_QtMips/qtmips_osemu
-'''
+```
 
 Accepted binary formats
 ------------------------
@@ -98,12 +98,12 @@ of writtent word is transmitted to terminal window.
 Definition of peripheral base address and registers
 offsets follows.
 
-'''
+```
 #define SERIAL_PORT_BASE   0xffffc000
 #define SERP_ST_REG_o            0x00
 #define SERP_ST_REG_TX_BUSY_m     0x1
 #define SERP_TX_REG_o            0x04
-'''
+```
 
 The another peripheral allows to set three bytes values
 concatenated to single word from user panel and
@@ -112,7 +112,7 @@ format ('LED_LINE' register). There are two other
 words writtable which define color of RGB LED 1 and 2
 (registers 'LED_RGB1' and 'LED_RGB2').
 
-'''
+```
 #define SPILED_REG_BASE    0xffffc100
 
 #define SPILED_REG_LED_LINE_o           0x004
@@ -122,7 +122,7 @@ words writtable which define color of RGB LED 1 and 2
 
 #define SPILED_REG_KBDRD_KNOBS_DIRECT_o 0x020
 #define SPILED_REG_KNOBS_8BIT_o         0x024
-'''
+```
 
 Limitations of the Implementation
 ---------------------------------
