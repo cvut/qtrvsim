@@ -14,7 +14,7 @@ overview of the project architecture and basic usage
 information.
 
 The used [MIPS CPU](https://en.wikipedia.org/wiki/MIPS_architecture) building block diagram,
-and a pipeline model matches lecture slides prepared by Micha Štepanovský for the subject
+and a pipeline model matches lecture slides prepared by Michal Štepanovský for the subject
 [Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b35apo/start).
 The course is based on the book  [Computer Organization and Design, The HW/SW Interface](https://www.elsevier.com/books/computer-organization-and-design-mips-edition/patterson/978-0-12-407726-3) written by
 professors Paterson and Henessy.
