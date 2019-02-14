@@ -63,7 +63,7 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
         MIPS_SYS(sys_exit       , 1, syscall_default_handler)
         MIPS_SYS(sys_fork       , 0, syscall_default_handler)
         MIPS_SYS(sys_read       , 3, syscall_default_handler)
-        MIPS_SYS(sys_write      , 3, syscall_default_handler)
+        MIPS_SYS(sys_write      , 3, do_sys_write)
         MIPS_SYS(sys_open       , 3, syscall_default_handler)    /* 4005 */
         MIPS_SYS(sys_close      , 1, syscall_default_handler)
         MIPS_SYS(sys_waitpid    , 3, syscall_default_handler)
@@ -440,6 +440,7 @@ bool OsSyscallExceptionHandler::handle_exception(Core *core, Registers *regs,
 
     MemoryAccess *mem_data = core->get_mem_data();
     MemoryAccess *mem_program = core->get_mem_program();
+    (void)mem_program;
 
 #if 1
     printf("Exception cause %d instruction PC 0x%08lx next PC 0x%08lx jump branch PC 0x%08lx "
@@ -554,9 +555,38 @@ int OsSyscallExceptionHandler::do_sys_writev(std::uint32_t &result, Core *core,
         std::uint32_t iov_len = mem->read_word(iov + 4);
         iov += 8;
         for (std::uint32_t i = 0; i < iov_len; i++) {
-            printf("%c", mem->read_byte(iov_base++));
+            int ch = mem->read_byte(iov_base++);
+            printf("%c", ch);
+            emit char_written(fd, ch);
         }
         result += iov_len;
+    }
+
+    return 0;
+}
+
+// ssize_t write(int fd, const void *buf, size_t count);
+int OsSyscallExceptionHandler::do_sys_write(std::uint32_t &result, Core *core,
+               std::uint32_t syscall_num,
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
+               std::uint32_t a7, std::uint32_t a8) {
+    (void)core; (void)syscall_num;
+    (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
+
+    result = 0;
+    int fd = a1;
+    std::uint32_t buf = a2;
+    int size = a3;
+    MemoryAccess *mem = core->get_mem_data();
+
+    printf("sys_write to fd %d\n", fd);
+
+    result += size;
+    while (size-- > 0) {
+        int ch = mem->read_byte(buf++);
+        printf("%c", ch);
+        emit char_written(fd, ch);
     }
 
     return 0;

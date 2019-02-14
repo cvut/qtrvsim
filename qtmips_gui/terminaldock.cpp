@@ -70,3 +70,9 @@ void TerminalDock::tx_byte(unsigned int data) {
     else
         append_cursor->insertText(QString(QChar(data)));
 }
+
+void TerminalDock::tx_byte(int fd, unsigned int data)
+{
+    (void)fd;
+    tx_byte(data);
+}

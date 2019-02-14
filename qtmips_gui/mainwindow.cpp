@@ -148,8 +148,9 @@ void MainWindow::create_core(const machine::MachineConfig &config) {
     set_speed(); // Update machine speed to current settings
 
 #if 1
-    machine->register_exception_handler(machine::EXCAUSE_SYSCALL,
-                                        new osemu::OsSyscallExceptionHandler);
+    osemu::OsSyscallExceptionHandler *osemu_handler = new osemu::OsSyscallExceptionHandler;
+    machine->register_exception_handler(machine::EXCAUSE_SYSCALL, osemu_handler);
+    connect(osemu_handler, SIGNAL(char_written(int,uint)), terminal, SLOT(tx_byte(int,uint)));
 #endif
 
     // Connect machine signals and slots

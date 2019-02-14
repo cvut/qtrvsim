@@ -64,6 +64,9 @@ public:
     OSSYCALL_HANDLER_DECLARE(syscall_default_handler);
     OSSYCALL_HANDLER_DECLARE(do_sys_set_thread_area);
     OSSYCALL_HANDLER_DECLARE(do_sys_writev);
+    OSSYCALL_HANDLER_DECLARE(do_sys_write);
+signals:
+    void char_written(int fd, unsigned int val);
 };
 
 #undef OSSYCALL_HANDLER_DECLARE

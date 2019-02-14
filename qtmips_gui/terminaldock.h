@@ -53,6 +53,7 @@ public:
 
 public slots:
     void tx_byte(unsigned int data);
+    void tx_byte(int fd, unsigned int data);
 
 private:
     QVBoxLayout *layout_box;
