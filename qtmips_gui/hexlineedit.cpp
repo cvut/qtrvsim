@@ -88,7 +88,7 @@ void HexLineEdit::set_value(std::uint32_t value) {
 void HexLineEdit::on_edit_finished() {
     bool ok;
     std::uint32_t val;
-    val = text().toLong(&ok, 16);
+    val = text().toULong(&ok, 16);
     if (!ok) {
         set_value(last_set);
         return;
