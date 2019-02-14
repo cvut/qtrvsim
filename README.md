@@ -5,7 +5,7 @@ MIPS CPU simulator for education purposes.
 Dependencies
 ------------
 * Qt 5
-* elfutils (libelf might works too but there can be some problems)
+* elfutils (libelf works too but there can be some problems)
 
 General compilation
 -------------------
@@ -20,13 +20,39 @@ Where `/path/to/qtmips` is path to this project root.
 
 Compilation for local execution
 -------------------------------
-Because simulator it self is implemented as library you need to have that library
-in path where loader can found it. Which is not commonly a case, so you have to
-compile it with following additional option:
+Because simulator it self and operating system stub are implemented as libraries you
+need to have that libraries in path where loader can found them. Binary looks for library
+at system libary paths (on Windows in actual directory as well) and on compiled in
+RPATH which is `../lib` (i.e., install into 'bin' and 'lib' directory is assumed):
+
 ```
-qmake /path/to/qtmips "QMAKE_RPATHDIR += ../qtmips_machine"
+qmake /path/to/qtmips "QMAKE_RPATHDIR += ../qtmips_machine ../qtmips_osemu"
 make
 ```
+
+Or compile the application with static libraries
+
+'''
+mkdir QtMips-build
+cd QtMips-build
+qmake CONFIG+=static" "CONFIG+=staticlib" -recursive ../QtMips/qtmips.pro
+'''
+
+Alternativelly, you can setup
+
+'''
+LD_LIBRARY_PATH=/path_to_QtMips/qtmips_machine /path_to_QtMips/qtmips_osemu
+'''
+
+Accepted binary formats
+------------------------
+The simulator accepts ELF statically linked executables
+compiled for 32-bit big-endian MISP target.
+
+Optimal is use of plain mips-elf GCC toolchain.
+
+For more reffer to the [supported executable formats](docs/exec-formats-and tools.md)
+documentation in the 'docs' projects subdirectory.
 
 Tests
 -----
@@ -38,18 +64,57 @@ compiled elf binaries. All these tests can be executed using script
 Source files for unit tests can be found in path `qtmips_machine/tests` and
 integration tests are located in `tests` directory.
 
-Not implemented features
-------------------------
-These are features that are not implemented and are not currently being planned as
-being so.
+Peripherals
+-----------
 
-* Privileged instructions and all features dependent on it
+The simulator implements emulation of two peripherals for now.
+
+The firs is simple serial port (UART) which transmission
+(Tx) support only for now. It provides two registers, the
+first is status port. Bit 0 is reserved for notification
+that UART is busy and cannot accept next character.
+The second register is actual Tx buffer. The LSB byte
+of writtent word is transmitted to terminal window.
+Definition of peripheral base address and registers
+offsets follows.
+
+'''
+#define SERIAL_PORT_BASE   0xffffc000
+#define SERP_ST_REG_o            0x00
+#define SERP_ST_REG_TX_BUSY_m     0x1
+#define SERP_TX_REG_o            0x04
+'''
+
+The another peripheral allows to set three bytes values
+concatenated to single word from user panel and
+display one word in hexadecimal, decimal and binary
+format ('LED_LINE' register). There are two other
+words writtable which define color of RGB LED 1 and 2
+(registers 'LED_RGB1' and 'LED_RGB2').
+
+'''
+#define SPILED_REG_BASE    0xffffc100
+
+#define SPILED_REG_LED_LINE_o           0x004
+#define SPILED_REG_LED_RGB1_o           0x010
+#define SPILED_REG_LED_RGB2_o           0x014
+#define SPILED_REG_LED_KBDWR_DIRECT_o   0x018
+
+#define SPILED_REG_KBDRD_KNOBS_DIRECT_o 0x020
+#define SPILED_REG_KNOBS_8BIT_o         0x024
+'''
+
+Limitations of the implementation
+---------------------------------
+* Only 'rdhwr' privileged instruction is implemented for now. All other privileged
+  instructions and features dependent on them are not implemented.
 * Coprocessors (so no floating point unit nor any other type)
-* Peripherals
 * Memory access stall (stalling execution because of cache miss would be pretty
   annoying for users so difference between cache and memory is just in collected
   statistics)
-* Interrupts and exceptions (if exception occurs then machine execution is halted)
-* Branch-likeli instructions (they are marked as obsolete)
+* Only limited support for interrupts and exceptions. When 'syscall' or 'break'
+  instruction is recognized, emulation stops. Single step proceed after instruction.
 * Complete binary instruction check (we check only minimal set of bites to decode
-  instruction, we don't check if zero sections are really zero unless we need it).
+  instruction, we don't check if zero sections are really zero unless we need it),
+  but instruction decoder can be easily extended to distinguish instructions
+  according additional subfiled.
