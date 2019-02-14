@@ -105,11 +105,11 @@ offsets follows.
 #define SERP_TX_REG_o            0x04
 ```
 
-The another peripheral allows to set three bytes values
-concatenated to single word from user panel and
-display one word in hexadecimal, decimal and binary
-format ('LED_LINE' register). There are two other
-words writtable which define color of RGB LED 1 and 2
+The another peripheral allows to set three byte values
+concatenated to single word (read-only KNOBS_8BIT register)
+from user panel set by knobs and display one word in hexadecimal,
+decimal and binary format ('LED_LINE' register). There are two
+other words writtable which control color of RGB LED 1 and 2
 (registers 'LED_RGB1' and 'LED_RGB2').
 
 ```
