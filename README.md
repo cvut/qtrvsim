@@ -72,7 +72,7 @@ compiled for 32-bit big-endian MISP target.
 Optimal is use of plain mips-elf GCC toolchain.
 
 For more reffer to the [supported executable formats](docs/exec-formats-and-tools.md)
-documentation in the 'docs' projects subdirectory.
+documentation in the ['docs'](docs) projects subdirectory.
 
 Tests
 -----
