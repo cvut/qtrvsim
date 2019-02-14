@@ -441,7 +441,8 @@ static const struct InstructionMap instruction_map[] = {
      .flags = FLAGS_ALU_I_LOAD},
     IM_UNKNOWN,  // 49
     IM_UNKNOWN,  // 50
-    IM_UNKNOWN,  // 51
+    {"PREF", IT_I, NOALU, NOMEM, nullptr,            // PREF
+     .flags = IMF_SUPPORTED},
     IM_UNKNOWN,  // 52
     IM_UNKNOWN,  // 53
     IM_UNKNOWN,  // 54
@@ -927,8 +928,6 @@ Instruction Instruction::from_string(QString str, bool *pok) {
 
         return Instruction(code);
     }
-
-    printf("not found\n");
 
     if (str == "NOP")
         ok = true;
