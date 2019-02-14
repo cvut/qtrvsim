@@ -161,6 +161,26 @@ static const struct InstructionMap  alu_instruction_map[] = {
      .flags = FLAGS_ALU_T_R_STD},
     {"SLTU",   IT_R, ALU_OP_SLTU, NOMEM, nullptr,
      .flags = FLAGS_ALU_T_R_STD},
+    IM_UNKNOWN, // 44
+    IM_UNKNOWN, // 45
+    IM_UNKNOWN, // 46
+    IM_UNKNOWN, // 47
+    IM_UNKNOWN, // 48
+    IM_UNKNOWN, // 49
+    IM_UNKNOWN, // 50
+    IM_UNKNOWN, // 51
+    IM_UNKNOWN, // 52
+    IM_UNKNOWN, // 53
+    IM_UNKNOWN, // 54
+    IM_UNKNOWN, // 55
+    IM_UNKNOWN, // 56
+    IM_UNKNOWN, // 57
+    IM_UNKNOWN, // 58
+    IM_UNKNOWN, // 59
+    IM_UNKNOWN, // 60
+    IM_UNKNOWN, // 61
+    IM_UNKNOWN, // 62
+    IM_UNKNOWN, // 63
 };
 
 static const struct InstructionMap  special2_instruction_map[] = {
