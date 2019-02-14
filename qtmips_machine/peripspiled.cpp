@@ -61,12 +61,15 @@ bool PeripSpiLed::wword(std::uint32_t address, std::uint32_t value) {
     switch (address) {
     case  SPILED_REG_LED_LINE_o:
         spiled_reg_led_line = value;
+        emit led_line_changed(value);
         break;
     case  SPILED_REG_LED_RGB1_o:
         spiled_reg_led_rgb1 = value;
+        emit led_rgb1_changed(value);
         break;
     case  SPILED_REG_LED_RGB2_o:
         spiled_reg_led_rgb2 = value;
+        emit led_rgb2_changed(value);
         break;
     default:
         break;
