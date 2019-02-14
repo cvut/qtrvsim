@@ -61,8 +61,8 @@ Memory::Memory(bool cache_used, const machine::Cache *cch) : QGraphicsObject(nul
         const QRectF &cache_t_b = cache_t.boundingRect();
         cache_t.setPos(WIDTH/2 - cache_t_b.width()/2, 1);
         const QRectF &cache_hit_b = cache_hit_t.boundingRect();
-        cache_hit_t.setPos(WIDTH/2 - cache_hit_b.width()/2, cache_t_b.height() + 2);
-        cache_miss_t.setPos(WIDTH/2 - cache_miss_t.boundingRect().width()/2, cache_t_b.height() + cache_hit_b.height() + 3);
+        cache_hit_t.setPos(WIDTH/20, cache_t_b.height() + 2);
+        cache_miss_t.setPos(WIDTH/20, cache_t_b.height() + cache_hit_b.height() + 3);
     }
 
     cache_t.setVisible(cache);
