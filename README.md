@@ -2,12 +2,32 @@ QtMips
 ======
 MIPS CPU simulator for education purposes.
 
-Dependencies
-------------
+Documentation
+-------------
+The project has started as diploma theses work of Karel Kočí.
+The complete text of the thesis [Graphical CPU Simulator with
+Cache Visualization](https://dspace.cvut.cz/bitstream/handle/10467/76764/F3-DP-2018-Koci-Karel-diploma.pdf)
+is available from the online archive of
+the [Czech Technical University in Prague](https://www.cvut.cz/).
+The document provides analysis of available alternative simulators,
+overview of the project architecture and basic usage
+information.
+
+The used [MIPS CPU](https://en.wikipedia.org/wiki/MIPS_architecture) building block diagram,
+and a pipeline model matches lecture slides prepared by Micha Štepanovský for the subject
+[Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b35apo/start).
+The course is based on the book  [Computer Organization and Design, The HW/SW Interface](https://www.elsevier.com/books/computer-organization-and-design-mips-edition/patterson/978-0-12-407726-3) written by
+professors Paterson and Henessy.
+
+Additional documentation can be found in subdirectory ['docs'](docs)
+of the project.
+
+Build Dependencies
+------------------
 * Qt 5
 * elfutils (libelf works too but there can be some problems)
 
-General compilation
+General Compilation
 -------------------
 To compile whole project just run these commands:
 ```
@@ -18,7 +38,7 @@ Where `/path/to/qtmips` is path to this project root.
 
 (Be sure to use qt5 qmake.)
 
-Compilation for local execution
+Compilation for Local Execution
 -------------------------------
 Because simulator it self and operating system stub are implemented as libraries you
 need to have that libraries in path where loader can found them. Binary looks for library
@@ -51,7 +71,7 @@ compiled for 32-bit big-endian MISP target.
 
 Optimal is use of plain mips-elf GCC toolchain.
 
-For more reffer to the [supported executable formats](docs/exec-formats-and tools.md)
+For more reffer to the [supported executable formats](docs/exec-formats-and-tools.md)
 documentation in the 'docs' projects subdirectory.
 
 Tests
@@ -104,7 +124,7 @@ words writtable which define color of RGB LED 1 and 2
 #define SPILED_REG_KNOBS_8BIT_o         0x024
 '''
 
-Limitations of the implementation
+Limitations of the Implementation
 ---------------------------------
 * Only 'rdhwr' privileged instruction is implemented for now. All other privileged
   instructions and features dependent on them are not implemented.
@@ -118,3 +138,7 @@ Limitations of the implementation
   instruction, we don't check if zero sections are really zero unless we need it),
   but instruction decoder can be easily extended to distinguish instructions
   according additional subfiled.
+  
+List of ACtually Supported Instructions
+---------------------------------------
+ADD ADDU AND BREAK DIV DIVU JALR JR MFHI MFLO MOVN MOVZ MTHI MTLO MUL MULT MULTU NOR OR SLL SLLV SLT SLTU SRA SRAV SRL SRLV SUB SUBU SYNC SYSCALL XOR ADD ADDU AND BGEZ BGEZAL BGEZALL BGEZL BLTZ BLTZAL BLTZALL BLTZL BREAK DIV DIVU JALR JR MFHI MFLO MOVN MOVZ MTHI MTLO MUL MULT MULTU NOR OR SLL SLLV SLT SLTU SRA SRAV SRL SRLV SUB SUBU SYNC SYNCI SYSCALL XOR ADD ADDI ADDIU ADDU AND ANDI BEQ BEQL BGEZ BGEZAL BGEZALL BGEZL BGTZ BGTZL BLEZ BLEZL BLTZ BLTZAL BLTZALL BLTZL BNE BNEL BREAK DIV DIVU J JAL JALR JR LUI MFHI MFLO MOVN MOVZ MTHI MTLO MUL MUL MULT MULTU NOP NOR OR ORI SLL SLLV SLT SLTI SLTIU SLTU SRA SRAV SRL SRLV SUB SUBU SYNC SYNCI SYSCALL XOR XORI ADD ADDI ADDIU ADDU AND ANDI BEQ BEQL BGEZ BGEZAL BGEZALL BGEZL BGTZ BGTZL BLEZ BLEZL BLTZ BLTZAL BLTZALL BLTZL BNE BNEL BREAK BSHFL DIV DIVU J JAL JALR JR LUI MFHI MFLO MOVN MOVZ MTHI MTLO MUL MUL MULT MULTU NOR OR ORI RDHWR SLL SLLV SLT SLTI SLTIU SLTU SRA SRAV SRL SRLV SUB SUBU SYNC SYNCI SYSCALL XOR XORI ADD ADDI ADDIU ADDU AND ANDI BEQ BEQL BGEZ BGEZAL BGEZALL BGEZL BGTZ BGTZL BLEZ BLEZL BLTZ BLTZAL BLTZALL BLTZL BNE BNEL BREAK BSHFL CACHE DIV DIVU J JAL JALR JR LB LBU LH LHU LL LUI LW MFHI MFLO MOVN MOVZ MTHI MTLO MUL MUL MULT MULTU NOR OR ORI RDHWR SB SC SH SLL SLLV SLT SLTI SLTIU SLTU SRA SRAV SRL SRLV SUB SUBU SW SYNC SYNCI SYSCALL XOR XORI.
