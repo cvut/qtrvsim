@@ -104,7 +104,7 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
         MIPS_SYS(sys_pipe       , 0, syscall_default_handler)
         MIPS_SYS(sys_times      , 1, syscall_default_handler)
         MIPS_SYS(sys_ni_syscall , 0, syscall_default_handler)
-        MIPS_SYS(sys_brk        , 1, syscall_default_handler)    /* 4045 */
+        MIPS_SYS(sys_brk        , 1, do_sys_brk)    /* 4045 */
         MIPS_SYS(sys_setgid     , 1, syscall_default_handler)
         MIPS_SYS(sys_getgid     , 0, syscall_default_handler)
         MIPS_SYS(sys_ni_syscall , 0, syscall_default_handler)    /* was signal(2, syscall_default_handler) */
@@ -269,7 +269,7 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
         MIPS_SYS(sys_sendfile   , 4, syscall_default_handler)
         MIPS_SYS(sys_ni_syscall , 0, syscall_default_handler)
         MIPS_SYS(sys_ni_syscall , 0, syscall_default_handler)
-        MIPS_SYS(sys_mmap2      , 6, syscall_default_handler)    /* 4210 */
+        MIPS_SYS(sys_mmap2      , 6, do_sys_mmap2)               /* 4210 */
         MIPS_SYS(sys_truncate64 , 4, syscall_default_handler)
         MIPS_SYS(sys_ftruncate64, 4, syscall_default_handler)
         MIPS_SYS(sys_stat64     , 2, syscall_default_handler)
@@ -426,6 +426,12 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
 
 const unsigned mips_syscall_args_size =
         sizeof(mips_syscall_args)/sizeof(*mips_syscall_args);
+
+OsSyscallExceptionHandler::OsSyscallExceptionHandler() {
+    brk_limit = 0;
+    anonymous_base = 0x60000000;
+    anonymous_last = anonymous_base;
+}
 
 bool OsSyscallExceptionHandler::handle_exception(Core *core, Registers *regs,
                             ExceptionCause excause, std::uint32_t inst_addr,
@@ -588,6 +594,57 @@ int OsSyscallExceptionHandler::do_sys_write(std::uint32_t &result, Core *core,
         printf("%c", ch);
         emit char_written(fd, ch);
     }
+
+    return 0;
+}
+
+// int or void * brk(void *addr);
+int OsSyscallExceptionHandler::do_sys_brk(std::uint32_t &result, Core *core,
+               std::uint32_t syscall_num,
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
+               std::uint32_t a7, std::uint32_t a8) {
+    (void)core; (void)syscall_num;
+    (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
+
+    result = 0;
+    std::uint32_t new_limit = a1;
+    brk_limit = new_limit;
+    result = brk_limit;
+
+    return 0;
+}
+
+#define TARGET_SYSCALL_MMAP2_UNIT 4096ULL
+#define TARGET_MAP_ANONYMOUS  0x20
+
+// void *mmap2(void *addr, size_t length, int prot,
+//             int flags, int fd, off_t pgoffset);
+int OsSyscallExceptionHandler::do_sys_mmap2(std::uint32_t &result, Core *core,
+               std::uint32_t syscall_num,
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
+               std::uint32_t a7, std::uint32_t a8) {
+    (void)core; (void)syscall_num;
+    (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
+
+    result = 0;
+    std::uint32_t addr = a1;
+    std::uint32_t lenght = a2;
+    std::uint32_t prot = a3;
+    std::uint32_t flags = a4;
+    std::uint32_t fd = a5;
+    std::uint64_t offset = a6 * TARGET_SYSCALL_MMAP2_UNIT;
+
+    printf("sys_mmap2 addr = 0x%08lx lenght= 0x%08lx prot = 0x%08lx flags = 0x%08lx fd = %d offset = 0x%08llx\n",
+           (unsigned long)addr, (unsigned long)lenght, (unsigned long)prot,
+           (unsigned long)flags, (int)fd, (unsigned long long) offset);
+
+    lenght = (lenght  + TARGET_MAP_ANONYMOUS - 1) & ~(TARGET_MAP_ANONYMOUS - 1);
+    anonymous_last = (anonymous_last + TARGET_MAP_ANONYMOUS - 1) &
+                     ~(TARGET_MAP_ANONYMOUS - 1);
+    result = anonymous_last;
+    anonymous_last += lenght;
 
     return 0;
 }

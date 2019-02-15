@@ -57,6 +57,7 @@ int name(std::uint32_t &result, machine::Core *core, \
 class OsSyscallExceptionHandler : public machine::ExceptionHandler {
     Q_OBJECT
 public:
+    OsSyscallExceptionHandler();
     bool handle_exception(machine::Core *core, machine::Registers *regs,
                           machine::ExceptionCause excause, std::uint32_t inst_addr,
                           std::uint32_t next_addr, std::uint32_t jump_branch_pc,
@@ -65,8 +66,14 @@ public:
     OSSYCALL_HANDLER_DECLARE(do_sys_set_thread_area);
     OSSYCALL_HANDLER_DECLARE(do_sys_writev);
     OSSYCALL_HANDLER_DECLARE(do_sys_write);
+    OSSYCALL_HANDLER_DECLARE(do_sys_brk);
+    OSSYCALL_HANDLER_DECLARE(do_sys_mmap2);
 signals:
     void char_written(int fd, unsigned int val);
+private:
+    std::uint32_t brk_limit;
+    std::uint32_t anonymous_base;
+    std::uint32_t anonymous_last;
 };
 
 #undef OSSYCALL_HANDLER_DECLARE
