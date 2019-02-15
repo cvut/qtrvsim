@@ -39,6 +39,59 @@
 
 using namespace machine;
 
+#if defined(__GNUC__) && __GNUC__ >= 4
+
+static inline std::uint32_t alu_op_clz(std::uint32_t n)
+{
+    int intbits = sizeof(int) * CHAR_BIT;
+    if (n == 0)
+        return 32;
+    return __builtin_clz(n) - (intbits - 32);
+}
+
+#else /* Fallback for generic compiler */
+
+// see https://en.wikipedia.org/wiki/Find_first_set#CLZ
+static const std::uint8_t sig_table_4bit[16] =
+                       { 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4 };
+
+static inline std::uint32_t alu_op_clz(std::uint32_t n)
+{
+    int len = 32;
+
+    if (n & 0xFFFF0000) {
+        len -= 16;
+        n >>= 16;
+    }
+    if (n & 0xFF00) {
+        len -= 8;
+        n >>= 8;
+    }
+    if (n & 0xF0) {
+        len -= 4;
+        n >>= 4;
+    }
+    len -= sig_table_4bit[n];
+    return len;
+}
+
+#endif /* end of mips_clz */
+
+static inline std::uint64_t alu_read_hi_lo_64bit(Registers *regs)
+{
+    std::uint64_t val;
+    val = regs->read_hi_lo(false);
+    val |= (std::uint64_t)regs->read_hi_lo(true) << 32;
+    return val;
+}
+
+static inline void alu_write_hi_lo_64bit(Registers *regs, std::uint64_t val)
+{
+    regs->write_hi_lo(false, (std::uint32_t)(val & 0xffffffff));
+    regs->write_hi_lo(true,  (std::uint32_t)(val >> 32));
+}
+
+
 std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t,
                                    std::uint8_t sa, std::uint8_t sz, Registers *regs,
                                    bool &discard) {
@@ -83,13 +136,11 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
             return 0x0;
         case ALU_OP_MULT:
             s64_val = (std::int64_t)(std::int32_t)s * (std::int32_t)t;
-            regs->write_hi_lo(false, (std::uint32_t)(s64_val & 0xffffffff));
-            regs->write_hi_lo(true,  (std::uint32_t)(s64_val >> 32));
+            alu_write_hi_lo_64bit(regs, (std::uint64_t)s64_val);
             return 0x0;
         case ALU_OP_MULTU:
             u64_val = (std::uint64_t)s * t;
-            regs->write_hi_lo(false, (std::uint32_t)(u64_val & 0xffffffff));
-            regs->write_hi_lo(true,  (std::uint32_t)(u64_val >> 32));
+            alu_write_hi_lo_64bit(regs, u64_val);
             return 0x0;
         case ALU_OP_DIV:
             regs->write_hi_lo(false, (std::uint32_t)((std::int32_t)s / (std::int32_t)t));
@@ -130,12 +181,36 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
             return (s < t) ? 1 : 0;
         case ALU_OP_MUL:
             return (std::uint32_t)((std::int32_t)s * (std::int32_t)t);
+        case ALU_OP_MADD:
+            s64_val = (std::int64_t)alu_read_hi_lo_64bit(regs);
+            s64_val += (std::int64_t)(std::int32_t)s * (std::int32_t)t;
+            alu_write_hi_lo_64bit(regs, (std::uint64_t)s64_val);
+            return 0x0;
+        case ALU_OP_MADDU:
+            u64_val = alu_read_hi_lo_64bit(regs);
+            u64_val += (std::uint64_t)s * t;
+            alu_write_hi_lo_64bit(regs, u64_val);
+            return 0x0;
+        case ALU_OP_MSUB:
+            s64_val = (std::int64_t)alu_read_hi_lo_64bit(regs);
+            s64_val -= (std::int64_t)(std::int32_t)s * (std::int32_t)t;
+            alu_write_hi_lo_64bit(regs, (std::uint64_t)s64_val);
+            return 0x0;
+        case ALU_OP_MSUBU:
+            u64_val = alu_read_hi_lo_64bit(regs);
+            u64_val -= (std::uint64_t)s * t;
+            alu_write_hi_lo_64bit(regs, u64_val);
+            return 0x0;
         case ALU_OP_LUI:
             return t << 16;
         case ALU_OP_BSHFL:
             return (uint32_t)(int32_t)(int8_t)t;
         case ALU_OP_EXT:
             return (s >> sa) & ((1 << sz) - 1);
+        case ALU_OP_CLZ:
+            return alu_op_clz(s);
+        case ALU_OP_CLO:
+           return alu_op_clz(~s);
         case  ALU_OP_PASS_T: // Pass s argument without change for JAL
             return t;
         case ALU_OP_BREAK:

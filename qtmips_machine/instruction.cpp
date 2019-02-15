@@ -184,13 +184,17 @@ static const struct InstructionMap  alu_instruction_map[] = {
 };
 
 static const struct InstructionMap  special2_instruction_map[] = {
-    IM_UNKNOWN,	//	0
-    IM_UNKNOWN,	//	1
-    {"MUL",    IT_R, ALU_OP_MUL, NOMEM, nullptr,
+    {"MADD",    IT_R, ALU_OP_MADD, NOMEM, nullptr,
+     .flags = FLAGS_ALU_T_R_ST | IMF_READ_HILO | IMF_WRITE_HILO},
+    {"MADD",    IT_R, ALU_OP_MADDU, NOMEM, nullptr,
+     .flags = FLAGS_ALU_T_R_ST | IMF_READ_HILO | IMF_WRITE_HILO},
+    {"MUL",     IT_R, ALU_OP_MUL, NOMEM, nullptr,
      .flags = FLAGS_ALU_T_R_STD},     // 32
     IM_UNKNOWN,	//	3
-    IM_UNKNOWN,	//	4
-    IM_UNKNOWN,	//	5
+    {"MSUB",    IT_R, ALU_OP_MSUB, NOMEM, nullptr,
+     .flags = FLAGS_ALU_T_R_ST | IMF_READ_HILO | IMF_WRITE_HILO},
+    {"MSUBU",   IT_R, ALU_OP_MSUBU, NOMEM, nullptr,
+     .flags = FLAGS_ALU_T_R_ST | IMF_READ_HILO | IMF_WRITE_HILO},
     IM_UNKNOWN,	//	6
     IM_UNKNOWN,	//	7
     IM_UNKNOWN,	//	8
@@ -217,8 +221,10 @@ static const struct InstructionMap  special2_instruction_map[] = {
     IM_UNKNOWN,	//	29
     IM_UNKNOWN,	//	30
     IM_UNKNOWN,	//	31
-    IM_UNKNOWN,	//	32
-    IM_UNKNOWN,	//	33
+    {"CLZ",   IT_R, ALU_OP_CLZ, NOMEM, nullptr,
+     .flags = FLAGS_ALU_T_R_SD},
+    {"CLO",   IT_R, ALU_OP_CLO, NOMEM, nullptr,
+     .flags = FLAGS_ALU_T_R_SD},
     IM_UNKNOWN,	//	34
     IM_UNKNOWN,	//	35
     IM_UNKNOWN,	//	36
