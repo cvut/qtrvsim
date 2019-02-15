@@ -234,6 +234,11 @@ protected:
     void writeback(const struct dtMemory&);
     bool handle_pc(const struct dtDecode&);
 
+    enum ExceptionCause memory_special(enum AccessControl memctl,
+                           int mode, bool memread, bool memwrite,
+                           std::uint32_t &towrite_val,
+                           std::uint32_t rt_value, std::uint32_t mem_addr);
+
     // Initialize structures to NOPE instruction
     void dtFetchInit(struct dtFetch &dt);
     void dtDecodeInit(struct dtDecode &dt);

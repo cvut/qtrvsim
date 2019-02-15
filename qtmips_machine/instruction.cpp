@@ -432,29 +432,29 @@ static const struct InstructionMap instruction_map[] = {
      .flags = FLAGS_ALU_I_LOAD},
     {"LH",     IT_I, ALU_OP_ADDU, AC_HALFWORD, nullptr,  // LH
      .flags = FLAGS_ALU_I_LOAD},
-    {"LWL",    IT_I, ALU_OP_ADDU, NOMEM, nullptr,    // LWL - unsupported
-     .flags = IMF_MEM},
+    {"LWL",    IT_I, ALU_OP_ADDU, AC_WORD_LEFT, nullptr,    // LWL - unsupported
+     .flags = FLAGS_ALU_I_LOAD | IMF_ALU_REQ_RT},
     {"LW",     IT_I, ALU_OP_ADDU, AC_WORD, nullptr,  // LW
      .flags = FLAGS_ALU_I_LOAD},
     {"LBU",    IT_I, ALU_OP_ADDU, AC_BYTE_UNSIGNED, nullptr,  // LBU
      .flags = FLAGS_ALU_I_LOAD},
     {"LHU",    IT_I, ALU_OP_ADDU, AC_HALFWORD_UNSIGNED, nullptr,   // LHU
      .flags = FLAGS_ALU_I_LOAD},
-    {"LWR",    IT_I, ALU_OP_ADDU, NOMEM, nullptr,    // LWR - unsupported
-     .flags = IMF_MEM},
+    {"LWR",    IT_I, ALU_OP_ADDU, AC_WORD_RIGHT, nullptr,    // LWR - unsupported
+     .flags = FLAGS_ALU_I_LOAD | IMF_ALU_REQ_RT},
     IM_UNKNOWN,  // 39
     {"SB",     IT_I, ALU_OP_ADDU, AC_BYTE, nullptr,  // SB
      .flags = FLAGS_ALU_I_STORE},
     {"SH",     IT_I, ALU_OP_ADDU, AC_HALFWORD, nullptr,   // SH
      .flags = FLAGS_ALU_I_STORE},
-    {"SWL",    IT_I, ALU_OP_ADDU, NOMEM, nullptr,    // SWL
-     .flags = IMF_MEM | IMF_MEMWRITE},
+    {"SWL",    IT_I, ALU_OP_ADDU, AC_WORD_LEFT, nullptr,    // SWL
+     .flags = FLAGS_ALU_I_STORE},
     {"SW",     IT_I, ALU_OP_ADDU, AC_WORD, nullptr,  // SW
      .flags = FLAGS_ALU_I_STORE},
     IM_UNKNOWN,  // 44
     IM_UNKNOWN,  // 45
-    {"SWR",    IT_I, ALU_OP_ADDU, NOMEM, nullptr,    // SWR
-     .flags = IMF_MEM | IMF_MEMWRITE},
+    {"SWR",    IT_I, ALU_OP_ADDU, AC_WORD_RIGHT, nullptr,    // SWR
+     .flags = FLAGS_ALU_I_STORE},
     {"CACHE",  IT_I, ALU_OP_ADDU, AC_CACHE_OP, nullptr, // CACHE
      .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_MEM},
     {"LL",     IT_I, ALU_OP_ADDU, AC_LOAD_LINKED, nullptr,  // LL

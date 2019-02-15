@@ -49,7 +49,12 @@ enum AccessControl {
     AC_HALFWORD_UNSIGNED,
     AC_LOAD_LINKED,
     AC_STORE_CONDITIONAL,
+    AC_WORD_RIGHT,
+    AC_WORD_LEFT,
     AC_CACHE_OP,
+
+    AC_FIRST_REGULAR = AC_BYTE,
+    AC_LAST_REGULAR = AC_HALFWORD_UNSIGNED,
 };
 
 enum ExceptionCause {

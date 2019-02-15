@@ -139,6 +139,67 @@ void Core::set_c0_userlocal(std::uint32_t address) {
     hwr_userlocal = address;
 }
 
+enum ExceptionCause  Core::memory_special(enum AccessControl memctl,
+                       int mode, bool memread, bool memwrite,
+                       std::uint32_t &towrite_val,
+                       std::uint32_t rt_value, std::uint32_t mem_addr) {
+    std::uint32_t mask;
+    std::uint32_t shift;
+    std::uint32_t temp;
+    (void)mode;
+
+    switch (memctl) {
+    case AC_CACHE_OP:
+        mem_data->sync();
+        mem_program->sync();
+        break;
+    case AC_STORE_CONDITIONAL:
+        if (!memwrite)
+            break;
+        mem_data->write_ctl(AC_WORD, mem_addr, rt_value);
+        towrite_val = 1;
+        break;
+    case AC_LOAD_LINKED:
+        if (!memread)
+            break;
+        towrite_val = mem_data->read_ctl(AC_WORD, mem_addr);
+        break;
+    case AC_WORD_RIGHT:
+        if (memwrite) {
+            shift = (3 - (mem_addr & 3)) << 3;
+            mask = 0xffffffff << shift;
+            temp = mem_data->read_ctl(AC_WORD, mem_addr & ~3);
+            temp = (temp & ~mask) | (rt_value << shift);
+            mem_data->write_ctl(AC_WORD, mem_addr & ~3, temp);
+        } else {
+            shift = (3 - (mem_addr & 3)) << 3;
+            mask = 0xffffffff >> shift;
+            towrite_val = mem_data->read_ctl(AC_WORD, mem_addr & ~3);
+            towrite_val = (towrite_val >> shift) | (rt_value & ~mask);
+        }
+        break;
+    case AC_WORD_LEFT:
+        if (memwrite) {
+            shift = (mem_addr & 3) << 3;
+            mask = 0xffffffff >> shift;
+            temp = mem_data->read_ctl(AC_WORD, mem_addr & ~3);
+            temp = (temp & ~mask) | (rt_value >> shift);
+            mem_data->write_ctl(AC_WORD, mem_addr & ~3, temp);
+        } else {
+            shift = (mem_addr & 3) << 3;
+            mask = 0xffffffff << shift;
+            towrite_val = mem_data->read_ctl(AC_WORD, mem_addr & ~3);
+            towrite_val = (towrite_val << shift) | (rt_value & ~mask);
+        }
+        break;
+    default:
+        break;
+    }
+
+    return EXCAUSE_NONE;
+}
+
+
 struct Core::dtFetch Core::fetch(bool skip_break) {
     enum ExceptionCause excause = EXCAUSE_NONE;
     std::uint32_t inst_addr = regs->read_pc();
@@ -321,31 +382,27 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
 struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
     std::uint32_t towrite_val = dt.alu_val;
     std::uint32_t mem_addr = dt.alu_val;
+    enum ExceptionCause excause = dt.excause;
     bool memread = dt.memread;
     bool memwrite = dt.memwrite;
     bool regwrite = dt.regwrite;
+
+    if (excause == EXCAUSE_NONE) {
+        if (dt.memctl > AC_LAST_REGULAR) {
+            excause = memory_special(dt.memctl, dt.inst.rt(), memread, memwrite,
+                                 towrite_val, dt.val_rt, mem_addr);
+        } else {
+            if (memwrite)
+                mem_data->write_ctl(dt.memctl, mem_addr, dt.val_rt);
+            if (memread)
+                towrite_val = mem_data->read_ctl(dt.memctl, mem_addr);
+        }
+    }
 
     if (dt.excause != EXCAUSE_NONE) {
         memread = false;
         memwrite = false;
         regwrite = false;
-    } else {
-        if (dt.memctl == AC_CACHE_OP) {
-             mem_data->sync();
-             mem_program->sync();
-        } else if (memwrite) {
-            if (dt.memctl == AC_STORE_CONDITIONAL) {
-                mem_data->write_ctl(AC_WORD, mem_addr, dt.val_rt);
-                towrite_val = 1;
-            } else {
-                mem_data->write_ctl(dt.memctl, mem_addr, dt.val_rt);
-            }
-        } else if (memread) {
-            if (dt.memctl == AC_LOAD_LINKED)
-                towrite_val = mem_data->read_ctl(AC_WORD, mem_addr);
-            else
-                towrite_val = mem_data->read_ctl(dt.memctl, mem_addr);
-        }
     }
 
     emit memory_inst_addr_value(dt.inst_addr);
