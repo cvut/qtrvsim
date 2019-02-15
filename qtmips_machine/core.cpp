@@ -322,7 +322,8 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
     if (dt.alusrc)
         alu_sec = dt.immediate_val; // Sign or zero extend immediate value
 
-    std::uint32_t alu_val = alu_operate(dt.aluop, dt.val_rs, alu_sec, dt.inst.shamt(), regs, discard);
+    std::uint32_t alu_val = alu_operate(dt.aluop, dt.val_rs, alu_sec,
+                                dt.inst.shamt(), dt.inst.rd(), regs, discard);
     if (discard)
         regwrite = false;
 

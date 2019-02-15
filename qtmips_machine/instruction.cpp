@@ -252,7 +252,8 @@ static const struct InstructionMap  special2_instruction_map[] = {
 };
 
 static const struct InstructionMap  special3_instruction_map[] = {
-    IM_UNKNOWN,	//	0
+    {"EXT", IT_I, ALU_OP_EXT, NOMEM, nullptr,
+     .flags = IMF_SUPPORTED | IMF_REGWRITE | IMF_ALU_REQ_RS},
     IM_UNKNOWN,	//	1
     IM_UNKNOWN,	//	2
     IM_UNKNOWN,	//	3

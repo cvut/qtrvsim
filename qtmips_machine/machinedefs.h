@@ -95,6 +95,7 @@ enum AluOp : std::uint8_t {
     ALU_OP_MUL,
     ALU_OP_LUI,
     ALU_OP_BSHFL,
+    ALU_OP_EXT,
     ALU_OP_PASS_T, // Pass t argument without change for JAL
     ALU_OP_BREAK,
     ALU_OP_SYSCALL,
