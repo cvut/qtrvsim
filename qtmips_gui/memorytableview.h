@@ -57,6 +57,8 @@ public slots:
     void set_cell_size(int index);
     void go_to_address(std::uint32_t address);
     void focus_address(std::uint32_t address);
+protected:
+     void keyPressEvent(QKeyEvent *event);
 private slots:
     void adjust_scroll_pos();
 private:

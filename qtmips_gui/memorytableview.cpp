@@ -36,6 +36,9 @@
 #include <QHeaderView>
 #include <QFontMetrics>
 #include <QScrollBar>
+#include <QKeyEvent>
+#include <QClipboard>
+#include <QApplication>
 #include "memorytableview.h"
 #include "memorymodel.h"
 
@@ -190,4 +193,21 @@ void MemoryTableView::focus_address(std::uint32_t address) {
     if (!m->get_row_for_address(row, address))
         return;
     setCurrentIndex(m->index(row, 1));
+}
+
+void MemoryTableView::keyPressEvent(QKeyEvent *event) {
+    if(event->matches(QKeySequence::Copy)) {
+            QString text;
+            QItemSelectionRange range = selectionModel()->selection().first();
+            for (auto i = range.top(); i <= range.bottom(); ++i)
+            {
+                QStringList rowContents;
+                for (auto j = range.left(); j <= range.right(); ++j)
+                    rowContents << model()->index(i,j).data().toString();
+                text += rowContents.join("\t");
+                text += "\n";
+            }
+            QApplication::clipboard()->setText(text);
+    } else
+        Super::keyPressEvent(event);
 }
