@@ -56,7 +56,7 @@ _start:
 	// write the code there
 
 loop:	break
-	beq  zero, zero, _start
+	beq  zero, zero, loop
 	nop
 
 .end _start
