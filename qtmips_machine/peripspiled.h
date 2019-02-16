@@ -56,8 +56,8 @@ signals:
     void read_notification(std::uint32_t address, std::uint32_t *value) const;
 
     void led_line_changed(uint val) const;
-    void led_rgb1_changed(int val) const;
-    void led_rgb2_changed(int val) const;
+    void led_rgb1_changed(uint val) const;
+    void led_rgb2_changed(uint val) const;
 
 public slots:
     void red_knob_update(int val);

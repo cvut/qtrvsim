@@ -43,8 +43,8 @@ void PeripheralsView::setup(const machine::PeripSpiLed *perip_spi_led) {
     ui->labelRgb2->setAutoFillBackground(true);
 
     connect(perip_spi_led, SIGNAL(led_line_changed(uint)), this, SLOT(led_line_changed(uint)));
-    connect(perip_spi_led, SIGNAL(led_rgb1_changed(int)), this, SLOT(led_rgb1_changed(int)));
-    connect(perip_spi_led, SIGNAL(led_rgb2_changed(int)), this, SLOT(led_rgb2_changed(int)));
+    connect(perip_spi_led, SIGNAL(led_rgb1_changed(uint)), this, SLOT(led_rgb1_changed(uint)));
+    connect(perip_spi_led, SIGNAL(led_rgb2_changed(uint)), this, SLOT(led_rgb2_changed(uint)));
 
     led_line_changed(0);
     led_rgb1_changed(0);
@@ -63,7 +63,7 @@ void PeripheralsView::led_line_changed(uint val) {
     ui->lineEditBin->setText(t + s);
 }
 
-static void set_widget_background_color(QWidget *w, int val) {
+static void set_widget_background_color(QWidget *w, uint val) {
     int r = (val >> 16) & 0xff;
     int g = (val >> 8) & 0xff;
     int b = (val >> 0) & 0xff;
@@ -73,7 +73,7 @@ static void set_widget_background_color(QWidget *w, int val) {
     w->setPalette(pal);
 }
 
-void PeripheralsView::led_rgb1_changed(int val) {
+void PeripheralsView::led_rgb1_changed(uint val) {
     QString s, t;
     s = QString::number(val, 16);
     t.fill('0', 8 - s.count());
@@ -82,7 +82,7 @@ void PeripheralsView::led_rgb1_changed(int val) {
     set_widget_background_color(ui->labelRgb1, val);
 }
 
-void PeripheralsView::led_rgb2_changed(int val) {
+void PeripheralsView::led_rgb2_changed(uint val) {
     QString s, t;
     s = QString::number(val, 16);
     t.fill('0', 8 - s.count());

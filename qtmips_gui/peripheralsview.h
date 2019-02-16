@@ -21,8 +21,8 @@ public:
 
 public slots:
     void led_line_changed(uint val);
-    void led_rgb1_changed(int val);
-    void led_rgb2_changed(int val);
+    void led_rgb1_changed(uint val);
+    void led_rgb2_changed(uint val);
 
 private:
     Ui::PeripheralsView *ui;
