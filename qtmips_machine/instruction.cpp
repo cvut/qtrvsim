@@ -475,21 +475,25 @@ static const struct InstructionMap instruction_map[] = {
      .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_MEM},
     {"LL",     IT_I, ALU_OP_ADDU, AC_LOAD_LINKED, nullptr,  // LL
      .flags = FLAGS_ALU_I_LOAD},
-    IM_UNKNOWN,  // 49
+    {"LWC1", IT_I, NOALU, NOMEM, nullptr,
+     .flags = IMF_SUPPORTED},
     IM_UNKNOWN,  // 50
     {"PREF", IT_I, NOALU, NOMEM, nullptr,            // PREF
      .flags = IMF_SUPPORTED},
     IM_UNKNOWN,  // 52
-    IM_UNKNOWN,  // 53
+    {"LWD1", IT_I, NOALU, NOMEM, nullptr,
+     .flags = IMF_SUPPORTED},
     IM_UNKNOWN,  // 54
     IM_UNKNOWN,  // 55
     {"SC",     IT_I, ALU_OP_ADDU, AC_STORE_CONDITIONAL, nullptr,  // SW
      .flags = FLAGS_ALU_I_STORE | IMF_MEMREAD | IMF_REGWRITE},
-    IM_UNKNOWN,  // 57
+    {"SWC1", IT_I, NOALU, NOMEM, nullptr,
+     .flags = IMF_SUPPORTED},
     IM_UNKNOWN,  // 58
     IM_UNKNOWN,  // 59
     IM_UNKNOWN,  // 60
-    IM_UNKNOWN,  // 61
+    {"SDC1", IT_I, NOALU, NOMEM, nullptr,
+     .flags = IMF_SUPPORTED},
     IM_UNKNOWN,  // 62
     IM_UNKNOWN,  // 63
 };
