@@ -744,7 +744,7 @@ void CorePipelined::do_step(bool skip_break) {
         fetch(skip_break);
         // clear decode latch (insert nope to execute stage)
         dtDecodeInit(dt_d);
-        emit instruction_decoded(dt_d.inst, dt_d.inst_addr, dt_d.excause);
+        // emit instruction_decoded(dt_d.inst, dt_d.inst_addr, dt_d.excause);
     }
 }
 
