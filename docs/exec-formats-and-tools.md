@@ -100,7 +100,7 @@ Compile Executables with 'mips-linux-gnu' Toolchain
 
 The Linux targetting toolchains use a MIPS O32 ABI calling
 convention which allows building position-independent
-binaries and overcome missing PC relative support
+binaries (PIC, PIE) and overcome missing PC relative support
 in the basic MIPS instruction set. The ABI uses strictly
 convention equivalent to calling each function indirectly
 through 't9' register ('jalr t9'). The known value pointing
@@ -127,17 +127,17 @@ next:   .set    noreorder
         .cpload $31
         .set    reorder
 
-        addi    a0, zero, 0
-        addi    a1, zero, 0
+        addi    $a0, $zero, 0
+        addi    $a1, $zero, 0
         jal     main
 quit:
-        addi    a0, zero, 0
-        addi    v0, zero, 4001  /* SYS_exit */
+        addi    $a0, $zero, 0
+        addi    $v0, $zero, 4001  /* SYS_exit */
 
         syscall
 
 loop:   break
-        beq     zero, zero, loop
+        beq     $zero, $zero, loop
         nop
 
 .end __start
@@ -239,4 +239,48 @@ and allows code compiled agains musl C library to start as well.
 ```
 mips-linux-gnu-gcc -ggdb -O1 -march=mips2 -static -specs=/opt/musl/mips-linux-gnu/lib/musl-gcc.specs  -c program.c -o program.o
 mips-linux-gnu-gcc -ggdb -march=mips2 -static -specs=/opt/musl/mips-linux-gnu/lib/musl-gcc.specs programo -o program
+```
+
+The C library startup code which support both PIC/PIE and non-PIC environment
+
+```
+/* minimal replacement of crt0.o which is else provided by C library */
+/* this variant support both static and PIC/PIE environments */
+
+.globl main
+.globl _start
+.globl __start
+.set noat
+.set noreorder
+.ent _start
+
+.text
+
+__start:
+_start:
+#if defined(__PIC__) || defined(__pic__)
+	bal     next
+	nop
+next:
+	.set    noreorder
+	.cpload $31
+	.set    reorder
+#else
+	la      $gp, _gp
+#endif
+	addi    $a0, $zero, 0
+	addi    $a1, $zero, 0
+	jal     main
+	nop
+quit:
+	addi    $a0, $zero, 0
+	addi    $v0, $zero, 4001  /* SYS_exit */
+
+	syscall
+
+loop:	break
+        beq     $zero, $zero, loop
+	nop
+
+.end _start
 ```
