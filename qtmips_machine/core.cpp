@@ -314,6 +314,8 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
 
 struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
     bool discard;
+    enum ExceptionCause excause = dt.excause;
+    std::uint32_t alu_val = 0;
 
     // Handle conditional move (we have to change regwrite signal if conditional is not met)
     bool regwrite = dt.regwrite;
@@ -322,35 +324,38 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
     if (dt.alusrc)
         alu_sec = dt.immediate_val; // Sign or zero extend immediate value
 
-    std::uint32_t alu_val = alu_operate(dt.aluop, dt.val_rs, alu_sec,
-                                dt.inst.shamt(), dt.inst.rd(), regs, discard);
-    if (discard)
-        regwrite = false;
+    if (excause == EXCAUSE_NONE) {
+        alu_val = alu_operate(dt.aluop, dt.val_rs,
+                              alu_sec, dt.inst.shamt(), dt.inst.rd(), regs,
+                              discard, excause);
+        if (discard)
+            regwrite = false;
 
-    if (dt.aluop == ALU_OP_RDHWR) {
-        switch (dt.inst.rd()) {
-        case 0: // CPUNum
-            alu_val = 0;
-            break;
-        case 1: // SYNCI_Step
-            alu_val = min_cache_row_size;
-            break;
-        case 2: // CC
-            alu_val = cycle_c;
-            break;
-        case 3: // CCRes
-            alu_val = 1;
-            break;
-        case 29: // UserLocal
-            alu_val = hwr_userlocal;
-            break;
-        default:
-            alu_val = 0;
+        if (dt.aluop == ALU_OP_RDHWR) {
+            switch (dt.inst.rd()) {
+            case 0: // CPUNum
+                alu_val = 0;
+                break;
+            case 1: // SYNCI_Step
+                alu_val = min_cache_row_size;
+                break;
+            case 2: // CC
+                alu_val = cycle_c;
+                break;
+            case 3: // CCRes
+                alu_val = 1;
+                break;
+            case 29: // UserLocal
+                alu_val = hwr_userlocal;
+                break;
+            default:
+                alu_val = 0;
+            }
         }
     }
 
     emit execute_inst_addr_value(dt.inst_addr);
-    emit instruction_executed(dt.inst, dt.inst_addr, dt.excause);
+    emit instruction_executed(dt.inst, dt.inst_addr, excause);
     emit execute_alu_value(alu_val);
     emit execute_reg1_value(dt.val_rs);
     emit execute_reg2_value(dt.val_rt);
@@ -375,7 +380,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
         .rwrite = dt.rwrite,
         .alu_val = alu_val,
         .inst_addr = dt.inst_addr,
-        .excause = dt.excause,
+        .excause = excause,
         .in_delay_slot = dt.in_delay_slot,
     };
 }

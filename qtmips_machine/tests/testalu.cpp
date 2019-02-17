@@ -216,6 +216,7 @@ void MachineTests::alu_data() {
 
 void MachineTests::alu() {
     bool discard;
+    enum ExceptionCause excause = EXCAUSE_NONE;
     QFETCH(AluOp, op);
     QFETCH(std::uint32_t, s);
     QFETCH(std::uint32_t, t);
@@ -224,22 +225,80 @@ void MachineTests::alu() {
     QFETCH(Registers, regs_res);
     QFETCH(std::uint32_t, res);
 
-    QCOMPARE(alu_operate(op, s , t, sa, 0, &regs_init, discard), res);
+    QCOMPARE(alu_operate(op, s , t, sa, 0, &regs_init, discard, excause), res);
     QCOMPARE(regs_res, regs_init);
+    QCOMPARE(excause, EXCAUSE_NONE);
 }
+
+void MachineTests::alu_trap_overflow_data() {
+    QTest::addColumn<std::uint8_t>("op");
+    QTest::addColumn<std::uint32_t>("s");
+    QTest::addColumn<std::uint32_t>("t");
+    QTest::addColumn<enum ExceptionCause>("excause");
+    // Note no sa as shift unstruction has no exceptions
+
+    QTest::newRow("ADD") << (std::uint8_t)ALU_OP_ADD \
+                         << (std::uint32_t)0x8fffffff \
+                         << (std::uint32_t)0x90000000 \
+                         << EXCAUSE_OVERFLOW;
+    QTest::newRow("SUB") << (std::uint8_t)ALU_OP_SUB \
+                         << (std::uint32_t)0x80000003 \
+                         << (std::uint32_t)4 \
+                         << EXCAUSE_OVERFLOW;
+    QTest::newRow("TEQ") << (std::uint8_t)ALU_OP_TEQ \
+                         << (std::uint32_t)0x12345678 \
+                         << (std::uint32_t)0x12345678 \
+                         << EXCAUSE_TRAP;
+    QTest::newRow("TEQ") << (std::uint8_t)ALU_OP_TEQ \
+                         << (std::uint32_t)0x12345679 \
+                         << (std::uint32_t)0x12345678 \
+                         << EXCAUSE_NONE;
+    QTest::newRow("TNE") << (std::uint8_t)ALU_OP_TNE \
+                         << (std::uint32_t)0x12345678 \
+                         << (std::uint32_t)0x12345679 \
+                         << EXCAUSE_TRAP;
+    QTest::newRow("TNE") << (std::uint8_t)ALU_OP_TNE \
+                         << (std::uint32_t)0x12345678 \
+                         << (std::uint32_t)0x12345678 \
+                         << EXCAUSE_NONE;
+    QTest::newRow("TGE") << (std::uint8_t)ALU_OP_TGE \
+                         << (std::uint32_t)0x12345679 \
+                         << (std::uint32_t)0x12345678 \
+                         << EXCAUSE_TRAP;
+    QTest::newRow("TGEU") << (std::uint8_t)ALU_OP_TGEU \
+                         << (std::uint32_t)0x12345679 \
+                         << (std::uint32_t)0x12345678 \
+                         << EXCAUSE_TRAP;
+    QTest::newRow("TLT") << (std::uint8_t)ALU_OP_TLT \
+                         << (std::uint32_t)0x12345678 \
+                         << (std::uint32_t)0x12345679 \
+                         << EXCAUSE_TRAP;
+    QTest::newRow("TLTU") << (std::uint8_t)ALU_OP_TLTU \
+                         << (std::uint32_t)0x12345678 \
+                         << (std::uint32_t)0x12345679 \
+                         << EXCAUSE_TRAP;
+}
+
+void MachineTests::alu_trap_overflow() {
+    bool discard;
+    enum ExceptionCause exc = EXCAUSE_NONE;
+    QFETCH(std::uint8_t, op);
+    QFETCH(std::uint32_t, s);
+    QFETCH(std::uint32_t, t);
+    QFETCH(enum ExceptionCause, excause);
+    Registers regs;
+
+    // Only runtime exception is expected as any other exception is a bug
+    alu_operate((enum AluOp)op, s , t, 0, 0, &regs, discard, exc);
+    QCOMPARE((uint)exc, (uint)excause);
+}
+
 
 void MachineTests::alu_except_data() {
     QTest::addColumn<std::uint8_t>("op");
     QTest::addColumn<std::uint32_t>("s");
     QTest::addColumn<std::uint32_t>("t");
-    // Note no sa as shift unstruction has no exceptions
 
-    QTest::newRow("ADD") << (std::uint8_t)ALU_OP_ADD \
-                         << (std::uint32_t)0x8fffffff \
-                         << (std::uint32_t)0x90000000;
-    QTest::newRow("SUB") << (std::uint8_t)ALU_OP_SUB \
-                         << (std::uint32_t)0x80000003 \
-                         << (std::uint32_t)4;
     // Just test that we can throw unsupported ALU operation
     QTest::newRow("?") << (std::uint8_t)ALU_OP_LAST \
                          << (std::uint32_t)0 \
@@ -248,11 +307,13 @@ void MachineTests::alu_except_data() {
 
 void MachineTests::alu_except() {
     bool discard;
+    enum ExceptionCause excause = EXCAUSE_NONE;
     QFETCH(std::uint8_t, op);
     QFETCH(std::uint32_t, s);
     QFETCH(std::uint32_t, t);
     Registers regs;
 
     // Only runtime exception is expected as any other exception is a bug
-    QVERIFY_EXCEPTION_THROWN(alu_operate((enum AluOp)op, s , t, 0, 0, &regs, discard), QtMipsExceptionRuntime);
+    QVERIFY_EXCEPTION_THROWN(alu_operate((enum AluOp)op, s , t, 0, 0, &regs, discard, excause),
+                             QtMipsExceptionRuntime);
 }

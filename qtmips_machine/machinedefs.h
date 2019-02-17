@@ -62,6 +62,8 @@ enum ExceptionCause {
     EXCAUSE_BREAK,
     EXCAUSE_SYSCALL,
     EXCAUSE_HWBREAK,
+    EXCAUSE_TRAP,
+    EXCAUSE_OVERFLOW,
 };
 
 enum AluOp : std::uint8_t {
@@ -97,6 +99,12 @@ enum AluOp : std::uint8_t {
     ALU_OP_MADDU,
     ALU_OP_MSUB,
     ALU_OP_MSUBU,
+    ALU_OP_TGE,
+    ALU_OP_TGEU,
+    ALU_OP_TLT,
+    ALU_OP_TLTU,
+    ALU_OP_TEQ,
+    ALU_OP_TNE,
     ALU_OP_LUI,
     ALU_OP_BSHFL,
     ALU_OP_EXT,

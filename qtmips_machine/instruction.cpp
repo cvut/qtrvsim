@@ -60,6 +60,9 @@ using namespace machine;
 #define FLAGS_ALU_T_R_SD (FLAGS_ALU_T_R_D | IMF_ALU_REQ_RS)
 #define FLAGS_ALU_T_R_ST (IMF_SUPPORTED | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
 
+#define FLAGS_ALU_TRAP_ST (IMF_SUPPORTED | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
+#define FLAGS_ALU_TRAP_SI (IMF_SUPPORTED | IMF_ALU_REQ_RS | IMF_ALUSRC)
+
 #define FLAGS_J_B_PC_TO_R31 (IMF_SUPPORTED | IMF_PC_TO_R31 | IMF_REGWRITE)
 
 #define NOALU .alu = ALU_OP_SLL
@@ -165,13 +168,19 @@ static const struct InstructionMap  alu_instruction_map[] = {
     IM_UNKNOWN, // 45
     IM_UNKNOWN, // 46
     IM_UNKNOWN, // 47
-    IM_UNKNOWN, // 48
-    IM_UNKNOWN, // 49
-    IM_UNKNOWN, // 50
-    IM_UNKNOWN, // 51
-    IM_UNKNOWN, // 52
+    {"TGE", IT_I, ALU_OP_TGE, NOMEM, nullptr, // TGE 48
+     .flags = FLAGS_ALU_TRAP_ST},
+    {"TGEU", IT_I, ALU_OP_TGEU, NOMEM, nullptr, // TGEU 49
+     .flags = FLAGS_ALU_TRAP_ST},
+    {"TLT", IT_I, ALU_OP_TLT, NOMEM, nullptr, // TLT 50
+     .flags = FLAGS_ALU_TRAP_ST},
+    {"TLTU", IT_I, ALU_OP_TGEU, NOMEM, nullptr, // TLTU 51
+     .flags = FLAGS_ALU_TRAP_ST},
+    {"TEQ", IT_I, ALU_OP_TEQ, NOMEM, nullptr, // TEQ 52
+     .flags = FLAGS_ALU_TRAP_ST},
     IM_UNKNOWN, // 53
-    IM_UNKNOWN, // 54
+    {"TNE", IT_I, ALU_OP_TNE, NOMEM, nullptr, // TNE 54
+     .flags = FLAGS_ALU_TRAP_ST},
     IM_UNKNOWN, // 55
     IM_UNKNOWN, // 56
     IM_UNKNOWN, // 57
@@ -340,20 +349,20 @@ static const struct InstructionMap  regimm_instruction_map[] = {
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
-    {"TGEI", IT_I, NOALU, NOMEM, nullptr,       // TGEI
-     .flags = IMF_BJR_REQ_RS},
-    {"TGEIU", IT_I, NOALU, NOMEM, nullptr,       // TGEIU
-     .flags = IMF_BJR_REQ_RS},
-    {"TLTI", IT_I, NOALU, NOMEM, nullptr,       // TLTI
-     .flags = IMF_BJR_REQ_RS},
-    {"TLTIU", IT_I, NOALU, NOMEM, nullptr,       // TLTIU
-     .flags = IMF_BJR_REQ_RS},
-    {"TEQI", IT_I, NOALU, NOMEM, nullptr,       // TEQI
-     .flags = IMF_BJR_REQ_RS},
-    IM_UNKNOWN,
-    {"TNEI", IT_I, NOALU, NOMEM, nullptr,       // TNEI
-     .flags = IMF_BJR_REQ_RS},
-    IM_UNKNOWN,
+    {"TGEI", IT_I, ALU_OP_TGE, NOMEM, nullptr, // TGEI 16
+     .flags = FLAGS_ALU_TRAP_SI},
+    {"TGEIU", IT_I, ALU_OP_TGEU, NOMEM, nullptr, // TGEIU 17
+     .flags = FLAGS_ALU_TRAP_SI},
+    {"TLTI", IT_I, ALU_OP_TLT, NOMEM, nullptr, // TLTI 18
+     .flags = FLAGS_ALU_TRAP_SI},
+    {"TLTIU", IT_I, ALU_OP_TGEU, NOMEM, nullptr, // TLTIU 19
+     .flags = FLAGS_ALU_TRAP_SI},
+    {"TEQI", IT_I, ALU_OP_TEQ, NOMEM, nullptr, // TEQI 20
+     .flags = FLAGS_ALU_TRAP_SI},
+    IM_UNKNOWN, // 21
+    {"TNEI", IT_I, ALU_OP_TNE, NOMEM, nullptr, // TNEI 22
+     .flags = FLAGS_ALU_TRAP_SI},
+    IM_UNKNOWN, // 23
     {"BLTZAL", IT_I, ALU_OP_PASS_T, NOMEM, nullptr, // BLTZAL
      .flags = FLAGS_J_B_PC_TO_R31 | IMF_BJR_REQ_RS | IMF_BRANCH},
     {"BGEZAL", IT_I, ALU_OP_PASS_T, NOMEM, nullptr, // BGEZAL

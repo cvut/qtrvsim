@@ -92,9 +92,10 @@ static inline void alu_write_hi_lo_64bit(Registers *regs, std::uint64_t val)
 }
 
 
-std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::uint32_t t,
-                                   std::uint8_t sa, std::uint8_t sz, Registers *regs,
-                                   bool &discard) {
+std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s,
+                                   std::uint32_t t, std::uint8_t sa, std::uint8_t sz,
+                                   Registers *regs, bool &discard,
+                                   ExceptionCause &excause) {
     std::int64_t s64_val;
     std::uint64_t u64_val;
     discard = false;
@@ -154,7 +155,7 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
             /* s(31) ^ ~t(31) ... same signs on input  */
             /* (s + t)(31) ^ s(31)  ... different sign on output */
             if (((s ^ ~t) & ((s + t) ^ s)) & 0x80000000)
-                throw QTMIPS_EXCEPTION(Overflow, "ADD operation overflow/underflow", QString::number(s) + QString(" + ") + QString::number(t));
+                excause = EXCAUSE_OVERFLOW;
             FALLTROUGH
         case ALU_OP_ADDU:
             return s + t;
@@ -162,7 +163,7 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
             /* s(31) ^ t(31) ... differnt signd on input */
             /* (s - t)(31) ^ ~s(31)  <> 0 ... otput sign differs from s  */
             if (((s ^ t) & ((s - t) ^ s)) & 0x80000000)
-                throw QTMIPS_EXCEPTION(Overflow, "SUB operation overflow/underflow", QString::number(s) + QString(" - ") + QString::number(t));
+                excause = EXCAUSE_OVERFLOW;
             FALLTROUGH
         case ALU_OP_SUBU:
             return s - t;
@@ -201,10 +202,43 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s, std::u
             u64_val -= (std::uint64_t)s * t;
             alu_write_hi_lo_64bit(regs, u64_val);
             return 0x0;
+        case ALU_OP_TGE:
+            if ((std::int32_t)s >= (std::int32_t)t)
+                excause = EXCAUSE_TRAP;
+            return 0;
+        case ALU_OP_TGEU:
+            if (s >= t)
+                excause = EXCAUSE_TRAP;
+            return 0;
+        case ALU_OP_TLT:
+            if ((std::int32_t)s < (std::int32_t)t)
+                excause = EXCAUSE_TRAP;
+            return 0;
+        case ALU_OP_TLTU:
+            if (s < t)
+                excause = EXCAUSE_TRAP;
+            return 0;
+        case ALU_OP_TEQ:
+            if (s == t)
+                excause = EXCAUSE_TRAP;
+            return 0;
+        case ALU_OP_TNE:
+            if (s != t)
+                excause = EXCAUSE_TRAP;
+            return 0;
         case ALU_OP_LUI:
             return t << 16;
         case ALU_OP_BSHFL:
-            return (uint32_t)(int32_t)(int8_t)t;
+            switch (sa) {
+            case 0x02:
+                return ((t << 8) & 0xff00ff00) | ((t >> 8) & 0x00ff00ff);
+            case 0x10:
+                return (uint32_t)(int32_t)(int8_t)t;
+            case 0x18:
+                return (uint32_t)(int32_t)(int16_t)t;
+            default:
+                throw QTMIPS_EXCEPTION(UnsupportedAluOperation, "Unknown BSHFL variant", QString::number(sa, 16));
+            }
         case ALU_OP_EXT:
             return (s >> sa) & ((1 << sz) - 1);
         case ALU_OP_CLZ:

@@ -66,6 +66,8 @@ private Q_SLOTS:
     // Alu
     void alu();
     void alu_data();
+    void alu_trap_overflow();
+    void alu_trap_overflow_data();
     void alu_except();
     void alu_except_data();
     // Core

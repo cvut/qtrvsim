@@ -133,5 +133,6 @@ private:
 
 Q_DECLARE_METATYPE(machine::AccessControl)
 Q_DECLARE_METATYPE(machine::Memory)
+Q_DECLARE_METATYPE(machine::LocationStatus)
 
 #endif // MEMORY_H
