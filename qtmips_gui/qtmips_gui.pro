@@ -55,7 +55,8 @@ SOURCES += \
     aboutdialog.cpp \
     peripheralsdock.cpp \
     terminaldock.cpp \
-    peripheralsview.cpp
+    peripheralsview.cpp \
+    coreview/multitext.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -90,7 +91,8 @@ HEADERS += \
     aboutdialog.h \
     peripheralsdock.h \
     terminaldock.h \
-    peripheralsview.h
+    peripheralsview.h \
+    coreview/multitext.h
 
 FORMS += \
         NewDialog.ui \

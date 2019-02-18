@@ -54,6 +54,7 @@
 #include "coreview/logicblock.h"
 #include "coreview/and.h"
 #include "coreview/value.h"
+#include "coreview/multitext.h"
 
 class CoreViewScene : public QGraphicsScene {
     Q_OBJECT
@@ -100,6 +101,7 @@ protected:
     } ex;
     struct {
         coreview::Junction *j_addr;
+        coreview::MultiText *multi_excause;
     } mm;
     struct {
         coreview::Multiplexer *mem_or_reg;
@@ -109,6 +111,7 @@ protected:
         coreview::Multiplexer *mux_alu_reg_a;
         coreview::Multiplexer *mux_alu_reg_b;
         coreview::Junction *j_alu_out;
+        coreview::MultiText *multi_stall;
     } hu;
 
     coreview::Connection *new_connection(const coreview::Connector*, const coreview::Connector*);

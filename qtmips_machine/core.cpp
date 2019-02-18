@@ -734,11 +734,11 @@ void CorePipelined::do_step(bool skip_break) {
     printf("PC 0x%08lx\n", (unsigned long)dt_f.inst_addr);
 #endif
 
-    dt_d.stall = stall;
     emit hu_stall_value(stall);
 
     // Now process program counter (loop connections from decode stage)
     if (!stall) {
+        dt_d.stall = false;
         dt_f = fetch(skip_break);
         if (handle_pc(dt_d)) {
             dt_f.in_delay_slot = true;
@@ -753,6 +753,7 @@ void CorePipelined::do_step(bool skip_break) {
         fetch(skip_break);
         // clear decode latch (insert nope to execute stage)
         dtDecodeInit(dt_d);
+        dt_d.stall = true;
         // emit instruction_decoded(dt_d.inst, dt_d.inst_addr, dt_d.excause);
     }
 }

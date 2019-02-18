@@ -59,6 +59,11 @@
         NEW(Value, val, X, Y, __VA_ARGS__); \
         connect(machine->core(), SIGNAL(SIG(std::uint32_t)), val, SLOT(value_update(std::uint32_t))); \
     } while(false)
+#define NEW_MULTI(VAR, X, Y, SIG, ...) do { \
+        NEW(MultiText, VAR, X, Y, __VA_ARGS__); \
+        connect(machine->core(), &machine::Core::SIG, \
+                VAR, &coreview::MultiText::multitext_update); \
+    } while(false)
 
 CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene() {
     setSceneRect(0, 0, SC_WIDTH, SC_HEIGHT);
@@ -99,6 +104,15 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     NEW(Multiplexer, ex.mux_regdest, 480, 370, 2, true);
     // Memory
     NEW(Junction, mm.j_addr, 570, mem_data->connector_address()->y());
+    static QMap<std::uint32_t, QString> excause_map =
+        {{machine::EXCAUSE_NONE,     "NONE"},
+         {machine::EXCAUSE_BREAK,    "BERAK"},
+         {machine::EXCAUSE_SYSCALL,  "SYSCALL"},
+         {machine::EXCAUSE_HWBREAK,  "HWBREAK"},
+         {machine::EXCAUSE_TRAP,     "TRAP"},
+         {machine::EXCAUSE_OVERFLOW, "OVERFLOW"}};
+
+    NEW_MULTI(mm.multi_excause, 602, 447, memory_excause_value, excause_map);
     // WriteBack stage
     NEW(Multiplexer, wb.mem_or_reg, 690, 252, 2, true);
     NEW(Junction, wb.j_reg_write_val, 411, 510);
@@ -328,8 +342,10 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
     if (machine->config().hazard_unit() != machine::MachineConfig::HU_NONE) {
         NEW(LogicBlock, hazard_unit, SC_WIDTH/2, SC_HEIGHT - 15, "Hazard Unit");
         hazard_unit->setSize(SC_WIDTH - 100, 12);
+        static QMap<std::uint32_t, QString> stall_map = {{0, "NORMAL"},{1, "STALL"}};
+        NEW_MULTI(hu.multi_stall, 480, 447, execute_stall_value, stall_map);
+        NEW_MULTI(hu.multi_stall, 250, SC_HEIGHT - 15, hu_stall_value, stall_map);
     }
-
     coreview::Connection *con;
     // Fetch stage
     struct coreview::Latch::ConnectorPair lp_ft_inst = latch_if_id->new_connector(mem_program->connector_instruction()->y() - latch_if_id->y());
