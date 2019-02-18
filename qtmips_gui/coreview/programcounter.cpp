@@ -50,7 +50,7 @@ ProgramCounter::ProgramCounter(machine::QtMipsMachine *machine) : QGraphicsObjec
 
     QFont font;
 
-    font.setPointSize(FontSize::SIZE7);
+    font.setPixelSize(FontSize::SIZE7);
     name.setPos(WIDTH/2 - name.boundingRect().width()/2, 0);
     name.setFont(font);
     font.setPointSize(FontSize::SIZE8);

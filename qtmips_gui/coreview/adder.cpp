@@ -48,7 +48,7 @@ using namespace coreview;
 
 Adder::Adder() : QGraphicsItem(nullptr), plus("+", this) {
     QFont font;
-    font.setPointSize(FontSize::SIZE7);
+    font.setPixelSize(FontSize::SIZE7);
     plus.setFont(font);
     QRectF plus_box = plus.boundingRect();
     plus.setPos(DENT + (WIDTH-DENT)/2 - plus_box.width()/2, HEIGHT/2 - plus_box.height()/2);

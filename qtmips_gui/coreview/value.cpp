@@ -59,7 +59,7 @@ QRectF Value::boundingRect() const {
 
 void Value::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))){
     QFont f;
-    f.setPointSize(FontSize::SIZE7);
+    f.setPixelSize(FontSize::SIZE7);
     painter->setFont(f);
 
     QRectF rect;

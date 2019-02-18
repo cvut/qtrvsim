@@ -57,7 +57,7 @@ Registers::Registers() : QGraphicsObject(nullptr), name("Registers", this) {
     // TODO do we want to have any hooks on real registers?
 
     QFont font;
-    font.setPointSize(FontSize::SIZE7);
+    font.setPixelSize(FontSize::SIZE7);
     name.setFont(font);
 
     QRectF name_box = name.boundingRect();

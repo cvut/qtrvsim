@@ -50,7 +50,7 @@ Memory::Memory(bool cache_used, const machine::Cache *cch) : QGraphicsObject(nul
     cache = cache_used;
 
     QFont font;
-    font.setPointSize(FontSize::SIZE7);
+    font.setPixelSize(FontSize::SIZE7);
     name.setFont(font);
     type.setFont(font);
     cache_t.setFont(font);

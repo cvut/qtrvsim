@@ -14,10 +14,10 @@ void FontSize::init()
 {
 	int h = QFontMetrics(QApplication::font()).height();
 	qDebug() << "Font size:" << h;
-	h /= 5;
-	int d = h / 10 + 1;
+	h /= 3;
+	int d = h / 4 + 1;
 	FontSize::SIZE5 = h - 2*d;
 	FontSize::SIZE6 = h - d;
 	FontSize::SIZE7 = h;
-	FontSize::SIZE8 = h + d;
+	FontSize::SIZE8 = h + d/2;
 }

@@ -47,7 +47,7 @@
 coreview::Alu::Alu() : QGraphicsItem(nullptr), name("ALU", this) {
     name.setPos(3, 25);
     QFont font;
-    font.setPointSize(FontSize::SIZE7);
+    font.setPixelSize(FontSize::SIZE7);
     name.setFont(font);
 
     con_in_a = new Connector(Connector::AX_X);
