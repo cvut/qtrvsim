@@ -142,7 +142,7 @@ static const struct InstructionMap  alu_instruction_map[] = {
     IM_UNKNOWN, // 29
     IM_UNKNOWN, // 30
     IM_UNKNOWN, // 31
-    {"ADD",    IT_R, ALU_OP_ADDU, NOMEM, nullptr,
+    {"ADD",    IT_R, ALU_OP_ADD, NOMEM, nullptr,
      .flags = FLAGS_ALU_T_R_STD},     // 32
     {"ADDU",   IT_R, ALU_OP_ADDU, NOMEM, nullptr,
      .flags = FLAGS_ALU_T_R_STD},
