@@ -370,7 +370,12 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
     emit execute_alusrc_value(dt.alusrc);
     emit execute_regdest_value(dt.regd);
     emit execute_regw_num_value(dt.rwrite);
-    emit execute_stall_value(dt.stall);
+    if (dt.stall)
+        emit execute_stall_forward_value(1);
+    else if (dt.ff_rs != FORWARD_NONE || dt.ff_rt != FORWARD_NONE)
+        emit execute_stall_forward_value(2);
+    else
+        emit execute_stall_forward_value(0);
 
     return {
         .inst = dt.inst,
@@ -612,6 +617,7 @@ CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem_program, MemoryA
 
 void CorePipelined::do_step(bool skip_break) {
     bool stall = false;
+    bool branch_stall = false;
     bool excpt_in_progress = false;
     std::uint32_t jump_branch_pc = dt_m.inst_addr;
 
@@ -697,6 +703,7 @@ void CorePipelined::do_step(bool skip_break) {
             ((dt_d.bjr_req_rs && dt_d.inst.rs() == dt_e.rwrite) ||
              (dt_d.bjr_req_rt && dt_d.inst.rt() == dt_e.rwrite))) {
             stall = true;
+            branch_stall = true;
         } else {
             if (hazard_unit != MachineConfig::HU_STALL_FORWARD || dt_m.memtoreg) {
                 if (dt_m.rwrite != 0 && dt_m.regwrite &&
@@ -719,6 +726,7 @@ void CorePipelined::do_step(bool skip_break) {
         emit forward_m_d_rs_value(dt_d.forward_m_d_rs);
         emit forward_m_d_rt_value(dt_d.forward_m_d_rt);
     }
+    emit branch_forward_value((dt_d.forward_m_d_rs || dt_d.forward_m_d_rt)? 2: branch_stall);
 #if 0
     if (stall)
         printf("STALL\n");

@@ -136,7 +136,7 @@ signals:
     void execute_alusrc_value(std::uint32_t);
     void execute_regdest_value(std::uint32_t);
     void execute_regw_num_value(std::uint32_t);
-    void execute_stall_value(std::uint32_t);
+    void execute_stall_forward_value(std::uint32_t);
     void memory_inst_addr_value(std::uint32_t);
     void memory_alu_value(std::uint32_t);
     void memory_rt_value(std::uint32_t);
@@ -153,6 +153,7 @@ signals:
     void writeback_regw_num_value(std::uint32_t);
 
     void hu_stall_value(std::uint32_t);
+    void branch_forward_value(std::uint32_t);
 
     void stop_on_exception_reached();
 

@@ -46,7 +46,7 @@ namespace coreview {
 class MultiText : public QGraphicsObject {
     Q_OBJECT
 public:
-    MultiText(QMap<std::uint32_t, QString> value_map);
+    MultiText(QMap<std::uint32_t, QString> value_map, bool nonzero_red = false);
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -58,6 +58,7 @@ private:
     QGraphicsSimpleTextItem text;
     std::uint32_t value;
     QMap<std::uint32_t, QString> value_map;
+    std::uint32_t nonzero_red;
 };
 
 }

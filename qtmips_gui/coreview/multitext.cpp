@@ -47,13 +47,14 @@ using namespace coreview;
 #define PENW 1
 //////////////////////
 
-MultiText::MultiText(QMap<std::uint32_t, QString> value_map) :
+MultiText::MultiText(QMap<std::uint32_t, QString> value_map, bool nonzero_red) :
                  QGraphicsObject(nullptr), text(this) {
     QFont f;
     f.setPointSize(6);
     text.setFont(f);
 
     this->value_map = value_map;
+    this->nonzero_red = nonzero_red;
 
     multitext_update(0);
 }
@@ -64,7 +65,11 @@ QRectF MultiText::boundingRect() const {
 
 void MultiText::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
     painter->setPen(QPen(QColor(240, 240, 240)));
-    painter->setBrush(QBrush(QColor(240, 240, 240)));
+    if (value != 0 && nonzero_red)
+        painter->setBrush(QBrush(QColor(255, 100, 100)));
+    else
+        painter->setBrush(QBrush(QColor(240, 240, 240)));
+
     painter->drawRoundRect(-WIDTH/2, 0, WIDTH, HEIGHT, ROUND, ROUND);
 }
 
