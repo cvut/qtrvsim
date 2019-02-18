@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "logicblock.h"
+#include "fontsize.h"
 #include <cmath>
 
 using namespace coreview;
@@ -49,7 +50,7 @@ LogicBlock::LogicBlock(QString name) : LogicBlock(QVector<QString>({name})) { }
 
 LogicBlock::LogicBlock(QVector<QString> name) : QGraphicsObject(nullptr) {
     QFont font;
-    font.setPointSize(7);
+    font.setPointSize(FontSize::SIZE7);
 
     qreal h = 0, w = 0;
     for (int i = 0; i < name.size(); i++) {

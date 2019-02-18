@@ -36,6 +36,7 @@
 #include "mainwindow.h"
 #include "aboutdialog.h"
 #include "ossyscall.h"
+#include "fontsize.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     machine = nullptr;

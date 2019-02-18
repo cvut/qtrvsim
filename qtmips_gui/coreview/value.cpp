@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "value.h"
+#include "../fontsize.h"
 
 using namespace coreview;
 
@@ -58,7 +59,7 @@ QRectF Value::boundingRect() const {
 
 void Value::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))){
     QFont f;
-    f.setPointSize(7);
+    f.setPointSize(FontSize::SIZE7);
     painter->setFont(f);
 
     QRectF rect;

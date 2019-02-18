@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "coreview.h"
+#include "fontsize.h"
 #include <cmath>
 
 //////////////////////////////////////////////////////////////////////////////
@@ -243,7 +244,7 @@ coreview::Signal *CoreViewScene::new_signal(const coreview::Connector *a, const 
 QGraphicsSimpleTextItem *CoreViewScene::new_label(const QString &str, qreal x, qreal y) {
     QGraphicsSimpleTextItem *i= new QGraphicsSimpleTextItem(str);
     QFont f;
-    f.setPointSize(5);
+    f.setPointSize(FontSize::SIZE5);
     i->setFont(f);
     addItem(i);
     i->setPos(x, y);

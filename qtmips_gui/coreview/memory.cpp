@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "memory.h"
+#include "fontsize.h"
 #include <cmath>
 
 using namespace coreview;
@@ -49,7 +50,7 @@ Memory::Memory(bool cache_used, const machine::Cache *cch) : QGraphicsObject(nul
     cache = cache_used;
 
     QFont font;
-    font.setPointSize(7);
+    font.setPointSize(FontSize::SIZE7);
     name.setFont(font);
     type.setFont(font);
     cache_t.setFont(font);

@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "constant.h"
+#include "fontsize.h"
 #include <cmath>
 
 using namespace coreview;
@@ -44,7 +45,7 @@ using namespace coreview;
 
 Constant::Constant(const Connector *con, const QString &text) : QGraphicsObject(nullptr), text(text, this) {
     QFont font;
-    font.setPointSize(7);
+    font.setPointSize(FontSize::SIZE7);
     this->text.setFont(font);
 
     con_our = new Connector(Connector::AX_X);

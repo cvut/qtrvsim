@@ -34,6 +34,8 @@
  ******************************************************************************/
 
 #include "instructionview.h"
+#include "../fontsize.h"
+
 #include <QPainter>
 #include <QFont>
 
@@ -49,7 +51,7 @@ using namespace coreview;
 
 InstructionView::InstructionView() : QGraphicsObject(nullptr), text(this) {
     QFont f;
-    f.setPointSize(6);
+    f.setPointSize(FontSize::SIZE6);
     text.setFont(f);
 
     // Initialize to NOP

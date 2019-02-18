@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "programcounter.h"
+#include "fontsize.h"
 #include <cmath>
 
 using namespace coreview;
@@ -49,10 +50,10 @@ ProgramCounter::ProgramCounter(machine::QtMipsMachine *machine) : QGraphicsObjec
 
     QFont font;
 
-    font.setPointSize(7);
+    font.setPointSize(FontSize::SIZE7);
     name.setPos(WIDTH/2 - name.boundingRect().width()/2, 0);
     name.setFont(font);
-    font.setPointSize(8);
+    font.setPointSize(FontSize::SIZE8);
     value.setText(QString("0x") + QString::number(machine->registers()->read_pc(), 16));
     value.setPos(1, HEIGHT - value.boundingRect().height());
     value.setFont(font);

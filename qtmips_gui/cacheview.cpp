@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "cacheview.h"
+#include "fontsize.h"
 #include <cmath>
 
 //////////////////////
@@ -145,7 +146,7 @@ CacheViewBlock::CacheViewBlock(const machine::Cache *cache, unsigned block , boo
     curr_row = 0;
 
     QFont font;
-    font.setPointSize(7);
+    font.setPointSize(FontSize::SIZE7);
 
     validity = new QGraphicsSimpleTextItem*[rows];
     if (cache->config().write_policy() == machine::MachineConfigCache::WP_BACK)
