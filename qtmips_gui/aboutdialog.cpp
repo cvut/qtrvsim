@@ -67,7 +67,7 @@ AboutDialog::AboutDialog(QWidget *parent)
   hl->addWidget(vbox);
 
   QString versionText;
-  versionText = "Version 0.5 \n";
+  versionText = "Version 0.6 \n";
 
   vl->addWidget(new QLabel("<span style='font-size:x-large; font-weight:bold;'>Qt Mips - MIPS Architecture Simulator</span>"));
   lbl = new QLabel(versionText);
@@ -80,8 +80,7 @@ AboutDialog::AboutDialog(QWidget *parent)
                 "<a href=\"mailto://pisa@cmp.felk.cvut.cz\">pisa@cmp.felk.cvut.cz</a>"));
 
   QString supportText;
-  supportText =  "Home Page : <a href=\"https://github.com/ppisa/QtMips\">https://github.com/ppisa/QtMips</a><br/>"
-                 "Home Page : <a href=\"https://github.com/Cynerd/QtMips\">https://github.com/Cynerd/QtMips</a><br/>"
+  supportText =  "Home Page : <a href=\"https://github.com/cvut/QtMips\">https://github.com/cvut/QtMips</a><br/>"
                  "Implemented for<br/>"
                  "<a href=\"https://cw.fel.cvut.cz/wiki/courses/b35apo/start\">Computer Architectures</a><br/>"
                  "and<br/>"
