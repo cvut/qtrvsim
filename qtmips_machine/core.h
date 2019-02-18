@@ -136,6 +136,7 @@ signals:
     void execute_alusrc_value(std::uint32_t);
     void execute_regdest_value(std::uint32_t);
     void execute_regw_num_value(std::uint32_t);
+    void execute_stall_value(std::uint32_t);
     void memory_inst_addr_value(std::uint32_t);
     void memory_alu_value(std::uint32_t);
     void memory_rt_value(std::uint32_t);
@@ -145,10 +146,13 @@ signals:
     void memory_memwrite_value(std::uint32_t);
     void memory_memread_value(std::uint32_t);
     void memory_regw_num_value(std::uint32_t);
+    void memory_excause_value(std::uint32_t);
     void writeback_inst_addr_value(std::uint32_t);
     void writeback_value(std::uint32_t);
     void writeback_regw_value(std::uint32_t);
     void writeback_regw_num_value(std::uint32_t);
+
+    void hu_stall_value(std::uint32_t);
 
     void stop_on_exception_reached();
 
@@ -202,6 +206,7 @@ protected:
         uint32_t inst_addr; // Address of instruction
         enum ExceptionCause excause;
         bool in_delay_slot;
+        bool stall;
     };
     struct dtExecute {
         Instruction inst;
@@ -218,6 +223,7 @@ protected:
     };
     struct dtMemory {
         Instruction inst;
+        bool memtoreg;
         bool regwrite;
         std::uint8_t rwrite;
         std::uint32_t towrite_val;

@@ -309,6 +309,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .inst_addr = dt.inst_addr,
         .excause = excause,
         .in_delay_slot = dt.in_delay_slot,
+        .stall = false,
     };
 }
 
@@ -369,6 +370,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
     emit execute_alusrc_value(dt.alusrc);
     emit execute_regdest_value(dt.regd);
     emit execute_regw_num_value(dt.rwrite);
+    emit execute_stall_value(dt.stall);
 
     return {
         .inst = dt.inst,
@@ -421,9 +423,11 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
     emit memory_memread_value(dt.memread);
     emit memory_memwrite_value(memwrite);
     emit memory_regw_num_value(dt.rwrite);
+    emit memory_excause_value(excause);
 
     return {
         .inst = dt.inst,
+        .memtoreg = memread,
         .regwrite = regwrite,
         .rwrite = dt.rwrite,
         .towrite_val = towrite_val,
@@ -517,6 +521,7 @@ void Core::dtDecodeInit(struct dtDecode &dt) {
     dt.ff_rt = FORWARD_NONE;
     dt.excause = EXCAUSE_NONE;
     dt.in_delay_slot = false;
+    dt.stall = false;
 }
 
 void Core::dtExecuteInit(struct dtExecute &dt) {
@@ -534,6 +539,7 @@ void Core::dtExecuteInit(struct dtExecute &dt) {
 
 void Core::dtMemoryInit(struct dtMemory &dt) {
     dt.inst = Instruction(0x00);
+    dt.memtoreg = false;
     dt.regwrite = false;
     dt.rwrite = false;
     dt.towrite_val = 0;
@@ -692,7 +698,7 @@ void CorePipelined::do_step(bool skip_break) {
              (dt_d.bjr_req_rt && dt_d.inst.rt() == dt_e.rwrite))) {
             stall = true;
         } else {
-            if (hazard_unit != MachineConfig::HU_STALL_FORWARD) {
+            if (hazard_unit != MachineConfig::HU_STALL_FORWARD || dt_m.memtoreg) {
                 if (dt_m.rwrite != 0 && dt_m.regwrite &&
                     ((dt_d.bjr_req_rs && dt_d.inst.rs() == dt_m.rwrite) ||
                      (dt_d.bjr_req_rt && dt_d.inst.rt() == dt_m.rwrite)))
@@ -727,6 +733,9 @@ void CorePipelined::do_step(bool skip_break) {
 #if 0
     printf("PC 0x%08lx\n", (unsigned long)dt_f.inst_addr);
 #endif
+
+    dt_d.stall = stall;
+    emit hu_stall_value(stall);
 
     // Now process program counter (loop connections from decode stage)
     if (!stall) {
