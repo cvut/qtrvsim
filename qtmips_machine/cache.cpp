@@ -384,6 +384,7 @@ void Cache::kick(unsigned associat_indx, unsigned row) const {
         break;
     }
     case MachineConfigCache::RP_LFU:
+        replc.lfu[row][associat_indx] = 0;
         break;
     default:
         break;
