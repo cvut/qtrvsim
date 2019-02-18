@@ -186,17 +186,18 @@ int StaticTableLayout::layout_count_approx(const QRect &rect) const {
     if (items.size() <= 0 || rect.width() < rect.height())
         return 1;
     // Note: for some reason (probably optimalisation) when qlabel is not visible it reports 0 size. So we have to found at least one that is visible
+    // !items[vis][0]->widget()->isVisible()
     int vis = 0;
-    while (items[vis].size() <= 0 || !items[vis][0]->widget()->isVisible()) {
+    while (items[vis].size() <= 0 || items[vis][0]->widget()->sizeHint().width() == 0) {
         vis++;
         if (vis >= items.size())
-            return 1; // If non is visible then just say that it has to be single column
+            return 1; // If none is visible then just say that it has to be single column
     }
 
     int w = 0;
     for (int i = 0; i < items[vis].size(); i++)
         w += items[vis][i]->sizeHint().width() + shspace;
-    w -= shspace; // subtract lastest spacing
+    w -= shspace; // subtract latest spacing
     int width = rect.right() / w; // Note: this always rounds down so this always founds maximal possible count
     return width <= 0 ? 1 : width; // We have to fit at least one column
 }
@@ -282,7 +283,7 @@ int StaticTableLayout::layout_height(int width) const {
     int count;
     layout_parms(reff, row_h, row_w, count);
 
-    return (row_h + vspace) * (items.size() / count);
+    return (row_h + vspace) * ((items.size() + count - 1) / count);
 }
 
 QVector<QLayoutItem*> StaticTableLayout::list2vec(QList<QWidget*> w) {

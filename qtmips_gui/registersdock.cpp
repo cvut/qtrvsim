@@ -114,6 +114,7 @@ void RegistersDock::setup(machine::QtMipsMachine *machine) {
         lo->setText("");
         for (int i = 0; i < 32; i++)
             gp[i]->setText("");
+        return;
     }
 
     const machine::Registers *regs = machine->registers();
