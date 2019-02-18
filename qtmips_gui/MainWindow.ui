@@ -128,6 +128,7 @@
    <addaction name="ips2"/>
    <addaction name="ips5"/>
    <addaction name="ips10"/>
+   <addaction name="ipsUnlimited"/>
    <addaction name="ipsMax"/>
   </widget>
   <action name="actionNew">
