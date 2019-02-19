@@ -7,7 +7,11 @@ CONFIG += c++11
 
 TEMPLATE = app
 
-LIBS += -L$$OUT_PWD/../qtmips_machine/ -lqtmips_machine -lelf
+win32:CONFIG(release, debug|release): LIBS_SUBDIR = release
+else:win32:CONFIG(debug, debug|release): LIBS_SUBDIR = debug
+else:unix: LIBS_SUBDIR = .
+
+LIBS += -L$$OUT_PWD/../qtmips_machine/$${LIBS_SUBDIR} -lqtmips_machine -lelf
 
 DOLAR=$
 
