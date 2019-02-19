@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "multitext.h"
+#include "fontsize.h"
 #include <QPainter>
 #include <QFont>
 
@@ -50,7 +51,7 @@ using namespace coreview;
 MultiText::MultiText(QMap<std::uint32_t, QString> value_map, bool nonzero_red) :
                  QGraphicsObject(nullptr), text(this) {
     QFont f;
-    f.setPointSize(6);
+    f.setPointSize(FontSize::SIZE6);
     text.setFont(f);
 
     this->value_map = value_map;

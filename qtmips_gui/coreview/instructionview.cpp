@@ -34,7 +34,7 @@
  ******************************************************************************/
 
 #include "instructionview.h"
-#include "../fontsize.h"
+#include "fontsize.h"
 
 #include <QPainter>
 #include <QFont>
