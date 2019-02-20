@@ -44,7 +44,7 @@ void MachineTests::cache_data() {
     QTest::addColumn<unsigned>("miss");
 
     MachineConfigCache cache_c;
-    cache_c.set_write_policy(MachineConfigCache::WP_TROUGH);
+    cache_c.set_write_policy(MachineConfigCache::WP_TROUGH_ALLOC);
     cache_c.set_enabled(true);
     cache_c.set_sets(8);
     cache_c.set_blocks(1);

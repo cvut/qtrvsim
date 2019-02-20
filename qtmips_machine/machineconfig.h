@@ -65,7 +65,8 @@ public:
     };
 
     enum WritePolicy {
-        WP_TROUGH, // Write trough
+        WP_TROUGH_NOALLOC, // Write trough
+        WP_TROUGH_ALLOC, // Write trough
         WP_BACK // Write back
     };
 

@@ -48,6 +48,8 @@ Cache::Cache(MemoryAccess  *m, const MachineConfigCache *cc, unsigned memory_acc
     hit_write = 0;
     miss_read = 0;
     miss_write = 0;
+    mem_reads = 0;
+    mem_writes = 0;
     dt = nullptr;
     replc.lfu = nullptr;
     replc.lru = nullptr;
@@ -128,20 +130,27 @@ bool Cache::wword(std::uint32_t address, std::uint32_t value) {
 
     if (!cnf.enabled() ||
         (address >= uncached_start && address <= uncached_last)) {
+        mem_writes++;
+        emit memory_writes_update(mem_writes);
         return mem->write_word(address, value);
     }
 
     std::uint32_t data;
     changed = access(address, &data, true, value);
 
-    if (cnf.write_policy() == MachineConfigCache::WP_TROUGH)
+    if (cnf.write_policy() != MachineConfigCache::WP_BACK) {
+        mem_writes++;
+        emit memory_writes_update(mem_writes);
         return mem->write_word(address, value);
+    }
     return changed;
 }
 
 std::uint32_t Cache::rword(std::uint32_t address, bool debug_access) const {
     if (!cnf.enabled() ||
         (address >= uncached_start && address <= uncached_last)) {
+        mem_reads++;
+        emit memory_reads_update(mem_reads);
         return mem->read_word(address, debug_access);
     }
 
@@ -177,20 +186,32 @@ unsigned Cache::miss() const {
     return miss_read + miss_write;
 }
 
+unsigned Cache::memory_reads() const {
+    return mem_reads;
+}
+
+unsigned Cache::memory_writes() const {
+    return mem_writes;
+}
+
 unsigned Cache::stalled_cycles() const {
     return miss_read * (access_pen_r - 1) + miss_write * (access_pen_w - 1);
 }
 
 double Cache::speed_improvement() const {
+    unsigned lookup_time;
     unsigned comp = hit_read + hit_write + miss_read + miss_write;
     if (comp == 0)
         return 100.0;
+    lookup_time = hit_read + miss_read;
+    if (cnf.write_policy() == MachineConfigCache::WP_BACK)
+        lookup_time += hit_write + miss_write;
     return (double)((miss_read + hit_read) * access_pen_r + (miss_write + hit_write) * access_pen_w) \
-            / (double)(hit_write + hit_read + miss_read * access_pen_r + miss_write * access_pen_w) \
+            / (double)(lookup_time + mem_reads * access_pen_r + mem_writes * access_pen_w) \
             * 100;
 }
 
-double Cache::usage_efficiency() const {
+double Cache::hit_rate() const {
     unsigned comp = hit_read + hit_write + miss_read + miss_write;
     if (comp == 0)
         return 0.0;
@@ -198,26 +219,31 @@ double Cache::usage_efficiency() const {
 }
 
 void Cache::reset() {
-    if (!cnf.enabled())
-        return;
-
-    // Set all cells to ne invalid
-    for (unsigned as = 0; as < cnf.associativity(); as++)
-        for (unsigned st = 0; st < cnf.sets(); st++)
-            dt[as][st].valid = false;
+    // Set all cells to invalid
+    if (cnf.enabled()) {
+        for (unsigned as = 0; as < cnf.associativity(); as++)
+            for (unsigned st = 0; st < cnf.sets(); st++)
+                dt[as][st].valid = false;
+    }
     // Note: we don't have to zero replacement policy data as those are zeroed when first used on invalid cell
     // Zero hit and miss rate
     hit_read = 0;
     hit_write = 0;
     miss_read = 0;
     miss_write = 0;
+    mem_reads = 0;
+    mem_writes = 0;
     // Trigger signals
     emit hit_update(hit());
     emit miss_update(miss());
+    emit memory_reads_update(memory_reads());
+    emit memory_writes_update(memory_writes());
     update_statistics();
-    for (unsigned as = 0; as < cnf.associativity(); as++)
-        for (unsigned st = 0; st < cnf.sets(); st++)
-            emit cache_update(as, st, false, false, 0, 0);
+    if (cnf.enabled()) {
+        for (unsigned as = 0; as < cnf.associativity(); as++)
+            for (unsigned st = 0; st < cnf.sets(); st++)
+                emit cache_update(as, st, false, false, 0, 0);
+    }
 }
 
 const MachineConfigCache &Cache::config() const {
@@ -262,6 +288,12 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
         indx++;
     // Need to find new block
     if (indx >= cnf.associativity()) {
+        // if write through we do not need to alloecate cache line does not allocate
+        if (write && cnf.write_policy() == MachineConfigCache::WP_TROUGH_NOALLOC) {
+            miss_write++;
+            emit miss_update(miss());
+            return false;
+        }
         // We have to kick something
         switch (cnf.replacement_policy()) {
         case MachineConfigCache::RP_RAND:
@@ -319,6 +351,8 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
             cd.data[i] = mem->read_word(base_address(tag, row) + (4*i));
             change_counter++;
         }
+        mem_reads += cnf.blocks();
+        emit memory_reads_update(mem_reads);
     }
 
     // Update replcement data
@@ -338,7 +372,10 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
         break;
     }
     case MachineConfigCache::RP_LFU:
-        replc.lfu[row][indx]++;
+        if (cd.valid)
+            replc.lfu[row][indx]++;
+        else
+            replc.lfu[row][indx] = 0;
         break;
     default:
         break;
@@ -362,9 +399,12 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
 
 void Cache::kick(unsigned associat_indx, unsigned row) const {
     struct cache_data &cd = dt[associat_indx][row];
-    if (cd.dirty && cnf.write_policy() == MachineConfigCache::WP_BACK)
+    if (cd.dirty && cnf.write_policy() == MachineConfigCache::WP_BACK) {
         for (unsigned i = 0; i < cnf.blocks(); i++)
             mem->write_word(base_address(cd.tag, row) + (4*i), cd.data[i]);
+        mem_writes += cnf.blocks();
+        emit memory_writes_update(mem_writes);
+    }
     cd.valid = false;
     cd.dirty = false;
 
@@ -396,5 +436,5 @@ std::uint32_t Cache::base_address(std::uint32_t tag, unsigned row) const {
 }
 
 void Cache::update_statistics() const {
-    emit statistics_update(stalled_cycles(), speed_improvement(), usage_efficiency());
+    emit statistics_update(stalled_cycles(), speed_improvement(), hit_rate());
 }

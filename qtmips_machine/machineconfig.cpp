@@ -54,7 +54,7 @@ using namespace machine;
 #define DFC_BLOCKS 1
 #define DFC_ASSOC 1
 #define DFC_REPLAC RP_RAND
-#define DFC_WRITE WP_TROUGH
+#define DFC_WRITE WP_TROUGH_NOALLOC
 //////////////////////////////////////////////////////////////////////////////
 
 MachineConfigCache::MachineConfigCache() {
@@ -106,7 +106,7 @@ void MachineConfigCache::preset(enum ConfigPresets p) {
         set_blocks(2);
         set_associativity(2);
         set_replacement_policy(RP_RAND);
-        set_write_policy(WP_TROUGH);
+        set_write_policy(WP_TROUGH_NOALLOC);
         break;
     case CP_SINGLE:
     case CP_PIPE_NO_HAZARD:

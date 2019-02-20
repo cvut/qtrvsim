@@ -40,9 +40,6 @@ CacheDock::CacheDock(QWidget *parent, const QString &type) : QDockWidget(parent)
     setWidget(top_widget);
     layout_box = new QVBoxLayout(top_widget);
 
-    no_cache = new QLabel("No " + type + " Cache configured", top_widget);
-    layout_box->addWidget(no_cache);
-
     top_form = new QWidget(top_widget);
     top_form->setVisible(false);
     layout_box->addWidget(top_form);
@@ -52,17 +49,24 @@ CacheDock::CacheDock(QWidget *parent, const QString &type) : QDockWidget(parent)
     layout_top_form->addRow("Hit:", l_hit);
     l_miss = new QLabel("0", top_form);
     layout_top_form->addRow("Miss:", l_miss);
+    l_m_reads = new QLabel("0", top_form);
+    layout_top_form->addRow("Memory reads:", l_m_reads);
+    l_m_writes = new QLabel("0", top_form);
+    layout_top_form->addRow("Memory writes:", l_m_writes);
     l_stalled = new QLabel("0", top_form);
     layout_top_form->addRow("Memory stall cycles:", l_stalled);
-    l_usage = new QLabel("0.000%", top_form);
-    layout_top_form->addRow("Usage effectiveness:", l_usage);
+    l_hit_rate = new QLabel("0.000%", top_form);
+    layout_top_form->addRow("Hit rate:", l_hit_rate);
     l_speed  = new QLabel("100%", top_form);
-    layout_top_form->addRow("Speed improvement:", l_speed);
+    layout_top_form->addRow("Improved speed:", l_speed);
 
     graphicsview = new GraphicsView(top_widget);
     graphicsview->setVisible(false);
     layout_box->addWidget(graphicsview);
     cachescene = nullptr;
+
+    no_cache = new QLabel("No " + type + " Cache configured", top_widget);
+    layout_box->addWidget(no_cache);
 
     setObjectName(type + "Cache");
     setWindowTitle(type + " Cache");
@@ -72,14 +76,18 @@ void CacheDock::setup(const machine::Cache *cache) {
     l_hit->setText("0");
     l_miss->setText("0");
     l_stalled->setText("0");
-    l_usage->setText("0.000%");
+    l_m_reads->setText("0");
+    l_m_writes->setText("0");
+    l_hit_rate->setText("0.000%");
     l_speed->setText("100%");
-    if (cache->config().enabled()) {
+    if (cache != nullptr) {
         connect(cache, SIGNAL(hit_update(uint)), this, SLOT(hit_update(uint)));
         connect(cache, SIGNAL(miss_update(uint)), this, SLOT(miss_update(uint)));
+        connect(cache, SIGNAL(memory_reads_update(uint)), this, SLOT(memory_reads_update(uint)));
+        connect(cache, SIGNAL(memory_writes_update(uint)), this, SLOT(memory_writes_update(uint)));
         connect(cache, SIGNAL(statistics_update(uint,double,double)), this, SLOT(statistics_update(uint,double,double)));
     }
-    top_form->setVisible(cache->config().enabled());
+    top_form->setVisible(cache != nullptr);
     no_cache->setVisible(!cache->config().enabled());
 
     if (cachescene)
@@ -97,8 +105,16 @@ void CacheDock::miss_update(unsigned val) {
     l_miss->setText(QString::number(val));
 }
 
-void CacheDock::statistics_update(unsigned stalled_cycles, double speed_improv, double usage_effic) {
+void CacheDock::memory_reads_update(unsigned val) {
+    l_m_reads->setText(QString::number(val));
+}
+
+void CacheDock::memory_writes_update(unsigned val) {
+    l_m_writes->setText(QString::number(val));
+}
+
+void CacheDock::statistics_update(unsigned stalled_cycles, double speed_improv, double hit_rate) {
     l_stalled->setText(QString::number(stalled_cycles));
-    l_usage->setText(QString::number(usage_effic, 'f', 3) + QString("%"));
+    l_hit_rate->setText(QString::number(hit_rate, 'f', 3) + QString("%"));
     l_speed->setText(QString::number(speed_improv, 'f', 0) + QString("%"));
 }

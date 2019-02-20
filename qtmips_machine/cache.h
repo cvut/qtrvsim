@@ -57,9 +57,11 @@ public:
 
     unsigned hit() const; // Number of recorded hits
     unsigned miss() const; // Number of recorded misses
+    unsigned memory_reads() const; // Number backing/main memory reads
+    unsigned memory_writes() const; // Number backing/main memory writes
     unsigned stalled_cycles() const; // Number of wasted cycles in memory waitin statistic
     double speed_improvement() const; // Speed improvement in percents in comare with no used cache
-    double usage_efficiency() const; // Usage efficiency in percents
+    double hit_rate() const; // Usage efficiency in percents
 
     void reset(); // Reset whole state of cache
 
@@ -72,8 +74,10 @@ public:
 signals:
     void hit_update(unsigned) const;
     void miss_update(unsigned) const;
-    void statistics_update(unsigned stalled_cycles, double speed_improv, double usage_effic) const;
+    void statistics_update(unsigned stalled_cycles, double speed_improv, double hit_rate) const;
     void cache_update(unsigned associat, unsigned set, bool valid, bool dirty, std::uint32_t tag, const std::uint32_t *data) const;
+    void memory_writes_update(unsigned) const;
+    void memory_reads_update(unsigned) const;
 
 private:
     MachineConfigCache cnf;
@@ -95,6 +99,7 @@ private:
     } replc; // Data used for replacement policy
 
     mutable unsigned hit_read, miss_read, hit_write, miss_write; // Hit and miss counters
+    mutable unsigned mem_reads, mem_writes; // Dirrect access to memory
     mutable std::uint32_t change_counter;
 
     std::uint32_t debug_rword(std::uint32_t address) const;

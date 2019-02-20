@@ -53,13 +53,17 @@ public:
 private slots:
     void hit_update(unsigned);
     void miss_update(unsigned);
-    void statistics_update(unsigned stalled_cycles, double speed_improv, double usage_effic);
+    void memory_reads_update(unsigned val);
+    void memory_writes_update(unsigned val);
+    void statistics_update(unsigned stalled_cycles, double speed_improv, double hit_rate);
 
 private:
     QVBoxLayout *layout_box;
     QWidget *top_widget, *top_form;
     QFormLayout *layout_top_form;
-    QLabel *l_hit, *l_miss, *l_stalled, *l_speed, *l_usage, *no_cache;
+    QLabel *l_hit, *l_miss, *l_stalled, *l_speed, *l_hit_rate;
+    QLabel *no_cache;
+    QLabel *l_m_reads, *l_m_writes;
     GraphicsView *graphicsview;
     CacheViewScene *cachescene;
 };

@@ -835,7 +835,11 @@ void MachineTests::pipecore_nc_memory_tests_data() {
     core_memory_tests_data();
 }
 
-void MachineTests::pipecore_wt_memory_tests_data() {
+void MachineTests::pipecore_wt_na_memory_tests_data() {
+    core_memory_tests_data();
+}
+
+void MachineTests::pipecore_wt_a_memory_tests_data() {
     core_memory_tests_data();
 }
 
@@ -863,7 +867,7 @@ void MachineTests::pipecore_nc_memory_tests() {
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
-void MachineTests::pipecore_wt_memory_tests() {
+void MachineTests::pipecore_wt_na_memory_tests() {
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
@@ -875,7 +879,26 @@ void MachineTests::pipecore_wt_memory_tests() {
     cache_conf.set_blocks(1); // Number of blocks
     cache_conf.set_associativity(2); // Degree of associativity
     cache_conf.set_replacement_policy(MachineConfigCache::RP_LRU);
-    cache_conf.set_write_policy(MachineConfigCache::WP_TROUGH);
+    cache_conf.set_write_policy(MachineConfigCache::WP_TROUGH_NOALLOC);
+    Cache i_cache(&mem_init, &cache_conf);
+    Cache d_cache(&mem_init, &cache_conf);
+    CorePipelined core(&reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD);
+    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
+}
+
+void MachineTests::pipecore_wt_a_memory_tests() {
+    QFETCH(QVector<uint32_t>, code);
+    QFETCH(Registers, reg_init);
+    QFETCH(Registers, reg_res);
+    QFETCH(Memory, mem_init);
+    QFETCH(Memory, mem_res);
+    MachineConfigCache cache_conf;
+    cache_conf.set_enabled(true);
+    cache_conf.set_sets(2); // Number of sets
+    cache_conf.set_blocks(1); // Number of blocks
+    cache_conf.set_associativity(2); // Degree of associativity
+    cache_conf.set_replacement_policy(MachineConfigCache::RP_LRU);
+    cache_conf.set_write_policy(MachineConfigCache::WP_TROUGH_ALLOC);
     Cache i_cache(&mem_init, &cache_conf);
     Cache d_cache(&mem_init, &cache_conf);
     CorePipelined core(&reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD);
