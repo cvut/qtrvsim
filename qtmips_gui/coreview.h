@@ -93,6 +93,7 @@ protected:
         coreview::Junction *j_sign_ext;
         coreview::And *and_branch;
         coreview::Junction *j_inst_up, *j_inst_down;
+        coreview::Junction *j_jalpctor31, *j_jump_reg;
         coreview::Bus *instr_bus;
     } dc;
     struct {

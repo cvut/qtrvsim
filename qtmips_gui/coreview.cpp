@@ -99,6 +99,8 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     dc.cmp->setSize(24, 12);
     NEW(Junction, dc.j_inst_up, 190, 126);
     NEW(Junction, dc.j_inst_down, 190, dc_con_sign_ext->y());
+    NEW(Junction, dc.j_jalpctor31, 365, 100);
+    NEW(Junction, dc.j_jump_reg, 355, 94);
     // Execute stage
     NEW(Junction, ex.j_mux, 450, 303);
     NEW(Multiplexer, ex.mux_imm, 470, 292, 2, true);
@@ -142,6 +144,8 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     new_bus(dc.j_inst_down->new_connector(coreview::Connector::AX_X), dc.sign_ext->new_connector(-1, 0), 2);
     new_bus(dc.instr_bus->new_connector(regs->connector_read1_reg()->point()), regs->connector_read1_reg(), 2);
     new_bus(dc.instr_bus->new_connector(regs->connector_read2_reg()->point()), regs->connector_read2_reg(), 2);
+    new_signal(dc.ctl_block->new_connector(1, -0.8), dc.j_jalpctor31->new_connector(coreview::Connector::AX_X));
+    new_signal(dc.ctl_block->new_connector(1, -10), dc.j_jump_reg->new_connector(coreview::Connector::AX_X));
     // Execute stage
     new_bus(ex.j_mux->new_connector(CON_AX_X), ex.mux_imm->connector_in(0));
     new_bus(ex.mux_imm->connector_out(), alu->connector_in_b());
@@ -154,7 +158,8 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     con->setAxes({CON_AXIS_Y(172)});
 
     // Control unit labels
-    new_label("JalPcToR31", 300, 92);
+    new_label("JumpReg", 300, 86);
+    new_label("PcToR31", 300, 92);
     new_label("MemToReg", 300, 106);
     new_label("MemWrite", 300, 112);
     new_label("MemRead", 300, 119);
@@ -165,7 +170,8 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
 
     coreview::Value *val;
     // Fetch stage values
-    NEW_V(25, 440, fetch_branch_value, false, 1);
+    NEW_V(25, 440,  fetch_branch_value, false, 1);
+    NEW_V(360, 93,  fetch_jump_reg_value, false, 1);
     // Decode stage values
     NEW_V(200, 200, decode_instruction_value); // Instruction
     NEW_V(360, 250, decode_reg1_value); // Register output 1
