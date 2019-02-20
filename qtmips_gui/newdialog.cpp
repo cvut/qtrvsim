@@ -65,8 +65,12 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     connect(ui->hazard_unit, SIGNAL(clicked(bool)), this, SLOT(hazard_unit_change()));
     connect(ui->hazard_stall, SIGNAL(clicked(bool)), this, SLOT(hazard_unit_change()));
     connect(ui->hazard_stall_forward, SIGNAL(clicked(bool)), this, SLOT(hazard_unit_change()));
+
     connect(ui->mem_protec_exec, SIGNAL(clicked(bool)), this, SLOT(mem_protec_exec_change(bool)));
     connect(ui->mem_protec_write, SIGNAL(clicked(bool)), this, SLOT(mem_protec_write_change(bool)));
+    connect(ui->mem_time_read, SIGNAL(valueChanged(int)), this, SLOT(mem_time_read_change(int)));
+    connect(ui->mem_time_write, SIGNAL(valueChanged(int)), this, SLOT(mem_time_write_change(int)));
+    connect(ui->mem_time_burst, SIGNAL(valueChanged(int)), this, SLOT(mem_time_burst_change(int)));
 
 	cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d);
 	cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p);
@@ -171,6 +175,27 @@ void NewDialog::mem_protec_write_change(bool v) {
 	switch2custom();
 }
 
+void NewDialog::mem_time_read_change(int v) {
+    if (config->memory_access_time_read() != (unsigned)v) {
+        config->set_memory_access_time_read(v);
+        switch2custom();
+    }
+}
+
+void NewDialog::mem_time_write_change(int v) {
+    if (config->memory_access_time_write() != (unsigned)v) {
+        config->set_memory_access_time_write(v);
+        switch2custom();
+    }
+}
+
+void NewDialog::mem_time_burst_change(int v) {
+    if (config->memory_access_time_burst() != (unsigned)v) {
+        config->set_memory_access_time_burst(v);
+        switch2custom();
+    }
+}
+
 void NewDialog::config_gui() {
     // Basic
     ui->elf_file->setText(config->elf());
@@ -185,6 +210,7 @@ void NewDialog::config_gui() {
     ui->mem_protec_write->setChecked(config->memory_write_protection());
     ui->mem_time_read->setValue(config->memory_access_time_read());
     ui->mem_time_write->setValue(config->memory_access_time_write());
+    ui->mem_time_burst->setValue(config->memory_access_time_burst());
     // Cache
 	cache_handler_d->config_gui();
 	cache_handler_p->config_gui();

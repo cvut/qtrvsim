@@ -46,6 +46,7 @@ using namespace machine;
 #define DF_WRITE_PROTEC false
 #define DF_MEM_ACC_READ 10
 #define DF_MEM_ACC_WRITE 10
+#define DF_MEM_ACC_BURST 0
 #define DF_ELF QString("")
 //////////////////////////////////////////////////////////////////////////////
 /// Default config of MachineConfigCache
@@ -185,6 +186,7 @@ MachineConfig::MachineConfig() {
     write_protect = DF_WRITE_PROTEC;
     mem_acc_read = DF_MEM_ACC_READ;
     mem_acc_write = DF_MEM_ACC_WRITE;
+    mem_acc_burst = DF_MEM_ACC_BURST;
     elf_path = DF_ELF;
     cch_program = MachineConfigCache();
     cch_data = MachineConfigCache();
@@ -198,6 +200,7 @@ MachineConfig::MachineConfig(const MachineConfig *cc) {
     write_protect = cc->memory_write_protection();
     mem_acc_read = cc->memory_access_time_read();
     mem_acc_write = cc->memory_access_time_write();
+    mem_acc_burst = cc->memory_access_time_burst();
     elf_path = cc->elf();
     cch_program = cc->cache_program();
     cch_data = cc->cache_data();
@@ -213,6 +216,7 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     write_protect = sts->value(N("MemoryWriteProtection"), DF_WRITE_PROTEC).toBool();
     mem_acc_read = sts->value(N("MemoryRead"), DF_MEM_ACC_READ).toUInt();
     mem_acc_write = sts->value(N("MemoryWrite"), DF_MEM_ACC_WRITE).toUInt();
+    mem_acc_burst = sts->value(N("MemoryBurts"), DF_MEM_ACC_BURST).toUInt();
     elf_path = sts->value(N("Elf"), DF_ELF).toString();
     cch_program = MachineConfigCache(sts, N("ProgramCache_"));
     cch_data = MachineConfigCache(sts, N("DataCache_"));
@@ -222,6 +226,9 @@ void MachineConfig::store(QSettings *sts, const QString &prefix) {
     sts->setValue(N("Pipelined"), pipelined());
     sts->setValue(N("DelaySlot"), delay_slot());
     sts->setValue(N("HazardUnit"), (unsigned)hazard_unit());
+    sts->setValue(N("MemoryRead"), memory_access_time_read());
+    sts->setValue(N("MemoryWrite"), memory_access_time_write());
+    sts->setValue(N("MemoryBurts"), memory_access_time_burst());
     sts->setValue(N("Elf"), elf_path);
     cch_program.store(sts, N("ProgramCache_"));
     cch_data.store(sts, N("DataCache_"));
@@ -251,6 +258,7 @@ void MachineConfig::preset(enum ConfigPresets p) {
     set_memory_write_protection(DF_WRITE_PROTEC);
     set_memory_access_time_read(DF_MEM_ACC_READ);
     set_memory_access_time_write(DF_MEM_ACC_WRITE);
+    set_memory_access_time_burst(DF_MEM_ACC_BURST);
 
     access_cache_program()->preset(p);
     access_cache_data()->preset(p);
@@ -282,6 +290,10 @@ void MachineConfig::set_memory_access_time_read(unsigned v) {
 
 void MachineConfig::set_memory_access_time_write(unsigned v) {
     mem_acc_write = v;
+}
+
+void MachineConfig::set_memory_access_time_burst(unsigned v) {
+    mem_acc_burst = v;
 }
 
 void MachineConfig::set_elf(QString path) {
@@ -326,6 +338,10 @@ unsigned MachineConfig::memory_access_time_write() const {
     return mem_acc_write > 1 ? mem_acc_write : 1;
 }
 
+unsigned MachineConfig::memory_access_time_burst() const {
+    return mem_acc_burst;
+}
+
 QString MachineConfig::elf() const {
     return elf_path;
 }
@@ -355,6 +371,7 @@ bool MachineConfig::operator==(const MachineConfig &c) const {
             CMP(memory_write_protection) && \
             CMP(memory_access_time_read) && \
             CMP(memory_access_time_write) && \
+            CMP(memory_access_time_burst) && \
             CMP(elf) && \
             CMP(cache_program) && \
             CMP(cache_data);

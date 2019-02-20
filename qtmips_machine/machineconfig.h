@@ -126,6 +126,7 @@ public:
     // Set memory access times. Passed value is in cycles.
     void set_memory_access_time_read(unsigned);
     void set_memory_access_time_write(unsigned);
+    void set_memory_access_time_burst(unsigned);
     // Set path to source elf file. This has to be set before core is initialized.
     void set_elf(QString path);
     // Configure cache
@@ -139,6 +140,7 @@ public:
     bool memory_write_protection() const;
     unsigned memory_access_time_read() const;
     unsigned memory_access_time_write() const;
+    unsigned memory_access_time_burst() const;
     QString elf() const;
     const MachineConfigCache &cache_program() const;
     const MachineConfigCache &cache_data() const;
@@ -153,7 +155,7 @@ private:
     bool pipeline, delayslot;
     enum HazardUnit hunit;
     bool exec_protect, write_protect;
-    unsigned mem_acc_read, mem_acc_write;
+    unsigned mem_acc_read, mem_acc_write, mem_acc_burst;
     QString elf_path;
     MachineConfigCache cch_program, cch_data;
 };

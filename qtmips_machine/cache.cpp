@@ -37,10 +37,12 @@
 
 using namespace machine;
 
-Cache::Cache(MemoryAccess  *m, const MachineConfigCache *cc, unsigned memory_access_penalty_r, unsigned memory_access_penalty_w) : cnf(cc) {
+Cache::Cache(MemoryAccess  *m, const MachineConfigCache *cc, unsigned memory_access_penalty_r,
+             unsigned memory_access_penalty_w, unsigned memory_access_penalty_b) : cnf(cc) {
     mem = m;
     access_pen_r = memory_access_penalty_r;
     access_pen_w = memory_access_penalty_w;
+    access_pen_b = memory_access_penalty_b;
     uncached_start = 0xf0000000;
     uncached_last = 0xffffffff;
     // Zero hit and miss rate
@@ -50,6 +52,8 @@ Cache::Cache(MemoryAccess  *m, const MachineConfigCache *cc, unsigned memory_acc
     miss_write = 0;
     mem_reads = 0;
     mem_writes = 0;
+    burst_reads = 0;
+    burst_writes = 0;
     dt = nullptr;
     replc.lfu = nullptr;
     replc.lru = nullptr;
@@ -132,6 +136,7 @@ bool Cache::wword(std::uint32_t address, std::uint32_t value) {
         (address >= uncached_start && address <= uncached_last)) {
         mem_writes++;
         emit memory_writes_update(mem_writes);
+        update_statistics();
         return mem->write_word(address, value);
     }
 
@@ -141,6 +146,7 @@ bool Cache::wword(std::uint32_t address, std::uint32_t value) {
     if (cnf.write_policy() != MachineConfigCache::WP_BACK) {
         mem_writes++;
         emit memory_writes_update(mem_writes);
+        update_statistics();
         return mem->write_word(address, value);
     }
     return changed;
@@ -151,6 +157,7 @@ std::uint32_t Cache::rword(std::uint32_t address, bool debug_access) const {
         (address >= uncached_start && address <= uncached_last)) {
         mem_reads++;
         emit memory_reads_update(mem_reads);
+        update_statistics();
         return mem->read_word(address, debug_access);
     }
 
@@ -172,6 +179,7 @@ void Cache::flush() {
         for (unsigned st = 0; st < cnf.sets(); st++)
             if (dt[as][st].valid)
                 kick(as, st);
+    update_statistics();
 }
 
 void Cache::sync() {
@@ -195,19 +203,28 @@ unsigned Cache::memory_writes() const {
 }
 
 unsigned Cache::stalled_cycles() const {
-    return miss_read * (access_pen_r - 1) + miss_write * (access_pen_w - 1);
+    unsigned st_cycles = mem_reads * (access_pen_r - 1) + mem_writes * (access_pen_w - 1);
+    if (access_pen_b != 0)
+        st_cycles -= burst_reads * (access_pen_r - access_pen_b) +
+                     burst_writes * (access_pen_w - access_pen_b);
+    return st_cycles;
 }
 
 double Cache::speed_improvement() const {
     unsigned lookup_time;
+    unsigned mem_access_time;
     unsigned comp = hit_read + hit_write + miss_read + miss_write;
     if (comp == 0)
         return 100.0;
     lookup_time = hit_read + miss_read;
     if (cnf.write_policy() == MachineConfigCache::WP_BACK)
         lookup_time += hit_write + miss_write;
+    mem_access_time = mem_reads * access_pen_r + mem_writes * access_pen_w;
+    if (access_pen_b != 0)
+        mem_access_time -= burst_reads * (access_pen_r - access_pen_b) +
+                           burst_writes * (access_pen_w - access_pen_b);
     return (double)((miss_read + hit_read) * access_pen_r + (miss_write + hit_write) * access_pen_w) \
-            / (double)(lookup_time + mem_reads * access_pen_r + mem_writes * access_pen_w) \
+            / (double)(lookup_time + mem_access_time) \
             * 100;
 }
 
@@ -233,6 +250,8 @@ void Cache::reset() {
     miss_write = 0;
     mem_reads = 0;
     mem_writes = 0;
+    burst_reads = 0;
+    burst_writes = 0;
     // Trigger signals
     emit hit_update(hit());
     emit miss_update(miss());
@@ -292,6 +311,7 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
         if (write && cnf.write_policy() == MachineConfigCache::WP_TROUGH_NOALLOC) {
             miss_write++;
             emit miss_update(miss());
+            update_statistics();
             return false;
         }
         // We have to kick something
@@ -346,13 +366,14 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
         else
             miss_read++;
         emit miss_update(miss());
-        update_statistics();
         for (unsigned i = 0; i < cnf.blocks(); i++) {
             cd.data[i] = mem->read_word(base_address(tag, row) + (4*i));
             change_counter++;
         }
         mem_reads += cnf.blocks();
+        burst_reads += cnf.blocks() - 1;
         emit memory_reads_update(mem_reads);
+        update_statistics();
     }
 
     // Update replcement data
@@ -403,6 +424,7 @@ void Cache::kick(unsigned associat_indx, unsigned row) const {
         for (unsigned i = 0; i < cnf.blocks(); i++)
             mem->write_word(base_address(cd.tag, row) + (4*i), cd.data[i]);
         mem_writes += cnf.blocks();
+        burst_writes += cnf.blocks() - 1;
         emit memory_writes_update(mem_writes);
     }
     cd.valid = false;

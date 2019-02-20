@@ -62,8 +62,10 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc) : QObject(), mcnf(&cc) {
     perip_spi_led = new PeripSpiLed();
     addressapce_insert_range(perip_spi_led, 0xffffc100, 0xffffc1ff, true);
 
-    cch_program = new Cache(cpu_mem, &cc.cache_program(), cc.memory_access_time_read(), cc.memory_access_time_write());
-    cch_data = new Cache(cpu_mem, &cc.cache_data(), cc.memory_access_time_read(), cc.memory_access_time_write());
+    cch_program = new Cache(cpu_mem, &cc.cache_program(), cc.memory_access_time_read(),
+                            cc.memory_access_time_write(), cc.memory_access_time_burst());
+    cch_data = new Cache(cpu_mem, &cc.cache_data(), cc.memory_access_time_read(),
+                         cc.memory_access_time_write(), cc.memory_access_time_burst());
 
     if (cc.pipelined())
         cr = new CorePipelined(regs, cch_program, cch_data, cc.hazard_unit());

@@ -46,7 +46,8 @@ namespace machine {
 class Cache : public MemoryAccess {
     Q_OBJECT
 public:
-    Cache(MemoryAccess *m, const MachineConfigCache *c, unsigned memory_access_penalty_r = 1, unsigned memory_access_penalty_w = 1);
+    Cache(MemoryAccess *m, const MachineConfigCache *c, unsigned memory_access_penalty_r = 1,
+          unsigned memory_access_penalty_w = 1, unsigned memory_access_penalty_b = 0);
     ~Cache();
 
     bool wword(std::uint32_t address, std::uint32_t value);
@@ -82,7 +83,7 @@ signals:
 private:
     MachineConfigCache cnf;
     MemoryAccess *mem;
-    unsigned access_pen_r, access_pen_w;
+    unsigned access_pen_r, access_pen_w, access_pen_b;
     std::uint32_t uncached_start;
     std::uint32_t uncached_last;
 
@@ -99,7 +100,7 @@ private:
     } replc; // Data used for replacement policy
 
     mutable unsigned hit_read, miss_read, hit_write, miss_write; // Hit and miss counters
-    mutable unsigned mem_reads, mem_writes; // Dirrect access to memory
+    mutable unsigned mem_reads, mem_writes, burst_reads, burst_writes; // Dirrect access to memory
     mutable std::uint32_t change_counter;
 
     std::uint32_t debug_rword(std::uint32_t address) const;
