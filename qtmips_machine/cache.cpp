@@ -177,8 +177,11 @@ void Cache::flush() {
 
     for (unsigned as = cnf.associativity(); as-- > 0 ; )
         for (unsigned st = 0; st < cnf.sets(); st++)
-            if (dt[as][st].valid)
+            if (dt[as][st].valid) {
                 kick(as, st);
+                emit cache_update(as, st, false, false, 0, 0);
+            }
+    change_counter++;
     update_statistics();
 }
 
