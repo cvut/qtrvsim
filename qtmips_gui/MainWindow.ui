@@ -87,6 +87,7 @@
     <addaction name="ipsMax"/>
     <addaction name="separator"/>
     <addaction name="actionRestart"/>
+    <addaction name="actionShow_Symbol"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
