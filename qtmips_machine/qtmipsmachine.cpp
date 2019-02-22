@@ -39,13 +39,17 @@
 
 using namespace machine;
 
-QtMipsMachine::QtMipsMachine(const MachineConfig &cc) : QObject(), mcnf(&cc) {
+QtMipsMachine::QtMipsMachine(const MachineConfig &cc, bool load_symtab) :
+                             QObject(), mcnf(&cc) {
     MemoryAccess *cpu_mem;
     stat = ST_READY;
+    symtab = nullptr;
 
     ProgramLoader program(cc.elf());
     mem_program_only = new Memory();
     program.to_memory(mem_program_only);
+    if (load_symtab)
+        symtab = program.get_symbol_table();
     program_end = program.end();
     regs = new Registers();
     if (program.get_executable_entry())
@@ -102,6 +106,9 @@ QtMipsMachine::~QtMipsMachine() {
     if (mem_program_only != nullptr)
         delete mem_program_only;
     mem_program_only = nullptr;
+    if (symtab != nullptr)
+        delete symtab;
+    symtab = nullptr;
 }
 
 const MachineConfig &QtMipsMachine::config() {
@@ -143,6 +150,10 @@ SerialPort *QtMipsMachine::serial_port() {
 
 PeripSpiLed *QtMipsMachine::peripheral_spi_led() {
     return perip_spi_led;
+}
+
+const SymbolTable *QtMipsMachine::symbol_table() {
+    return symtab;
 }
 
 const Core *QtMipsMachine::core() {

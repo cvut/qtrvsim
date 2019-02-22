@@ -53,6 +53,7 @@ public:
 
 signals:
     void machine_setup(machine::QtMipsMachine *machine);
+    void focus_addr(std::uint32_t);
 
 private:
 

@@ -33,40 +33,50 @@
  *
  ******************************************************************************/
 
-#ifndef PROGRAM_H
-#define PROGRAM_H
+#ifndef SYMBOLTABLE_H
+#define SYMBOLTABLE_H
 
-#include <unistd.h>
-#include <libelf.h>
-#include <gelf.h>
-#include <cstdint>
-#include <qvector.h>
-#include <qstring.h>
-#include <memory.h>
-#include "symboltable.h"
+#include <QString>
+#include <QObject>
+#include <QMap>
+#include <QMultiMap>
+#include <QStringList>
 
 namespace machine {
 
-class ProgramLoader {
-public:
-    ProgramLoader(const char *file);
-    ProgramLoader(QString file);
-    ~ProgramLoader();
+class SymbolTableEntry {
+    friend class SymbolTable;
+    SymbolTableEntry(QString name, std::uint32_t value, std::uint32_t size,
+                     unsigned char info = 0, unsigned char other = 0);
+protected:
+    QString name;
+    std::uint32_t value;
+    std::uint32_t size;
+    unsigned char info;
+    unsigned char other;
+};
 
-    void to_memory(Memory *mem); // Writes all loaded sections to memory
-    std::uint32_t end(); // Return address after which there is no more code for sure
-    std::uint32_t get_executable_entry();
-    SymbolTable *get_symbol_table();
+class SymbolTable : public QObject
+{
+    Q_OBJECT
+public:
+    SymbolTable(QObject *parent = 0);
+    ~SymbolTable();
+
+    void add_symbol(QString name, std::uint32_t value, std::uint32_t size,
+              unsigned char info = 0, unsigned char other = 0);
+    QStringList *names() const;
+public slots:
+    bool name_to_value(std::uint32_t &value, QString name) const;
+    bool value_to_name(QString &name, std::uint32_t value) const;
+signals:
+
+
 private:
-    int fd;
-    Elf *elf;
-    GElf_Ehdr hdr; // elf file header
-    size_t n_secs; // number of sections in elf program header
-    Elf32_Phdr *phdrs; // program section headers
-    QVector<size_t> map; // external index to phdrs index
-    std::uint32_t executable_entry;
+    QMultiMap<std::uint32_t, SymbolTableEntry*> map_value_to_symbol;
+    QMap<QString, SymbolTableEntry*> map_name_to_symbol;
 };
 
 }
 
-#endif // PROGRAM_H
+#endif // SYMBOLTABLE_H

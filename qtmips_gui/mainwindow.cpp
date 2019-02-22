@@ -37,6 +37,7 @@
 #include "aboutdialog.h"
 #include "ossyscall.h"
 #include "fontsize.h"
+#include "gotosymboldialog.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     machine = nullptr;
@@ -81,6 +82,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->actionExit, SIGNAL(triggered(bool)), this, SLOT(close()));
     connect(ui->actionNew, SIGNAL(triggered(bool)), this, SLOT(new_machine()));
     connect(ui->actionReload, SIGNAL(triggered(bool)), this, SLOT(machine_reload()));
+    connect(ui->actionShow_Symbol, SIGNAL(triggered(bool)), this, SLOT(show_symbol_dialog()));
     connect(ui->actionRegisters, SIGNAL(triggered(bool)), this, SLOT(show_registers()));
     connect(ui->actionProgram_memory, SIGNAL(triggered(bool)), this, SLOT(show_program()));
     connect(ui->actionMemory, SIGNAL(triggered(bool)), this, SLOT(show_memory()));
@@ -129,7 +131,7 @@ void MainWindow::start() {
 
 void MainWindow::create_core(const machine::MachineConfig &config) {
     // Create machine
-    machine::QtMipsMachine *new_machine = new machine::QtMipsMachine(&config);
+    machine::QtMipsMachine *new_machine = new machine::QtMipsMachine(&config, true);
 
     // Remove old machine
     if (machine != nullptr)
@@ -234,6 +236,21 @@ SHOW_HANDLER(cache_data)
 SHOW_HANDLER(peripherals)
 SHOW_HANDLER(terminal)
 #undef SHOW_HANDLER
+
+void MainWindow::show_symbol_dialog(){
+    if (machine == nullptr || machine->symbol_table() == nullptr)
+        return;
+    QStringList *symnames = machine->symbol_table()->names();
+    GoToSymbolDialog *gotosyboldialog = new GoToSymbolDialog(this, *symnames);
+    connect(gotosyboldialog, SIGNAL(program_focus_addr(std::uint32_t)),
+            program, SIGNAL(focus_addr(std::uint32_t)));
+    connect(gotosyboldialog, SIGNAL(memory_focus_addr(std::uint32_t)),
+            memory, SIGNAL(focus_addr(std::uint32_t)));
+    connect(gotosyboldialog, SIGNAL(obtain_value_for_name(std::uint32_t&,QString)),
+            machine->symbol_table(), SLOT(name_to_value(std::uint32_t&,QString)));
+    gotosyboldialog->exec();
+    delete symnames;
+}
 
 void MainWindow::about_qtmips()
 {

@@ -130,3 +130,36 @@ std::uint32_t ProgramLoader::end() {
 std::uint32_t ProgramLoader::get_executable_entry() {
     return executable_entry;
 }
+
+SymbolTable *ProgramLoader::get_symbol_table() {
+    SymbolTable *p_st = new SymbolTable();
+    Elf_Scn     *scn = NULL;
+    GElf_Shdr   shdr;
+    Elf_Data    *data;
+    int          count, ii;
+
+    elf_version(EV_CURRENT);
+
+    while (1) {
+        if ((scn = elf_nextscn(this->elf, scn)) == NULL)
+            return p_st;
+        gelf_getshdr(scn, &shdr);
+        if (shdr.sh_type == SHT_SYMTAB) {
+            /* found a symbol table, go print it. */
+            break;
+        }
+    }
+
+    data = elf_getdata(scn, NULL);
+    count = shdr.sh_size / shdr.sh_entsize;
+
+    /* rettrieve the symbol names */
+    for (ii = 0; ii < count; ++ii) {
+        GElf_Sym sym;
+        gelf_getsym(data, ii, &sym);
+        p_st->add_symbol(elf_strptr(elf, shdr.sh_link, sym.st_name),
+                        sym.st_value, sym.st_size, sym.st_info, sym.st_other);
+    }
+
+    return p_st;
+}

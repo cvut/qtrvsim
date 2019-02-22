@@ -373,6 +373,14 @@
     <string>Terminal</string>
    </property>
   </action>
+  <action name="actionShow_Symbol">
+   <property name="text">
+    <string>Show Symbol</string>
+   </property>
+   <property name="toolTip">
+    <string>Show Symbol</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>

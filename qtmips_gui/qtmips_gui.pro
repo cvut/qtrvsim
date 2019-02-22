@@ -61,7 +61,8 @@ SOURCES += \
     terminaldock.cpp \
     peripheralsview.cpp \
     coreview/multitext.cpp \
-    fontsize.cpp
+    fontsize.cpp \
+    gotosymboldialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -98,13 +99,15 @@ HEADERS += \
     terminaldock.h \
     peripheralsview.h \
     coreview/multitext.h \
-    fontsize.h
+    fontsize.h \
+    gotosymboldialog.h
 
 FORMS += \
         NewDialog.ui \
         NewDialogCache.ui \
         MainWindow.ui \
-    peripheralsview.ui
+    peripheralsview.ui \
+    gotosymboldialog.ui
 
 RESOURCES += \
         icons.qrc

@@ -74,6 +74,7 @@ public slots:
     void show_cache_program();
     void show_peripherals();
     void show_terminal();
+    void show_symbol_dialog();
     // Actions - help menu
     void about_qtmips();
     void about_qt();

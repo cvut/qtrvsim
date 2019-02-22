@@ -49,13 +49,14 @@
 #include <peripheral.h>
 #include <serialport.h>
 #include <peripspiled.h>
+#include <symboltable.h>
 
 namespace machine {
 
 class QtMipsMachine : public QObject {
     Q_OBJECT
 public:
-    QtMipsMachine(const MachineConfig &cc);
+    QtMipsMachine(const MachineConfig &cc, bool load_symtab = false);
     ~QtMipsMachine();
 
     const MachineConfig &config();
@@ -69,6 +70,7 @@ public:
     Cache *cache_data_rw();
     SerialPort *serial_port();
     PeripSpiLed *peripheral_spi_led();
+    const SymbolTable *symbol_table();
     const Core *core();
     const CoreSingle *core_singe();
     const CorePipelined *core_pipelined();
@@ -122,6 +124,7 @@ private:
     QTimer *run_t;
     unsigned int time_chunk;
 
+    SymbolTable *symtab;
     std::uint32_t program_end;
     enum Status stat;
     void set_status(enum Status st);
