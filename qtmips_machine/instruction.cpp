@@ -35,6 +35,7 @@
 
 #include <QMultiMap>
 #include <QVector>
+#include <iostream>
 #include "instruction.h"
 #include "alu.h"
 #include "memory.h"
@@ -87,20 +88,34 @@ struct InstructionMap {
 #define IT_I Instruction::T_I
 #define IT_J Instruction::T_J
 
+static const struct InstructionMap  srl_rotr_instruction_map[] = {
+    {"SRL",    IT_R, ALU_OP_SRL, NOMEM, nullptr,
+     .flags = FLAGS_ALU_T_R_TD_SHAMT},
+    {"ROTR",   IT_R, ALU_OP_ROTR, NOMEM, nullptr,
+     .flags = FLAGS_ALU_T_R_TD_SHAMT},
+};
+
+static const struct InstructionMap  srlv_rotrv_instruction_map[] = {
+    {"SRLV",   IT_R, ALU_OP_SRLV, NOMEM, nullptr,
+     .flags = FLAGS_ALU_T_R_STD_SHV},
+    {"ROTRV",   IT_R, ALU_OP_ROTRV, NOMEM, nullptr,
+     .flags = FLAGS_ALU_T_R_STD_SHV},
+};
+
 // This table is indexed by funct
 static const struct InstructionMap  alu_instruction_map[] = {
     {"SLL",    IT_R, ALU_OP_SLL, NOMEM, nullptr,
      .flags = FLAGS_ALU_T_R_TD_SHAMT},
     IM_UNKNOWN,
-    {"SRL",    IT_R, ALU_OP_SRL, NOMEM, nullptr,
-     .flags = FLAGS_ALU_T_R_TD_SHAMT},
+    {"SRL",    IT_R, ALU_OP_SRL, NOMEM, srl_rotr_instruction_map,
+     .flags = IMF_SUB_ENCODE(1, 21)},
     {"SRA",    IT_R, ALU_OP_SRA, NOMEM, nullptr,
      .flags = FLAGS_ALU_T_R_TD_SHAMT},
     {"SLLV",   IT_R, ALU_OP_SLLV, NOMEM, nullptr,
      .flags = FLAGS_ALU_T_R_STD_SHV},
     IM_UNKNOWN,
-    {"SRLV",   IT_R, ALU_OP_SRLV, NOMEM, nullptr,
-     .flags = FLAGS_ALU_T_R_STD_SHV},
+    {"SRLV",   IT_R, ALU_OP_SRLV, NOMEM, srlv_rotrv_instruction_map,
+     .flags = IMF_SUB_ENCODE(1, 6)},
     {"SRAV",   IT_R, ALU_OP_SRAV, NOMEM, nullptr,
      .flags = FLAGS_ALU_T_R_STD_SHV},
     {"JR",     IT_R, ALU_OP_NOP, NOMEM, nullptr,
@@ -195,7 +210,7 @@ static const struct InstructionMap  alu_instruction_map[] = {
 static const struct InstructionMap  special2_instruction_map[] = {
     {"MADD",    IT_R, ALU_OP_MADD, NOMEM, nullptr,
      .flags = FLAGS_ALU_T_R_ST | IMF_READ_HILO | IMF_WRITE_HILO},
-    {"MADD",    IT_R, ALU_OP_MADDU, NOMEM, nullptr,
+    {"MADDU",   IT_R, ALU_OP_MADDU, NOMEM, nullptr,
      .flags = FLAGS_ALU_T_R_ST | IMF_READ_HILO | IMF_WRITE_HILO},
     {"MUL",     IT_R, ALU_OP_MUL, NOMEM, nullptr,
      .flags = FLAGS_ALU_T_R_STD},     // 32
@@ -266,13 +281,52 @@ static const struct InstructionMap  special2_instruction_map[] = {
     IM_UNKNOWN,	//	63
 };
 
+static const struct InstructionMap  bshfl_instruction_map[] = {
+    IM_UNKNOWN,	//	0
+    IM_UNKNOWN,	//	1
+    {"WSBH", IT_R, ALU_OP_WSBH, NOMEM, nullptr,
+     .flags = FLAGS_ALU_T_R_TD},
+    IM_UNKNOWN,	//	3
+    IM_UNKNOWN,	//	4
+    IM_UNKNOWN,	//	5
+    IM_UNKNOWN,	//	6
+    IM_UNKNOWN,	//	7
+    IM_UNKNOWN,	//	8
+    IM_UNKNOWN,	//	9
+    IM_UNKNOWN,	//	10
+    IM_UNKNOWN,	//	11
+    IM_UNKNOWN,	//	12
+    IM_UNKNOWN,	//	13
+    IM_UNKNOWN,	//	14
+    IM_UNKNOWN,	//	15
+    {"SEB", IT_R, ALU_OP_SEB, NOMEM, nullptr,
+     .flags = FLAGS_ALU_T_R_TD},
+    IM_UNKNOWN,	//	17
+    IM_UNKNOWN,	//	18
+    IM_UNKNOWN,	//	19
+    IM_UNKNOWN,	//	20
+    IM_UNKNOWN,	//	21
+    IM_UNKNOWN,	//	22
+    IM_UNKNOWN,	//	23
+    {"SEH", IT_R, ALU_OP_SEH, NOMEM, nullptr,
+     .flags = FLAGS_ALU_T_R_TD},
+    IM_UNKNOWN,	//	25
+    IM_UNKNOWN,	//	26
+    IM_UNKNOWN,	//	27
+    IM_UNKNOWN,	//	28
+    IM_UNKNOWN,	//	29
+    IM_UNKNOWN,	//	30
+    IM_UNKNOWN,	//	31
+};
+
 static const struct InstructionMap  special3_instruction_map[] = {
     {"EXT", IT_I, ALU_OP_EXT, NOMEM, nullptr,
      .flags = IMF_SUPPORTED | IMF_REGWRITE | IMF_ALU_REQ_RS},
     IM_UNKNOWN,	//	1
     IM_UNKNOWN,	//	2
     IM_UNKNOWN,	//	3
-    IM_UNKNOWN,	//	4
+    {"INS", IT_I, ALU_OP_EXT, NOMEM, nullptr,
+     .flags = IMF_SUPPORTED | IMF_REGWRITE | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT},
     IM_UNKNOWN,	//	5
     IM_UNKNOWN,	//	6
     IM_UNKNOWN,	//	7
@@ -300,8 +354,8 @@ static const struct InstructionMap  special3_instruction_map[] = {
     IM_UNKNOWN,	//	29
     IM_UNKNOWN,	//	30
     IM_UNKNOWN,	//	31
-    {"BSHFL", IT_R, ALU_OP_BSHFL, NOMEM, nullptr,
-     .flags = FLAGS_ALU_T_R_TD},
+    {"BSHFL", IT_I, NOALU, NOMEM, bshfl_instruction_map,
+     .flags = IMF_SUB_ENCODE(5, 6)},
     IM_UNKNOWN,	//	33
     IM_UNKNOWN,	//	34
     IM_UNKNOWN,	//	35
@@ -759,6 +813,11 @@ void instruction_from_string_build_base(const InstructionMap *im = nullptr,
             continue;
         str_to_instruction_code_map.insert(im->name, code);
     }
+#if 0
+    for (auto i = str_to_instruction_code_map.begin();
+         i != str_to_instruction_code_map.end(); i++)
+        std::cout << i.key().toStdString() << ' ';
+#endif
 }
 
 static int parse_reg_from_string(QString str)

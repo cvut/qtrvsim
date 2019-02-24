@@ -37,7 +37,7 @@
 #define INSTRUCTION_H
 
 #include <QObject>
-#include <qstring.h>
+#include <QString>
 
 #include "machinedefs.h"
 

@@ -98,6 +98,7 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s,
                                    ExceptionCause &excause) {
     std::int64_t s64_val;
     std::uint64_t u64_val;
+    std::uint32_t u32_val;
     discard = false;
 
     switch(operation) {
@@ -107,16 +108,25 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s,
             return t << sa;
         case ALU_OP_SRL:
             return t >> sa;
+        case ALU_OP_ROTR:
+            if (!sa)
+                return t;
+            return (t >> sa) | (t << (32 - sa));
         case ALU_OP_SRA:
             // Note: This might be broken with some compilers but works with gcc
             return (std::int32_t)t >> sa;
         case ALU_OP_SLLV:
-            return t << s;
+            return t << (s & 0x1f);
         case ALU_OP_SRLV:
-            return t >> s;
+            return t >> (s & 0x1f);
+        case ALU_OP_ROTRV:
+            u32_val = s & 0x1f;
+            if (!u32_val)
+                return t;
+            return (t >> u32_val) | (t << (32 - u32_val));
         case ALU_OP_SRAV:
             // Note: same note as in case of SRA
-            return (std::int32_t)t >> s;
+            return (std::int32_t)t >> (s & 0x1f);
         case ALU_OP_MOVZ:
             // Signal discard of result when condition is not true
             discard = t != 0;
@@ -228,19 +238,17 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s,
             return 0;
         case ALU_OP_LUI:
             return t << 16;
-        case ALU_OP_BSHFL:
-            switch (sa) {
-            case 0x02:
-                return ((t << 8) & 0xff00ff00) | ((t >> 8) & 0x00ff00ff);
-            case 0x10:
-                return (uint32_t)(int32_t)(int8_t)t;
-            case 0x18:
-                return (uint32_t)(int32_t)(int16_t)t;
-            default:
-                throw QTMIPS_EXCEPTION(UnsupportedAluOperation, "Unknown BSHFL variant", QString::number(sa, 16));
-            }
+        case ALU_OP_WSBH:
+            return ((t << 8) & 0xff00ff00) | ((t >> 8) & 0x00ff00ff);
+        case ALU_OP_SEB:
+            return (uint32_t)(int32_t)(int8_t)t;
+        case ALU_OP_SEH:
+            return (uint32_t)(int32_t)(int16_t)t;
         case ALU_OP_EXT:
-            return (s >> sa) & ((1 << sz) - 1);
+            return (s >> sa) & ((1 << (sz + 1)) - 1);
+        case ALU_OP_INS:
+            u32_val = (1 << (sz + 1)) - 1;
+            return ((s & u32_val) << sa) | (t & ~(u32_val << sa));
         case ALU_OP_CLZ:
             return alu_op_clz(s);
         case ALU_OP_CLO:
