@@ -245,7 +245,7 @@ protected:
     struct dtExecute execute(const struct dtDecode&);
     struct dtMemory memory(const struct dtExecute&);
     void writeback(const struct dtMemory&);
-    bool handle_pc(const struct dtDecode&);
+    bool handle_pc(const struct dtDecode&, std::int32_t rel_adj = 0);
 
     enum ExceptionCause memory_special(enum AccessControl memctl,
                            int mode, bool memread, bool memwrite,

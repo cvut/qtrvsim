@@ -462,7 +462,7 @@ void Core::writeback(const struct dtMemory &dt) {
         regs->write_gp(dt.rwrite, dt.towrite_val);
 }
 
-bool Core::handle_pc(const struct dtDecode &dt) {
+bool Core::handle_pc(const struct dtDecode &dt, int32_t rel_adj) {
     bool branch = false;
     emit instruction_program_counter(dt.inst, dt.inst_addr, EXCAUSE_NONE);
 
@@ -497,10 +497,14 @@ bool Core::handle_pc(const struct dtDecode &dt) {
     emit fetch_jump_reg_value(false);
     emit fetch_branch_value(branch);
 
-    if (branch)
-        regs->pc_jmp((std::int32_t)(((dt.inst.immediate() & 0x8000) ? 0xFFFF0000 : 0) | (dt.inst.immediate() << 2)));
-    else
+    if (branch) {
+        std::int32_t rel_offset = dt.inst.immediate() << 2;
+        if (rel_offset & (1 << 17))
+            rel_offset -= 1 << 18;
+        regs->pc_jmp(rel_offset + rel_adj);
+    } else {
         regs->pc_inc();
+    }
     return branch;
 }
 
@@ -596,7 +600,7 @@ void CoreSingle::do_step(bool skip_break) {
         jump_branch_pc = jmp_delay_decode->inst_addr;
         *jmp_delay_decode = d; // Copy current decode
     } else {
-        handle_pc(d);
+        handle_pc(d, 4);
         jump_branch_pc = d.inst_addr;
     }
 
