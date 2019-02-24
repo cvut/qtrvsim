@@ -98,6 +98,7 @@ protected:
     } dc;
     struct {
         coreview::Junction *j_mux;
+        coreview::Junction *j_rs_num;
         coreview::Multiplexer *mux_imm, *mux_regdest;
     } ex;
     struct {

@@ -137,6 +137,9 @@ signals:
     void execute_regdest_value(std::uint32_t);
     void execute_regw_num_value(std::uint32_t);
     void execute_stall_forward_value(std::uint32_t);
+    void execute_rs_num_value(std::uint32_t);
+    void execute_rt_num_value(std::uint32_t);
+    void execute_rd_num_value(std::uint32_t);
     void memory_inst_addr_value(std::uint32_t);
     void memory_alu_value(std::uint32_t);
     void memory_rt_value(std::uint32_t);
@@ -198,6 +201,9 @@ protected:
         bool forward_m_d_rt; // forwarding required for beq, bne
         enum AluOp aluop; // Decoded ALU operation
         enum AccessControl memctl; // Decoded memory access type
+        std::uint8_t num_rs; // Number of the register s
+        std::uint8_t num_rt; // Number of the register t
+        std::uint8_t num_rd; // Number of the register d
         std::uint32_t val_rs; // Value from register rs
         std::uint32_t val_rt; // Value from register rt
         std::uint32_t immediate_val; // zero or sign-extended immediate value

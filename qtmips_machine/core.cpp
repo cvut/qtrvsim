@@ -233,8 +233,11 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     if (!(flags & IMF_SUPPORTED))
         throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Instruction with following opcode is not supported", QString::number(dt.inst.opcode(), 16));
 
-    std::uint32_t val_rs = regs->read_gp(dt.inst.rs());
-    std::uint32_t val_rt = regs->read_gp(dt.inst.rt());
+    std::uint8_t num_rs = dt.inst.rs();
+    std::uint8_t num_rt = dt.inst.rt();
+    std::uint8_t num_rd = dt.inst.rd();
+    std::uint32_t val_rs = regs->read_gp(num_rs);
+    std::uint32_t val_rt = regs->read_gp(num_rt);
     std::uint32_t immediate_val;
     bool regwrite = flags & IMF_REGWRITE;
     bool regd = flags & IMF_REGD;
@@ -268,16 +271,16 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     emit decode_memread_value((bool)(flags & IMF_MEMREAD));
     emit decode_alusrc_value((bool)(flags & IMF_ALUSRC));
     emit decode_regdest_value((bool)(flags & IMF_REGD));
-    emit decode_rs_num_value(dt.inst.rs());
-    emit decode_rt_num_value(dt.inst.rt());
-    emit decode_rd_num_value(dt.inst.rd());
+    emit decode_rs_num_value(num_rs);
+    emit decode_rt_num_value(num_rt);
+    emit decode_rd_num_value(num_rd);
     emit decode_regd31_value(regd31);
 
     if (regd31) {
         val_rt = dt.inst_addr + 8;
     }
 
-    rwrite = regd31 ? 31: regd ? dt.inst.rd() : dt.inst.rt();
+    rwrite = regd31 ? 31: regd ? num_rd : num_rt;
 
     return {
         .inst = dt.inst,
@@ -300,6 +303,9 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .forward_m_d_rt = false,
         .aluop = alu_op,
         .memctl = mem_ctl,
+        .num_rs = num_rs,
+        .num_rt = num_rt,
+        .num_rd = num_rd,
         .val_rs = val_rs,
         .val_rt = val_rt,
         .immediate_val = immediate_val,
@@ -327,13 +333,13 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
 
     if (excause == EXCAUSE_NONE) {
         alu_val = alu_operate(dt.aluop, dt.val_rs,
-                              alu_sec, dt.inst.shamt(), dt.inst.rd(), regs,
+                              alu_sec, dt.inst.shamt(), dt.num_rd, regs,
                               discard, excause);
         if (discard)
             regwrite = false;
 
         if (dt.aluop == ALU_OP_RDHWR) {
-            switch (dt.inst.rd()) {
+            switch (dt.num_rd) {
             case 0: // CPUNum
                 alu_val = 0;
                 break;
@@ -370,6 +376,9 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
     emit execute_alusrc_value(dt.alusrc);
     emit execute_regdest_value(dt.regd);
     emit execute_regw_num_value(dt.rwrite);
+    emit execute_rs_num_value(dt.num_rs);
+    emit execute_rt_num_value(dt.num_rt);
+    emit execute_rd_num_value(dt.num_rd);
     if (dt.stall)
         emit execute_stall_forward_value(1);
     else if (dt.ff_rs != FORWARD_NONE || dt.ff_rt != FORWARD_NONE)
@@ -518,6 +527,8 @@ void Core::dtDecodeInit(struct dtDecode &dt) {
     dt.forward_m_d_rt = false;
     dt.aluop = ALU_OP_SLL;
     dt.memctl = AC_NONE;
+    dt.num_rs = 0;
+    dt.num_rt = 0;
     dt.val_rs = 0;
     dt.val_rt = 0;
     dt.rwrite = 0;
@@ -659,8 +670,8 @@ void CorePipelined::do_step(bool skip_break) {
 
 #define HAZARD(STAGE) ( \
             (STAGE).regwrite && (STAGE).rwrite != 0 && \
-            ((dt_d.alu_req_rs && (STAGE).rwrite == dt_d.inst.rs()) ||  \
-             (dt_d.alu_req_rt && (STAGE).rwrite == dt_d.inst.rt())) \
+            ((dt_d.alu_req_rs && (STAGE).rwrite == dt_d.num_rs) ||  \
+             (dt_d.alu_req_rt && (STAGE).rwrite == dt_d.num_rt)) \
         ) // Note: We make exception with $0 as that has no effect and is used in nop instruction
 
         // Write back stage combinatoricly propagates written instruction to decode stage so nothing has to be done for that stage
@@ -668,11 +679,11 @@ void CorePipelined::do_step(bool skip_break) {
             // Hazard with instruction in memory stage
             if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
                 // Forward result value
-                if (dt_d.alu_req_rs && dt_m.rwrite == dt_d.inst.rs()) {
+                if (dt_d.alu_req_rs && dt_m.rwrite == dt_d.num_rs) {
                     dt_d.val_rs = dt_m.towrite_val;
                     dt_d.ff_rs = FORWARD_FROM_W;
                 }
-                if (dt_d.alu_req_rt && dt_m.rwrite == dt_d.inst.rt()) {
+                if (dt_d.alu_req_rt && dt_m.rwrite == dt_d.num_rt) {
                     dt_d.val_rt = dt_m.towrite_val;
                     dt_d.ff_rt = FORWARD_FROM_W;
                 }
@@ -686,11 +697,11 @@ void CorePipelined::do_step(bool skip_break) {
                     stall = true;
                 else {
                     // Forward result value
-                    if (dt_d.alu_req_rs && dt_e.rwrite == dt_d.inst.rs()) {
+                    if (dt_d.alu_req_rs && dt_e.rwrite == dt_d.num_rs) {
                         dt_d.val_rs = dt_e.alu_val;
                         dt_d.ff_rs = FORWARD_FROM_M;
                      }
-                    if (dt_d.alu_req_rt && dt_e.rwrite == dt_d.inst.rt()) {
+                    if (dt_d.alu_req_rt && dt_e.rwrite == dt_d.num_rt) {
                         dt_d.val_rt = dt_e.alu_val;
                         dt_d.ff_rt = FORWARD_FROM_M;
                     }
@@ -700,24 +711,24 @@ void CorePipelined::do_step(bool skip_break) {
         }
 #undef HAZARD
         if (dt_e.rwrite != 0 && dt_e.regwrite &&
-            ((dt_d.bjr_req_rs && dt_d.inst.rs() == dt_e.rwrite) ||
-             (dt_d.bjr_req_rt && dt_d.inst.rt() == dt_e.rwrite))) {
+            ((dt_d.bjr_req_rs && dt_d.num_rs == dt_e.rwrite) ||
+             (dt_d.bjr_req_rt && dt_d.num_rt == dt_e.rwrite))) {
             stall = true;
             branch_stall = true;
         } else {
             if (hazard_unit != MachineConfig::HU_STALL_FORWARD || dt_m.memtoreg) {
                 if (dt_m.rwrite != 0 && dt_m.regwrite &&
-                    ((dt_d.bjr_req_rs && dt_d.inst.rs() == dt_m.rwrite) ||
-                     (dt_d.bjr_req_rt && dt_d.inst.rt() == dt_m.rwrite)))
+                    ((dt_d.bjr_req_rs && dt_d.num_rs == dt_m.rwrite) ||
+                     (dt_d.bjr_req_rt && dt_d.num_rt == dt_m.rwrite)))
                     stall = true;
             } else {
                 if (dt_m.rwrite != 0 && dt_m.regwrite &&
-                    dt_d.bjr_req_rs && dt_d.inst.rs() == dt_m.rwrite) {
+                    dt_d.bjr_req_rs && dt_d.num_rs == dt_m.rwrite) {
                     dt_d.val_rs = dt_m.towrite_val;
                     dt_d.forward_m_d_rs = true;
                 }
                 if (dt_m.rwrite != 0 && dt_m.regwrite &&
-                    dt_d.bjr_req_rt && dt_d.inst.rt() == dt_m.rwrite) {
+                    dt_d.bjr_req_rt && dt_d.num_rt == dt_m.rwrite) {
                     dt_d.val_rt = dt_m.towrite_val;
                     dt_d.forward_m_d_rt = true;
                 }

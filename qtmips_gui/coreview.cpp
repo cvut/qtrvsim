@@ -204,10 +204,14 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     // Write back stage
     NEW_V(710, 330, writeback_value, true); // Write back value
 
+    new_label("RsD", 215, 241);
     NEW_V(205, 250, decode_rs_num_value, false, 2, 0, 10);
+    new_label("RtD", 215, 261);
     NEW_V(205, 270, decode_rt_num_value, false, 2, 0, 10);
 
+    new_label("RtD", 297, 372);
     NEW_V(320, 380, decode_rt_num_value, false, 2, 0, 10);
+    new_label("RdD", 297, 380);
     NEW_V(320, 390, decode_rd_num_value, false, 2, 0, 10);
     NEW_V(320, 500, writeback_regw_num_value, false, 2, 0, 10);
 
@@ -472,6 +476,10 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
     NEW_V(460, 105, execute_regw_value, false, 1);
     NEW_V(560, 105, memory_regw_value, false, 1);
 
+    new_label("RtE", 427, 372);
+    NEW_V(450, 380, execute_rt_num_value, false, 2, 0, 10);
+    new_label("RdE", 427, 380);
+    NEW_V(450, 390, execute_rd_num_value, false, 2, 0, 10);
     NEW_V(510, 385, execute_regw_num_value, false, 2, 0, 10);
     NEW_V(610, 385, memory_regw_num_value, false, 2, 0, 10);
 
@@ -498,6 +506,14 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
         con->setAxes({CON_AXIS_Y(380), CON_AXIS_X(330)});
         con = new_bus(hu.j_alu_out->new_connector(CON_AX_X), dc.cmp->new_connector(0.5, 1));
         con->setAxes({CON_AXIS_Y(380), CON_AXIS_X(330)});
+
+        struct coreview::Latch::ConnectorPair regdest_dc_rs = latch_id_ex->new_connector(ex.mux_regdest->connector_in(0)->point().y() - latch_id_ex->y() - 8);
+        new_bus(dc.instr_bus->new_connector(0, ex.mux_regdest->connector_in(0)->y() - 8), regdest_dc_rs.in, 2);
+        new_label("RsE", 427, 364);
+        NEW_V(450, 370, execute_rs_num_value, false, 2, 0, 10);
+        NEW(Junction, ex.j_rs_num, 442, 372);
+        new_bus(regdest_dc_rs.out, ex.j_rs_num->new_connector(coreview::Connector::AX_X), 2);
+
 
         NEW_V(434, 250, execute_reg1_ff_value, false, 1); // Register 1 forward to ALU
         NEW_V(434, 303, execute_reg2_ff_value, false, 1); // Register 2 forward to ALU
