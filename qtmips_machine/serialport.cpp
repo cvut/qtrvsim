@@ -35,10 +35,23 @@
 
 #include "serialport.h"
 
+#define SERP_RX_ST_REG_o           0x00
+#define SERP_RX_ST_REG_READY_m      0x1
+#define SERP_RX_ST_REG_IE_m         0x2
+
+#define SERP_RX_DATA_REG_o         0x04
+
+#define SERP_TX_ST_REG_o           0x08
+#define SERP_TX_ST_REG_READY_m      0x1
+#define SERP_TX_ST_REG_IE_m         0x2
+
+#define SERP_TX_DATA_REG_o         0x0c
+
 using namespace machine;
 
 SerialPort::SerialPort() {
-
+    rx_st_reg = 0;
+    tx_st_reg = 0;
 }
 
 SerialPort::~SerialPort() {
@@ -52,9 +65,19 @@ bool SerialPort::wword(std::uint32_t address, std::uint32_t value) {
 #endif
     emit write_notification(address, value);
 
-    if (address == 0x04)
+    switch (address) {
+    case SERP_RX_ST_REG_o:
+        rx_st_reg &= ~SERP_RX_ST_REG_IE_m;
+        rx_st_reg |= value & SERP_RX_ST_REG_IE_m;
+        break;
+    case SERP_TX_ST_REG_o:
+        tx_st_reg &= ~SERP_TX_ST_REG_IE_m;
+        tx_st_reg |= value & SERP_TX_ST_REG_IE_m;
+        break;
+    case SERP_TX_DATA_REG_o:
         emit tx_byte(value & 0xff);
-
+        break;
+    }
     return true;
 }
 
@@ -65,6 +88,17 @@ std::uint32_t SerialPort::rword(std::uint32_t address, bool debug_access) const 
     printf("SerialPort::rword address 0x%08lx\n",
            (unsigned long)address);
 #endif
+    switch (address) {
+    case SERP_RX_ST_REG_o:
+        value = rx_st_reg;
+        break;
+    case SERP_RX_DATA_REG_o:
+        value = 0;
+        break;
+    case SERP_TX_ST_REG_o:
+        value = tx_st_reg | SERP_TX_ST_REG_READY_m;
+        break;
+    }
 
     emit read_notification(address, &value);
 

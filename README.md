@@ -90,19 +90,29 @@ Peripherals
 The simulator implements emulation of two peripherals for now.
 
 The firs is simple serial port (UART) which transmission
-(Tx) support only for now. It provides two registers, the
-first is status port. Bit 0 is reserved for notification
-that UART is busy and cannot accept next character.
-The second register is actual Tx buffer. The LSB byte
-of writtent word is transmitted to terminal window.
-Definition of peripheral base address and registers
-offsets follows.
-
+(Tx) support only for now. Actual version implements only
+two registers, the 'SERP_TX_ST_REG' is trasmit status register.
+Bit 0 signals by value 1 that UART is ready and can
+accept next character to be sent.
+The second register 'SERP_TX_DATA_REG' is actual Tx buffer.
+The LSB byte of writtent word is transmitted to terminal
+window. Definition of peripheral base address and registers
+offsets follows including reserve for the future Rx port
+implementation.
 ```
 #define SERIAL_PORT_BASE   0xffffc000
-#define SERP_ST_REG_o            0x00
-#define SERP_ST_REG_TX_BUSY_m     0x1
-#define SERP_TX_REG_o            0x04
+
+#define SERP_RX_ST_REG_o           0x00
+#define SERP_RX_ST_REG_READY_m      0x1
+#define SERP_RX_ST_REG_IE_m         0x2
+
+#define SERP_RX_DATA_REG_o         0x04
+
+#define SERP_TX_ST_REG_o           0x08
+#define SERP_TX_ST_REG_READY_m      0x1
+#define SERP_TX_ST_REG_IE_m         0x2
+
+#define SERP_TX_DATA_REG_o         0x0c
 ```
 
 The another peripheral allows to set three byte values

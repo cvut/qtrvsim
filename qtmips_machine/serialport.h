@@ -58,6 +58,9 @@ signals:
 public:
     bool wword(std::uint32_t address, std::uint32_t value);
     std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
+private:
+    std::uint32_t rx_st_reg;
+    std::uint32_t tx_st_reg;
 };
 
 }
