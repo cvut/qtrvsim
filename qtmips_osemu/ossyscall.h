@@ -66,10 +66,13 @@ public:
     OSSYCALL_HANDLER_DECLARE(do_sys_set_thread_area);
     OSSYCALL_HANDLER_DECLARE(do_sys_writev);
     OSSYCALL_HANDLER_DECLARE(do_sys_write);
+    OSSYCALL_HANDLER_DECLARE(do_sys_readv);
+    OSSYCALL_HANDLER_DECLARE(do_sys_read);
     OSSYCALL_HANDLER_DECLARE(do_sys_brk);
     OSSYCALL_HANDLER_DECLARE(do_sys_mmap2);
 signals:
     void char_written(int fd, unsigned int val);
+    void rx_byte_pool(int fd, unsigned int &data, bool &available);
 private:
     std::uint32_t brk_limit;
     std::uint32_t anonymous_base;

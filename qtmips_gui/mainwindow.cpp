@@ -154,6 +154,8 @@ void MainWindow::create_core(const machine::MachineConfig &config) {
     osemu::OsSyscallExceptionHandler *osemu_handler = new osemu::OsSyscallExceptionHandler;
     machine->register_exception_handler(machine::EXCAUSE_SYSCALL, osemu_handler);
     connect(osemu_handler, SIGNAL(char_written(int,uint)), terminal, SLOT(tx_byte(int,uint)));
+    connect(osemu_handler, SIGNAL(rx_byte_pool(int,uint&,bool&)),
+            terminal, SLOT(rx_byte_pool(int,uint&,bool&)));
 #endif
 
     // Connect machine signals and slots

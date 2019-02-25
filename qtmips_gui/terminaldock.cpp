@@ -49,6 +49,11 @@ TerminalDock::TerminalDock(QWidget *parent, QSettings *settings) : QDockWidget(p
     terminal_text->setMinimumSize(30, 30);
     layout_box->addWidget(terminal_text);
     append_cursor = new QTextCursor(terminal_text->document());
+    layout_bottom_box = new QHBoxLayout();
+    layout_bottom_box->addWidget(new QLabel("Input:"));
+    input_edit = new QLineEdit();
+    layout_bottom_box->addWidget(input_edit);
+    layout_box->addLayout(layout_bottom_box);
 
     setObjectName("Terminal");
     setWindowTitle("Terminal");
@@ -62,6 +67,8 @@ void TerminalDock::setup(const machine::SerialPort *ser_port) {
     if (ser_port == nullptr)
         return;
     connect(ser_port, SIGNAL(tx_byte(uint)), this, SLOT(tx_byte(uint)));
+    connect(ser_port, SIGNAL(rx_byte_pool(int,uint&,bool&)),
+            this, SLOT(rx_byte_pool(int,uint&,bool&)));
 }
 
 void TerminalDock::tx_byte(unsigned int data) {
@@ -75,4 +82,14 @@ void TerminalDock::tx_byte(int fd, unsigned int data)
 {
     (void)fd;
     tx_byte(data);
+}
+
+void TerminalDock::rx_byte_pool(int fd, unsigned int &data, bool &available) {
+    QString str = input_edit->text();
+    available = false;
+    if (str.count() > 0) {
+        data = str[0].toLatin1();
+        input_edit->setText(str.remove(0, 1));
+        available = true;
+    }
 }

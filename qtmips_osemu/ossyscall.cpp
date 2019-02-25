@@ -62,7 +62,7 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
         MIPS_SYS(sys_syscall    , 8, syscall_default_handler)    /* 4000 */
         MIPS_SYS(sys_exit       , 1, syscall_default_handler)
         MIPS_SYS(sys_fork       , 0, syscall_default_handler)
-        MIPS_SYS(sys_read       , 3, syscall_default_handler)
+        MIPS_SYS(sys_read       , 3, do_sys_read)
         MIPS_SYS(sys_write      , 3, do_sys_write)
         MIPS_SYS(sys_open       , 3, syscall_default_handler)    /* 4005 */
         MIPS_SYS(sys_close      , 1, syscall_default_handler)
@@ -204,7 +204,7 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
         MIPS_SYS(sys_select     , 5, syscall_default_handler)
         MIPS_SYS(sys_flock      , 2, syscall_default_handler)
         MIPS_SYS(sys_msync      , 3, syscall_default_handler)
-        MIPS_SYS(sys_readv      , 3, syscall_default_handler)    /* 4145 */
+        MIPS_SYS(sys_readv      , 3, do_sys_readv)    /* 4145 */
         MIPS_SYS(sys_writev     , 3, do_sys_writev)
         MIPS_SYS(sys_cacheflush , 3, syscall_default_handler)
         MIPS_SYS(sys_cachectl   , 3, syscall_default_handler)
@@ -593,6 +593,83 @@ int OsSyscallExceptionHandler::do_sys_write(std::uint32_t &result, Core *core,
         int ch = mem->read_byte(buf++);
         printf("%c", ch);
         emit char_written(fd, ch);
+    }
+
+    return 0;
+}
+
+// ssize_t readv(int fd, const struct iovec *iov, int iovcnt);
+int OsSyscallExceptionHandler::do_sys_readv(std::uint32_t &result, Core *core,
+               std::uint32_t syscall_num,
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
+               std::uint32_t a7, std::uint32_t a8) {
+    (void)core; (void)syscall_num;
+    (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
+
+    result = 0;
+    int fd = a1;
+    std::uint32_t iov = a2;
+    int iovcnt = a3;
+    MemoryAccess *mem = core->get_mem_data();
+    bool available;
+    unsigned int byte;
+
+    printf("sys_readv to fd %d\n", fd);
+
+    while (iovcnt-- > 0) {
+        std::uint32_t iov_base = mem->read_word(iov);
+        std::uint32_t iov_len = mem->read_word(iov + 4);
+        iov += 8;
+        available = true;
+        for (std::uint32_t i = 0; i < iov_len; i++) {
+            emit rx_byte_pool(fd, byte, available);
+            if (!available) {
+                // add final newline if there are no more data
+                mem->write_byte(iov_base++, '\n');
+                result += 1;
+                break;
+            }
+            mem->write_byte(iov_base++, byte);
+            result += 1;
+        }
+        if (!available)
+            break;
+    }
+
+    return 0;
+}
+
+// ssize_t read(int fd, void *buf, size_t count);
+int OsSyscallExceptionHandler::do_sys_read(std::uint32_t &result, Core *core,
+               std::uint32_t syscall_num,
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
+               std::uint32_t a7, std::uint32_t a8) {
+    (void)core; (void)syscall_num;
+    (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
+
+    result = 0;
+    int fd = a1;
+    std::uint32_t buf = a2;
+    int size = a3;
+    MemoryAccess *mem = core->get_mem_data();
+    bool available;
+    unsigned int byte;
+
+    printf("sys_read to fd %d\n", fd);
+
+    result = 0;
+    while (size-- > 0) {
+        emit rx_byte_pool(fd, byte, available);
+        if (!available) {
+            // add final newline if there are no more data
+            mem->write_byte(buf++, '\n');
+            result += 1;
+            break;
+        }
+        mem->write_byte(buf++, byte);
+        result += 1;
     }
 
     return 0;

@@ -51,11 +51,24 @@ using namespace machine;
 
 SerialPort::SerialPort() {
     rx_st_reg = 0;
+    rx_data_reg = 0;
     tx_st_reg = 0;
 }
 
 SerialPort::~SerialPort() {
 
+}
+
+void SerialPort::pool_rx_byte() const {
+    unsigned int byte = 0;
+    bool available = false;
+    if (!(rx_st_reg & SERP_RX_ST_REG_READY_m)) {
+        emit rx_byte_pool(0, byte, available);
+        if (available) {
+            rx_data_reg = byte;
+            rx_st_reg |= SERP_RX_ST_REG_READY_m;
+        }
+    }
 }
 
 bool SerialPort::wword(std::uint32_t address, std::uint32_t value) {
@@ -90,10 +103,17 @@ std::uint32_t SerialPort::rword(std::uint32_t address, bool debug_access) const 
 #endif
     switch (address) {
     case SERP_RX_ST_REG_o:
+        pool_rx_byte();
         value = rx_st_reg;
         break;
     case SERP_RX_DATA_REG_o:
-        value = 0;
+        pool_rx_byte();
+        if (rx_st_reg & SERP_RX_ST_REG_READY_m) {
+            value = rx_data_reg;
+            rx_st_reg &= ~SERP_RX_ST_REG_READY_m;
+        } else {
+            value = 0;
+        }
         break;
     case SERP_TX_ST_REG_o:
         value = tx_st_reg | SERP_TX_ST_REG_READY_m;
