@@ -58,12 +58,13 @@ enum AccessControl {
 };
 
 enum ExceptionCause {
-    EXCAUSE_NONE,
-    EXCAUSE_BREAK,
-    EXCAUSE_SYSCALL,
-    EXCAUSE_HWBREAK,
-    EXCAUSE_TRAP,
-    EXCAUSE_OVERFLOW,
+    EXCAUSE_NONE     =  0,
+    EXCAUSE_INT      =  1,
+    EXCAUSE_SYSCALL  =  8,
+    EXCAUSE_BREAK    =  9,
+    EXCAUSE_OVERFLOW = 12,
+    EXCAUSE_TRAP     = 13,
+    EXCAUSE_HWBREAK  = 14,
 };
 
 enum AluOp : std::uint8_t {

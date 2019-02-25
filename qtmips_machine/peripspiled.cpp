@@ -46,7 +46,13 @@ using namespace machine;
 #define SPILED_REG_KNOBS_8BIT_o         0x024
 
 PeripSpiLed::PeripSpiLed() {
+    spiled_reg_led_line = 0;
+    spiled_reg_led_rgb1 = 0;
+    spiled_reg_led_rgb2 = 0;
+    spiled_reg_led_kbdwr_direct = 0;
 
+    spiled_reg_kbdrd_knobs_direct = 0;
+    spiled_reg_knobs_8bit = 0;
 }
 
 PeripSpiLed::~PeripSpiLed() {
@@ -83,10 +89,7 @@ bool PeripSpiLed::wword(std::uint32_t address, std::uint32_t value) {
 std::uint32_t PeripSpiLed::rword(std::uint32_t address, bool debug_access) const {
     (void)debug_access;
     std::uint32_t value = 0x00000000;
-#if 0
-    printf("PeripSpiLed::rword address 0x%08lx\n",
-           (unsigned long)address);
-#endif
+
     switch (address) {
     case  SPILED_REG_LED_LINE_o:
         value = spiled_reg_led_line;
@@ -111,6 +114,11 @@ std::uint32_t PeripSpiLed::rword(std::uint32_t address, bool debug_access) const
     }
 
     emit read_notification(address, &value);
+
+#if 0
+    printf("PeripSpiLed::rword address 0x%08lx value 0x%08lx\n",
+           (unsigned long)address, (unsigned long)value);
+#endif
 
     return value;
 }

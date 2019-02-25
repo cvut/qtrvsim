@@ -61,7 +61,8 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc, bool load_symtab) :
     cpu_mem = physaddrspace;
 
     ser_port = new SerialPort();
-    addressapce_insert_range(ser_port, 0xffffc000, 0xffffc0ff, true);
+    addressapce_insert_range(ser_port, 0xffffc000, 0xffffc03f, true);
+    addressapce_insert_range(ser_port, 0xffff0000, 0xffff003f, false);
 
     perip_spi_led = new PeripSpiLed();
     addressapce_insert_range(perip_spi_led, 0xffffc100, 0xffffc1ff, true);
