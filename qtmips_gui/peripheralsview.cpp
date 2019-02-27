@@ -7,6 +7,10 @@ PeripheralsView::PeripheralsView(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->dialRed->setStyleSheet("QDial { background-color: red }");
+    ui->dialGreen->setStyleSheet("QDial { background-color: green }");
+    ui->dialBlue->setStyleSheet("QDial { background-color: blue }");
+
     connect(ui->dialRed, SIGNAL(valueChanged(int)), ui->spinRed, SLOT(setValue(int)));
     connect(ui->dialGreen, SIGNAL(valueChanged(int)), ui->spinGreen, SLOT(setValue(int)));
     connect(ui->dialBlue, SIGNAL(valueChanged(int)), ui->spinBlue, SLOT(setValue(int)));
