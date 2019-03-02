@@ -7,8 +7,8 @@ mkdir -p build
 cd build
 
 # Compile
-qtchooser -run-tool=qmake -qt=5 "$ROOT" "QMAKE_RPATHDIR += ../qtmips_machine"
-make -j$(nproc) sub-qtmips_cli sub-qtmips_gui # Note: we are building these to to not build tests
+qtchooser -run-tool=qmake -qt=5 -recursive "$ROOT" "QMAKE_RPATHDIR += ../qtmips_machine ../qtmips_osemu"
+make sub-qtmips_cli sub-qtmips_gui # Note: we are building these to to not build tests
 
 # Link executables to more suitable place
 ln -fs qtmips_cli/qtmips_cli cli
