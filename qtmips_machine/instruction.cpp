@@ -437,7 +437,129 @@ static const struct InstructionMap  regimm_instruction_map[] = {
     IM_UNKNOWN,
     IM_UNKNOWN,
     {"SYNCI", IT_I,  ALU_OP_ADDU, AC_CACHE_OP, nullptr, // SYNCI
-     .flags = IMF_SUPPORTED | IMF_BJR_REQ_RS},
+     .flags = IMF_SUPPORTED | IMF_STOP_IF | IMF_BJR_REQ_RS},
+};
+
+static const struct InstructionMap  cop0_func_instruction_map[] = {
+    IM_UNKNOWN,	//	0
+    IM_UNKNOWN,	//	1
+    IM_UNKNOWN,	//	2
+    IM_UNKNOWN,	//	3
+    IM_UNKNOWN,	//	4
+    IM_UNKNOWN,	//	5
+    IM_UNKNOWN,	//	6
+    IM_UNKNOWN,	//	7
+    IM_UNKNOWN,	//	8
+    IM_UNKNOWN,	//	9
+    IM_UNKNOWN,	//	10
+    IM_UNKNOWN,	//	11
+    IM_UNKNOWN,	//	12
+    IM_UNKNOWN,	//	13
+    IM_UNKNOWN,	//	14
+    IM_UNKNOWN,	//	15
+    IM_UNKNOWN,	//	16
+    IM_UNKNOWN,	//	17
+    IM_UNKNOWN,	//	18
+    IM_UNKNOWN,	//	19
+    IM_UNKNOWN,	//	20
+    IM_UNKNOWN,	//	21
+    IM_UNKNOWN,	//	22
+    IM_UNKNOWN,	//	23
+    {"ERET", IT_I, ALU_OP_ERET, NOMEM, nullptr,
+     .flags = IMF_SUPPORTED | IMF_STOP_IF},
+    IM_UNKNOWN,	//	25
+    IM_UNKNOWN,	//	26
+    IM_UNKNOWN,	//	27
+    IM_UNKNOWN,	//	28
+    IM_UNKNOWN,	//	29
+    IM_UNKNOWN,	//	30
+    IM_UNKNOWN,	//	31
+    IM_UNKNOWN,	//	32
+    IM_UNKNOWN,	//	33
+    IM_UNKNOWN,	//	34
+    IM_UNKNOWN,	//	35
+    IM_UNKNOWN,	//	36
+    IM_UNKNOWN,	//	37
+    IM_UNKNOWN,	//	38
+    IM_UNKNOWN,	//	39
+    IM_UNKNOWN,	//	40
+    IM_UNKNOWN,	//	41
+    IM_UNKNOWN,	//	42
+    IM_UNKNOWN,	//	43
+    IM_UNKNOWN,	//	44
+    IM_UNKNOWN,	//	45
+    IM_UNKNOWN,	//	46
+    IM_UNKNOWN,	//	47
+    IM_UNKNOWN,	//	48
+    IM_UNKNOWN,	//	49
+    IM_UNKNOWN,	//	50
+    IM_UNKNOWN,	//	51
+    IM_UNKNOWN,	//	52
+    IM_UNKNOWN,	//	53
+    IM_UNKNOWN,	//	54
+    IM_UNKNOWN,	//	55
+    IM_UNKNOWN,	//	56
+    IM_UNKNOWN,	//	57
+    IM_UNKNOWN,	//	58
+    IM_UNKNOWN,	//	59
+    IM_UNKNOWN,	//	60
+    IM_UNKNOWN,	//	61
+    IM_UNKNOWN,	//	62
+    IM_UNKNOWN,	//	63
+};
+
+static const struct InstructionMap  cop0_instruction_map[] = {
+    {"MFC0", IT_I, ALU_OP_MFC0, NOMEM, nullptr,
+     .flags = IMF_SUPPORTED | IMF_REGWRITE},
+    IM_UNKNOWN,	//	1
+    IM_UNKNOWN,	//	2 MFH
+    IM_UNKNOWN,	//	3
+    {"MTC0", IT_I, ALU_OP_MTC0, NOMEM, nullptr,
+     .flags = IMF_SUPPORTED | IMF_ALU_REQ_RT},
+    IM_UNKNOWN,	//	5
+    IM_UNKNOWN,	//	6 MTH
+    IM_UNKNOWN,	//	7
+    IM_UNKNOWN,	//	8
+    IM_UNKNOWN,	//	9
+    IM_UNKNOWN,	//  10 RDPGPR
+    {"MFMC0", IT_I, ALU_OP_MFMC0, NOMEM, nullptr,
+     .flags = IMF_SUPPORTED | IMF_REGWRITE},
+    IM_UNKNOWN,	//	12
+    IM_UNKNOWN,	//	13
+    IM_UNKNOWN,	//	13 WRPGPR
+    IM_UNKNOWN,	//	15
+    {"C0", IT_I, NOALU, NOMEM, cop0_func_instruction_map,
+     .flags = IMF_SUB_ENCODE(6, 0)},
+    {"C0", IT_I, NOALU, NOMEM, cop0_func_instruction_map,
+     .flags = IMF_SUB_ENCODE(6, 0)},
+    {"C0", IT_I, NOALU, NOMEM, cop0_func_instruction_map,
+     .flags = IMF_SUB_ENCODE(6, 0)},
+    {"C0", IT_I, NOALU, NOMEM, cop0_func_instruction_map,
+     .flags = IMF_SUB_ENCODE(6, 0)},
+    {"C0", IT_I, NOALU, NOMEM, cop0_func_instruction_map,
+     .flags = IMF_SUB_ENCODE(6, 0)},
+    {"C0", IT_I, NOALU, NOMEM, cop0_func_instruction_map,
+     .flags = IMF_SUB_ENCODE(6, 0)},
+    {"C0", IT_I, NOALU, NOMEM, cop0_func_instruction_map,
+     .flags = IMF_SUB_ENCODE(6, 0)},
+    {"C0", IT_I, NOALU, NOMEM, cop0_func_instruction_map,
+     .flags = IMF_SUB_ENCODE(6, 0)},
+    {"C0", IT_I, NOALU, NOMEM, cop0_func_instruction_map,
+     .flags = IMF_SUB_ENCODE(6, 0)},
+    {"C0", IT_I, NOALU, NOMEM, cop0_func_instruction_map,
+     .flags = IMF_SUB_ENCODE(6, 0)},
+    {"C0", IT_I, NOALU, NOMEM, cop0_func_instruction_map,
+     .flags = IMF_SUB_ENCODE(6, 0)},
+    {"C0", IT_I, NOALU, NOMEM, cop0_func_instruction_map,
+     .flags = IMF_SUB_ENCODE(6, 0)},
+    {"C0", IT_I, NOALU, NOMEM, cop0_func_instruction_map,
+     .flags = IMF_SUB_ENCODE(6, 0)},
+    {"C0", IT_I, NOALU, NOMEM, cop0_func_instruction_map,
+     .flags = IMF_SUB_ENCODE(6, 0)},
+    {"C0", IT_I, NOALU, NOMEM, cop0_func_instruction_map,
+     .flags = IMF_SUB_ENCODE(6, 0)},
+    {"C0", IT_I, NOALU, NOMEM, cop0_func_instruction_map,
+     .flags = IMF_SUB_ENCODE(6, 0)},
 };
 
 const std::int32_t instruction_map_opcode_field = IMF_SUB_ENCODE(6, 26);
@@ -476,7 +598,8 @@ static const struct InstructionMap instruction_map[] = {
      .flags = FLAGS_ALU_I_ZE},
     {"LUI",    IT_I, ALU_OP_LUI, NOMEM, nullptr,     // LUI
      .flags = FLAGS_ALU_I_NO_RS},
-    IM_UNKNOWN,  // 16
+    {"COP0",   IT_I, NOALU, NOMEM, cop0_instruction_map, // COP0
+     .flags = IMF_SUB_ENCODE(5, 21)},
     IM_UNKNOWN,  // 17
     IM_UNKNOWN,  // 18
     IM_UNKNOWN,  // 19
@@ -634,6 +757,10 @@ std::uint8_t Instruction::shamt() const {
 
 std::uint8_t Instruction::funct() const {
     return (std::uint8_t) MASK(6, 0);
+}
+
+std::uint8_t Instruction::cop0sel() const {
+    return (std::uint8_t) MASK(3, 0);
 }
 
 std::uint16_t Instruction::immediate() const {

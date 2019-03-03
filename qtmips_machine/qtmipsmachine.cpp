@@ -72,10 +72,21 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc, bool load_symtab) :
     cch_data = new Cache(cpu_mem, &cc.cache_data(), cc.memory_access_time_read(),
                          cc.memory_access_time_write(), cc.memory_access_time_burst());
 
+    unsigned int min_cache_row_size = 16;
+    if (cc.cache_data().enabled())
+        min_cache_row_size = cc.cache_data().blocks() * 4;
+    if (cc.cache_program().enabled() &&
+        cc.cache_program().blocks() < min_cache_row_size)
+        min_cache_row_size = cc.cache_program().blocks() * 4;
+
+    cop0state = new Cop0State();
+
     if (cc.pipelined())
-        cr = new CorePipelined(regs, cch_program, cch_data, cc.hazard_unit());
+        cr = new CorePipelined(regs, cch_program, cch_data, cc.hazard_unit(),
+                               min_cache_row_size, cop0state);
     else
-        cr = new CoreSingle(regs, cch_program, cch_data, cc.delay_slot());
+        cr = new CoreSingle(regs, cch_program, cch_data, cc.delay_slot(),
+                            min_cache_row_size, cop0state);
 
     run_t = new QTimer(this);
     set_speed(0); // In default run as fast as possible
@@ -89,6 +100,9 @@ QtMipsMachine::~QtMipsMachine() {
     if (cr != nullptr)
         delete cr;
     cr = nullptr;
+    if (cop0state != nullptr)
+        delete cop0state;
+    cop0state = nullptr;
     if (regs != nullptr)
         delete regs;
     regs = nullptr;

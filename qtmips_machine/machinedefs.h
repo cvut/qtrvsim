@@ -120,6 +120,10 @@ enum AluOp : std::uint8_t {
     ALU_OP_BREAK,
     ALU_OP_SYSCALL,
     ALU_OP_RDHWR,
+    ALU_OP_MTC0,
+    ALU_OP_MFC0,
+    ALU_OP_MFMC0,
+    ALU_OP_ERET,
     ALU_OP_UNKNOWN,
     ALU_OP_LAST // First impossible operation (just to be sure that we don't overflow)
 };

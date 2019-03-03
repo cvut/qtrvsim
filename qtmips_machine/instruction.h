@@ -71,6 +71,7 @@ enum InstructionFlags {
     IMF_BGTZ_BLEZ  = 1L<<20, /**< BGTZ/BLEZ, else BEGT/BLTZ or BEQ, BNE when RT */
     IMF_NB_SKIP_DS = 1L<<21, /**< Skip instruction in delay slot if branch not taken */
     IMF_EXCEPTION  = 1L<<22, /**< Instruction causes synchronous exception */
+    IMF_STOP_IF    = 1L<<23, /**< Stop instruction fetch until instruction processed */
 };
 
 class Instruction {
@@ -95,6 +96,7 @@ public:
     std::uint8_t rd() const;
     std::uint8_t shamt() const;
     std::uint8_t funct() const;
+    std::uint8_t cop0sel() const;
     std::uint16_t immediate() const;
     std::uint32_t address() const;
     std::uint32_t data() const;

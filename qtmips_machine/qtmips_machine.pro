@@ -28,7 +28,8 @@ SOURCES += \
     peripheral.cpp \
     serialport.cpp \
     peripspiled.cpp \
-    symboltable.cpp
+    symboltable.cpp \
+    cop0state.cpp
 
 HEADERS += \
     qtmipsmachine.h \
@@ -47,4 +48,5 @@ HEADERS += \
     peripheral.h \
     serialport.h \
     peripspiled.h \
-    symboltable.h
+    symboltable.h \
+    cop0state.h

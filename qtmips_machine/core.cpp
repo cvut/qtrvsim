@@ -40,14 +40,18 @@
 using namespace machine;
 
 Core::Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
-           unsigned int min_cache_row_size) : ex_handlers(), hw_breaks() {
+           unsigned int min_cache_row_size, Cop0State *cop0state) :
+           ex_handlers(), hw_breaks() {
     cycle_c = 0;
     this->regs = regs;
+    this->cop0state = cop0state;
     this->mem_program = mem_program;
     this->mem_data = mem_data;
     this->ex_default_handler = new StopExceptionHandler();
     this->min_cache_row_size = min_cache_row_size;
     this->hwr_userlocal = 0xe0000000;
+    if (cop0state != nullptr)
+        cop0state->setup_core(this);
 }
 
 void Core::step(bool skip_break) {
@@ -67,6 +71,11 @@ unsigned Core::cycles() {
 Registers *Core::get_regs() {
     return regs;
 }
+
+Cop0State *Core::get_cop0state() {
+    return cop0state;
+}
+
 
 MemoryAccess *Core::get_mem_data() {
     return mem_data;
@@ -121,6 +130,14 @@ bool Core::handle_exception(Core *core, Registers *regs, ExceptionCause excause,
             regs->pc_abs_jmp(jump_branch_pc);
         else
             regs->pc_abs_jmp(inst_addr);
+    }
+
+    if (cop0state != nullptr) {
+        if (in_delay_slot)
+            cop0state->write_cop0reg(Cop0State::EPC, jump_branch_pc);
+        else
+            cop0state->write_cop0reg(Cop0State::EPC, inst_addr);
+        cop0state->update_execption_cause(excause, in_delay_slot);
     }
 
     ExceptionHandler *exhandler = ex_handlers.value(excause);
@@ -316,6 +333,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
         .excause = excause,
         .in_delay_slot = dt.in_delay_slot,
         .stall = false,
+        .stop_if = !!(flags & IMF_STOP_IF),
     };
 }
 
@@ -338,7 +356,8 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
         if (discard)
             regwrite = false;
 
-        if (dt.aluop == ALU_OP_RDHWR) {
+        switch (dt.aluop) {
+        case ALU_OP_RDHWR:
             switch (dt.num_rd) {
             case 0: // CPUNum
                 alu_val = 0;
@@ -358,6 +377,31 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
             default:
                 alu_val = 0;
             }
+            break;
+        case ALU_OP_MTC0:
+            if (cop0state == nullptr)
+                throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Cop0 not supported", "setup Cop0State");
+            cop0state->write_cop0reg(dt.num_rd, dt.inst.cop0sel(), dt.val_rt);
+            break;
+        case ALU_OP_MFC0:
+            if (cop0state == nullptr)
+                throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Cop0 not supported", "setup Cop0State");
+            alu_val = cop0state->read_cop0reg(dt.num_rd, dt.inst.cop0sel());
+            break;
+        case ALU_OP_MFMC0:
+            if (cop0state == nullptr)
+                throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Cop0 not supported", "setup Cop0State");
+            alu_val = cop0state->read_cop0reg(dt.num_rd, dt.inst.cop0sel());
+            if (dt.inst.funct() & 0x20)
+                cop0state->write_cop0reg(dt.num_rd, dt.inst.cop0sel(), dt.val_rt | 1);
+            else
+                cop0state->write_cop0reg(dt.num_rd, dt.inst.cop0sel(), dt.val_rt & ~1);
+            break;
+        case ALU_OP_ERET:
+            regs->pc_abs_jmp(cop0state->read_cop0reg(Cop0State::EPC));
+            break;
+        default:
+            break;
         }
     }
 
@@ -398,6 +442,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
         .inst_addr = dt.inst_addr,
         .excause = excause,
         .in_delay_slot = dt.in_delay_slot,
+        .stop_if = dt.stop_if,
     };
 }
 
@@ -449,6 +494,7 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
         .inst_addr = dt.inst_addr,
         .excause = dt.excause,
         .in_delay_slot = dt.in_delay_slot,
+        .stop_if = dt.stop_if,
     };
 }
 
@@ -542,6 +588,7 @@ void Core::dtDecodeInit(struct dtDecode &dt) {
     dt.excause = EXCAUSE_NONE;
     dt.in_delay_slot = false;
     dt.stall = false;
+    dt.stop_if = false;
 }
 
 void Core::dtExecuteInit(struct dtExecute &dt) {
@@ -555,6 +602,7 @@ void Core::dtExecuteInit(struct dtExecute &dt) {
     dt.alu_val = 0;
     dt.excause = EXCAUSE_NONE;
     dt.in_delay_slot = false;
+    dt.stop_if = false;
 }
 
 void Core::dtMemoryInit(struct dtMemory &dt) {
@@ -566,10 +614,12 @@ void Core::dtMemoryInit(struct dtMemory &dt) {
     dt.mem_addr = 0;
     dt.excause = EXCAUSE_NONE;
     dt.in_delay_slot = false;
+    dt.stop_if = false;
 }
 
-CoreSingle::CoreSingle(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data, bool jmp_delay_slot) : \
-    Core(regs, mem_program, mem_data) {
+CoreSingle::CoreSingle(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
+                       bool jmp_delay_slot, unsigned int min_cache_row_size, Cop0State *cop0state) :
+    Core(regs, mem_program, mem_data, min_cache_row_size, cop0state) {
     if (jmp_delay_slot)
         jmp_delay_decode = new struct Core::dtDecode();
     else
@@ -624,8 +674,10 @@ void CoreSingle::do_reset() {
     }
 }
 
-CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data, enum MachineConfig::HazardUnit hazard_unit) : \
-    Core(regs, mem_program, mem_data) {
+CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
+                             enum MachineConfig::HazardUnit hazard_unit,
+                             unsigned int min_cache_row_size, Cop0State *cop0state) :
+    Core(regs, mem_program, mem_data, min_cache_row_size, cop0state) {
     this->hazard_unit = hazard_unit;
     reset();
 }
@@ -757,10 +809,13 @@ void CorePipelined::do_step(bool skip_break) {
     printf("PC 0x%08lx\n", (unsigned long)dt_f.inst_addr);
 #endif
 
+    if (dt_e.stop_if || dt_m.stop_if)
+        stall = true;
+
     emit hu_stall_value(stall);
 
     // Now process program counter (loop connections from decode stage)
-    if (!stall) {
+    if (!stall && !dt_d.stop_if) {
         dt_d.stall = false;
         dt_f = fetch(skip_break);
         if (handle_pc(dt_d)) {
@@ -775,8 +830,12 @@ void CorePipelined::do_step(bool skip_break) {
         // Run fetch stage on empty
         fetch(skip_break);
         // clear decode latch (insert nope to execute stage)
-        dtDecodeInit(dt_d);
-        dt_d.stall = true;
+        if (!dt_d.stop_if) {
+            dtDecodeInit(dt_d);
+            dt_d.stall = true;
+        } else {
+            dtFetchInit(dt_f);
+        }
         // emit instruction_decoded(dt_d.inst, dt_d.inst_addr, dt_d.excause);
     }
 }

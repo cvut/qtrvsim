@@ -253,13 +253,15 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s,
             return alu_op_clz(s);
         case ALU_OP_CLO:
            return alu_op_clz(~s);
-        case  ALU_OP_PASS_T: // Pass s argument without change for JAL
+        case ALU_OP_PASS_T: // Pass s argument without change for JAL
             return t;
         case ALU_OP_BREAK:
-            return 0;
-        case  ALU_OP_SYSCALL:
-            return 0;
-        case  ALU_OP_RDHWR:
+        case ALU_OP_SYSCALL:
+        case ALU_OP_RDHWR:
+        case ALU_OP_MTC0:
+        case ALU_OP_MFC0:
+        case ALU_OP_MFMC0:
+        case ALU_OP_ERET:
             return 0;
         default:
             throw QTMIPS_EXCEPTION(UnsupportedAluOperation, "Unknown ALU operation", QString::number(operation, 16));

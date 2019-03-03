@@ -40,6 +40,7 @@
 #include <qtmipsexception.h>
 #include <machineconfig.h>
 #include <registers.h>
+#include <cop0state.h>
 #include <memory.h>
 #include <instruction.h>
 #include <alu.h>
@@ -70,7 +71,7 @@ class Core : public QObject {
     Q_OBJECT
 public:
     Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
-         unsigned int min_cache_row_size = 1);
+         unsigned int min_cache_row_size = 1, Cop0State *cop0state = nullptr);
 
     void step(bool skip_break = false); // Do single step
     void reset(); // Reset core (only core, memory and registers has to be reseted separately)
@@ -78,6 +79,7 @@ public:
     unsigned cycles(); // Returns number of executed cycles
 
     Registers *get_regs();
+    Cop0State *get_cop0state();
     MemoryAccess *get_mem_data();
     MemoryAccess *get_mem_program();
     void register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler);
@@ -170,6 +172,7 @@ protected:
                      bool in_delay_slot, std::uint32_t mem_ref_addr);
 
     Registers *regs;
+    Cop0State *cop0state;
     MemoryAccess *mem_data, *mem_program;
     QMap<ExceptionCause, ExceptionHandler *> ex_handlers;
     ExceptionHandler *ex_default_handler;
@@ -214,6 +217,7 @@ protected:
         enum ExceptionCause excause;
         bool in_delay_slot;
         bool stall;
+        bool stop_if;
     };
     struct dtExecute {
         Instruction inst;
@@ -227,6 +231,7 @@ protected:
         uint32_t inst_addr; // Address of instruction
         enum ExceptionCause excause;
         bool in_delay_slot;
+        bool stop_if;
     };
     struct dtMemory {
         Instruction inst;
@@ -238,6 +243,7 @@ protected:
         uint32_t inst_addr; // Address of instruction
         enum ExceptionCause excause;
         bool in_delay_slot;
+        bool stop_if;
     };
 
     struct dtFetch fetch(bool skip_break = false);
@@ -273,7 +279,8 @@ private:
 
 class CoreSingle : public Core {
 public:
-    CoreSingle(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data, bool jmp_delay_slot);
+    CoreSingle(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data, bool jmp_delay_slot,
+               unsigned int min_cache_row_size = 1, Cop0State *cop0state = nullptr);
     ~CoreSingle();
 
 protected:
@@ -286,7 +293,9 @@ private:
 
 class CorePipelined : public Core {
 public:
-    CorePipelined(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data, enum MachineConfig::HazardUnit hazard_unit = MachineConfig::HU_STALL_FORWARD);
+    CorePipelined(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
+                  enum MachineConfig::HazardUnit hazard_unit = MachineConfig::HU_STALL_FORWARD,
+                  unsigned int min_cache_row_size = 1, Cop0State *cop0state = nullptr);
 
 protected:
     void do_step(bool skip_break = false);

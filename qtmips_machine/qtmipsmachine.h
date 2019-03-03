@@ -119,6 +119,7 @@ private:
     SerialPort *ser_port;
     PeripSpiLed *perip_spi_led;
     Cache *cch_program, *cch_data;
+    Cop0State *cop0state;
     Core *cr;
 
     QTimer *run_t;
