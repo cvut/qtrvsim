@@ -40,7 +40,6 @@
 
 using namespace machine;
 
-
 // sorry, unimplemented: non-trivial designated initializers not supported
 
 static enum Cop0State::Cop0Regsisters cop0reg_map[32][8] = {
@@ -81,25 +80,25 @@ static enum Cop0State::Cop0Regsisters cop0reg_map[32][8] = {
 // sorry, unimplemented: non-trivial designated initializers not supported
 
 const Cop0State::cop0reg_desc_t Cop0State::cop0reg_desc[Cop0State::COP0REGS_CNT] = {
-    [Cop0State::Unsupported] = {"Unsupported", 0x00000000,
+    [Cop0State::Unsupported] = {"Unsupported", 0x00000000, 0x00000000,
         &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-    [Cop0State::UserLocal] = {"UserLocal", 0xffffffff,
+    [Cop0State::UserLocal] = {"UserLocal", 0xffffffff, 0x00000000,
         &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-    [Cop0State::BadVAddr] = {"BadVAddr", 0x00000000,
+    [Cop0State::BadVAddr] = {"BadVAddr", 0x00000000, 0x00000000,
         &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-    [Cop0State::Count] =    {"Count", 0x00000000,
+    [Cop0State::Count] =    {"Count", 0x00000000, 0x00000000,
         &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-    [Cop0State::Compare] =  {"Compare", 0x00000000,
+    [Cop0State::Compare] =  {"Compare", 0x00000000, 0x00000000,
         &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-    [Cop0State::Status] =   {"Status",  Status_IE | Status_IntMask,
+    [Cop0State::Status] =   {"Status",  Status_IE | Status_IntMask, 0x00000000,
         &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-    [Cop0State::Cause] =    {"Cause", 0x00000000,
+    [Cop0State::Cause] =    {"Cause", 0x00000000, 0x00000000,
         &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-    [Cop0State::EPC] =      {"EPC", 0xffffffff,
+    [Cop0State::EPC] =      {"EPC", 0xffffffff, 0x00000000,
         &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-    [Cop0State::EBase] =    {"EBase", 0xfffffffc,
+    [Cop0State::EBase] =    {"EBase", 0xfffffffc, 0x80000000,
         &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-    [Cop0State::Config] =   {"Config", 0x00000000,
+    [Cop0State::Config] =   {"Config", 0x00000000, 0x00000000,
         &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
 };
 
@@ -166,7 +165,7 @@ bool Cop0State::operator!=(const Cop0State &c) const {
 
 void Cop0State::reset() {
     for (int i = 0; i < COP0REGS_CNT; i++)
-        this->cop0reg[i] = 0;
+        this->cop0reg[i] = cop0reg_desc[i].init_value;
 }
 
 void Cop0State::update_execption_cause(enum ExceptionCause excause, bool in_delay_slot) {
@@ -197,7 +196,8 @@ bool Cop0State::core_interrupt_request() {
     irqs &= Status_IntMask;
 
     return !!(irqs && cop0reg[(int)Status] & Status_IntMask &&
-              !(cop0reg[(int)Status] & Status_EXL));
+           !(cop0reg[(int)Status] & Status_EXL) &&
+           !(cop0reg[(int)Status] & Status_ERL));
 }
 
 void Cop0State::set_status_exl(bool value) {
@@ -205,4 +205,8 @@ void Cop0State::set_status_exl(bool value) {
         cop0reg[(int)Status] |= Status_EXL;
     else
         cop0reg[(int)Status] &= ~Status_EXL;
+}
+
+std::uint32_t Cop0State::exception_pc_address() {
+    return cop0reg[(int)EBase] + 0x180;
 }

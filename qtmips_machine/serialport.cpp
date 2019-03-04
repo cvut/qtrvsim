@@ -53,8 +53,8 @@ SerialPort::SerialPort() {
     rx_st_reg = 0;
     rx_data_reg = 0;
     tx_st_reg = 0;
-    tx_irq_level = 0;
-    rx_irq_level = 1;
+    tx_irq_level = 2;  // HW Interrupt 0
+    rx_irq_level = 3;  // HW Interrupt 1
     tx_irq_active = false;
     rx_irq_active = false;
 }

@@ -110,11 +110,16 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     static QMap<std::uint32_t, QString> excause_map =
         {{machine::EXCAUSE_NONE,     "NONE"},
          {machine::EXCAUSE_INT,      "INT"},
-         {machine::EXCAUSE_BREAK,    "BERAK"},
+         {machine::EXCAUSE_ADDRL,    "ADDRL"},
+         {machine::EXCAUSE_ADDRS,    "ADDRS"},
+         {machine::EXCAUSE_IBUS,     "IBUS"},
+         {machine::EXCAUSE_DBUS,     "DBUS"},
          {machine::EXCAUSE_SYSCALL,  "SYSCALL"},
-         {machine::EXCAUSE_HWBREAK,  "HWBREAK"},
+         {machine::EXCAUSE_BREAK,    "BREAK"},
+         {machine::EXCAUSE_OVERFLOW, "OVERFLOW"},
          {machine::EXCAUSE_TRAP,     "TRAP"},
-         {machine::EXCAUSE_OVERFLOW, "OVERFLOW"}};
+         {machine::EXCAUSE_HWBREAK,  "HWBREAK"}
+        };
     NEW_MULTI(mm.multi_excause, 602, 447, memory_excause_value, excause_map, true);
     new_label("Exception", 595, 437);
     // WriteBack stage

@@ -58,8 +58,12 @@ enum AccessControl {
 };
 
 enum ExceptionCause {
-    EXCAUSE_NONE     =  0,
-    EXCAUSE_INT      =  1,
+    EXCAUSE_NONE     =  0,  // Use zero as default value when no exception is pending
+    EXCAUSE_INT      =  1,  // Int is 0 on real CPU and in Cause regsiter
+    EXCAUSE_ADDRL    =  4,
+    EXCAUSE_ADDRS    =  5,
+    EXCAUSE_IBUS     =  6,
+    EXCAUSE_DBUS     =  7,
     EXCAUSE_SYSCALL  =  8,
     EXCAUSE_BREAK    =  9,
     EXCAUSE_OVERFLOW = 12,

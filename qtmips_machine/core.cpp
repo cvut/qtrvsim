@@ -141,7 +141,7 @@ bool Core::handle_exception(Core *core, Registers *regs, ExceptionCause excause,
         if (cop0state->read_cop0reg(Cop0State::EBase) != 0) {
             if (excause == EXCAUSE_INT) {
                 cop0state->set_status_exl(true);
-                regs->pc_abs_jmp(cop0state->read_cop0reg(Cop0State::EBase));
+                regs->pc_abs_jmp(cop0state->exception_pc_address());
             }
         }
     }

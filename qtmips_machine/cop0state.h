@@ -64,6 +64,7 @@ public:
     enum StatusReg {
         Status_IE =      0x00000001,
         Status_EXL =     0x00000002,
+        Status_ERL =     0x00000004,
         Status_IntMask = 0x0000ff00,
         Status_Int0 =    0x00000100,
     };
@@ -82,6 +83,7 @@ public:
     void reset(); // Reset all values to zero
 
     bool core_interrupt_request();
+    std::uint32_t exception_pc_address();
 
 public slots:
     void set_interrupt_signal(uint irq_num, bool active);
@@ -102,8 +104,10 @@ private:
     struct cop0reg_desc_t {
         const char *name;
         std::uint32_t write_mask;
+        std::uint32_t init_value;
         reg_read_t reg_read;
         reg_write_t reg_write;
+
     };
 
     static const cop0reg_desc_t cop0reg_desc[COP0REGS_CNT];
