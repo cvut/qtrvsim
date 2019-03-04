@@ -109,6 +109,7 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     NEW(Junction, mm.j_addr, 570, mem_data->connector_address()->y());
     static QMap<std::uint32_t, QString> excause_map =
         {{machine::EXCAUSE_NONE,     "NONE"},
+         {machine::EXCAUSE_INT,      "INT"},
          {machine::EXCAUSE_BREAK,    "BERAK"},
          {machine::EXCAUSE_SYSCALL,  "SYSCALL"},
          {machine::EXCAUSE_HWBREAK,  "HWBREAK"},

@@ -63,12 +63,14 @@ TerminalDock::~TerminalDock() {
     delete append_cursor;
 }
 
-void TerminalDock::setup(const machine::SerialPort *ser_port) {
+void TerminalDock::setup(machine::SerialPort *ser_port) {
     if (ser_port == nullptr)
         return;
     connect(ser_port, SIGNAL(tx_byte(uint)), this, SLOT(tx_byte(uint)));
     connect(ser_port, SIGNAL(rx_byte_pool(int,uint&,bool&)),
             this, SLOT(rx_byte_pool(int,uint&,bool&)));
+    connect(input_edit, SIGNAL(textChanged(QString)),
+            ser_port, SLOT(rx_queue_check()));
 }
 
 void TerminalDock::tx_byte(unsigned int data) {

@@ -61,6 +61,13 @@ public:
         COP0REGS_CNT,
     };
 
+    enum StatusReg {
+        Status_IE =      0x00000001,
+        Status_EXL =     0x00000002,
+        Status_IntMask = 0x0000ff00,
+        Status_Int0 =    0x00000100,
+    };
+
     Cop0State(Core *core = nullptr);
     Cop0State(const Cop0State&);
 
@@ -73,6 +80,12 @@ public:
     bool operator !=(const Cop0State &c) const;
 
     void reset(); // Reset all values to zero
+
+    bool core_interrupt_request();
+
+public slots:
+    void set_interrupt_signal(uint irq_num, bool active);
+    void set_status_exl(bool value);
 
 protected:
     void setup_core(Core *core);

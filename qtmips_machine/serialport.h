@@ -55,15 +55,25 @@ signals:
     void rx_byte_pool(int fd, unsigned int &data, bool &available) const;
     void write_notification(std::uint32_t address, std::uint32_t value);
     void read_notification(std::uint32_t address, std::uint32_t *value) const;
+    void signal_interrupt(uint irq_level, bool active) const;
+
+public slots:
+    void rx_queue_check() const;
 
 public:
     bool wword(std::uint32_t address, std::uint32_t value);
     std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
 private:
     void pool_rx_byte() const;
+    void update_rx_irq() const;
+    void update_tx_irq() const;
     mutable std::uint32_t rx_st_reg;
     mutable std::uint32_t rx_data_reg;
     std::uint32_t tx_st_reg;
+    std::uint8_t tx_irq_level;
+    std::uint8_t rx_irq_level;
+    mutable bool tx_irq_active;
+    mutable bool rx_irq_active;
 };
 
 }

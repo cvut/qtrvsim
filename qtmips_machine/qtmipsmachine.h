@@ -105,6 +105,7 @@ signals:
     void status_change(enum machine::QtMipsMachine::Status st);
     void tick(); // Time tick
     void post_tick(); // Emitted after tick to allow updates
+    void set_interrupt_signal(uint irq_num, bool active);
 
 private slots:
     void step_timer();

@@ -50,7 +50,7 @@ public:
     TerminalDock(QWidget *parent, QSettings *settings);
     ~TerminalDock();
 
-    void setup(const machine::SerialPort *ser_port);
+    void setup(machine::SerialPort *ser_port);
 
 public slots:
     void tx_byte(unsigned int data);

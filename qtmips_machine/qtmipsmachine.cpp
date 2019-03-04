@@ -63,6 +63,8 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc, bool load_symtab) :
     ser_port = new SerialPort();
     addressapce_insert_range(ser_port, 0xffffc000, 0xffffc03f, true);
     addressapce_insert_range(ser_port, 0xffff0000, 0xffff003f, false);
+    connect(ser_port, SIGNAL(signal_interrupt(uint,bool)),
+            this, SIGNAL(set_interrupt_signal(uint,bool)));
 
     perip_spi_led = new PeripSpiLed();
     addressapce_insert_range(perip_spi_led, 0xffffc100, 0xffffc1ff, true);
@@ -87,6 +89,8 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc, bool load_symtab) :
     else
         cr = new CoreSingle(regs, cch_program, cch_data, cc.delay_slot(),
                             min_cache_row_size, cop0state);
+    connect(this, SIGNAL(set_interrupt_signal(uint,bool)),
+            cop0state, SLOT(set_interrupt_signal(uint,bool)));
 
     run_t = new QTimer(this);
     set_speed(0); // In default run as fast as possible

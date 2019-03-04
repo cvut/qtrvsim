@@ -91,7 +91,7 @@ const Cop0State::cop0reg_desc_t Cop0State::cop0reg_desc[Cop0State::COP0REGS_CNT]
         &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
     [Cop0State::Compare] =  {"Compare", 0x00000000,
         &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-    [Cop0State::Status] =   {"Status", 0x00000000,
+    [Cop0State::Status] =   {"Status",  Status_IE | Status_IntMask,
         &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
     [Cop0State::Cause] =    {"Cause", 0x00000000,
         &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
@@ -177,4 +177,32 @@ void Cop0State::update_execption_cause(enum ExceptionCause excause, bool in_dela
     cop0reg[(int)Cause] &= ~0x0000007f;
     if (excause != EXCAUSE_INT)
         cop0reg[(int)Cause] |= (int)excause << 2;
+}
+
+void Cop0State::set_interrupt_signal(uint irq_num, bool active) {
+    std::uint32_t mask;
+    if (irq_num >= 8)
+        return;
+    mask = Status_Int0 << irq_num;
+    if (active)
+        cop0reg[(int)Cause] |= mask;
+    else
+        cop0reg[(int)Cause] &= ~mask;
+}
+
+bool Cop0State::core_interrupt_request() {
+    std::uint32_t irqs;
+    irqs = cop0reg[(int)Status];
+    irqs &= cop0reg[(int)Cause];
+    irqs &= Status_IntMask;
+
+    return !!(irqs && cop0reg[(int)Status] & Status_IntMask &&
+              !(cop0reg[(int)Status] & Status_EXL));
+}
+
+void Cop0State::set_status_exl(bool value) {
+    if (value)
+        cop0reg[(int)Status] |= Status_EXL;
+    else
+        cop0reg[(int)Status] &= ~Status_EXL;
 }

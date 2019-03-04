@@ -138,6 +138,12 @@ bool Core::handle_exception(Core *core, Registers *regs, ExceptionCause excause,
         else
             cop0state->write_cop0reg(Cop0State::EPC, inst_addr);
         cop0state->update_execption_cause(excause, in_delay_slot);
+        if (cop0state->read_cop0reg(Cop0State::EBase) != 0) {
+            if (excause == EXCAUSE_INT) {
+                cop0state->set_status_exl(true);
+                regs->pc_abs_jmp(cop0state->read_cop0reg(Cop0State::EBase));
+            }
+        }
     }
 
     ExceptionHandler *exhandler = ex_handlers.value(excause);
@@ -228,6 +234,12 @@ struct Core::dtFetch Core::fetch(bool skip_break) {
             excause = EXCAUSE_HWBREAK;
         }
     }
+    if (cop0state != nullptr && excause == EXCAUSE_NONE) {
+        if (cop0state->core_interrupt_request()) {
+            excause = EXCAUSE_INT;
+        }
+    }
+
     emit fetch_inst_addr_value(inst_addr);
     emit instruction_fetched(inst, inst_addr, excause);
     return {
@@ -399,6 +411,8 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
             break;
         case ALU_OP_ERET:
             regs->pc_abs_jmp(cop0state->read_cop0reg(Cop0State::EPC));
+            if (cop0state != nullptr)
+                cop0state->set_status_exl(false);
             break;
         default:
             break;
