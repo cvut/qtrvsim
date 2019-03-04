@@ -67,6 +67,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     peripherals->hide();
     terminal = new TerminalDock(this, settings);
     terminal->hide();
+    cop0dock = new Cop0Dock(this);
+    cop0dock->hide();
 
     // Execution speed actions
     speed_group = new QActionGroup(this);
@@ -90,6 +92,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->actionData_Cache, SIGNAL(triggered(bool)), this, SLOT(show_cache_data()));
     connect(ui->actionPeripherals, SIGNAL(triggered(bool)), this, SLOT(show_peripherals()));
     connect(ui->actionTerminal, SIGNAL(triggered(bool)), this, SLOT(show_terminal()));
+    connect(ui->actionCop0State, SIGNAL(triggered(bool)), this, SLOT(show_cop0dock()));
     connect(ui->actionAbout, SIGNAL(triggered(bool)), this, SLOT(about_qtmips()));
     connect(ui->actionAboutQt, SIGNAL(triggered(bool)), this, SLOT(about_qt()));
     connect(ui->ips1, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
@@ -187,6 +190,7 @@ void MainWindow::create_core(const machine::MachineConfig &config) {
     cache_data->setup(machine->cache_data());
     terminal->setup(machine->serial_port());
     peripherals->setup(machine->peripheral_spi_led());
+    cop0dock->setup(machine);
 
     // Connect signals for instruction address followup
     connect(machine->core(), SIGNAL(fetch_inst_addr_value(std::uint32_t)),
@@ -237,6 +241,7 @@ SHOW_HANDLER(cache_program)
 SHOW_HANDLER(cache_data)
 SHOW_HANDLER(peripherals)
 SHOW_HANDLER(terminal)
+SHOW_HANDLER(cop0dock)
 #undef SHOW_HANDLER
 
 void MainWindow::show_symbol_dialog(){

@@ -63,6 +63,7 @@ public:
     void set_speed(unsigned int ips, unsigned int time_chunk = 0);
 
     const Registers *registers();
+    const Cop0State *cop0state();
     const Memory *memory();
     Memory *memory_rw();
     const Cache *cache_program();
@@ -120,7 +121,7 @@ private:
     SerialPort *ser_port;
     PeripSpiLed *perip_spi_led;
     Cache *cch_program, *cch_data;
-    Cop0State *cop0state;
+    Cop0State *cop0st;
     Core *cr;
 
     QTimer *run_t;

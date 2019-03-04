@@ -81,16 +81,16 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc, bool load_symtab) :
         cc.cache_program().blocks() < min_cache_row_size)
         min_cache_row_size = cc.cache_program().blocks() * 4;
 
-    cop0state = new Cop0State();
+    cop0st = new Cop0State();
 
     if (cc.pipelined())
         cr = new CorePipelined(regs, cch_program, cch_data, cc.hazard_unit(),
-                               min_cache_row_size, cop0state);
+                               min_cache_row_size, cop0st);
     else
         cr = new CoreSingle(regs, cch_program, cch_data, cc.delay_slot(),
-                            min_cache_row_size, cop0state);
+                            min_cache_row_size, cop0st);
     connect(this, SIGNAL(set_interrupt_signal(uint,bool)),
-            cop0state, SLOT(set_interrupt_signal(uint,bool)));
+            cop0st, SLOT(set_interrupt_signal(uint,bool)));
 
     run_t = new QTimer(this);
     set_speed(0); // In default run as fast as possible
@@ -104,9 +104,9 @@ QtMipsMachine::~QtMipsMachine() {
     if (cr != nullptr)
         delete cr;
     cr = nullptr;
-    if (cop0state != nullptr)
-        delete cop0state;
-    cop0state = nullptr;
+    if (cop0st != nullptr)
+        delete cop0st;
+    cop0st = nullptr;
     if (regs != nullptr)
         delete regs;
     regs = nullptr;
@@ -141,6 +141,10 @@ void QtMipsMachine::set_speed(unsigned int ips, unsigned int time_chunk) {
 
 const Registers *QtMipsMachine::registers() {
     return regs;
+}
+
+const Cop0State *QtMipsMachine::cop0state() {
+    return cop0st;
 }
 
 const Memory *QtMipsMachine::memory() {

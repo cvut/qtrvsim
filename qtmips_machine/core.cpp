@@ -160,6 +160,10 @@ bool Core::handle_exception(Core *core, Registers *regs, ExceptionCause excause,
 
 void Core::set_c0_userlocal(std::uint32_t address) {
     hwr_userlocal = address;
+    if (cop0state != nullptr) {
+        if (address != cop0state->read_cop0reg(Cop0State::UserLocal))
+            cop0state->write_cop0reg(Cop0State::UserLocal, address);
+    }
 }
 
 enum ExceptionCause  Core::memory_special(enum AccessControl memctl,

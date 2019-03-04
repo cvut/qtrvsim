@@ -37,6 +37,7 @@
 #define COP0STATE_H
 
 #include <QObject>
+#include <QString>
 #include <cstdint>
 #include <machinedefs.h>
 namespace machine {
@@ -47,7 +48,7 @@ class Cop0State : public QObject {
     Q_OBJECT
     friend class Core;
 public:
-    enum Cop0Regsisters {
+    enum Cop0Registers {
         Unsupported = 0,
         UserLocal,
         BadVAddr, // Reports the address for the most recent address-related exception
@@ -72,10 +73,11 @@ public:
     Cop0State(Core *core = nullptr);
     Cop0State(const Cop0State&);
 
-    std::uint32_t read_cop0reg(enum Cop0Regsisters reg) const;
+    std::uint32_t read_cop0reg(enum Cop0Registers reg) const;
     std::uint32_t read_cop0reg(std::uint8_t rd, std::uint8_t sel) const; // Read coprocessor 0 register
-    void write_cop0reg(enum Cop0Regsisters reg, std::uint32_t value);
+    void write_cop0reg(enum Cop0Registers reg, std::uint32_t value);
     void write_cop0reg(std::uint8_t reg, std::uint8_t sel, std::uint32_t value); // Write coprocessor 0 register
+    static QString cop0reg_name(enum Cop0Registers reg);
 
     bool operator ==(const Cop0State &c) const;
     bool operator !=(const Cop0State &c) const;
@@ -85,6 +87,9 @@ public:
     bool core_interrupt_request();
     std::uint32_t exception_pc_address();
 
+signals:
+    void cop0reg_update(enum Cop0Registers reg, std::uint32_t val);
+
 public slots:
     void set_interrupt_signal(uint irq_num, bool active);
     void set_status_exl(bool value);
@@ -92,14 +97,15 @@ public slots:
 protected:
     void setup_core(Core *core);
     void update_execption_cause(enum ExceptionCause excause, bool in_delay_slot);
+    void update_count_and_compare_irq();
 
 private:
 
     typedef std::uint32_t (Cop0State::*reg_read_t)
-                  (enum Cop0Regsisters reg) const;
+                  (enum Cop0Registers reg) const;
 
     typedef void (Cop0State::*reg_write_t)
-                  (enum Cop0Regsisters reg, std::uint32_t value);
+                  (enum Cop0Registers reg, std::uint32_t value);
 
     struct cop0reg_desc_t {
         const char *name;
@@ -112,14 +118,18 @@ private:
 
     static const cop0reg_desc_t cop0reg_desc[COP0REGS_CNT];
 
-    std::uint32_t read_cop0reg_default(enum Cop0Regsisters reg) const;
-    void write_cop0reg_default(enum Cop0Regsisters reg, std::uint32_t value);
+    std::uint32_t read_cop0reg_default(enum Cop0Registers reg) const;
+    void write_cop0reg_default(enum Cop0Registers reg, std::uint32_t value);
+    void write_cop0reg_count_compare(enum Cop0Registers reg, std::uint32_t value);
+    void write_cop0reg_user_local(enum Cop0Registers reg, std::uint32_t value);
     Core *core;
     std::uint32_t cop0reg[COP0REGS_CNT]; // coprocessor 0 registers
+    std::uint32_t last_core_cycles;
 };
 
 }
 
 Q_DECLARE_METATYPE(machine::Cop0State)
+Q_DECLARE_METATYPE(machine::Cop0State::Cop0Registers)
 
 #endif // COP0STATE_H

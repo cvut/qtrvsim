@@ -62,7 +62,8 @@ SOURCES += \
     peripheralsview.cpp \
     coreview/multitext.cpp \
     fontsize.cpp \
-    gotosymboldialog.cpp
+    gotosymboldialog.cpp \
+    cop0dock.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -100,7 +101,8 @@ HEADERS += \
     peripheralsview.h \
     coreview/multitext.h \
     fontsize.h \
-    gotosymboldialog.h
+    gotosymboldialog.h \
+    cop0dock.h
 
 FORMS += \
         NewDialog.ui \

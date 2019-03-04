@@ -70,6 +70,7 @@
     <addaction name="actionData_Cache"/>
     <addaction name="actionPeripherals"/>
     <addaction name="actionTerminal"/>
+    <addaction name="actionCop0State"/>
    </widget>
    <widget class="QMenu" name="menuMachine">
     <property name="title">
@@ -293,6 +294,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionCop0State">
+   <property name="text">
+    <string>Cop0 State</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
    </property>
   </action>
   <action name="actionReload">
