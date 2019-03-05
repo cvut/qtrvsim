@@ -301,7 +301,7 @@
     <string>Cop0 State</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+C</string>
+    <string>Ctrl+I</string>
    </property>
   </action>
   <action name="actionReload">

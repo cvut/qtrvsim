@@ -233,7 +233,7 @@ bool ProgramModel::setData(const QModelIndex & index, const QVariant & value, in
             mem->write_word(address, data);
             break;
         case 3:
-            data = machine::Instruction::from_string(value.toString(), &ok).data();
+            data = machine::Instruction::from_string(value.toString(), &ok, address).data();
             if (!ok)
                 return false;
             mem->write_word(address, data);
