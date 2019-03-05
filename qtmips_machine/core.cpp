@@ -264,7 +264,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     dt.inst.flags_alu_op_mem_ctl(flags, alu_op, mem_ctl);
 
     if (!(flags & IMF_SUPPORTED))
-        throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Instruction with following opcode is not supported", QString::number(dt.inst.opcode(), 16));
+        throw QTMIPS_EXCEPTION(UnsupportedInstruction, "Instruction with following encoding is not supported", QString::number(dt.inst.data(), 16));
 
     std::uint8_t num_rs = dt.inst.rs();
     std::uint8_t num_rt = dt.inst.rt();

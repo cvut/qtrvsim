@@ -214,12 +214,12 @@ static const struct InstructionMap  alu_instruction_map[] = {
      .flags = FLAGS_ALU_T_R_STD},
     {"MOVN",   IT_R, ALU_OP_MOVN, NOMEM, nullptr, {"d", "v", "t"}, 0x0000000b, 0xfc0007ff,
      .flags = FLAGS_ALU_T_R_STD},
-    {"SYSCALL",IT_R, ALU_OP_SYSCALL, NOMEM, nullptr, {nullptr}, 0x0000000c, 0xffffffff,
+    {"SYSCALL",IT_R, ALU_OP_SYSCALL, NOMEM, nullptr, {nullptr}, 0x0000000c, 0xfc00003f,
      .flags = IMF_SUPPORTED | IMF_EXCEPTION},
-    {"BREAK",  IT_R, ALU_OP_BREAK, NOMEM, nullptr, {nullptr}, 0x0000000d, 0xffffffff,
+    {"BREAK",  IT_R, ALU_OP_BREAK, NOMEM, nullptr, {nullptr}, 0x0000000d, 0xfc00003f,
      .flags = IMF_SUPPORTED | IMF_EXCEPTION},
     IM_UNKNOWN,
-    {"SYNC", IT_I, NOALU, NOMEM, nullptr, {nullptr}, 0x0000000f, 0xffffffff,       // SYNC
+    {"SYNC", IT_I, NOALU, NOMEM, nullptr, {nullptr}, 0x0000000f, 0xfffff83f,       // SYNC
      .flags = IMF_SUPPORTED},
     {"MFHI",   IT_R, ALU_OP_MFHI, NOMEM, nullptr, {"d"}, 0x00000010, 0xffff07ff,
      .flags = FLAGS_ALU_T_R_D | IMF_READ_HILO},
@@ -237,9 +237,9 @@ static const struct InstructionMap  alu_instruction_map[] = {
      .flags = FLAGS_ALU_T_R_ST | IMF_WRITE_HILO},    // 24
     {"MULTU",  IT_R, ALU_OP_MULTU, NOMEM, nullptr, {"s", "t"}, 0x00000019, 0xfc00ffff,
      .flags = FLAGS_ALU_T_R_ST | IMF_WRITE_HILO},   // 25
-    {"DIV",    IT_R, ALU_OP_DIV, NOMEM, nullptr, {"z", "s", "t"}, 0x0000001a, 0xfc00ffff,
+    {"DIV",    IT_R, ALU_OP_DIV, NOMEM, nullptr, {"s", "t"}, 0x0000001a, 0xfc00ffff,
      .flags = FLAGS_ALU_T_R_ST | IMF_WRITE_HILO},     // 26
-    {"DIVU",   IT_R, ALU_OP_DIVU, NOMEM, nullptr, {"z", "s", "t"}, 0x0000001b, 0xfc00ffff,
+    {"DIVU",   IT_R, ALU_OP_DIVU, NOMEM, nullptr, {"s", "t"}, 0x0000001b, 0xfc00ffff,
      .flags = FLAGS_ALU_T_R_ST | IMF_WRITE_HILO},    // 27
     IM_UNKNOWN, // 28
     IM_UNKNOWN, // 29
@@ -271,18 +271,18 @@ static const struct InstructionMap  alu_instruction_map[] = {
     IM_UNKNOWN, // 45
     IM_UNKNOWN, // 46
     IM_UNKNOWN, // 47
-    {"TGE", IT_I, ALU_OP_TGE, NOMEM, nullptr, {"s", "t"}, 0x00000030, 0xfc00ffff, // TGE 48
+    {"TGE", IT_I, ALU_OP_TGE, NOMEM, nullptr, {"s", "t"}, 0x00000030, 0xfc00003f, // TGE 48
      .flags = FLAGS_ALU_TRAP_ST},
-    {"TGEU", IT_I, ALU_OP_TGEU, NOMEM, nullptr, {"s", "t"}, 0x00000031, 0xfc00ffff, // TGEU 49
+    {"TGEU", IT_I, ALU_OP_TGEU, NOMEM, nullptr, {"s", "t"}, 0x00000031, 0xfc00003f, // TGEU 49
      .flags = FLAGS_ALU_TRAP_ST},
-    {"TLT", IT_I, ALU_OP_TLT, NOMEM, nullptr, {"s", "t"}, 0x00000032, 0xfc00ffff, // TLT 50
+    {"TLT", IT_I, ALU_OP_TLT, NOMEM, nullptr, {"s", "t"}, 0x00000032, 0xfc00003f, // TLT 50
      .flags = FLAGS_ALU_TRAP_ST},
-    {"TLTU", IT_I, ALU_OP_TGEU, NOMEM, nullptr, {"s", "t"}, 0x00000033, 0xfc00ffff, // TLTU 51
+    {"TLTU", IT_I, ALU_OP_TGEU, NOMEM, nullptr, {"s", "t"}, 0x00000033, 0xfc00003f, // TLTU 51
      .flags = FLAGS_ALU_TRAP_ST},
-    {"TEQ", IT_I, ALU_OP_TEQ, NOMEM, nullptr, {"s", "t"}, 0x00000034, 0xfc00ffff, // TEQ 52
+    {"TEQ", IT_I, ALU_OP_TEQ, NOMEM, nullptr, {"s", "t"}, 0x00000034, 0xfc00003f, // TEQ 52
      .flags = FLAGS_ALU_TRAP_ST},
     IM_UNKNOWN, // 53
-    {"TNE", IT_I, ALU_OP_TNE, NOMEM, nullptr, {"s", "t"}, 0x00000036, 0xfc00ffff, // TNE 54
+    {"TNE", IT_I, ALU_OP_TNE, NOMEM, nullptr, {"s", "t"}, 0x00000036, 0xfc00003f, // TNE 54
      .flags = FLAGS_ALU_TRAP_ST},
     IM_UNKNOWN, // 55
     IM_UNKNOWN, // 56
@@ -597,12 +597,12 @@ static const struct InstructionMap  cop0_func_instruction_map[] = {
 };
 
 static const struct InstructionMap  cop0_instruction_map[] = {
-    {"MFC0", IT_I, ALU_OP_MFC0, NOMEM, nullptr, {"t", "G", "H"}, 0x40000000, 0xffe007ff,
+    {"MFC0", IT_I, ALU_OP_MFC0, NOMEM, nullptr, {"t", "G", "H"}, 0x40000000, 0xffe007f8,
      .flags = IMF_SUPPORTED | IMF_REGWRITE},
     IM_UNKNOWN,	//	1
     IM_UNKNOWN,	//	2 MFH
     IM_UNKNOWN,	//	3
-    {"MTC0", IT_I, ALU_OP_MTC0, NOMEM, nullptr, {"t", "G", "H"}, 0x40800000, 0xffe007ff,
+    {"MTC0", IT_I, ALU_OP_MTC0, NOMEM, nullptr, {"t", "G", "H"}, 0x40800000, 0xffe007f8,
      .flags = IMF_SUPPORTED | IMF_ALU_REQ_RT},
     IM_UNKNOWN,	//	5
     IM_UNKNOWN,	//	6 MTH
@@ -883,6 +883,10 @@ void Instruction::flags_alu_op_mem_ctl(enum InstructionFlags &flags,
     flags = (enum InstructionFlags)im.flags;
     alu_op = im.alu;
     mem_ctl = im.mem_ctl;
+   #if 1
+    if ((dt ^ im.code) & (im.mask))
+        flags = (enum InstructionFlags)(flags & ~IMF_SUPPORTED);
+   #endif
 }
 
 enum ExceptionCause Instruction::encoded_exception() const {
