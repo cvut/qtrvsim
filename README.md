@@ -134,11 +134,78 @@ other words writtable which control color of RGB LED 1 and 2
 #define SPILED_REG_KNOBS_8BIT_o         0x024
 ```
 
+Interrupts and Coprocessor 0 Support
+------------------------------------
+
+List of interrupt sources:
+
+| Irq number | Cause/Status Bit | Source                                       |
+|-----------:|-----------------:|:---------------------------------------------|
+| 2 / HW0    | 10               | Serial port ready to accept character to Tx  |
+| 3 / HW1    | 11               | There is received character ready to be read |
+| 7 / HW5    | 15               | Counter reached value in Compare register    |
+
+Following coprocessor 0 registers are recognized
+
+| Number | Name       | Description |
+|-------:|:-----------|:------------|
+|  $4,2  | UserLocal  | Used as TLS base by operating system usually |
+|  $8,0  | BadVAddr   | Reports the address for the most recent address-related exception |
+|  $9,0  | Count      | Processor cycle count |
+| $11,0  | Compare    | Timer interrupt control |
+| $12,0  | Status     | Processor status and control |
+| $13,0  | Cause      | Cause of last exception |
+| $14,0  | EPC        | Program counter at last exception |
+| $15,1  | EBase      | Exception vector base register |
+| $16,0  | Config     | Configuration registers |
+
+Hardware/special registers implemented:
+
+| Number | Name       | Description |
+|-------:|:-----------|:------------|
+|  0     | CPUNum     | CPU number, fixed to 0  |
+|  1     | SYNCI_Step | Increment required for instruction cache synchronization |
+|  2     | CC         | Cycle counter |
+|  3     | CCRes      | Cycle counter resolution, fixed on 1 |
+| 29     | UserLocal  | Read only value of Coprocessor 0 $4,2 register |
+
+Sequence to enable serial port receive interrupt:
+
+Decide location of interrupt service routine the first. The default address
+is 0x80000180. The base can be changed (EBase register) and then PC is set
+to address EBase + 0x180. This is in accordance with MIPS release 1 and 2
+manuals.
+
+Enable bit 10 (interrupt mask) in the Status register. Ensure that bit
+1 (EXL) is zero and bit 0 (IE) is set to one.
+
+Enable interrupt in the receiver status register (bit 1 of SERP_RX_ST_REG).
+
+Write character to the terminal It should be immediately consumed by
+the serial port receiver if interrupt is enabled in SERP_RX_ST_REG.
+CPU should report interrupt exception and when it propagates to
+the execution phase PC is set to the interrupt routine start address.
+
+Some hints how to direct linker to place interrupt handler routine
+at appropriate address. Implement interrupt routine in new section
+
+```
+.section .irq_handler, "ax"
+```
+
+Use next linker option to place section start at right address
+
+```
+ -Wl,--section-start=.irq_handler=0x80000180
+```
+
+
 Limitations of the Implementation
 ---------------------------------
-* Only 'rdhwr' privileged instruction is implemented for now. All other privileged
-  instructions and features dependent on them are not implemented.
-* Coprocessors (so no floating point unit nor any other type)
+* Only very minimal support for privileged instruction is implemented for now.
+  Only RDHWR and some coprocessor 0 registers implemented. TLB and virtual
+  memory and complete exception model not implemented.
+* Coprocessors (so no floating point unit and only limited coprocessor 0)
 * Memory access stall (stalling execution because of cache miss would be pretty
   annoying for users so difference between cache and memory is just in collected
   statistics)
@@ -151,4 +218,4 @@ Limitations of the Implementation
   
 List of Actually Supported Instructions
 ---------------------------------------
-ADD ADDI ADDIU ADDU AND ANDI BEQ BEQL BGEZ BGEZAL BGEZALL BGEZL BGTZ BGTZL BLEZ BLEZL BLTZ BLTZAL BLTZALL BLTZL BNE BNEL BREAK CACHE CLO CLZ DIV DIVU EXT INS J JAL JALR JR LB LBU LH LHU LL LUI LW LWC1 LWD1 LWL LWR MADD MADDU MFHI MFLO MOVN MOVZ MSUB MSUBU MTHI MTLO MUL MULT MULTU NOR OR ORI PREF RDHWR ROTR ROTRV SB SC SDC1 SEB SEH SH SLL SLLV SLT SLTI SLTIU SLTU SRA SRAV SRL SRLV SUB SUBU SW SWC1 SWL SWR SYNC SYNCI SYSCALL TEQ TEQI TGE TGEI TGEIU TGEU TLT TLTI TLTIU TLTU TNE TNEI WSBH XOR XORI.
+ADD ADDI ADDIU ADDU AND ANDI BEQ BEQL BGEZ BGEZAL BGEZALL BGEZL BGTZ BGTZL BLEZ BLEZL BLTZ BLTZAL BLTZALL BLTZL BNE BNEL BREAK CACHE CLO CLZ DIV DIVU ERET EXT INS J JAL JALR JR LB LBU LH LHU LL LUI LW LWC1 LWD1 LWL LWR MADD MADDU MFC0 MFHI MFLO MFMC0 MOVN MOVZ MSUB MSUBU MTC0 MTHI MTLO MUL MULT MULTU NOR OR ORI PREF RDHWR ROTR ROTRV SB SC SDC1 SEB SEH SH SLL SLLV SLT SLTI SLTIU SLTU SRA SRAV SRL SRLV SUB SUBU SW SWC1 SWL SWR SYNC SYNCI SYSCALL TEQ TEQI TGE TGEI TGEIU TGEU TLT TLTI TLTIU TLTU TNE TNEI WSBH XOR XORI 
