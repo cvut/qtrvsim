@@ -41,6 +41,7 @@
 #include "instruction.h"
 #include "alu.h"
 #include "memory.h"
+#include "utils.h"
 #include "qtmipsexception.h"
 
 using namespace machine;
@@ -1142,6 +1143,7 @@ Instruction Instruction::from_string(QString str, bool *pok, uint32_t inst_addr)
                     break;
                 case 'p':
                     val -= (inst_addr + 4);
+                    FALLTROUGH
                 case 'o':
                 case 'n':
                     // Qt functions are limited, toLongLong would be usable
