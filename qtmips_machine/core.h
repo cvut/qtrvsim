@@ -86,6 +86,10 @@ public:
     void insert_hwbreak(std::uint32_t address);
     void remove_hwbreak(std::uint32_t address);
     bool is_hwbreak(std::uint32_t address);
+    void set_stop_on_exception(enum ExceptionCause excause, bool value);
+    bool get_stop_on_exception(enum ExceptionCause excause) const;
+    void set_step_over_exception(enum ExceptionCause excause, bool value);
+    bool get_step_over_exception(enum ExceptionCause excause) const;
 
     void set_c0_userlocal(std::uint32_t address);
 
@@ -275,6 +279,8 @@ private:
     unsigned int min_cache_row_size;
     std::uint32_t hwr_userlocal;
     QMap<std::uint32_t, hwBreak *> hw_breaks;
+    bool stop_on_exception[EXCAUSE_COUNT];
+    bool step_over_exception[EXCAUSE_COUNT];
 };
 
 class CoreSingle : public Core {

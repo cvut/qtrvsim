@@ -127,6 +127,12 @@ public:
     void set_memory_access_time_read(unsigned);
     void set_memory_access_time_write(unsigned);
     void set_memory_access_time_burst(unsigned);
+    // Operating system and exceptions setup
+    void set_osemu_enable(bool);
+    void set_osemu_known_syscall_stop(bool);
+    void set_osemu_unknown_syscall_stop(bool);
+    void set_osemu_interrupt_stop(bool);
+    void set_osemu_exception_stop(bool);
     // Set path to source elf file. This has to be set before core is initialized.
     void set_elf(QString path);
     // Configure cache
@@ -141,6 +147,11 @@ public:
     unsigned memory_access_time_read() const;
     unsigned memory_access_time_write() const;
     unsigned memory_access_time_burst() const;
+    bool osemu_enable() const;
+    bool osemu_known_syscall_stop() const;
+    bool osemu_unknown_syscall_stop() const;
+    bool osemu_interrupt_stop() const;
+    bool osemu_exception_stop() const;
     QString elf() const;
     const MachineConfigCache &cache_program() const;
     const MachineConfigCache &cache_data() const;
@@ -156,6 +167,8 @@ private:
     enum HazardUnit hunit;
     bool exec_protect, write_protect;
     unsigned mem_acc_read, mem_acc_write, mem_acc_burst;
+    bool osem_enable, osem_known_syscall_stop, osem_unknown_syscall_stop;
+    bool osem_interrupt_stop, osem_exception_stop;
     QString elf_path;
     MachineConfigCache cch_program, cch_data;
 };

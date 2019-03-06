@@ -95,6 +95,17 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc, bool load_symtab) :
     run_t = new QTimer(this);
     set_speed(0); // In default run as fast as possible
     connect(run_t, SIGNAL(timeout()), this, SLOT(step_timer()));
+
+    for (int i = 0; i < EXCAUSE_COUNT; i++) {
+         if (i != EXCAUSE_INT && i != EXCAUSE_BREAK && i != EXCAUSE_HWBREAK) {
+
+         }
+         set_stop_on_exception((enum ExceptionCause)i, cc.osemu_exception_stop());
+         set_step_over_exception((enum ExceptionCause)i, cc.osemu_exception_stop());
+    }
+
+    set_stop_on_exception(EXCAUSE_INT, cc.osemu_interrupt_stop());
+    set_step_over_exception(EXCAUSE_INT, false);
 }
 
 QtMipsMachine::~QtMipsMachine() {
@@ -298,5 +309,27 @@ void QtMipsMachine::remove_hwbreak(std::uint32_t address) {
 bool QtMipsMachine::is_hwbreak(std::uint32_t address) {
     if (cr != nullptr)
         return cr->is_hwbreak(address);
+    return false;
+}
+
+void QtMipsMachine::set_stop_on_exception(enum ExceptionCause excause, bool value) {
+    if (cr != nullptr)
+        cr->set_stop_on_exception(excause, value);
+}
+
+bool QtMipsMachine::get_stop_on_exception(enum ExceptionCause excause) const {
+    if (cr != nullptr)
+        return cr->get_stop_on_exception(excause);
+    return false;
+}
+
+void QtMipsMachine::set_step_over_exception(enum ExceptionCause excause, bool value) {
+    if (cr != nullptr)
+        cr->set_step_over_exception(excause, value);
+}
+
+bool QtMipsMachine::get_step_over_exception(enum ExceptionCause excause) const {
+    if (cr != nullptr)
+        return cr->get_step_over_exception(excause);
     return false;
 }

@@ -52,6 +52,11 @@ Core::Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
     this->hwr_userlocal = 0xe0000000;
     if (cop0state != nullptr)
         cop0state->setup_core(this);
+    for (int i = 0; i < EXCAUSE_COUNT; i++) {
+         stop_on_exception[i] =  true;
+         step_over_exception[i] = true;
+    }
+    step_over_exception[EXCAUSE_INT] = false;
 }
 
 void Core::step(bool skip_break) {
@@ -107,6 +112,22 @@ bool Core::is_hwbreak(std::uint32_t address) {
     return hwbrk != nullptr;
 }
 
+void Core::set_stop_on_exception(enum ExceptionCause excause, bool value) {
+    stop_on_exception[excause] = value;
+}
+
+bool Core::get_stop_on_exception(enum ExceptionCause excause) const {
+    return stop_on_exception[excause];
+}
+
+void Core::set_step_over_exception(enum ExceptionCause excause, bool value) {
+    step_over_exception[excause] = value;
+}
+
+bool Core::get_step_over_exception(enum ExceptionCause excause) const {
+    return step_over_exception[excause];
+}
+
 void Core::register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler)
 {
     if (excause == EXCAUSE_NONE ) {
@@ -125,6 +146,7 @@ bool Core::handle_exception(Core *core, Registers *regs, ExceptionCause excause,
                       std::uint32_t jump_branch_pc, bool in_delay_slot,
                       std::uint32_t mem_ref_addr)
 {
+    bool ret = false;
     if (excause == EXCAUSE_HWBREAK) {
         if (in_delay_slot)
             regs->pc_abs_jmp(jump_branch_pc);
@@ -138,24 +160,26 @@ bool Core::handle_exception(Core *core, Registers *regs, ExceptionCause excause,
         else
             cop0state->write_cop0reg(Cop0State::EPC, inst_addr);
         cop0state->update_execption_cause(excause, in_delay_slot);
-        if (cop0state->read_cop0reg(Cop0State::EBase) != 0) {
-            if (excause == EXCAUSE_INT) {
-                cop0state->set_status_exl(true);
-                regs->pc_abs_jmp(cop0state->exception_pc_address());
-            }
+        if (cop0state->read_cop0reg(Cop0State::EBase) != 0 &&
+            !get_step_over_exception(excause)) {
+            cop0state->set_status_exl(true);
+            regs->pc_abs_jmp(cop0state->exception_pc_address());
         }
     }
 
     ExceptionHandler *exhandler = ex_handlers.value(excause);
     if (exhandler != nullptr)
-        return exhandler->handle_exception(core, regs, excause, inst_addr,
+        ret = exhandler->handle_exception(core, regs, excause, inst_addr,
                                            next_addr, jump_branch_pc, in_delay_slot,
                                            mem_ref_addr);
-    if (ex_default_handler != nullptr)
-        return ex_default_handler->handle_exception(core, regs, excause, inst_addr,
-                                                    next_addr, jump_branch_pc, in_delay_slot,
-                                                    mem_ref_addr);
-    return false;
+    else if (ex_default_handler != nullptr)
+        ret = ex_default_handler->handle_exception(core, regs, excause, inst_addr,
+                                                   next_addr, jump_branch_pc, in_delay_slot,
+                                                   mem_ref_addr);
+    if (get_stop_on_exception(excause))
+        emit core->stop_on_exception_reached();
+
+    return ret;
 }
 
 void Core::set_c0_userlocal(std::uint32_t address) {
@@ -883,6 +907,5 @@ bool StopExceptionHandler::handle_exception(Core *core, Registers *regs,
     (void)excause; (void)inst_addr; (void)next_addr; (void)mem_ref_addr; (void)regs;
     (void)jump_branch_pc; (void)in_delay_slot;
 #endif
-    emit core->stop_on_exception_reached();
     return true;
 };

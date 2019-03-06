@@ -60,7 +60,7 @@ struct mips_syscall_desc_t {
         &OsSyscallExceptionHandler::handler},
 static const mips_syscall_desc_t mips_syscall_args[] = {
         MIPS_SYS(sys_syscall    , 8, syscall_default_handler)    /* 4000 */
-        MIPS_SYS(sys_exit       , 1, syscall_default_handler)
+        MIPS_SYS(sys_exit       , 1, do_sys_exit)
         MIPS_SYS(sys_fork       , 0, syscall_default_handler)
         MIPS_SYS(sys_read       , 3, do_sys_read)
         MIPS_SYS(sys_write      , 3, do_sys_write)
@@ -427,10 +427,13 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
 const unsigned mips_syscall_args_size =
         sizeof(mips_syscall_args)/sizeof(*mips_syscall_args);
 
-OsSyscallExceptionHandler::OsSyscallExceptionHandler() {
+OsSyscallExceptionHandler::OsSyscallExceptionHandler(bool known_syscall_stop,
+                                                     bool unknown_syscall_stop) {
     brk_limit = 0;
     anonymous_base = 0x60000000;
     anonymous_last = anonymous_base;
+    this->known_syscall_stop = known_syscall_stop;
+    this->unknown_syscall_stop = unknown_syscall_stop;
 }
 
 bool OsSyscallExceptionHandler::handle_exception(Core *core, Registers *regs,
@@ -496,7 +499,8 @@ bool OsSyscallExceptionHandler::handle_exception(Core *core, Registers *regs,
 #endif
     status = (this->*sdesc->handler)(result, core, syscall_num,
                                       a1, a2, a3, a4, a5, a6, a7, a8);
-    emit core->stop_on_exception_reached();
+    if (known_syscall_stop)
+        emit core->stop_on_exception_reached();
 
     regs->write_gp(7, status);
     if (status < 0)
@@ -524,6 +528,26 @@ int OsSyscallExceptionHandler::syscall_default_handler(std::uint32_t &result, Co
     (void)core; (void)syscall_num;
     (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
     result = 0;
+    if (unknown_syscall_stop)
+        emit core->stop_on_exception_reached();
+    return 0;
+}
+
+// void exit(int status);
+int OsSyscallExceptionHandler::do_sys_exit(std::uint32_t &result, Core *core,
+               std::uint32_t syscall_num,
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
+               std::uint32_t a7, std::uint32_t a8) {
+    (void)core; (void)syscall_num;
+    (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
+
+    result = 0;
+    int status = a1;
+
+    printf("sys_exit status %d\n", status);
+        emit core->stop_on_exception_reached();
+
     return 0;
 }
 

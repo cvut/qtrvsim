@@ -57,12 +57,13 @@ int name(std::uint32_t &result, machine::Core *core, \
 class OsSyscallExceptionHandler : public machine::ExceptionHandler {
     Q_OBJECT
 public:
-    OsSyscallExceptionHandler();
+    OsSyscallExceptionHandler(bool known_syscall_stop = false, bool unknown_syscall_stop = false);
     bool handle_exception(machine::Core *core, machine::Registers *regs,
                           machine::ExceptionCause excause, std::uint32_t inst_addr,
                           std::uint32_t next_addr, std::uint32_t jump_branch_pc,
                           bool in_delay_slot, std::uint32_t mem_ref_addr);
     OSSYCALL_HANDLER_DECLARE(syscall_default_handler);
+    OSSYCALL_HANDLER_DECLARE(do_sys_exit);
     OSSYCALL_HANDLER_DECLARE(do_sys_set_thread_area);
     OSSYCALL_HANDLER_DECLARE(do_sys_writev);
     OSSYCALL_HANDLER_DECLARE(do_sys_write);
@@ -77,6 +78,8 @@ private:
     std::uint32_t brk_limit;
     std::uint32_t anonymous_base;
     std::uint32_t anonymous_last;
+    bool known_syscall_stop;
+    bool unknown_syscall_stop;
 };
 
 #undef OSSYCALL_HANDLER_DECLARE

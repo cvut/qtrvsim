@@ -153,13 +153,21 @@ void MainWindow::create_core(const machine::MachineConfig &config) {
 
     set_speed(); // Update machine speed to current settings
 
-#if 1
-    osemu::OsSyscallExceptionHandler *osemu_handler = new osemu::OsSyscallExceptionHandler;
-    machine->register_exception_handler(machine::EXCAUSE_SYSCALL, osemu_handler);
-    connect(osemu_handler, SIGNAL(char_written(int,uint)), terminal, SLOT(tx_byte(int,uint)));
-    connect(osemu_handler, SIGNAL(rx_byte_pool(int,uint&,bool&)),
+    if (config.osemu_enable()) {
+        osemu::OsSyscallExceptionHandler *osemu_handler =
+                new osemu::OsSyscallExceptionHandler(config.osemu_known_syscall_stop(),
+                                                     config.osemu_unknown_syscall_stop());
+        machine->register_exception_handler(machine::EXCAUSE_SYSCALL, osemu_handler);
+        connect(osemu_handler, SIGNAL(char_written(int,uint)), terminal, SLOT(tx_byte(int,uint)));
+        connect(osemu_handler, SIGNAL(rx_byte_pool(int,uint&,bool&)),
             terminal, SLOT(rx_byte_pool(int,uint&,bool&)));
-#endif
+        machine->set_step_over_exception(machine::EXCAUSE_SYSCALL, true);
+        machine->set_stop_on_exception(machine::EXCAUSE_SYSCALL, false);
+    } else {
+        machine->set_step_over_exception(machine::EXCAUSE_SYSCALL, false);
+        machine->set_stop_on_exception(machine::EXCAUSE_SYSCALL,
+                                               config.osemu_exception_stop());
+    }
 
     // Connect machine signals and slots
     connect(ui->actionRun, SIGNAL(triggered(bool)), machine, SLOT(play()));

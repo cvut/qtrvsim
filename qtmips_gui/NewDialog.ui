@@ -305,9 +305,52 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_7">
        <item>
-        <widget class="QCheckBox" name="osemu_enablecheck">
+        <widget class="QCheckBox" name="osemu_enable">
          <property name="text">
-          <string>Enable OS Emulation</string>
+          <string>Enable emulation of operating system services</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="osemu_known_syscall_stop">
+         <property name="text">
+          <string>Stop on known system call</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="osemu_unknown_syscall_stop">
+         <property name="text">
+          <string>Stop on unknown system call</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="osemu_interrupt_stop">
+         <property name="text">
+          <string>Stop on interrupt entry</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="osemu_exception_stop">
+         <property name="text">
+          <string>Stop and step over exceptions (overflow, etc.)</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </item>

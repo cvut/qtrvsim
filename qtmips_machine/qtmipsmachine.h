@@ -93,6 +93,10 @@ public:
     void insert_hwbreak(std::uint32_t address);
     void remove_hwbreak(std::uint32_t address);
     bool is_hwbreak(std::uint32_t address);
+    void set_stop_on_exception(enum ExceptionCause excause, bool value);
+    bool get_stop_on_exception(enum ExceptionCause excause) const;
+    void set_step_over_exception(enum ExceptionCause excause, bool value);
+    bool get_step_over_exception(enum ExceptionCause excause) const;
 
 public slots:
     void play();

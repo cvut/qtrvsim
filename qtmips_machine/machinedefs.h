@@ -69,6 +69,7 @@ enum ExceptionCause {
     EXCAUSE_OVERFLOW = 12,
     EXCAUSE_TRAP     = 13,
     EXCAUSE_HWBREAK  = 14,
+    EXCAUSE_COUNT    = 15,
 };
 
 enum AluOp : std::uint8_t {

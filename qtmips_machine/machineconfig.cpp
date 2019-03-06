@@ -201,6 +201,11 @@ MachineConfig::MachineConfig(const MachineConfig *cc) {
     mem_acc_read = cc->memory_access_time_read();
     mem_acc_write = cc->memory_access_time_write();
     mem_acc_burst = cc->memory_access_time_burst();
+    osem_enable = cc->osemu_enable();
+    osem_known_syscall_stop = cc->osemu_known_syscall_stop();
+    osem_unknown_syscall_stop = cc->osemu_unknown_syscall_stop();
+    osem_interrupt_stop = cc->osemu_interrupt_stop();
+    osem_exception_stop = cc->osemu_exception_stop();
     elf_path = cc->elf();
     cch_program = cc->cache_program();
     cch_data = cc->cache_data();
@@ -217,6 +222,11 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     mem_acc_read = sts->value(N("MemoryRead"), DF_MEM_ACC_READ).toUInt();
     mem_acc_write = sts->value(N("MemoryWrite"), DF_MEM_ACC_WRITE).toUInt();
     mem_acc_burst = sts->value(N("MemoryBurts"), DF_MEM_ACC_BURST).toUInt();
+    osem_enable = sts->value(N("OsemuEnable"), true).toBool();
+    osem_known_syscall_stop = sts->value(N("OsemuKnownSyscallStop"), true).toBool();
+    osem_unknown_syscall_stop = sts->value(N("OsemuUnknownSyscallStop"), true).toBool();
+    osem_interrupt_stop = sts->value(N("OsemuInterruptStop"), true).toBool();
+    osem_exception_stop = sts->value(N("OsemuExceptionStop"), true).toBool();
     elf_path = sts->value(N("Elf"), DF_ELF).toString();
     cch_program = MachineConfigCache(sts, N("ProgramCache_"));
     cch_data = MachineConfigCache(sts, N("DataCache_"));
@@ -229,6 +239,11 @@ void MachineConfig::store(QSettings *sts, const QString &prefix) {
     sts->setValue(N("MemoryRead"), memory_access_time_read());
     sts->setValue(N("MemoryWrite"), memory_access_time_write());
     sts->setValue(N("MemoryBurts"), memory_access_time_burst());
+    sts->setValue(N("OsemuEnable"), osemu_enable());
+    sts->setValue(N("OsemuKnownSyscallStop"), osemu_known_syscall_stop());
+    sts->setValue(N("OsemuUnknownSyscallStop"), osemu_unknown_syscall_stop());
+    sts->setValue(N("OsemuInterruptStop"), osemu_interrupt_stop());
+    sts->setValue(N("OsemuExceptionStop"), osemu_exception_stop());
     sts->setValue(N("Elf"), elf_path);
     cch_program.store(sts, N("ProgramCache_"));
     cch_data.store(sts, N("DataCache_"));
@@ -296,6 +311,26 @@ void MachineConfig::set_memory_access_time_burst(unsigned v) {
     mem_acc_burst = v;
 }
 
+void MachineConfig::set_osemu_enable(bool v) {
+    osem_enable = v;
+}
+
+void MachineConfig::set_osemu_known_syscall_stop(bool v) {
+    osem_known_syscall_stop = v;
+}
+
+void MachineConfig::set_osemu_unknown_syscall_stop(bool v) {
+    osem_unknown_syscall_stop = v;
+}
+
+void MachineConfig::set_osemu_interrupt_stop(bool v) {
+    osem_interrupt_stop = v;
+}
+
+void MachineConfig::set_osemu_exception_stop(bool v) {
+    osem_exception_stop = v;
+}
+
 void MachineConfig::set_elf(QString path) {
     elf_path = path;
 }
@@ -340,6 +375,22 @@ unsigned MachineConfig::memory_access_time_write() const {
 
 unsigned MachineConfig::memory_access_time_burst() const {
     return mem_acc_burst;
+}
+
+bool MachineConfig::osemu_enable() const {
+    return osem_enable;
+}
+bool MachineConfig::osemu_known_syscall_stop() const {
+    return osem_known_syscall_stop;
+}
+bool MachineConfig::osemu_unknown_syscall_stop() const {
+    return osem_unknown_syscall_stop;
+}
+bool MachineConfig::osemu_interrupt_stop() const {
+    return osem_interrupt_stop;
+}
+bool MachineConfig::osemu_exception_stop() const {
+    return osem_exception_stop;
 }
 
 QString MachineConfig::elf() const {

@@ -70,6 +70,11 @@ private slots:
     void mem_time_read_change(int);
     void mem_time_write_change(int);
     void mem_time_burst_change(int);
+    void osemu_enable_change(bool);
+    void osemu_known_syscall_stop_change(bool);
+    void osemu_unknown_syscall_stop_change(bool);
+    void osemu_interrupt_stop_change(bool);
+    void osemu_exception_stop_change(bool);
 
 private:
     Ui::NewDialog *ui;

@@ -72,6 +72,12 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     connect(ui->mem_time_write, SIGNAL(valueChanged(int)), this, SLOT(mem_time_write_change(int)));
     connect(ui->mem_time_burst, SIGNAL(valueChanged(int)), this, SLOT(mem_time_burst_change(int)));
 
+    connect(ui->osemu_enable, SIGNAL(clicked(bool)), this, SLOT(osemu_enable_change(bool)));
+    connect(ui->osemu_known_syscall_stop, SIGNAL(clicked(bool)), this, SLOT(osemu_known_syscall_stop_change(bool)));
+    connect(ui->osemu_unknown_syscall_stop, SIGNAL(clicked(bool)), this, SLOT(osemu_unknown_syscall_stop_change(bool)));
+    connect(ui->osemu_interrupt_stop, SIGNAL(clicked(bool)), this, SLOT(osemu_interrupt_stop_change(bool)));
+    connect(ui->osemu_exception_stop, SIGNAL(clicked(bool)), this, SLOT(osemu_exception_stop_change(bool)));
+
 	cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d);
 	cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p);
 
@@ -196,6 +202,26 @@ void NewDialog::mem_time_burst_change(int v) {
     }
 }
 
+void NewDialog::osemu_enable_change(bool v) {
+    config->set_osemu_enable(v);
+}
+
+void NewDialog::osemu_known_syscall_stop_change(bool v) {
+    config->set_osemu_known_syscall_stop(v);
+}
+
+void NewDialog::osemu_unknown_syscall_stop_change(bool v) {
+    config->set_osemu_unknown_syscall_stop(v);
+}
+
+void NewDialog::osemu_interrupt_stop_change(bool v) {
+    config->set_osemu_interrupt_stop(v);
+}
+
+void NewDialog::osemu_exception_stop_change(bool v) {
+    config->set_osemu_exception_stop(v);
+}
+
 void NewDialog::config_gui() {
     // Basic
     ui->elf_file->setText(config->elf());
@@ -214,6 +240,12 @@ void NewDialog::config_gui() {
     // Cache
 	cache_handler_d->config_gui();
 	cache_handler_p->config_gui();
+    // Operating system and exceptions
+    ui->osemu_enable->setChecked(config->osemu_enable());
+    ui->osemu_known_syscall_stop->setChecked(config->osemu_known_syscall_stop());
+    ui->osemu_unknown_syscall_stop->setChecked(config->osemu_unknown_syscall_stop());
+    ui->osemu_interrupt_stop->setChecked(config->osemu_interrupt_stop());
+    ui->osemu_exception_stop->setChecked(config->osemu_exception_stop());
 
     // Disable various sections according to configuration
     ui->delay_slot->setEnabled(!config->pipelined());
