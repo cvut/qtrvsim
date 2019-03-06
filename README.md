@@ -42,7 +42,7 @@ Compilation for Local Execution
 -------------------------------
 Because simulator it self and operating system stub are implemented as libraries you
 need to have that libraries in path where loader can found them. Binary looks for library
-at system libary paths (on Windows in actual directory as well) and on compiled in
+at system library paths (on Windows in actual directory as well) and on compiled in
 RPATH which is `../lib` (i.e., install into 'bin' and 'lib' directory is assumed):
 
 ```
@@ -58,7 +58,7 @@ cd QtMips-build
 qmake CONFIG+=static" "CONFIG+=staticlib" -recursive ../QtMips/qtmips.pro
 ```
 
-Alternativelly, you can setup
+Alternatively, you can setup
 
 ```
 LD_LIBRARY_PATH=/path_to_QtMips/qtmips_machine /path_to_QtMips/qtmips_osemu
@@ -71,7 +71,7 @@ compiled for 32-bit big-endian MISP target.
 
 Optimal is use of plain mips-elf GCC toolchain.
 
-For more reffer to the [supported executable formats](docs/exec-formats-and-tools.md)
+For more refer to the [supported executable formats](docs/exec-formats-and-tools.md)
 documentation in the ['docs'](docs) projects subdirectory.
 
 Tests
@@ -95,7 +95,7 @@ two registers, the 'SERP_TX_ST_REG' is trasmit status register.
 Bit 0 signals by value 1 that UART is ready and can
 accept next character to be sent.
 The second register 'SERP_TX_DATA_REG' is actual Tx buffer.
-The LSB byte of writtent word is transmitted to terminal
+The LSB byte of written word is transmitted to terminal
 window. Definition of peripheral base address and registers
 offsets follows including reserve for the future Rx port
 implementation.
@@ -119,7 +119,7 @@ The another peripheral allows to set three byte values
 concatenated to single word (read-only KNOBS_8BIT register)
 from user panel set by knobs and display one word in hexadecimal,
 decimal and binary format ('LED_LINE' register). There are two
-other words writtable which control color of RGB LED 1 and 2
+other words writable which control color of RGB LED 1 and 2
 (registers 'LED_RGB1' and 'LED_RGB2').
 
 ```
@@ -214,7 +214,7 @@ Limitations of the Implementation
 * Complete binary instruction check (we check only minimal set of bites to decode
   instruction, we don't check if zero sections are really zero unless we need it),
   but instruction decoder can be easily extended to distinguish instructions
-  according additional subfiled.
+  according additional subfield.
   
 List of Actually Supported Instructions
 ---------------------------------------
