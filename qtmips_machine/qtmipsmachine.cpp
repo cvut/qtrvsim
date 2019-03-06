@@ -98,10 +98,9 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc, bool load_symtab) :
 
     for (int i = 0; i < EXCAUSE_COUNT; i++) {
          if (i != EXCAUSE_INT && i != EXCAUSE_BREAK && i != EXCAUSE_HWBREAK) {
-
+             set_stop_on_exception((enum ExceptionCause)i, cc.osemu_exception_stop());
+             set_step_over_exception((enum ExceptionCause)i, cc.osemu_exception_stop());
          }
-         set_stop_on_exception((enum ExceptionCause)i, cc.osemu_exception_stop());
-         set_step_over_exception((enum ExceptionCause)i, cc.osemu_exception_stop());
     }
 
     set_stop_on_exception(EXCAUSE_INT, cc.osemu_interrupt_stop());
