@@ -55,7 +55,7 @@ Or compile the application with static libraries
 ```
 mkdir QtMips-build
 cd QtMips-build
-qmake CONFIG+=static" "CONFIG+=staticlib" -recursive ../QtMips/qtmips.pro
+qmake "CONFIG+=static" "CONFIG+=staticlib" -recursive ../QtMips/qtmips.pro
 ```
 
 Alternatively, you can setup
