@@ -1017,17 +1017,19 @@ void instruction_from_string_build_base(const InstructionMap *im = nullptr,
 static int parse_reg_from_string(QString str, uint *chars_taken = nullptr)
 {
     int res;
+    uint ctk;
     if (str.count() < 2 || str.at(0) != '$')
         return -1;
     const char *p = str.toLatin1().data() + 1;
     char *r;
     res = std::strtol(p, &r, 0);
+    ctk = r - p + 1;
     if (p == r)
         return -1;
     if (res > 31)
         return -1;
     if (chars_taken != nullptr)
-        *chars_taken = r - p;
+        *chars_taken = ctk;
     return res;
 }
 
@@ -1122,6 +1124,7 @@ Instruction Instruction::from_string(QString str, bool *pok, uint32_t inst_addr)
                        field = -1;
                        break;
                    }
+                   fl = fl.mid(1);
                    continue;
                 }
                 uint bits = IMF_SUB_GET_BITS(adesc->loc);
