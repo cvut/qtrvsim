@@ -48,19 +48,6 @@
 using namespace machine;
 using namespace osemu;
 
-typedef int (OsSyscallExceptionHandler::*syscall_handler_t)
-              (std::uint32_t &result, Core *core,
-               std::uint32_t syscall_num,
-               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
-               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
-               std::uint32_t a7, std::uint32_t a8);
-
-struct mips_syscall_desc_t {
-    const char *name;
-    unsigned int args;
-    syscall_handler_t handler;
-};
-
 // The copyied from musl-libc
 
 #define TARGET_O_CREAT        0400
@@ -535,6 +522,35 @@ static const QMap<int, int> errno_map = {
     #ifdef EDQUOT
         {EDQUOT, TARGET_EDQUOT},
     #endif
+};
+
+std::uint32_t result_errno_if_error(std::uint32_t result) {
+    if (result < (std::uint32_t)-4096)
+        return result;
+    result = (std::uint32_t)-errno_map.value(errno);
+    if (!result)
+        result = (std::uint32_t)-1;
+    return result;
+}
+
+int status_from_result(std::uint32_t result) {
+    if (result < (std::uint32_t)-4096)
+        return 0;
+    else
+        return -result;
+}
+
+typedef int (OsSyscallExceptionHandler::*syscall_handler_t)
+              (std::uint32_t &result, Core *core,
+               std::uint32_t syscall_num,
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
+               std::uint32_t a7, std::uint32_t a8);
+
+struct mips_syscall_desc_t {
+    const char *name;
+    unsigned int args;
+    syscall_handler_t handler;
 };
 
 // The list copyied from QEMU
@@ -1029,7 +1045,7 @@ std::int32_t OsSyscallExceptionHandler::write_io(int fd, const QVector<std::uint
     } else {
         count = write(fd, data.data(), count);
     }
-    return count;
+    return result_errno_if_error(count);
 }
 
 std::int32_t OsSyscallExceptionHandler::read_io(int fd, QVector<std::uint8_t> &data,
@@ -1056,8 +1072,9 @@ std::int32_t OsSyscallExceptionHandler::read_io(int fd, QVector<std::uint8_t> &d
     } else {
         count = read(fd, data.data(), count);
     }
-    data.resize(count);
-    return count;
+    if ((std::int32_t)count >= 0)
+        data.resize(count);
+    return result_errno_if_error(count);
 }
 
 int OsSyscallExceptionHandler::allocate_fd(int val) {
@@ -1105,8 +1122,7 @@ int OsSyscallExceptionHandler::file_open(QString fname, int flags, int mode) {
     if (fd >= 0) {
         targetfd = allocate_fd(fd);
     } else {
-        perror("file_open");
-        targetfd = -1;
+        targetfd = result_errno_if_error(fd);
     }
     return targetfd;
 }
@@ -1173,7 +1189,7 @@ int OsSyscallExceptionHandler::syscall_default_handler(std::uint32_t &result, Co
     result = 0;
     if (unknown_syscall_stop)
         emit core->stop_on_exception_reached();
-    return 0;
+    return TARGET_ENOSYS;
 }
 
 // void exit(int status);
@@ -1248,7 +1264,7 @@ int OsSyscallExceptionHandler::do_sys_writev(std::uint32_t &result, Core *core,
             break;
     }
 
-    return 0;
+return status_from_result(result);
 }
 
 // ssize_t write(int fd, const void *buf, size_t count);
@@ -1281,7 +1297,7 @@ int OsSyscallExceptionHandler::do_sys_write(std::uint32_t &result, Core *core,
 
     result = count;
 
-    return 0;
+    return status_from_result(result);
 }
 
 // ssize_t readv(int fd, const struct iovec *iov, int iovcnt);
@@ -1320,13 +1336,13 @@ int OsSyscallExceptionHandler::do_sys_readv(std::uint32_t &result, Core *core,
             result += count;
         } else {
             if (result == 0)
-                result =count;
+                result = count;
         }
         if (count < (std::int32_t)iov_len)
             break;
     }
 
-    return 0;
+    return status_from_result(result);
 }
 
 // ssize_t read(int fd, void *buf, size_t count);
@@ -1362,7 +1378,7 @@ int OsSyscallExceptionHandler::do_sys_read(std::uint32_t &result, Core *core,
     }
     result = count;
 
-    return 0;
+    return status_from_result(result);
 }
 
 // int open(const char *pathname, int flags, mode_t mode);
@@ -1393,7 +1409,7 @@ int OsSyscallExceptionHandler::do_sys_open(std::uint32_t &result, Core *core,
 
     result = file_open(fname, flags, mode);
 
-    return 0;
+    return status_from_result(result);
 }
 
 // int close(int fd);
@@ -1420,7 +1436,7 @@ int OsSyscallExceptionHandler::do_sys_close(std::uint32_t &result, Core *core,
     close(fd);
     close_fd(targetfd);
 
-    return 0;
+    return status_from_result(result);
 }
 
 // int ftruncate(int fd, off_t length);
@@ -1444,9 +1460,9 @@ int OsSyscallExceptionHandler::do_sys_ftruncate(std::uint32_t &result, Core *cor
         return 0;
     }
 
-    ftruncate(fd, length);
+    result = result_errno_if_error(ftruncate(fd, length));
 
-    return 0;
+    return status_from_result(result);
 }
 
 // int or void * brk(void *addr);
