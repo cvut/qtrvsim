@@ -187,6 +187,12 @@ MachineConfig::MachineConfig() {
     mem_acc_read = DF_MEM_ACC_READ;
     mem_acc_write = DF_MEM_ACC_WRITE;
     mem_acc_burst = DF_MEM_ACC_BURST;
+    osem_enable = true;
+    osem_known_syscall_stop = true;
+    osem_unknown_syscall_stop = true;
+    osem_interrupt_stop = true;
+    osem_exception_stop = true;
+    osem_fs_root = "";
     elf_path = DF_ELF;
     cch_program = MachineConfigCache();
     cch_data = MachineConfigCache();
@@ -206,6 +212,7 @@ MachineConfig::MachineConfig(const MachineConfig *cc) {
     osem_unknown_syscall_stop = cc->osemu_unknown_syscall_stop();
     osem_interrupt_stop = cc->osemu_interrupt_stop();
     osem_exception_stop = cc->osemu_exception_stop();
+    osem_fs_root = cc->osemu_fs_root();
     elf_path = cc->elf();
     cch_program = cc->cache_program();
     cch_data = cc->cache_data();
@@ -227,6 +234,7 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     osem_unknown_syscall_stop = sts->value(N("OsemuUnknownSyscallStop"), true).toBool();
     osem_interrupt_stop = sts->value(N("OsemuInterruptStop"), true).toBool();
     osem_exception_stop = sts->value(N("OsemuExceptionStop"), true).toBool();
+    osem_fs_root = sts->value(N("OsemuFilesystemRoot"), "").toString();
     elf_path = sts->value(N("Elf"), DF_ELF).toString();
     cch_program = MachineConfigCache(sts, N("ProgramCache_"));
     cch_data = MachineConfigCache(sts, N("DataCache_"));
@@ -244,6 +252,7 @@ void MachineConfig::store(QSettings *sts, const QString &prefix) {
     sts->setValue(N("OsemuUnknownSyscallStop"), osemu_unknown_syscall_stop());
     sts->setValue(N("OsemuInterruptStop"), osemu_interrupt_stop());
     sts->setValue(N("OsemuExceptionStop"), osemu_exception_stop());
+    sts->setValue(N("OsemuFilesystemRoot"), osemu_fs_root());
     sts->setValue(N("Elf"), elf_path);
     cch_program.store(sts, N("ProgramCache_"));
     cch_data.store(sts, N("DataCache_"));
@@ -331,6 +340,10 @@ void MachineConfig::set_osemu_exception_stop(bool v) {
     osem_exception_stop = v;
 }
 
+void MachineConfig::set_osemu_fs_root(QString v) {
+    osem_fs_root = v;
+}
+
 void MachineConfig::set_elf(QString path) {
     elf_path = path;
 }
@@ -391,6 +404,10 @@ bool MachineConfig::osemu_interrupt_stop() const {
 }
 bool MachineConfig::osemu_exception_stop() const {
     return osem_exception_stop;
+}
+
+QString MachineConfig::osemu_fs_root() const {
+    return osem_fs_root;
 }
 
 QString MachineConfig::elf() const {

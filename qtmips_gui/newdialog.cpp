@@ -55,6 +55,7 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     connect(ui->pushButton_load, SIGNAL(clicked(bool)), this, SLOT(create()));
     connect(ui->pushButton_cancel, SIGNAL(clicked(bool)), this, SLOT(cancel()));
     connect(ui->pushButton_browse, SIGNAL(clicked(bool)), this, SLOT(browse_elf()));
+    connect(ui->elf_file, SIGNAL(textChanged(QString)), this, SLOT(elf_change(QString)));
     connect(ui->preset_no_pipeline, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
     connect(ui->preset_no_pipeline_cache, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
     connect(ui->preset_pipelined_bare, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
@@ -77,6 +78,8 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     connect(ui->osemu_unknown_syscall_stop, SIGNAL(clicked(bool)), this, SLOT(osemu_unknown_syscall_stop_change(bool)));
     connect(ui->osemu_interrupt_stop, SIGNAL(clicked(bool)), this, SLOT(osemu_interrupt_stop_change(bool)));
     connect(ui->osemu_exception_stop, SIGNAL(clicked(bool)), this, SLOT(osemu_exception_stop_change(bool)));
+    connect(ui->osemu_fs_root_browse, SIGNAL(clicked(bool)), this, SLOT(browse_osemu_fs_root()));
+    connect(ui->osemu_fs_root, SIGNAL(textChanged(QString)), this, SLOT(osemu_fs_root_change(QString)));
 
 	cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d);
 	cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p);
@@ -142,6 +145,10 @@ void NewDialog::browse_elf() {
         config->set_elf(path);
     }
     // Elf shouldn't have any other effect so we skip config_gui here
+}
+
+void NewDialog::elf_change(QString val) {
+    config->set_elf(val);
 }
 
 void NewDialog::set_preset() {
@@ -222,6 +229,20 @@ void NewDialog::osemu_exception_stop_change(bool v) {
     config->set_osemu_exception_stop(v);
 }
 
+void NewDialog::browse_osemu_fs_root() {
+    QFileDialog osemu_fs_root_dialog(this);
+    osemu_fs_root_dialog.setFileMode(QFileDialog::DirectoryOnly);
+    if (osemu_fs_root_dialog.exec()) {
+        QString path = osemu_fs_root_dialog.selectedFiles()[0];
+        ui->osemu_fs_root->setText(path);
+        config->set_osemu_fs_root(path);
+    }
+}
+
+void NewDialog::osemu_fs_root_change(QString val) {
+    config->set_osemu_fs_root(val);
+}
+
 void NewDialog::config_gui() {
     // Basic
     ui->elf_file->setText(config->elf());
@@ -246,6 +267,7 @@ void NewDialog::config_gui() {
     ui->osemu_unknown_syscall_stop->setChecked(config->osemu_unknown_syscall_stop());
     ui->osemu_interrupt_stop->setChecked(config->osemu_interrupt_stop());
     ui->osemu_exception_stop->setChecked(config->osemu_exception_stop());
+    ui->osemu_fs_root->setText(config->osemu_fs_root());
 
     // Disable various sections according to configuration
     ui->delay_slot->setEnabled(!config->pipelined());

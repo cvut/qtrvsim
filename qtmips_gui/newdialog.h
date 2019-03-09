@@ -61,6 +61,7 @@ private slots:
     void cancel();
     void create();
     void browse_elf();
+    void elf_change(QString val);
     void set_preset();
     void pipelined_change(bool);
     void delay_slot_change(bool);
@@ -75,6 +76,8 @@ private slots:
     void osemu_unknown_syscall_stop_change(bool);
     void osemu_interrupt_stop_change(bool);
     void osemu_exception_stop_change(bool);
+    void browse_osemu_fs_root();
+    void osemu_fs_root_change(QString val);
 
 private:
     Ui::NewDialog *ui;

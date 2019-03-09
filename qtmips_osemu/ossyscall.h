@@ -37,6 +37,8 @@
 #define OSSYCALL_H
 
 #include <QObject>
+#include <QString>
+#include <QVector>
 #include <qtmipsexception.h>
 #include <machineconfig.h>
 #include <registers.h>
@@ -57,7 +59,8 @@ int name(std::uint32_t &result, machine::Core *core, \
 class OsSyscallExceptionHandler : public machine::ExceptionHandler {
     Q_OBJECT
 public:
-    OsSyscallExceptionHandler(bool known_syscall_stop = false, bool unknown_syscall_stop = false);
+    OsSyscallExceptionHandler(bool known_syscall_stop = false, bool unknown_syscall_stop = false,
+                              QString fs_root = "");
     bool handle_exception(machine::Core *core, machine::Registers *regs,
                           machine::ExceptionCause excause, std::uint32_t inst_addr,
                           std::uint32_t next_addr, std::uint32_t jump_branch_pc,
@@ -69,17 +72,39 @@ public:
     OSSYCALL_HANDLER_DECLARE(do_sys_write);
     OSSYCALL_HANDLER_DECLARE(do_sys_readv);
     OSSYCALL_HANDLER_DECLARE(do_sys_read);
+    OSSYCALL_HANDLER_DECLARE(do_sys_open);
+    OSSYCALL_HANDLER_DECLARE(do_sys_close);
+    OSSYCALL_HANDLER_DECLARE(do_sys_ftruncate);
     OSSYCALL_HANDLER_DECLARE(do_sys_brk);
     OSSYCALL_HANDLER_DECLARE(do_sys_mmap2);
 signals:
     void char_written(int fd, unsigned int val);
     void rx_byte_pool(int fd, unsigned int &data, bool &available);
 private:
+    enum FdMapping {
+        FD_UNUSED = -1,
+        FD_INVALID = -1,
+        FD_TERMINAL = -2,
+    };
+    std::int32_t write_mem(machine::MemoryAccess *mem, std::uint32_t addr,
+                       const QVector<std::uint8_t> &data, std::uint32_t count);
+    std::int32_t read_mem(machine::MemoryAccess *mem, std::uint32_t addr,
+                       QVector<std::uint8_t> &data, std::uint32_t count);
+    std::int32_t write_io(int fd, const QVector<std::uint8_t> &data, std::uint32_t count);
+    std::int32_t read_io(int fd, QVector<std::uint8_t> &data, std::uint32_t count, bool add_nl_at_eof);
+    int allocate_fd(int val = FD_UNUSED);
+    int file_open(QString fname, int flags, int mode);
+    int targetfd_to_fd(int targetfd);
+    void close_fd(int targetfd);
+    QString filepath_to_host(QString path);
+
+    QVector<int> fd_mapping;
     std::uint32_t brk_limit;
     std::uint32_t anonymous_base;
     std::uint32_t anonymous_last;
     bool known_syscall_stop;
     bool unknown_syscall_stop;
+    QString fs_root;
 };
 
 #undef OSSYCALL_HANDLER_DECLARE
