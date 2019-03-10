@@ -199,6 +199,84 @@ Use next linker option to place section start at right address
  -Wl,--section-start=.irq_handler=0x80000180
 ```
 
+System Calls Support
+--------------------
+
+The emulator includes support for a few Linux kernel systemcalls.
+The MIPS O32 ABI is used.
+
+| Register                           | use on input          | use on output                     | Note
+|:-----------------------------------|:----------------------|:----------------------------------|:-------
+| $at ($1)                           | —                     | (caller saved)                    |
+| $v0 ($2)                           | syscall number        | return value                      |
+| $v1 ($3)                           | —                     | 2nd fd only for pipe(2)           |
+| $a0 ... $a2 ($4 ... $6)            | syscall arguments     | returned unmodified               |
+| $a3 ($7)                           | 4th syscall argument  | $a3 set to 0/1 for success/error  |
+| $t0 ... $t9 ($8 ... $15, $24, $25) | —                     | (caller saved)                    |
+| $s0 ... $s7 ($16 ... $23)          | —                     | (callee saved)                    |
+| $k0, $k1 ($26, $27)                |                       |                                   |
+| $gp ($28)                          |                       | (callee saved)                    |
+| $sp ($29)                          |                       | (callee saved)                    |
+| $fp or $s8 ($30)                   |                       | (callee saved)                    |
+| $ra ($31)                          |                       | (callee saved)                    |
+| $hi, $lo                           | —                     | (caller saved)                    |
+
+The first four input arguments are passed in registers $a0 to $a3, if more arguments are required
+then fifth and following arguments are stored on the stack.
+
+Supported syscalls:
+
+#### void [exit](http://man7.org/linux/man-pages/man2/exit.2.html)(int status) __NR_exit (4001)
+Stop/end execution of the program. The argument is exit status code,
+zero means OK, other values informs about error.
+
+#### ssize_t [read](http://man7.org/linux/man-pages/man2/read.2.html)(int fd, void *buf, size_t count) __NR_read (4003)
+Read 'count' bytes from open file descriptor 'fd'. The emulator maps
+file descriptors 0, 1 and 2 to the internal terminal/console emulator.
+They can be used without 'open' call. If there are no more characters to read
+from the console, newline is appended. At most the count bytes read
+are stored to the memory location specified by 'buf' argument.
+Actual number of read bytes is returned.
+
+#### ssize_t [write](http://man7.org/linux/man-pages/man2/write.2.html)(int fd, const void *buf, size_t count) __NR_write (4004)
+Write 'count' bytes from memory location 'buf' to the open file descriptor
+'fd'. The same about console for file handles 0, 1 and 2 is valid as for 'read'.
+
+#### int [close](http://man7.org/linux/man-pages/man2/close.2.html)(int fd) __NR_close (4006)
+Close file associated to descriptor 'fd' and release descriptor.
+
+#### int open(const char *pathname, int flags, mode_t mode) __NR_open (4005)
+Open file and associate it with the first unused file descriptor number
+and return that number. If the option 'OS Emulation'->'Filesystem root'
+is not empty then the file path 'pathname' received from emulated
+environment is appended to the path specified by 'Filesystem root'.
+The host filesystem is protected against attempt to traverse to
+random directory by use of '..' path elements. If the root is not specified
+then all open files are targetted to the emulated terminal.
+
+#### void * [brk](http://man7.org/linux/man-pages/man2/brk.2.html)(void *addr) __NR_brk (4045)
+Set end of the area used by standard heap after end of the program data/bss.
+The syscall is emulated by dummy implementation. Whole address space
+up to 0xffff0000 is backuped by automatically attached RAM.
+
+#### int [ftruncate](http://man7.org/linux/man-pages/man2/ftruncate.2.html)(int fd, off_t length) __NR_truncate (4092)
+Set length of the open file specified by 'fd' to the new 'length'.
+The 'length' argument is 64-bit even on 32-bit system and for
+big-endian MIPS it is apssed as higher part and the lower part
+in the second and third argument.
+
+#### ssize_t [readv](http://man7.org/linux/man-pages/man2/readv.2.html)(int fd, const struct iovec *iov, int iovcnt) __NR_Linux (4145)
+The variant of 'read' system call where data to read are would be stored
+to locations specified by 'iovcnt' pairs of base address, length pairs stored
+in memory at address pass in 'iov'.
+
+#### ssize_t [writev](http://man7.org/linux/man-pages/man2/writev.2.html)(int fd, const struct iovec *iov, int iovcnt) __NR_Linux (4146)
+The variant of 'write' system call where data to write are defined
+by 'iovcnt' pairs of base address, length pairs stored in memory
+at address pass in 'iov'.
+
+#### int [set_thread_area](http://man7.org/linux/man-pages/man2/set_thread_area.2.html)(unsigned long addr) __NR_set_thread_area (4283)
+Set TLS base into 'C0' 'user_local' register accessible by 'rdhwr' instruction..
 
 Limitations of the Implementation
 ---------------------------------
@@ -211,11 +289,7 @@ Limitations of the Implementation
   statistics)
 * Only limited support for interrupts and exceptions. When 'syscall' or 'break'
   instruction is recognized, emulation stops. Single step proceed after instruction.
-* Complete binary instruction check (we check only minimal set of bites to decode
-  instruction, we don't check if zero sections are really zero unless we need it),
-  but instruction decoder can be easily extended to distinguish instructions
-  according additional subfield.
-  
+
 List of Actually Supported Instructions
 ---------------------------------------
 ADD ADDI ADDIU ADDU AND ANDI BEQ BEQL BGEZ BGEZAL BGEZALL BGEZL BGTZ BGTZL BLEZ BLEZL BLTZ BLTZAL BLTZALL BLTZL BNE BNEL BREAK CACHE CLO CLZ DIV DIVU ERET EXT INS J JAL JALR JR LB LBU LH LHU LL LUI LW LWC1 LWD1 LWL LWR MADD MADDU MFC0 MFHI MFLO MFMC0 MOVN MOVZ MSUB MSUBU MTC0 MTHI MTLO MUL MULT MULTU NOR OR ORI PREF RDHWR ROTR ROTRV SB SC SDC1 SEB SEH SH SLL SLLV SLT SLTI SLTIU SLTU SRA SRAV SRL SRLV SUB SUBU SW SWC1 SWL SWR SYNC SYNCI SYSCALL TEQ TEQI TGE TGEI TGEIU TGEU TLT TLTI TLTIU TLTU TNE TNEI WSBH XOR XORI 
