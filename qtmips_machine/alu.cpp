@@ -154,10 +154,20 @@ std::uint32_t machine::alu_operate(enum AluOp operation, std::uint32_t s,
             alu_write_hi_lo_64bit(regs, u64_val);
             return 0x0;
         case ALU_OP_DIV:
+            if (t == 0) {
+                regs->write_hi_lo(false, 0);
+                regs->write_hi_lo(true, 0);
+                return 0;
+            }
             regs->write_hi_lo(false, (std::uint32_t)((std::int32_t)s / (std::int32_t)t));
             regs->write_hi_lo(true,  (std::uint32_t)((std::int32_t)s % (std::int32_t)t));
             return 0x0;
         case ALU_OP_DIVU:
+            if (t == 0) {
+                regs->write_hi_lo(false, 0);
+                regs->write_hi_lo(true, 0);
+                return 0;
+            }
             regs->write_hi_lo(false, s / t);
             regs->write_hi_lo(true, s % t);
             return 0x0;
