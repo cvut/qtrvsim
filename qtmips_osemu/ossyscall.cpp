@@ -1507,9 +1507,9 @@ int OsSyscallExceptionHandler::do_sys_mmap2(std::uint32_t &result, Core *core,
            (unsigned long)addr, (unsigned long)lenght, (unsigned long)prot,
            (unsigned long)flags, (int)fd, (unsigned long long) offset);
 
-    lenght = (lenght  + TARGET_MAP_ANONYMOUS - 1) & ~(TARGET_MAP_ANONYMOUS - 1);
-    anonymous_last = (anonymous_last + TARGET_MAP_ANONYMOUS - 1) &
-                     ~(TARGET_MAP_ANONYMOUS - 1);
+    lenght = (lenght  + TARGET_SYSCALL_MMAP2_UNIT - 1) & ~(TARGET_SYSCALL_MMAP2_UNIT - 1);
+    anonymous_last = (anonymous_last + TARGET_SYSCALL_MMAP2_UNIT - 1) &
+                     ~(TARGET_SYSCALL_MMAP2_UNIT - 1);
     result = anonymous_last;
     anonymous_last += lenght;
 
