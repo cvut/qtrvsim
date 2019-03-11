@@ -21,4 +21,6 @@ SOURCES += \
     ossyscall.cpp
 
 HEADERS += \
-    ossyscall.h
+    ossyscall.h \
+    syscall_nr.h \
+    target_errno.h

@@ -1,3 +1,6 @@
+#ifndef SYSCALL_NR_H
+#define SYSCALL_NR_H
+
 /*
  * Linux o32 style syscalls are in the range from 4000 to 4999.
  */
@@ -372,3 +375,5 @@
 #define TARGET_NR_statx                 (TARGET_NR_Linux + 366)
 #define TARGET_NR_rseq                  (TARGET_NR_Linux + 367)
 #define TARGET_NR_io_pgetevents         (TARGET_NR_Linux + 368)
+
+#endif /*SYSCALL_NR_H*/
