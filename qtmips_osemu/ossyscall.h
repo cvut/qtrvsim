@@ -77,6 +77,15 @@ public:
     OSSYCALL_HANDLER_DECLARE(do_sys_ftruncate);
     OSSYCALL_HANDLER_DECLARE(do_sys_brk);
     OSSYCALL_HANDLER_DECLARE(do_sys_mmap2);
+
+    OSSYCALL_HANDLER_DECLARE(do_spim_print_integer);
+    OSSYCALL_HANDLER_DECLARE(do_spim_print_string);
+    OSSYCALL_HANDLER_DECLARE(do_spim_read_string);
+    OSSYCALL_HANDLER_DECLARE(do_spim_sbrk);
+    OSSYCALL_HANDLER_DECLARE(do_spim_exit);
+    OSSYCALL_HANDLER_DECLARE(do_spim_print_character);
+    OSSYCALL_HANDLER_DECLARE(do_spim_read_character);
+
 signals:
     void char_written(int fd, unsigned int val);
     void rx_byte_pool(int fd, unsigned int &data, bool &available);
@@ -91,7 +100,8 @@ private:
     std::int32_t read_mem(machine::MemoryAccess *mem, std::uint32_t addr,
                        QVector<std::uint8_t> &data, std::uint32_t count);
     std::int32_t write_io(int fd, const QVector<std::uint8_t> &data, std::uint32_t count);
-    std::int32_t read_io(int fd, QVector<std::uint8_t> &data, std::uint32_t count, bool add_nl_at_eof);
+    std::int32_t read_io(int fd, QVector<std::uint8_t> &data, std::uint32_t count,
+                         bool add_nl_at_eof = false);
     int allocate_fd(int val = FD_UNUSED);
     int file_open(QString fname, int flags, int mode);
     int targetfd_to_fd(int targetfd);

@@ -926,6 +926,29 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
 const unsigned mips_syscall_args_size =
         sizeof(mips_syscall_args)/sizeof(*mips_syscall_args);
 
+static const mips_syscall_desc_t spim_syscall_args[] = {
+    MIPS_SYS(print_integer, 1, do_spim_print_integer)    /*  1 */
+    MIPS_SYS(print_float, 1, syscall_default_handler)    /*  2 */
+    MIPS_SYS(print_double, 1, syscall_default_handler)   /*  3 */
+    MIPS_SYS(print_string, 1, do_spim_print_string)      /*  4 */
+    MIPS_SYS(read_integer, 0, syscall_default_handler)   /*  5 */
+    MIPS_SYS(read_float, 0, syscall_default_handler)     /*  6 */
+    MIPS_SYS(read_double, 0, syscall_default_handler)    /*  7 */
+    MIPS_SYS(read_string, 0, do_spim_read_string)        /*  8 */
+    MIPS_SYS(sbrk, 0, do_spim_sbrk)                      /*  9 */
+    MIPS_SYS(exit, 1, do_spim_exit)                      /* 10 */
+    MIPS_SYS(print_character, 1, do_spim_print_character)/* 11 */
+    MIPS_SYS(read_character, 1, do_spim_read_character)  /* 12 */
+    MIPS_SYS(open_file, 3, do_sys_open)                  /* 13 */
+    MIPS_SYS(read_from_file, 3, do_sys_read)             /* 14 */
+    MIPS_SYS(read_to_file, 3, do_sys_write)              /* 15 */
+    MIPS_SYS(close_file, 3, do_sys_close)                /* 16 */
+    MIPS_SYS(exit, 1, do_sys_exit)                       /* 17 */
+};
+
+const unsigned spim_syscall_args_size =
+        sizeof(spim_syscall_args)/sizeof(*spim_syscall_args);
+
 OsSyscallExceptionHandler::OsSyscallExceptionHandler(bool known_syscall_stop,
                                                      bool unknown_syscall_stop,
                                                      QString fs_root) :
@@ -964,12 +987,16 @@ bool OsSyscallExceptionHandler::handle_exception(Core *core, Registers *regs,
     (void)jump_branch_pc; (void)in_delay_slot;
 #endif
 
-    if (syscall_num < 4000 || syscall_num >= 4000 + mips_syscall_args_size)
+
+    if (syscall_num >= 1 && syscall_num < 1 + spim_syscall_args_size) {
+        sdesc = &spim_syscall_args[syscall_num - 1];
+    } else if (syscall_num >= 4000 && syscall_num < 4000 + mips_syscall_args_size) {
+        syscall_num -= 4000;
+        sdesc = &mips_syscall_args[syscall_num];
+    } else {
         throw QTMIPS_EXCEPTION(SyscallUnknown, "System call number unknown ", QString::number(syscall_num));
+    }
 
-    syscall_num -= 4000;
-
-    sdesc = &mips_syscall_args[syscall_num];
     a1 = regs->read_gp(4);
     a2 = regs->read_gp(5);
     a3 = regs->read_gp(6);
@@ -1512,6 +1539,121 @@ int OsSyscallExceptionHandler::do_sys_mmap2(std::uint32_t &result, Core *core,
                      ~(TARGET_SYSCALL_MMAP2_UNIT - 1);
     result = anonymous_last;
     anonymous_last += lenght;
+
+    return 0;
+}
+
+int OsSyscallExceptionHandler::do_spim_print_integer(std::uint32_t &result, Core *core,
+               std::uint32_t syscall_num,
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
+               std::uint32_t a7, std::uint32_t a8) {
+    (void)core; (void)syscall_num;
+    (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
+
+    result = 0;
+
+    QString str = QString::number(a1);
+    QVector<std::uint8_t> data;
+    foreach (QChar ch, str)
+        data.append(ch.toLatin1());
+    write_io(1, data, data.size());
+
+    return 0;
+}
+
+int OsSyscallExceptionHandler::do_spim_print_string(std::uint32_t &result, Core *core,
+               std::uint32_t syscall_num,
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
+               std::uint32_t a7, std::uint32_t a8) {
+    (void)core; (void)syscall_num;
+    (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
+
+    std::uint32_t str_ptr = a1;
+    QVector<std::uint8_t> data;
+    MemoryAccess *mem = core->get_mem_data();
+
+    while (true) {
+        std::uint8_t ch;
+        ch = mem->read_byte(str_ptr++);
+        if (ch == 0)
+            break;
+        data.append(ch);
+    }
+    write_io(1, data, data.size());
+    result = 0;
+
+    return 0;
+}
+
+int OsSyscallExceptionHandler::do_spim_read_string(std::uint32_t &result, Core *core,
+               std::uint32_t syscall_num,
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
+               std::uint32_t a7, std::uint32_t a8) {
+    (void)core; (void)syscall_num;
+    (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
+
+    QVector<std::uint8_t> data;
+    read_io(1, data, (std::uint32_t)data.size(), false);
+
+    result = 0;
+
+    return 0;
+}
+
+int OsSyscallExceptionHandler::do_spim_sbrk(std::uint32_t &result, Core *core,
+               std::uint32_t syscall_num,
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
+               std::uint32_t a7, std::uint32_t a8) {
+    (void)core; (void)syscall_num;
+    (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
+
+    std::uint32_t increment = a1;
+    increment = (increment + 15) & ~15;;
+    brk_limit = (brk_limit + 15) & ~15;;
+    result = brk_limit;
+    brk_limit += increment;
+
+    return 0;
+}
+
+int OsSyscallExceptionHandler::do_spim_exit(std::uint32_t &result, Core *core,
+               std::uint32_t syscall_num,
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
+               std::uint32_t a7, std::uint32_t a8) {
+    (void)core; (void)syscall_num;
+    (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
+
+    return do_sys_exit(result, core, syscall_num, 0, a2, a3, a4, a5, a6, a7, a8);
+}
+
+int OsSyscallExceptionHandler::do_spim_print_character(std::uint32_t &result, Core *core,
+               std::uint32_t syscall_num,
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
+               std::uint32_t a7, std::uint32_t a8) {
+    (void)core; (void)syscall_num;
+    (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
+
+    result = 0;
+
+    return 0;
+}
+
+int OsSyscallExceptionHandler::do_spim_read_character(std::uint32_t &result, Core *core,
+               std::uint32_t syscall_num,
+               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3,
+               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6,
+               std::uint32_t a7, std::uint32_t a8) {
+    (void)core; (void)syscall_num;
+    (void)a1; (void)a2; (void)a3; (void)a4; (void)a5; (void)a6; (void)a7; (void)a8;
+
+    result = 0;
+
 
     return 0;
 }
