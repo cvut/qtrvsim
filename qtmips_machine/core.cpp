@@ -621,6 +621,7 @@ void Core::dtDecodeInit(struct dtDecode &dt) {
     dt.memctl = AC_NONE;
     dt.num_rs = 0;
     dt.num_rt = 0;
+    dt.num_rd = 0;
     dt.val_rs = 0;
     dt.val_rt = 0;
     dt.rwrite = 0;

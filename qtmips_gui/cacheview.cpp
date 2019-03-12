@@ -217,7 +217,7 @@ CacheViewBlock::~CacheViewBlock() {
     delete[] tag;
     for (unsigned y = 0; y < rows; y++)
         delete[] data[y];
-    delete data;
+    delete[] data;
 }
 
 QRectF CacheViewBlock::boundingRect() const  {
