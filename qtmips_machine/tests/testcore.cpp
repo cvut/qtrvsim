@@ -365,13 +365,13 @@ static void core_mem_data() {
     Registers regs;
     regs.write_gp(1, 0x22);
     Registers regs_res(regs);
-    regs_res.write_gp(21, 0x80000023);
+    regs_res.write_gp(21, 0xFFFFFFA3);
     QTest::newRow("LB") << Instruction(32, 1, 21, 0x2) \
                          << regs \
                          << regs_res \
                          << mem \
                          << mem;
-    regs_res.write_gp(21, 0x80002324);
+    regs_res.write_gp(21, 0xFFFFA324);
     QTest::newRow("LH") << Instruction(33, 1, 21, 0x2) \
                          << regs \
                          << regs_res \

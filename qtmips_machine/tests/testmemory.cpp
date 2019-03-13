@@ -179,9 +179,9 @@ void MachineTests::memory_read_ctl_data() {
     QTest::newRow("none") << AC_NONE \
                           << (std::uint32_t)0;
     QTest::newRow("byte") << AC_BYTE \
-                          << (std::uint32_t)0x80000023;
+                          << (std::uint32_t)0xFFFFFFA3;
     QTest::newRow("halfword") << AC_HALFWORD \
-                          << (std::uint32_t)0x80002324;
+                          << (std::uint32_t)0xFFFFA324;
     QTest::newRow("word") << AC_WORD \
                           << (std::uint32_t)0xA3242526;
     QTest::newRow("byte-unsigned") << AC_BYTE_UNSIGNED \

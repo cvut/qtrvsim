@@ -39,10 +39,10 @@ using namespace machine;
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 #define SH_NTH_8(OFFSET) ((3 - ((OFFSET) & 0b11)) * 8)
-#define SH_NTH_16(OFFSET) ((1 - ((OFFSET) & 0b10)) * 16)
+#define SH_NTH_16(OFFSET) ((2 - ((OFFSET) & 0b10)) * 8)
 #else
 #define SH_NTH_8(OFFSET) (((OFFSET) & 0b11) * 8)
-#define SH_NTH_16(OFFSET) (((OFFSET) & 0b10) * 16)
+#define SH_NTH_16(OFFSET) (((OFFSET) & 0b10) * 8)
 #endif
 
 bool MemoryAccess::write_byte(std::uint32_t offset, std::uint8_t value) {
@@ -102,12 +102,12 @@ std::uint32_t MemoryAccess::read_ctl(enum AccessControl ctl, std::uint32_t offse
     case AC_BYTE:
         {
         std::uint8_t b = this->read_byte(offset);
-        return (((std::uint32_t)b & 0x80) << 24) | ((std::uint32_t)b & 0x7F); // Sign extend
+        return  ((std::uint32_t)b & 0xFF) - (((std::uint32_t)b & 0x80) << 1); // Sign extend
         }
     case AC_HALFWORD:
         {
         std::uint16_t h = this->read_hword(offset);
-        return (((std::uint32_t)h & 0x8000) << 16) | ((std::uint32_t)h & 0x7FFF); // Sign extend
+        return ((std::uint32_t)h & 0xFFFF) - (((std::uint32_t)h & 0x8000) << 1); // Sign extend
         }
     case AC_WORD:
         return this->read_word(offset);
