@@ -83,7 +83,7 @@ bool SerialPort::wword(std::uint32_t address, std::uint32_t value) {
 #endif
     emit write_notification(address, value);
 
-    switch (address) {
+    switch (address & ~3) {
     case SERP_RX_ST_REG_o:
         rx_st_reg &= ~SERP_RX_ST_REG_IE_m;
         rx_st_reg |= value & SERP_RX_ST_REG_IE_m;
@@ -110,7 +110,7 @@ std::uint32_t SerialPort::rword(std::uint32_t address, bool debug_access) const 
     printf("SerialPort::rword address 0x%08lx\n",
            (unsigned long)address);
 #endif
-    switch (address) {
+    switch (address & ~3) {
     case SERP_RX_ST_REG_o:
         pool_rx_byte();
         value = rx_st_reg;

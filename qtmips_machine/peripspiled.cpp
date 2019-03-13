@@ -64,7 +64,7 @@ bool PeripSpiLed::wword(std::uint32_t address, std::uint32_t value) {
     printf("PeripSpiLed::wword address 0x%08lx data 0x%08lx\n",
            (unsigned long)address, (unsigned long)value);
 #endif
-    switch (address) {
+    switch (address & ~3) {
     case  SPILED_REG_LED_LINE_o:
         spiled_reg_led_line = value;
         emit led_line_changed(value);
@@ -90,7 +90,7 @@ std::uint32_t PeripSpiLed::rword(std::uint32_t address, bool debug_access) const
     (void)debug_access;
     std::uint32_t value = 0x00000000;
 
-    switch (address) {
+    switch (address & ~3) {
     case  SPILED_REG_LED_LINE_o:
         value = spiled_reg_led_line;
         break;
