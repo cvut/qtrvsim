@@ -156,6 +156,7 @@ void MemoryModel::setup(machine::QtMipsMachine *machine) {
     if (machine != nullptr)
         connect(machine, SIGNAL(post_tick()), this, SLOT(check_for_updates()));
     emit update_all();
+    emit setup_done();
 }
 
 void MemoryModel::setCellsPerRow(unsigned int cells) {

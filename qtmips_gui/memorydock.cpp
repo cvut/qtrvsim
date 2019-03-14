@@ -93,6 +93,7 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
             go_edit, SLOT(set_value(std::uint32_t)));
     connect(this, SIGNAL(focus_addr(std::uint32_t)),
             memory_content, SLOT(focus_address(std::uint32_t)));
+    connect(memory_model, SIGNAL(setup_done()), memory_content, SLOT(recompute_columns()));
 }
 
 void MemoryDock::setup(machine::QtMipsMachine *machine) {

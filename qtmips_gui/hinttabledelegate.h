@@ -33,44 +33,22 @@
  *
  ******************************************************************************/
 
-#ifndef MEMORYTABLEVIEW_H
-#define MEMORYTABLEVIEW_H
+#ifndef HINTTABLEDELEGATE_H
+#define HINTTABLEDELEGATE_H
 
 #include <QObject>
-#include <QSettings>
-#include <QTableView>
-#include <QSharedPointer>
+#include <QStyledItemDelegate>
 
-class MemoryTableView : public QTableView
+class HintTableDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 
-    using Super = QTableView;
+    using Super = QStyledItemDelegate;
 
 public:
-    MemoryTableView(QWidget *parent, QSettings *settings);
-
-    void resizeEvent(QResizeEvent *event) override;
-signals:
-    void address_changed(std::uint32_t address);
-    void adjust_scroll_pos_queue();
-public slots:
-    void set_cell_size(int index);
-    void go_to_address(std::uint32_t address);
-    void focus_address(std::uint32_t address);
-    void recompute_columns();
-protected:
-    void keyPressEvent(QKeyEvent *event);
-private slots:
-    void adjust_scroll_pos_check();
-    void adjust_scroll_pos_process();
-private:
-    void addr0_save_change(std::uint32_t val);
-    void adjustColumnCount();
-    QSettings *settings;
-
-    std::uint32_t initial_address;
-    bool adjust_scroll_pos_in_progress;
+    HintTableDelegate(QWidget *parent = 0) : Super(parent) {}
+    QSize sizeHintForText(const QStyleOptionViewItem &option,
+                          const QModelIndex &index, const QString &str) const;
 };
 
-#endif // MEMORYTABLEVIEW_H
+#endif // HINTTABLEDELEGATE_H

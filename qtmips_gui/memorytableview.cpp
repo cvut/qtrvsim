@@ -41,8 +41,10 @@
 #include <QApplication>
 #include "memorytableview.h"
 #include "memorymodel.h"
+#include "hinttabledelegate.h"
 
 MemoryTableView::MemoryTableView(QWidget *parent, QSettings *settings) : Super(parent) {
+    setItemDelegate(new HintTableDelegate);
     connect(verticalScrollBar() , SIGNAL(valueChanged(int)),
             this, SLOT(adjust_scroll_pos_check()));
     connect(this , SIGNAL(adjust_scroll_pos_queue()),
@@ -58,31 +60,41 @@ void MemoryTableView::addr0_save_change(std::uint32_t val) {
 
 void MemoryTableView::adjustColumnCount() {
     MemoryModel *m = dynamic_cast<MemoryModel*>(model());
+    if (m == nullptr)
+        return;
 
-    if (horizontalHeader()->count() >= 2 && m != nullptr) {
+    HintTableDelegate *delegate = dynamic_cast<HintTableDelegate*>(itemDelegate());
+    if (delegate == nullptr)
+        return;
+
+    if (horizontalHeader()->count() >= 2) {
+        QModelIndex idx;
         QFontMetrics fm(*m->getFont());
-        int width0 = fm.width("0x00000000");
+        idx = m->index(0, 0);
+        // int width0_dh = itemDelegate(idx)->sizeHint(viewOptions(), idx).width() + 2;
+        int width0_dh = delegate->sizeHintForText(viewOptions(), idx,
+                                                  "0x00000000").width() + 2;
         horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
-        horizontalHeader()->resizeSection(0, width0);
+        horizontalHeader()->resizeSection(0, width0_dh);
 
+        idx = m->index(0, 1);
         QString t = "";
         t.fill(QChar('0'), m->cellSizeBytes() * 2);
-        /* t + = " C"; */
-        int width1 = fm.width(t);
-        if (width1 < fm.width("+99"))
-            width1 = fm.width("+99");
+        int width1_dh = delegate->sizeHintForText(viewOptions(), idx, t).width() + 2;
+        if (width1_dh < fm.width("+99"))
+            width1_dh = fm.width("+99");
         horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
-        horizontalHeader()->resizeSection(1, width1);
+        horizontalHeader()->resizeSection(1, width1_dh);
 
         int w = verticalHeader()->width() + 4;
         unsigned int cells;
-        width0 = columnWidth(0);
-        width1 = columnWidth(1);
+        int width0 = columnWidth(0);
+        int width1 = columnWidth(1);
         w = width() - w - width0;
-        if (w < width1 + 2) {
+        if (w < width1 + 4) {
             cells = 1;
         } else {
-            cells = w / (width1 + 2);
+            cells = w / (width1 + 4);
         }
         if (cells != m->cellsPerRow()) {
             m->setCellsPerRow(cells);
@@ -96,6 +108,10 @@ void MemoryTableView::adjustColumnCount() {
             initial_address = 0;
         }
     }
+}
+
+void MemoryTableView::recompute_columns() {
+    adjustColumnCount();
 }
 
 void MemoryTableView::set_cell_size(int index) {

@@ -41,8 +41,10 @@
 #include <QApplication>
 #include "programtableview.h"
 #include "programmodel.h"
+#include "hinttabledelegate.h"
 
 ProgramTableView::ProgramTableView(QWidget *parent, QSettings *settings) : Super(parent) {
+    setItemDelegate(new HintTableDelegate);
     connect(verticalScrollBar() , SIGNAL(valueChanged(int)),
             this, SLOT(adjust_scroll_pos_check()));
     connect(this , SIGNAL(adjust_scroll_pos_queue()),
@@ -57,28 +59,44 @@ void ProgramTableView::addr0_save_change(std::uint32_t val) {
 }
 
 void ProgramTableView::adjustColumnCount() {
-    int cwidth;
+    QModelIndex idx;
+    int cwidth_dh;
     int totwidth;
+
     ProgramModel *m = dynamic_cast<ProgramModel*>(model());
 
     if (m == nullptr)
         return;
 
-    QFontMetrics fm(*m->getFont());
-    cwidth = fm.width("Bp");
-    totwidth = cwidth;
+    HintTableDelegate *delegate = dynamic_cast<HintTableDelegate*>(itemDelegate());
+    if (delegate == nullptr)
+        return;
+
+    idx = m->index(0, 0);
+    cwidth_dh = delegate->sizeHintForText(viewOptions(), idx,
+                                          "Bp").width() + 2;
     horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
-    horizontalHeader()->resizeSection(0, cwidth);
-    cwidth = fm.width("0x00000000");
-    totwidth += cwidth;
+    horizontalHeader()->resizeSection(0, cwidth_dh);
+    totwidth = cwidth_dh;
+
+    idx = m->index(0, 1);
+    cwidth_dh = delegate->sizeHintForText(viewOptions(), idx,
+                                          "0x00000000").width() + 2;
     horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
-    horizontalHeader()->resizeSection(1, cwidth);
-    totwidth += cwidth;
-    cwidth = fm.width("00000000");
+    horizontalHeader()->resizeSection(1, cwidth_dh);
+    totwidth += cwidth_dh;
+
+    idx = m->index(0, 2);
+    cwidth_dh = delegate->sizeHintForText(viewOptions(), idx,
+                                          "00000000").width() + 2;
     horizontalHeader()->setSectionResizeMode(2, QHeaderView::Fixed);
-    horizontalHeader()->resizeSection(2, cwidth);
+    horizontalHeader()->resizeSection(2, cwidth_dh);
+    totwidth += cwidth_dh;
+
     horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
-    totwidth += fm.width("BEQ $18, $17, 0x80020058");
+    idx = m->index(0, 3);
+    totwidth += delegate->sizeHintForText(viewOptions(), idx,
+                                          "BEQ $18, $17, 0x80020058").width() + 2;
     totwidth += verticalHeader()->width();
     setColumnHidden(2, totwidth > width());
 

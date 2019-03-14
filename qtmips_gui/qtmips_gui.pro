@@ -63,7 +63,8 @@ SOURCES += \
     coreview/multitext.cpp \
     fontsize.cpp \
     gotosymboldialog.cpp \
-    cop0dock.cpp
+    cop0dock.cpp \
+    hinttabledelegate.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -102,7 +103,8 @@ HEADERS += \
     coreview/multitext.h \
     fontsize.h \
     gotosymboldialog.h \
-    cop0dock.h
+    cop0dock.h \
+    hinttabledelegate.h
 
 FORMS += \
         NewDialog.ui \

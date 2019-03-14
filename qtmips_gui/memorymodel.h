@@ -112,6 +112,7 @@ public slots:
 
 signals:
     void cell_size_changed();
+    void setup_done();
 
 private:
     enum MemoryCellSize cell_size;
