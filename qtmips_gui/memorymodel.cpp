@@ -199,11 +199,7 @@ void MemoryModel::check_for_updates() {
     update_all();
 }
 
-bool MemoryModel::adjustRowAndOffset(int &row, int optimal_row, std::uint32_t address) {
-    if (optimal_row < rowCount() / 8)
-        optimal_row = rowCount() / 8;
-    if (optimal_row >= rowCount() - rowCount() / 8)
-        optimal_row = rowCount() - rowCount() / 8;
+bool MemoryModel::adjustRowAndOffset(int &row, std::uint32_t address) {
     row = rowCount() / 2;
     address -= address % cellSizeBytes();
     std::uint32_t row_bytes = cells_per_row * cellSizeBytes();

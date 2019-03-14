@@ -44,9 +44,12 @@
 
 MemoryTableView::MemoryTableView(QWidget *parent, QSettings *settings) : Super(parent) {
     connect(verticalScrollBar() , SIGNAL(valueChanged(int)),
-            this, SLOT(adjust_scroll_pos()));
+            this, SLOT(adjust_scroll_pos_check()));
+    connect(this , SIGNAL(adjust_scroll_pos_queue()),
+            this, SLOT(adjust_scroll_pos_process()), Qt::QueuedConnection);
     this->settings = settings;
     initial_address = settings->value("DataViewAddr0", 0).toULongLong();
+    adjust_scroll_pos_in_progress = false;
 }
 
 void MemoryTableView::addr0_save_change(std::uint32_t val) {
@@ -106,13 +109,21 @@ void MemoryTableView::set_cell_size(int index) {
     }
     adjustColumnCount();
     if (keep_row0) {
-        m->adjustRowAndOffset(row, m->rowCount() / 2, address);
+        m->adjustRowAndOffset(row, address);
         scrollTo(m->index(row, 0),
                  QAbstractItemView::PositionAtTop);
     }
 }
 
-void MemoryTableView:: adjust_scroll_pos() {
+void MemoryTableView::adjust_scroll_pos_check() {
+    if (!adjust_scroll_pos_in_progress) {
+        adjust_scroll_pos_in_progress = true;
+        emit adjust_scroll_pos_queue();
+    }
+}
+
+void MemoryTableView::adjust_scroll_pos_process() {
+    adjust_scroll_pos_in_progress = false;
     std::uint32_t address;
     MemoryModel *m = dynamic_cast<MemoryModel*>(model());
     if (m == nullptr)
@@ -127,16 +138,16 @@ void MemoryTableView:: adjust_scroll_pos() {
         int prev_row = row;
         if (row < m->rowCount() / 8) {
             if ((row == 0) && (index0_offset < row_bytes) && (index0_offset != 0)) {
-                m->adjustRowAndOffset(row, 0, 0);
+                m->adjustRowAndOffset(row, 0);
             } else if (index0_offset > row_bytes) {
                 m->get_row_address(address, row);
-                m->adjustRowAndOffset(row, m->rowCount() / 7, address);
+                m->adjustRowAndOffset(row, address);
             } else {
                 break;
             }
         } else if (row > m->rowCount() - m->rowCount() / 8) {
             m->get_row_address(address, row);
-            m->adjustRowAndOffset(row, m->rowCount() - m->rowCount() / 7, address);
+            m->adjustRowAndOffset(row, address);
         } else {
             break;
         }
@@ -175,7 +186,7 @@ void MemoryTableView::go_to_address(std::uint32_t address) {
     int row;
     if (m == nullptr)
         return;
-    m->adjustRowAndOffset(row, m->rowCount() / 2, address);
+    m->adjustRowAndOffset(row, address);
     scrollTo(m->index(row, 0),
          QAbstractItemView::PositionAtTop);
     setCurrentIndex(m->index(row, 1));

@@ -59,7 +59,7 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const;
     bool setData(const QModelIndex & index, const QVariant & value, int role);
-    bool adjustRowAndOffset(int &row, int optimal_row, std::uint32_t address);
+    bool adjustRowAndOffset(int &row, std::uint32_t address);
     void update_all();
 
     void setCellsPerRow(unsigned int cells);
