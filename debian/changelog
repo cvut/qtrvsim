@@ -1,5 +1,5 @@
-qtmips (0.6.1) unstable; urgency=medium
+qtmips (0.6.5) unstable; urgency=medium
 
-  * Initial import
+  * Initial Debian packaging.
 
- -- Pavel Pisa  <pisa@cmp.felk.cvut.cz> Wed, 13 Mar 2019 19:38:33 +0100
+ -- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Wed, 13 Mar 2019 19:38:33 +0100

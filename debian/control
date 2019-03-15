@@ -2,9 +2,8 @@ Source: qtmips
 Section: devel
 Priority: optional
 Maintainer: Pavel Pisa <pisa@cmp.felk.cvut.cz>
-Uploaders: Pavel Pisa <pisa@cmp.felk.cvut.cz>
 Build-Depends: debhelper (>= 9), qtbase5-dev, libelf-dev
-Standards-Version: 0.6
+Standards-Version: 3.9.8
 Homepage: https://github.com/cvut/QtMips/
 Vcs-Git: https://github.com/cvut/QtMips.git
 Vcs-Browser: https://github.com/cvut/QtMips/
