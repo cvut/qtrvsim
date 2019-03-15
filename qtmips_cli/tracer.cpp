@@ -52,31 +52,34 @@ Tracer::Tracer(QtMipsMachine *machine) {
     con_regs_hi_lo = false;
 }
 
-#define CON(VAR, FROM, SIG, SLT) do { \
+#define CON_RAW(VAR, FROM, SIG, SLT) do { \
         if (!VAR) { \
-            connect(FROM, SIGNAL(SIG), this, SLOT(SLT)); \
+            connect(FROM, SIG, this, SLT); \
             VAR = true;\
         }\
     } while(false)
 
+#define CON(VAR, FROM, SIG, SLT) \
+          CON_RAW(VAR, FROM, SIGNAL(SIG), SLOT(SLT))
+
 void Tracer::fetch() {
-    CON(con_fetch, machine->core(), instruction_fetched(const machine::Instruction&), instruction_fetch(const machine::Instruction&));
+    CON_RAW(con_fetch, machine->core(), &Core::instruction_fetched, &Tracer::instruction_fetch);
 }
 
 void Tracer::decode() {
-    CON(con_fetch, machine->core(), instruction_decoded(const machine::Instruction&), instruction_decode(const machine::Instruction&));
+    CON_RAW(con_fetch, machine->core(), &Core::instruction_decoded, &Tracer::instruction_decode);
 }
 
 void Tracer::execute() {
-    CON(con_fetch, machine->core(), instruction_executed(const machine::Instruction&), instruction_execute(const machine::Instruction&));
+    CON_RAW(con_fetch, machine->core(), &Core::instruction_executed, &Tracer::instruction_execute);
 }
 
 void Tracer::memory() {
-    CON(con_fetch, machine->core(), instruction_memory(const machine::Instruction&), instruction_memory(const machine::Instruction&));
+    CON_RAW(con_fetch, machine->core(), &Core::instruction_memory, &Tracer::instruction_memory);
 }
 
 void Tracer::writeback() {
-    CON(con_fetch, machine->core(), instruction_writeback(const machine::Instruction&), instruction_writeback(const machine::Instruction&));
+    CON_RAW(con_fetch, machine->core(), &Core::instruction_writeback, &Tracer::instruction_writeback);
 }
 
 void Tracer::reg_pc() {
@@ -99,24 +102,24 @@ void Tracer::reg_hi() {
     r_hi = true;
 }
 
-void Tracer::instruction_fetch(const Instruction &inst) {
-    cout << "Fetch: " << inst.to_str().toStdString() << endl;
+void Tracer::instruction_fetch(const Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause) {
+    cout << "Fetch: " << (excause != EXCAUSE_NONE? "!": "") << inst.to_str(inst_addr).toStdString() << endl;
 }
 
-void Tracer::instruction_decode(const machine::Instruction &inst) {
-    cout << "Decode: " << inst.to_str().toStdString() << endl;
+void Tracer::instruction_decode(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause) {
+    cout << "Decode: " << (excause != EXCAUSE_NONE? "!": "") << inst.to_str(inst_addr).toStdString() << endl;
 }
 
-void Tracer::instruction_execute(const machine::Instruction &inst) {
-    cout << "Execute: " << inst.to_str().toStdString() << endl;
+void Tracer::instruction_execute(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause) {
+    cout << "Execute: " << (excause != EXCAUSE_NONE? "!": "") << inst.to_str(inst_addr).toStdString() << endl;
 }
 
-void Tracer::instruction_memory(const machine::Instruction &inst) {
-    cout << "Memory: " << inst.to_str().toStdString() << endl;
+void Tracer::instruction_memory(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause) {
+    cout << "Memory: " << (excause != EXCAUSE_NONE? "!": "") << inst.to_str(inst_addr).toStdString() << endl;
 }
 
-void Tracer::instruction_writeback(const machine::Instruction &inst) {
-    cout << "Writeback: " << inst.to_str().toStdString() << endl;
+void Tracer::instruction_writeback(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause) {
+    cout << "Writeback: " << (excause != EXCAUSE_NONE? "!": "") << inst.to_str(inst_addr).toStdString() << endl;
 }
 
 void Tracer::regs_pc_update(std::uint32_t val) {
