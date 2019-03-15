@@ -50,22 +50,21 @@ void create_parser(QCommandLineParser &p) {
 
     p.addPositionalArgument("FILE", "Input ELF executable file");
 
-    p.addOptions({
-        {"pipelined", "Configure CPU to use five stage pipeline."},
-        {"no-delay-slot", "Disable jump delay slot."},
-        {{"trace-fetch", "tr-fetch"}, "Trace fetched instruction (for both pipelined and not core)."},
-        {{"trace-decode", "tr-decode"}, "Trace instruction in decode stage. (only for pipelined core)"},
-        {{"trace-execute", "tr-execute"}, "Trace instruction in execute stage. (only for pipelined core)"},
-        {{"trace-memory", "tr-memory"}, "Trace instruction in memory stage. (only for pipelined core)"},
-        {{"trace-writeback", "tr-writeback"}, "Trace instruction in write back stage. (only for pipelined core)"},
-        {{"trace-pc", "tr-pc"}, "Print program counter register changes."},
-        {{"trace-gp", "tr-gp"}, "Print general purpose register changes. You can use * for all registers.", "REG"},
-        {{"trace-lo", "tr-lo"}, "Print LO register changes."},
-        {{"trace-hi", "tr-hi"}, "Print HI register changes."},
-        {{"dump-registers", "d-regs"}, "Dump registers state at program exit."},
-        {"expect-fail", "Expect that program causes CPU trap and fail if it doesn't."},
-        {"fail-match", "Program should exit with exactly this CPU TRAP. Possible values are I(unsupported Instruction), A(Unsupported ALU operation), O(Overflow/underflow) and J(Unaligned Jump). You can freely combine them. Using this implies expect-fail option.", "TRAP"},
-    });
+    // p.addOptions({}); available only from Qt 5.4+
+    p.addOption({"pipelined", "Configure CPU to use five stage pipeline."});
+    p.addOption({"no-delay-slot", "Disable jump delay slot."});
+    p.addOption({{"trace-fetch", "tr-fetch"}, "Trace fetched instruction (for both pipelined and not core)."});
+    p.addOption({{"trace-decode", "tr-decode"}, "Trace instruction in decode stage. (only for pipelined core)"});
+    p.addOption({{"trace-execute", "tr-execute"}, "Trace instruction in execute stage. (only for pipelined core)"});
+    p.addOption({{"trace-memory", "tr-memory"}, "Trace instruction in memory stage. (only for pipelined core)"});
+    p.addOption({{"trace-writeback", "tr-writeback"}, "Trace instruction in write back stage. (only for pipelined core)"});
+    p.addOption({{"trace-pc", "tr-pc"}, "Print program counter register changes."});
+    p.addOption({{"trace-gp", "tr-gp"}, "Print general purpose register changes. You can use * for all registers.", "REG"});
+    p.addOption({{"trace-lo", "tr-lo"}, "Print LO register changes."});
+    p.addOption({{"trace-hi", "tr-hi"}, "Print HI register changes."});
+    p.addOption({{"dump-registers", "d-regs"}, "Dump registers state at program exit."});
+    p.addOption({"expect-fail", "Expect that program causes CPU trap and fail if it doesn't."});
+    p.addOption({"fail-match", "Program should exit with exactly this CPU TRAP. Possible values are I(unsupported Instruction), A(Unsupported ALU operation), O(Overflow/underflow) and J(Unaligned Jump). You can freely combine them. Using this implies expect-fail option.", "TRAP"});
 }
 
 void configure_machine(QCommandLineParser &p, MachineConfig &cc) {
