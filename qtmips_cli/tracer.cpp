@@ -67,19 +67,19 @@ void Tracer::fetch() {
 }
 
 void Tracer::decode() {
-    CON_RAW(con_fetch, machine->core(), &Core::instruction_decoded, &Tracer::instruction_decode);
+    CON_RAW(con_decode, machine->core(), &Core::instruction_decoded, &Tracer::instruction_decode);
 }
 
 void Tracer::execute() {
-    CON_RAW(con_fetch, machine->core(), &Core::instruction_executed, &Tracer::instruction_execute);
+    CON_RAW(con_execute, machine->core(), &Core::instruction_executed, &Tracer::instruction_execute);
 }
 
 void Tracer::memory() {
-    CON_RAW(con_fetch, machine->core(), &Core::instruction_memory, &Tracer::instruction_memory);
+    CON_RAW(con_memory, machine->core(), &Core::instruction_memory, &Tracer::instruction_memory);
 }
 
 void Tracer::writeback() {
-    CON_RAW(con_fetch, machine->core(), &Core::instruction_writeback, &Tracer::instruction_writeback);
+    CON_RAW(con_writeback, machine->core(), &Core::instruction_writeback, &Tracer::instruction_writeback);
 }
 
 void Tracer::reg_pc() {

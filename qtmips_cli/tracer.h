@@ -73,7 +73,8 @@ private:
     bool gp_regs[32];
     bool r_hi, r_lo;
 
-    bool con_fetch, con_regs_pc, con_regs_gp, con_regs_hi_lo;
+    bool con_fetch, con_decode, con_execute, con_memory, con_writeback,
+         con_regs_pc, con_regs_gp, con_regs_hi_lo;
 };
 
 #endif // TRACER_H
