@@ -71,8 +71,10 @@ void MachineTests::registers_pc() {
     QCOMPARE(r.pc_jmp(0xC), (unsigned)0x8002000C);
     r.pc_abs_jmp(0x80020100);
     QCOMPARE(r.read_pc(), (unsigned)0x80020100);
+#ifdef QVERIFY_EXCEPTION_THROWN
     QVERIFY_EXCEPTION_THROWN(r.pc_jmp(0x1), QtMipsExceptionUnalignedJump);
     QVERIFY_EXCEPTION_THROWN(r.pc_abs_jmp(0x80020101), QtMipsExceptionUnalignedJump);
+#endif
 }
 
 void MachineTests::registers_compare() {
