@@ -1,0 +1,3 @@
+qtmips_gui/qtmips_gui /usr/bin
+debian/qtmips.desktop usr/share/applications
+

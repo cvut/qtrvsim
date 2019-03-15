@@ -1,0 +1,17 @@
+Source: qtmips
+Section: devel
+Priority: optional
+Maintainer: Pavel Pisa <pisa@cmp.felk.cvut.cz>
+Uploaders: Pavel Pisa <pisa@cmp.felk.cvut.cz>
+Build-Depends: debhelper (>= 9), qtbase5-dev, libelf-dev
+Standards-Version: 0.6
+Homepage: https://github.com/cvut/QtMips/
+Vcs-Git: https://github.com/cvut/QtMips.git
+Vcs-Browser: https://github.com/cvut/QtMips/
+
+Package: qtmips
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, git
+Description: Qt based Mips architecture emulator
+ Graphical MIPS CPU simulator with pipeline and cache visualization.
+

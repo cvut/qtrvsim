@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=qtmips
+GenericName=Qt Mips emulator
+Exec=qtmips
+Icon=qtmips
+Type=Application
+Comment=Qt Mips emulator
+Terminal=false
+Categories=Qt;Development
