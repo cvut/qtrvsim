@@ -4,6 +4,7 @@ TARGET = qtmips_osemu
 CONFIG += c++11
 
 TEMPLATE = lib
+CONFIG += staticlib
 
 LIBS += -L$$OUT_PWD/../qtmips_machine/ -lqtmips_machine
 

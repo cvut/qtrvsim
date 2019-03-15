@@ -4,6 +4,7 @@ TARGET = qtmips_machine
 CONFIG += c++11
 
 TEMPLATE = lib
+CONFIG += staticlib
 
 LIBS += -lelf
 QMAKE_CXXFLAGS += -std=c++0x

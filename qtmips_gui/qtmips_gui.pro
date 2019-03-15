@@ -12,6 +12,9 @@ else:unix: LIBS_SUBDIR = .
 LIBS += -L$$OUT_PWD/../qtmips_osemu/$${LIBS_SUBDIR}  -lqtmips_osemu
 LIBS += -L$$OUT_PWD/../qtmips_machine/$${LIBS_SUBDIR} -lqtmips_machine -lelf
 
+PRE_TARGETDEPS += $$OUT_PWD/../qtmips_osemu/$${LIBS_SUBDIR}/libqtmips_osemu.a
+PRE_TARGETDEPS += $$OUT_PWD/../qtmips_machine/$${LIBS_SUBDIR}/libqtmips_machine.a
+
 DOLAR=$
 
 unix: LIBS += \
