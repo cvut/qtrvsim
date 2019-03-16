@@ -67,7 +67,7 @@ LD_LIBRARY_PATH=/path_to_QtMips/qtmips_machine /path_to_QtMips/qtmips_osemu
 Download Binary Packages
 ------------------------
 
-* [https://github.com/ppisa/QtMips/releases](https://github.com/ppisa/QtMips/releases) - archives with Windows and generic GNU/Linux binaries
+* [https://github.com/cvut/QtMips/releases](https://github.com/cvut/QtMips/releases) - archives with Windows and generic GNU/Linux binaries
 * [https://launchpad.net/~ppisa/+archive/ubuntu/qtmips](https://launchpad.net/~ppisa/+archive/ubuntu/qtmips) - Ubuntu packages for Disco, Cosmic, Bionic and Xenial releases.
 
 Accepted Binary Formats
