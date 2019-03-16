@@ -59,7 +59,8 @@ CacheAddressBlock::CacheAddressBlock(const machine::Cache *cache, unsigned width
     row = 0;
     col = 0;
 
-    connect(cache, SIGNAL(cache_update(uint,uint,bool,bool,std::uint32_t,const std::uint32_t*)), this, SLOT(cache_update(uint,uint,bool,bool,std::uint32_t,const std::uint32_t*)));
+    connect(cache, SIGNAL(cache_update(uint,uint,uint,bool,bool,std::uint32_t,const std::uint32_t*)),
+            this, SLOT(cache_update(uint,uint,uint,bool,bool,std::uint32_t,const std::uint32_t*)));
 }
 
 QRectF CacheAddressBlock::boundingRect() const {
@@ -130,10 +131,10 @@ void CacheAddressBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     }
 }
 
-void CacheAddressBlock::cache_update(unsigned associat, unsigned set, bool valid, bool dirty, std::uint32_t tag, const std::uint32_t *data) {
+void CacheAddressBlock::cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty, std::uint32_t tag, const std::uint32_t *data) {
     this->tag = tag;
-    this->row = 0; // TODO we are missing this information
-    this->col = set;
+    this->row = set;
+    this->col = col;
     update();
 }
 
@@ -207,7 +208,8 @@ CacheViewBlock::CacheViewBlock(const machine::Cache *cache, unsigned block , boo
     box = l_data->boundingRect();
     l_data->setPos(wd + (columns*DATA_WIDTH - box.width())/2 , -1 - box.height());
 
-    connect(cache, SIGNAL(cache_update(uint,uint,bool,bool,std::uint32_t,const std::uint32_t*)), this, SLOT(cache_update(uint,uint,bool,bool,std::uint32_t,const std::uint32_t*)));
+    connect(cache, SIGNAL(cache_update(uint,uint,uint,bool,bool,std::uint32_t,const std::uint32_t*)),
+            this, SLOT(cache_update(uint,uint,uint,bool,bool,std::uint32_t,const std::uint32_t*)));
 }
 
 CacheViewBlock::~CacheViewBlock() {
@@ -325,7 +327,8 @@ void CacheViewBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     }
 }
 
-void CacheViewBlock::cache_update(unsigned associat, unsigned set, bool valid, bool dirty, std::uint32_t tag, const std::uint32_t *data) {
+void CacheViewBlock::cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty, std::uint32_t tag, const std::uint32_t *data) {
+    (void)col;
     if (associat != block)
         return; // Ignore blocks that are not us
     validity[set]->setText(valid ? "1" : "0");
