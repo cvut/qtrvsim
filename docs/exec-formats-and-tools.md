@@ -83,8 +83,8 @@ instructions in the pipeline are discarded and execution stops.
 PC is set to the address of instruction causing the exception
 or to the branch instruction address if the exception occurs in
 delay slot. When the single step or continuous execution
-is requested again then  the "hardware" breakpoint exception
-in the fetch stage is masked for the first executed instruction which.
+is requested again then the "hardware" breakpoint exception
+in the fetch stage is masked for the first executed instruction.
 But then CPU accepts breakpoint exceptions again. This is why it
 is not a good idea to set up breakpoint to address of an instruction
 in the delay slot.
