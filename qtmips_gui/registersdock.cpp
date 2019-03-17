@@ -74,6 +74,9 @@ RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
     scrollarea = new QScrollArea(this);
     scrollarea->setWidgetResizable(true);
     widg = new StaticTable(scrollarea);
+    gp_highlighted = 0;
+    hi_highlighted = false;
+    lo_highlighted = false;
 
 #define INIT(X, LABEL) do{ \
         X = new QLabel("0x00000000", widg); \
@@ -94,6 +97,13 @@ RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
     setWidget(scrollarea);
     setObjectName("Registers");
     setWindowTitle("Registers");
+
+    pal_normal = QPalette(gp[0]->palette());
+    pal_updated = QPalette(gp[0]->palette());
+    pal_read = QPalette(gp[0]->palette());
+    pal_normal.setColor(QPalette::WindowText, QColor(0, 0, 0));
+    pal_updated.setColor(QPalette::WindowText, QColor(240, 0, 0));
+    pal_read.setColor(QPalette::WindowText, QColor(0, 0, 240));
 }
 
 RegistersDock::~RegistersDock() {
@@ -118,9 +128,6 @@ void RegistersDock::setup(machine::QtMipsMachine *machine) {
     }
 
     const machine::Registers *regs = machine->registers();
-    connect(regs, SIGNAL(pc_update(std::uint32_t)), this, SLOT(pc_changed(std::uint32_t)));
-    connect(regs, SIGNAL(gp_update(std::uint8_t,std::uint32_t)), this, SLOT(gp_changed(std::uint8_t,std::uint32_t)));
-    connect(regs, SIGNAL(hi_lo_update(bool,std::uint32_t)), this, SLOT(hi_lo_changed(bool,std::uint32_t)));
 
     // Load values
     labelVal(pc, regs->read_pc());
@@ -128,6 +135,13 @@ void RegistersDock::setup(machine::QtMipsMachine *machine) {
     labelVal(lo, regs->read_hi_lo(false));
     for (int i = 0; i < 32; i++)
         labelVal(gp[i], regs->read_gp(i));
+
+    connect(regs, SIGNAL(pc_update(std::uint32_t)), this, SLOT(pc_changed(std::uint32_t)));
+    connect(regs, SIGNAL(gp_update(std::uint8_t,std::uint32_t)), this, SLOT(gp_changed(std::uint8_t,std::uint32_t)));
+    connect(regs, SIGNAL(hi_lo_update(bool,std::uint32_t)), this, SLOT(hi_lo_changed(bool,std::uint32_t)));
+    connect(regs, SIGNAL(gp_read(std::uint8_t,std::uint32_t)), this, SLOT(gp_read(std::uint8_t,std::uint32_t)));
+    connect(regs, SIGNAL(hi_lo_read(bool,std::uint32_t)), this, SLOT(hi_lo_read(bool,std::uint32_t)));
+    connect(machine, SIGNAL(tick()), this, SLOT(clear_highlights()));
 }
 
 void RegistersDock::pc_changed(std::uint32_t val) {
@@ -137,13 +151,58 @@ void RegistersDock::pc_changed(std::uint32_t val) {
 void RegistersDock::gp_changed(std::uint8_t i, std::uint32_t val) {
     SANITY_ASSERT(i < 32, QString("RegistersDock received signal with invalid gp register: ") + QString::number(i));
     labelVal(gp[i], val);
+    gp[i]->setPalette(pal_updated);
+    gp_highlighted |= 1 << i;
+}
+
+void RegistersDock::gp_read(std::uint8_t i, std::uint32_t val) {
+    (void)val;
+    SANITY_ASSERT(i < 32, QString("RegistersDock received signal with invalid gp register: ") + QString::number(i));
+    if (!(gp_highlighted & (1 << i))) {
+        gp[i]->setPalette(pal_read);
+        gp_highlighted |= 1 << i;
+    }
 }
 
 void RegistersDock::hi_lo_changed(bool hi, std::uint32_t val) {
-    if (hi)
+    if (hi) {
         labelVal(this->hi, val);
-    else
+        this->hi->setPalette(pal_updated);
+        hi_highlighted = true;
+    } else {
         labelVal(lo, val);
+        this->lo->setPalette(pal_updated);
+        lo_highlighted = true;
+    }
+}
+
+void RegistersDock::hi_lo_read(bool hi, std::uint32_t val) {
+    (void)val;
+    if (hi) {
+        if (!hi_highlighted)
+            this->hi->setPalette(pal_read);
+        hi_highlighted = true;
+    } else {
+        if (!lo_highlighted)
+            this->lo->setPalette(pal_read);
+        lo_highlighted = true;
+    }
+}
+
+void RegistersDock::clear_highlights() {
+    if (hi_highlighted)
+        this->hi->setPalette(pal_normal);
+    if (lo_highlighted)
+        this->lo->setPalette(pal_normal);
+    if (gp_highlighted != 0) {
+        for (int i = 0; i < 32; i++) {
+            if (gp_highlighted & (1 << i))
+                gp[i]->setPalette(pal_normal);
+        }
+    }
+    gp_highlighted = 0;
+    hi_highlighted = false;
+    lo_highlighted = false;
 }
 
 void RegistersDock::labelVal(QLabel *label, std::uint32_t value) {

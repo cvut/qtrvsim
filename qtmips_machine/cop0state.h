@@ -89,6 +89,7 @@ public:
 
 signals:
     void cop0reg_update(enum Cop0Registers reg, std::uint32_t val);
+    void cop0reg_read(enum Cop0Registers reg, std::uint32_t val) const;
 
 public slots:
     void set_interrupt_signal(uint irq_num, bool active);

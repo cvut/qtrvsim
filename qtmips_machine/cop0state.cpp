@@ -150,7 +150,10 @@ QString Cop0State::cop0reg_name(enum Cop0Registers reg) {
 }
 
 std::uint32_t Cop0State::read_cop0reg_default(enum Cop0Registers reg) const {
-    return cop0reg[(int)reg];
+    std::uint32_t val;
+    val = cop0reg[(int)reg];
+    emit cop0reg_read(reg, val);
+    return val;
 }
 
 void Cop0State::write_cop0reg_default(enum Cop0Registers reg, std::uint32_t value) {

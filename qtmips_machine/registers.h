@@ -67,6 +67,8 @@ signals:
     void pc_update(std::uint32_t val);
     void gp_update(std::uint8_t i, std::uint32_t val);
     void hi_lo_update(bool hi, std::uint32_t val);
+    void gp_read(std::uint8_t i, std::uint32_t val) const;
+    void hi_lo_read(bool hi, std::uint32_t val) const;
 
 private:
     std::uint32_t gp[31]; // general-purpose registers ($0 is intentionally skipped)

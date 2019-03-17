@@ -87,25 +87,31 @@ void Registers::pc_abs_jmp_28(std::uint32_t address) {
 }
 
 std::uint32_t Registers::read_gp(std::uint8_t i) const {
+    std::uint32_t value;
     SANITY_ASSERT(i < 32, QString("Trying to read from register ") + QString(i));
     if (!i) // $0 always reads as 0
         return 0;
-    return this->gp[i - 1];
+    value = this->gp[i - 1];
+    emit gp_read(i, value);
+    return value;
 }
 
 void Registers::write_gp(std::uint8_t i, std::uint32_t value) {
     SANITY_ASSERT(i < 32, QString("Trying to write to register ") + QString(i));
     if (i == 0) // Skip write to $0
         return;
-    emit gp_update(i, value);
     this->gp[i - 1] = value;
+    emit gp_update(i, value);
 }
 
 std::uint32_t Registers::read_hi_lo(bool is_hi) const {
+    std::uint32_t value;
     if (is_hi)
-        return hi;
+        value = hi;
     else
-        return lo;
+        value = lo;
+    emit hi_lo_read(is_hi, value);
+    return value;
 }
 
 void Registers::write_hi_lo(bool is_hi, std::uint32_t value) {

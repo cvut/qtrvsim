@@ -41,6 +41,7 @@
 #include <QFormLayout>
 #include <QScrollArea>
 #include <QPropertyAnimation>
+#include <QPalette>
 #include "qtmipsmachine.h"
 #include "statictable.h"
 
@@ -56,6 +57,9 @@ private slots:
     void pc_changed(std::uint32_t val);
     void gp_changed(std::uint8_t i, std::uint32_t val);
     void hi_lo_changed(bool hi, std::uint32_t val);
+    void gp_read(std::uint8_t i, std::uint32_t val);
+    void hi_lo_read(bool hi, std::uint32_t val);
+    void clear_highlights();
 
 private:
     StaticTable *widg;
@@ -65,6 +69,14 @@ private:
     QLabel *hi;
     QLabel *lo;
     QLabel *gp[32];
+
+    std::uint32_t gp_highlighted;
+    bool hi_highlighted;
+    bool lo_highlighted;
+
+    QPalette pal_normal;
+    QPalette pal_updated;
+    QPalette pal_read;
 
     void labelVal(QLabel *label, std::uint32_t val);
 };
