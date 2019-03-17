@@ -65,7 +65,7 @@ QRectF InstructionView::boundingRect() const {
 void InstructionView::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
     painter->setPen(QPen(QColor(240, 240, 240)));
     if (excause == machine::EXCAUSE_NONE)
-      painter->setBrush(QBrush(QColor(240, 240, 240)));
+        painter->setBrush(QBrush(QColor(240, 240, 240)));
     else
         painter->setBrush(QBrush(QColor(255, 100, 100)));
     painter->drawRoundRect(-WIDTH/2, 0, WIDTH, HEIGHT, ROUND, ROUND);

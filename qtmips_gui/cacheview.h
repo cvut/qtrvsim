@@ -53,7 +53,8 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 private slots:
-    void cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty, std::uint32_t tag, const std::uint32_t *data);
+    void cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty,
+                      std::uint32_t tag, const std::uint32_t *data, bool write);
 
 private:
     unsigned tag, row, col;
@@ -72,7 +73,8 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 private slots:
-    void cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty, std::uint32_t tag, const std::uint32_t *data);
+    void cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty,
+                      std::uint32_t tag, const std::uint32_t *data, bool write);
 
 private:
     bool islast;
@@ -80,6 +82,9 @@ private:
     unsigned rows, columns;
     QGraphicsSimpleTextItem **validity, **dirty, **tag, ***data;
     unsigned curr_row;
+    bool last_highlighted;
+    unsigned last_set;
+    unsigned last_col;
 };
 
 class CacheViewScene : public QGraphicsScene {

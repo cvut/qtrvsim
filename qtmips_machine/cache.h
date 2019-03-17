@@ -76,7 +76,8 @@ signals:
     void hit_update(unsigned) const;
     void miss_update(unsigned) const;
     void statistics_update(unsigned stalled_cycles, double speed_improv, double hit_rate) const;
-    void cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty, std::uint32_t tag, const std::uint32_t *data) const;
+    void cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty,
+                      std::uint32_t tag, const std::uint32_t *data, bool write) const;
     void memory_writes_update(unsigned) const;
     void memory_reads_update(unsigned) const;
 

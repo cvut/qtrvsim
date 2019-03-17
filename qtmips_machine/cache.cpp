@@ -179,7 +179,7 @@ void Cache::flush() {
         for (unsigned st = 0; st < cnf.sets(); st++)
             if (dt[as][st].valid) {
                 kick(as, st);
-                emit cache_update(as, st, 0, false, false, 0, 0);
+                emit cache_update(as, st, 0, false, false, 0, 0, false);
             }
     change_counter++;
     update_statistics();
@@ -264,7 +264,7 @@ void Cache::reset() {
     if (cnf.enabled()) {
         for (unsigned as = 0; as < cnf.associativity(); as++)
             for (unsigned st = 0; st < cnf.sets(); st++)
-                emit cache_update(as, st, 0, false, false, 0, 0);
+                emit cache_update(as, st, 0, false, false, 0, 0, false);
     }
 }
 
@@ -415,7 +415,7 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
         cd.data[col] = value;
     }
 
-    emit cache_update(indx, row, col, cd.valid, cd.dirty, cd.tag, cd.data);
+    emit cache_update(indx, row, col, cd.valid, cd.dirty, cd.tag, cd.data, write);
     if (changed)
         change_counter++;
     return changed;

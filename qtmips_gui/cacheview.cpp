@@ -59,8 +59,8 @@ CacheAddressBlock::CacheAddressBlock(const machine::Cache *cache, unsigned width
     row = 0;
     col = 0;
 
-    connect(cache, SIGNAL(cache_update(uint,uint,uint,bool,bool,std::uint32_t,const std::uint32_t*)),
-            this, SLOT(cache_update(uint,uint,uint,bool,bool,std::uint32_t,const std::uint32_t*)));
+    connect(cache, SIGNAL(cache_update(uint,uint,uint,bool,bool,std::uint32_t,const std::uint32_t*,bool)),
+            this, SLOT(cache_update(uint,uint,uint,bool,bool,std::uint32_t,const std::uint32_t*,bool)));
 }
 
 QRectF CacheAddressBlock::boundingRect() const {
@@ -131,7 +131,14 @@ void CacheAddressBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     }
 }
 
-void CacheAddressBlock::cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty, std::uint32_t tag, const std::uint32_t *data) {
+void CacheAddressBlock::cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty,
+                                     std::uint32_t tag, const std::uint32_t *data, bool write) {
+    (void)associat;
+    (void)valid;
+    (void)dirty;
+    (void)data;
+    (void)write;
+
     this->tag = tag;
     this->row = set;
     this->col = col;
@@ -145,6 +152,9 @@ CacheViewBlock::CacheViewBlock(const machine::Cache *cache, unsigned block , boo
     rows = cache->config().sets();
     columns = cache->config().blocks();
     curr_row = 0;
+    last_set = 0;
+    last_col = 0;
+    last_highlighted = false;
 
     QFont font;
     font.setPixelSize(FontSize::SIZE7);
@@ -208,8 +218,8 @@ CacheViewBlock::CacheViewBlock(const machine::Cache *cache, unsigned block , boo
     box = l_data->boundingRect();
     l_data->setPos(wd + (columns*DATA_WIDTH - box.width())/2 , -1 - box.height());
 
-    connect(cache, SIGNAL(cache_update(uint,uint,uint,bool,bool,std::uint32_t,const std::uint32_t*)),
-            this, SLOT(cache_update(uint,uint,uint,bool,bool,std::uint32_t,const std::uint32_t*)));
+    connect(cache, SIGNAL(cache_update(uint,uint,uint,bool,bool,std::uint32_t,const std::uint32_t*,bool)),
+            this, SLOT(cache_update(uint,uint,uint,bool,bool,std::uint32_t,const std::uint32_t*,bool)));
 }
 
 CacheViewBlock::~CacheViewBlock() {
@@ -327,10 +337,14 @@ void CacheViewBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     }
 }
 
-void CacheViewBlock::cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty, std::uint32_t tag, const std::uint32_t *data) {
+void CacheViewBlock::cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty,
+                                  std::uint32_t tag, const std::uint32_t *data, bool write) {
     (void)col;
-    if (associat != block)
+    if (associat != block) {
+        if (last_highlighted)
+            this->data[last_set][last_col]->setBrush(QBrush(QColor(0, 0, 0)));
         return; // Ignore blocks that are not us
+    }
     validity[set]->setText(valid ? "1" : "0");
     if (this->dirty)
         this->dirty[set]->setText(valid ? (dirty ? "1" : "0") : "");
@@ -339,7 +353,17 @@ void CacheViewBlock::cache_update(unsigned associat, unsigned set, unsigned col,
     for (unsigned i = 0; i < columns; i++)
         this->data[set][i]->setText(valid ? QString("0x") + QString("%1").arg(data[i], 8, 16, QChar('0')).toUpper() : "");
 
+    if (last_highlighted)
+        this->data[last_set][last_col]->setBrush(QBrush(QColor(0, 0, 0)));
+    if (write)
+        this->data[set][col]->setBrush(QBrush(QColor(240, 0, 0)));
+    else
+        this->data[set][col]->setBrush(QBrush(QColor(0, 0, 240)));
+    last_highlighted = true;
+
     curr_row = set;
+    last_set = set;
+    last_col = col;
     update();
 }
 
