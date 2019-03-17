@@ -49,6 +49,8 @@
 using namespace std;
 
 CacheAddressBlock::CacheAddressBlock(const machine::Cache *cache, unsigned width) {
+    rows = cache->config().sets();
+    columns = cache->config().blocks();
     s_row = cache->config().sets() > 1 ? sqrt(cache->config().sets()) : 0;
     this->width = width;
     s_col = cache->config().blocks() > 1 ? sqrt(cache->config().blocks()) : 0;
@@ -108,6 +110,8 @@ void CacheAddressBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem 
 
     // Pain address label
     painter->drawText(QRectF(5, 0, wpos - 5, 14), Qt::AlignCenter, "Address");
+    std::uint32_t addr = (((tag * rows) + row) * columns + col) * 4;
+    painter->drawText(QRectF(50, 0, wpos + 40, 14), Qt::AlignCenter, "0x" + QString("%1").arg(addr, 8, 16, QChar('0')));
 
     QPen p;
     p.setWidth(2);
@@ -343,6 +347,7 @@ void CacheViewBlock::cache_update(unsigned associat, unsigned set, unsigned col,
     if (associat != block) {
         if (last_highlighted)
             this->data[last_set][last_col]->setBrush(QBrush(QColor(0, 0, 0)));
+        last_highlighted = false;
         return; // Ignore blocks that are not us
     }
     validity[set]->setText(valid ? "1" : "0");

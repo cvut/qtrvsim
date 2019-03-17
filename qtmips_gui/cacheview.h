@@ -57,6 +57,7 @@ private slots:
                       std::uint32_t tag, const std::uint32_t *data, bool write);
 
 private:
+    unsigned rows, columns;
     unsigned tag, row, col;
     unsigned s_tag, s_row, s_col;
     unsigned width;
