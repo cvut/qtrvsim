@@ -1,3 +1,11 @@
+qtmips (0.6.6) unstable; urgency=medium
+
+  * Corrected row and column output in cache address fields.
+  * Highlight cache read and write acesses.
+  * Highlight registers and coprocessor 0 read and writes.
+
+ -- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Sun, 17 Mar 2019 20:51:55 +0100
+
 qtmips (0.6.5) unstable; urgency=medium
 
   * Initial Debian packaging.
