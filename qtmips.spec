@@ -26,12 +26,18 @@ Url:            https://github.com/cvut/QtMips/
 
 Source:         qtmips-%{version}.tar.gz 
 
+%if 0%{?suse_version}
+BuildRequires: libqt5-qtbase-devel
+BuildRequires: libelf-devel
+%endif
 
+%if 0%{?fedora} || 0%{?centos_version} || 0%{?rhel_version} || 0%{?scientificlinux_version}
 BuildRequires: gcc-c++
 BuildRequires: qt5-qtbase-devel >= 5.3
 BuildRequires: elfutils-libelf-devel
-
 Requires: qt5-qtbase
+%endif
+
 
 # Qt devel packages
 %define  qmake  /usr/bin/qmake-qt5
