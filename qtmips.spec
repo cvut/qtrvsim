@@ -1,76 +1,71 @@
 #
 # spec file for package qtmips
 #
-# -- Copyright omitted --
+# Copyright (c) 2019 Pavel Pisa <pisa@cmp.felk.cvut.cz>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# Please submit bugfixes or comments via
+#   https://github.com/cvut/QtMips/
+# issues tracker.
+#
+
 
 Name:           qtmips
-
-
 Version:        0.6.6
+Release:        0
+Summary:        MIPS CPU simulator for education purposes with pipeline and cache visualization
+License:        GPL-2.0-or-later
+Group:          System/Emulators/Other
+URL:            https://github.com/cvut/QtMips/
+Source:         qtmips-%{version}.tar.gz
+BuildRequires:  gcc-c++
+BuildRequires:  pkgconfig
+BuildRequires:  pkgconfig(Qt5Core)
+BuildRequires:  pkgconfig(Qt5Widgets)
+BuildRequires:  pkgconfig(Qt5Test)
 
-
-Release:        0 
-
-
-License:        GPL-2.0+
-
-
-Group:          Emulators
-
-
-Summary:        MIPS CPU simulator for education purposes with pipeline and cache visualization.
-
-
-Url:            https://github.com/cvut/QtMips/
-
-
-Source:         qtmips-%{version}.tar.gz 
+%if ! 0%{?suse_version}
+BuildRequires:  pkgconfig(libelf)
+%endif
 
 %if 0%{?suse_version}
-BuildRequires: libqt5-qtbase-devel
 BuildRequires: libelf-devel
 %endif
 
-%if 0%{?fedora} || 0%{?centos_version} || 0%{?rhel_version} || 0%{?scientificlinux_version}
-BuildRequires: gcc-c++
-BuildRequires: qt5-qtbase-devel >= 5.3
-BuildRequires: elfutils-libelf-devel
-Requires: qt5-qtbase
+%if !0%{?suse_version}
+%define  qmake5  /usr/bin/qmake-qt5
 %endif
 
-
-# Qt devel packages
-%define  qmake  /usr/bin/qmake-qt5
-BuildRequires:  cmake 
-
-
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-
-%description 
-
+%description
 MIPS CPU simulator for education purposes with pipeline and cache visualization.
 
-%prep 
+%prep
+%setup -q
 
-
-%setup -q -n %{name}-%{version}
-
-%build 
-%{qmake} "CONFIG+=release" "CONFIG+=force_debug_info"
-
+%build
+%qmake5 "CONFIG+=release" "CONFIG+=force_debug_info"
+#make %{?_smp_mflags} - do not use SMP for now, there can be problem with generated makefiles
 make
 
 
-%install 
+%install
 mkdir -p %{buildroot}/%{_bindir}
 install -m755 qtmips_gui/qtmips_gui %{buildroot}/%{_bindir}
 install -m755 qtmips_cli/qtmips_cli %{buildroot}/%{_bindir}
 
-%files 
+%files
 %{_bindir}/qtmips_gui
 %{_bindir}/qtmips_cli
-%doc README.md LICENSE
+%license LICENSE
+%doc README.md
 
-%changelog 
-* Thu 21 Mar 2019 Pavel Pisa <pisa@cmp.felk.cvut.cz - 1.0-1
-- Initial attemp to package QtMips by Open Build Service.
+%changelog
