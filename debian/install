@@ -1,3 +1,4 @@
 qtmips_gui/qtmips_gui /usr/bin
+qtmips_cli/qtmips_cli /usr/bin
 debian/qtmips.desktop usr/share/applications
 
