@@ -26,7 +26,7 @@ Summary:        MIPS CPU simulator for education purposes with pipeline and cach
 License:        GPL-2.0-or-later
 Group:          System/Emulators/Other
 URL:            https://github.com/cvut/QtMips/
-Source:         qtmips-%{version}.tar.gz
+Source:         qtmips_%{version}.tar.xz
 BuildRequires:  gcc-c++
 BuildRequires:  pkgconfig
 BuildRequires:  pkgconfig(Qt5Core)
