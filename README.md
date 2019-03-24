@@ -69,7 +69,8 @@ Download Binary Packages
 
 * [https://github.com/cvut/QtMips/releases](https://github.com/cvut/QtMips/releases) - archives with Windows and generic GNU/Linux binaries
 * [https://launchpad.net/~ppisa/+archive/ubuntu/qtmips](https://launchpad.net/~ppisa/+archive/ubuntu/qtmips) - Ubuntu packages for Disco, Cosmic, Bionic and Xenial releases.
-* [https://build.opensuse.org/repositories/home:ppisa/qtmips](https://build.opensuse.org/repositories/home:ppisa/qtmips) - Open Build Service provided packages for Fedora_29, Fedora_Rawhide, Raspbian_9.0, SLE_15, openSUSE_Leap_15.0_Ports, openSUSE_Leap_15.0, openSUSE_Leap_15.1, openSUSE_Leap_42.3, openSUSE_Leap_42.3_Ports, openSUSE_Tumbleweed
+* [https://build.opensuse.org/repositories/home:ppisa/qtmips](https://build.opensuse.org/repositories/home:ppisa/qtmips) - Open Build Service build for Fedora_29, Fedora_Rawhide, Raspbian_9.0, SLE_15, openSUSE_Leap_15.0_Ports, openSUSE_Leap_15.0, openSUSE_Leap_15.1, openSUSE_Leap_42.3, openSUSE_Leap_42.3_Ports, openSUSE_Tumbleweed and Debian
+* [https://software.opensuse.org//download.html?project=home%3Appisa&package=qtmips](https://software.opensuse.org//download.html?project=home%3Appisa&package=qtmips) - Open Build Service binary packages
 
 Accepted Binary Formats
 ------------------------
