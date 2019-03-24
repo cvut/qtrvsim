@@ -51,11 +51,16 @@ Reporter::Reporter(QCoreApplication *app, QtMipsMachine *machine) : QObject() {
     connect(machine->core(), SIGNAL(stop_on_exception_reached()), this, SLOT(machine_exception_reached()));
 
     e_regs = false;
+    e_cache_stats = false;
     e_fail = (enum FailReason)0;
 }
 
 void Reporter::regs() {
     e_regs = true;
+}
+
+void Reporter::cache_stats() {
+    e_cache_stats = true;
 }
 
 void Reporter::expect_fail(enum FailReason reason) {
@@ -166,6 +171,21 @@ void Reporter::report() {
             else
                 cout << endl;
         }
-
+    }
+    if (e_cache_stats) {
+        cout << "Cache statistics report:" << endl;
+        cout << "i-cache:reads:" << machine->cache_program()->memory_reads() << endl;
+        cout << "i-cache:hit:" << machine->cache_program()->hit() << endl;
+        cout << "i-cache:miss:" << machine->cache_program()->miss() << endl;
+        cout << "i-cache:hit-rate:" << machine->cache_program()->hit_rate() << endl;
+        cout << "i-cache:stalled-cycles:" << machine->cache_program()->stalled_cycles() << endl;
+        cout << "i-cache:improved-speed:" << machine->cache_program()->speed_improvement() << endl;
+        cout << "d-cache:reads:" << machine->cache_data()->memory_reads() << endl;
+        cout << "d-cache:writes:" << machine->cache_data()->memory_writes() << endl;
+        cout << "d-cache:hit:" << machine->cache_data()->hit() << endl;
+        cout << "d-cache:miss:" << machine->cache_data()->miss() << endl;
+        cout << "d-cache:hit-rate:" << machine->cache_data()->hit_rate() << endl;
+        cout << "d-cache:stalled-cycles:" << machine->cache_data()->stalled_cycles() << endl;
+        cout << "d-cache:improved-speed:" << machine->cache_data()->speed_improvement() << endl;
     }
 }

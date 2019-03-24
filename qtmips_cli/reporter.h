@@ -46,7 +46,7 @@ public:
     Reporter(QCoreApplication *app, machine::QtMipsMachine *machine);
 
     void regs(); // Report status of registers
-    // TODO
+    void cache_stats();
 
     enum FailReason {
         FR_I = (1<<0), // Unsupported Instruction
@@ -68,6 +68,7 @@ private:
     machine::QtMipsMachine *machine;
 
     bool e_regs;
+    bool e_cache_stats;
     enum FailReason e_fail;
 
     void report();

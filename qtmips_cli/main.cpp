@@ -63,8 +63,62 @@ void create_parser(QCommandLineParser &p) {
     p.addOption({{"trace-lo", "tr-lo"}, "Print LO register changes."});
     p.addOption({{"trace-hi", "tr-hi"}, "Print HI register changes."});
     p.addOption({{"dump-registers", "d-regs"}, "Dump registers state at program exit."});
+    p.addOption({"dump-cache-stats", "Dump cache statistics at program exit."});
     p.addOption({"expect-fail", "Expect that program causes CPU trap and fail if it doesn't."});
     p.addOption({"fail-match", "Program should exit with exactly this CPU TRAP. Possible values are I(unsupported Instruction), A(Unsupported ALU operation), O(Overflow/underflow) and J(Unaligned Jump). You can freely combine them. Using this implies expect-fail option.", "TRAP"});
+    p.addOption({"d-cache", "Data cache. Format policy,sets,words_in_blocks,associativity where policy is random/lru/lfu", "DCACHE"});
+    p.addOption({"i-cache", "Instruction cache. Format policy,sets,words_in_blocks,associativity where policy is random/lru/lfu", "ICACHE"});
+}
+
+void configure_cache(MachineConfigCache &cacheconf, QStringList cachearg, QString which) {
+    if (cachearg.size() < 1)
+        return;
+    cacheconf.set_enabled(true);
+    QStringList pieces = cachearg.at(cachearg.size() - 1).split(",");
+    if (pieces.size() < 3) {
+        std::cerr << "Parameters for " << which.toLocal8Bit().data() << " cache incorrect (correct lru,4,2,2,wb)." << std::endl;
+        exit(1);
+    }
+    if (pieces.at(0).size() < 1) {
+        std::cerr << "Policy for " << which.toLocal8Bit().data() << " cache is incorrect." << std::endl;
+        exit(1);
+    }
+    if (!pieces.at(0).at(0).isDigit()) {
+        if (pieces.at(0).toLower() == "random")
+            cacheconf.set_replacement_policy(MachineConfigCache::RP_RAND);
+        else if (pieces.at(0).toLower() == "lru")
+            cacheconf.set_replacement_policy(MachineConfigCache::RP_LRU);
+        else if (pieces.at(0).toLower() == "lfu")
+            cacheconf.set_replacement_policy(MachineConfigCache::RP_LFU);
+        else {
+            std::cerr << "Policy for " << which.toLocal8Bit().data() << " cache is incorrect." << std::endl;
+            exit(1);
+        }
+        pieces.removeFirst();
+    }
+    if (pieces.size() < 3) {
+        std::cerr << "Parameters for " << which.toLocal8Bit().data() << " cache incorrect (correct lru,4,2,2,wb)." << std::endl;
+        exit(1);
+    }
+    cacheconf.set_sets(pieces.at(0).toLong());
+    cacheconf.set_blocks(pieces.at(1).toLong());
+    cacheconf.set_associativity(pieces.at(2).toLong());
+    if (cacheconf.sets() == 0 || cacheconf.blocks() == 0 || cacheconf.associativity() == 0) {
+        std::cerr << "Parameters for " << which.toLocal8Bit().data() << " cache cannot have zero component." << std::endl;
+        exit(1);
+    }
+    if (pieces.size() > 3) {
+        if (pieces.at(3).toLower() == "wb")
+            cacheconf.set_write_policy(MachineConfigCache::WP_BACK);
+        else if (pieces.at(3).toLower() == "wt" || pieces.at(3).toLower() == "wtna")
+            cacheconf.set_write_policy(MachineConfigCache::WP_TROUGH_NOALLOC);
+        else if (pieces.at(3).toLower() == "wta")
+            cacheconf.set_write_policy(MachineConfigCache::WP_TROUGH_ALLOC);
+        else {
+            std::cerr << "Write policy for " << which.toLocal8Bit().data() << " cache is incorrect (correct wb/wt/wtna/wta)." << std::endl;
+            exit(1);
+        }
+    }
 }
 
 void configure_machine(QCommandLineParser &p, MachineConfig &cc) {
@@ -77,6 +131,9 @@ void configure_machine(QCommandLineParser &p, MachineConfig &cc) {
 
     cc.set_delay_slot(!p.isSet("no-delay-slot"));
     cc.set_pipelined(p.isSet("pipelined"));
+
+    configure_cache(*cc.access_cache_data(), p.values("d-cache"), "data");
+    configure_cache(*cc.access_cache_program(), p.values("i-cache"), "instruction");
 }
 
 void configure_tracer(QCommandLineParser &p, Tracer &tr) {
@@ -124,6 +181,8 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
 void configure_reporter(QCommandLineParser &p, Reporter &r) {
     if (p.isSet("dump-registers"))
         r.regs();
+    if (p.isSet("dump-cache-stats"))
+        r.cache_stats();
 
     QStringList fail = p.values("fail-match");
     for (int i = 0; i < fail.size(); i++) {
