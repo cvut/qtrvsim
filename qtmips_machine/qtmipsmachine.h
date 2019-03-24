@@ -97,6 +97,7 @@ public:
     bool get_stop_on_exception(enum ExceptionCause excause) const;
     void set_step_over_exception(enum ExceptionCause excause, bool value);
     bool get_step_over_exception(enum ExceptionCause excause) const;
+    enum ExceptionCause get_exception_cause() const;
 
 public slots:
     void play();

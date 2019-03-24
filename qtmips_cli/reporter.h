@@ -61,6 +61,7 @@ public:
 private slots:
     void machine_exit();
     void machine_trap(machine::QtMipsException &e);
+    void machine_exception_reached();
 
 private:
     QCoreApplication *app;

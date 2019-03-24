@@ -332,3 +332,14 @@ bool QtMipsMachine::get_step_over_exception(enum ExceptionCause excause) const {
         return cr->get_step_over_exception(excause);
     return false;
 }
+
+enum ExceptionCause QtMipsMachine::get_exception_cause() const {
+    std::uint32_t val;
+    if (cop0st == nullptr)
+        return EXCAUSE_NONE;
+    val = (cop0st->read_cop0reg(Cop0State::Cause) >> 2) & 0x3f;
+    if (val == 0)
+        return EXCAUSE_INT;
+    else
+        return (ExceptionCause)val;
+}

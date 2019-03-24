@@ -35,6 +35,7 @@
 
 #include "reporter.h"
 #include <iostream>
+#include <iomanip>
 #include <typeinfo>
 #include <qtmipsexception.h>
 
@@ -47,6 +48,7 @@ Reporter::Reporter(QCoreApplication *app, QtMipsMachine *machine) : QObject() {
 
     connect(machine, SIGNAL(program_exit()), this, SLOT(machine_exit()));
     connect(machine, SIGNAL(program_trap(machine::QtMipsException&)), this, SLOT(machine_trap(machine::QtMipsException&)));
+    connect(machine->core(), SIGNAL(stop_on_exception_reached()), this, SLOT(machine_exception_reached()));
 
     e_regs = false;
     e_fail = (enum FailReason)0;
@@ -69,6 +71,47 @@ void Reporter::machine_exit() {
         app->exit();
 }
 
+void Reporter::machine_exception_reached() {
+    ExceptionCause excause;
+    excause = machine->get_exception_cause();
+    switch (excause) {
+    case EXCAUSE_NONE:
+        cout << "Machine stopped on NONE exception." << endl;
+        break;
+    case EXCAUSE_INT:
+        cout << "Machine stopped on INT exception." << endl;
+        break;
+    case EXCAUSE_ADDRL:
+        cout << "Machine stopped on ADDRL exception." << endl;
+        break;
+    case EXCAUSE_ADDRS:
+        cout << "Machine stopped on ADDRS exception." << endl;
+        break;
+    case EXCAUSE_IBUS:
+        cout << "Machine stopped on IBUS exception." << endl;
+        break;
+    case EXCAUSE_DBUS:
+        cout << "Machine stopped on DBUS exception." << endl;
+        break;
+    case EXCAUSE_SYSCALL:
+        cout << "Machine stopped on SYSCALL exception." << endl;
+        break;
+    case EXCAUSE_OVERFLOW:
+        cout << "Machine stopped on OVERFLOW exception." << endl;
+        break;
+    case EXCAUSE_TRAP:
+        cout << "Machine stopped on TRAP exception." << endl;
+        break;
+    case EXCAUSE_HWBREAK:
+        cout << "Machine stopped on HWBREAK exception." << endl;
+        break;
+    default:
+        break;
+    }
+    report();
+    app->exit();
+}
+
 void Reporter::machine_trap(QtMipsException &e) {
     report();
 
@@ -87,8 +130,42 @@ void Reporter::machine_trap(QtMipsException &e) {
     app->exit(expected ? 0 : 1);
 }
 
+static void out_hex(ostream &out, std::uint64_t val, int digits) {
+    std::ios_base::fmtflags saveflg(out.flags());
+    char prevfill = out.fill('0');
+    out.setf(ios::hex, ios::basefield);
+    out << setfill('0') << setw(digits) << val;
+    out.fill(prevfill);
+    out.flags(saveflg);
+}
+
 void Reporter::report() {
     if (e_regs) {
-        // TODO
+        cout << "Machine state report:" << endl;
+        cout << "PC:0x";
+        out_hex(cout, machine->registers()->read_pc(), 8);
+        cout << endl;
+        for (int i = 0; i < 32; i++) {
+            cout << "R" << i << ":0x";
+            out_hex(cout, machine->registers()->read_gp(i), 8);
+            if (i != 31)
+                cout << " ";
+            else
+                cout << endl;
+        }
+        cout << "HI:0x";
+        out_hex(cout, machine->registers()->read_hi_lo(true), 8);
+        cout << " LO:0x";
+        out_hex(cout, machine->registers()->read_hi_lo(false), 8);
+        cout << endl;
+        for (int i = 1; i < Cop0State::COP0REGS_CNT; i++) {
+            cout << Cop0State::cop0reg_name((Cop0State::Cop0Registers)i).toLocal8Bit().data() << ":0x";
+            out_hex(cout, machine->cop0state()->read_cop0reg((Cop0State::Cop0Registers)i), 8);
+            if (i != Cop0State::COP0REGS_CNT - 1)
+                cout << " ";
+            else
+                cout << endl;
+        }
+
     }
 }
