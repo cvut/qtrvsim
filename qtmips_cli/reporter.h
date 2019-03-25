@@ -37,6 +37,8 @@
 #define REPORTER_H
 
 #include <QObject>
+#include <QVector>
+#include <QString>
 #include <QCoreApplication>
 #include "qtmipsmachine.h"
 
@@ -55,8 +57,14 @@ public:
         FR_J = (1<<3), // Unaligned jump
     };
     static const enum FailReason FailAny = (enum FailReason)(FR_I | FR_A | FR_O | FR_J);
-
     void expect_fail(enum FailReason reason);
+
+    struct DumpRange {
+        std::uint32_t start;
+        std::uint32_t len;
+        QString fname;
+    };
+    void add_dump_range(std::uint32_t start, std::uint32_t len, QString fname);
 
 private slots:
     void machine_exit();
@@ -66,6 +74,7 @@ private slots:
 private:
     QCoreApplication *app;
     machine::QtMipsMachine *machine;
+    QVector<DumpRange> dump_ranges;
 
     bool e_regs;
     bool e_cache_stats;

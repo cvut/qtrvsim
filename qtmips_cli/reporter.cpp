@@ -35,6 +35,7 @@
 
 #include "reporter.h"
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <typeinfo>
 #include <qtmipsexception.h>
@@ -65,6 +66,10 @@ void Reporter::cache_stats() {
 
 void Reporter::expect_fail(enum FailReason reason) {
     e_fail = (enum FailReason)(e_fail | reason);
+}
+
+void Reporter::add_dump_range(std::uint32_t start, std::uint32_t len, QString fname) {
+    dump_ranges.append({start, len, fname});
 }
 
 void Reporter::machine_exit() {
@@ -187,5 +192,19 @@ void Reporter::report() {
         cout << "d-cache:hit-rate:" << machine->cache_data()->hit_rate() << endl;
         cout << "d-cache:stalled-cycles:" << machine->cache_data()->stalled_cycles() << endl;
         cout << "d-cache:improved-speed:" << machine->cache_data()->speed_improvement() << endl;
+    }
+    foreach (DumpRange range, dump_ranges) {
+        ofstream out;
+        out.open(range.fname.toLocal8Bit().data(), ios::out | ios::trunc);
+        std::int32_t start = range.start & ~3;
+        std::int32_t end = range.start + range.len;
+        if (end < start)
+            end = 0xffffffff;
+        for (std::int32_t addr = start; addr < end; addr += 4) {
+            out << "0x";
+            out_hex(out, machine->memory()->read_word(addr), 8);
+            out << endl;
+        }
+        out.close();
     }
 }

@@ -37,6 +37,7 @@
 #include <QCommandLineParser>
 #include <cctype>
 #include <iostream>
+#include <fstream>
 #include "tracer.h"
 #include "reporter.h"
 
@@ -64,13 +65,15 @@ void create_parser(QCommandLineParser &p) {
     p.addOption({{"trace-hi", "tr-hi"}, "Print HI register changes."});
     p.addOption({{"dump-registers", "d-regs"}, "Dump registers state at program exit."});
     p.addOption({"dump-cache-stats", "Dump cache statistics at program exit."});
+    p.addOption({"dump-range", "Dump memory range.", "START,LENGTH,FNAME"});
+    p.addOption({"load-range", "Load memory range.", "START,FNAME"});
     p.addOption({"expect-fail", "Expect that program causes CPU trap and fail if it doesn't."});
     p.addOption({"fail-match", "Program should exit with exactly this CPU TRAP. Possible values are I(unsupported Instruction), A(Unsupported ALU operation), O(Overflow/underflow) and J(Unaligned Jump). You can freely combine them. Using this implies expect-fail option.", "TRAP"});
     p.addOption({"d-cache", "Data cache. Format policy,sets,words_in_blocks,associativity where policy is random/lru/lfu", "DCACHE"});
     p.addOption({"i-cache", "Instruction cache. Format policy,sets,words_in_blocks,associativity where policy is random/lru/lfu", "ICACHE"});
-    p.addOption({"read-time", "memory read access time (cycles).", "RTIME"});
-    p.addOption({"write-time", "memory read access time (cycles).", "WTIME"});
-    p.addOption({"burst-time", "memory read access time (cycles).", "BTIME"});
+    p.addOption({"read-time", "Memory read access time (cycles).", "RTIME"});
+    p.addOption({"write-time", "Memory read access time (cycles).", "WTIME"});
+    p.addOption({"burst-time", "Memory read access time (cycles).", "BTIME"});
 }
 
 void configure_cache(MachineConfigCache &cacheconf, QStringList cachearg, QString which) {
@@ -192,7 +195,7 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
     // TODO
 }
 
-void configure_reporter(QCommandLineParser &p, Reporter &r) {
+void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *symtab) {
     if (p.isSet("dump-registers"))
         r.regs();
     if (p.isSet("dump-cache-stats"))
@@ -225,7 +228,88 @@ void configure_reporter(QCommandLineParser &p, Reporter &r) {
     if (p.isSet("expect-fail") && !p.isSet("fail-match"))
         r.expect_fail(Reporter::FailAny);
 
+    foreach (QString range_arg, p.values("dump-range")) {
+        std::uint32_t start;
+        std::uint32_t len;
+        bool ok1 = true;
+        bool ok2 = true;
+        QString str;
+        int comma1 = range_arg.indexOf(",");
+        if (comma1 < 0) {
+            cout << "Range start missing" << endl;
+            exit(1);
+        }
+        int comma2 = range_arg.indexOf(",", comma1 + 1);
+        if (comma2 < 0) {
+            cout << "Range lengt/name missing" << endl;
+            exit(1);
+        }
+        str = range_arg.mid(0, comma1);
+        if (str.size() >= 1 && !str.at(0).isDigit() && symtab != nullptr) {
+            ok1 = symtab->name_to_value(start, str);
+        } else {
+            start = str.toULong(&ok1, 0);
+        }
+        str = range_arg.mid(comma1 + 1, comma2 - comma1 - 1);
+        if (str.size() >= 1 && !str.at(0).isDigit() && symtab != nullptr) {
+            ok2 = symtab->name_to_value(len, str);
+        } else {
+            len = str.toULong(&ok2, 0);
+        }
+        if (!ok1 || !ok2) {
+            cout << "Range start/length specification error." << endl;
+            exit(1);
+        }
+        r.add_dump_range(start, len, range_arg.mid(comma2 + 1));
+    }
+
     // TODO
+}
+
+void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
+    foreach (QString range_arg, ranges) {
+        std::uint32_t start;
+        bool ok = true;
+        QString str;
+        int comma1 = range_arg.indexOf(",");
+        if (comma1 < 0) {
+            cout << "Range start missing" << endl;
+            exit(1);
+        }
+        str = range_arg.mid(0, comma1);
+        if (str.size() >= 1 && !str.at(0).isDigit() && machine.symbol_table() != nullptr) {
+            ok = machine.symbol_table()->name_to_value(start, str);
+        } else {
+            start = str.toULong(&ok, 0);
+        }
+        if (!ok) {
+            cout << "Range start/length specification error." << endl;
+            exit(1);
+        }
+        ifstream in;
+        std::uint32_t val;
+        std::uint32_t addr = start;
+        in.open(range_arg.mid(comma1 + 1).toLocal8Bit().data(), ios::in);
+        start = start & ~3;
+        for (std::string line; getline(in, line); )
+        {
+            size_t endpos = line.find_last_not_of(" \t\n");
+            size_t startpos = line.find_first_not_of(" \t\n");
+            size_t idx;
+            if (std::string::npos == endpos)
+                continue;
+            line = line.substr(0, endpos + 1);
+            line = line.substr(startpos);
+            val = stoul(line, &idx, 0);
+            if (idx != line.size()) {
+                cout << "cannot parse load range data." << endl;
+                exit(1);
+            }
+            machine.memory_rw()->write_word(addr, val);
+            addr += 4;
+        }
+        in.close();
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -239,13 +323,15 @@ int main(int argc, char *argv[]) {
 
     MachineConfig cc;
     configure_machine(p, cc);
-    QtMipsMachine machine(cc);
+    QtMipsMachine machine(cc, true);
 
     Tracer tr(&machine);
     configure_tracer(p, tr);
 
     Reporter r(&app, &machine);
-    configure_reporter(p, r);
+    configure_reporter(p, r, machine.symbol_table());
+
+    load_ranges(machine, p.values("load-range"));
 
     machine.play();
     return app.exec();
