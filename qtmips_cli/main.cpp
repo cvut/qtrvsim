@@ -117,9 +117,9 @@ void configure_cache(MachineConfigCache &cacheconf, QStringList cachearg, QStrin
         if (pieces.at(3).toLower() == "wb")
             cacheconf.set_write_policy(MachineConfigCache::WP_BACK);
         else if (pieces.at(3).toLower() == "wt" || pieces.at(3).toLower() == "wtna")
-            cacheconf.set_write_policy(MachineConfigCache::WP_TROUGH_NOALLOC);
+            cacheconf.set_write_policy(MachineConfigCache::WP_THROUGH_NOALLOC);
         else if (pieces.at(3).toLower() == "wta")
-            cacheconf.set_write_policy(MachineConfigCache::WP_TROUGH_ALLOC);
+            cacheconf.set_write_policy(MachineConfigCache::WP_THROUGH_ALLOC);
         else {
             std::cerr << "Write policy for " << which.toLocal8Bit().data() << " cache is incorrect (correct wb/wt/wtna/wta)." << std::endl;
             exit(1);

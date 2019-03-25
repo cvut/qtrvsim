@@ -311,7 +311,7 @@ bool Cache::access(std::uint32_t address, std::uint32_t *data, bool write, std::
     // Need to find new block
     if (indx >= cnf.associativity()) {
         // if write through we do not need to alloecate cache line does not allocate
-        if (write && cnf.write_policy() == MachineConfigCache::WP_TROUGH_NOALLOC) {
+        if (write && cnf.write_policy() == MachineConfigCache::WP_THROUGH_NOALLOC) {
             miss_write++;
             emit miss_update(miss());
             update_statistics();

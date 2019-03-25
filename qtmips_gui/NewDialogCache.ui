@@ -102,12 +102,12 @@
        <widget class="QComboBox" name="writeback_policy">
         <item>
          <property name="text">
-          <string>Write trough - noallocate</string>
+          <string>Write through - noallocate</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Write trough - write allocate</string>
+          <string>Write through - write allocate</string>
          </property>
         </item>
         <item>

@@ -981,7 +981,7 @@ void MachineTests::pipecore_wt_na_memory_tests() {
     cache_conf.set_blocks(1); // Number of blocks
     cache_conf.set_associativity(2); // Degree of associativity
     cache_conf.set_replacement_policy(MachineConfigCache::RP_LRU);
-    cache_conf.set_write_policy(MachineConfigCache::WP_TROUGH_NOALLOC);
+    cache_conf.set_write_policy(MachineConfigCache::WP_THROUGH_NOALLOC);
     Cache i_cache(&mem_init, &cache_conf);
     Cache d_cache(&mem_init, &cache_conf);
     CorePipelined core(&reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD);
@@ -1000,7 +1000,7 @@ void MachineTests::pipecore_wt_a_memory_tests() {
     cache_conf.set_blocks(1); // Number of blocks
     cache_conf.set_associativity(2); // Degree of associativity
     cache_conf.set_replacement_policy(MachineConfigCache::RP_LRU);
-    cache_conf.set_write_policy(MachineConfigCache::WP_TROUGH_ALLOC);
+    cache_conf.set_write_policy(MachineConfigCache::WP_THROUGH_ALLOC);
     Cache i_cache(&mem_init, &cache_conf);
     Cache d_cache(&mem_init, &cache_conf);
     CorePipelined core(&reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD);
