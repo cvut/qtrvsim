@@ -52,10 +52,12 @@ ProgramTableView::ProgramTableView(QWidget *parent, QSettings *settings) : Super
     this->settings = settings;
     initial_address = settings->value("ProgramViewAddr0", 0).toULongLong();
     adjust_scroll_pos_in_progress = false;
+    need_addr0_save = false;
 }
 
 void ProgramTableView::addr0_save_change(std::uint32_t val) {
-   settings->setValue("ProgramViewAddr0", val);
+    need_addr0_save = false;
+    settings->setValue("ProgramViewAddr0", val);
 }
 
 void ProgramTableView::adjustColumnCount() {
@@ -148,7 +150,8 @@ void ProgramTableView::adjust_scroll_pos_process() {
         emit m->update_all();
     } while(0);
     m->get_row_address(address, rowAt(0));
-    addr0_save_change(address);
+    if (need_addr0_save)
+        addr0_save_change(address);
     emit address_changed(address);
 }
 
@@ -172,7 +175,7 @@ void ProgramTableView::resizeEvent(QResizeEvent *event) {
     }
 }
 
-void ProgramTableView:: go_to_address(std::uint32_t address) {
+void ProgramTableView::go_to_address_priv(std::uint32_t address) {
     ProgramModel *m = dynamic_cast<ProgramModel*>(model());
     int row;
     if (m == nullptr)
@@ -181,8 +184,14 @@ void ProgramTableView:: go_to_address(std::uint32_t address) {
     scrollTo(m->index(row, 0),
          QAbstractItemView::PositionAtTop);
     setCurrentIndex(m->index(row, 1));
-    addr0_save_change(address);
+    if (need_addr0_save)
+        addr0_save_change(address);
     emit m->update_all();
+}
+
+void ProgramTableView::go_to_address(std::uint32_t address) {
+    need_addr0_save = true;
+    go_to_address_priv(address);
 }
 
 void ProgramTableView::focus_address(std::uint32_t address) {
@@ -191,10 +200,15 @@ void ProgramTableView::focus_address(std::uint32_t address) {
     if (m == nullptr)
         return;
     if (!m->get_row_for_address(row, address))
-        go_to_address(address);
+        go_to_address_priv(address);
     if (!m->get_row_for_address(row, address))
         return;
     setCurrentIndex(m->index(row, 3));
+}
+
+void ProgramTableView::focus_address_with_save(std::uint32_t address) {
+    need_addr0_save = true;
+    focus_address(address);
 }
 
 void ProgramTableView::keyPressEvent(QKeyEvent *event) {

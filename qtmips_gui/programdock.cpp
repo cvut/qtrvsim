@@ -97,6 +97,8 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
             this, SLOT(set_follow_inst(int)));
     connect(this, SIGNAL(focus_addr(std::uint32_t)),
             program_content, SLOT(focus_address(std::uint32_t)));
+    connect(this, SIGNAL(focus_addr_with_save(std::uint32_t)),
+            program_content, SLOT(focus_address_with_save(std::uint32_t)));
     connect(program_content, SIGNAL(doubleClicked(QModelIndex)),
             program_model, SLOT(toggle_hw_break(QModelIndex)));
 }
