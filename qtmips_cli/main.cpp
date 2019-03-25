@@ -68,6 +68,9 @@ void create_parser(QCommandLineParser &p) {
     p.addOption({"fail-match", "Program should exit with exactly this CPU TRAP. Possible values are I(unsupported Instruction), A(Unsupported ALU operation), O(Overflow/underflow) and J(Unaligned Jump). You can freely combine them. Using this implies expect-fail option.", "TRAP"});
     p.addOption({"d-cache", "Data cache. Format policy,sets,words_in_blocks,associativity where policy is random/lru/lfu", "DCACHE"});
     p.addOption({"i-cache", "Instruction cache. Format policy,sets,words_in_blocks,associativity where policy is random/lru/lfu", "ICACHE"});
+    p.addOption({"read-time", "memory read access time (cycles).", "RTIME"});
+    p.addOption({"write-time", "memory read access time (cycles).", "WTIME"});
+    p.addOption({"burst-time", "memory read access time (cycles).", "BTIME"});
 }
 
 void configure_cache(MachineConfigCache &cacheconf, QStringList cachearg, QString which) {
@@ -123,6 +126,7 @@ void configure_cache(MachineConfigCache &cacheconf, QStringList cachearg, QStrin
 
 void configure_machine(QCommandLineParser &p, MachineConfig &cc) {
     QStringList pa = p.positionalArguments();
+    int siz;
     if (pa.size() != 1) {
         std::cerr << "Single ELF file has to be specified" << std::endl;
         exit(1);
@@ -131,6 +135,16 @@ void configure_machine(QCommandLineParser &p, MachineConfig &cc) {
 
     cc.set_delay_slot(!p.isSet("no-delay-slot"));
     cc.set_pipelined(p.isSet("pipelined"));
+
+    siz = p.values("read-time").size();
+    if (siz >= 1)
+        cc.set_memory_access_time_read(p.values("read-time").at(siz - 1).toLong());
+    siz = p.values("write-time").size();
+    if (siz >= 1)
+        cc.set_memory_access_time_write(p.values("write-time").at(siz - 1).toLong());
+    siz = p.values("burst-time").size();
+    if (siz >= 1)
+        cc.set_memory_access_time_burst(p.values("burst-time").at(siz - 1).toLong());
 
     configure_cache(*cc.access_cache_data(), p.values("d-cache"), "data");
     configure_cache(*cc.access_cache_program(), p.values("i-cache"), "instruction");
