@@ -141,6 +141,8 @@ enum LocationStatus {
     LOCSTAT_ILLEGAL   = 1 << 3,
 };
 
+const std::uint32_t STAGEADDR_NONE = 0xffffffff;
+
 }
 
 #endif // MACHINEDEFS_H

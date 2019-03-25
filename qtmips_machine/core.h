@@ -186,6 +186,7 @@ protected:
         uint32_t inst_addr; // Address of instruction
         enum ExceptionCause excause;
         bool in_delay_slot;
+        bool is_valid;
     };
     struct dtDecode {
         Instruction inst;
@@ -222,6 +223,7 @@ protected:
         bool in_delay_slot;
         bool stall;
         bool stop_if;
+        bool is_valid;
     };
     struct dtExecute {
         Instruction inst;
@@ -236,6 +238,7 @@ protected:
         enum ExceptionCause excause;
         bool in_delay_slot;
         bool stop_if;
+        bool is_valid;
     };
     struct dtMemory {
         Instruction inst;
@@ -248,6 +251,7 @@ protected:
         enum ExceptionCause excause;
         bool in_delay_slot;
         bool stop_if;
+        bool is_valid;
     };
 
     struct dtFetch fetch(bool skip_break = false);

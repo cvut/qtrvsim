@@ -84,10 +84,20 @@ public:
         return true;
     }
 
+    enum StageAddress {
+        STAGEADDR_FETCH,
+        STAGEADDR_DECODE,
+        STAGEADDR_EXECUTE,
+        STAGEADDR_MEMORY,
+        STAGEADDR_WRITEBACK,
+        STAGEADDR_COUNT,
+    };
+
 public slots:
     void setup(machine::QtMipsMachine *machine);
     void check_for_updates();
     void toggle_hw_break(const QModelIndex & index);
+    void update_stage_addr(uint stage, std::uint32_t addr);
 
 private:
     std::uint32_t index0_offset;
@@ -95,6 +105,8 @@ private:
     machine::QtMipsMachine *machine;
     std::uint32_t memory_change_counter;
     std::uint32_t cache_program_change_counter;
+    std::uint32_t stage_addr[STAGEADDR_COUNT];
+    bool stages_need_update;
 };
 
 #endif // PROGRAMMODEL_H

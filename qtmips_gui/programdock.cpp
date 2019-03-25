@@ -101,6 +101,8 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
             program_content, SLOT(focus_address_with_save(std::uint32_t)));
     connect(program_content, SIGNAL(doubleClicked(QModelIndex)),
             program_model, SLOT(toggle_hw_break(QModelIndex)));
+    connect(this, SIGNAL(stage_addr_changed(uint,std::uint32_t)),
+            program_model, SLOT(update_stage_addr(uint,std::uint32_t)));
 }
 
 void ProgramDock::setup(machine::QtMipsMachine *machine) {
@@ -121,31 +123,41 @@ void ProgramDock::set_follow_inst(int follow) {
 }
 
 void ProgramDock::fetch_inst_addr(std::uint32_t addr) {
-    follow_addr[FOLLOWSRC_FETCH] = addr;
+    if (addr != machine::STAGEADDR_NONE)
+        follow_addr[FOLLOWSRC_FETCH] = addr;
+    emit stage_addr_changed(ProgramModel::STAGEADDR_FETCH, addr);
     if (follow_source == FOLLOWSRC_FETCH)
         update_follow_position();
 }
 
 void ProgramDock::decode_inst_addr(std::uint32_t addr) {
-    follow_addr[FOLLOWSRC_DECODE] = addr;
+    if (addr != machine::STAGEADDR_NONE)
+        follow_addr[FOLLOWSRC_DECODE] = addr;
+    emit stage_addr_changed(ProgramModel::STAGEADDR_DECODE, addr);
     if (follow_source == FOLLOWSRC_DECODE)
         update_follow_position();
 }
 
 void ProgramDock::execute_inst_addr(std::uint32_t addr) {
-    follow_addr[FOLLOWSRC_EXECUTE] = addr;
+    if (addr != machine::STAGEADDR_NONE)
+        follow_addr[FOLLOWSRC_EXECUTE] = addr;
+    emit stage_addr_changed(ProgramModel::STAGEADDR_EXECUTE, addr);
     if (follow_source == FOLLOWSRC_EXECUTE)
         update_follow_position();
 }
 
 void ProgramDock::memory_inst_addr(std::uint32_t addr) {
-    follow_addr[FOLLOWSRC_MEMORY] = addr;
+    if (addr != machine::STAGEADDR_NONE)
+        follow_addr[FOLLOWSRC_MEMORY] = addr;
+    emit stage_addr_changed(ProgramModel::STAGEADDR_MEMORY, addr);
     if (follow_source == FOLLOWSRC_MEMORY)
         update_follow_position();
 }
 
 void ProgramDock::writeback_inst_addr(std::uint32_t addr) {
-    follow_addr[FOLLOWSRC_WRITEBACK] = addr;
+    if (addr != machine::STAGEADDR_NONE)
+        follow_addr[FOLLOWSRC_WRITEBACK] = addr;
+    emit stage_addr_changed(ProgramModel::STAGEADDR_WRITEBACK, addr);
     if (follow_source == FOLLOWSRC_WRITEBACK)
         update_follow_position();
 }

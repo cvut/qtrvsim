@@ -44,6 +44,9 @@ ProgramModel::ProgramModel(QObject *parent)
     machine = nullptr;
     memory_change_counter = 0;
     cache_program_change_counter = 0;
+    for (int i = 0 ; i < STAGEADDR_COUNT; i++)
+        stage_addr[i] = machine::STAGEADDR_NONE;
+    stages_need_update = false;
 }
 
 int ProgramModel::rowCount(const QModelIndex & /*parent*/) const {
@@ -125,6 +128,26 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
         } else if (index.column() == 0 && machine->is_hwbreak(address)) {
             QBrush bgd(Qt::red);
             return bgd;
+        } else if (index.column() == 3) {
+            if (address == stage_addr[STAGEADDR_WRITEBACK]) {
+                QBrush bgd(QColor(255, 173, 230));
+                return bgd;
+            } else if (address == stage_addr[STAGEADDR_MEMORY]) {
+                QBrush bgd(QColor(173, 255, 229));
+                return bgd;
+            } else if (address == stage_addr[STAGEADDR_MEMORY]) {
+                QBrush bgd(QColor(173, 255, 229));
+                return bgd;
+            } else if (address == stage_addr[STAGEADDR_EXECUTE]) {
+                QBrush bgd(QColor(193, 255, 173));
+                return bgd;
+            } else if (address == stage_addr[STAGEADDR_DECODE]) {
+                QBrush bgd(QColor(255, 212, 173));
+                return bgd;
+            } else if (address == stage_addr[STAGEADDR_FETCH]) {
+                QBrush bgd(QColor(255, 173, 173));
+                return bgd;
+            }
         }
         return QVariant();
     }
@@ -135,6 +158,8 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
 
 void ProgramModel::setup(machine::QtMipsMachine *machine) {
     this->machine = machine;
+    for (int i = 0 ; i < STAGEADDR_COUNT; i++)
+        stage_addr[i] = machine::STAGEADDR_NONE;
     if (machine != nullptr)
         connect(machine, SIGNAL(post_tick()), this, SLOT(check_for_updates()));
     emit update_all();
@@ -146,11 +171,12 @@ void ProgramModel::update_all() {
         if (machine->cache_program() != nullptr)
             cache_program_change_counter = machine->cache_program()->get_change_counter();
     }
+    stages_need_update = false;
     emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
 }
 
 void ProgramModel::check_for_updates() {
-    bool need_update = false;
+    bool need_update = stages_need_update;
     if (machine == nullptr)
         return;
     if (machine->memory() == nullptr)
@@ -239,4 +265,13 @@ bool ProgramModel::setData(const QModelIndex & index, const QVariant & value, in
         }
     }
     return true;
+}
+
+void ProgramModel::update_stage_addr(uint stage, std::uint32_t addr) {
+    if (stage < STAGEADDR_COUNT) {
+        if (stage_addr[stage] != addr) {
+            stage_addr[stage] = addr;
+            stages_need_update = true;
+        }
+    }
 }

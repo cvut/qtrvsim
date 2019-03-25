@@ -57,6 +57,7 @@ signals:
     void jump_to_pc(std::uint32_t);
     void focus_addr(std::uint32_t);
     void focus_addr_with_save(std::uint32_t);
+    void stage_addr_changed(uint stage, std::uint32_t addr);
 public slots:
     void set_follow_inst(int);
     void fetch_inst_addr(std::uint32_t addr);
