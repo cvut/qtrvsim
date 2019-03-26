@@ -60,6 +60,8 @@ rm -rf ../debian-test-build
 
 mkdir -p ../debian-test-build/qtmips-$V_TXT
 
+cp -xa . ../debian-test-build/qtmips-$V_TXT
+
 cd ../debian-test-build/qtmips-$V_TXT || exit 1
 
 dpkg-buildpackage

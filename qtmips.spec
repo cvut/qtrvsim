@@ -20,7 +20,7 @@
 
 
 Name:           qtmips
-Version:        0.6.6
+Version:        0.6.7
 Release:        0
 Summary:        MIPS CPU simulator for education purposes with pipeline and cache visualization
 License:        GPL-2.0-or-later

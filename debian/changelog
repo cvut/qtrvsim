@@ -1,3 +1,13 @@
+qtmips (0.6.7) unstable; urgency=medium
+
+  * Debian package updated to version 0.6.7.
+  * Change single cycle core with delay slot to use separate fetch stage.
+  * Program listing and stages use color background.
+  * Correct write through spelling. Reported by Richard Susta.
+  * qtmips_cli can be used for cache statistic and result memory tests.
+
+ -- Pavel Pisa <pisa@cmp.felk.cvut.cz> Wed, 27 Mar 2019 00:38:24 +0100
+
 qtmips (0.6.6) unstable; urgency=medium
 
   * Corrected row and column output in cache address fields.
