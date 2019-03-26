@@ -135,9 +135,6 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
             } else if (address == stage_addr[STAGEADDR_MEMORY]) {
                 QBrush bgd(QColor(173, 255, 229));
                 return bgd;
-            } else if (address == stage_addr[STAGEADDR_MEMORY]) {
-                QBrush bgd(QColor(173, 255, 229));
-                return bgd;
             } else if (address == stage_addr[STAGEADDR_EXECUTE]) {
                 QBrush bgd(QColor(193, 255, 173));
                 return bgd;

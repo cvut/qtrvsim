@@ -45,7 +45,7 @@ namespace coreview {
 class InstructionView : public QGraphicsObject {
     Q_OBJECT
 public:
-    InstructionView();
+    InstructionView(QColor bgnd = QColor(240, 240, 240));
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -57,6 +57,7 @@ public slots:
 private:
     QGraphicsSimpleTextItem text;
     machine::ExceptionCause excause;
+    QColor bgnd;
 };
 
 }
