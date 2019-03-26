@@ -268,17 +268,28 @@ QGraphicsSimpleTextItem *CoreViewScene::new_label(const QString &str, qreal x, q
 }
 
 CoreViewSceneSimple::CoreViewSceneSimple(machine::QtMipsMachine *machine) : CoreViewScene(machine) {
-    NEW_I(instr_prim, 230, 60, instruction_fetched);
+    NEW_I(inst_prim, 230, 60, instruction_executed, QColor(255, 173, 230));
     if (machine->config().delay_slot()) {
-        NEW(Latch, delay_slot_latch, 55, 470, machine, 25);
-        NEW_I(instr_delay, 60, 500, instruction_program_counter);
+        NEW(Latch, latch_if_id, 158, 250, machine, 220);
+        NEW_I(inst_fetch,  79, 60, instruction_fetched, QColor(255, 173, 173));
     }
 
     coreview::Connection *con;
     // Fetch stage
-    new_bus(mem_program->connector_instruction(), dc.instr_bus->new_connector(mem_program->connector_instruction()->point()));
-    con = new_bus(ft.junc_pc_4->new_connector(coreview::Connector::AX_Y), dc.add->connector_in_b());
-    con->setAxes({CON_AXIS_Y(270)});
+    if (machine->config().delay_slot()) {
+        struct coreview::Latch::ConnectorPair lp_ft_inst = latch_if_id->new_connector(mem_program->connector_instruction()->y() - latch_if_id->y());
+        new_bus(mem_program->connector_instruction(), lp_ft_inst.in);
+        struct coreview::Latch::ConnectorPair lp_ft_pc = latch_if_id->new_connector(210);
+        new_bus(ft.junc_pc_4->new_connector(coreview::Connector::AX_Y), lp_ft_pc.in);
+        // Decode stage
+        new_bus(lp_ft_inst.out, dc.instr_bus->new_connector(lp_ft_inst.out->point()));
+        con = new_bus(lp_ft_pc.out, dc.add->connector_in_b());
+        con->setAxes({CON_AXIS_Y(270)});
+    } else {
+        new_bus(mem_program->connector_instruction(), dc.instr_bus->new_connector(mem_program->connector_instruction()->point()));
+        con = new_bus(ft.junc_pc_4->new_connector(coreview::Connector::AX_Y), dc.add->connector_in_b());
+        con->setAxes({CON_AXIS_Y(270)});
+    }
     // Decode stage
     coreview::Bus *regs_bus1 = new_bus(regs->connector_read1(), alu->connector_in_a());
     const coreview::Connector *regs_bus_con = dc.cmp->new_connector(-0.5, 1);
@@ -301,22 +312,10 @@ CoreViewSceneSimple::CoreViewSceneSimple(machine::QtMipsMachine *machine) : Core
     con->setAxes({CON_AXIS_Y(678)});
     // WriteBack
     // From decode stage to fetch stage
-    if (machine->config().delay_slot()) {
-        struct coreview::Latch::ConnectorPair lp_addr = delay_slot_latch->new_connector(10);
-        struct coreview::Latch::ConnectorPair lp_branch = delay_slot_latch->new_connector(20);
-        con = new_signal(dc.and_branch->connector_out(), lp_branch.out);
-        con->setAxes({CON_AXIS_Y(370)});
-        new_signal(lp_branch.in, ft.multiplex->connector_ctl());
-        con = new_bus(dc.add->connector_out(), lp_addr.out);
-        con->setAxes({CON_AXIS_Y(360)});
-        con = new_bus(lp_addr.in, ft.multiplex->connector_in(1));
-        con->setAxes({CON_AXIS_Y(10)});
-    } else {
-        con = new_signal(dc.and_branch->connector_out(), ft.multiplex->connector_ctl());
-        con->setAxes({CON_AXIS_Y(370), CON_AXIS_X(490)});
-        con = new_bus(dc.add->connector_out(), ft.multiplex->connector_in(1));
-        con->setAxes({CON_AXIS_Y(360), CON_AXIS_X(480), CON_AXIS_Y(10)});
-    }
+    con = new_signal(dc.and_branch->connector_out(), ft.multiplex->connector_ctl());
+    con->setAxes({CON_AXIS_Y(370), CON_AXIS_X(490)});
+    con = new_bus(dc.add->connector_out(), ft.multiplex->connector_in(1));
+    con->setAxes({CON_AXIS_Y(360), CON_AXIS_X(480), CON_AXIS_Y(10)});
     // From decode to execute stage
     new_signal(dc.ctl_block->new_connector(1, 0.6), ex.mux_imm->connector_ctl());
 	new_signal(dc.ctl_block->new_connector(1, 0.2), alu->connector_ctl());

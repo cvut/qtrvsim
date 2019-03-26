@@ -130,8 +130,8 @@ public:
     CoreViewSceneSimple(machine::QtMipsMachine *machine);
 
 private:
-    coreview::InstructionView *instr_prim, *instr_delay;
-    coreview::Latch *delay_slot_latch;
+    coreview::InstructionView *inst_prim, *inst_fetch;
+    coreview::Latch *latch_if_id;
 };
 
 class CoreViewScenePipelined : public CoreViewScene {

@@ -259,7 +259,7 @@ protected:
     struct dtExecute execute(const struct dtDecode&);
     struct dtMemory memory(const struct dtExecute&);
     void writeback(const struct dtMemory&);
-    bool handle_pc(const struct dtDecode&, std::int32_t rel_adj = 0);
+    bool handle_pc(const struct dtDecode&);
 
     enum ExceptionCause memory_special(enum AccessControl memctl,
                            int mode, bool memread, bool memwrite,
@@ -298,7 +298,8 @@ protected:
     void do_reset();
 
 private:
-    struct Core::dtDecode *jmp_delay_decode;
+    struct Core::dtFetch *dt_f;
+    std::uint32_t prev_inst_addr;
 };
 
 class CorePipelined : public Core {

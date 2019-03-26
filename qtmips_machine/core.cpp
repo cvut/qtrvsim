@@ -554,7 +554,7 @@ void Core::writeback(const struct dtMemory &dt) {
         regs->write_gp(dt.rwrite, dt.towrite_val);
 }
 
-bool Core::handle_pc(const struct dtDecode &dt, int32_t rel_adj) {
+bool Core::handle_pc(const struct dtDecode &dt) {
     bool branch = false;
     emit instruction_program_counter(dt.inst, dt.inst_addr, EXCAUSE_NONE);
 
@@ -593,7 +593,7 @@ bool Core::handle_pc(const struct dtDecode &dt, int32_t rel_adj) {
         std::int32_t rel_offset = dt.inst.immediate() << 2;
         if (rel_offset & (1 << 17))
             rel_offset -= 1 << 18;
-        regs->pc_jmp(rel_offset + rel_adj);
+        regs->pc_abs_jmp(dt.inst_addr + rel_offset + 4);
     } else {
         regs->pc_inc();
     }
@@ -672,57 +672,66 @@ CoreSingle::CoreSingle(Registers *regs, MemoryAccess *mem_program, MemoryAccess 
                        bool jmp_delay_slot, unsigned int min_cache_row_size, Cop0State *cop0state) :
     Core(regs, mem_program, mem_data, min_cache_row_size, cop0state) {
     if (jmp_delay_slot)
-        jmp_delay_decode = new struct Core::dtDecode();
+        dt_f = new struct Core::dtFetch();
     else
-        jmp_delay_decode = nullptr;
+        dt_f = nullptr;
     reset();
 }
 
 CoreSingle::~CoreSingle() {
-    if (jmp_delay_decode != nullptr)
-        delete jmp_delay_decode;
+    if (dt_f != nullptr)
+        delete dt_f;
 }
 
 void CoreSingle::do_step(bool skip_break) {
-    bool in_delay_slot = false;
-    std::uint32_t jump_branch_pc;
+    bool branch_taken = false;
 
     struct dtFetch f = fetch(skip_break);
-    struct dtDecode d = decode(f);
-
-    // Handle PC before instruction following jump leaves decode stage
-    if (jmp_delay_decode != nullptr) {
-        in_delay_slot = handle_pc(*jmp_delay_decode);
-        if (jmp_delay_decode->nb_skip_ds && !in_delay_slot) {
-            // Discard processing of instruction in delay slot
-            // for BEQL, BNEL, BLEZL, BGTZL, BLTZL, BGEZL, BLTZALL, BGEZALL
-            dtDecodeInit(d);
-        }
-        jump_branch_pc = jmp_delay_decode->inst_addr;
-        *jmp_delay_decode = d; // Copy current decode
-    } else {
-        handle_pc(d, 4);
-        jump_branch_pc = d.inst_addr;
+    if (dt_f != nullptr) {
+        struct dtFetch f_swap = *dt_f;
+        *dt_f = f;
+        f = f_swap;
     }
-
+    struct dtDecode d = decode(f);
     struct dtExecute e = execute(d);
     struct dtMemory m = memory(e);
     writeback(m);
 
+    // Handle PC before instruction following jump leaves decode stage
+
+    if ((m.stop_if || (m.excause != EXCAUSE_NONE)) && dt_f != nullptr) {
+        dtFetchInit(*dt_f);
+        emit instruction_fetched(dt_f->inst, dt_f->inst_addr, dt_f->excause);
+        emit fetch_inst_addr_value(STAGEADDR_NONE);
+    } else {
+        branch_taken = handle_pc(d);
+        if (dt_f != nullptr) {
+            dt_f->in_delay_slot = branch_taken;
+            if (d.nb_skip_ds && !branch_taken) {
+                // Discard processing of instruction in delay slot
+                // for BEQL, BNEL, BLEZL, BGTZL, BLTZL, BGEZL, BLTZALL, BGEZALL
+                dtFetchInit(*dt_f);
+            }
+        }
+    }
+
     if (m.excause != EXCAUSE_NONE) {
-        if (jmp_delay_decode != nullptr)
-            dtDecodeInit(*jmp_delay_decode);
+        if (dt_f != nullptr) {
+            regs->pc_abs_jmp(dt_f->inst_addr);
+        }
         handle_exception(this, regs, m.excause, m.inst_addr, regs->read_pc(),
-                         jump_branch_pc, in_delay_slot, m.mem_addr);
+                         prev_inst_addr, m.in_delay_slot, m.mem_addr);
         return;
     }
+    prev_inst_addr = m.inst_addr;
 }
 
 void CoreSingle::do_reset() {
-    if (jmp_delay_decode != nullptr) {
-        Core::dtDecodeInit(*jmp_delay_decode);
-        jmp_delay_decode->inst_addr = 0;
+    if (dt_f != nullptr) {
+        Core::dtFetchInit(*dt_f);
+        dt_f->inst_addr = 0;
     }
+    prev_inst_addr = 0;
 }
 
 CorePipelined::CorePipelined(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,

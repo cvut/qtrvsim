@@ -230,7 +230,9 @@ void MachineTests::singlecore_regs() {
 
     CoreSingle core(&init, &mem_used, &mem_used, true);
     core.step(); // Single step should be enought as this is risc without pipeline
+    core.step();
 
+    res.pc_inc();
     res.pc_inc(); // We did single step	so increment program counter accordingly
     QCOMPARE(init, res); // After doing changes from initial state this should be same state as in case of passed expected result
     QCOMPARE(mem, mem_used); // There should be no change in memory
@@ -444,7 +446,9 @@ void MachineTests::singlecore_mem() {
 
     CoreSingle core(&regs_init, &mem_init, &mem_init, true);
     core.step();
+    core.step();
 
+    regs_res.pc_inc();
     regs_res.pc_inc();
     QCOMPARE(regs_init, regs_res);
     QCOMPARE(mem_init, mem_res);
