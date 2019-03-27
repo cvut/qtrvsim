@@ -30,7 +30,7 @@ qtmips ($V_TXT) unstable; urgency=medium
 
   * Debian package updated to version $V_TXT.
 
- -- $V_USER_NAME <$V_USER_EMAIL> $V_DATE_RFC
+ -- $V_USER_NAME <$V_USER_EMAIL>  $V_DATE_RFC
 
 EOF
 cat debian/changelog >>debian/changelog.tmp
