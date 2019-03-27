@@ -150,6 +150,7 @@ static void out_hex(ostream &out, std::uint64_t val, int digits) {
 }
 
 void Reporter::report() {
+    cout << dec;
     if (e_regs) {
         cout << "Machine state report:" << endl;
         cout << "PC:0x";
