@@ -2,8 +2,8 @@
 Name=qtmips
 GenericName=Qt Mips emulator
 Exec=qtmips_gui
-Icon=qtmips
+Icon=qtmips_gui
 Type=Application
 Comment=Qt Mips emulator
 Terminal=false
-Categories=Qt;Development
+Categories=System;Emulator;

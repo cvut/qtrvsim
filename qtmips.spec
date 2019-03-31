@@ -35,10 +35,12 @@ BuildRequires:  pkgconfig(Qt5Test)
 
 %if ! 0%{?suse_version}
 BuildRequires:  pkgconfig(libelf)
+BuildRequires:  desktop-file-utils
 %endif
 
 %if 0%{?suse_version}
-BuildRequires: libelf-devel
+BuildRequires:  libelf-devel
+BuildRequires:  update-desktop-files
 %endif
 
 %if !0%{?suse_version}
@@ -61,10 +63,34 @@ make
 mkdir -p %{buildroot}/%{_bindir}
 install -m755 qtmips_gui/qtmips_gui %{buildroot}/%{_bindir}
 install -m755 qtmips_cli/qtmips_cli %{buildroot}/%{_bindir}
+mkdir -p %{buildroot}/%{_datadir}/icons/hicolor/48x48/apps
+install -m644 data/icons/qtmips_gui.png %{buildroot}/%{_datadir}/icons/hicolor/48x48/apps
+mkdir -p %{buildroot}/%{_datadir}/icons/hicolor/scalable/apps
+install -m644 data/icons/qtmips_gui.svg %{buildroot}/%{_datadir}/icons/hicolor/scalable/apps
+
+#desktop icon
+%if 0%{?suse_version}
+install -m755 -d %{buildroot}%{_datadir}/applications
+install -m644 data/qtmips.desktop %{buildroot}%{_datadir}/applications
+%suse_update_desktop_file -r -i qtmips 'System Emulator'
+%endif
+
+%if 0%{?fedora} || 0%{?rhel} || 0%{?centos}
+desktop-file-install --dir=%{buildroot}%{_datadir}/applications data/qtmips.desktop
+desktop-file-validate %{buildroot}%{_datadir}/applications/qtmips.desktop
+%endif
 
 %files
 %{_bindir}/qtmips_gui
 %{_bindir}/qtmips_cli
+%{_datadir}/applications/qtmips.desktop
+%dir %{_datadir}/icons/hicolor
+%dir %{_datadir}/icons/hicolor/48x48
+%dir %{_datadir}/icons/hicolor/48x48/apps
+%{_datadir}/icons/hicolor/48x48/apps/qtmips_gui.png
+%dir %{_datadir}/icons/hicolor/scalable
+%dir %{_datadir}/icons/hicolor/scalable/apps
+%{_datadir}/icons/hicolor/scalable/apps/qtmips_gui.svg
 %license LICENSE
 %doc README.md
 

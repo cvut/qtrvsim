@@ -1,4 +1,5 @@
 qtmips_gui/qtmips_gui /usr/bin
 qtmips_cli/qtmips_cli /usr/bin
 data/qtmips.desktop usr/share/applications
-
+data/icons/qtmips_gui.svg /usr/share/icons/hicolor/scalable/apps
+data/icons/qtmips_gui.png /usr/share/icons/hicolor/48x48/apps
