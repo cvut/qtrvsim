@@ -100,12 +100,12 @@ public:
     };
 
 signals:
-    void instruction_fetched(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause);
-    void instruction_decoded(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause);
-    void instruction_executed(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause);
-    void instruction_memory(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause);
-    void instruction_writeback(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause);
-    void instruction_program_counter(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause);
+    void instruction_fetched(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause, bool valid);
+    void instruction_decoded(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause, bool valid);
+    void instruction_executed(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause, bool valid);
+    void instruction_memory(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause, bool valid);
+    void instruction_writeback(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause, bool valid);
+    void instruction_program_counter(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause, bool valid);
 
     void fetch_inst_addr_value(std::uint32_t);
     void fetch_jump_reg_value(std::uint32_t);

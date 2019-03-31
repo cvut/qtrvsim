@@ -102,24 +102,24 @@ void Tracer::reg_hi() {
     r_hi = true;
 }
 
-void Tracer::instruction_fetch(const Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause) {
-    cout << "Fetch: " << (excause != EXCAUSE_NONE? "!": "") << inst.to_str(inst_addr).toStdString() << endl;
+void Tracer::instruction_fetch(const Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause, bool valid) {
+    cout << "Fetch: " << (excause != EXCAUSE_NONE? "!": "") << (valid? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
 }
 
-void Tracer::instruction_decode(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause) {
-    cout << "Decode: " << (excause != EXCAUSE_NONE? "!": "") << inst.to_str(inst_addr).toStdString() << endl;
+void Tracer::instruction_decode(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause, bool valid) {
+    cout << "Decode: " << (excause != EXCAUSE_NONE? "!": "") << (valid? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
 }
 
-void Tracer::instruction_execute(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause) {
-    cout << "Execute: " << (excause != EXCAUSE_NONE? "!": "") << inst.to_str(inst_addr).toStdString() << endl;
+void Tracer::instruction_execute(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause, bool valid) {
+    cout << "Execute: " << (excause != EXCAUSE_NONE? "!": "") << (valid? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
 }
 
-void Tracer::instruction_memory(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause) {
-    cout << "Memory: " << (excause != EXCAUSE_NONE? "!": "") << inst.to_str(inst_addr).toStdString() << endl;
+void Tracer::instruction_memory(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause, bool valid) {
+    cout << "Memory: " << (excause != EXCAUSE_NONE? "!": "") << (valid? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
 }
 
-void Tracer::instruction_writeback(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause) {
-    cout << "Writeback: " << (excause != EXCAUSE_NONE? "!": "") << inst.to_str(inst_addr).toStdString() << endl;
+void Tracer::instruction_writeback(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause, bool valid) {
+    cout << "Writeback: " << (excause != EXCAUSE_NONE? "!": "") << (valid? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
 }
 
 void Tracer::regs_pc_update(std::uint32_t val) {

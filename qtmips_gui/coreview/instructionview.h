@@ -52,12 +52,13 @@ public:
 
 public slots:
     void instruction_update(const machine::Instruction &i, std::uint32_t inst_addr,
-                            machine::ExceptionCause excause);
+                            machine::ExceptionCause excause, bool valid);
 
 private:
     QGraphicsSimpleTextItem text;
     machine::ExceptionCause excause;
     QColor bgnd;
+    bool valid;
 };
 
 }

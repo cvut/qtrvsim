@@ -269,7 +269,7 @@ struct Core::dtFetch Core::fetch(bool skip_break) {
     }
 
     emit fetch_inst_addr_value(inst_addr);
-    emit instruction_fetched(inst, inst_addr, excause);
+    emit instruction_fetched(inst, inst_addr, excause, true);
     return {
         .inst = inst,
         .inst_addr = inst_addr,
@@ -318,7 +318,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     }
 
     emit decode_inst_addr_value(dt.is_valid? dt.inst_addr: STAGEADDR_NONE);
-    emit instruction_decoded(dt.inst, dt.inst_addr, excause);
+    emit instruction_decoded(dt.inst, dt.inst_addr, excause, dt.is_valid);
     emit decode_instruction_value(dt.inst.data());
     emit decode_reg1_value(val_rs);
     emit decode_reg2_value(val_rt);
@@ -450,7 +450,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
     }
 
     emit execute_inst_addr_value(dt.is_valid? dt.inst_addr: STAGEADDR_NONE);
-    emit instruction_executed(dt.inst, dt.inst_addr, excause);
+    emit instruction_executed(dt.inst, dt.inst_addr, excause, dt.is_valid);
     emit execute_alu_value(alu_val);
     emit execute_reg1_value(dt.val_rs);
     emit execute_reg2_value(dt.val_rt);
@@ -518,7 +518,7 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
     }
 
     emit memory_inst_addr_value(dt.is_valid? dt.inst_addr: STAGEADDR_NONE);
-    emit instruction_memory(dt.inst, dt.inst_addr, dt.excause);
+    emit instruction_memory(dt.inst, dt.inst_addr, dt.excause, dt.is_valid);
     emit memory_alu_value(dt.alu_val);
     emit memory_rt_value(dt.val_rt);
     emit memory_mem_value(memread ? towrite_val : 0);
@@ -546,7 +546,7 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
 
 void Core::writeback(const struct dtMemory &dt) {
     emit writeback_inst_addr_value(dt.is_valid? dt.inst_addr: STAGEADDR_NONE);
-    emit instruction_writeback(dt.inst, dt.inst_addr, dt.excause);
+    emit instruction_writeback(dt.inst, dt.inst_addr, dt.excause, dt.is_valid);
     emit writeback_value(dt.towrite_val);
     emit writeback_regw_value(dt.regwrite);
     emit writeback_regw_num_value(dt.rwrite);
@@ -556,7 +556,7 @@ void Core::writeback(const struct dtMemory &dt) {
 
 bool Core::handle_pc(const struct dtDecode &dt) {
     bool branch = false;
-    emit instruction_program_counter(dt.inst, dt.inst_addr, EXCAUSE_NONE);
+    emit instruction_program_counter(dt.inst, dt.inst_addr, EXCAUSE_NONE, dt.is_valid);
 
     if (dt.jump) {
         if (!dt.bjr_req_rs) {
@@ -701,7 +701,7 @@ void CoreSingle::do_step(bool skip_break) {
 
     if ((m.stop_if || (m.excause != EXCAUSE_NONE)) && dt_f != nullptr) {
         dtFetchInit(*dt_f);
-        emit instruction_fetched(dt_f->inst, dt_f->inst_addr, dt_f->excause);
+        emit instruction_fetched(dt_f->inst, dt_f->inst_addr, dt_f->excause, dt_f->is_valid);
         emit fetch_inst_addr_value(STAGEADDR_NONE);
     } else {
         branch_taken = handle_pc(d);
@@ -758,19 +758,19 @@ void CorePipelined::do_step(bool skip_break) {
     excpt_in_progress = dt_m.excause != EXCAUSE_NONE;
     if (excpt_in_progress) {
         dtExecuteInit(dt_e);
-        emit instruction_executed(dt_e.inst, dt_e.inst_addr, dt_e.excause);
+        emit instruction_executed(dt_e.inst, dt_e.inst_addr, dt_e.excause, dt_e.is_valid);
         emit execute_inst_addr_value(STAGEADDR_NONE);
     }
     excpt_in_progress = excpt_in_progress || dt_e.excause != EXCAUSE_NONE;
     if (excpt_in_progress) {
         dtDecodeInit(dt_d);
-        emit instruction_decoded(dt_d.inst, dt_d.inst_addr, dt_d.excause);
+        emit instruction_decoded(dt_d.inst, dt_d.inst_addr, dt_d.excause, dt_d.is_valid);
         emit decode_inst_addr_value(STAGEADDR_NONE);
     }
     excpt_in_progress = excpt_in_progress || dt_e.excause != EXCAUSE_NONE;
     if (excpt_in_progress) {
         dtFetchInit(dt_f);
-        emit instruction_fetched(dt_f.inst, dt_f.inst_addr, dt_f.excause);
+        emit instruction_fetched(dt_f.inst, dt_f.inst_addr, dt_f.excause, dt_f.is_valid);
         emit fetch_inst_addr_value(STAGEADDR_NONE);
         if (dt_m.excause != EXCAUSE_NONE) {
             regs->pc_abs_jmp(dt_e.inst_addr);
@@ -886,7 +886,7 @@ void CorePipelined::do_step(bool skip_break) {
         } else {
             if (dt_d.nb_skip_ds) {
                 dtFetchInit(dt_f);
-                emit instruction_fetched(dt_f.inst, dt_f.inst_addr, dt_f.excause);
+                emit instruction_fetched(dt_f.inst, dt_f.inst_addr, dt_f.excause, dt_f.is_valid);
                 emit fetch_inst_addr_value(STAGEADDR_NONE);
             }
         }
@@ -900,7 +900,7 @@ void CorePipelined::do_step(bool skip_break) {
         } else {
             dtFetchInit(dt_f);
         }
-        // emit instruction_decoded(dt_d.inst, dt_d.inst_addr, dt_d.excause);
+        // emit instruction_decoded(dt_d.inst, dt_d.inst_addr, dt_d.excause, dt_d.is_valid);
     }
 }
 

@@ -54,8 +54,9 @@ InstructionView::InstructionView(QColor bgnd) : QGraphicsObject(nullptr), text(t
     f.setPointSize(FontSize::SIZE6);
     text.setFont(f);
     this->bgnd = bgnd;
+    valid = false;
     // Initialize to NOP
-    instruction_update(machine::Instruction(), 0, machine::EXCAUSE_NONE);
+    instruction_update(machine::Instruction(), 0, machine::EXCAUSE_NONE, false);
 }
 
 QRectF InstructionView::boundingRect() const {
@@ -65,15 +66,19 @@ QRectF InstructionView::boundingRect() const {
 void InstructionView::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
     painter->setPen(QPen(QColor(240, 240, 240)));
     if (excause == machine::EXCAUSE_NONE)
-        painter->setBrush(QBrush(bgnd));
+        if (valid)
+            painter->setBrush(QBrush(bgnd));
+        else
+            painter->setBrush(QBrush(QColor(240, 240, 240)));
     else
         painter->setBrush(QBrush(QColor(255, 100, 100)));
     painter->drawRoundRect(-WIDTH/2, 0, WIDTH, HEIGHT, ROUND, ROUND);
 }
 
 void InstructionView::instruction_update(const machine::Instruction &i,
-                   std::uint32_t inst_addr, machine::ExceptionCause excause) {
+                   std::uint32_t inst_addr, machine::ExceptionCause excause, bool valid) {
 
+    this->valid = valid;
     QRectF prev_box = boundingRect();
     text.setText(i.to_str(inst_addr));
     this->excause = excause;
