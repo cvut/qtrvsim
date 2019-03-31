@@ -20,6 +20,10 @@ sed --in-place \
   -e 's#^\([\t ]*\)versionText = "Version [^"]*\\n";.*$#\1versionText = "Version '"$V_TXT"'\\n";#' \
   qtmips_gui/aboutdialog.cpp
 
+sed --in-place \
+  -e 's#^\([\t ]*\)app.setApplicationVersion("[^"]*");.*$#\1app.setApplicationVersion("'"$V_TXT"'");#' \
+  qtmips_gui/main.cpp
+
 if grep -q "qtmips ($V_TXT)" debian/changelog ; then
 sed --in-place \
   -e '1,/^ -- .*$/s/^ -- .*$/'" -- $V_USER_NAME <$V_USER_EMAIL> $V_DATE_RFC/" \
