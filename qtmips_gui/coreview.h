@@ -43,6 +43,7 @@
 #include "coreview/connection.h"
 #include "coreview/programcounter.h"
 #include "coreview/multiplexer.h"
+#include "coreview/minimux.h"
 #include "coreview/latch.h"
 #include "coreview/alu.h"
 #include "coreview/adder.h"
@@ -114,6 +115,8 @@ protected:
         coreview::Multiplexer *mux_alu_reg_b;
         coreview::Junction *j_alu_out;
         coreview::MultiText *multi_stall;
+        coreview::MiniMux *mux_branch_reg_a;
+        coreview::MiniMux *mux_branch_reg_b;
     } hu;
 
     coreview::Connection *new_connection(const coreview::Connector*, const coreview::Connector*);

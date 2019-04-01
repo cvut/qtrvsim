@@ -65,6 +65,14 @@
         connect(machine->core(), &machine::Core::SIG, \
                 VAR, &coreview::MultiText::multitext_update); \
     } while(false)
+#define NEW_MUX(VAR, X, Y, SIG, ...) do { \
+        NEW(Multiplexer, VAR, X, Y, __VA_ARGS__); \
+        connect(machine->core(), SIGNAL(SIG(std::uint32_t)), VAR, SLOT(set(std::uint32_t))); \
+    } while(false)
+#define NEW_MINIMUX(VAR, X, Y, SIG, ...) do { \
+        NEW(MiniMux, VAR, X, Y, __VA_ARGS__); \
+        connect(machine->core(), SIGNAL(SIG(std::uint32_t)), VAR, SLOT(set(std::uint32_t))); \
+    } while(false)
 
 CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene() {
     setSceneRect(0, 0, SC_WIDTH, SC_HEIGHT);
@@ -85,7 +93,7 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     NEW_B(Constant, ft.adder_4, ft.adder->connector_in_b(), "4");
     NEW(Junction, ft.junc_pc, 80, mem_program->connector_address()->y());
     NEW(Junction, ft.junc_pc_4, 130, 380);
-    NEW(Multiplexer, ft.multiplex, 20, 390, 2);
+    NEW_MUX(ft.multiplex, 20, 390, fetch_branch_value, 2);
     // Decode stage
     NEW(LogicBlock, dc.ctl_block, 230, 90, {"Control", "unit"});
     dc.ctl_block->setSize(35, 70);
@@ -94,7 +102,7 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     NEW(Adder, dc.add, 340, 428);
     const coreview::Connector *dc_con_sign_ext = dc.sign_ext->new_connector(1, 0);
     NEW(Junction, dc.j_sign_ext, 290, dc_con_sign_ext->y());
-    NEW(LogicBlock, dc.cmp, 320, 200, "=");
+    NEW(LogicBlock, dc.cmp, 312, 200, "=");
     NEW(And, dc.and_branch, 350, 190);
     dc.cmp->setSize(24, 12);
     NEW(Junction, dc.j_inst_up, 190, 126);
@@ -103,8 +111,8 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     NEW(Junction, dc.j_jump_reg, 355, 94);
     // Execute stage
     NEW(Junction, ex.j_mux, 450, 303);
-    NEW(Multiplexer, ex.mux_imm, 470, 292, 2, true);
-    NEW(Multiplexer, ex.mux_regdest, 480, 370, 2, true);
+    NEW_MUX(ex.mux_imm, 470, 292, execute_alusrc_value, 2, true);
+    NEW_MUX(ex.mux_regdest, 480, 370, execute_regdest_value, 2, true);
     // Memory
     NEW(Junction, mm.j_addr, 570, mem_data->connector_address()->y());
     static QMap<std::uint32_t, QString> excause_map =
@@ -123,7 +131,7 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     NEW_MULTI(mm.multi_excause, 602, 447, memory_excause_value, excause_map, true);
     new_label("Exception", 595, 437);
     // WriteBack stage
-    NEW(Multiplexer, wb.mem_or_reg, 690, 252, 2, true);
+    NEW_MUX(wb.mem_or_reg, 690, 252, writeback_memtoreg_value, 2, true);
     NEW(Junction, wb.j_reg_write_val, 411, 510);
 
     // Connections //
@@ -204,7 +212,7 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     NEW_V(560, 260, memory_alu_value, true); // Alu output
     NEW_V(560, 345, memory_rt_value, true); // rt
     NEW_V(650, 290, memory_mem_value, true); // Memory output
-    NEW_V(570, 113, execute_memtoreg_value, false, 1);
+    NEW_V(570, 113, memory_memtoreg_value, false, 1);
     NEW_V(630, 220, memory_memwrite_value, false, 1);
     NEW_V(620, 220, memory_memread_value, false, 1);
     // Write back stage
@@ -377,12 +385,13 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
     struct coreview::Latch::ConnectorPair lp_dc_rt = latch_id_ex->new_connector(regs->connector_read2()->y() - latch_id_ex->y());
     coreview::Bus *regs_bus1 = new_bus(regs->connector_read1(), lp_dc_rs.in);
     coreview::Bus *regs_bus2 = new_bus(regs->connector_read2(), lp_dc_rt.in);
-    //if (machine->config().hazard_unit() == machine::MachineConfig::HU_NONE) {
-        const coreview::Connector *regs_bus_con = dc.cmp->new_connector(-0.5, 1);
+    const coreview::Connector *regs_bus_con;
+    if (machine->config().hazard_unit() != machine::MachineConfig::HU_STALL_FORWARD) {
+        regs_bus_con = dc.cmp->new_connector(-0.5, 1);
         new_bus(regs_bus1->new_connector(regs_bus_con->point(), coreview::Connector::AX_Y), regs_bus_con);
         regs_bus_con = dc.cmp->new_connector(0.5, 1);
         new_bus(regs_bus2->new_connector(regs_bus_con->point(), coreview::Connector::AX_Y), regs_bus_con);
-    //} // TODO else
+    }
     struct coreview::Latch::ConnectorPair lp_dc_immed = latch_id_ex->new_connector(dc.j_sign_ext->y() - latch_id_ex->y());
     new_bus(dc.j_sign_ext->new_connector(coreview::Connector::AX_X), lp_dc_immed.in);
     struct coreview::Latch::ConnectorPair regdest_dc_rt = latch_id_ex->new_connector(ex.mux_regdest->connector_in(0)->point().y() - latch_id_ex->y());
@@ -489,8 +498,10 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
     NEW_V(610, 385, memory_regw_num_value, false, 2, 0, 10);
 
     if (machine->config().hazard_unit() == machine::MachineConfig::HU_STALL_FORWARD) {
-        NEW(Multiplexer, hu.mux_alu_reg_a, 430, 232, 3, false);
-        NEW(Multiplexer, hu.mux_alu_reg_b, 430, 285, 3, false);
+        NEW_MUX(hu.mux_alu_reg_a, 430, 232, execute_reg1_ff_value, 3, false);
+        NEW_MUX(hu.mux_alu_reg_b, 430, 285, execute_reg2_ff_value, 3, false);
+        NEW_MINIMUX(hu.mux_branch_reg_a, 296, 228, forward_m_d_rs_value, 2, false);
+        NEW_MINIMUX(hu.mux_branch_reg_b, 314, 228, forward_m_d_rt_value, 2, false);
         NEW(Junction, hu.j_alu_out, 420, 490);
 
         con = new_bus(lp_dc_rs.out, hu.mux_alu_reg_a->connector_in(0));
@@ -507,10 +518,16 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
         con = new_bus(hu.j_alu_out->new_connector(CON_AX_Y), hu.mux_alu_reg_a->connector_in(2));
         con = new_bus(hu.j_alu_out->new_connector(CON_AX_Y), hu.mux_alu_reg_b->connector_in(2));
 
-        con = new_bus(hu.j_alu_out->new_connector(CON_AX_X), dc.cmp->new_connector(-0.5, 1));
+        con = new_bus(hu.j_alu_out->new_connector(CON_AX_X), hu.mux_branch_reg_a->connector_in(1));
         con->setAxes({CON_AXIS_Y(380), CON_AXIS_X(330)});
-        con = new_bus(hu.j_alu_out->new_connector(CON_AX_X), dc.cmp->new_connector(0.5, 1));
+        con = new_bus(hu.j_alu_out->new_connector(CON_AX_X), hu.mux_branch_reg_b->connector_in(1));
         con->setAxes({CON_AXIS_Y(380), CON_AXIS_X(330)});
+
+        new_bus(regs_bus1->new_connector(hu.mux_branch_reg_a->connector_in(0)->point(), coreview::Connector::AX_Y), hu.mux_branch_reg_a->connector_in(0));
+        new_bus(regs_bus2->new_connector(hu.mux_branch_reg_b->connector_in(0)->point(), coreview::Connector::AX_Y), hu.mux_branch_reg_b->connector_in(0));
+
+        con = new_bus(hu.mux_branch_reg_a->connector_out(), dc.cmp->new_connector(-0.75, 1));
+        con = new_bus(hu.mux_branch_reg_b->connector_out(), dc.cmp->new_connector(0.75, 1));
 
         struct coreview::Latch::ConnectorPair regdest_dc_rs = latch_id_ex->new_connector(ex.mux_regdest->connector_in(0)->point().y() - latch_id_ex->y() - 8);
         new_bus(dc.instr_bus->new_connector(0, ex.mux_regdest->connector_in(0)->y() - 8), regdest_dc_rs.in, 2);
@@ -519,12 +536,11 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
         NEW(Junction, ex.j_rs_num, 442, 372);
         new_bus(regdest_dc_rs.out, ex.j_rs_num->new_connector(coreview::Connector::AX_X), 2);
 
+        NEW_V(434, 227, execute_reg1_ff_value, false, 1); // Register 1 forward to ALU
+        NEW_V(434, 280, execute_reg2_ff_value, false, 1); // Register 2 forward to ALU
 
-        NEW_V(434, 250, execute_reg1_ff_value, false, 1); // Register 1 forward to ALU
-        NEW_V(434, 303, execute_reg2_ff_value, false, 1); // Register 2 forward to ALU
-
-        NEW_V(312, 290, forward_m_d_rs_value, false, 1); // Register 1 forward for bxx and jr, jalr
-        NEW_V(327, 290, forward_m_d_rt_value, false, 1); // Register 2 forward for beq, bne
+        NEW_V(291, 230, forward_m_d_rs_value, false, 1); // Register 1 forward for bxx and jr, jalr
+        NEW_V(333, 230, forward_m_d_rt_value, false, 1); // Register 2 forward for beq, bne
 
     }
 }

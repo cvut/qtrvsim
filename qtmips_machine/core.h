@@ -158,6 +158,7 @@ signals:
     void memory_excause_value(std::uint32_t);
     void writeback_inst_addr_value(std::uint32_t);
     void writeback_value(std::uint32_t);
+    void writeback_memtoreg_value(std::uint32_t);
     void writeback_regw_value(std::uint32_t);
     void writeback_regw_num_value(std::uint32_t);
 

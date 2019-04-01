@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef COREVIEW_MULTIPLEXER_H
-#define COREVIEW_MULTIPLEXER_H
+#ifndef COREVIEW_MINIMUX_H
+#define COREVIEW_MINIMUX_H
 
 #include <QGraphicsObject>
 #include "qtmipsexception.h"
@@ -42,11 +42,11 @@
 
 namespace coreview {
 
-class Multiplexer : public  QGraphicsObject {
+class MiniMux : public  QGraphicsObject {
     Q_OBJECT
 public:
-    Multiplexer(unsigned size, bool ctl_up = false);
-    ~Multiplexer();
+    MiniMux(unsigned size, bool ctl_up = false);
+    ~MiniMux();
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -68,4 +68,4 @@ private:
 
 }
 
-#endif // COREVIEW_MULTIPLEXER_H
+#endif // COREVIEW_MINIMUX_H

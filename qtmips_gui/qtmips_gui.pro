@@ -67,7 +67,8 @@ SOURCES += \
     fontsize.cpp \
     gotosymboldialog.cpp \
     cop0dock.cpp \
-    hinttabledelegate.cpp
+    hinttabledelegate.cpp \
+    coreview/minimux.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -107,7 +108,8 @@ HEADERS += \
     fontsize.h \
     gotosymboldialog.h \
     cop0dock.h \
-    hinttabledelegate.h
+    hinttabledelegate.h \
+    coreview/minimux.h
 
 FORMS += \
         NewDialog.ui \

@@ -548,6 +548,7 @@ void Core::writeback(const struct dtMemory &dt) {
     emit writeback_inst_addr_value(dt.is_valid? dt.inst_addr: STAGEADDR_NONE);
     emit instruction_writeback(dt.inst, dt.inst_addr, dt.excause, dt.is_valid);
     emit writeback_value(dt.towrite_val);
+    emit writeback_memtoreg_value(dt.memtoreg);
     emit writeback_regw_value(dt.regwrite);
     emit writeback_regw_num_value(dt.rwrite);
     if (dt.regwrite)
