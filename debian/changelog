@@ -1,3 +1,14 @@
+qtmips (0.6.8) unstable; urgency=medium
+
+  * Debian package updated to version 0.6.8.
+  * Coreview multiplexers updated and added for branch compare forward.
+  * qtmips_gui: set application window icon.
+  * Set gray background to stalled instructions/idled stages.
+  * Setting background color dial
+  * qtmips_cli: start report in decimal mode.
+
+ -- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Mon, 01 Apr 2019 15:26:46 +0200
+
 qtmips (0.6.7) unstable; urgency=medium
 
   * Debian package updated to version 0.6.7.

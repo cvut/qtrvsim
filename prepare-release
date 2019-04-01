@@ -50,7 +50,8 @@ nedit-nc debian/changelog
 echo Press enter to continue
 read x
 
-git add debian/changelog qtmips_gui/aboutdialog.cpp qtmips.spec
+git add debian/changelog qtmips_gui/aboutdialog.cpp \
+        qtmips_gui/main.cpp qtmips.spec
 
 echo >.git/GITGUI_MSG "Version updated to $V_TXT"
 
