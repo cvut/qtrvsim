@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="icons.qrc">
+    <normaloff>:/icons/qtmips_gui.png</normaloff>:/icons/qtmips_gui.png</iconset>
+  </property>
   <property name="dockNestingEnabled">
    <bool>false</bool>
   </property>

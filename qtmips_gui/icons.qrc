@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
+        <file>icons/qtmips_gui.png</file>
         <file>icons/application-exit.png</file>
         <file>icons/reload.png</file>
         <file>icons/document-import.png</file>
