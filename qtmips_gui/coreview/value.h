@@ -38,14 +38,16 @@
 
 #include <QGraphicsObject>
 #include <QPainter>
+#include <QChar>
 
 namespace coreview {
 
 class Value : public QGraphicsObject {
     Q_OBJECT
 public:
-    Value(bool vertical = false, unsigned width = 8,
-          unsigned init_val = 0, unsigned base = 16); // width is for number of character to be shown from number
+    Value(bool vertical = false, unsigned width = 8,  // width is for number of character to be shown from number
+          unsigned init_val = 0, unsigned base = 16,
+          QChar fillchr = '0', bool frame = true);
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -60,6 +62,8 @@ private:
     unsigned wid;
     unsigned base;
     bool vertical;
+    QChar fillchr;
+    bool frame;
 };
 
 }

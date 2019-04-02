@@ -43,6 +43,7 @@ Core::Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
            unsigned int min_cache_row_size, Cop0State *cop0state) :
            ex_handlers(), hw_breaks() {
     cycle_c = 0;
+    stall_c = 0;
     this->regs = regs;
     this->cop0state = cop0state;
     this->mem_program = mem_program;
@@ -61,11 +62,13 @@ Core::Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
 
 void Core::step(bool skip_break) {
     cycle_c++;
+    emit cycle_c_value(cycle_c);
     do_step(skip_break);
 }
 
 void Core::reset() {
     cycle_c = 0;
+    stall_c = 0;
     do_reset();
 }
 
@@ -902,6 +905,10 @@ void CorePipelined::do_step(bool skip_break) {
             dtFetchInit(dt_f);
         }
         // emit instruction_decoded(dt_d.inst, dt_d.inst_addr, dt_d.excause, dt_d.is_valid);
+    }
+    if (stall || dt_d.stop_if) {
+        stall_c++;
+        emit stall_c_value(stall_c);
     }
 }
 

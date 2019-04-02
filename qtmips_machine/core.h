@@ -165,6 +165,9 @@ signals:
     void hu_stall_value(std::uint32_t);
     void branch_forward_value(std::uint32_t);
 
+    void cycle_c_value(std::uint32_t);
+    void stall_c_value(std::uint32_t);
+
     void stop_on_exception_reached();
 
 protected:
@@ -273,6 +276,8 @@ protected:
     void dtExecuteInit(struct dtExecute &dt);
     void dtMemoryInit(struct dtMemory &dt);
 
+protected:
+    unsigned int stall_c;
 private:
     struct hwBreak{
         hwBreak(std::uint32_t addr);

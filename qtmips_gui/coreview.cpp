@@ -190,7 +190,7 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     NEW_V(200, 200, decode_instruction_value); // Instruction
     NEW_V(360, 250, decode_reg1_value); // Register output 1
     NEW_V(360, 270, decode_reg2_value); // Register output 2
-    NEW_V(335, 415, decode_immediate_value); // Sign extended immediate value
+    NEW_V(335, 413, decode_immediate_value); // Sign extended immediate value
     NEW_V(370, 99,  decode_regd31_value, false, 1);
     NEW_V(370, 113, decode_memtoreg_value, false, 1);
     NEW_V(360, 120, decode_memwrite_value, false, 1);
@@ -219,15 +219,20 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     NEW_V(710, 330, writeback_value, true); // Write back value
 
     new_label("RsD", 215, 241);
-    NEW_V(205, 250, decode_rs_num_value, false, 2, 0, 10);
+    NEW_V(205, 250, decode_rs_num_value, false, 2, 0, 10, ' ');
     new_label("RtD", 215, 261);
-    NEW_V(205, 270, decode_rt_num_value, false, 2, 0, 10);
+    NEW_V(205, 270, decode_rt_num_value, false, 2, 0, 10, ' ');
 
     new_label("RtD", 297, 372);
-    NEW_V(320, 380, decode_rt_num_value, false, 2, 0, 10);
+    NEW_V(320, 380, decode_rt_num_value, false, 2, 0, 10, ' ');
     new_label("RdD", 297, 380);
-    NEW_V(320, 390, decode_rd_num_value, false, 2, 0, 10);
-    NEW_V(320, 500, writeback_regw_num_value, false, 2, 0, 10);
+    NEW_V(320, 390, decode_rd_num_value, false, 2, 0, 10, ' ');
+    NEW_V(320, 500, writeback_regw_num_value, false, 2, 0, 10, ' ');
+
+    new_label("Cycles", 440, SC_HEIGHT - 14);
+    NEW_V(500, SC_HEIGHT - 9, cycle_c_value, false, 10, 0, 10, ' ', false);
+    new_label("Stalls", 570, SC_HEIGHT - 14);
+    NEW_V(630, SC_HEIGHT - 9, stall_c_value, false, 10, 0, 10, ' ', false);
 
     connect(regs, SIGNAL(open_registers()), this, SIGNAL(request_registers()));
     connect(mem_program, SIGNAL(open_mem()), this, SIGNAL(request_program_memory()));
@@ -491,11 +496,11 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
     NEW_V(560, 105, memory_regw_value, false, 1);
 
     new_label("RtE", 427, 372);
-    NEW_V(450, 380, execute_rt_num_value, false, 2, 0, 10);
+    NEW_V(450, 380, execute_rt_num_value, false, 2, 0, 10, ' ');
     new_label("RdE", 427, 380);
-    NEW_V(450, 390, execute_rd_num_value, false, 2, 0, 10);
-    NEW_V(510, 385, execute_regw_num_value, false, 2, 0, 10);
-    NEW_V(610, 385, memory_regw_num_value, false, 2, 0, 10);
+    NEW_V(450, 390, execute_rd_num_value, false, 2, 0, 10, ' ');
+    NEW_V(510, 385, execute_regw_num_value, false, 2, 0, 10, ' ');
+    NEW_V(610, 385, memory_regw_num_value, false, 2, 0, 10, ' ');
 
     if (machine->config().hazard_unit() == machine::MachineConfig::HU_STALL_FORWARD) {
         NEW_MUX(hu.mux_alu_reg_a, 430, 232, execute_reg1_ff_value, 3, false);
@@ -532,7 +537,7 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine) 
         struct coreview::Latch::ConnectorPair regdest_dc_rs = latch_id_ex->new_connector(ex.mux_regdest->connector_in(0)->point().y() - latch_id_ex->y() - 8);
         new_bus(dc.instr_bus->new_connector(0, ex.mux_regdest->connector_in(0)->y() - 8), regdest_dc_rs.in, 2);
         new_label("RsE", 427, 364);
-        NEW_V(450, 370, execute_rs_num_value, false, 2, 0, 10);
+        NEW_V(450, 370, execute_rs_num_value, false, 2, 0, 10, ' ');
         NEW(Junction, ex.j_rs_num, 442, 372);
         new_bus(regdest_dc_rs.out, ex.j_rs_num->new_connector(coreview::Connector::AX_X), 2);
 

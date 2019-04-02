@@ -43,11 +43,13 @@ using namespace coreview;
 
 // TODO orientation
 Value::Value(bool vertical, unsigned width, std::uint32_t init_val,
-             unsigned a_base) : QGraphicsObject(nullptr) {
+             unsigned a_base, QChar fillchr, bool frame) : QGraphicsObject(nullptr) {
     wid = width;
     val = init_val;
     base = a_base;
     this->vertical = vertical;
+    this->fillchr = fillchr;
+    this->frame = frame;
 }
 
 QRectF Value::boundingRect() const {
@@ -69,9 +71,12 @@ void Value::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __at
         rect = QRectF(-(LETWIDTH*(int)wid)/2 - 0.5, -HEIGHT/2 - 0.5, LETWIDTH*wid + 1, HEIGHT + 1);
     painter->setBrush(QBrush(QColor(Qt::white)));
     painter->setBackgroundMode(Qt::OpaqueMode);
+    if (!frame)
+        painter->setPen(QColor(Qt::white));
     painter->drawRect(rect);
+    painter->setPen(QColor(Qt::black));
     painter->setBackgroundMode(Qt::TransparentMode);
-    QString str = QString("%1").arg(val, wid, base, QChar('0'));
+    QString str = QString("%1").arg(val, wid, base, fillchr);
     if (vertical) {
         rect.setHeight(HEIGHT + 1);
         for (unsigned i = 0; i < wid; i++) {
