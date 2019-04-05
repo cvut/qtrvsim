@@ -38,18 +38,27 @@
 
 #include <QGraphicsView>
 #include <QGraphicsScene>
+#include <QWheelEvent>
+#include <QResizeEvent>
+#include <QKeyEvent>
 
 class GraphicsView : public QGraphicsView {
+    Q_OBJECT
+    using Super = QGraphicsView;
+
 public:
     GraphicsView(QWidget *parent);
-
     void setScene(QGraphicsScene *scene);
 
 protected:
     void resizeEvent(QResizeEvent *event);
+    void wheelEvent(QWheelEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     void update_scale();
+    int prev_height;
+    int prev_width;
 };
 
 #endif // GRAPHICSVIEW_H
