@@ -53,6 +53,7 @@ Reporter::Reporter(QCoreApplication *app, QtMipsMachine *machine) : QObject() {
 
     e_regs = false;
     e_cache_stats = false;
+    e_cycles = false;
     e_fail = (enum FailReason)0;
 }
 
@@ -62,6 +63,10 @@ void Reporter::regs() {
 
 void Reporter::cache_stats() {
     e_cache_stats = true;
+}
+
+void Reporter::cycles() {
+    e_cycles = true;
 }
 
 void Reporter::expect_fail(enum FailReason reason) {
@@ -193,6 +198,10 @@ void Reporter::report() {
         cout << "d-cache:hit-rate:" << machine->cache_data()->hit_rate() << endl;
         cout << "d-cache:stalled-cycles:" << machine->cache_data()->stalled_cycles() << endl;
         cout << "d-cache:improved-speed:" << machine->cache_data()->speed_improvement() << endl;
+    }
+    if (e_cycles) {
+        cout << "cycles:" << machine->core()->cycles() << endl;
+        cout << "stalls:" << machine->core()->stalls() << endl;
     }
     foreach (DumpRange range, dump_ranges) {
         ofstream out;

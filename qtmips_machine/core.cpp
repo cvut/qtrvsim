@@ -72,8 +72,12 @@ void Core::reset() {
     do_reset();
 }
 
-unsigned Core::cycles() {
+unsigned Core::cycles() const {
     return cycle_c;
+}
+
+unsigned Core::stalls() const {
+    return stall_c;
 }
 
 Registers *Core::get_regs() {
@@ -935,7 +939,7 @@ bool StopExceptionHandler::handle_exception(Core *core, Registers *regs,
            (unsigned long)regs->read_pc(), (unsigned long)mem_ref_addr);
 #else
     (void)excause; (void)inst_addr; (void)next_addr; (void)mem_ref_addr; (void)regs;
-    (void)jump_branch_pc; (void)in_delay_slot;
+    (void)jump_branch_pc; (void)in_delay_slot, (void)core;
 #endif
     return true;
 };

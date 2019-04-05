@@ -76,7 +76,8 @@ public:
     void step(bool skip_break = false); // Do single step
     void reset(); // Reset core (only core, memory and registers has to be reseted separately)
 
-    unsigned cycles(); // Returns number of executed cycles
+    unsigned cycles() const; // Returns number of executed cycles
+    unsigned stalls() const; // Returns number of stall cycles
 
     Registers *get_regs();
     Cop0State *get_cop0state();

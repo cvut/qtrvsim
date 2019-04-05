@@ -49,6 +49,7 @@ public:
 
     void regs(); // Report status of registers
     void cache_stats();
+    void cycles();
 
     enum FailReason {
         FR_I = (1<<0), // Unsupported Instruction
@@ -78,6 +79,7 @@ private:
 
     bool e_regs;
     bool e_cache_stats;
+    bool e_cycles;
     enum FailReason e_fail;
 
     void report();
