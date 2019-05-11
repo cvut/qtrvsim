@@ -33,10 +33,16 @@ jobs:
       # docs: https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/bash?view=azure-devops
       - bash: brew install qt libelf
         displayName: Install Qt and libelf using brew
+      - bash: echo 'export PATH="/usr/local/opt/qt/bin:$PATH"' >> ~/.bash_profile
+        displayName: Add Qt to the path
       - bash: qmake --version
         displayName: Print qmake version
+        noProfile: false
+        noRc: false
       - bash: ./build-macos.sh
         displayName: Run build script
+        noProfile: false
+        noRc: false
       # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/publish-pipeline-artifact?view=azure-devops
       - task: PublishPipelineArtifact@0
         inputs:
