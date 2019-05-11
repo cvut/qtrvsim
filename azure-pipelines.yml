@@ -1,0 +1,43 @@
+# Azure DevOps Pipelines YAML schema
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=schema
+
+# build number format
+name: $(Date:yyyyMMdd)$(Rev:.r) # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/options?view=azure-devops&tabs=yaml#build-number-format
+
+trigger:
+  batch: true # batch changes if true, start a new build for every push if false
+  branches:
+    include:
+      - master
+    exclude:
+      - refs/tags/*
+
+pr: none # disable PR triggers
+
+# we use only one stage, so we can directly define its jobs
+
+# jobs run in parallel unless dependsOn is set in job
+# TODO: it would be nice to build automatically for Linux and Windows, too
+jobs:
+
+  - job: build_macos
+    displayName: Build for macOS
+    pool:
+      # see all available images on Microsoft-hosted VMs
+      # https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops
+      vmImage: 'macos-10.14'
+    # tasks catalog: https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/?view=azure-devops
+    steps:
+      # bash is shortcut for task Bash@3
+      # docs: https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/bash?view=azure-devops
+      - bash: brew install qt libelf
+        displayName: Install Qt and libelf using brew
+      - bash: qmake --version
+        displayName: Print qmake version
+      - bash: ./build-macos.sh
+        displayName: Run build script
+      # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/publish-pipeline-artifact?view=azure-devops
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'qtmips'
+          targetPath: build/qtmips.zip
