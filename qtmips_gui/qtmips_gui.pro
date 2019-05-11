@@ -120,3 +120,8 @@ FORMS += \
 
 RESOURCES += \
         icons.qrc
+
+# ICON is config specific to macOS
+# see https://doc.qt.io/qt-5/appicon.html#setting-the-application-icon-on-macos
+# see data/icons/macos/README.md
+ICON = icons/qtmips_gui.icns
