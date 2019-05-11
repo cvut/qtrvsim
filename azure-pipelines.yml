@@ -33,22 +33,16 @@ jobs:
       # docs: https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/bash?view=azure-devops
       - bash: brew install qt libelf
         displayName: Install Qt and libelf using brew
-      - bash: echo 'export PATH="/usr/local/opt/qt/bin:$PATH"' >> ~/.bash_profile
-        displayName: Add Qt to the path
-      - task: Bash@3
+      - bash: echo $PATH
+        displayName: Echo $PATH
+      - bash: echo "##vso[task.setvariable variable=PATH;]/usr/local/opt/qt/bin:$PATH"
+        displayName: Add Qt to the PATH
+      - bash: echo $PATH
+        displayName: Echo $PATH
+      - bash: qmake --version
         displayName: Print qmake version
-        inputs:
-          targetType: inline
-          script: qmake --version
-          noProfile: false
-          noRc: false
-      - task: Bash@3
+      - bash: ./build-macos.sh
         displayName: Run build script
-        inputs:
-          targetType: file
-          filePath: ./build-macos.sh
-          noProfile: false
-          noRc: false
       # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/publish-pipeline-artifact?view=azure-devops
       - task: PublishPipelineArtifact@0
         inputs:
