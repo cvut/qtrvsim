@@ -1,5 +1,8 @@
 QtMips
 ======
+
+[![build status](https://dev.azure.com/pokusew/QtMips/_apis/build/status/QtMips?branchName=macos-build)](https://dev.azure.com/pokusew/QtMips/_build/latest?definitionId=1&branchName=macos-build)
+
 MIPS CPU simulator for education purposes.
 
 Documentation
