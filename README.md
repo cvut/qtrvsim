@@ -67,6 +67,42 @@ Alternatively, you can setup
 LD_LIBRARY_PATH=/path_to_QtMips/qtmips_machine /path_to_QtMips/qtmips_osemu
 ```
 
+Building from source on macOS
+-------------------------------
+
+Install the latest version of **Xcode** from the App Store.
+Then open a terminal and execute xcode-select --install to install Command Line Tools.
+Then open Xcode, accept the license agreement and wait for it to install
+any additional components. After you finally see the "Welcome to Xcode" screen,
+from the top bar choose Xcode -> Preferences -> Locations -> Command Line Tools
+and select an SDK version.
+
+Install [Homebrew](https://brew.sh/) and the following dependencies:
+```bash
+brew install qt libelf
+```
+
+Add Qt to the PATH. If you use Bash, you can do it like this:
+```bash
+echo 'export PATH="/usr/local/opt/qt/bin:$PATH"' >> ~/.bash_profile
+```
+
+Verify Qt is available in the PATH by running:
+```bash
+qmake --version
+```
+
+Finally, you can build the QtMips:
+```bash
+./build-macos.sh
+```
+
+After successful completion, you should see **build/qtmips-macos.zip**
+which contains two files: qtmips_qui.app and qtmips_cli.
+
+You can unzip it and then copy qtmips_qui.app wherever you want. Double-click to start it.
+
+
 Download Binary Packages
 ------------------------
 
