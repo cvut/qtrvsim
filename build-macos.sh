@@ -45,7 +45,7 @@ echo ""
 
 echo "creating qtmips.zip ..."
 cd qtmips_gui
-zip -yr ../qtmips.zip qtmips_gui.app
+zip -yr ../qtmips-macos.zip qtmips_gui.app
 cd ..
-zip -j qtmips.zip qtmips_cli/qtmips_cli
+zip -j qtmips-macos.zip qtmips_cli/qtmips_cli
 echo ""
