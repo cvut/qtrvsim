@@ -52,6 +52,7 @@ MemoryTableView::MemoryTableView(QWidget *parent, QSettings *settings) : Super(p
     this->settings = settings;
     initial_address = settings->value("DataViewAddr0", 0).toULongLong();
     adjust_scroll_pos_in_progress = false;
+    setTextElideMode(Qt::ElideNone);
 }
 
 void MemoryTableView::addr0_save_change(std::uint32_t val) {

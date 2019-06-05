@@ -53,6 +53,7 @@ ProgramTableView::ProgramTableView(QWidget *parent, QSettings *settings) : Super
     initial_address = settings->value("ProgramViewAddr0", 0).toULongLong();
     adjust_scroll_pos_in_progress = false;
     need_addr0_save = false;
+    setTextElideMode(Qt::ElideNone);
 }
 
 void ProgramTableView::addr0_save_change(std::uint32_t val) {
