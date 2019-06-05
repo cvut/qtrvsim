@@ -79,7 +79,7 @@ QVariant ProgramModel::headerData(int section, Qt::Orientation orientation, int 
 }
 
 QVariant ProgramModel::data(const QModelIndex &index, int role) const {
-    if (role == Qt::DisplayRole)
+    if (role == Qt::DisplayRole || role == Qt::EditRole)
     {
         QString s, t;
         std::uint32_t address;
