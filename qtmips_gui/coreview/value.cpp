@@ -82,7 +82,7 @@ void Value::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __at
         for (unsigned i = 0; i < wid; i++) {
             painter->drawText(rect, Qt::AlignCenter, QString(str[i]));
             // TODO this is probably broken (it is offseted)
-            rect.setY(rect.y() + HEIGHT + 8);
+            rect.translate(0, HEIGHT);
         }
     } else
         painter->drawText(rect, Qt::AlignCenter, str);
