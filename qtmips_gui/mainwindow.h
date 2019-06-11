@@ -68,6 +68,7 @@ public slots:
     // Actions signals
     void new_machine();
     void machine_reload();
+    void print_action();
     void show_registers();
     void show_program();
     void show_memory();

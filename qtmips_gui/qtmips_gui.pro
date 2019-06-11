@@ -1,4 +1,6 @@
 QT += core gui widgets
+qtHaveModule(printsupport): QT += printsupport
+qtHaveModule(printsupport): DEFINES += QTMIPS_WITH_PRINTING=1
 
 TARGET = qtmips_gui
 CONFIG += c++11

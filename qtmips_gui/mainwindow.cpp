@@ -33,6 +33,12 @@
  *
  ******************************************************************************/
 
+#include <QtWidgets>
+#ifdef QTMIPS_WITH_PRINTING
+#include <QPrinter>
+#include <QPrintDialog>
+#endif
+
 #include "mainwindow.h"
 #include "aboutdialog.h"
 #include "ossyscall.h"
@@ -84,6 +90,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->actionExit, SIGNAL(triggered(bool)), this, SLOT(close()));
     connect(ui->actionNew, SIGNAL(triggered(bool)), this, SLOT(new_machine()));
     connect(ui->actionReload, SIGNAL(triggered(bool)), this, SLOT(machine_reload()));
+    connect(ui->actionPrint, SIGNAL(triggered(bool)), this, SLOT(print_action()));
     connect(ui->actionShow_Symbol, SIGNAL(triggered(bool)), this, SLOT(show_symbol_dialog()));
     connect(ui->actionRegisters, SIGNAL(triggered(bool)), this, SLOT(show_registers()));
     connect(ui->actionProgram_memory, SIGNAL(triggered(bool)), this, SLOT(show_program()));
@@ -237,6 +244,20 @@ void MainWindow::machine_reload() {
         msg.setWindowTitle("Error while initializing new machine");
         msg.exec();
     }
+}
+
+void MainWindow::print_action() {
+#ifdef QTMIPS_WITH_PRINTING
+    QPrinter printer(QPrinter::HighResolution);
+    printer.setColorMode(QPrinter::Color);
+    QPrintDialog print_dialog(&printer, this);
+    if (print_dialog.exec() == QDialog::Accepted) {
+        QPainter painter(&printer);
+        QRectF scene_rect = corescene->sceneRect();
+        QRectF target_rect = painter.viewport();
+        corescene->render(&painter, target_rect, scene_rect, Qt::KeepAspectRatio);
+    }
+#endif // QTMIPS_WITH_PRINTING
 }
 
 #define SHOW_HANDLER(NAME)  void MainWindow::show_##NAME() { \
