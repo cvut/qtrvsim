@@ -252,8 +252,24 @@ void MainWindow::print_action() {
     printer.setColorMode(QPrinter::Color);
     QPrintDialog print_dialog(&printer, this);
     if (print_dialog.exec() == QDialog::Accepted) {
-        QPainter painter(&printer);
         QRectF scene_rect = corescene->sceneRect();
+        if (printer.outputFormat() == QPrinter::PdfFormat && scene_rect.height()) {
+            QPageLayout layout = printer.pageLayout();
+            layout.setOrientation(QPageLayout::Portrait);
+            QPageSize pagesize = layout.pageSize();
+            QRectF paint_rect = layout.paintRect(QPageLayout::Point);
+            QSize pointsize = pagesize.sizePoints();
+            qreal ratio = scene_rect.width() / scene_rect.height();
+            if (paint_rect.height() * ratio > paint_rect.width()) {
+                pointsize.setHeight(pointsize.height() - paint_rect.height() + paint_rect.width() / ratio);
+            } else {
+                pointsize.setWidth(pointsize.width() - paint_rect.width() + paint_rect.height() * ratio);
+            }
+            pagesize = QPageSize(pointsize, "custom", QPageSize::ExactMatch);
+            layout.setPageSize(pagesize, layout.margins());
+            printer.setPageLayout(layout);
+        }
+        QPainter painter(&printer);
         QRectF target_rect = painter.viewport();
         corescene->render(&painter, target_rect, scene_rect, Qt::KeepAspectRatio);
     }
