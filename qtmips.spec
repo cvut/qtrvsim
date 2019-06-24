@@ -32,6 +32,7 @@ BuildRequires:  pkgconfig
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Widgets)
 BuildRequires:  pkgconfig(Qt5Test)
+BuildRequires:  pkgconfig(Qt5PrintSupport)
 
 %if ! 0%{?suse_version}
 BuildRequires:  pkgconfig(libelf)
