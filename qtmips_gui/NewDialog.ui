@@ -420,9 +420,19 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="pushButton_start_empty">
+       <property name="text">
+        <string>Start empty</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="pushButton_load">
        <property name="text">
         <string>Load machine</string>
+       </property>
+       <property name="default">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

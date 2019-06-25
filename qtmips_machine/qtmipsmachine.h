@@ -56,7 +56,7 @@ namespace machine {
 class QtMipsMachine : public QObject {
     Q_OBJECT
 public:
-    QtMipsMachine(const MachineConfig &cc, bool load_symtab = false);
+    QtMipsMachine(const MachineConfig &cc, bool load_symtab = false, bool load_executable = true);
     ~QtMipsMachine();
 
     const MachineConfig &config();
@@ -75,6 +75,7 @@ public:
     const Core *core();
     const CoreSingle *core_singe();
     const CorePipelined *core_pipelined();
+    bool executable_loaded() const;
 
     enum Status {
         ST_READY, // Machine is ready to be started or step to be called

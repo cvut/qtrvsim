@@ -60,7 +60,7 @@ public:
     ~MainWindow();
 
     void start();
-    void create_core(const machine::MachineConfig &config);
+    void create_core(const machine::MachineConfig &config, bool load_executable = true);
 
     bool configured();
 

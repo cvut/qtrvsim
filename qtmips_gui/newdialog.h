@@ -60,6 +60,7 @@ protected:
 private slots:
     void cancel();
     void create();
+    void create_empty();
     void browse_elf();
     void elf_change(QString val);
     void set_preset();

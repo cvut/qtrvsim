@@ -139,9 +139,13 @@ void MainWindow::start() {
     ndialog->show();
 }
 
-void MainWindow::create_core(const machine::MachineConfig &config) {
+void MainWindow::create_core(const machine::MachineConfig &config, bool load_executable) {
     // Create machine
-    machine::QtMipsMachine *new_machine = new machine::QtMipsMachine(&config, true);
+    machine::QtMipsMachine *new_machine = new machine::QtMipsMachine(&config, true, load_executable);
+
+    if (!load_executable && (machine != nullptr)) {
+        new_machine->memory_rw()->reset(*machine->memory());
+    }
 
     // Remove old machine
     if (machine != nullptr)
@@ -233,9 +237,10 @@ void MainWindow::new_machine() {
 }
 
 void MainWindow::machine_reload() {
+    bool load_executable = machine->executable_loaded();
     machine::MachineConfig cnf(&machine->config()); // We have to make local copy as create_core will delete current machine
     try {
-        create_core(cnf);
+        create_core(cnf, load_executable);
     } catch (const machine::QtMipsExceptionInput &e) {
         QMessageBox msg(this);
         msg.setText(e.msg(false));

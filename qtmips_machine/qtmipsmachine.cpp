@@ -39,22 +39,28 @@
 
 using namespace machine;
 
-QtMipsMachine::QtMipsMachine(const MachineConfig &cc, bool load_symtab) :
+QtMipsMachine::QtMipsMachine(const MachineConfig &cc, bool load_symtab, bool load_executable) :
                              QObject(), mcnf(&cc) {
     MemoryAccess *cpu_mem;
     stat = ST_READY;
     symtab = nullptr;
 
-    ProgramLoader program(cc.elf());
-    mem_program_only = new Memory();
-    program.to_memory(mem_program_only);
-    if (load_symtab)
-        symtab = program.get_symbol_table();
-    program_end = program.end();
     regs = new Registers();
-    if (program.get_executable_entry())
-        regs->pc_abs_jmp(program.get_executable_entry());
-    mem = new Memory(*mem_program_only);
+    if (load_executable) {
+        ProgramLoader program(cc.elf());
+        mem_program_only = new Memory();
+        program.to_memory(mem_program_only);
+        if (load_symtab)
+            symtab = program.get_symbol_table();
+        program_end = program.end();
+        if (program.get_executable_entry())
+            regs->pc_abs_jmp(program.get_executable_entry());
+        mem = new Memory(*mem_program_only);
+    } else {
+        program_end = 0xf0000000;
+        mem_program_only = nullptr;
+        mem = new Memory();
+    }
 
     physaddrspace = new PhysAddrSpace();
     physaddrspace->insert_range(mem, 0x00000000, 0xefffffff, false);
@@ -201,6 +207,10 @@ const CorePipelined *QtMipsMachine::core_pipelined() {
     return mcnf.pipelined() ? (const CorePipelined*)cr : nullptr;
 }
 
+bool QtMipsMachine::executable_loaded() const {
+    return (mem_program_only != nullptr);
+}
+
 enum QtMipsMachine::Status QtMipsMachine::status() {
     return stat;
 }
@@ -266,7 +276,8 @@ void QtMipsMachine::step_timer() {
 void QtMipsMachine::restart() {
     pause();
     regs->reset();
-    mem->reset(*mem_program_only);
+    if (mem_program_only != nullptr)
+        mem->reset(*mem_program_only);
     cch_program->reset();
     cch_data->reset();
     cr->reset();

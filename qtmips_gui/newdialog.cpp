@@ -52,6 +52,7 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     ui_cache_d = new Ui::NewDialogCache();
     ui_cache_d->setupUi(ui->tab_cache_data);
 
+    connect(ui->pushButton_start_empty, SIGNAL(clicked(bool)), this, SLOT(create_empty()));
     connect(ui->pushButton_load, SIGNAL(clicked(bool)), this, SLOT(create()));
     connect(ui->pushButton_cancel, SIGNAL(clicked(bool)), this, SLOT(cancel()));
     connect(ui->pushButton_browse, SIGNAL(clicked(bool)), this, SLOT(browse_elf()));
@@ -135,6 +136,14 @@ void NewDialog::create() {
     store_settings(); // Save to settings
     this->close();
 }
+
+void NewDialog::create_empty() {
+    MainWindow *prnt = (MainWindow*)parent();
+    prnt->create_core(*config, false);
+    store_settings(); // Save to settings
+    this->close();
+}
+
 
 void NewDialog::browse_elf() {
     QFileDialog elf_dialog(this);
