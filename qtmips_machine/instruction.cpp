@@ -1018,10 +1018,15 @@ void instruction_from_string_build_base(const InstructionMap *im = nullptr,
 static int parse_reg_from_string(QString str, uint *chars_taken = nullptr)
 {
     int res;
+    int i;
     uint ctk;
     if (str.count() < 2 || str.at(0) != '$')
         return -1;
-    const char *p = str.toLatin1().data() + 1;
+    char cstr[str.count() + 1];
+    for (i = 0; i < str.count(); i++)
+        cstr[i] = str.at(i).toLatin1();
+    cstr[i] = 0;
+    const char *p = cstr + 1;
     char *r;
     res = std::strtol(p, &r, 0);
     ctk = r - p + 1;
@@ -1146,23 +1151,37 @@ Instruction Instruction::from_string(QString str, bool *pok, uint32_t inst_addr)
                     FALLTROUGH
                 case 'o':
                 case 'n':
-                    // Qt functions are limited, toLongLong would be usable
-                    // but does not return information how many characters
-                    // are processed. Used solution has horrible overhead
-                    // but is usable for now
-                    p = fl.toLatin1().data();
-                    if (adesc->min < 0)
-                        val += std::strtoll(p, &r, 0);
-                    else
-                        val += std::strtoull(p, &r, 0);
-                    chars_taken = r - p;
+                    {
+                        int i;
+                        // Qt functions are limited, toLongLong would be usable
+                        // but does not return information how many characters
+                        // are processed. Used solution has horrible overhead
+                        // but is usable for now
+                        char cstr[fl.count() + 1];
+                        for (i = 0; i < fl.count(); i++)
+                            cstr[i] = fl.at(i).toLatin1();
+                        cstr[i] = 0;
+                        p = cstr;
+                        if (adesc->min < 0)
+                            val += std::strtoll(p, &r, 0);
+                        else
+                            val += std::strtoull(p, &r, 0);
+                        chars_taken = r - p;
+                    }
                     break;
                 case 'a':
-                    p = fl.toLatin1().data();
-                    val -= (inst_addr + 4) & 0xf0000000;
-                    val += std::strtoull(p, &r, 0);
-                    chars_taken = r - p;
-                    break;
+                    {
+                        int i;
+                        char cstr[fl.count() + 1];
+                        for (i = 0; i < fl.count(); i++)
+                            cstr[i] = fl.at(i).toLatin1();
+                        cstr[i] = 0;
+                        p = cstr;
+                        val -= (inst_addr + 4) & 0xf0000000;
+                        val += std::strtoull(p, &r, 0);
+                        chars_taken = r - p;
+                        break;
+                    }
                 }
                 if (chars_taken <= 0) {
                     field = -1;
