@@ -2,9 +2,13 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     qtmips_machine \
-    qtmips_osemu \
+    qtmips_osemu
+
+!wasm: SUBDIRS += \
     qtmips_machine/tests \
     qtmips_cli \
+
+SUBDIRS += \
     qtmips_gui
 
 qtmips_cli.depends = qtmips_machine
