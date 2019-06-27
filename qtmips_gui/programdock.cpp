@@ -52,7 +52,7 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
 
     this->settings = settings;
     follow_source = (enum FollowSource)
-            settings->value("ProgramViewFollowSource", 0).toInt();
+            settings->value("ProgramViewFollowSource", FOLLOWSRC_FETCH).toInt();
 
     for (int i = 0; i < FOLLOWSRC_COUNT; i++)
         follow_addr[i] = 0;
