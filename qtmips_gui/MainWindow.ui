@@ -75,6 +75,7 @@
     <addaction name="actionData_Cache"/>
     <addaction name="actionPeripherals"/>
     <addaction name="actionTerminal"/>
+    <addaction name="actionLcdDisplay"/>
     <addaction name="actionCop0State"/>
    </widget>
    <widget class="QMenu" name="menuMachine">
@@ -394,6 +395,11 @@
   <action name="actionTerminal">
    <property name="text">
     <string>Terminal</string>
+   </property>
+  </action>
+  <action name="actionLcdDisplay">
+   <property name="text">
+    <string>LCD display</string>
    </property>
   </action>
   <action name="actionShow_Symbol">

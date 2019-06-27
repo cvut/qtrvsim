@@ -74,6 +74,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     peripherals->hide();
     terminal = new TerminalDock(this, settings);
     terminal->hide();
+    lcd_display = new LcdDisplayDock(this, settings);
+    lcd_display->hide();
     cop0dock = new Cop0Dock(this);
     cop0dock->hide();
 
@@ -100,6 +102,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->actionData_Cache, SIGNAL(triggered(bool)), this, SLOT(show_cache_data()));
     connect(ui->actionPeripherals, SIGNAL(triggered(bool)), this, SLOT(show_peripherals()));
     connect(ui->actionTerminal, SIGNAL(triggered(bool)), this, SLOT(show_terminal()));
+    connect(ui->actionLcdDisplay, SIGNAL(triggered(bool)), this, SLOT(show_lcd_display()));
     connect(ui->actionCop0State, SIGNAL(triggered(bool)), this, SLOT(show_cop0dock()));
     connect(ui->actionAbout, SIGNAL(triggered(bool)), this, SLOT(about_qtmips()));
     connect(ui->actionAboutQt, SIGNAL(triggered(bool)), this, SLOT(about_qt()));
@@ -128,6 +131,7 @@ MainWindow::~MainWindow() {
     delete cache_data;
     delete peripherals;
     delete terminal;
+    delete lcd_display;
     delete ui;
     if (machine != nullptr)
         delete machine;
@@ -211,6 +215,7 @@ void MainWindow::create_core(const machine::MachineConfig &config, bool load_exe
     cache_data->setup(machine->cache_data());
     terminal->setup(machine->serial_port());
     peripherals->setup(machine->peripheral_spi_led());
+    lcd_display->setup(machine->peripheral_lcd_display());
     cop0dock->setup(machine);
 
     // Connect signals for instruction address followup
@@ -293,6 +298,7 @@ SHOW_HANDLER(cache_program, Qt::RightDockWidgetArea)
 SHOW_HANDLER(cache_data, Qt::RightDockWidgetArea)
 SHOW_HANDLER(peripherals, Qt::RightDockWidgetArea)
 SHOW_HANDLER(terminal, Qt::RightDockWidgetArea)
+SHOW_HANDLER(lcd_display, Qt::RightDockWidgetArea)
 SHOW_HANDLER(cop0dock, Qt::RightDockWidgetArea)
 #undef SHOW_HANDLER
 

@@ -47,6 +47,7 @@
 #include "cachedock.h"
 #include "peripheralsdock.h"
 #include "terminaldock.h"
+#include "lcddisplaydock.h"
 #include "cop0dock.h"
 
 #include "qtmipsmachine.h"
@@ -76,6 +77,7 @@ public slots:
     void show_cache_program();
     void show_peripherals();
     void show_terminal();
+    void show_lcd_display();
     void show_cop0dock();
     void show_symbol_dialog();
     // Actions - help menu
@@ -105,6 +107,7 @@ private:
     CacheDock *cache_program, *cache_data;
     PeripheralsDock *peripherals;
     TerminalDock *terminal;
+    LcdDisplayDock *lcd_display;
     Cop0Dock *cop0dock;
 
 

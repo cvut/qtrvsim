@@ -29,6 +29,7 @@ SOURCES += \
     peripheral.cpp \
     serialport.cpp \
     peripspiled.cpp \
+    lcddisplay.cpp \
     symboltable.cpp \
     cop0state.cpp
 
@@ -49,5 +50,6 @@ HEADERS += \
     peripheral.h \
     serialport.h \
     peripspiled.h \
+    lcddisplay.h \
     symboltable.h \
     cop0state.h

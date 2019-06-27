@@ -49,6 +49,7 @@
 #include <peripheral.h>
 #include <serialport.h>
 #include <peripspiled.h>
+#include <lcddisplay.h>
 #include <symboltable.h>
 
 namespace machine {
@@ -71,6 +72,7 @@ public:
     Cache *cache_data_rw();
     SerialPort *serial_port();
     PeripSpiLed *peripheral_spi_led();
+    LcdDisplay *peripheral_lcd_display();
     const SymbolTable *symbol_table();
     const Core *core();
     const CoreSingle *core_singe();
@@ -126,6 +128,7 @@ private:
     PhysAddrSpace *physaddrspace;
     SerialPort *ser_port;
     PeripSpiLed *perip_spi_led;
+    LcdDisplay *perip_lcd_display;
     Cache *cch_program, *cch_data;
     Cop0State *cop0st;
     Core *cr;

@@ -75,6 +75,9 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc, bool load_symtab, bool loa
     perip_spi_led = new PeripSpiLed();
     addressapce_insert_range(perip_spi_led, 0xffffc100, 0xffffc1ff, true);
 
+    perip_lcd_display = new LcdDisplay();
+    addressapce_insert_range(perip_lcd_display, 0xffe00000, 0xffe4afff, true);
+
     cch_program = new Cache(cpu_mem, &cc.cache_program(), cc.memory_access_time_read(),
                             cc.memory_access_time_write(), cc.memory_access_time_burst());
     cch_data = new Cache(cpu_mem, &cc.cache_data(), cc.memory_access_time_read(),
@@ -189,6 +192,10 @@ SerialPort *QtMipsMachine::serial_port() {
 
 PeripSpiLed *QtMipsMachine::peripheral_spi_led() {
     return perip_spi_led;
+}
+
+LcdDisplay *QtMipsMachine::peripheral_lcd_display() {
+    return perip_lcd_display;
 }
 
 const SymbolTable *QtMipsMachine::symbol_table() {

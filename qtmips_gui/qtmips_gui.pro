@@ -65,6 +65,8 @@ SOURCES += \
     peripheralsdock.cpp \
     terminaldock.cpp \
     peripheralsview.cpp \
+    lcddisplaydock.cpp \
+    lcddisplayview.cpp \
     coreview/multitext.cpp \
     fontsize.cpp \
     gotosymboldialog.cpp \
@@ -106,6 +108,8 @@ HEADERS += \
     peripheralsdock.h \
     terminaldock.h \
     peripheralsview.h \
+    lcddisplaydock.h \
+    lcddisplayview.h \
     coreview/multitext.h \
     fontsize.h \
     gotosymboldialog.h \
