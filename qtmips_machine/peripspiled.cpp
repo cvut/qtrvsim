@@ -137,3 +137,21 @@ void PeripSpiLed::blue_knob_update(int val) {
     spiled_reg_knobs_8bit &= ~(0xff << 0);
     spiled_reg_knobs_8bit |= (val & 0xff) << 0;
 }
+
+void PeripSpiLed::red_knob_push(bool state) {
+    spiled_reg_knobs_8bit &= ~(1 << 26);
+    if (state)
+        spiled_reg_knobs_8bit |= 1 << 26;
+}
+
+void PeripSpiLed::green_knob_push(bool state) {
+    spiled_reg_knobs_8bit &= ~(1 << 25);
+    if (state)
+        spiled_reg_knobs_8bit |= 1 << 25;
+}
+
+void PeripSpiLed::blue_knob_push(bool state) {
+    spiled_reg_knobs_8bit &= ~(1 << 24);
+    if (state)
+        spiled_reg_knobs_8bit |= 1 << 24;
+}

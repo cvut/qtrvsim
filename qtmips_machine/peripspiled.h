@@ -63,7 +63,9 @@ public slots:
     void red_knob_update(int val);
     void green_knob_update(int val);
     void blue_knob_update(int val);
-
+    void red_knob_push(bool state);
+    void green_knob_push(bool state);
+    void blue_knob_push(bool state);
 public:
     bool wword(std::uint32_t address, std::uint32_t value);
     std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;

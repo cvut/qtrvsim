@@ -43,6 +43,14 @@ void PeripheralsView::setup(const machine::PeripSpiLed *perip_spi_led) {
     ui->spinBlue->setValue(val - 1);
     ui->spinBlue->setValue(val);
 
+    connect(ui->checkRed, SIGNAL(clicked(bool)), perip_spi_led, SLOT(red_knob_push(bool)));
+    connect(ui->checkGreen, SIGNAL(clicked(bool)), perip_spi_led, SLOT(green_knob_push(bool)));
+    connect(ui->checkBlue, SIGNAL(clicked(bool)), perip_spi_led, SLOT(blue_knob_push(bool)));
+
+    ui->checkRed->setChecked(false);
+    ui->checkGreen->setChecked(false);;
+    ui->checkBlue->setChecked(false);;
+
     ui->labelRgb1->setAutoFillBackground(true);
     ui->labelRgb2->setAutoFillBackground(true);
 

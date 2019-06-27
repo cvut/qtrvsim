@@ -114,6 +114,13 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
+          <widget class="QCheckBox" name="checkRed">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QDial" name="dialRed">
            <property name="maximum">
             <number>255</number>
@@ -161,6 +168,13 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
+          <widget class="QCheckBox" name="checkGreen">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QDial" name="dialGreen">
            <property name="maximum">
             <number>255</number>
@@ -207,6 +221,13 @@
        </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <widget class="QCheckBox" name="checkBlue">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QDial" name="dialBlue">
            <property name="maximum">
