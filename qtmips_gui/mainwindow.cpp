@@ -314,7 +314,7 @@ void MainWindow::show_symbol_dialog(){
 void MainWindow::about_qtmips()
 {
     AboutDialog *aboutdialog = new AboutDialog(this);
-    aboutdialog->exec();
+    aboutdialog->show();
 }
 
 void MainWindow::about_qt()

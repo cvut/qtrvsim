@@ -51,6 +51,9 @@ AboutDialog::AboutDialog(QWidget *parent)
 {
   QLabel *lbl;
 
+  setWindowModality(Qt::WindowModal);
+  setAttribute(Qt::WA_DeleteOnClose);
+
   setWindowTitle(tr("About Qt Mips"));
 
   all = new QVBoxLayout(this);
