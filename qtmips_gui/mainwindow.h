@@ -114,7 +114,7 @@ private:
 
     machine::QtMipsMachine *machine; // Current simulated machine
 
-    void show_dockwidget(QDockWidget *w);
+    void show_dockwidget(QDockWidget *w, Qt::DockWidgetArea area = Qt::RightDockWidgetArea);
 };
 
 #endif // MAINWINDOW_H

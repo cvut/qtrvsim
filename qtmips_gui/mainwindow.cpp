@@ -62,7 +62,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     registers = new RegistersDock(this);
     registers->hide();
     program = new ProgramDock(this, settings);
-    program->hide();
+    addDockWidget(Qt::LeftDockWidgetArea, program);
+    program->show();
     memory = new MemoryDock(this, settings);
     memory->hide();
     cache_program = new CacheDock(this, "Program");
@@ -281,18 +282,18 @@ void MainWindow::print_action() {
 #endif // QTMIPS_WITH_PRINTING
 }
 
-#define SHOW_HANDLER(NAME)  void MainWindow::show_##NAME() { \
-        show_dockwidget(NAME); \
+#define SHOW_HANDLER(NAME, DEFAULT_AREA)  void MainWindow::show_##NAME() { \
+        show_dockwidget(NAME, DEFAULT_AREA); \
     } \
 
-SHOW_HANDLER(registers)
-SHOW_HANDLER(program)
-SHOW_HANDLER(memory)
-SHOW_HANDLER(cache_program)
-SHOW_HANDLER(cache_data)
-SHOW_HANDLER(peripherals)
-SHOW_HANDLER(terminal)
-SHOW_HANDLER(cop0dock)
+SHOW_HANDLER(registers, Qt::RightDockWidgetArea)
+SHOW_HANDLER(program, Qt::LeftDockWidgetArea)
+SHOW_HANDLER(memory, Qt::RightDockWidgetArea)
+SHOW_HANDLER(cache_program, Qt::RightDockWidgetArea)
+SHOW_HANDLER(cache_data, Qt::RightDockWidgetArea)
+SHOW_HANDLER(peripherals, Qt::RightDockWidgetArea)
+SHOW_HANDLER(terminal, Qt::RightDockWidgetArea)
+SHOW_HANDLER(cop0dock, Qt::RightDockWidgetArea)
 #undef SHOW_HANDLER
 
 void MainWindow::show_symbol_dialog(){
@@ -345,10 +346,10 @@ void MainWindow::closeEvent(QCloseEvent *event __attribute__((unused))) {
     settings->sync();
 }
 
-void MainWindow::show_dockwidget(QDockWidget *dw) {
+void MainWindow::show_dockwidget(QDockWidget *dw, Qt::DockWidgetArea area) {
     if (dw->isHidden()) {
         dw->show();
-        addDockWidget(Qt::RightDockWidgetArea, dw);
+        addDockWidget(area, dw);
     } else {
         dw->raise();
         dw->setFocus();
