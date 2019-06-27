@@ -51,8 +51,9 @@ AboutDialog::AboutDialog(QWidget *parent)
 {
   QLabel *lbl;
 
-  setWindowModality(Qt::WindowModal);
   setAttribute(Qt::WA_DeleteOnClose);
+  setAttribute(Qt::WA_ShowModal);
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   setWindowTitle(tr("About Qt Mips"));
 
@@ -130,6 +131,8 @@ AboutDialog::AboutDialog(QWidget *parent)
   connect(okButton, SIGNAL(clicked()), this, SLOT(close()));
   hlBtn->addStretch();
   hlBtn->addWidget(okButton);
+
+  setMinimumSize(450, 500);
 
   prevTab = 0; // first Tab is selected by default
 }
