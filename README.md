@@ -192,6 +192,16 @@ other words writable which control color of RGB LED 1 and 2
 #define SPILED_REG_KNOBS_8BIT_o         0x024
 ```
 
+The simple 16-bit per pixel (RGB565) framebuffer and LCD display
+are implemented. The framebuffer is mapped into range starting
+at `LCD_FB_START` address. The display size is 480 x 320 pixel.
+Pixel format RGB565 expect red component in bits 11 .. 15, green
+component in bits 5 .. 10 and blue component in bits 0 .. 4.
+```
+#define LCD_FB_START       0xffe00000
+#define LCD_FB_END         0xffe4afff
+```
+
 Interrupts and Coprocessor 0 Support
 ------------------------------------
 
