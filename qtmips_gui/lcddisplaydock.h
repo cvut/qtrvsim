@@ -37,20 +37,28 @@
 #define LCDDISPLAYDOCK_H
 
 #include <QDockWidget>
+#include <QBoxLayout>
 #include "lcddisplayview.h"
 #include "qtmipsmachine.h"
 
 class LcdDisplayDock : public QDockWidget {
     Q_OBJECT
+
+    using Super = QDockWidget;
+
 public:
     LcdDisplayDock(QWidget *parent, QSettings *settings);
     ~LcdDisplayDock();
+    virtual void resizeEvent(QResizeEvent *event) override;
 
     void setup(machine::LcdDisplay *lcd_display);
 
 //public slots:
 
 private:
+    void update_layout(int w, int h);
+
+    QBoxLayout *layout;
     LcdDisplayView *lcd_display_widget;
 };
 

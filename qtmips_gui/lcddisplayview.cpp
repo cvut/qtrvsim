@@ -1,4 +1,5 @@
 #include <QPainter>
+#include <QPaintEvent>
 #include <QStyle>
 #include "lcddisplay.h"
 #include "lcddisplayview.h"
@@ -6,6 +7,8 @@
 LcdDisplayView::LcdDisplayView(QWidget *parent) : Super(parent) {
     setMinimumSize(100, 100);
     fb_pixels = nullptr;
+    scale_x = 1.0;
+    scale_y = 1.0;
 }
 
 LcdDisplayView::~LcdDisplayView() {
@@ -21,17 +24,43 @@ void LcdDisplayView::setup(machine::LcdDisplay *lcd_display) {
     if (fb_pixels != nullptr)
         delete fb_pixels;
     fb_pixels = nullptr;
-    fb_pixels = new QImage(lcd_display->height(),
-                           lcd_display->width(), QImage::Format_RGB32);
+    fb_pixels = new QImage(lcd_display->width(),
+                           lcd_display->height(), QImage::Format_RGB32);
     fb_pixels->fill(qRgb(0, 0, 0));
+    update_scale();
     update();
 }
 
 void LcdDisplayView::pixel_update(uint x, uint y, uint r, uint g, uint b) {
+    int x1, y1, x2, y2;
     if (fb_pixels != nullptr) {
         fb_pixels->setPixel(x, y, qRgb(r, g, b));
-        update();
+        x1 = x * scale_x - 2;
+        if (x1 < 0)
+            x1 = 0;
+        x2 = x * scale_x + 2;
+        if (x2 > width())
+            x2 = width();
+        y1 = y * scale_y - 2;
+        if (y1 < 0)
+            y1 = 0;
+        y2 = y * scale_y + 2;
+        if (y2 > height())
+            y2 = height();
+        update(x1, y1, x2 - x1, y2 - y1);
     }
+}
+
+void LcdDisplayView::update_scale() {
+    if (fb_pixels != nullptr) {
+        if ((fb_pixels->width() != 0) && (fb_pixels->height() != 0)) {
+            scale_x = (float)width() / fb_pixels->width();
+            scale_y = (float)height() / fb_pixels->height();
+            return;
+        }
+    }
+    scale_x = 1.0;
+    scale_y = 1.0;
 }
 
 void LcdDisplayView::paintEvent(QPaintEvent *event) {
@@ -41,12 +70,28 @@ void LcdDisplayView::paintEvent(QPaintEvent *event) {
         return Super::paintEvent(event);
 
     QPainter painter(this);
-    QSize widgetSize = rect().size();
-    const auto newHeight = widgetSize.width() * fb_pixels->height() / fb_pixels->width();
-    if(newHeight <= widgetSize.height())
-        widgetSize.setHeight(newHeight);
-    else
-       widgetSize.setWidth(widgetSize.height() * fb_pixels->width() / fb_pixels->height());
-    painter.drawImage(rect(), fb_pixels->scaled(widgetSize));
+    painter.drawImage(rect(), *fb_pixels);
+#if 0
+    painter.setPen(QPen(QColor(255, 255, 0)));
+    painter.drawLine(event->rect().topLeft(),event->rect().topRight());
+    painter.drawLine(event->rect().topLeft(),event->rect().bottomLeft());
+    painter.drawLine(event->rect().topLeft(),event->rect().bottomRight());
+#endif
 }
 
+void LcdDisplayView::resizeEvent(QResizeEvent *event) {
+    Super::resizeEvent(event);
+    update_scale();
+}
+
+uint LcdDisplayView::fb_width() {
+    if (fb_pixels == nullptr)
+        return 0;
+    return fb_pixels->width();
+}
+
+uint LcdDisplayView::fb_height() {
+    if (fb_pixels == nullptr)
+        return 0;
+    return fb_pixels->height();
+}
