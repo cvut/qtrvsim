@@ -1,3 +1,15 @@
+qtmips (0.7.0) unstable; urgency=medium
+
+  * Debian package updated to version 0.7.0.
+  * Include simple LCD frame-buffer and display implementation.
+  * Simulate push of dial buttons by check box.
+  * Allow to create simulator without loaded executable.
+  * Printing/export to PDF file reduces print area/page to actual image size.
+  * Disable text elide for memory and program views (fix for MAC OS).
+  * Implement standard zoom handling by mouse wheel and keys.
+
+ -- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Fri, 28 Jun 2019 15:38:52 +0200
+
 qtmips (0.6.8) unstable; urgency=medium
 
   * Debian package updated to version 0.6.8.
