@@ -201,6 +201,10 @@ component in bits 5 .. 10 and blue component in bits 0 .. 4.
 #define LCD_FB_START       0xffe00000
 #define LCD_FB_END         0xffe4afff
 ```
+Limitation: actual concept of memory view updates and access
+doesnot allows to reliably read peripheral registers and I/O
+memory content. It is possible to write into framebuffer memory
+when cached (from CPU perspective) access to memory is selected.
 
 Interrupts and Coprocessor 0 Support
 ------------------------------------
