@@ -117,6 +117,12 @@ HEADERS += \
     hinttabledelegate.h \
     coreview/minimux.h
 
+wasm: SOURCES += \
+    qhtml5file_html5.cpp
+
+wasm: HEADERS += \
+    qhtml5file.h
+
 FORMS += \
         NewDialog.ui \
         NewDialogCache.ui \

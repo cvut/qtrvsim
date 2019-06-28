@@ -37,6 +37,11 @@
 #include "mainwindow.h"
 #include "qtmipsexception.h"
 
+#ifdef __EMSCRIPTEN__
+#include <QFileInfo>
+#include "qhtml5file.h"
+#endif
+
 NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     setWindowTitle("New machine");
 
@@ -146,6 +151,7 @@ void NewDialog::create_empty() {
 
 
 void NewDialog::browse_elf() {
+#ifndef __EMSCRIPTEN__
     QFileDialog elf_dialog(this);
     elf_dialog.setFileMode(QFileDialog::ExistingFile);
     if (elf_dialog.exec()) {
@@ -154,6 +160,18 @@ void NewDialog::browse_elf() {
         config->set_elf(path);
     }
     // Elf shouldn't have any other effect so we skip config_gui here
+#else
+    QHtml5File::load("*", [&](const QByteArray &content, const QString &fileName) {
+                QFileInfo fi(fileName);
+                QString elf_name = fi.fileName();
+                QFile file(elf_name);
+                file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+                file.write(content);
+                file.close();
+                ui->elf_file->setText(elf_name);
+                config->set_elf(elf_name);
+            });
+#endif
 }
 
 void NewDialog::elf_change(QString val) {
