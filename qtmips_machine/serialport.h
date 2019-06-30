@@ -61,8 +61,8 @@ public slots:
     void rx_queue_check() const;
 
 public:
-    bool wword(std::uint32_t address, std::uint32_t value);
-    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
+    bool wword(std::uint32_t address, std::uint32_t value) override;
+    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const override;
     virtual std::uint32_t get_change_counter() const override;
 private:
     void rx_queue_check_internal() const;

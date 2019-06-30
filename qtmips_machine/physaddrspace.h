@@ -51,14 +51,14 @@ public:
     PhysAddrSpace();
     ~PhysAddrSpace();
 
-    bool wword(std::uint32_t address, std::uint32_t value);
-    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
+    bool wword(std::uint32_t address, std::uint32_t value) override;
+    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const override;
     virtual std::uint32_t get_change_counter() const override;
 
     bool insert_range(MemoryAccess *mem_acces, std::uint32_t start_addr, std::uint32_t last_addr, bool move_ownership);
     bool remove_range(MemoryAccess *mem_acces);
     void clean_range(std::uint32_t start_addr, std::uint32_t last_addr);
-    enum LocationStatus location_status(std::uint32_t offset) const;
+    enum LocationStatus location_status(std::uint32_t offset) const override;
 private slots:
     void range_external_change(const MemoryAccess *mem_access, std::uint32_t start_addr,
                                std::uint32_t last_addr, bool external);

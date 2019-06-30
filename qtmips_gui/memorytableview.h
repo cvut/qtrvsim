@@ -60,7 +60,7 @@ public slots:
     void focus_address(std::uint32_t address);
     void recompute_columns();
 protected:
-    void keyPressEvent(QKeyEvent *event);
+    void keyPressEvent(QKeyEvent *event) override;
 private slots:
     void adjust_scroll_pos_check();
     void adjust_scroll_pos_process();

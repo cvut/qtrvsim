@@ -67,8 +67,8 @@ public slots:
     void green_knob_push(bool state);
     void blue_knob_push(bool state);
 public:
-    bool wword(std::uint32_t address, std::uint32_t value);
-    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
+    bool wword(std::uint32_t address, std::uint32_t value) override;
+    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const override;
     virtual std::uint32_t get_change_counter() const override;
 private:
     void knob_update_notify(std::uint32_t val, std::uint32_t mask, int shift);

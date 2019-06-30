@@ -50,12 +50,12 @@ public:
           unsigned memory_access_penalty_w = 1, unsigned memory_access_penalty_b = 0);
     ~Cache();
 
-    bool wword(std::uint32_t address, std::uint32_t value);
-    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
+    bool wword(std::uint32_t address, std::uint32_t value) override;
+    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const override;
     virtual std::uint32_t get_change_counter() const override;
 
     void flush(); // flush cache
-    void sync(); // Same as flush
+    void sync() override; // Same as flush
 
     unsigned hit() const; // Number of recorded hits
     unsigned miss() const; // Number of recorded misses
@@ -68,7 +68,7 @@ public:
     void reset(); // Reset whole state of cache
 
     const MachineConfigCache &config() const;
-    enum LocationStatus location_status(std::uint32_t address) const;
+    enum LocationStatus location_status(std::uint32_t address) const override;
 
 signals:
     void hit_update(unsigned) const;

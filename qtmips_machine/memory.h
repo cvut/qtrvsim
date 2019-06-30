@@ -81,8 +81,8 @@ public:
     MemorySection(const MemorySection&);
     ~MemorySection();
 
-    bool wword(std::uint32_t offset, std::uint32_t value);
-    std::uint32_t rword(std::uint32_t offsetbool, bool debug_access = false) const;
+    bool wword(std::uint32_t offset, std::uint32_t value) override;
+    std::uint32_t rword(std::uint32_t offsetbool, bool debug_access = false) const override;
     virtual std::uint32_t get_change_counter() const override;
     void merge(MemorySection&);
 
@@ -112,8 +112,8 @@ public:
     void reset(const Memory&);
 
     MemorySection *get_section(std::uint32_t address, bool create) const; // returns section containing given address
-    bool wword(std::uint32_t address, std::uint32_t value);
-    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
+    bool wword(std::uint32_t address, std::uint32_t value) override;
+    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const override;
     virtual std::uint32_t get_change_counter() const override;
 
     bool operator==(const Memory&) const;
