@@ -92,6 +92,7 @@ class CacheViewScene : public QGraphicsScene {
     Q_OBJECT
 public:
     CacheViewScene(const machine::Cache *cache);
+    ~CacheViewScene();
 
 private:
     unsigned associativity;

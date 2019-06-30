@@ -58,6 +58,13 @@ coreview::Alu::Alu() : QGraphicsItem(nullptr), name("ALU", this) {
     setPos(x(), y()); // set connector's position
 }
 
+coreview::Alu::~Alu() {
+    delete con_in_a;
+    delete con_in_b;
+    delete con_out;
+    delete con_ctl;
+}
+
 QRectF coreview::Alu::boundingRect() const {
     return QRectF(-PENW / 2, -PENW / 2, WIDTH + PENW, HEIGHT + PENW);
 }

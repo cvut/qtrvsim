@@ -44,6 +44,7 @@ namespace coreview {
 class Alu : public QGraphicsItem {
 public:
     Alu();
+    ~Alu();
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

@@ -60,6 +60,10 @@ Core::Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
     step_over_exception[EXCAUSE_INT] = false;
 }
 
+Core::~Core() {
+    delete ex_default_handler;
+}
+
 void Core::step(bool skip_break) {
     cycle_c++;
     emit cycle_c_value(cycle_c);

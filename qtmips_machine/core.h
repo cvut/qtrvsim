@@ -72,6 +72,7 @@ class Core : public QObject {
 public:
     Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
          unsigned int min_cache_row_size = 1, Cop0State *cop0state = nullptr);
+    ~Core();
 
     void step(bool skip_break = false); // Do single step
     void reset(); // Reset core (only core, memory and registers has to be reseted separately)

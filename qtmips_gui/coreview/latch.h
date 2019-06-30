@@ -50,6 +50,7 @@ class Latch : public QGraphicsObject {
     Q_PROPERTY(QColor wedge_clr READ wedge_color WRITE set_wedge_color)
 public:
     Latch(machine::QtMipsMachine *machine, qreal height);
+    ~Latch();
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

@@ -60,6 +60,15 @@ Latch::Latch(machine::QtMipsMachine *machine, qreal height) : QGraphicsObject(nu
     connect(machine, SIGNAL(tick()), this, SLOT(tick()));
 }
 
+Latch::~Latch() {
+    while (!connectors.isEmpty()) {
+        ConnectorPair cp = connectors.takeFirst();
+        delete cp.in;
+        delete cp.out;
+    }
+    delete wedge_animation;
+}
+
 QRectF Latch::boundingRect() const {
     QRectF b(-PENW / 2, -PENW / 2, WIDTH + PENW, height + PENW);
     b |= title->boundingRect();

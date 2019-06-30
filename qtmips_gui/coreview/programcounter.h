@@ -47,6 +47,7 @@ class ProgramCounter : public QGraphicsObject {
         Q_OBJECT
 public:
     ProgramCounter(machine::QtMipsMachine *machine);
+    ~ProgramCounter();
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

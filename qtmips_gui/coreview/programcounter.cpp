@@ -65,6 +65,11 @@ ProgramCounter::ProgramCounter(machine::QtMipsMachine *machine) : QGraphicsObjec
     setPos(x(), y()); // To set initial connectors positions
 }
 
+ProgramCounter::~ProgramCounter() {
+    delete con_in;
+    delete con_out;
+}
+
 QRectF ProgramCounter::boundingRect() const {
     return QRectF(-PENW / 2, -PENW / 2, WIDTH + PENW, HEIGHT + PENW);
 }

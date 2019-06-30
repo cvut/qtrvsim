@@ -387,3 +387,7 @@ CacheViewScene::CacheViewScene(const machine::Cache *cache) {
     addItem(ablock);
     ablock->setPos(0, -ablock->boundingRect().height() -16);
 }
+
+CacheViewScene::~CacheViewScene() {
+    delete[] block;
+}
