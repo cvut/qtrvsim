@@ -49,6 +49,22 @@ MemoryModel::MemoryModel(QObject *parent)
     access_through_cache = 0;
 }
 
+const machine::MemoryAccess *MemoryModel::mem_access() const {
+    if (machine == nullptr)
+        return nullptr;
+    if (machine->physical_address_space() != nullptr)
+        return machine->physical_address_space();
+    return machine->memory();
+}
+
+machine::MemoryAccess *MemoryModel::mem_access_rw() const {
+    if (machine == nullptr)
+        return nullptr;
+    if (machine->physical_address_space_rw() != nullptr)
+        return machine->physical_address_space_rw();
+    return machine->memory_rw();
+}
+
 int MemoryModel::rowCount(const QModelIndex & /*parent*/) const {
    // std::uint64_t rows = (0x2000 + cells_per_row - 1) / cells_per_row;
    return 750;
@@ -91,7 +107,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
         }
         if (machine == nullptr)
             return QString("");
-        mem = machine->memory();
+        mem = mem_access();
         if (mem == nullptr)
             return QString("");
         if ((access_through_cache > 0) && (machine->cache_data() != nullptr))
@@ -155,6 +171,9 @@ void MemoryModel::setup(machine::QtMipsMachine *machine) {
     this->machine = machine;
     if (machine != nullptr)
         connect(machine, SIGNAL(post_tick()), this, SLOT(check_for_updates()));
+    if (mem_access() != nullptr)
+        connect(mem_access(), SIGNAL(external_change_notify(const MemoryAccess*,std::uint32_t,std::uint32_t,bool)),
+                this, SLOT(check_for_updates()));
     emit update_all();
     emit setup_done();
 }
@@ -174,8 +193,10 @@ void MemoryModel::set_cell_size(int index) {
 }
 
 void MemoryModel::update_all() {
-    if (machine != nullptr && machine->memory() != nullptr) {
-        memory_change_counter = machine->memory()->get_change_counter();
+    const machine::MemoryAccess *mem;
+    mem = mem_access();
+    if (mem != nullptr) {
+        memory_change_counter = mem->get_change_counter();
         if (machine->cache_data() != nullptr)
             cache_data_change_counter = machine->cache_data()->get_change_counter();
     }
@@ -184,12 +205,12 @@ void MemoryModel::update_all() {
 
 void MemoryModel::check_for_updates() {
     bool need_update = false;
-    if (machine == nullptr)
-        return;
-    if (machine->memory() == nullptr)
+    const machine::MemoryAccess *mem;
+    mem = mem_access();
+    if (mem == nullptr)
         return;
 
-    if (memory_change_counter != machine->memory()->get_change_counter())
+    if (memory_change_counter != mem->get_change_counter())
         need_update = true;
     if (machine->cache_data() != nullptr) {
         if (cache_data_change_counter != machine->cache_data()->get_change_counter())
@@ -235,15 +256,15 @@ bool MemoryModel::setData(const QModelIndex & index, const QVariant & value, int
     {
         bool ok;
         std::uint32_t address;
+        machine::MemoryAccess *mem;
         std::uint32_t data = value.toString().toULong(&ok, 16);
         if (!ok)
             return false;
-        machine::MemoryAccess *mem;
         if (!get_row_address(address, index.row()))
             return false;
         if (index.column() == 0 || machine == nullptr)
             return false;
-        mem = machine->memory_rw();
+        mem = mem_access_rw();
         if (mem == nullptr)
             return false;
         if ((access_through_cache > 0) && (machine->cache_data_rw() != nullptr))

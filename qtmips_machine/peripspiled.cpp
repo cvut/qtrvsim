@@ -46,6 +46,8 @@ using namespace machine;
 #define SPILED_REG_KNOBS_8BIT_o         0x024
 
 PeripSpiLed::PeripSpiLed() {
+    change_counter = 0;
+
     spiled_reg_led_line = 0;
     spiled_reg_led_rgb1 = 0;
     spiled_reg_led_rgb2 = 0;
@@ -60,20 +62,27 @@ PeripSpiLed::~PeripSpiLed() {
 }
 
 bool PeripSpiLed::wword(std::uint32_t address, std::uint32_t value) {
+    bool changed = false;
 #if 0
     printf("PeripSpiLed::wword address 0x%08lx data 0x%08lx\n",
            (unsigned long)address, (unsigned long)value);
 #endif
     switch (address & ~3) {
     case  SPILED_REG_LED_LINE_o:
+        if (spiled_reg_led_line == value)
+            break;
         spiled_reg_led_line = value;
         emit led_line_changed(value);
         break;
     case  SPILED_REG_LED_RGB1_o:
+        if (spiled_reg_led_rgb1 == value)
+            break;
         spiled_reg_led_rgb1 = value;
         emit led_rgb1_changed(value);
         break;
     case  SPILED_REG_LED_RGB2_o:
+        if (spiled_reg_led_rgb2 == value)
+            break;
         spiled_reg_led_rgb2 = value;
         emit led_rgb2_changed(value);
         break;
@@ -83,7 +92,9 @@ bool PeripSpiLed::wword(std::uint32_t address, std::uint32_t value) {
 
     emit write_notification(address, value);
 
-    return true;
+    if (changed)
+        change_counter++;
+    return changed;
 }
 
 std::uint32_t PeripSpiLed::rword(std::uint32_t address, bool debug_access) const {
@@ -123,35 +134,42 @@ std::uint32_t PeripSpiLed::rword(std::uint32_t address, bool debug_access) const
     return value;
 }
 
+std::uint32_t PeripSpiLed::get_change_counter() const {
+    return change_counter;
+}
+
+void PeripSpiLed::knob_update_notify(std::uint32_t val, std::uint32_t mask, int shift) {
+    mask <<= shift;
+    val <<= shift;
+    if (!((spiled_reg_knobs_8bit ^ val) & mask))
+        return;
+    spiled_reg_knobs_8bit &= ~mask;
+    spiled_reg_knobs_8bit |= val;
+    change_counter++;
+    emit external_change_notify(this, SPILED_REG_KNOBS_8BIT_o,
+                                SPILED_REG_KNOBS_8BIT_o + 3, true);
+}
+
 void PeripSpiLed::red_knob_update(int val) {
-    spiled_reg_knobs_8bit &= ~(0xff << 16);
-    spiled_reg_knobs_8bit |= (val & 0xff) << 16;
+    knob_update_notify(val, 0xff, 16);
 }
 
 void PeripSpiLed::green_knob_update(int val) {
-    spiled_reg_knobs_8bit &= ~(0xff << 8);
-    spiled_reg_knobs_8bit |= (val & 0xff) << 8;
+    knob_update_notify(val, 0xff, 8);
 }
 
 void PeripSpiLed::blue_knob_update(int val) {
-    spiled_reg_knobs_8bit &= ~(0xff << 0);
-    spiled_reg_knobs_8bit |= (val & 0xff) << 0;
+    knob_update_notify(val, 0xff, 0);
 }
 
 void PeripSpiLed::red_knob_push(bool state) {
-    spiled_reg_knobs_8bit &= ~(1 << 26);
-    if (state)
-        spiled_reg_knobs_8bit |= 1 << 26;
+    knob_update_notify(state? 1: 0, 1, 26);
 }
 
 void PeripSpiLed::green_knob_push(bool state) {
-    spiled_reg_knobs_8bit &= ~(1 << 25);
-    if (state)
-        spiled_reg_knobs_8bit |= 1 << 25;
+    knob_update_notify(state? 1: 0, 1, 25);
 }
 
 void PeripSpiLed::blue_knob_push(bool state) {
-    spiled_reg_knobs_8bit &= ~(1 << 24);
-    if (state)
-        spiled_reg_knobs_8bit |= 1 << 24;
+    knob_update_notify(state? 1: 0, 1, 24);
 }

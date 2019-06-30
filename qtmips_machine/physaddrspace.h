@@ -53,11 +53,15 @@ public:
 
     bool wword(std::uint32_t address, std::uint32_t value);
     std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
+    virtual std::uint32_t get_change_counter() const override;
 
     bool insert_range(MemoryAccess *mem_acces, std::uint32_t start_addr, std::uint32_t last_addr, bool move_ownership);
     bool remove_range(MemoryAccess *mem_acces);
     void clean_range(std::uint32_t start_addr, std::uint32_t last_addr);
     enum LocationStatus location_status(std::uint32_t offset) const;
+private slots:
+    void range_external_change(const MemoryAccess *mem_access, std::uint32_t start_addr,
+                               std::uint32_t last_addr, bool external);
 private:
     class RangeDesc {
     public:
@@ -70,6 +74,7 @@ private:
     QMap<std::uint32_t, RangeDesc *> ranges_by_addr;
     QMap<MemoryAccess *, RangeDesc *> ranges_by_access;
     RangeDesc *find_range(std::uint32_t address) const;
+    mutable std::uint32_t change_counter;
 };
 
 }

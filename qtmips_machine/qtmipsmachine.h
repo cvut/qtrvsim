@@ -70,6 +70,8 @@ public:
     const Cache *cache_program();
     const Cache *cache_data();
     Cache *cache_data_rw();
+    const  PhysAddrSpace *physical_address_space();
+    PhysAddrSpace *physical_address_space_rw();
     SerialPort *serial_port();
     PeripSpiLed *peripheral_spi_led();
     LcdDisplay *peripheral_lcd_display();

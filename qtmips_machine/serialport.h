@@ -63,7 +63,10 @@ public slots:
 public:
     bool wword(std::uint32_t address, std::uint32_t value);
     std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
+    virtual std::uint32_t get_change_counter() const override;
 private:
+    void rx_queue_check_internal() const;
+    mutable std::uint32_t change_counter;
     void pool_rx_byte() const;
     void update_rx_irq() const;
     void update_tx_irq() const;

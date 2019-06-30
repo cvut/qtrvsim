@@ -38,6 +38,7 @@
 using namespace machine;
 
 LcdDisplay::LcdDisplay() {
+    change_counter = 0;
     size_t need_bytes;
     fb_size = 0x4b000;
     fb_bpp = 16;
@@ -88,11 +89,15 @@ bool LcdDisplay::wword(std::uint32_t address, std::uint32_t value) {
     printf("LcdDisplay::wword address 0x%08lx data 0x%08lx\n",
            (unsigned long)address, (unsigned long)value);
 #endif
+    if (value == rword(address, true))
+        return false;
 
     fb_data[address + 0] = (value >> 24) & 0xff;
     fb_data[address + 1] = (value >> 16) & 0xff;
     fb_data[address + 2] = (value >> 8) & 0xff;
     fb_data[address + 3] = (value >> 0) & 0xff;
+
+    change_counter++;
 
     y = address / fb_linesize;
     if (fb_bpp > 12)
@@ -142,4 +147,8 @@ std::uint32_t LcdDisplay::rword(std::uint32_t address, bool debug_access) const 
     emit read_notification(address, &value);
 
     return value;
+}
+
+std::uint32_t LcdDisplay::get_change_counter() const {
+    return change_counter;
 }

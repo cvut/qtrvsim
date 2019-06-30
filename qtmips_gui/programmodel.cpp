@@ -49,6 +49,22 @@ ProgramModel::ProgramModel(QObject *parent)
     stages_need_update = false;
 }
 
+const machine::MemoryAccess *ProgramModel::mem_access() const {
+    if (machine == nullptr)
+        return nullptr;
+    if (machine->physical_address_space() != nullptr)
+        return machine->physical_address_space();
+    return machine->memory();
+}
+
+machine::MemoryAccess *ProgramModel::mem_access_rw() const {
+    if (machine == nullptr)
+        return nullptr;
+    if (machine->physical_address_space_rw() != nullptr)
+        return machine->physical_address_space_rw();
+    return machine->memory_rw();
+}
+
 int ProgramModel::rowCount(const QModelIndex & /*parent*/) const {
    return 750;
 }
@@ -79,6 +95,8 @@ QVariant ProgramModel::headerData(int section, Qt::Orientation orientation, int 
 }
 
 QVariant ProgramModel::data(const QModelIndex &index, int role) const {
+    const machine::MemoryAccess *mem;
+
     if (role == Qt::DisplayRole || role == Qt::EditRole)
     {
         QString s, t;
@@ -92,12 +110,11 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
             return "0x" + s + t.toUpper();
         }
 
-        if (machine == nullptr)
-            return QString(" ");
-        if (machine->memory() == nullptr)
+        mem = mem_access();
+        if (mem == nullptr)
             return QString(" ");
 
-        machine::Instruction inst(machine->memory()->read_word(address));
+        machine::Instruction inst(mem->read_word(address));
 
         switch (index.column()) {
         case 0:
@@ -163,8 +180,10 @@ void ProgramModel::setup(machine::QtMipsMachine *machine) {
 }
 
 void ProgramModel::update_all() {
-    if (machine != nullptr && machine->memory() != nullptr) {
-        memory_change_counter = machine->memory()->get_change_counter();
+    const machine::MemoryAccess *mem;
+    mem = mem_access();
+    if (mem != nullptr) {
+        memory_change_counter = mem->get_change_counter();
         if (machine->cache_program() != nullptr)
             cache_program_change_counter = machine->cache_program()->get_change_counter();
     }
@@ -174,12 +193,12 @@ void ProgramModel::update_all() {
 
 void ProgramModel::check_for_updates() {
     bool need_update = stages_need_update;
-    if (machine == nullptr)
-        return;
-    if (machine->memory() == nullptr)
+    const machine::MemoryAccess *mem;
+    mem = mem_access();
+    if (mem == nullptr)
         return;
 
-    if (memory_change_counter != machine->memory()->get_change_counter())
+    if (memory_change_counter != mem->get_change_counter())
         need_update = true;
     if (machine->cache_data() != nullptr) {
         if (cache_program_change_counter != machine->cache_program()->get_change_counter())
@@ -241,7 +260,7 @@ bool ProgramModel::setData(const QModelIndex & index, const QVariant & value, in
             return false;
         if (index.column() == 0 || machine == nullptr)
             return false;
-        mem = machine->memory_rw();
+        mem = mem_access_rw();
         if (mem == nullptr)
             return false;
         switch (index.column()) {

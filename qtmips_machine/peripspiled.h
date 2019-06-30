@@ -69,7 +69,11 @@ public slots:
 public:
     bool wword(std::uint32_t address, std::uint32_t value);
     std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
+    virtual std::uint32_t get_change_counter() const override;
 private:
+    void knob_update_notify(std::uint32_t val, std::uint32_t mask, int shift);
+
+    mutable std::uint32_t change_counter;
     std::uint32_t spiled_reg_led_line;
     std::uint32_t spiled_reg_led_rgb1;
     std::uint32_t spiled_reg_led_rgb2;

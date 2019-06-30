@@ -171,6 +171,10 @@ std::uint32_t Cache::rword(std::uint32_t address, bool debug_access) const {
     return data;
 }
 
+std::uint32_t Cache::get_change_counter() const {
+    return change_counter;
+}
+
 void Cache::flush() {
     if (!cnf.enabled())
         return;

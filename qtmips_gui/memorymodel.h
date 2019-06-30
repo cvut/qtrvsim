@@ -115,6 +115,8 @@ signals:
     void setup_done();
 
 private:
+    const machine::MemoryAccess *mem_access() const;
+    machine::MemoryAccess *mem_access_rw() const;
     enum MemoryCellSize cell_size;
     unsigned int cells_per_row;
     std::uint32_t index0_offset;

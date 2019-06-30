@@ -100,6 +100,8 @@ public slots:
     void update_stage_addr(uint stage, std::uint32_t addr);
 
 private:
+    const machine::MemoryAccess *mem_access() const;
+    machine::MemoryAccess *mem_access_rw() const;
     std::uint32_t index0_offset;
     QFont data_font;
     machine::QtMipsMachine *machine;

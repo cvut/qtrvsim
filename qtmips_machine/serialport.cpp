@@ -50,6 +50,7 @@
 using namespace machine;
 
 SerialPort::SerialPort() {
+    change_counter = 0;
     rx_st_reg = 0;
     rx_data_reg = 0;
     tx_st_reg = 0;
@@ -69,10 +70,12 @@ void SerialPort::pool_rx_byte() const {
     if (!(rx_st_reg & SERP_RX_ST_REG_READY_m)) {
         rx_st_reg |= SERP_RX_ST_REG_READY_m;
         emit rx_byte_pool(0, byte, available);
-        if (available)
+        if (available) {
+            change_counter++;
             rx_data_reg = byte;
-        else
+        } else {
             rx_st_reg &= ~SERP_RX_ST_REG_READY_m;
+        }
     }
 }
 
@@ -87,7 +90,7 @@ bool SerialPort::wword(std::uint32_t address, std::uint32_t value) {
     case SERP_RX_ST_REG_o:
         rx_st_reg &= ~SERP_RX_ST_REG_IE_m;
         rx_st_reg |= value & SERP_RX_ST_REG_IE_m;
-        rx_queue_check();
+        rx_queue_check_internal();
         update_rx_irq();
         break;
     case SERP_TX_ST_REG_o:
@@ -119,12 +122,16 @@ std::uint32_t SerialPort::rword(std::uint32_t address, bool debug_access) const 
         pool_rx_byte();
         if (rx_st_reg & SERP_RX_ST_REG_READY_m) {
             value = rx_data_reg;
-            rx_st_reg &= ~SERP_RX_ST_REG_READY_m;
-            update_rx_irq();
+            if (!debug_access) {
+                rx_st_reg &= ~SERP_RX_ST_REG_READY_m;
+                update_rx_irq();
+                emit external_change_notify(this, SERP_RX_ST_REG_o,
+                                            SERP_RX_DATA_REG_o + 3, true);
+            }
         } else {
             value = 0;
         }
-        rx_queue_check();
+        rx_queue_check_internal();
         break;
     case SERP_TX_ST_REG_o:
         value = tx_st_reg | SERP_TX_ST_REG_READY_m;
@@ -136,11 +143,16 @@ std::uint32_t SerialPort::rword(std::uint32_t address, bool debug_access) const 
     return value;
 }
 
+std::uint32_t SerialPort::get_change_counter() const {
+    return change_counter;
+}
+
 void SerialPort::update_rx_irq() const {
     bool active = !!(rx_st_reg & SERP_RX_ST_REG_IE_m);
     active &= !!(rx_st_reg & SERP_RX_ST_REG_READY_m);
     if (active != rx_irq_active) {
         rx_irq_active = active;
+        change_counter++;
         emit signal_interrupt(rx_irq_level, active);
     }
 }
@@ -150,12 +162,19 @@ void SerialPort::update_tx_irq() const {
     active &= !!(tx_st_reg & SERP_TX_ST_REG_READY_m);
     if (active != tx_irq_active) {
         tx_irq_active = active;
+        change_counter++;
         emit signal_interrupt(tx_irq_level, active);
     }
 }
 
-void SerialPort::rx_queue_check() const {
+void SerialPort::rx_queue_check_internal() const {
     if (rx_st_reg & SERP_RX_ST_REG_IE_m)
         pool_rx_byte();
     update_rx_irq();
+}
+
+void SerialPort::rx_queue_check() const {
+    rx_queue_check_internal();
+    emit external_change_notify(this, SERP_RX_ST_REG_o,
+                                SERP_RX_DATA_REG_o + 3, true);
 }

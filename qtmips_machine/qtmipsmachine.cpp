@@ -186,6 +186,14 @@ Cache *QtMipsMachine::cache_data_rw() {
     return cch_data;
 }
 
+const  PhysAddrSpace *QtMipsMachine::physical_address_space() {
+    return physaddrspace;
+}
+
+PhysAddrSpace *QtMipsMachine::physical_address_space_rw() {
+    return physaddrspace;
+}
+
 SerialPort *QtMipsMachine::serial_port() {
     return ser_port;
 }

@@ -61,6 +61,11 @@ public:
 
     virtual void sync();
     virtual enum LocationStatus location_status(std::uint32_t offset) const;
+    virtual std::uint32_t get_change_counter() const = 0;
+
+signals:
+    void external_change_notify(const MemoryAccess *mem_access, std::uint32_t start_addr,
+                                std::uint32_t last_addr, bool external) const;
 
 protected:
     virtual bool wword(std::uint32_t offset, std::uint32_t value) = 0;
@@ -78,6 +83,7 @@ public:
 
     bool wword(std::uint32_t offset, std::uint32_t value);
     std::uint32_t rword(std::uint32_t offsetbool, bool debug_access = false) const;
+    virtual std::uint32_t get_change_counter() const override;
     void merge(MemorySection&);
 
     std::uint32_t length() const;
@@ -108,15 +114,12 @@ public:
     MemorySection *get_section(std::uint32_t address, bool create) const; // returns section containing given address
     bool wword(std::uint32_t address, std::uint32_t value);
     std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
+    virtual std::uint32_t get_change_counter() const override;
 
     bool operator==(const Memory&) const;
     bool operator!=(const Memory&) const;
 
     const union MemoryTree *get_memorytree_root() const;
-
-    inline std::uint32_t get_change_counter() const {
-        return change_counter;
-    }
 
 private:
     union MemoryTree *mt_root;

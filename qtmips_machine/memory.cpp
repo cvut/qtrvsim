@@ -159,6 +159,10 @@ std::uint32_t MemorySection::rword(std::uint32_t offset, bool debug_access) cons
     return this->dt[offset];
 }
 
+std::uint32_t MemorySection::get_change_counter() const {
+    return 0;
+}
+
 std::uint32_t MemorySection::length() const {
     return len;
 }
@@ -270,6 +274,10 @@ std::uint32_t Memory::rword(std::uint32_t address, bool debug_access) const {
         return 0;
     else
         return section->read_word(SECTION_OFFSET_MASK(address), debug_access);
+}
+
+std::uint32_t Memory::get_change_counter() const {
+    return change_counter;
 }
 
 bool Memory::operator==(const Memory&m) const {

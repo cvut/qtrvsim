@@ -52,6 +52,7 @@ public:
 
     bool wword(std::uint32_t address, std::uint32_t value);
     std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
+    virtual std::uint32_t get_change_counter() const override;
 
     void flush(); // flush cache
     void sync(); // Same as flush
@@ -69,9 +70,6 @@ public:
     const MachineConfigCache &config() const;
     enum LocationStatus location_status(std::uint32_t address) const;
 
-    inline std::uint32_t get_change_counter() const {
-        return change_counter;
-    }
 signals:
     void hit_update(unsigned) const;
     void miss_update(unsigned) const;

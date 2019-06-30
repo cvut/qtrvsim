@@ -38,12 +38,12 @@
 using namespace machine;
 
 PhysAddrSpace::PhysAddrSpace() {
-
+    change_counter = 0;
 }
 
 PhysAddrSpace::~PhysAddrSpace() {
     while (!ranges_by_access.isEmpty()) {
-        RangeDesc *p_range = ranges_by_access.first();
+        RangeDesc *p_range = ranges_by_addr.first();
         ranges_by_addr.remove(p_range->last_addr);
         ranges_by_access.remove(p_range->mem_acces);
         if (p_range->owned)
@@ -53,10 +53,14 @@ PhysAddrSpace::~PhysAddrSpace() {
 }
 
 bool PhysAddrSpace::wword(std::uint32_t address, std::uint32_t value) {
+    bool changed;
     RangeDesc *p_range = find_range(address);
     if (p_range == nullptr)
         return false;
-    return p_range->mem_acces->write_word(address - p_range->start_addr, value);
+    changed = p_range->mem_acces->write_word(address - p_range->start_addr, value);
+    if (changed)
+        change_counter++;
+    return changed;
 }
 
 std::uint32_t PhysAddrSpace::rword(std::uint32_t address, bool debug_access) const {
@@ -64,6 +68,10 @@ std::uint32_t PhysAddrSpace::rword(std::uint32_t address, bool debug_access) con
     if (p_range == nullptr)
         return 0x00000000;
     return p_range->mem_acces->read_word(address - p_range->start_addr, debug_access);
+}
+
+std::uint32_t PhysAddrSpace::get_change_counter() const {
+    return change_counter;
 }
 
 enum LocationStatus PhysAddrSpace::location_status(std::uint32_t address) const {
@@ -92,7 +100,9 @@ bool PhysAddrSpace::insert_range(MemoryAccess *mem_acces, std::uint32_t start_ad
             return false;
     }
     ranges_by_addr.insert(last_addr, p_range);
-    ranges_by_access.insert(mem_acces, p_range);
+    ranges_by_access.insertMulti(mem_acces, p_range);
+    connect(mem_acces, SIGNAL(external_change_notify(const MemoryAccess*,std::uint32_t,std::uint32_t,bool)),
+            this, SLOT(range_external_change(const MemoryAccess*,std::uint32_t,std::uint32_t,bool)));
     return true;
 }
 
@@ -116,6 +126,19 @@ void PhysAddrSpace::clean_range(std::uint32_t start_addr, std::uint32_t last_add
             remove_range(p_range->mem_acces);
         else
             break;
+    }
+}
+
+void PhysAddrSpace::range_external_change(const MemoryAccess *mem_access, std::uint32_t start_addr,
+                                          std::uint32_t last_addr, bool external) {
+    if (external)
+        change_counter++;
+    auto i = ranges_by_access.find(const_cast<MemoryAccess *>(mem_access));
+    while (i != ranges_by_access.end() && i.key() == mem_access) {
+        RangeDesc *p_range = i.value();
+        ++i;
+        emit external_change_notify(this, start_addr + p_range->start_addr,
+                                    last_addr + p_range->start_addr, external);
     }
 }
 
