@@ -79,6 +79,7 @@ public slots:
     void show_terminal();
     void show_lcd_display();
     void show_cop0dock();
+    void show_hide_coreview(bool show);
     void show_symbol_dialog();
     // Actions - help menu
     void about_qtmips();
@@ -109,6 +110,7 @@ private:
     TerminalDock *terminal;
     LcdDisplayDock *lcd_display;
     Cop0Dock *cop0dock;
+    bool coreview_shown;
 
 
     QActionGroup *speed_group;

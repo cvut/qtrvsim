@@ -77,6 +77,7 @@
     <addaction name="actionTerminal"/>
     <addaction name="actionLcdDisplay"/>
     <addaction name="actionCop0State"/>
+    <addaction name="actionCore_View_show"/>
    </widget>
    <widget class="QMenu" name="menuMachine">
     <property name="title">
@@ -408,6 +409,17 @@
    </property>
    <property name="toolTip">
     <string>Show Symbol</string>
+   </property>
+  </action>
+  <action name="actionCore_View_show">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Core View</string>
    </property>
   </action>
  </widget>

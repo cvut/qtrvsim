@@ -48,6 +48,7 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     machine = nullptr;
     corescene = nullptr;
+    coreview_shown = true;
     settings = new QSettings("CTU", "QtMips");
 
     ui = new Ui::MainWindow();
@@ -104,6 +105,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->actionTerminal, SIGNAL(triggered(bool)), this, SLOT(show_terminal()));
     connect(ui->actionLcdDisplay, SIGNAL(triggered(bool)), this, SLOT(show_lcd_display()));
     connect(ui->actionCop0State, SIGNAL(triggered(bool)), this, SLOT(show_cop0dock()));
+    connect(ui->actionCore_View_show, SIGNAL(triggered(bool)), this, SLOT(show_hide_coreview(bool)));
     connect(ui->actionAbout, SIGNAL(triggered(bool)), this, SLOT(about_qtmips()));
     connect(ui->actionAboutQt, SIGNAL(triggered(bool)), this, SLOT(about_qt()));
     connect(ui->ips1, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
@@ -144,6 +146,37 @@ void MainWindow::start() {
     ndialog->show();
 }
 
+void MainWindow::show_hide_coreview(bool show) {
+    coreview_shown = show;
+    if (!show && (corescene == nullptr))
+        return;
+    if (((machine == nullptr) || !show) && (corescene != nullptr)) {
+        delete corescene;
+        corescene = nullptr;
+        if (coreview != nullptr)
+            coreview->setScene(corescene);
+        return;
+    }
+    if (show && (corescene != nullptr))
+        return;
+
+    if (machine->config().pipelined()) {
+        corescene = new CoreViewScenePipelined(machine);
+    } else {
+        corescene = new CoreViewSceneSimple(machine);
+    }
+    // Connect scene signals to actions
+    connect(corescene, SIGNAL(request_registers()), this, SLOT(show_registers()));
+    connect(corescene, SIGNAL(request_program_memory()), this, SLOT(show_program()));
+    connect(corescene, SIGNAL(request_data_memory()), this, SLOT(show_memory()));
+    connect(corescene, SIGNAL(request_jump_to_program_counter(std::uint32_t)), program, SIGNAL(jump_to_pc(std::uint32_t)));
+    connect(corescene, SIGNAL(request_cache_program()), this, SLOT(show_cache_program()));
+    connect(corescene, SIGNAL(request_cache_data()), this, SLOT(show_cache_data()));
+    connect(corescene, SIGNAL(request_peripherals()), this, SLOT(show_peripherals()));
+    connect(corescene, SIGNAL(request_terminal()), this, SLOT(show_terminal()));
+    coreview->setScene(corescene);
+}
+
 void MainWindow::create_core(const machine::MachineConfig &config, bool load_executable) {
     // Create machine
     machine::QtMipsMachine *new_machine = new machine::QtMipsMachine(&config, true, load_executable);
@@ -160,12 +193,8 @@ void MainWindow::create_core(const machine::MachineConfig &config, bool load_exe
     // Create machine view
     if (corescene != nullptr)
         delete corescene;
-    if (config.pipelined()) {
-        corescene = new CoreViewScenePipelined(machine);
-    } else {
-        corescene = new CoreViewSceneSimple(machine);
-    }
-    coreview->setScene(corescene);
+    corescene = nullptr;
+    show_hide_coreview(coreview_shown);
 
     set_speed(); // Update machine speed to current settings
 
@@ -194,15 +223,6 @@ void MainWindow::create_core(const machine::MachineConfig &config, bool load_exe
     connect(machine, SIGNAL(status_change(machine::QtMipsMachine::Status)), this, SLOT(machine_status(machine::QtMipsMachine::Status)));
     connect(machine, SIGNAL(program_exit()), this, SLOT(machine_exit()));
     connect(machine, SIGNAL(program_trap(machine::QtMipsException&)), this, SLOT(machine_trap(machine::QtMipsException&)));
-    // Connect scene signals to actions
-    connect(corescene, SIGNAL(request_registers()), this, SLOT(show_registers()));
-    connect(corescene, SIGNAL(request_program_memory()), this, SLOT(show_program()));
-    connect(corescene, SIGNAL(request_data_memory()), this, SLOT(show_memory()));
-    connect(corescene, SIGNAL(request_jump_to_program_counter(std::uint32_t)), program, SIGNAL(jump_to_pc(std::uint32_t)));
-    connect(corescene, SIGNAL(request_cache_program()), this, SLOT(show_cache_program()));
-    connect(corescene, SIGNAL(request_cache_data()), this, SLOT(show_cache_data()));
-    connect(corescene, SIGNAL(request_peripherals()), this, SLOT(show_peripherals()));
-    connect(corescene, SIGNAL(request_terminal()), this, SLOT(show_terminal()));
     // Connect signal from break to machine pause
     connect(machine->core(), SIGNAL(stop_on_exception_reached()), machine, SLOT(pause()));
 
@@ -353,6 +373,8 @@ void MainWindow::closeEvent(QCloseEvent *event __attribute__((unused))) {
 }
 
 void MainWindow::show_dockwidget(QDockWidget *dw, Qt::DockWidgetArea area) {
+    if (dw == nullptr)
+        return;
     if (dw->isHidden()) {
         dw->show();
         addDockWidget(area, dw);
