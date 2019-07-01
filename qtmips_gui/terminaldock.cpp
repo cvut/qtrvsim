@@ -41,6 +41,7 @@
 #include "terminaldock.h"
 
 TerminalDock::TerminalDock(QWidget *parent, QSettings *settings) : QDockWidget(parent) {
+    (void)settings;
     top_widget = new QWidget(this);
     setWidget(top_widget);
     layout_box = new QVBoxLayout(top_widget);
@@ -87,6 +88,7 @@ void TerminalDock::tx_byte(int fd, unsigned int data)
 }
 
 void TerminalDock::rx_byte_pool(int fd, unsigned int &data, bool &available) {
+    (void)fd;
     QString str = input_edit->text();
     available = false;
     if (str.count() > 0) {

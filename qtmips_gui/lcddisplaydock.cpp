@@ -41,6 +41,7 @@
 #include "lcddisplayview.h"
 
 LcdDisplayDock::LcdDisplayDock(QWidget *parent, QSettings *settings) : Super(parent) {
+    (void)settings;
     lcd_display_widget = new LcdDisplayView(this);
     QWidget *fill_widget = new QWidget(this);
 

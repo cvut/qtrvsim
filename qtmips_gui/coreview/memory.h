@@ -51,7 +51,7 @@ public:
     Memory(bool cache_used, const machine::Cache *cache);
 
     QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 signals:
     void open_mem();

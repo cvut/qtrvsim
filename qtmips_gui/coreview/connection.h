@@ -79,7 +79,7 @@ public:
     Connection(const Connector *start, const Connector *end);
 
     QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
     void setHasText(bool has);
     void setText(QString val);

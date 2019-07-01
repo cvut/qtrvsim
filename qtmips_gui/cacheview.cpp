@@ -70,6 +70,8 @@ QRectF CacheAddressBlock::boundingRect() const {
 }
 
 void CacheAddressBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    (void)option;
+    (void)widget;
     QFont fnt;
     fnt.setPointSize(7);
     painter->setFont(fnt);

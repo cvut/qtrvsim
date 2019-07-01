@@ -36,6 +36,7 @@
 #include "peripheralsdock.h"
 
 PeripheralsDock::PeripheralsDock(QWidget *parent, QSettings *settings) : QDockWidget(parent) {
+    (void)settings;
     top_widget = new QWidget(this);
     setWidget(top_widget);
     layout_box = new QVBoxLayout(top_widget);

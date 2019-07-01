@@ -53,7 +53,7 @@ public:
     ~LogicBlock();
 
     QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
     void setPos(qreal x, qreal y);
     void setSize(qreal width, qreal height);

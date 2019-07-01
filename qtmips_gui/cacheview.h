@@ -50,7 +50,7 @@ public:
 
     QRectF boundingRect() const;
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 private slots:
     void cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty,
@@ -71,10 +71,10 @@ public:
 
     QRectF boundingRect() const;
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 private slots:
-    void cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty,
+    virtual void cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty,
                       std::uint32_t tag, const std::uint32_t *data, bool write);
 
 private:

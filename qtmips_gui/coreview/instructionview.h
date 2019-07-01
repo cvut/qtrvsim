@@ -48,7 +48,7 @@ public:
     InstructionView(QColor bgnd = QColor(240, 240, 240));
 
     QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 public slots:
     void instruction_update(const machine::Instruction &i, std::uint32_t inst_addr,

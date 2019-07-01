@@ -50,7 +50,7 @@ public:
           QChar fillchr = '0', bool frame = true);
 
     QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 public slots:
     void value_update(std::uint32_t);

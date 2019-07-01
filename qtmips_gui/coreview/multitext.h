@@ -49,7 +49,7 @@ public:
     MultiText(QMap<std::uint32_t, QString> value_map, bool nonzero_red = false);
 
     QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 public slots:
     void multitext_update(std::uint32_t value);

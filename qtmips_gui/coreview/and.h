@@ -48,7 +48,7 @@ public:
     ~And();
 
     QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
     void setPos(qreal x, qreal y);
     const Connector *connector_in(unsigned) const;

@@ -49,7 +49,7 @@ public:
     ~Junction();
 
     QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
     void setPos(qreal x, qreal y);
     Connector *new_connector(enum Connector::Axis axis = Connector::AX_X);

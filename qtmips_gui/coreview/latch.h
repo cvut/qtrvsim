@@ -53,7 +53,7 @@ public:
     ~Latch();
 
     QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
     QColor wedge_color();
     void set_wedge_color(QColor &c);
