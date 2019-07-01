@@ -58,9 +58,14 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionNew"/>
+    <addaction name="actionNewMachine"/>
     <addaction name="actionReload"/>
     <addaction name="actionPrint"/>
+    <addaction name="actionNew"/>
+    <addaction name="actionOpen"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSaveAs"/>
+    <addaction name="actionClose"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -126,7 +131,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionNew"/>
+   <addaction name="actionNewMachine"/>
    <addaction name="actionReload"/>
    <addaction name="separator"/>
    <addaction name="actionRun"/>
@@ -140,7 +145,7 @@
    <addaction name="ipsUnlimited"/>
    <addaction name="ipsMax"/>
   </widget>
-  <action name="actionNew">
+  <action name="actionNewMachine">
    <property name="icon">
     <iconset resource="icons.qrc">
      <normaloff>:/icons/document-import.png</normaloff>:/icons/document-import.png</iconset>
@@ -149,7 +154,89 @@
     <string>New simulation...</string>
    </property>
    <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionRestart">
+   <property name="text">
+    <string>Restart</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/new.png</normaloff>:/icons/new.png</iconset>
+   </property>
+   <property name="text">
+    <string>New source</string>
+   </property>
+   <property name="toolTip">
+    <string>New source</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/open.png</normaloff>:/icons/open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open source</string>
+   </property>
+   <property name="toolTip">
+    <string>Open source</string>
+   </property>
+   <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/save.png</normaloff>:/icons/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save source</string>
+   </property>
+   <property name="toolTip">
+    <string>Save source</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionSaveAs">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Save source as</string>
+   </property>
+   <property name="toolTip">
+    <string>Save source as</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/closetab.png</normaloff>:/icons/closetab.png</iconset>
+   </property>
+   <property name="text">
+    <string>Close source</string>
+   </property>
+   <property name="toolTip">
+    <string>Close source</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
    </property>
   </action>
   <action name="actionExit">
@@ -165,11 +252,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
-   </property>
-  </action>
-  <action name="actionRestart">
-   <property name="text">
-    <string>Restart</string>
    </property>
   </action>
   <action name="actionRun">
@@ -193,7 +275,7 @@
     <string>Step</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+S</string>
+    <string>Ctrl+T</string>
    </property>
   </action>
   <action name="actionPause">
@@ -366,7 +448,7 @@
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>&amp;About Qt Mips</string>
+    <string>About Qt Mips</string>
    </property>
   </action>
   <action name="ipsMax">
@@ -374,7 +456,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>&amp;Max</string>
+    <string>Max</string>
    </property>
    <property name="toolTip">
     <string>Run at maximal speed, skip visualization for 100 msec</string>

@@ -72,7 +72,8 @@ SOURCES += \
     gotosymboldialog.cpp \
     cop0dock.cpp \
     hinttabledelegate.cpp \
-    coreview/minimux.cpp
+    coreview/minimux.cpp \
+    srceditor.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -115,7 +116,8 @@ HEADERS += \
     gotosymboldialog.h \
     cop0dock.h \
     hinttabledelegate.h \
-    coreview/minimux.h
+    coreview/minimux.h \
+    srceditor.h
 
 wasm: SOURCES += \
     qhtml5file_html5.cpp

@@ -38,6 +38,9 @@
 #include <QPrinter>
 #include <QPrintDialog>
 #endif
+#include <QFile>
+#include <QFileInfo>
+#include <QMessageBox>
 
 #include "mainwindow.h"
 #include "aboutdialog.h"
@@ -48,6 +51,7 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     machine = nullptr;
     corescene = nullptr;
+    current_srceditor = nullptr;
     coreview_shown = true;
     settings = new QSettings("CTU", "QtMips");
 
@@ -55,9 +59,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     ui->setupUi(this);
     setWindowTitle("QtMips");
 
+    central_window = new QTabWidget(this);
+    this->setCentralWidget(central_window);
+
     // Prepare empty core view
     coreview  = new GraphicsView(this);
-    this->setCentralWidget(coreview);
+    central_window->addTab(coreview, "Core");
     // Create/prepare other widgets
     ndialog = new NewDialog(this, settings);
     registers = new RegistersDock(this);
@@ -92,9 +99,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     // Connect signals from menu
     connect(ui->actionExit, SIGNAL(triggered(bool)), this, SLOT(close()));
-    connect(ui->actionNew, SIGNAL(triggered(bool)), this, SLOT(new_machine()));
+    connect(ui->actionNewMachine, SIGNAL(triggered(bool)), this, SLOT(new_machine()));
     connect(ui->actionReload, SIGNAL(triggered(bool)), this, SLOT(machine_reload()));
     connect(ui->actionPrint, SIGNAL(triggered(bool)), this, SLOT(print_action()));
+    connect(ui->actionNew, SIGNAL(triggered(bool)), this, SLOT(new_source()));
+    connect(ui->actionOpen, SIGNAL(triggered(bool)), this, SLOT(open_source()));
+    connect(ui->actionSave, SIGNAL(triggered(bool)), this, SLOT(save_source()));
+    connect(ui->actionSaveAs, SIGNAL(triggered(bool)), this, SLOT(save_source_as()));
+    connect(ui->actionClose, SIGNAL(triggered(bool)), this, SLOT(close_source()));
     connect(ui->actionShow_Symbol, SIGNAL(triggered(bool)), this, SLOT(show_symbol_dialog()));
     connect(ui->actionRegisters, SIGNAL(triggered(bool)), this, SLOT(show_registers()));
     connect(ui->actionProgram_memory, SIGNAL(triggered(bool)), this, SLOT(show_program()));
@@ -118,6 +130,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     // Restore application state from settings
     restoreState(settings->value("windowState").toByteArray());
     restoreGeometry(settings->value("windowGeometry").toByteArray());
+
+    // Source editor related actions
+    connect(central_window, SIGNAL(currentChanged(int)), this, SLOT(central_tab_changed(int)));
 }
 
 MainWindow::~MainWindow() {
@@ -125,6 +140,7 @@ MainWindow::~MainWindow() {
         delete corescene;
     if (coreview != nullptr)
         delete coreview;
+    delete central_window;
     delete ndialog;
     delete registers;
     delete program;
@@ -150,7 +166,7 @@ void MainWindow::show_hide_coreview(bool show) {
     coreview_shown = show;
     if (!show && (corescene == nullptr))
         return;
-    if (((machine == nullptr) || !show) && (corescene != nullptr)) {
+    if ((machine == nullptr) || !show) {
         delete corescene;
         corescene = nullptr;
         if (coreview != nullptr)
@@ -263,6 +279,8 @@ void MainWindow::new_machine() {
 }
 
 void MainWindow::machine_reload() {
+    if (machine == nullptr)
+        return new_machine();
     bool load_executable = machine->executable_loaded();
     machine::MachineConfig cnf(&machine->config()); // We have to make local copy as create_core will delete current machine
     try {
@@ -432,4 +450,92 @@ void MainWindow::machine_trap(machine::QtMipsException &e) {
     msg.setDetailedText(e.msg(true));
     msg.setWindowTitle("Machine trapped");
     msg.exec();
+}
+
+void MainWindow::setCurrentSrcEditor(SrcEditor *srceditor) {
+    current_srceditor = srceditor;
+    if (srceditor == nullptr) {
+        ui->actionSave->setEnabled(false);
+        ui->actionSaveAs->setEnabled(false);
+        ui->actionClose->setEnabled(false);
+    } else {
+        ui->actionSave->setEnabled(true);
+        ui->actionSaveAs->setEnabled(true);
+        ui->actionClose->setEnabled(true);
+    }
+}
+
+void MainWindow::tab_widget_destroyed(QObject *obj) {
+   if (obj == current_srceditor)
+       setCurrentSrcEditor(nullptr);
+}
+
+void MainWindow::central_tab_changed(int index) {
+    QWidget *widget = central_window->widget(index);
+    SrcEditor *srceditor = dynamic_cast<SrcEditor *>(widget);
+    if (srceditor != nullptr)
+        setCurrentSrcEditor(srceditor);
+}
+
+void MainWindow::new_source() {
+    SrcEditor *editor = new SrcEditor();
+    central_window->addTab(editor, editor->title());
+    central_window->setCurrentWidget(editor);
+    connect(editor, SIGNAL(destroyed(QObject*)), this, SLOT(tab_widget_destroyed(QObject*)));
+}
+
+void MainWindow::open_source() {
+    QString file_name = "";
+
+    file_name = QFileDialog::getOpenFileName(this, tr("Open File"), "", "Source Files (*.asm *.S *.s)");
+
+    if (!file_name.isEmpty()) {
+        SrcEditor *editor = new SrcEditor();
+        if (editor->loadFile(file_name)) {
+            central_window->addTab(editor, editor->title());
+            central_window->setCurrentWidget(editor);
+            connect(editor, SIGNAL(destroyed(QObject*)), this, SLOT(tab_widget_destroyed(QObject*)));
+        } else {
+            QMessageBox::critical(this, "QtMips Error", tr("Cannot open file '%1' for reading.").arg(file_name));
+            delete(editor);
+        }
+    }
+}
+
+void MainWindow::save_source_as() {
+    if (current_srceditor == nullptr)
+       return;
+    QFileDialog fileDialog(this, tr("Save as..."));
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    fileDialog.setDefaultSuffix("s");
+    if (fileDialog.exec() != QDialog::Accepted)
+        return;
+    const QString fn = fileDialog.selectedFiles().first();
+    if (current_srceditor->saveFile(fn)) {
+        int idx = central_window->indexOf(current_srceditor);
+        if (idx >= 0)
+            central_window->setTabText(idx, current_srceditor->title());
+    } else {
+        QMessageBox::critical(this, "QtMips Error", tr("Cannot save file '%1'.").arg(fn));
+    }
+}
+
+void MainWindow::save_source() {
+    if (current_srceditor == nullptr)
+        return;
+    if (current_srceditor->filename().isEmpty())
+        return save_source_as();
+    if (!current_srceditor->saveFile()) {
+        QMessageBox::critical(this, "QtMips Error", tr("Cannot save file '%1'.").arg(current_srceditor->filename()));
+    }
+}
+
+void MainWindow::close_source() {
+    if (current_srceditor == nullptr)
+        return;
+    int idx = central_window->indexOf(current_srceditor);
+    if (idx >= 0)
+        central_window->removeTab(idx);
+    delete current_srceditor;
+    current_srceditor = nullptr;
 }

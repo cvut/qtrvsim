@@ -38,6 +38,7 @@
 
 #include <QMainWindow>
 #include <QSettings>
+#include <QTabWidget>
 #include "ui_MainWindow.h"
 #include "newdialog.h"
 #include "coreview.h"
@@ -52,6 +53,7 @@
 
 #include "qtmipsmachine.h"
 #include "machineconfig.h"
+#include "srceditor.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -70,6 +72,11 @@ public slots:
     void new_machine();
     void machine_reload();
     void print_action();
+    void new_source();
+    void open_source();
+    void save_source();
+    void save_source_as();
+    void close_source();
     void show_registers();
     void show_program();
     void show_memory();
@@ -90,14 +97,18 @@ public slots:
     void machine_status(enum machine::QtMipsMachine::Status st);
     void machine_exit();
     void machine_trap(machine::QtMipsException &e);
+    void central_tab_changed(int index);
+    void tab_widget_destroyed(QObject *obj);
 
 protected:
     void closeEvent(QCloseEvent *event);
+    void setCurrentSrcEditor(SrcEditor  *srceditor);
 
 private:
     Ui::MainWindow *ui;
 
     NewDialog *ndialog;
+    QTabWidget *central_window;
 
     GraphicsView *coreview;
     CoreViewScene *corescene;
@@ -111,6 +122,7 @@ private:
     LcdDisplayDock *lcd_display;
     Cop0Dock *cop0dock;
     bool coreview_shown;
+    SrcEditor  *current_srceditor;
 
 
     QActionGroup *speed_group;
