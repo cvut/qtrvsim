@@ -38,6 +38,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QVector>
 
 #include "machinedefs.h"
 
@@ -73,6 +74,30 @@ enum InstructionFlags {
     IMF_EXCEPTION  = 1L<<22, /**< Instruction causes synchronous exception */
     IMF_STOP_IF    = 1L<<23, /**< Stop instruction fetch until instruction processed */
 };
+
+struct RelocExpression {
+    inline RelocExpression(std::int32_t location, QString expression, std::int64_t offset, std::int64_t min,
+                           std::int64_t max, unsigned lsb_bit, unsigned bits, unsigned shift) {
+        this->location = location;
+        this->expression = expression;
+        this->offset = offset;
+        this->min = min;
+        this->max = max;
+        this->lsb_bit = lsb_bit;
+        this->bits = bits;
+        this->shift = shift;
+    }
+    std::int32_t  location;
+    QString       expression;
+    std::int64_t  offset;
+    std::int64_t  min;
+    std::int64_t  max;
+    unsigned      lsb_bit;
+    unsigned      bits;
+    unsigned      shift;
+};
+
+typedef QVector<RelocExpression *> RelocExpressionList;
 
 class Instruction {
 public:
@@ -117,7 +142,8 @@ public:
 
     QString to_str(std::int32_t inst_addr = 0) const;
 
-    static Instruction from_string(QString str, bool *pok = nullptr, std::uint32_t inst_addr = 0);
+    static Instruction from_string(QString str, bool *pok = nullptr,
+                           std::uint32_t inst_addr = 0, RelocExpressionList *reloc = nullptr);
 private:
     std::uint32_t dt;
 };

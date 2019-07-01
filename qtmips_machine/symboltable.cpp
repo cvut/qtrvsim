@@ -66,6 +66,15 @@ void SymbolTable::add_symbol(QString name, std::uint32_t value, std::uint32_t si
     map_name_to_symbol.insert(name, p_ste);
 }
 
+void SymbolTable::remove_symbol(QString name) {
+    SymbolTableEntry *p_ste = map_name_to_symbol.value(name);
+    if (p_ste == nullptr)
+        return;
+    map_name_to_symbol.remove(name);
+    map_value_to_symbol.remove(p_ste->value, p_ste);
+    delete p_ste;
+}
+
 bool SymbolTable::name_to_value(std::uint32_t &value, QString name) const {
     SymbolTableEntry *p_ste = map_name_to_symbol.value(name);
     if (p_ste == nullptr) {

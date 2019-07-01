@@ -77,6 +77,7 @@ public slots:
     void save_source();
     void save_source_as();
     void close_source();
+    void compile_source();
     void show_registers();
     void show_program();
     void show_memory();
@@ -123,7 +124,6 @@ private:
     Cop0Dock *cop0dock;
     bool coreview_shown;
     SrcEditor  *current_srceditor;
-
 
     QActionGroup *speed_group;
 

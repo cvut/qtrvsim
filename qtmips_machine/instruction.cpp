@@ -1039,7 +1039,34 @@ static int parse_reg_from_string(QString str, uint *chars_taken = nullptr)
     return res;
 }
 
-Instruction Instruction::from_string(QString str, bool *pok, uint32_t inst_addr) {
+static void reloc_append(RelocExpressionList *reloc, QString fl, uint32_t inst_addr,
+                    std::int64_t offset, const ArgumentDesc *adesc, uint *chars_taken = nullptr) {
+    uint bits = IMF_SUB_GET_BITS(adesc->loc);
+    uint shift = IMF_SUB_GET_SHIFT(adesc->loc);
+    QString expression = "";
+    QString allowed_operators = "+-/*";
+    int i = 0;
+    for (; i < fl.size(); i++) {
+        QChar ch = fl.at(i);
+        if (ch.isSpace())
+            continue;
+        if (ch.isLetterOrNumber())
+            expression.append(ch);
+        else if (allowed_operators.indexOf(ch) >= 0)
+            expression.append(ch);
+        else
+            break;
+    }
+
+    reloc->append(new RelocExpression(inst_addr, expression, offset,
+                    adesc->min, adesc->max, shift, bits, adesc->shift));
+    if (chars_taken != nullptr) {
+        *chars_taken = i;
+    }
+}
+
+Instruction Instruction::from_string(QString str, bool *pok, uint32_t inst_addr,
+                                     RelocExpressionList *reloc) {
     std::uint32_t code;
     bool ok = false;
 
@@ -1151,7 +1178,7 @@ Instruction Instruction::from_string(QString str, bool *pok, uint32_t inst_addr)
                     FALLTROUGH
                 case 'o':
                 case 'n':
-                    {
+                    if(fl.at(0).isDigit() || (reloc == nullptr)) {
                         int i;
                         // Qt functions are limited, toLongLong would be usable
                         // but does not return information how many characters
@@ -1167,20 +1194,26 @@ Instruction Instruction::from_string(QString str, bool *pok, uint32_t inst_addr)
                         else
                             val += std::strtoull(p, &r, 0);
                         chars_taken = r - p;
+                    } else {
+                        reloc_append(reloc, fl, val, inst_addr, adesc, &chars_taken);
+                        val = 0;
                     }
                     break;
                 case 'a':
-                    {
+                    val -= (inst_addr + 4) & 0xf0000000;
+                    if(fl.at(0).isDigit() || (reloc == nullptr)) {
                         int i;
                         char cstr[fl.count() + 1];
                         for (i = 0; i < fl.count(); i++)
                             cstr[i] = fl.at(i).toLatin1();
                         cstr[i] = 0;
                         p = cstr;
-                        val -= (inst_addr + 4) & 0xf0000000;
                         val += std::strtoull(p, &r, 0);
                         chars_taken = r - p;
                         break;
+                    } else {
+                        reloc_append(reloc, fl, val, inst_addr, adesc, &chars_taken);
+                        val = 0;
                     }
                 }
                 if (chars_taken <= 0) {

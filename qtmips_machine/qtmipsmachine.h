@@ -70,12 +70,15 @@ public:
     const Cache *cache_program();
     const Cache *cache_data();
     Cache *cache_data_rw();
+    void cache_sync();
     const  PhysAddrSpace *physical_address_space();
     PhysAddrSpace *physical_address_space_rw();
     SerialPort *serial_port();
     PeripSpiLed *peripheral_spi_led();
     LcdDisplay *peripheral_lcd_display();
     const SymbolTable *symbol_table();
+    void set_symbol(QString name, std::uint32_t value, std::uint32_t size,
+                    unsigned char info = 0, unsigned char other = 0);
     const Core *core();
     const CoreSingle *core_singe();
     const CorePipelined *core_pipelined();

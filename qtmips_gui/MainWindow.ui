@@ -101,6 +101,7 @@
     <addaction name="separator"/>
     <addaction name="actionRestart"/>
     <addaction name="actionShow_Symbol"/>
+    <addaction name="actionCompileSource"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -234,6 +235,20 @@
    </property>
    <property name="toolTip">
     <string>Close source</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionCompileSource">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Compile Source</string>
+   </property>
+   <property name="toolTip">
+    <string>Compile source and update memory</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+C</string>

@@ -65,6 +65,7 @@ public:
 
     void add_symbol(QString name, std::uint32_t value, std::uint32_t size,
               unsigned char info = 0, unsigned char other = 0);
+    void remove_symbol(QString name);
     QStringList *names() const;
 public slots:
     bool name_to_value(std::uint32_t &value, QString name) const;

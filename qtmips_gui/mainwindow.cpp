@@ -41,6 +41,8 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QTextDocument>
+#include <iostream>
 
 #include "mainwindow.h"
 #include "aboutdialog.h"
@@ -107,6 +109,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->actionSave, SIGNAL(triggered(bool)), this, SLOT(save_source()));
     connect(ui->actionSaveAs, SIGNAL(triggered(bool)), this, SLOT(save_source_as()));
     connect(ui->actionClose, SIGNAL(triggered(bool)), this, SLOT(close_source()));
+    connect(ui->actionCompileSource, SIGNAL(triggered(bool)), this, SLOT(compile_source()));
     connect(ui->actionShow_Symbol, SIGNAL(triggered(bool)), this, SLOT(show_symbol_dialog()));
     connect(ui->actionRegisters, SIGNAL(triggered(bool)), this, SLOT(show_registers()));
     connect(ui->actionProgram_memory, SIGNAL(triggered(bool)), this, SLOT(show_program()));
@@ -458,10 +461,12 @@ void MainWindow::setCurrentSrcEditor(SrcEditor *srceditor) {
         ui->actionSave->setEnabled(false);
         ui->actionSaveAs->setEnabled(false);
         ui->actionClose->setEnabled(false);
+        ui->actionCompileSource->setEnabled(false);
     } else {
         ui->actionSave->setEnabled(true);
         ui->actionSaveAs->setEnabled(true);
         ui->actionClose->setEnabled(true);
+        ui->actionCompileSource->setEnabled(true);
     }
 }
 
@@ -539,4 +544,56 @@ void MainWindow::close_source() {
     if (idx >= 0)
         central_window->removeTab(idx);
     delete editor;
+}
+
+void MainWindow::compile_source() {
+    if (current_srceditor == nullptr)
+        return;
+    if (machine == nullptr) {
+        QMessageBox::critical(this, "QtMips Error", tr("No machine to store program."));
+        return;
+    }
+    machine::MemoryAccess *mem = machine->physical_address_space_rw();
+    if (mem == nullptr) {
+        QMessageBox::critical(this, "QtMips Error", tr("No physical addresspace to store program."));
+        return;
+    }
+    machine->cache_sync();
+    SrcEditor *editor = current_srceditor;
+    QTextDocument *doc = editor->document();
+    std::uint32_t address = 0x80020000;
+    machine::RelocExpressionList reloc;
+
+    int ln = 1;
+    bool ok;
+    for ( QTextBlock block = doc->begin(); block.isValid(); block = block.next(), ln++) {
+        int pos;
+        QString label = "";
+        QString line = block.text();
+        pos = line.indexOf("#");
+        if (pos >= 0)
+            line.truncate(pos);
+        pos = line.indexOf(";");
+        if (pos >= 0)
+            line.truncate(pos);
+        line = line.simplified();
+        pos = line.indexOf(":");
+        if (pos >= 0) {
+            label = line.mid(0, pos);
+            line = line.mid(pos + 1).trimmed();
+            machine->set_symbol(label, address, 4);
+        }
+        machine::Instruction inst;
+        inst = machine::Instruction::from_string(line, &ok, address, &reloc);
+        mem->write_word(address, inst.data());
+        address += 4;
+    }
+    foreach(machine::RelocExpression *r, reloc) {
+        QString e = r->expression;
+
+
+        delete r;
+    }
+
+    emit mem->external_change_notify(mem, 0, 0xffffffff, true);
 }
