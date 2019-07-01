@@ -533,9 +533,10 @@ void MainWindow::save_source() {
 void MainWindow::close_source() {
     if (current_srceditor == nullptr)
         return;
-    int idx = central_window->indexOf(current_srceditor);
+    SrcEditor *editor = current_srceditor;
+    setCurrentSrcEditor(nullptr);
+    int idx = central_window->indexOf(editor);
     if (idx >= 0)
         central_window->removeTab(idx);
-    delete current_srceditor;
-    current_srceditor = nullptr;
+    delete editor;
 }
