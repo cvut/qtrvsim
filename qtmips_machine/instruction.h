@@ -144,8 +144,17 @@ public:
 
     QString to_str(std::int32_t inst_addr = 0) const;
 
-    static Instruction from_string(QString str, bool *pok = nullptr,
-                           std::uint32_t inst_addr = 0, RelocExpressionList *reloc = nullptr, int line = 0);
+    static ssize_t code_from_string(std::uint32_t *code, size_t buffsize,
+                           QString inst_base, QVector<QString> &inst_fields,
+                           std::uint32_t inst_addr = 0,
+                           RelocExpressionList *reloc = nullptr,
+                           int line = 0, bool pseudo_opt = false);
+
+    static ssize_t code_from_string(std::uint32_t *code, size_t buffsize,
+                           QString str, std::uint32_t inst_addr = 0,
+                           RelocExpressionList *reloc = nullptr,
+                           int line = 0, bool pseudo_opt = false);
+
     bool update(std::int64_t val, RelocExpression *relocexp);
 private:
     std::uint32_t dt;

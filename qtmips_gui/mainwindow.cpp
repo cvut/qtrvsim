@@ -606,16 +606,21 @@ void MainWindow::compile_source() {
         }
         if (line.isEmpty())
             continue;
-        machine::Instruction inst;
-        inst = machine::Instruction::from_string(line, &ok, address, &reloc, ln);
-        if (!ok) {
+        std::uint32_t inst[2] = {0, 0};
+        ssize_t size = machine::Instruction::code_from_string(inst, 8, line,
+                                                 address, &reloc, ln, true);
+        if (size < 0) {
             QMessageBox::critical(this, "QtMips Error",
                                   tr("line %1 instruction %2 parse error.")
                                   .arg(QString::number(ln), line));
+            ok = false;
             break;
         }
-        mem->write_word(address, inst.data());
-        address += 4;
+        std::uint32_t *p = inst;
+        for (ssize_t l = 0; l < size; l += 4) {
+            mem->write_word(address, *(p++));
+            address += 4;
+        }
     }
     SymbolTableDb symtab(machine->symbol_table());
     foreach(machine::RelocExpression *r, reloc) {

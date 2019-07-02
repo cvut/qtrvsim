@@ -1066,71 +1066,21 @@ static void reloc_append(RelocExpressionList *reloc, QString fl, uint32_t inst_a
     }
 }
 
-Instruction Instruction::from_string(QString str, bool *pok, uint32_t inst_addr,
-                                     RelocExpressionList *reloc, int line) {
-    std::uint32_t code;
-    bool ok = false;
-
-    if (str_to_instruction_code_map.isEmpty())
-        instruction_from_string_build_base();
-
-    QString inst_base = "";
-    QVector<QString> inst_fields(0);
-    bool prev_white = true;
-    bool act_white;
-    bool comma = false;
-    bool next_comma = false;
+ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
+                       QString inst_base, QVector<QString> &inst_fields,
+                       std::uint32_t inst_addr, RelocExpressionList *reloc,
+                       int line, bool pseudo_opt)
+{
     int field = 0;
-    bool error = false;
-
-    for (int k = 0, l = 0; k < str.count() + 1; k++, prev_white = act_white) {
-        if (next_comma)
-            comma = true;
-        next_comma = false;
-        if (k >= str.count()) {
-            act_white = true;
-        } else {
-            act_white = str.at(k).isSpace();
-            if (str.at(k) == ',')
-                next_comma = act_white = true;
-        }
-
-        if (prev_white and !act_white)
-            l = k;
-        if (!prev_white and act_white) {
-            if (inst_base.count() == 0) {
-                if (comma) {
-                    error = true;
-                    break;
-                }
-                inst_base = str.mid(l, k - l).toUpper();
-            } else {
-                if ((field && !comma) || (!field && comma)) {
-                    error = true;
-                    break;
-                }
-                inst_fields.append(str.mid(l, k - l));
-                comma = false;
-                field++;
-            }
-            l = k;
-        }
-    }
-
-    if (error) {
-        if (pok != nullptr)
-            *pok = true;
-        return Instruction(0);
-    }
-
+    std::uint32_t inst_code = 0;
     auto i = str_to_instruction_code_map.lowerBound(inst_base);
     for (; ; i++) {
         if (i == str_to_instruction_code_map.end())
             break;
         if (i.key() != inst_base)
             break;
-        code = i.value();
-        const InstructionMap &im = InstructionMapFind(code);
+        inst_code = i.value();
+        const InstructionMap &im = InstructionMapFind(inst_code);
 
         field = 0;
         foreach (const QString &arg, im.args) {
@@ -1241,7 +1191,7 @@ Instruction Instruction::from_string(QString str, bool *pok, uint32_t inst_addr,
                     }
                 }
                 val = (val & ((1 << bits) - 1)) << shift;
-                code += val;
+                inst_code += val;
                 fl = fl.mid(chars_taken);
             }
             if (field == -1)
@@ -1250,17 +1200,77 @@ Instruction Instruction::from_string(QString str, bool *pok, uint32_t inst_addr,
         if (field != inst_fields.count())
             continue;
 
-        if (pok != nullptr)
-            *pok = true;
-
-        return Instruction(code);
+        if (buffsize >= 4)
+            *code = inst_code;
+        return 4;
     }
 
-    if (str.toUpper() == "NOP")
-        ok = true;
-    if (pok != nullptr)
-        *pok = ok;
-    return Instruction(0);
+    ssize_t ret = -1;
+    inst_code = 0;
+    if ((inst_base == "NOP") && (inst_fields.size() == 0)) {
+        inst_code = 0;
+        ret = 4;
+    }
+    if (buffsize >= 4)
+        *code = inst_code;
+    return ret;
+}
+
+ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
+                       QString str, std::uint32_t inst_addr,
+                       RelocExpressionList *reloc, int line, bool pseudo_opt)
+{
+    if (str_to_instruction_code_map.isEmpty())
+        instruction_from_string_build_base();
+
+    QString inst_base = "";
+    QVector<QString> inst_fields(0);
+    bool prev_white = true;
+    bool act_white;
+    bool comma = false;
+    bool next_comma = false;
+    int field = 0;
+    bool error = false;
+
+    for (int k = 0, l = 0; k < str.count() + 1; k++, prev_white = act_white) {
+        if (next_comma)
+            comma = true;
+        next_comma = false;
+        if (k >= str.count()) {
+            act_white = true;
+        } else {
+            act_white = str.at(k).isSpace();
+            if (str.at(k) == ',')
+                next_comma = act_white = true;
+        }
+
+        if (prev_white and !act_white)
+            l = k;
+        if (!prev_white and act_white) {
+            if (inst_base.count() == 0) {
+                if (comma) {
+                    error = true;
+                    break;
+                }
+                inst_base = str.mid(l, k - l).toUpper();
+            } else {
+                if ((field && !comma) || (!field && comma)) {
+                    error = true;
+                    break;
+                }
+                inst_fields.append(str.mid(l, k - l));
+                comma = false;
+                field++;
+            }
+            l = k;
+        }
+    }
+
+    if (error)
+         return -1;
+
+    return code_from_string(code, buffsize, inst_base, inst_fields, inst_addr,
+                            reloc, line, pseudo_opt);
 }
 
 bool Instruction::update(std::int64_t val, RelocExpression *relocexp) {
