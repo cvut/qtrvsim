@@ -52,7 +52,7 @@ public:
     LogicBlock(QVector<QString> name);
     ~LogicBlock();
 
-    QRectF boundingRect() const;
+    QRectF boundingRect() const override;
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
     void setPos(qreal x, qreal y);
@@ -79,7 +79,7 @@ private:
     QPointF con_pos(qreal x, qreal y);
 
 protected:
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 };
 
 }

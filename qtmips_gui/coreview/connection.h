@@ -78,7 +78,7 @@ class Connection : public QGraphicsObject {
 public:
     Connection(const Connector *start, const Connector *end);
 
-    QRectF boundingRect() const;
+    QRectF boundingRect() const override;
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
     void setHasText(bool has);

@@ -49,7 +49,7 @@ public:
     Registers();
     ~Registers();
 
-    QRectF boundingRect() const;
+    QRectF boundingRect() const override;
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
     void setPos(qreal x, qreal y);
@@ -65,7 +65,7 @@ signals:
     void open_registers();
 
 protected:
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 
 private:
     Connector *con_read1, *con_read1_reg, *con_read2, *con_read2_reg;

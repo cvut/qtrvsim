@@ -48,7 +48,7 @@ class MultiText : public QGraphicsObject {
 public:
     MultiText(QMap<std::uint32_t, QString> value_map, bool nonzero_red = false);
 
-    QRectF boundingRect() const;
+    QRectF boundingRect() const override;
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 public slots:

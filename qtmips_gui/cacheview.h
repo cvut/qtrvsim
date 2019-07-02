@@ -48,7 +48,7 @@ class CacheAddressBlock : public QGraphicsObject {
 public:
     CacheAddressBlock(const machine::Cache *cache, unsigned width);
 
-    QRectF boundingRect() const;
+    QRectF boundingRect() const override;
 
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
@@ -69,7 +69,7 @@ public:
     CacheViewBlock(const machine::Cache *cache, unsigned block, bool last);
     ~CacheViewBlock();
 
-    QRectF boundingRect() const;
+    QRectF boundingRect() const override;
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 

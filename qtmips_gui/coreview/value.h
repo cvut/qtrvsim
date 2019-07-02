@@ -49,7 +49,7 @@ public:
           unsigned init_val = 0, unsigned base = 16,
           QChar fillchr = '0', bool frame = true);
 
-    QRectF boundingRect() const;
+    QRectF boundingRect() const override;
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 public slots:

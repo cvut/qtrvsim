@@ -50,7 +50,7 @@ class Memory : public QGraphicsObject  {
 public:
     Memory(bool cache_used, const machine::Cache *cache);
 
-    QRectF boundingRect() const;
+    QRectF boundingRect() const override;
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 signals:
@@ -62,7 +62,7 @@ private slots:
     void cache_miss_update(unsigned);
 
 protected:
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 
     void set_type(const QString&);
 
