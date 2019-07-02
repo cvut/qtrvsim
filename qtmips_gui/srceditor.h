@@ -39,6 +39,7 @@
 #include <QTextEdit>
 #include <QString>
 #include "qtmipsmachine.h"
+#include "highlighter.h"
 
 class SrcEditor : public QTextEdit {
     Q_OBJECT
@@ -54,6 +55,7 @@ public:
     bool loadByteArray(const QByteArray &content, QString filename = "");
     void setCursorToLine(int ln);
 private:
+    Highlighter *highlighter;
     void setup_common();
     QString fname;
     QString tname;

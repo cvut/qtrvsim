@@ -1073,6 +1073,9 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                        std::uint32_t inst_addr, RelocExpressionList *reloc,
                        int line, bool pseudo_opt, int options)
 {
+    if (str_to_instruction_code_map.isEmpty())
+        instruction_from_string_build_base();
+
     int field = 0;
     std::uint32_t inst_code = 0;
     auto i = str_to_instruction_code_map.lowerBound(inst_base);
@@ -1320,4 +1323,15 @@ bool Instruction::update(std::int64_t val, RelocExpression *relocexp) {
     }
     dt |= (val << relocexp->lsb_bit) & mask;
     return true;
+}
+
+void Instruction::append_recognized_instructions(QStringList &list) {
+    if (str_to_instruction_code_map.isEmpty())
+        instruction_from_string_build_base();
+
+    foreach (const QString &str, str_to_instruction_code_map.keys())
+        list.append(str);
+    list.append("LA");
+    list.append("LI");
+    list.append("NOP");
 }

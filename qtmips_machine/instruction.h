@@ -38,6 +38,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QVector>
 
 #include "machinedefs.h"
@@ -159,6 +160,8 @@ public:
                            int line = 0, bool pseudo_opt = false, int options = 0);
 
     bool update(std::int64_t val, RelocExpression *relocexp);
+
+    static void append_recognized_instructions(QStringList &list);
 private:
     std::uint32_t dt;
 };
