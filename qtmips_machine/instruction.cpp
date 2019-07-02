@@ -38,6 +38,8 @@
 #include <QStringList>
 #include <QChar>
 #include <iostream>
+#include <cctype>
+#include <cstring>
 #include "instruction.h"
 #include "alu.h"
 #include "memory.h"
@@ -1095,6 +1097,7 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
             }
             QString fl = inst_fields.at(field++);
             foreach (QChar ao, arg) {
+                bool need_reloc = false;
                 const char *p;
                 char *r;
                 uint a = ao.toLatin1();
@@ -1116,6 +1119,7 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                 }
                 uint bits = IMF_SUB_GET_BITS(adesc->loc);
                 uint shift = IMF_SUB_GET_SHIFT(adesc->loc);
+                int shift_right = adesc->shift;
                 std::uint64_t val = 0;
                 uint chars_taken = 0;
 
@@ -1132,7 +1136,9 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                     FALLTROUGH
                 case 'o':
                 case 'n':
+                    shift_right += options & 0xff;
                     if(fl.at(0).isDigit() || (reloc == nullptr)) {
+                        std::uint64_t num_val;
                         int i;
                         // Qt functions are limited, toLongLong would be usable
                         // but does not return information how many characters
@@ -1144,31 +1150,51 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                         cstr[i] = 0;
                         p = cstr;
                         if (adesc->min < 0)
-                            val += std::strtoll(p, &r, 0);
+                            num_val = std::strtoll(p, &r, 0);
                         else
-                            val += std::strtoull(p, &r, 0);
+                            num_val = std::strtoull(p, &r, 0);
+                        while(*r && std::isspace(*r))
+                            r++;
+                        if (*r && std::strchr("+-/*|&^~", *r))
+                            need_reloc = true;
+                        else
+                            val += num_val;
                         chars_taken = r - p;
                     } else {
+                        need_reloc = true;
+                    }
+                    if (need_reloc && (reloc != nullptr)) {
                         reloc_append(reloc, fl, inst_addr, val, adesc, &chars_taken, line, options);
                         val = 0;
                     }
                     break;
                 case 'a':
+                    shift_right += options & 0xff;
                     val -= (inst_addr + 4) & 0xf0000000;
                     if(fl.at(0).isDigit() || (reloc == nullptr)) {
+                        std::uint64_t num_val;
                         int i;
                         char cstr[fl.count() + 1];
                         for (i = 0; i < fl.count(); i++)
                             cstr[i] = fl.at(i).toLatin1();
                         cstr[i] = 0;
                         p = cstr;
-                        val += std::strtoull(p, &r, 0);
+                        num_val = std::strtoull(p, &r, 0);
+                        while(*r && std::isspace(*r))
+                            r++;
+                        if (*r && std::strchr("+-/*|&^~", *r))
+                            need_reloc = true;
+                        else
+                            val += num_val;
                         chars_taken = r - p;
-                        break;
                     } else {
+                        need_reloc = true;
+                    }
+                    if (need_reloc && (reloc != nullptr)) {
                         reloc_append(reloc, fl, val, inst_addr, adesc, &chars_taken, line, options);
                         val = 0;
                     }
+                    break;
                 }
                 if (chars_taken <= 0) {
                     field = -1;
@@ -1179,7 +1205,6 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                     field = -1;
                     break;
                 }
-                int shift_right = adesc->shift + (options & 0xff);
                 if (adesc->min >= 0)
                    val = (val >> shift_right) ;
                 else
