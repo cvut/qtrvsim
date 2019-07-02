@@ -214,7 +214,9 @@ LcdDisplay *QtMipsMachine::peripheral_lcd_display() {
     return perip_lcd_display;
 }
 
-const SymbolTable *QtMipsMachine::symbol_table() {
+const SymbolTable *QtMipsMachine::symbol_table(bool create) {
+    if (create && (symtab == nullptr))
+        symtab = new SymbolTable;
     return symtab;
 }
 

@@ -51,6 +51,11 @@
 #include "gotosymboldialog.h"
 #include "fixmatheval.h"
 
+#ifdef __EMSCRIPTEN__
+#include <QFileInfo>
+#include "qhtml5file.h"
+#endif
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     machine = nullptr;
     corescene = nullptr;
@@ -491,6 +496,7 @@ void MainWindow::new_source() {
 }
 
 void MainWindow::open_source() {
+#ifndef __EMSCRIPTEN__
     QString file_name = "";
 
     file_name = QFileDialog::getOpenFileName(this, tr("Open File"), "", "Source Files (*.asm *.S *.s)");
@@ -506,6 +512,15 @@ void MainWindow::open_source() {
             delete(editor);
         }
     }
+#else
+    QHtml5File::load("*", [&](const QByteArray &content, const QString &filename) {
+            SrcEditor *editor = new SrcEditor();
+            editor->loadByteArray(content, filename);
+            central_window->addTab(editor, editor->title());
+            central_window->setCurrentWidget(editor);
+            connect(editor, SIGNAL(destroyed(QObject*)), this, SLOT(tab_widget_destroyed(QObject*)));
+            });
+#endif
 }
 
 void MainWindow::save_source_as() {
@@ -584,7 +599,7 @@ static std::uint64_t string_to_uint64(QString str, int base,
 }
 
 void MainWindow::compile_source() {
-    SymbolTableDb symtab(machine->symbol_table());
+    SymbolTableDb symtab(machine->symbol_table(true));
     int error_line = 0;
     if (current_srceditor == nullptr)
         return;

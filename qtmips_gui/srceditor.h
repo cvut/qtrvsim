@@ -51,8 +51,10 @@ public:
     QString title();
     bool loadFile(QString filename);
     bool saveFile(QString filename = "");
+    bool loadByteArray(const QByteArray &content, QString filename = "");
     void setCursorToLine(int ln);
 private:
+    void setup_common();
     QString fname;
     QString tname;
 };

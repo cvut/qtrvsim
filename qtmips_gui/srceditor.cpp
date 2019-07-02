@@ -41,12 +41,21 @@
 
 #include "srceditor.h"
 
-SrcEditor::SrcEditor(QWidget *parent) : Super(parent) {
+void SrcEditor::setup_common() {
+    QFont font;
+    font.setFamily("Courier");
+    font.setFixedPitch(true);
+    font.setPointSize(10);
+    setFont(font);
     tname = "Unknown";
 }
 
+SrcEditor::SrcEditor(QWidget *parent) : Super(parent) {
+    setup_common();
+}
+
 SrcEditor::SrcEditor(const QString &text, QWidget *parent) : Super(text, parent) {
-    tname = "Unknown";
+    setup_common();
 }
 
 SrcEditor::~SrcEditor() {
@@ -72,6 +81,16 @@ bool SrcEditor::loadFile(QString filename) {
     } else {
         return false;
     }
+}
+
+bool SrcEditor::loadByteArray(const QByteArray &content, QString filename) {
+    setPlainText(QString::fromUtf8(content.data(), content.size()));
+    if (!filename.isEmpty()) {
+        QFileInfo fi(filename);
+        fname = filename;
+        tname = fi.fileName();
+    }
+    return true;
 }
 
 bool SrcEditor::saveFile(QString filename) {
