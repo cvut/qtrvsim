@@ -145,6 +145,9 @@
    <addaction name="ips10"/>
    <addaction name="ipsUnlimited"/>
    <addaction name="ipsMax"/>
+   <addaction name="actionOpen"/>
+   <addaction name="actionSave"/>
+   <addaction name="actionCompileSource"/>
   </widget>
   <action name="actionNewMachine">
    <property name="icon">
@@ -243,6 +246,10 @@
   <action name="actionCompileSource">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/compfile-256.png</normaloff>:/icons/compfile-256.png</iconset>
    </property>
    <property name="text">
     <string>Compile Source</string>
