@@ -121,6 +121,14 @@ Optimal is use of plain mips-elf GCC toolchain.
 For more refer to the [supported executable formats](docs/exec-formats-and-tools.md)
 documentation in the [`docs`](docs) projects subdirectory.
 
+Integrated Assembler
+-------------------
+Basic integrated assembler is included in the simulator. It recognizes basic
+MIPS instructions and `la` and `li` pseudo instructions. Only `.word` and
+assembler `.orig` directives are recognized for now. Addresses are assigned
+to labels/symbols which are stored in symbol table. Addition, substraction,
+multiplication, divide and bitwise and and or are recognized.
+
 Tests
 -----
 There are two types of tests in QtMips. One type are unit tests for simulator it
