@@ -231,7 +231,11 @@ bool FmeExpression::parse(const QString &expression, QString &error) {
             FmeValue (*binary_op)(FmeValue &a, FmeValue &b) = nullptr;
             FmeValue (*unary_op)(FmeValue &a) = nullptr;
             int prio = base_prio;
-            if (ch == '-') {
+
+            if (ch == '~') {
+                prio += 90;
+                unary_op = [](FmeValue &a) -> FmeValue { return ~a; };
+            } else if (ch == '-') {
                 if (is_unary) {
                     prio += 90;
                     unary_op = [](FmeValue &a) -> FmeValue { return -a; };
@@ -255,6 +259,9 @@ bool FmeExpression::parse(const QString &expression, QString &error) {
                 prio += 10;
             } else if (ch == '&') {
                 binary_op = [](FmeValue &a, FmeValue &b) -> FmeValue { return a & b; };
+                prio += 15;
+            } else if (ch == '^') {
+                binary_op = [](FmeValue &a, FmeValue &b) -> FmeValue { return a ^ b; };
                 prio += 15;
             } else if (ch == '(') {
                 base_prio += 100;

@@ -1045,7 +1045,7 @@ static void reloc_append(RelocExpressionList *reloc, QString fl, uint32_t inst_a
     uint bits = IMF_SUB_GET_BITS(adesc->loc);
     uint shift = IMF_SUB_GET_SHIFT(adesc->loc);
     QString expression = "";
-    QString allowed_operators = "+-/*|&";
+    QString allowed_operators = "+-/*|&^~";
     int i = 0;
     for (; i < fl.size(); i++) {
         QChar ch = fl.at(i);
