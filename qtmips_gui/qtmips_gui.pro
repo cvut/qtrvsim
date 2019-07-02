@@ -73,7 +73,8 @@ SOURCES += \
     cop0dock.cpp \
     hinttabledelegate.cpp \
     coreview/minimux.cpp \
-    srceditor.cpp
+    srceditor.cpp \
+    fixmatheval.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -117,7 +118,8 @@ HEADERS += \
     cop0dock.h \
     hinttabledelegate.h \
     coreview/minimux.h \
-    srceditor.h
+    srceditor.h \
+    fixmatheval.h
 
 wasm: SOURCES += \
     qhtml5file_html5.cpp

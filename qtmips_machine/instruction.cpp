@@ -1040,7 +1040,8 @@ static int parse_reg_from_string(QString str, uint *chars_taken = nullptr)
 }
 
 static void reloc_append(RelocExpressionList *reloc, QString fl, uint32_t inst_addr,
-                    std::int64_t offset, const ArgumentDesc *adesc, uint *chars_taken = nullptr) {
+                    std::int64_t offset, const ArgumentDesc *adesc, uint *chars_taken = nullptr,
+                    int line = 0) {
     uint bits = IMF_SUB_GET_BITS(adesc->loc);
     uint shift = IMF_SUB_GET_SHIFT(adesc->loc);
     QString expression = "";
@@ -1059,21 +1060,19 @@ static void reloc_append(RelocExpressionList *reloc, QString fl, uint32_t inst_a
     }
 
     reloc->append(new RelocExpression(inst_addr, expression, offset,
-                    adesc->min, adesc->max, shift, bits, adesc->shift));
+                    adesc->min, adesc->max, shift, bits, adesc->shift, line));
     if (chars_taken != nullptr) {
         *chars_taken = i;
     }
 }
 
 Instruction Instruction::from_string(QString str, bool *pok, uint32_t inst_addr,
-                                     RelocExpressionList *reloc) {
+                                     RelocExpressionList *reloc, int line) {
     std::uint32_t code;
     bool ok = false;
 
     if (str_to_instruction_code_map.isEmpty())
         instruction_from_string_build_base();
-
-    str = str.toUpper();
 
     QString inst_base = "";
     QVector<QString> inst_fields(0);
@@ -1104,7 +1103,7 @@ Instruction Instruction::from_string(QString str, bool *pok, uint32_t inst_addr,
                     error = true;
                     break;
                 }
-                inst_base = str.mid(l, k - l);
+                inst_base = str.mid(l, k - l).toUpper();
             } else {
                 if ((field && !comma) || (!field && comma)) {
                     error = true;
@@ -1195,7 +1194,7 @@ Instruction Instruction::from_string(QString str, bool *pok, uint32_t inst_addr,
                             val += std::strtoull(p, &r, 0);
                         chars_taken = r - p;
                     } else {
-                        reloc_append(reloc, fl, val, inst_addr, adesc, &chars_taken);
+                        reloc_append(reloc, fl, inst_addr, val, adesc, &chars_taken, line);
                         val = 0;
                     }
                     break;
@@ -1212,7 +1211,7 @@ Instruction Instruction::from_string(QString str, bool *pok, uint32_t inst_addr,
                         chars_taken = r - p;
                         break;
                     } else {
-                        reloc_append(reloc, fl, val, inst_addr, adesc, &chars_taken);
+                        reloc_append(reloc, fl, val, inst_addr, adesc, &chars_taken, line);
                         val = 0;
                     }
                 }
@@ -1257,9 +1256,16 @@ Instruction Instruction::from_string(QString str, bool *pok, uint32_t inst_addr,
         return Instruction(code);
     }
 
-    if (str == "NOP")
+    if (str.toUpper() == "NOP")
         ok = true;
     if (pok != nullptr)
         *pok = ok;
     return Instruction(0);
+}
+
+bool Instruction::update(std::int64_t val, RelocExpression *relocexp) {
+    std::int64_t mask = ((1 << relocexp->bits) - 1) << relocexp->lsb_bit;
+    dt &= ~ mask;
+    dt |= (((val + relocexp->offset) >> relocexp->shift) << relocexp->lsb_bit) & mask;
+    return true;
 }

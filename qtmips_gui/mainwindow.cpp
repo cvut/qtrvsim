@@ -49,6 +49,7 @@
 #include "ossyscall.h"
 #include "fontsize.h"
 #include "gotosymboldialog.h"
+#include "fixmatheval.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     machine = nullptr;
@@ -546,6 +547,26 @@ void MainWindow::close_source() {
     delete editor;
 }
 
+class SymbolTableDb : public fixmatheval::FmeSymbolDb {
+public:
+    SymbolTableDb(const machine::SymbolTable *symtab);
+    virtual bool getValue(fixmatheval::FmeValue &value, QString name) override;
+private:
+    const machine::SymbolTable *symtab;
+};
+
+SymbolTableDb::SymbolTableDb(const machine::SymbolTable *symtab) {
+    this->symtab = symtab;
+}
+
+bool SymbolTableDb::getValue(fixmatheval::FmeValue &value, QString name) {
+    std::uint32_t val;
+    if (!symtab->name_to_value(val, name))
+        return false;
+    value = val;
+    return true;
+}
+
 void MainWindow::compile_source() {
     if (current_srceditor == nullptr)
         return;
@@ -565,7 +586,7 @@ void MainWindow::compile_source() {
     machine::RelocExpressionList reloc;
 
     int ln = 1;
-    bool ok;
+    bool ok = true;
     for ( QTextBlock block = doc->begin(); block.isValid(); block = block.next(), ln++) {
         int pos;
         QString label = "";
@@ -583,16 +604,47 @@ void MainWindow::compile_source() {
             line = line.mid(pos + 1).trimmed();
             machine->set_symbol(label, address, 4);
         }
+        if (line.isEmpty())
+            continue;
         machine::Instruction inst;
-        inst = machine::Instruction::from_string(line, &ok, address, &reloc);
+        inst = machine::Instruction::from_string(line, &ok, address, &reloc, ln);
+        if (!ok) {
+            QMessageBox::critical(this, "QtMips Error",
+                                  tr("line %1 instruction %2 parse error.")
+                                  .arg(QString::number(ln), line));
+            break;
+        }
         mem->write_word(address, inst.data());
         address += 4;
     }
+    SymbolTableDb symtab(machine->symbol_table());
     foreach(machine::RelocExpression *r, reloc) {
-        QString e = r->expression;
-
-
-        delete r;
+        QString error;
+        fixmatheval::FmeExpression expression;
+        if (ok && !expression.parse(r->expression, error)) {
+            QMessageBox::critical(this, "QtMips Error",
+                                  tr("expression parse error %1 at line %2, expression %3.")
+                                  .arg(error, QString::number(r->line), expression.dump()));
+            ok = false;
+        } else {
+            fixmatheval::FmeValue value;
+            if (ok && !expression.eval(value, &symtab, error)) {
+                QMessageBox::critical(this, "QtMips Error",
+                                      tr("expression evalution error %1 at line %2 , expression %3.")
+                                      .arg(error, QString::number(r->line), expression.dump()));
+                ok = false;
+            } else {
+                if (false)
+                    QMessageBox::information(this, "QtMips info",
+                                         expression.dump() + " -> " + QString::number(value));
+                machine::Instruction inst(mem->read_word(r->location, true));
+                inst.update(value, r);
+                mem->write_word(r->location, inst.data());
+            }
+        }
+    }
+    while (!reloc.isEmpty()) {
+        delete reloc.takeFirst();
     }
 
     emit mem->external_change_notify(mem, 0, 0xffffffff, true);
