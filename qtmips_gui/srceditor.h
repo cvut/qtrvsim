@@ -51,6 +51,7 @@ public:
     QString title();
     bool loadFile(QString filename);
     bool saveFile(QString filename = "");
+    void setCursorToLine(int ln);
 private:
     QString fname;
     QString tname;

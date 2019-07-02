@@ -77,7 +77,8 @@ enum InstructionFlags {
 
 struct RelocExpression {
     inline RelocExpression(std::int32_t location, QString expression, std::int64_t offset, std::int64_t min,
-                           std::int64_t max, unsigned lsb_bit, unsigned bits, unsigned shift, int line) {
+                           std::int64_t max, unsigned lsb_bit, unsigned bits, unsigned shift, int line,
+                           int options) {
         this->location = location;
         this->expression = expression;
         this->offset = offset;
@@ -87,6 +88,7 @@ struct RelocExpression {
         this->bits = bits;
         this->shift = shift;
         this->line = line;
+        this->options = options;
     }
     std::int32_t  location;
     QString       expression;
@@ -97,6 +99,7 @@ struct RelocExpression {
     unsigned      bits;
     unsigned      shift;
     int           line;
+    int           options;
 };
 
 typedef QVector<RelocExpression *> RelocExpressionList;
@@ -148,12 +151,12 @@ public:
                            QString inst_base, QVector<QString> &inst_fields,
                            std::uint32_t inst_addr = 0,
                            RelocExpressionList *reloc = nullptr,
-                           int line = 0, bool pseudo_opt = false);
+                           int line = 0, bool pseudo_opt = false, int options = 0);
 
     static ssize_t code_from_string(std::uint32_t *code, size_t buffsize,
                            QString str, std::uint32_t inst_addr = 0,
                            RelocExpressionList *reloc = nullptr,
-                           int line = 0, bool pseudo_opt = false);
+                           int line = 0, bool pseudo_opt = false, int options = 0);
 
     bool update(std::int64_t val, RelocExpression *relocexp);
 private:

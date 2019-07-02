@@ -36,6 +36,8 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QTextDocumentWriter>
+#include <QTextCursor>
+#include <QTextBlock>
 
 #include "srceditor.h"
 
@@ -86,4 +88,9 @@ bool SrcEditor::saveFile(QString filename) {
         tname = fi.fileName();
     }
     return success;
+}
+
+void SrcEditor::setCursorToLine(int ln) {
+    QTextCursor cursor(document()->findBlockByLineNumber(ln-1));
+    setTextCursor(cursor);
 }

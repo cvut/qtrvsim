@@ -112,7 +112,7 @@ class FmeExpression : public FmeNode {
 public:
     FmeExpression();
     virtual ~FmeExpression();
-    virtual bool parse(QString &expression, QString &error);
+    virtual bool parse(const QString &expression, QString &error);
     virtual bool eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) override;
     virtual bool insert(FmeNode *node) override;
     virtual FmeNode *child() override;

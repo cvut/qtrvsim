@@ -1041,11 +1041,11 @@ static int parse_reg_from_string(QString str, uint *chars_taken = nullptr)
 
 static void reloc_append(RelocExpressionList *reloc, QString fl, uint32_t inst_addr,
                     std::int64_t offset, const ArgumentDesc *adesc, uint *chars_taken = nullptr,
-                    int line = 0) {
+                    int line = 0, int options = 0) {
     uint bits = IMF_SUB_GET_BITS(adesc->loc);
     uint shift = IMF_SUB_GET_SHIFT(adesc->loc);
     QString expression = "";
-    QString allowed_operators = "+-/*";
+    QString allowed_operators = "+-/*|&";
     int i = 0;
     for (; i < fl.size(); i++) {
         QChar ch = fl.at(i);
@@ -1060,16 +1060,18 @@ static void reloc_append(RelocExpressionList *reloc, QString fl, uint32_t inst_a
     }
 
     reloc->append(new RelocExpression(inst_addr, expression, offset,
-                    adesc->min, adesc->max, shift, bits, adesc->shift, line));
+                  adesc->min, adesc->max, shift, bits, adesc->shift, line, options));
     if (chars_taken != nullptr) {
         *chars_taken = i;
     }
 }
 
+#define CFS_OPTION_SILENT_MASK 0x100
+
 ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                        QString inst_base, QVector<QString> &inst_fields,
                        std::uint32_t inst_addr, RelocExpressionList *reloc,
-                       int line, bool pseudo_opt)
+                       int line, bool pseudo_opt, int options)
 {
     int field = 0;
     std::uint32_t inst_code = 0;
@@ -1144,7 +1146,7 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                             val += std::strtoull(p, &r, 0);
                         chars_taken = r - p;
                     } else {
-                        reloc_append(reloc, fl, inst_addr, val, adesc, &chars_taken, line);
+                        reloc_append(reloc, fl, inst_addr, val, adesc, &chars_taken, line, options);
                         val = 0;
                     }
                     break;
@@ -1161,7 +1163,7 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                         chars_taken = r - p;
                         break;
                     } else {
-                        reloc_append(reloc, fl, val, inst_addr, adesc, &chars_taken, line);
+                        reloc_append(reloc, fl, val, inst_addr, adesc, &chars_taken, line, options);
                         val = 0;
                     }
                 }
@@ -1169,25 +1171,29 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                     field = -1;
                     break;
                 }
-                if (val & ((1 << adesc->shift) - 1)) {
+                if ((val & ((1 << adesc->shift) - 1)) &&
+                    !(options & CFS_OPTION_SILENT_MASK)) {
                     field = -1;
                     break;
                 }
+                int shift_right = adesc->shift + (options & 0xff);
                 if (adesc->min >= 0)
-                   val = (val >> adesc->shift) ;
+                   val = (val >> shift_right) ;
                 else
-                    val = (std::uint64_t)((std::int64_t)val >> adesc->shift) ;
-                if (adesc->min < 0) {
-                    if (((std::int64_t)val < adesc->min) ||
-                        ((std::int64_t)val > adesc->max)) {
-                        field = -1;
-                        break;
-                    }
-                } else {
-                    if ((val < (std::uint64_t)adesc->min) ||
-                        (val > (std::uint64_t)adesc->max)) {
-                        field = -1;
-                        break;
+                    val = (std::uint64_t)((std::int64_t)val >> shift_right) ;
+                if (!(options & CFS_OPTION_SILENT_MASK)) {
+                    if (adesc->min < 0) {
+                        if (((std::int64_t)val < adesc->min) ||
+                            ((std::int64_t)val > adesc->max)) {
+                            field = -1;
+                            break;
+                        }
+                    } else {
+                        if ((val < (std::uint64_t)adesc->min) ||
+                            (val > (std::uint64_t)adesc->max)) {
+                            field = -1;
+                            break;
+                        }
                     }
                 }
                 val = (val & ((1 << bits) - 1)) << shift;
@@ -1210,6 +1216,19 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
     if ((inst_base == "NOP") && (inst_fields.size() == 0)) {
         inst_code = 0;
         ret = 4;
+    } else if (pseudo_opt) {
+        if (((inst_base == "LA") || (inst_base == "LI")) && (inst_fields.size() == 2)) {
+            if(code_from_string(code, buffsize, "LUI", inst_fields,
+                             inst_addr, reloc, line, false,
+                             CFS_OPTION_SILENT_MASK + 16) < 0)
+                return -1;
+            inst_fields.insert(1, "$0");
+            if (code_from_string(code + 1, buffsize - 4, "ORI", inst_fields,
+                             inst_addr + 4, reloc, line, false,
+                             CFS_OPTION_SILENT_MASK + 0) < 0)
+                return -1;
+            return 8;
+        }
     }
     if (buffsize >= 4)
         *code = inst_code;
@@ -1218,7 +1237,7 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
 
 ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                        QString str, std::uint32_t inst_addr,
-                       RelocExpressionList *reloc, int line, bool pseudo_opt)
+                       RelocExpressionList *reloc, int line, bool pseudo_opt, int options)
 {
     if (str_to_instruction_code_map.isEmpty())
         instruction_from_string_build_base();
@@ -1270,12 +1289,35 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
          return -1;
 
     return code_from_string(code, buffsize, inst_base, inst_fields, inst_addr,
-                            reloc, line, pseudo_opt);
+                            reloc, line, pseudo_opt, options);
 }
 
 bool Instruction::update(std::int64_t val, RelocExpression *relocexp) {
-    std::int64_t mask = ((1 << relocexp->bits) - 1) << relocexp->lsb_bit;
+    std::int64_t mask = (((std::int64_t)1 << relocexp->bits) - 1) << relocexp->lsb_bit;
     dt &= ~ mask;
-    dt |= (((val + relocexp->offset) >> relocexp->shift) << relocexp->lsb_bit) & mask;
+    val += relocexp->offset;
+    if ((val & ((1 << relocexp->shift) - 1)) &&
+        !(relocexp->options & CFS_OPTION_SILENT_MASK)) {
+        return false;
+    }
+    int shift_right = relocexp->shift + (relocexp->options & 0xff);
+    if (relocexp->min >= 0)
+        val = (val >> shift_right) ;
+    else
+        val = (std::uint64_t)((std::int64_t)val >> shift_right);
+    if (!(relocexp->options & CFS_OPTION_SILENT_MASK)) {
+        if (relocexp->min < 0) {
+            if (((std::int64_t)val < relocexp->min) ||
+                ((std::int64_t)val > relocexp->max)) {
+                return false;
+            }
+        } else {
+            if (((std::uint64_t)val < (std::uint64_t)relocexp->min) ||
+                ((std::uint64_t)val > (std::uint64_t)relocexp->max)) {
+                return false;
+            }
+        }
+    }
+    dt |= (val << relocexp->lsb_bit) & mask;
     return true;
 }

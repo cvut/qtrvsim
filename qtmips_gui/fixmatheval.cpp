@@ -186,7 +186,7 @@ FmeExpression::FmeExpression() : FmeNode(0) {
     root = nullptr;
 }
 
-bool FmeExpression::parse(QString &expression, QString &error) {
+bool FmeExpression::parse(const QString &expression, QString &error) {
     delete root;
     int base_prio = 100;
     root = nullptr;

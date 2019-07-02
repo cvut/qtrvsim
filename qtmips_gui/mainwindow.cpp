@@ -567,7 +567,25 @@ bool SymbolTableDb::getValue(fixmatheval::FmeValue &value, QString name) {
     return true;
 }
 
+static std::uint64_t string_to_uint64(QString str, int base,
+                                      int *chars_taken = nullptr) {
+    int i;
+    std::int64_t val;
+    char *p, *r;
+    char cstr[str.count() + 1];
+    for (i = 0; i < str.count(); i++)
+        cstr[i] = str.at(i).toLatin1();
+    cstr[i] = 0;
+    p = cstr;
+    val = std::strtoll(p, &r, base);
+    if (chars_taken != nullptr)
+        *chars_taken = r - p;
+    return val;
+}
+
 void MainWindow::compile_source() {
+    SymbolTableDb symtab(machine->symbol_table());
+    int error_line = 0;
     if (current_srceditor == nullptr)
         return;
     if (machine == nullptr) {
@@ -586,7 +604,6 @@ void MainWindow::compile_source() {
     machine::RelocExpressionList reloc;
 
     int ln = 1;
-    bool ok = true;
     for ( QTextBlock block = doc->begin(); block.isValid(); block = block.next(), ln++) {
         int pos;
         QString label = "";
@@ -606,14 +623,53 @@ void MainWindow::compile_source() {
         }
         if (line.isEmpty())
             continue;
+        QString op = line.split(" ").at(0).toUpper();
+        if (op == ".ORG") {
+            bool ok;
+            QString error;
+            fixmatheval::FmeExpression expression;
+            fixmatheval::FmeValue value;
+            ok = expression.parse(line.mid(op.size()), error);
+            if (ok)
+                ok = expression.eval(value, &symtab, error);
+            if (!ok) {
+                error_line = ln;
+                editor->setCursorToLine(error_line);
+                QMessageBox::critical(this, "QtMips Error",
+                                  tr("line %1 .orig %2 parse error.")
+                                  .arg(QString::number(ln), line));
+                break;
+            }
+            address = value;
+            continue;
+        }
+        if (op == ".WORD") {
+            QString error;
+            foreach (QString s, line.mid(op.size()).split(",")) {
+                s = s.simplified();
+                std::uint32_t val = 0;
+                int chars_taken;
+                val = string_to_uint64(s, 0, &chars_taken);
+                if (chars_taken != s.size()) {
+                    val = 0;
+                    reloc.append(new machine::RelocExpression(address, s, 0,
+                                 -0xffffffff, 0xffffffff, 0, 32, 0, ln, 0));
+                }
+                mem->write_word(address, val);
+                address += 4;
+            }
+            continue;
+        }
+
         std::uint32_t inst[2] = {0, 0};
         ssize_t size = machine::Instruction::code_from_string(inst, 8, line,
                                                  address, &reloc, ln, true);
         if (size < 0) {
+            error_line = ln;
+            editor->setCursorToLine(error_line);
             QMessageBox::critical(this, "QtMips Error",
-                                  tr("line %1 instruction %2 parse error.")
-                                  .arg(QString::number(ln), line));
-            ok = false;
+                              tr("line %1 instruction %2 parse error.")
+                              .arg(QString::number(ln), line));
             break;
         }
         std::uint32_t *p = inst;
@@ -622,28 +678,41 @@ void MainWindow::compile_source() {
             address += 4;
         }
     }
-    SymbolTableDb symtab(machine->symbol_table());
     foreach(machine::RelocExpression *r, reloc) {
         QString error;
         fixmatheval::FmeExpression expression;
-        if (ok && !expression.parse(r->expression, error)) {
-            QMessageBox::critical(this, "QtMips Error",
+        if (!expression.parse(r->expression, error)) {
+            if (!error_line) {
+                error_line = r->line;
+                editor->setCursorToLine(error_line);
+                QMessageBox::critical(this, "QtMips Error",
                                   tr("expression parse error %1 at line %2, expression %3.")
                                   .arg(error, QString::number(r->line), expression.dump()));
-            ok = false;
+            }
         } else {
             fixmatheval::FmeValue value;
-            if (ok && !expression.eval(value, &symtab, error)) {
-                QMessageBox::critical(this, "QtMips Error",
+            if (!expression.eval(value, &symtab, error)) {
+                if (!error_line) {
+                    error_line = r->line;
+                    editor->setCursorToLine(error_line);
+                    QMessageBox::critical(this, "QtMips Error",
                                       tr("expression evalution error %1 at line %2 , expression %3.")
                                       .arg(error, QString::number(r->line), expression.dump()));
-                ok = false;
+                }
             } else {
                 if (false)
                     QMessageBox::information(this, "QtMips info",
                                          expression.dump() + " -> " + QString::number(value));
                 machine::Instruction inst(mem->read_word(r->location, true));
-                inst.update(value, r);
+                if (!inst.update(value, r)) {
+                    if (!error_line) {
+                        error_line = r->line;
+                        editor->setCursorToLine(error_line);
+                        QMessageBox::critical(this, "QtMips Error",
+                                          tr("instruction update error %1 at line %2, expression %3.")
+                                          .arg(error, QString::number(r->line), expression.dump()));
+                    }
+                }
                 mem->write_word(r->location, inst.data());
             }
         }
