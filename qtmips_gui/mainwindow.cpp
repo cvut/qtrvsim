@@ -142,6 +142,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     // Source editor related actions
     connect(central_window, SIGNAL(currentChanged(int)), this, SLOT(central_tab_changed(int)));
+
+    foreach (QString file_name, settings->value("openSrcFiles").toStringList()) {
+        if (file_name.isEmpty())
+            continue;
+        SrcEditor *editor = new SrcEditor();
+        if (editor->loadFile(file_name)) {
+            add_src_editor_to_tabs(editor);
+        } else {
+            delete(editor);
+        }
+    }
 }
 
 MainWindow::~MainWindow() {
@@ -488,11 +499,32 @@ void MainWindow::central_tab_changed(int index) {
         setCurrentSrcEditor(srceditor);
 }
 
-void MainWindow::new_source() {
-    SrcEditor *editor = new SrcEditor();
+void MainWindow::add_src_editor_to_tabs(SrcEditor *editor) {
     central_window->addTab(editor, editor->title());
     central_window->setCurrentWidget(editor);
     connect(editor, SIGNAL(destroyed(QObject*)), this, SLOT(tab_widget_destroyed(QObject*)));
+}
+
+void MainWindow::update_open_file_list() {
+    QStringList open_src_files;
+    if ((central_window == nullptr) || (settings == nullptr))
+        return;
+    for (int i = 0; i < central_window->count(); i++) {
+        QWidget *w = central_window->widget(i);
+        SrcEditor *editor = dynamic_cast<SrcEditor *>(w);
+        if (editor == nullptr)
+            continue;
+        if (editor->filename() == "")
+            continue;
+        open_src_files.append(editor->filename());
+    }
+    settings->setValue("openSrcFiles", open_src_files);
+}
+
+void MainWindow::new_source() {
+    SrcEditor *editor = new SrcEditor();
+    add_src_editor_to_tabs(editor);
+    update_open_file_list();
 }
 
 void MainWindow::open_source() {
@@ -504,9 +536,7 @@ void MainWindow::open_source() {
     if (!file_name.isEmpty()) {
         SrcEditor *editor = new SrcEditor();
         if (editor->loadFile(file_name)) {
-            central_window->addTab(editor, editor->title());
-            central_window->setCurrentWidget(editor);
-            connect(editor, SIGNAL(destroyed(QObject*)), this, SLOT(tab_widget_destroyed(QObject*)));
+            add_src_editor_to_tabs(editor);
         } else {
             QMessageBox::critical(this, "QtMips Error", tr("Cannot open file '%1' for reading.").arg(file_name));
             delete(editor);
@@ -516,11 +546,10 @@ void MainWindow::open_source() {
     QHtml5File::load("*", [&](const QByteArray &content, const QString &filename) {
             SrcEditor *editor = new SrcEditor();
             editor->loadByteArray(content, filename);
-            central_window->addTab(editor, editor->title());
-            central_window->setCurrentWidget(editor);
-            connect(editor, SIGNAL(destroyed(QObject*)), this, SLOT(tab_widget_destroyed(QObject*)));
+            add_src_editor_to_tabs(editor);
             });
 #endif
+    update_open_file_list();
 }
 
 void MainWindow::save_source_as() {
@@ -539,6 +568,7 @@ void MainWindow::save_source_as() {
     } else {
         QMessageBox::critical(this, "QtMips Error", tr("Cannot save file '%1'.").arg(fn));
     }
+    update_open_file_list();
 }
 
 void MainWindow::save_source() {

@@ -132,6 +132,8 @@ private:
     machine::QtMipsMachine *machine; // Current simulated machine
 
     void show_dockwidget(QDockWidget *w, Qt::DockWidgetArea area = Qt::RightDockWidgetArea);
+    void add_src_editor_to_tabs(SrcEditor *editor);
+    void update_open_file_list();
 };
 
 #endif // MAINWINDOW_H
