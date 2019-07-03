@@ -65,6 +65,7 @@ public slots:
     void execute_inst_addr(std::uint32_t addr);
     void memory_inst_addr(std::uint32_t addr);
     void writeback_inst_addr(std::uint32_t addr);
+    void report_error(QString error);
 private:
     enum FollowSource {
         FOLLOWSRC_NONE,

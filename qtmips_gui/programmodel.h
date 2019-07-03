@@ -93,6 +93,8 @@ public:
         STAGEADDR_COUNT,
     };
 
+signals:
+    void report_error(QString error);
 public slots:
     void setup(machine::QtMipsMachine *machine);
     void check_for_updates();

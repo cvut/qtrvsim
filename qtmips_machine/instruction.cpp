@@ -1071,10 +1071,11 @@ static void reloc_append(RelocExpressionList *reloc, QString fl, uint32_t inst_a
 #define CFS_OPTION_SILENT_MASK 0x100
 
 ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
-                       QString inst_base, QVector<QString> &inst_fields,
+                       QString inst_base, QStringList &inst_fields, QString &error,
                        std::uint32_t inst_addr, RelocExpressionList *reloc,
                        int line, bool pseudo_opt, int options)
 {
+    const char *err = "unknown instruction";
     if (str_to_instruction_code_map.isEmpty())
         instruction_from_string_build_base();
 
@@ -1092,6 +1093,7 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
         field = 0;
         foreach (const QString &arg, im.args) {
             if (field >= inst_fields.count()) {
+                err = "number of arguments does not match";
                 field = -1;
                 break;
             }
@@ -1107,10 +1109,12 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                 const ArgumentDesc *adesc = argdesbycode[a];
                 if (adesc == nullptr) {
                    if (!fl.count()) {
+                       err = "empty argument encountered";
                        field = -1;
                        break;
                    }
                    if (fl.at(0) != ao) {
+                       err = "argument does not match instruction template";
                        field = -1;
                        break;
                    }
@@ -1197,11 +1201,13 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                     break;
                 }
                 if (chars_taken <= 0) {
+                    err = "argument parse error";
                     field = -1;
                     break;
                 }
                 if ((val & ((1 << adesc->shift) - 1)) &&
                     !(options & CFS_OPTION_SILENT_MASK)) {
+                    err = "low bits of argument has to be zero";
                     field = -1;
                     break;
                 }
@@ -1213,12 +1219,14 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                     if (adesc->min < 0) {
                         if (((std::int64_t)val < adesc->min) ||
                             ((std::int64_t)val > adesc->max)) {
+                            err = "argument range exceed";
                             field = -1;
                             break;
                         }
                     } else {
                         if ((val < (std::uint64_t)adesc->min) ||
                             (val > (std::uint64_t)adesc->max)) {
+                            err = "argument range exceed";
                             field = -1;
                             break;
                         }
@@ -1230,6 +1238,11 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
             }
             if (field == -1)
                 break;
+            if (fl.trimmed() != "") {
+                err = "excessive characters in argument";
+                field = -1;
+                break;
+            }
         }
         if (field != inst_fields.count())
             continue;
@@ -1246,77 +1259,58 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
         ret = 4;
     } else if (pseudo_opt) {
         if (((inst_base == "LA") || (inst_base == "LI")) && (inst_fields.size() == 2)) {
-            if(code_from_string(code, buffsize, "LUI", inst_fields,
+            if(code_from_string(code, buffsize, "LUI", inst_fields, error,
                              inst_addr, reloc, line, false,
-                             CFS_OPTION_SILENT_MASK + 16) < 0)
+                             CFS_OPTION_SILENT_MASK + 16) < 0) {
+                error = QString("error in LUI element of " + inst_base);
                 return -1;
+            }
             inst_fields.insert(1, "$0");
-            if (code_from_string(code + 1, buffsize - 4, "ORI", inst_fields,
+            if (code_from_string(code + 1, buffsize - 4, "ORI", inst_fields, error,
                              inst_addr + 4, reloc, line, false,
-                             CFS_OPTION_SILENT_MASK + 0) < 0)
+                             CFS_OPTION_SILENT_MASK + 0) < 0) {
+                error = QString("error in ORI element of " + inst_base);
                 return -1;
+            }
             return 8;
         }
     }
     if (buffsize >= 4)
         *code = inst_code;
+    if (ret < 0) {
+        error = err;
+    }
     return ret;
 }
 
 ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
-                       QString str, std::uint32_t inst_addr,
+                       QString str, QString &error, std::uint32_t inst_addr,
                        RelocExpressionList *reloc, int line, bool pseudo_opt, int options)
 {
-    if (str_to_instruction_code_map.isEmpty())
-        instruction_from_string_build_base();
+    int k = 0, l;
+    while (k < str.count()) {
+        if (!str.at(k).isSpace())
+            break;
+        k++;
+    }
+    l = k;
+    while (l < str.count()) {
+        if (!str.at(l).isLetterOrNumber())
+            break;
+        l++;
+    }
+    QString inst_base = str.mid(k, l - k).toUpper();
+    str = str.mid(l + 1).trimmed();
+    QStringList inst_fields;
+    if (str.count())
+        inst_fields = str.split(",");
 
-    QString inst_base = "";
-    QVector<QString> inst_fields(0);
-    bool prev_white = true;
-    bool act_white;
-    bool comma = false;
-    bool next_comma = false;
-    int field = 0;
-    bool error = false;
-
-    for (int k = 0, l = 0; k < str.count() + 1; k++, prev_white = act_white) {
-        if (next_comma)
-            comma = true;
-        next_comma = false;
-        if (k >= str.count()) {
-            act_white = true;
-        } else {
-            act_white = str.at(k).isSpace();
-            if (str.at(k) == ',')
-                next_comma = act_white = true;
-        }
-
-        if (prev_white and !act_white)
-            l = k;
-        if (!prev_white and act_white) {
-            if (inst_base.count() == 0) {
-                if (comma) {
-                    error = true;
-                    break;
-                }
-                inst_base = str.mid(l, k - l).toUpper();
-            } else {
-                if ((field && !comma) || (!field && comma)) {
-                    error = true;
-                    break;
-                }
-                inst_fields.append(str.mid(l, k - l));
-                comma = false;
-                field++;
-            }
-            l = k;
-        }
+    if (!inst_base.count()) {
+        error = "empty instruction field";
+        return -1;
     }
 
-    if (error)
-         return -1;
-
-    return code_from_string(code, buffsize, inst_base, inst_fields, inst_addr,
+    return code_from_string(code, buffsize, inst_base, inst_fields, error, inst_addr,
                             reloc, line, pseudo_opt, options);
 }
 

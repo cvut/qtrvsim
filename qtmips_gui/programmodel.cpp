@@ -256,6 +256,7 @@ bool ProgramModel::setData(const QModelIndex & index, const QVariant & value, in
     if (role == Qt::EditRole)
     {
         bool ok;
+        QString error;
         std::uint32_t address;
         std::uint32_t data;
         machine::MemoryAccess *mem;
@@ -274,8 +275,12 @@ bool ProgramModel::setData(const QModelIndex & index, const QVariant & value, in
             mem->write_word(address, data);
             break;
         case 3:
-            if (machine::Instruction::code_from_string(&data, 4, value.toString(), address) < 0)
+            if (machine::Instruction::code_from_string(&data, 4, value.toString(),
+                                                       error, address) < 0) {
+                emit report_error(tr("instruction 1 parse error - %2.").arg(error));
+
                 return false;
+            }
             mem->write_word(address, data);
             break;
         default:

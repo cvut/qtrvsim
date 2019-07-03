@@ -620,6 +620,7 @@ void MainWindow::compile_source() {
 
     int ln = 1;
     for ( QTextBlock block = doc->begin(); block.isValid(); block = block.next(), ln++) {
+        QString error;
         int pos;
         QString label = "";
         QString line = block.text();
@@ -641,7 +642,6 @@ void MainWindow::compile_source() {
         QString op = line.split(" ").at(0).toUpper();
         if (op == ".ORG") {
             bool ok;
-            QString error;
             fixmatheval::FmeExpression expression;
             fixmatheval::FmeValue value;
             ok = expression.parse(line.mid(op.size()), error);
@@ -659,7 +659,6 @@ void MainWindow::compile_source() {
             continue;
         }
         if (op == ".WORD") {
-            QString error;
             foreach (QString s, line.mid(op.size()).split(",")) {
                 s = s.simplified();
                 std::uint32_t val = 0;
@@ -677,14 +676,14 @@ void MainWindow::compile_source() {
         }
 
         std::uint32_t inst[2] = {0, 0};
-        ssize_t size = machine::Instruction::code_from_string(inst, 8, line,
+        ssize_t size = machine::Instruction::code_from_string(inst, 8, line, error,
                                                  address, &reloc, ln, true);
         if (size < 0) {
             error_line = ln;
             editor->setCursorToLine(error_line);
             QMessageBox::critical(this, "QtMips Error",
-                              tr("line %1 instruction %2 parse error.")
-                              .arg(QString::number(ln), line));
+                              tr("line %1 instruction %2 parse error - %3.")
+                              .arg(QString::number(ln), line, error));
             break;
         }
         std::uint32_t *p = inst;

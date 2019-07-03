@@ -149,13 +149,13 @@ public:
     QString to_str(std::int32_t inst_addr = 0) const;
 
     static ssize_t code_from_string(std::uint32_t *code, size_t buffsize,
-                           QString inst_base, QVector<QString> &inst_fields,
+                           QString inst_base, QStringList &inst_fields, QString &error,
                            std::uint32_t inst_addr = 0,
                            RelocExpressionList *reloc = nullptr,
                            int line = 0, bool pseudo_opt = false, int options = 0);
 
     static ssize_t code_from_string(std::uint32_t *code, size_t buffsize,
-                           QString str, std::uint32_t inst_addr = 0,
+                           QString str, QString &error, std::uint32_t inst_addr = 0,
                            RelocExpressionList *reloc = nullptr,
                            int line = 0, bool pseudo_opt = false, int options = 0);
 

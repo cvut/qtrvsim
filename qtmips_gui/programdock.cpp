@@ -39,6 +39,8 @@
 #include <QTableView>
 #include <QComboBox>
 #include <QHeaderView>
+#include <QMessageBox>
+
 #include "programdock.h"
 #include "programmodel.h"
 #include "programtableview.h"
@@ -103,6 +105,7 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
             program_model, SLOT(toggle_hw_break(QModelIndex)));
     connect(this, SIGNAL(stage_addr_changed(uint,std::uint32_t)),
             program_model, SLOT(update_stage_addr(uint,std::uint32_t)));
+    connect(program_model, SIGNAL(report_error(QString)), this, SLOT(report_error(QString)));
 }
 
 void ProgramDock::setup(machine::QtMipsMachine *machine) {
@@ -165,4 +168,8 @@ void ProgramDock::writeback_inst_addr(std::uint32_t addr) {
 void ProgramDock::update_follow_position() {
     if (follow_source != FOLLOWSRC_NONE)
         emit focus_addr(follow_addr[follow_source]);
+}
+
+void ProgramDock::report_error(QString error) {
+    QMessageBox::critical(this, "QtMips Error", error);
 }
