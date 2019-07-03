@@ -574,21 +574,29 @@ void MainWindow::save_source_as() {
         QMessageBox::critical(this, "QtMips Error", tr("Cannot save file '%1'.").arg(fn));
         return;
     }
+    int idx = central_window->indexOf(current_srceditor);
+    if (idx >= 0)
+        central_window->setTabText(idx, current_srceditor->title());
+    update_open_file_list();
 #else
     QInputDialog *dialog = new QInputDialog(this);
     dialog->setWindowTitle("Select file name");
     dialog->setLabelText("File name:");
     dialog->setTextValue("unknow.s");
     dialog->setMinimumSize(QSize(200, 100));
-    int ret = dialog->exec();
-    QString text = dialog->textValue();
-    delete dialog;
-    if (!ret || text.isEmpty())
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    connect(dialog, SIGNAL(textValueSelected(QString)),
+            this, SLOT(src_editor_save_to(QString)));
+    dialog->open();
+#endif
+}
+
+void MainWindow::src_editor_save_to(QString filename) {
+    if (filename.isEmpty() || (current_srceditor == nullptr))
         return;
-    current_srceditor->setFileName(text);
+    current_srceditor->setFileName(filename);
     if (!current_srceditor->filename().isEmpty())
             save_source();
-#endif
     int idx = central_window->indexOf(current_srceditor);
     if (idx >= 0)
         central_window->setTabText(idx, current_srceditor->title());

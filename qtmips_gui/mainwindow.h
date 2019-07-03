@@ -106,6 +106,9 @@ protected:
     void closeEvent(QCloseEvent *event);
     void setCurrentSrcEditor(SrcEditor  *srceditor);
 
+protected slots:
+    void src_editor_save_to(QString filename);
+
 private:
     Ui::MainWindow *ui;
 
