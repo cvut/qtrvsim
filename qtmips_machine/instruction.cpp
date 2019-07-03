@@ -1051,12 +1051,13 @@ void instruction_from_string_build_base(const InstructionMap *im = nullptr,
         }
         if (!(im->flags & IMF_SUPPORTED))
             continue;
-        str_to_instruction_code_map.insert(im->name, code);
-       #if 0
         if (im->code != code) {
+#if 0
             printf("code mitchmatch %s computed 0x%08x found 0x%08x\n", im->name, code, im->code);
+#endif
+            continue;
         }
-       #endif
+        str_to_instruction_code_map.insert(im->name, code);
     }
 #if 0
     for (auto i = str_to_instruction_code_map.begin();
@@ -1074,11 +1075,17 @@ static int parse_reg_from_string(QString str, uint *chars_taken = nullptr)
         return -1;
 
     if (str.at(1).isLetter()) {
-        str = str.mid(1);
+        int k = 1;
+        while(k < str.count()) {
+            if (!str.at(k).isLetterOrNumber())
+                break;
+            k++;
+        }
+        str = str.mid(1, k-1);
         for (i = 0 ; i < REGISTER_CODES; i++) {
             if (str == regbycode[i].name) {
                 if (chars_taken != nullptr)
-                   *chars_taken = str.count() + 1;
+                   *chars_taken = k;
                 return regbycode[i].number;
             }
         }
@@ -1235,7 +1242,7 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                     break;
                 case 'a':
                     shift_right += options & 0xff;
-                    val -= (inst_addr + 4) & 0xf0000000;
+                    val -= (inst_addr + 4) & ~(std::int64_t)0x0fffffff;
                     if(fl.at(0).isDigit() || (reloc == nullptr)) {
                         std::uint64_t num_val;
                         int i;
@@ -1256,7 +1263,7 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                         need_reloc = true;
                     }
                     if (need_reloc && (reloc != nullptr)) {
-                        reloc_append(reloc, fl, val, inst_addr, adesc, &chars_taken, line, options);
+                        reloc_append(reloc, fl, inst_addr, val, adesc, &chars_taken, line, options);
                         val = 0;
                     }
                     break;
@@ -1326,7 +1333,7 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                 error = QString("error in LUI element of " + inst_base);
                 return -1;
             }
-            inst_fields.insert(1, "$0");
+            inst_fields.insert(1, inst_fields.at(0));
             if (code_from_string(code + 1, buffsize - 4, "ORI", inst_fields, error,
                              inst_addr + 4, reloc, line, false,
                              CFS_OPTION_SILENT_MASK + 0) < 0) {
@@ -1378,6 +1385,8 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
 bool Instruction::update(std::int64_t val, RelocExpression *relocexp) {
     std::int64_t mask = (((std::int64_t)1 << relocexp->bits) - 1) << relocexp->lsb_bit;
     dt &= ~ mask;
+    if (relocexp->shift)
+        printf("reloc shift\n");
     val += relocexp->offset;
     if ((val & ((1 << relocexp->shift) - 1)) &&
         !(relocexp->options & CFS_OPTION_SILENT_MASK)) {
@@ -1392,7 +1401,9 @@ bool Instruction::update(std::int64_t val, RelocExpression *relocexp) {
         if (relocexp->min < 0) {
             if (((std::int64_t)val < relocexp->min) ||
                 ((std::int64_t)val > relocexp->max)) {
-                return false;
+                if (((std::int64_t)val - 0x100000000 < relocexp->min) ||
+                    ((std::int64_t)val - 0x100000000 > relocexp->max))
+                    return false;
             }
         } else {
             if (((std::uint64_t)val < (std::uint64_t)relocexp->min) ||
