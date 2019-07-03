@@ -72,13 +72,18 @@ QString SrcEditor::title() {
     return tname;
 }
 
+void SrcEditor::setFileName(QString filename) {
+    QFileInfo fi(filename);
+    fname = filename;
+    tname = fi.fileName();
+}
+
+
 bool SrcEditor::loadFile(QString filename) {
     QFile file(filename);
-    QFileInfo fi(filename);
     if (file.open(QFile::ReadOnly | QFile::Text)) {
         setPlainText(file.readAll());
-        fname = filename;
-        tname = fi.fileName();
+        setFileName(filename);
         return true;
     } else {
         return false;
@@ -88,9 +93,7 @@ bool SrcEditor::loadFile(QString filename) {
 bool SrcEditor::loadByteArray(const QByteArray &content, QString filename) {
     setPlainText(QString::fromUtf8(content.data(), content.size()));
     if (!filename.isEmpty()) {
-        QFileInfo fi(filename);
-        fname = filename;
-        tname = fi.fileName();
+        setFileName(filename);
     }
     return true;
 }
@@ -100,14 +103,10 @@ bool SrcEditor::saveFile(QString filename) {
         filename = this->filename();
     if (filename.isEmpty())
         return false;
-    QFileInfo fi(filename);
     QTextDocumentWriter writer(filename);
     writer.setFormat("plaintext");
     bool success = writer.write(document());
-    if (success) {
-        fname = filename;
-        tname = fi.fileName();
-    }
+    setFileName(filename);
     return success;
 }
 

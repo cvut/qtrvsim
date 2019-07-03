@@ -555,6 +555,7 @@ void MainWindow::open_source() {
 void MainWindow::save_source_as() {
     if (current_srceditor == nullptr)
        return;
+#ifndef __EMSCRIPTEN__
     QFileDialog fileDialog(this, tr("Save as..."));
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     fileDialog.setDefaultSuffix("s");
@@ -568,6 +569,17 @@ void MainWindow::save_source_as() {
     } else {
         QMessageBox::critical(this, "QtMips Error", tr("Cannot save file '%1'.").arg(fn));
     }
+#else
+    bool ok;
+    QString text = QInputDialog::getText(this, tr("Select file name"),
+                                             tr("File name:"), QLineEdit::Normal,
+                                             "unknow.s", &ok);
+    if (ok && !text.isEmpty()) {
+        current_srceditor->setFileName(text);
+        if (!current_srceditor->filename().isEmpty())
+            save_source();
+    }
+#endif
     update_open_file_list();
 }
 
@@ -576,9 +588,14 @@ void MainWindow::save_source() {
         return;
     if (current_srceditor->filename().isEmpty())
         return save_source_as();
+#ifndef __EMSCRIPTEN__
     if (!current_srceditor->saveFile()) {
         QMessageBox::critical(this, "QtMips Error", tr("Cannot save file '%1'.").arg(current_srceditor->filename()));
     }
+#else
+     QHtml5File::save(current_srceditor->document()->toPlainText().toUtf8(),
+                      current_srceditor->filename());
+#endif
 }
 
 void MainWindow::close_source() {

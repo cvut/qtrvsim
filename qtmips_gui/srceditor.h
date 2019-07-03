@@ -54,6 +54,7 @@ public:
     bool saveFile(QString filename = "");
     bool loadByteArray(const QByteArray &content, QString filename = "");
     void setCursorToLine(int ln);
+    void setFileName(QString filename);
 private:
     Highlighter *highlighter;
     void setup_common();
