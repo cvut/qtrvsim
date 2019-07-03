@@ -689,6 +689,9 @@ void MainWindow::compile_source() {
         pos = line.indexOf(";");
         if (pos >= 0)
             line.truncate(pos);
+        pos = line.indexOf("//");
+        if (pos >= 0)
+            line.truncate(pos);
         line = line.simplified();
         pos = line.indexOf(":");
         if (pos >= 0) {

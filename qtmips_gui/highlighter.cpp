@@ -47,7 +47,10 @@ Highlighter::Highlighter(QTextDocument *parent)
     keywordFormat.setFontWeight(QFont::Bold);
     const QString keywordPatterns[] = {
         QStringLiteral("\\.org\\b"), QStringLiteral("\\.word\\b"),
-        QStringLiteral("\\.text\\b"), QStringLiteral("\\.data\\b")
+        QStringLiteral("\\.text\\b"), QStringLiteral("\\.data\\b"),
+        QStringLiteral("\\.globl\\b"), QStringLiteral("\\.set\\b"),
+        QStringLiteral("\\.equ\\b"), QStringLiteral("\\.end\\b"),
+        QStringLiteral("\\.ent\\b")
     };
 
     for (const QString &pattern : keywordPatterns) {
@@ -84,9 +87,10 @@ Highlighter::Highlighter(QTextDocument *parent)
     rule.pattern = QRegularExpression(QStringLiteral(";[^\n]*"));
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
-
-    singleLineCommentFormat.setForeground(Qt::red);
     rule.pattern = QRegularExpression(QStringLiteral("#[^\n]*"));
+    rule.format = singleLineCommentFormat;
+    highlightingRules.append(rule);
+    rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
 
