@@ -71,7 +71,7 @@ AboutDialog::AboutDialog(QWidget *parent)
   hl->addWidget(vbox);
 
   QString versionText;
-  versionText = "Version 0.7.0\n";
+  versionText = "Version 0.7.1\n";
 
   vl->addWidget(new QLabel("<span style='font-size:x-large; font-weight:bold;'>Qt Mips - MIPS Architecture Simulator</span>"));
   lbl = new QLabel(versionText);

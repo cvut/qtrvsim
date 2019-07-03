@@ -1,3 +1,19 @@
+qtmips (0.7.1) unstable; urgency=medium
+
+  * Debian package updated to version 0.7.1.
+  * Add option to parse and show symbolic registers names.
+  * Implemented simple integrated assembler - it is not recommended for advanced users.
+  * Updated instructions parsing to be usable for integrated assembler.
+  * Change instruction parsing to allow multiple words pseudo-operations.
+  * Implemented simple expressions and labels/symbols evaluation.
+  * Simple highlighter for assembly language added.
+  * Include simple text editor in QtMips emulator.
+  * Fix memory leakages which repeat during program operation.
+  * Externally caused address-space changes (i.e. from peripherals) update memory view.
+  * Provide option to hide coreview to speedup simulation.
+
+ -- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Wed, 03 Jul 2019 12:18:15 +0200
+
 qtmips (0.7.0) unstable; urgency=medium
 
   * Debian package updated to version 0.7.0.
