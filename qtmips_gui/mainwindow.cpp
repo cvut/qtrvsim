@@ -640,6 +640,9 @@ void MainWindow::compile_source() {
         if (line.isEmpty())
             continue;
         QString op = line.split(" ").at(0).toUpper();
+        if ((op == ".DATA") || (op == ".CODE")) {
+            continue;
+        }
         if (op == ".ORG") {
             bool ok;
             fixmatheval::FmeExpression expression;
