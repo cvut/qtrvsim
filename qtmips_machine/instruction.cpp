@@ -48,6 +48,8 @@
 
 using namespace machine;
 
+bool Instruction::symbolic_registers_fl = false;
+
 #define IMF_SUB_ENCODE(bits, shift) (((bits) << 8) | (shift))
 #define IMF_SUB_GET_BITS(subcode) (((subcode) >> 8) & 0xff)
 #define IMF_SUB_GET_SHIFT(subcode) ((subcode) & 0xff)
@@ -134,6 +136,49 @@ static bool fill_argdesbycode() {
 }
 
 bool argdesbycode_filled = fill_argdesbycode();
+
+struct RegisterDesc {
+    int kind;
+    int number;
+    const char *name;
+};
+
+#define REGISTER_CODES 32
+
+const RegisterDesc regbycode[REGISTER_CODES] = {
+    [0] = {0, 0, "zero"},
+    [1] = {0, 1, "at"},
+    [2] = {0, 2, "v0"},
+    [3] = {0, 3, "v1"},
+    [4] = {0, 4, "a0"},
+    [5] = {0, 5, "a1"},
+    [6] = {0, 6, "a2"},
+    [7] = {0, 7, "a3"},
+    [8] = {0, 8, "t0"},
+    [9] = {0, 9, "t1"},
+    [10] = {0, 10, "t2"},
+    [11] = {0, 11, "t3"},
+    [12] = {0, 12, "t4"},
+    [13] = {0, 13, "t5"},
+    [14] = {0, 14, "t6"},
+    [15] = {0, 15, "t7"},
+    [16] = {0, 16, "s0"},
+    [17] = {0, 17, "s1"},
+    [18] = {0, 18, "s2"},
+    [19] = {0, 19, "s3"},
+    [20] = {0, 20, "s4"},
+    [21] = {0, 21, "s5"},
+    [22] = {0, 22, "s6"},
+    [23] = {0, 23, "s7"},
+    [24] = {0, 24, "t8"},
+    [25] = {0, 25, "t9"},
+    [26] = {0, 26, "k0"},
+    [27] = {0, 27, "k1"},
+    [28] = {0, 28, "gp"},
+    [29] = {0, 29, "sp"},
+    [30] = {0, 30, "s8"},
+    [31] = {0, 31, "ra"},
+};
 
 #define FLAGS_ALU_I_NO_RS (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE)
 #define FLAGS_ALU_I (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_ALU_REQ_RS)
@@ -958,7 +1003,10 @@ QString Instruction::to_str(std::int32_t inst_addr) const {
             field <<= adesc->shift;
             switch (adesc->kind) {
             case 'g':
-                res += "$" + QString::number(field);
+                if (symbolic_registers_fl)
+                    res += "$" + QString(regbycode[field].name);
+                else
+                    res += "$" + QString::number(field);
                 break;
             case 'o':
             case 'n':
@@ -1024,6 +1072,19 @@ static int parse_reg_from_string(QString str, uint *chars_taken = nullptr)
     uint ctk;
     if (str.count() < 2 || str.at(0) != '$')
         return -1;
+
+    if (str.at(1).isLetter()) {
+        str = str.mid(1);
+        for (i = 0 ; i < REGISTER_CODES; i++) {
+            if (str == regbycode[i].name) {
+                if (chars_taken != nullptr)
+                   *chars_taken = str.count() + 1;
+                return regbycode[i].number;
+            }
+        }
+        return -1;
+    }
+
     char cstr[str.count() + 1];
     for (i = 0; i < str.count(); i++)
         cstr[i] = str.at(i).toLatin1();
@@ -1353,4 +1414,17 @@ void Instruction::append_recognized_instructions(QStringList &list) {
     list.append("LA");
     list.append("LI");
     list.append("NOP");
+}
+
+void Instruction::set_symbolic_registers(bool enable) {
+    symbolic_registers_fl = enable;
+}
+
+void Instruction::append_recognized_registers(QStringList &list) {
+    int i;
+    for (i = 0 ; i < REGISTER_CODES; i++) {
+        QString name = regbycode[i].name;
+        if (name != "")
+            list.append(name);
+    }
 }

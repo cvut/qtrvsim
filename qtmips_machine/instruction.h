@@ -162,8 +162,11 @@ public:
     bool update(std::int64_t val, RelocExpression *relocexp);
 
     static void append_recognized_instructions(QStringList &list);
+    static void set_symbolic_registers(bool enable);
+    static void append_recognized_registers(QStringList &list);
 private:
     std::uint32_t dt;
+    static bool symbolic_registers_fl;
 };
 
 }
