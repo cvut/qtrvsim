@@ -1114,7 +1114,7 @@ static void reloc_append(RelocExpressionList *reloc, QString fl, uint32_t inst_a
         QChar ch = fl.at(i);
         if (ch.isSpace())
             continue;
-        if (ch.isLetterOrNumber())
+        if (ch.isLetterOrNumber() || (ch == '_'))
             expression.append(ch);
         else if (allowed_operators.indexOf(ch) >= 0)
             expression.append(ch);

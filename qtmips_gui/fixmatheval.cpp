@@ -199,7 +199,7 @@ bool FmeExpression::parse(const QString &expression, QString &error) {
         QChar ch = 0;
         if (i < expression.size())
             ch = expression.at(i);
-        if(!ch.isLetterOrNumber()|| (i >= expression.size())) {
+        if(!(ch.isLetterOrNumber() || (ch == '_')) || (i >= expression.size())) {
             if (in_word) {
                 FmeNode *new_node = nullptr;
                 QString word = expression.mid(word_start, i - word_start);
