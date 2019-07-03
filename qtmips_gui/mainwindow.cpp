@@ -579,10 +579,13 @@ void MainWindow::save_source_as() {
         central_window->setTabText(idx, current_srceditor->title());
     update_open_file_list();
 #else
+    QString filename = current_srceditor->filename();
+    if (filename.isEmpty())
+        filename = "unknown.s";
     QInputDialog *dialog = new QInputDialog(this);
     dialog->setWindowTitle("Select file name");
     dialog->setLabelText("File name:");
-    dialog->setTextValue("unknow.s");
+    dialog->setTextValue(filename);
     dialog->setMinimumSize(QSize(200, 100));
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     connect(dialog, SIGNAL(textValueSelected(QString)),
