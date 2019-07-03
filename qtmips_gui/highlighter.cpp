@@ -113,7 +113,12 @@ Highlighter::Highlighter(QTextDocument *parent)
 
 void Highlighter::highlightBlock(const QString &text)
 {
-    for (const HighlightingRule &rule : qAsConst(highlightingRules)) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 7, 0)
+    foreach(const HighlightingRule &rule, highlightingRules)
+#else
+    for (const HighlightingRule &rule : qAsConst(highlightingRules))
+#endif
+    {
         QRegularExpressionMatchIterator matchIterator = rule.pattern.globalMatch(text);
         while (matchIterator.hasNext()) {
             QRegularExpressionMatch match = matchIterator.next();
