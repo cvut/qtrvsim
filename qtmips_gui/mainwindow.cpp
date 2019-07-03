@@ -619,6 +619,7 @@ void MainWindow::close_source() {
     if (idx >= 0)
         central_window->removeTab(idx);
     delete editor;
+    update_open_file_list();
 }
 
 class SymbolTableDb : public fixmatheval::FmeSymbolDb {
@@ -701,8 +702,22 @@ void MainWindow::compile_source() {
         }
         if (line.isEmpty())
             continue;
-        QString op = line.split(" ").at(0).toUpper();
-        if ((op == ".DATA") || (op == ".CODE")) {
+        int k = 0, l;
+        while (k < line.count()) {
+            if (!line.at(k).isSpace())
+                break;
+            k++;
+        }
+        l = k;
+        while (l < line.count()) {
+            if (!line.at(l).isLetterOrNumber() && !(line.at(l) == '.'))
+                break;
+            l++;
+        }
+        QString op = line.mid(k, l - k).toUpper();
+        if ((op == ".DATA") || (op == ".TEXT") ||
+            (op == ".GLOBL") || (op == ".END") ||
+            (op == ".ENT")) {
             continue;
         }
         if (op == ".ORG") {
@@ -721,6 +736,38 @@ void MainWindow::compile_source() {
                 break;
             }
             address = value;
+            continue;
+        }
+        if ((op == ".EQU") || (op == ".SET")) {
+            QStringList operands = line.mid(op.size()).split(",");
+            if ((operands.count() > 2) || (operands.count() < 1)) {
+                error_line = ln;
+                editor->setCursorToLine(error_line);
+                QMessageBox::critical(this, "QtMips Error",
+                                  tr("line %1 .set or .equ incorrect arguments number.")
+                                  .arg(QString::number(ln)));
+                break;
+            }
+            QString name = operands.at(0).trimmed();
+            if ((name == "noat") || (name == "noreored"))
+                continue;
+            bool ok;
+            fixmatheval::FmeValue value = 1;
+            if (operands.count() > 1) {
+                fixmatheval::FmeExpression expression;
+                ok = expression.parse(operands.at(1), error);
+                if (ok)
+                    ok = expression.eval(value, &symtab, error);
+                if (!ok) {
+                    error_line = ln;
+                    editor->setCursorToLine(error_line);
+                    QMessageBox::critical(this, "QtMips Error",
+                                  tr("line %1 .set or .equ %2 parse error.")
+                                  .arg(QString::number(ln), operands.at(1)));
+                    break;
+                }
+            }
+            machine->set_symbol(name, value, 0);
             continue;
         }
         if (op == ".WORD") {
@@ -788,8 +835,8 @@ void MainWindow::compile_source() {
                         error_line = r->line;
                         editor->setCursorToLine(error_line);
                         QMessageBox::critical(this, "QtMips Error",
-                                          tr("instruction update error %1 at line %2, expression %3.")
-                                          .arg(error, QString::number(r->line), expression.dump()));
+                                          tr("instruction update error %1 at line %2, expression %3 -> value %4.")
+                                          .arg(error, QString::number(r->line), expression.dump(), QString::number(value)));
                     }
                 }
                 mem->write_word(r->location, inst.data());
