@@ -106,6 +106,7 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
     connect(this, SIGNAL(stage_addr_changed(uint,std::uint32_t)),
             program_model, SLOT(update_stage_addr(uint,std::uint32_t)));
     connect(program_model, SIGNAL(report_error(QString)), this, SLOT(report_error(QString)));
+    connect(this, SIGNAL(request_update_all()), program_model, SLOT(update_all()));
 }
 
 void ProgramDock::setup(machine::QtMipsMachine *machine) {

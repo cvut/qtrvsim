@@ -54,7 +54,6 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     bool setData(const QModelIndex & index, const QVariant & value, int role) override;
     bool adjustRowAndOffset(int &row, std::uint32_t address);
-    void update_all();
 
     inline const QFont *getFont() const {
         return &data_font;
@@ -100,6 +99,7 @@ public slots:
     void check_for_updates();
     void toggle_hw_break(const QModelIndex & index);
     void update_stage_addr(uint stage, std::uint32_t addr);
+    void update_all();
 
 private:
     const machine::MemoryAccess *mem_access() const;

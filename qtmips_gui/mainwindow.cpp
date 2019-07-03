@@ -115,6 +115,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->actionSave, SIGNAL(triggered(bool)), this, SLOT(save_source()));
     connect(ui->actionSaveAs, SIGNAL(triggered(bool)), this, SLOT(save_source_as()));
     connect(ui->actionClose, SIGNAL(triggered(bool)), this, SLOT(close_source()));
+    connect(ui->actionMnemonicRegisters, SIGNAL(triggered(bool)), this, SLOT(view_mnemonics_registers(bool)));
     connect(ui->actionCompileSource, SIGNAL(triggered(bool)), this, SLOT(compile_source()));
     connect(ui->actionShow_Symbol, SIGNAL(triggered(bool)), this, SLOT(show_symbol_dialog()));
     connect(ui->actionRegisters, SIGNAL(triggered(bool)), this, SLOT(show_registers()));
@@ -402,6 +403,13 @@ void MainWindow::set_speed() {
         machine->set_speed(0, 100);
     else
         machine->set_speed(0);
+}
+
+void MainWindow::view_mnemonics_registers(bool enable) {
+    machine::Instruction::set_symbolic_registers(enable);
+    if (program == nullptr)
+        return;
+    program->request_update_all();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event __attribute__((unused))) {

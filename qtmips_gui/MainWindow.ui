@@ -100,6 +100,7 @@
     <addaction name="ipsMax"/>
     <addaction name="separator"/>
     <addaction name="actionRestart"/>
+    <addaction name="actionMnemonicRegisters"/>
     <addaction name="actionShow_Symbol"/>
     <addaction name="actionCompileSource"/>
    </widget>
@@ -524,6 +525,17 @@
    </property>
    <property name="text">
     <string>Core View</string>
+   </property>
+  </action>
+  <action name="actionMnemonicRegisters">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Mnemonics Registers</string>
    </property>
   </action>
  </widget>

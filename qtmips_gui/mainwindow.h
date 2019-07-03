@@ -100,6 +100,7 @@ public slots:
     void machine_trap(machine::QtMipsException &e);
     void central_tab_changed(int index);
     void tab_widget_destroyed(QObject *obj);
+    void view_mnemonics_registers(bool enable);
 
 protected:
     void closeEvent(QCloseEvent *event);
