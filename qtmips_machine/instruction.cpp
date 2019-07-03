@@ -262,12 +262,12 @@ static const struct InstructionMap  alu_instruction_map[] = {
      .flags = FLAGS_ALU_T_R_STD},
     {"MOVN",   IT_R, ALU_OP_MOVN, NOMEM, nullptr, {"d", "v", "t"}, 0x0000000b, 0xfc0007ff,
      .flags = FLAGS_ALU_T_R_STD},
-    {"SYSCALL",IT_R, ALU_OP_SYSCALL, NOMEM, nullptr, {nullptr}, 0x0000000c, 0xfc00003f,
+    {"SYSCALL",IT_R, ALU_OP_SYSCALL, NOMEM, nullptr, {}, 0x0000000c, 0xfc00003f,
      .flags = IMF_SUPPORTED | IMF_EXCEPTION},
-    {"BREAK",  IT_R, ALU_OP_BREAK, NOMEM, nullptr, {nullptr}, 0x0000000d, 0xfc00003f,
+    {"BREAK",  IT_R, ALU_OP_BREAK, NOMEM, nullptr, {}, 0x0000000d, 0xfc00003f,
      .flags = IMF_SUPPORTED | IMF_EXCEPTION},
     IM_UNKNOWN,
-    {"SYNC", IT_I, NOALU, NOMEM, nullptr, {nullptr}, 0x0000000f, 0xfffff83f,       // SYNC
+    {"SYNC", IT_I, NOALU, NOMEM, nullptr, {}, 0x0000000f, 0xfffff83f,       // SYNC
      .flags = IMF_SUPPORTED},
     {"MFHI",   IT_R, ALU_OP_MFHI, NOMEM, nullptr, {"d"}, 0x00000010, 0xffff07ff,
      .flags = FLAGS_ALU_T_R_D | IMF_READ_HILO},
@@ -601,7 +601,7 @@ static const struct InstructionMap  cop0_func_instruction_map[] = {
     IM_UNKNOWN,	//	21
     IM_UNKNOWN,	//	22
     IM_UNKNOWN,	//	23
-    {"ERET", IT_I, ALU_OP_ERET, NOMEM, nullptr, {nullptr}, 0x42000018, 0xffffffff,
+    {"ERET", IT_I, ALU_OP_ERET, NOMEM, nullptr, {}, 0x42000018, 0xffffffff,
      .flags = IMF_SUPPORTED | IMF_STOP_IF},
     IM_UNKNOWN,	//	25
     IM_UNKNOWN,	//	26
