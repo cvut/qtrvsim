@@ -26,7 +26,7 @@ sed --in-place \
 
 if grep -q "qtmips ($V_TXT)" debian/changelog ; then
 sed --in-place \
-  -e '1,/^ -- .*$/s/^ -- .*$/'" -- $V_USER_NAME <$V_USER_EMAIL> $V_DATE_RFC/" \
+  -e '1,/^ -- .*$/s/^ -- .*$/'" -- $V_USER_NAME <$V_USER_EMAIL>  $V_DATE_RFC/" \
   debian/changelog
 else
 cat >debian/changelog.tmp <<EOF
