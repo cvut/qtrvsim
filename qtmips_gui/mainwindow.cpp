@@ -570,24 +570,28 @@ void MainWindow::save_source_as() {
     if (fileDialog.exec() != QDialog::Accepted)
         return;
     const QString fn = fileDialog.selectedFiles().first();
-    if (current_srceditor->saveFile(fn)) {
-        int idx = central_window->indexOf(current_srceditor);
-        if (idx >= 0)
-            central_window->setTabText(idx, current_srceditor->title());
-    } else {
+    if (!current_srceditor->saveFile(fn)) {
         QMessageBox::critical(this, "QtMips Error", tr("Cannot save file '%1'.").arg(fn));
+        return;
     }
 #else
-    bool ok;
-    QString text = QInputDialog::getText(this, tr("Select file name"),
-                                             tr("File name:"), QLineEdit::Normal,
-                                             "unknow.s", &ok);
-    if (ok && !text.isEmpty()) {
-        current_srceditor->setFileName(text);
-        if (!current_srceditor->filename().isEmpty())
+    QInputDialog *dialog = new QInputDialog(this);
+    dialog->setWindowTitle("Select file name");
+    dialog->setLabelText("File name:");
+    dialog->setTextValue("unknow.s");
+    dialog->setMinimumSize(QSize(200, 100));
+    int ret = dialog->exec();
+    QString text = dialog->textValue();
+    delete dialog;
+    if (!ret || text.isEmpty())
+        return;
+    current_srceditor->setFileName(text);
+    if (!current_srceditor->filename().isEmpty())
             save_source();
-    }
 #endif
+    int idx = central_window->indexOf(current_srceditor);
+    if (idx >= 0)
+        central_window->setTabText(idx, current_srceditor->title());
     update_open_file_list();
 }
 
