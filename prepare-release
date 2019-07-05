@@ -69,4 +69,8 @@ cp -xa . ../debian-test-build/qtmips-$V_TXT
 
 cd ../debian-test-build/qtmips-$V_TXT || exit 1
 
+if [ -x  /usr/lib/obs-build/changelog2spec ] ; then
+  /usr/lib/obs-build/changelog2spec debian/changelog >../qtmips.changes
+fi
+
 dpkg-buildpackage

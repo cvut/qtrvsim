@@ -22,7 +22,7 @@
 Name:           qtmips
 Version:        0.7.1
 Release:        0
-Summary:        MIPS CPU simulator for education purposes with pipeline and cache visualization
+Summary:        MIPS CPU simulator for education purposes
 License:        GPL-2.0-or-later
 Group:          System/Emulators/Other
 URL:            https://github.com/cvut/QtMips/
@@ -55,10 +55,14 @@ MIPS CPU simulator for education purposes with pipeline and cache visualization.
 %setup -q
 
 %build
-%qmake5 "CONFIG+=release" "CONFIG+=force_debug_info"
+%qmake5 "CONFIG+=release" \
+  CONFIG+="force_debug_info" \
+  QMAKE_CFLAGS+="%optflags" \
+  QMAKE_CXXFLAGS+="%optflags" \
+  QMAKE_STRIP="/bin/true"
 #make %{?_smp_mflags} - do not use SMP for now, there can be problem with generated makefiles
+#%make_build          - fails on openSUSE_Leap_42.3 and openSUSE_Leap_42.3_Ports
 make
-
 
 %install
 mkdir -p %{buildroot}/%{_bindir}
