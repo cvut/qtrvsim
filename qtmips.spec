@@ -33,6 +33,7 @@ BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Widgets)
 BuildRequires:  pkgconfig(Qt5Test)
 BuildRequires:  pkgconfig(Qt5PrintSupport)
+BuildRequires:  hicolor-icon-theme
 
 %if ! 0%{?suse_version}
 BuildRequires:  pkgconfig(libelf)
@@ -89,12 +90,7 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/qtmips.desktop
 %{_bindir}/qtmips_gui
 %{_bindir}/qtmips_cli
 %{_datadir}/applications/qtmips.desktop
-%dir %{_datadir}/icons/hicolor
-%dir %{_datadir}/icons/hicolor/48x48
-%dir %{_datadir}/icons/hicolor/48x48/apps
 %{_datadir}/icons/hicolor/48x48/apps/qtmips_gui.png
-%dir %{_datadir}/icons/hicolor/scalable
-%dir %{_datadir}/icons/hicolor/scalable/apps
 %{_datadir}/icons/hicolor/scalable/apps/qtmips_gui.svg
 %license LICENSE
 %doc README.md
