@@ -2,7 +2,8 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     qtmips_machine \
-    qtmips_osemu
+    qtmips_osemu \
+    qtmips_asm
 
 !wasm: SUBDIRS += \
     qtmips_machine/tests \
