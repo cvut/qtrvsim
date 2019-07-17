@@ -51,13 +51,13 @@ void MsgReport::report_message(messagetype::Type type, QString file,
 
     QString typestr = "error";
     switch (type) {
-    case messagetype::ERROR:
+    case messagetype::MSG_ERROR:
         typestr = "error";
         break;
-    case messagetype::WARNING:
+    case messagetype::MSG_WARNING:
         typestr = "warning";
         break;
-    case messagetype::INFO:
+    case messagetype::MSG_INFO:
         typestr = "info";
         break;
     default:

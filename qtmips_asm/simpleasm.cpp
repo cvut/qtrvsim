@@ -150,7 +150,7 @@ bool SimpleAsm::process_line(QString line, QString filename,
         if (!ok) {
             error = tr("line %1 .orig %2 parse error.")
                     .arg(QString::number(line_number), line);
-            emit report_message(messagetype::ERROR, filename, line_number, 0, error, "");
+            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
             fatal_occured = true;
             if (error_ptr != nullptr)
@@ -165,7 +165,7 @@ bool SimpleAsm::process_line(QString line, QString filename,
         if ((operands.count() > 2) || (operands.count() < 1)) {
             error = tr("line %1 .set or .equ incorrect arguments number.")
                     .arg(QString::number(line_number));
-            emit report_message(messagetype::ERROR, filename, line_number, 0, error, "");
+            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
             if (error_ptr != nullptr)
                 *error_ptr = error;
@@ -184,7 +184,7 @@ bool SimpleAsm::process_line(QString line, QString filename,
             if (!ok) {
                 error = tr("line %1 .set or .equ %2 parse error.")
                            .arg(QString::number(line_number), operands.at(1));
-                emit report_message(messagetype::ERROR, filename, line_number, 0, error, "");
+                emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
                 error_occured = true;
                 if (error_ptr != nullptr)
                     *error_ptr = error;
@@ -218,7 +218,7 @@ bool SimpleAsm::process_line(QString line, QString filename,
     if (size < 0) {
         error = tr("line %1 instruction %2 parse error - %3.")
                 .arg(QString::number(line_number), line, error);
-        emit report_message(messagetype::ERROR, filename, line_number, 0, error, "");
+        emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
         error_occured = true;
         if (error_ptr != nullptr)
             *error_ptr = error;
@@ -241,7 +241,7 @@ bool SimpleAsm::finish(QString *error_ptr) {
         if (!expression.parse(r->expression, error)) {
             error = tr("expression parse error %1 at line %2, expression %3.")
                     .arg(error, QString::number(r->line), expression.dump());
-            emit report_message(messagetype::ERROR, r->filename, r->line, 0, error, "");
+            emit report_message(messagetype::MSG_ERROR, r->filename, r->line, 0, error, "");
             if (error_ptr != nullptr && !error_reported)
                 *error_ptr = error;
             error_occured = true;
@@ -251,20 +251,20 @@ bool SimpleAsm::finish(QString *error_ptr) {
             if (!expression.eval(value, symtab, error)) {
                 error = tr("expression evalution error %1 at line %2 , expression %3.")
                         .arg(error, QString::number(r->line), expression.dump());
-                emit report_message(messagetype::ERROR, r->filename, r->line, 0, error, "");
+                emit report_message(messagetype::MSG_ERROR, r->filename, r->line, 0, error, "");
                 if (error_ptr != nullptr && !error_reported)
                     *error_ptr = error;
                 error_occured = true;
                 error_reported = true;
             } else {
                 if (false)
-                    emit report_message(messagetype::INFO, r->filename, r->line, 0,
+                    emit report_message(messagetype::MSG_INFO, r->filename, r->line, 0,
                                    expression.dump() + " -> " + QString::number(value), "");
                 machine::Instruction inst(mem->read_word(r->location, true));
                 if (!inst.update(value, r)) {
                     error = tr("instruction update error %1 at line %2, expression %3 -> value %4.")
                             .arg(error, QString::number(r->line), expression.dump(), QString::number(value));
-                    emit report_message(messagetype::ERROR, r->filename, r->line, 0, error, "");
+                    emit report_message(messagetype::MSG_ERROR, r->filename, r->line, 0, error, "");
                     if (error_ptr != nullptr && !error_reported)
                         *error_ptr = error;
                     error_occured = true;

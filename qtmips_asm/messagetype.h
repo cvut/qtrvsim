@@ -39,11 +39,11 @@
 namespace messagetype {
 
 enum Type {
-    START,
-    FINISH,
-    INFO,
-    WARNING,
-    ERROR,
+    MSG_START,
+    MSG_FINISH,
+    MSG_INFO,
+    MSG_WARNING,
+    MSG_ERROR,
 };
 
 }

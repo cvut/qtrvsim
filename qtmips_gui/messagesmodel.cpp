@@ -113,9 +113,9 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const {
     if (role == Qt::BackgroundRole) {
         MessagesEntry *ent = messages.at(index.row());
         switch (ent->type) {
-        case messagetype::ERROR:
+        case messagetype::MSG_ERROR:
             return QBrush(QColor(255, 230, 230));
-        case messagetype::WARNING:
+        case messagetype::MSG_WARNING:
             return QBrush(QColor(255, 255, 220));
         default:
             return QVariant();
