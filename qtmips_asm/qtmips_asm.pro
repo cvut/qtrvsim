@@ -17,4 +17,5 @@ SOURCES += \
     fixmatheval.cpp
 
 HEADERS += \
-    fixmatheval.h
+    fixmatheval.h \
+    messagetype.h

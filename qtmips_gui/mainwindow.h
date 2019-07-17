@@ -50,6 +50,7 @@
 #include "terminaldock.h"
 #include "lcddisplaydock.h"
 #include "cop0dock.h"
+#include "messagesdock.h"
 
 #include "qtmipsmachine.h"
 #include "machineconfig.h"
@@ -66,6 +67,11 @@ public:
     void create_core(const machine::MachineConfig &config, bool load_executable = true);
 
     bool configured();
+
+signals:
+    void report_message(messagetype::Type type, QString file, int line,
+                                   int column, QString text, QString hint);
+    void clear_messages();
 
 public slots:
     // Actions signals
@@ -89,6 +95,7 @@ public slots:
     void show_cop0dock();
     void show_hide_coreview(bool show);
     void show_symbol_dialog();
+    void show_messages();
     // Actions - help menu
     void about_qtmips();
     void about_qt();
@@ -101,6 +108,7 @@ public slots:
     void central_tab_changed(int index);
     void tab_widget_destroyed(QObject *obj);
     void view_mnemonics_registers(bool enable);
+    void message_selected(messagetype::Type type, QString file, int line, int column, QString text, QString hint);
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -126,6 +134,7 @@ private:
     TerminalDock *terminal;
     LcdDisplayDock *lcd_display;
     Cop0Dock *cop0dock;
+    MessagesDock *messages;
     bool coreview_shown;
     SrcEditor  *current_srceditor;
 
@@ -138,6 +147,7 @@ private:
     void show_dockwidget(QDockWidget *w, Qt::DockWidgetArea area = Qt::RightDockWidgetArea);
     void add_src_editor_to_tabs(SrcEditor *editor);
     void update_open_file_list();
+    SrcEditor *source_editor_for_file(QString filename, bool open);
 };
 
 #endif // MAINWINDOW_H

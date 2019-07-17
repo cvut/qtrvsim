@@ -94,6 +94,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     lcd_display->hide();
     cop0dock = new Cop0Dock(this);
     cop0dock->hide();
+    messages = new MessagesDock(this, settings);
+    messages->hide();
 
     // Execution speed actions
     speed_group = new QActionGroup(this);
@@ -128,6 +130,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->actionLcdDisplay, SIGNAL(triggered(bool)), this, SLOT(show_lcd_display()));
     connect(ui->actionCop0State, SIGNAL(triggered(bool)), this, SLOT(show_cop0dock()));
     connect(ui->actionCore_View_show, SIGNAL(triggered(bool)), this, SLOT(show_hide_coreview(bool)));
+    connect(ui->actionMessages, SIGNAL(triggered(bool)), this, SLOT(show_messages()));
     connect(ui->actionAbout, SIGNAL(triggered(bool)), this, SLOT(about_qtmips()));
     connect(ui->actionAboutQt, SIGNAL(triggered(bool)), this, SLOT(about_qt()));
     connect(ui->ips1, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
@@ -136,6 +139,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->ips10, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
     connect(ui->ipsUnlimited, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
     connect(ui->ipsMax, SIGNAL(toggled(bool)), this, SLOT(set_speed()));
+
+    connect(this, SIGNAL(report_message(messagetype::Type,QString,int,int,QString,QString)),
+            messages, SLOT(insert_line(messagetype::Type,QString,int,int,QString,QString)));
+    connect(this, SIGNAL(clear_messages()), messages, SLOT(clear_messages()));
+    connect(messages, SIGNAL(message_selected(messagetype::Type,QString,int,int,QString,QString)),
+            this, SLOT(message_selected(messagetype::Type,QString,int,int,QString,QString)));
 
     // Restore application state from settings
     restoreState(settings->value("windowState").toByteArray());
@@ -359,6 +368,7 @@ SHOW_HANDLER(peripherals, Qt::RightDockWidgetArea)
 SHOW_HANDLER(terminal, Qt::RightDockWidgetArea)
 SHOW_HANDLER(lcd_display, Qt::RightDockWidgetArea)
 SHOW_HANDLER(cop0dock, Qt::RightDockWidgetArea)
+SHOW_HANDLER(messages, Qt::BottomDockWidgetArea)
 #undef SHOW_HANDLER
 
 void MainWindow::show_symbol_dialog(){
@@ -529,6 +539,37 @@ void MainWindow::update_open_file_list() {
     settings->setValue("openSrcFiles", open_src_files);
 }
 
+SrcEditor *MainWindow::source_editor_for_file(QString filename, bool open) {
+    if ((central_window == nullptr) || (settings == nullptr))
+        return nullptr;
+    bool found = false;
+    SrcEditor *editor = nullptr;
+    for (int i = 0; i < central_window->count(); i++) {
+        QWidget *w = central_window->widget(i);
+        editor = dynamic_cast<SrcEditor *>(w);
+        if (editor == nullptr)
+            continue;
+        if (editor->filename() == filename) {
+            found = true;
+            break;
+        }
+    }
+    if (found)
+        return editor;
+
+    if (!open)
+        return nullptr;
+
+    editor = new SrcEditor();
+    if (!editor->loadFile(filename)) {
+        delete editor;
+        return nullptr;
+    }
+    add_src_editor_to_tabs(editor);
+    update_open_file_list();
+    return editor;
+}
+
 void MainWindow::new_source() {
     SrcEditor *editor = new SrcEditor();
     add_src_editor_to_tabs(editor);
@@ -633,6 +674,23 @@ void MainWindow::close_source() {
     update_open_file_list();
 }
 
+void MainWindow::message_selected(messagetype::Type type, QString file, int line,
+                      int column, QString text, QString hint) {
+
+    (void)type;
+    (void)column;
+    (void)text;
+    (void)hint;
+
+    SrcEditor *editor = source_editor_for_file(file, true);
+    if (editor == nullptr)
+        return;
+    editor->setCursorToLine(line);
+    editor->setFocus();
+    if (central_window != nullptr)
+        central_window->setCurrentWidget(editor);
+}
+
 class SymbolTableDb : public fixmatheval::FmeSymbolDb {
 public:
     SymbolTableDb(const machine::SymbolTable *symtab);
@@ -683,11 +741,14 @@ void MainWindow::compile_source() {
         QMessageBox::critical(this, "QtMips Error", tr("No physical addresspace to store program."));
         return;
     }
+    QString filename = current_srceditor->filename();
     machine->cache_sync();
     SrcEditor *editor = current_srceditor;
     QTextDocument *doc = editor->document();
     std::uint32_t address = 0x80020000;
     machine::RelocExpressionList reloc;
+
+    emit clear_messages();
 
     int ln = 1;
     for ( QTextBlock block = doc->begin(); block.isValid(); block = block.next(), ln++) {
@@ -740,10 +801,9 @@ void MainWindow::compile_source() {
                 ok = expression.eval(value, &symtab, error);
             if (!ok) {
                 error_line = ln;
-                editor->setCursorToLine(error_line);
-                QMessageBox::critical(this, "QtMips Error",
-                                  tr("line %1 .orig %2 parse error.")
-                                  .arg(QString::number(ln), line));
+                emit report_message(messagetype::ERROR, filename, ln, 0,
+                               tr("line %1 .orig %2 parse error.")
+                               .arg(QString::number(ln), line), "");
                 break;
             }
             address = value;
@@ -753,11 +813,10 @@ void MainWindow::compile_source() {
             QStringList operands = line.mid(op.size()).split(",");
             if ((operands.count() > 2) || (operands.count() < 1)) {
                 error_line = ln;
-                editor->setCursorToLine(error_line);
-                QMessageBox::critical(this, "QtMips Error",
-                                  tr("line %1 .set or .equ incorrect arguments number.")
-                                  .arg(QString::number(ln)));
-                break;
+                emit report_message(messagetype::ERROR, filename, ln, 0,
+                               tr("line %1 .set or .equ incorrect arguments number.")
+                               .arg(QString::number(ln)), "");
+                continue;
             }
             QString name = operands.at(0).trimmed();
             if ((name == "noat") || (name == "noreored"))
@@ -771,11 +830,10 @@ void MainWindow::compile_source() {
                     ok = expression.eval(value, &symtab, error);
                 if (!ok) {
                     error_line = ln;
-                    editor->setCursorToLine(error_line);
-                    QMessageBox::critical(this, "QtMips Error",
+                    emit report_message(messagetype::ERROR, filename, ln, 0,
                                   tr("line %1 .set or .equ %2 parse error.")
-                                  .arg(QString::number(ln), operands.at(1)));
-                    break;
+                                  .arg(QString::number(ln), operands.at(1)), "");
+                    continue;
                 }
             }
             machine->set_symbol(name, value, 0);
@@ -803,11 +861,10 @@ void MainWindow::compile_source() {
                                                  address, &reloc, ln, true);
         if (size < 0) {
             error_line = ln;
-            editor->setCursorToLine(error_line);
-            QMessageBox::critical(this, "QtMips Error",
+            emit report_message(messagetype::ERROR, filename, ln, 0,
                               tr("line %1 instruction %2 parse error - %3.")
-                              .arg(QString::number(ln), line, error));
-            break;
+                              .arg(QString::number(ln), line, error), "");
+            continue;
         }
         std::uint32_t *p = inst;
         for (ssize_t l = 0; l < size; l += 4) {
@@ -819,36 +876,27 @@ void MainWindow::compile_source() {
         QString error;
         fixmatheval::FmeExpression expression;
         if (!expression.parse(r->expression, error)) {
-            if (!error_line) {
-                error_line = r->line;
-                editor->setCursorToLine(error_line);
-                QMessageBox::critical(this, "QtMips Error",
-                                  tr("expression parse error %1 at line %2, expression %3.")
-                                  .arg(error, QString::number(r->line), expression.dump()));
-            }
+            error_line = r->line;
+            emit report_message(messagetype::ERROR, filename, ln, 0,
+                                tr("expression parse error %1 at line %2, expression %3.")
+                                .arg(error, QString::number(r->line), expression.dump()), "");
         } else {
             fixmatheval::FmeValue value;
             if (!expression.eval(value, &symtab, error)) {
-                if (!error_line) {
-                    error_line = r->line;
-                    editor->setCursorToLine(error_line);
-                    QMessageBox::critical(this, "QtMips Error",
-                                      tr("expression evalution error %1 at line %2 , expression %3.")
-                                      .arg(error, QString::number(r->line), expression.dump()));
-                }
+                error_line = r->line;
+                emit report_message(messagetype::ERROR, filename, ln, 0,
+                               tr("expression evalution error %1 at line %2 , expression %3.")
+                               .arg(error, QString::number(r->line), expression.dump()), "");
             } else {
                 if (false)
-                    QMessageBox::information(this, "QtMips info",
-                                         expression.dump() + " -> " + QString::number(value));
+                    emit report_message(messagetype::INFO, filename, ln, 0,
+                                   expression.dump() + " -> " + QString::number(value), "");
                 machine::Instruction inst(mem->read_word(r->location, true));
                 if (!inst.update(value, r)) {
-                    if (!error_line) {
-                        error_line = r->line;
-                        editor->setCursorToLine(error_line);
-                        QMessageBox::critical(this, "QtMips Error",
-                                          tr("instruction update error %1 at line %2, expression %3 -> value %4.")
-                                          .arg(error, QString::number(r->line), expression.dump(), QString::number(value)));
-                    }
+                    error_line = r->line;
+                    emit report_message(messagetype::ERROR, filename, ln, 0,
+                                   tr("instruction update error %1 at line %2, expression %3 -> value %4.")
+                                   .arg(error, QString::number(r->line), expression.dump(), QString::number(value)), "");
                 }
                 mem->write_word(r->location, inst.data());
             }
@@ -859,4 +907,7 @@ void MainWindow::compile_source() {
     }
 
     emit mem->external_change_notify(mem, 0, 0xffffffff, true);
+
+    if (error_line != 0)
+        show_messages();
 }

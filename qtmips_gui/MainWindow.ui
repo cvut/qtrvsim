@@ -83,6 +83,7 @@
     <addaction name="actionLcdDisplay"/>
     <addaction name="actionCop0State"/>
     <addaction name="actionCore_View_show"/>
+    <addaction name="actionMessages"/>
    </widget>
    <widget class="QMenu" name="menuMachine">
     <property name="title">
@@ -525,6 +526,14 @@
    </property>
    <property name="text">
     <string>Core View</string>
+   </property>
+  </action>
+  <action name="actionMessages">
+   <property name="text">
+    <string>Messages</string>
+   </property>
+   <property name="toolTip">
+    <string>Show compile/build messages</string>
    </property>
   </action>
   <action name="actionMnemonicRegisters">

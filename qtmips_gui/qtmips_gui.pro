@@ -76,7 +76,10 @@ SOURCES += \
     hinttabledelegate.cpp \
     coreview/minimux.cpp \
     srceditor.cpp \
-    highlighter.cpp
+    highlighter.cpp \
+    messagesdock.cpp \
+    messagesmodel.cpp \
+    messagesview.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -121,7 +124,10 @@ HEADERS += \
     hinttabledelegate.h \
     coreview/minimux.h \
     srceditor.h \
-    highlighter.h
+    highlighter.h \
+    messagesdock.h \
+    messagesmodel.h \
+    messagesview.h
 
 wasm: SOURCES += \
     qhtml5file_html5.cpp
