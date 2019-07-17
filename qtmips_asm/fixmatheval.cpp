@@ -110,10 +110,11 @@ QString FmeNodeSymbol::dump() {
     return name;
 }
 
-FmeNodeUnaryOp::FmeNodeUnaryOp(int priority, FmeValue (*op)(FmeValue &a)) :
-                FmeNode(priority) {
+FmeNodeUnaryOp::FmeNodeUnaryOp(int priority, FmeValue (*op)(FmeValue &a),
+                               QString description) : FmeNode(priority) {
     this->operand_a = nullptr;
     this->op = op;
+    this->description = description;
 }
 
 FmeNodeUnaryOp::~FmeNodeUnaryOp() {
@@ -141,14 +142,15 @@ bool FmeNodeUnaryOp::insert(FmeNode *node) {
 }
 
 QString FmeNodeUnaryOp::dump() {
-    return "(OP " + (operand_a? operand_a->dump(): "nullptr") + ")";
+    return "(" + description + " " + (operand_a? operand_a->dump(): "nullptr") + ")";
 }
 
 FmeNodeBinaryOp::FmeNodeBinaryOp(int priority, FmeValue (*op)(FmeValue &a, FmeValue &b),
-                                 FmeNode *left) : FmeNode(priority) {
+                                 FmeNode *left, QString description) : FmeNode(priority) {
     this->operand_a = left;
     this->operand_b = nullptr;
     this->op = op;
+    this->description = description;
 }
 
 FmeNodeBinaryOp::~FmeNodeBinaryOp() {
@@ -179,7 +181,7 @@ bool FmeNodeBinaryOp::insert(FmeNode *node) {
 
 QString FmeNodeBinaryOp::dump() {
     return "(" + (operand_a? operand_a->dump(): "nullptr") +
-            " OP " + (operand_b? operand_b->dump(): "nullptr") + ")";
+            " " + description + " " + (operand_b? operand_b->dump(): "nullptr") + ")";
 }
 
 FmeExpression::FmeExpression() : FmeNode(0) {
@@ -195,6 +197,7 @@ bool FmeExpression::parse(const QString &expression, QString &error) {
     int word_start = 0;
     bool in_word = false;
     bool is_unary = true;
+    QString optxtx;
     for (i = 0; true; i++) {
         QChar ch = 0;
         if (i < expression.size())
@@ -232,6 +235,7 @@ bool FmeExpression::parse(const QString &expression, QString &error) {
             FmeValue (*unary_op)(FmeValue &a) = nullptr;
             int prio = base_prio;
 
+            optxtx = ch;
             if (ch == '~') {
                 prio += 90;
                 unary_op = [](FmeValue &a) -> FmeValue { return ~a; };
@@ -285,10 +289,10 @@ bool FmeExpression::parse(const QString &expression, QString &error) {
                         break;
                 }
                 if (binary_op != nullptr) {
-                    ok = node->insert(new FmeNodeBinaryOp(prio, binary_op, child));
+                    ok = node->insert(new FmeNodeBinaryOp(prio, binary_op, child, optxtx));
                     is_unary = true;
                 } else {
-                    ok = node->insert(new FmeNodeUnaryOp(prio, unary_op));
+                    ok = node->insert(new FmeNodeUnaryOp(prio, unary_op, optxtx));
                 }
                 if (!ok) {
                     error = QString("parse stuck at \"%1\"").arg(QString(ch));

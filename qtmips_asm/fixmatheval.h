@@ -83,7 +83,8 @@ private:
 
 class FmeNodeUnaryOp : public FmeNode {
 public:
-    FmeNodeUnaryOp(int priority, FmeValue (*op)(FmeValue &a));
+    FmeNodeUnaryOp(int priority, FmeValue (*op)(FmeValue &a),
+                   QString description = "??");
     virtual ~FmeNodeUnaryOp();
     virtual bool eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) override;
     virtual bool insert(FmeNode *node) override;
@@ -92,11 +93,13 @@ public:
 private:
     FmeValue (*op)(FmeValue &a);
     FmeNode *operand_a;
+    QString description;
 };
 
 class FmeNodeBinaryOp : public FmeNode {
 public:
-    FmeNodeBinaryOp(int priority, FmeValue (*op)(FmeValue &a, FmeValue &b), FmeNode *left);
+    FmeNodeBinaryOp(int priority, FmeValue (*op)(FmeValue &a, FmeValue &b), FmeNode *left,
+                    QString description = "??");
     virtual ~FmeNodeBinaryOp();
     virtual bool eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) override;
     virtual bool insert(FmeNode *node) override;
@@ -106,6 +109,7 @@ private:
     FmeValue (*op)(FmeValue &a, FmeValue &b);
     FmeNode *operand_a;
     FmeNode *operand_b;
+    QString description;
 };
 
 class FmeExpression : public FmeNode {
