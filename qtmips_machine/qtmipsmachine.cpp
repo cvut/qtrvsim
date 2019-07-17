@@ -193,7 +193,6 @@ void QtMipsMachine::cache_sync() {
         cch_data->sync();
 }
 
-
 const PhysAddrSpace *QtMipsMachine::physical_address_space() {
     return physaddrspace;
 }
@@ -214,10 +213,14 @@ LcdDisplay *QtMipsMachine::peripheral_lcd_display() {
     return perip_lcd_display;
 }
 
-const SymbolTable *QtMipsMachine::symbol_table(bool create) {
+SymbolTable *QtMipsMachine::symbol_table_rw(bool create) {
     if (create && (symtab == nullptr))
         symtab = new SymbolTable;
     return symtab;
+}
+
+const SymbolTable *QtMipsMachine::symbol_table(bool create) {
+    return symbol_table_rw(create);
 }
 
 void QtMipsMachine::set_symbol(QString name, std::uint32_t value,
@@ -225,8 +228,7 @@ void QtMipsMachine::set_symbol(QString name, std::uint32_t value,
                                unsigned char other) {
     if (symtab == nullptr)
         symtab = new SymbolTable;
-    symtab->remove_symbol(name);
-    symtab->add_symbol(name, value, size, info, other);
+    symtab->set_symbol(name, value, size, info, other);
 }
 
 const Core *QtMipsMachine::core() {

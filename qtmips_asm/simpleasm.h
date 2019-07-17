@@ -33,53 +33,51 @@
  *
  ******************************************************************************/
 
-#ifndef SYMBOLTABLE_H
-#define SYMBOLTABLE_H
+#ifndef  SIMPLEASM_H
+#define  SIMPLEASM_H
 
-#include <QString>
-#include <QObject>
-#include <QMap>
-#include <QMultiMap>
-#include <QStringList>
+#include  <QString>
+#include "fixmatheval.h"
+#include "qtmipsmachine.h"
+#include "messagetype.h"
 
-namespace machine {
-
-class SymbolTableEntry {
-    friend class SymbolTable;
-    SymbolTableEntry(QString name, std::uint32_t value, std::uint32_t size,
-                     unsigned char info = 0, unsigned char other = 0);
-protected:
-    QString name;
-    std::uint32_t value;
-    std::uint32_t size;
-    unsigned char info;
-    unsigned char other;
-};
-
-class SymbolTable : public QObject
-{
-    Q_OBJECT
+class SymbolTableDb : public fixmatheval::FmeSymbolDb {
 public:
-    SymbolTable(QObject *parent = 0);
-    ~SymbolTable();
-
-    void add_symbol(QString name, std::uint32_t value, std::uint32_t size,
+    SymbolTableDb(machine::SymbolTable *symtab);
+    virtual bool getValue(fixmatheval::FmeValue &value, QString name) override;
+    void setSymbol(QString name, std::uint32_t value, std::uint32_t size,
               unsigned char info = 0, unsigned char other = 0);
-    void set_symbol(QString name, std::uint32_t value, std::uint32_t size,
-              unsigned char info = 0, unsigned char other = 0);
-    void remove_symbol(QString name);
-    QStringList *names() const;
-public slots:
-    bool name_to_value(std::uint32_t &value, QString name) const;
-    bool value_to_name(QString &name, std::uint32_t value) const;
-signals:
-
-
 private:
-    QMultiMap<std::uint32_t, SymbolTableEntry*> map_value_to_symbol;
-    QMap<QString, SymbolTableEntry*> map_name_to_symbol;
+    machine::SymbolTable *symtab;
 };
 
-}
+class SimpleAsm : public QObject {
+    Q_OBJECT
 
-#endif // SYMBOLTABLE_H
+    using Super = QObject;
+
+signals:
+    void report_message(messagetype::Type type, QString file, int line,
+                                   int column, QString text, QString hint);
+
+public:
+    SimpleAsm(QObject *parent = nullptr);
+    ~SimpleAsm();
+public:
+    static std::uint64_t string_to_uint64(QString str, int base,
+                                          int *chars_taken = nullptr);
+    void clear();
+    void setup(machine::MemoryAccess *mem, SymbolTableDb *symtab, std::uint32_t address);
+    bool process_line(QString line, QString filename = "",
+                      int line_number = 0, QString *error_ptr = nullptr);
+    bool finish(QString *error_ptr = nullptr);
+private:
+    bool error_occured;
+    bool fatal_occured;
+    SymbolTableDb *symtab;
+    machine::MemoryAccess *mem;
+    machine::RelocExpressionList reloc;
+    std::uint32_t address;
+};
+
+#endif /*SIMPLEASM_H*/

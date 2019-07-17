@@ -50,6 +50,7 @@
 #include "fontsize.h"
 #include "gotosymboldialog.h"
 #include "fixmatheval.h"
+#include "simpleasm.h"
 
 #ifdef __EMSCRIPTEN__
 #include <QFileInfo>
@@ -691,45 +692,9 @@ void MainWindow::message_selected(messagetype::Type type, QString file, int line
         central_window->setCurrentWidget(editor);
 }
 
-class SymbolTableDb : public fixmatheval::FmeSymbolDb {
-public:
-    SymbolTableDb(const machine::SymbolTable *symtab);
-    virtual bool getValue(fixmatheval::FmeValue &value, QString name) override;
-private:
-    const machine::SymbolTable *symtab;
-};
-
-SymbolTableDb::SymbolTableDb(const machine::SymbolTable *symtab) {
-    this->symtab = symtab;
-}
-
-bool SymbolTableDb::getValue(fixmatheval::FmeValue &value, QString name) {
-    std::uint32_t val;
-    if (!symtab->name_to_value(val, name))
-        return false;
-    value = val;
-    return true;
-}
-
-static std::uint64_t string_to_uint64(QString str, int base,
-                                      int *chars_taken = nullptr) {
-    int i;
-    std::int64_t val;
-    char *p, *r;
-    char cstr[str.count() + 1];
-    for (i = 0; i < str.count(); i++)
-        cstr[i] = str.at(i).toLatin1();
-    cstr[i] = 0;
-    p = cstr;
-    val = std::strtoll(p, &r, base);
-    if (chars_taken != nullptr)
-        *chars_taken = r - p;
-    return val;
-}
-
 void MainWindow::compile_source() {
-    SymbolTableDb symtab(machine->symbol_table(true));
-    int error_line = 0;
+    SymbolTableDb symtab(machine->symbol_table_rw(true));
+    bool error_occured;
     if (current_srceditor == nullptr)
         return;
     if (machine == nullptr) {
@@ -745,169 +710,24 @@ void MainWindow::compile_source() {
     machine->cache_sync();
     SrcEditor *editor = current_srceditor;
     QTextDocument *doc = editor->document();
-    std::uint32_t address = 0x80020000;
-    machine::RelocExpressionList reloc;
 
     emit clear_messages();
+    SimpleAsm sasm;
+
+    connect(&sasm, SIGNAL(report_message(messagetype::Type,QString,int,int,QString,QString)),
+            this, SIGNAL(report_message(messagetype::Type,QString,int,int,QString,QString)));
+
+    sasm.setup(mem, &symtab, 0x80020000);
 
     int ln = 1;
     for ( QTextBlock block = doc->begin(); block.isValid(); block = block.next(), ln++) {
-        QString error;
-        int pos;
-        QString label = "";
         QString line = block.text();
-        pos = line.indexOf("#");
-        if (pos >= 0)
-            line.truncate(pos);
-        pos = line.indexOf(";");
-        if (pos >= 0)
-            line.truncate(pos);
-        pos = line.indexOf("//");
-        if (pos >= 0)
-            line.truncate(pos);
-        line = line.simplified();
-        pos = line.indexOf(":");
-        if (pos >= 0) {
-            label = line.mid(0, pos);
-            line = line.mid(pos + 1).trimmed();
-            machine->set_symbol(label, address, 4);
-        }
-        if (line.isEmpty())
-            continue;
-        int k = 0, l;
-        while (k < line.count()) {
-            if (!line.at(k).isSpace())
-                break;
-            k++;
-        }
-        l = k;
-        while (l < line.count()) {
-            if (!line.at(l).isLetterOrNumber() && !(line.at(l) == '.'))
-                break;
-            l++;
-        }
-        QString op = line.mid(k, l - k).toUpper();
-        if ((op == ".DATA") || (op == ".TEXT") ||
-            (op == ".GLOBL") || (op == ".END") ||
-            (op == ".ENT")) {
-            continue;
-        }
-        if (op == ".ORG") {
-            bool ok;
-            fixmatheval::FmeExpression expression;
-            fixmatheval::FmeValue value;
-            ok = expression.parse(line.mid(op.size()), error);
-            if (ok)
-                ok = expression.eval(value, &symtab, error);
-            if (!ok) {
-                error_line = ln;
-                emit report_message(messagetype::ERROR, filename, ln, 0,
-                               tr("line %1 .orig %2 parse error.")
-                               .arg(QString::number(ln), line), "");
-                break;
-            }
-            address = value;
-            continue;
-        }
-        if ((op == ".EQU") || (op == ".SET")) {
-            QStringList operands = line.mid(op.size()).split(",");
-            if ((operands.count() > 2) || (operands.count() < 1)) {
-                error_line = ln;
-                emit report_message(messagetype::ERROR, filename, ln, 0,
-                               tr("line %1 .set or .equ incorrect arguments number.")
-                               .arg(QString::number(ln)), "");
-                continue;
-            }
-            QString name = operands.at(0).trimmed();
-            if ((name == "noat") || (name == "noreored"))
-                continue;
-            bool ok;
-            fixmatheval::FmeValue value = 1;
-            if (operands.count() > 1) {
-                fixmatheval::FmeExpression expression;
-                ok = expression.parse(operands.at(1), error);
-                if (ok)
-                    ok = expression.eval(value, &symtab, error);
-                if (!ok) {
-                    error_line = ln;
-                    emit report_message(messagetype::ERROR, filename, ln, 0,
-                                  tr("line %1 .set or .equ %2 parse error.")
-                                  .arg(QString::number(ln), operands.at(1)), "");
-                    continue;
-                }
-            }
-            machine->set_symbol(name, value, 0);
-            continue;
-        }
-        if (op == ".WORD") {
-            foreach (QString s, line.mid(op.size()).split(",")) {
-                s = s.simplified();
-                std::uint32_t val = 0;
-                int chars_taken;
-                val = string_to_uint64(s, 0, &chars_taken);
-                if (chars_taken != s.size()) {
-                    val = 0;
-                    reloc.append(new machine::RelocExpression(address, s, 0,
-                                 -0xffffffff, 0xffffffff, 0, 32, 0, ln, 0));
-                }
-                mem->write_word(address, val);
-                address += 4;
-            }
-            continue;
-        }
-
-        std::uint32_t inst[2] = {0, 0};
-        ssize_t size = machine::Instruction::code_from_string(inst, 8, line, error,
-                                                 address, &reloc, ln, true);
-        if (size < 0) {
-            error_line = ln;
-            emit report_message(messagetype::ERROR, filename, ln, 0,
-                              tr("line %1 instruction %2 parse error - %3.")
-                              .arg(QString::number(ln), line, error), "");
-            continue;
-        }
-        std::uint32_t *p = inst;
-        for (ssize_t l = 0; l < size; l += 4) {
-            mem->write_word(address, *(p++));
-            address += 4;
-        }
+        if (!sasm.process_line(line, filename, ln))
+            error_occured = true;
     }
-    foreach(machine::RelocExpression *r, reloc) {
-        QString error;
-        fixmatheval::FmeExpression expression;
-        if (!expression.parse(r->expression, error)) {
-            error_line = r->line;
-            emit report_message(messagetype::ERROR, filename, ln, 0,
-                                tr("expression parse error %1 at line %2, expression %3.")
-                                .arg(error, QString::number(r->line), expression.dump()), "");
-        } else {
-            fixmatheval::FmeValue value;
-            if (!expression.eval(value, &symtab, error)) {
-                error_line = r->line;
-                emit report_message(messagetype::ERROR, filename, ln, 0,
-                               tr("expression evalution error %1 at line %2 , expression %3.")
-                               .arg(error, QString::number(r->line), expression.dump()), "");
-            } else {
-                if (false)
-                    emit report_message(messagetype::INFO, filename, ln, 0,
-                                   expression.dump() + " -> " + QString::number(value), "");
-                machine::Instruction inst(mem->read_word(r->location, true));
-                if (!inst.update(value, r)) {
-                    error_line = r->line;
-                    emit report_message(messagetype::ERROR, filename, ln, 0,
-                                   tr("instruction update error %1 at line %2, expression %3 -> value %4.")
-                                   .arg(error, QString::number(r->line), expression.dump(), QString::number(value)), "");
-                }
-                mem->write_word(r->location, inst.data());
-            }
-        }
-    }
-    while (!reloc.isEmpty()) {
-        delete reloc.takeFirst();
-    }
+    if (!sasm.finish())
+        error_occured = true;
 
-    emit mem->external_change_notify(mem, 0, 0xffffffff, true);
-
-    if (error_line != 0)
+    if (error_occured)
         show_messages();
 }

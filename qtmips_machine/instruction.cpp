@@ -1111,7 +1111,7 @@ static int parse_reg_from_string(QString str, uint *chars_taken = nullptr)
 
 static void reloc_append(RelocExpressionList *reloc, QString fl, uint32_t inst_addr,
                     std::int64_t offset, const ArgumentDesc *adesc, uint *chars_taken = nullptr,
-                    int line = 0, int options = 0) {
+                    QString filename = "", int line = 0, int options = 0) {
     uint bits = IMF_SUB_GET_BITS(adesc->loc);
     uint shift = IMF_SUB_GET_SHIFT(adesc->loc);
     QString expression = "";
@@ -1130,7 +1130,7 @@ static void reloc_append(RelocExpressionList *reloc, QString fl, uint32_t inst_a
     }
 
     reloc->append(new RelocExpression(inst_addr, expression, offset,
-                  adesc->min, adesc->max, shift, bits, adesc->shift, line, options));
+                  adesc->min, adesc->max, shift, bits, adesc->shift, filename, line, options));
     if (chars_taken != nullptr) {
         *chars_taken = i;
     }
@@ -1141,7 +1141,7 @@ static void reloc_append(RelocExpressionList *reloc, QString fl, uint32_t inst_a
 ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                        QString inst_base, QStringList &inst_fields, QString &error,
                        std::uint32_t inst_addr, RelocExpressionList *reloc,
-                       int line, bool pseudo_opt, int options)
+                       QString filename, int line, bool pseudo_opt, int options)
 {
     const char *err = "unknown instruction";
     if (str_to_instruction_code_map.isEmpty())
@@ -1236,7 +1236,7 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                         need_reloc = true;
                     }
                     if (need_reloc && (reloc != nullptr)) {
-                        reloc_append(reloc, fl, inst_addr, val, adesc, &chars_taken, line, options);
+                        reloc_append(reloc, fl, inst_addr, val, adesc, &chars_taken, filename, line, options);
                         val = 0;
                     }
                     break;
@@ -1263,7 +1263,7 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                         need_reloc = true;
                     }
                     if (need_reloc && (reloc != nullptr)) {
-                        reloc_append(reloc, fl, inst_addr, val, adesc, &chars_taken, line, options);
+                        reloc_append(reloc, fl, inst_addr, val, adesc, &chars_taken, filename, line, options);
                         val = 0;
                     }
                     break;
@@ -1328,14 +1328,14 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
     } else if (pseudo_opt) {
         if (((inst_base == "LA") || (inst_base == "LI")) && (inst_fields.size() == 2)) {
             if(code_from_string(code, buffsize, "LUI", inst_fields, error,
-                             inst_addr, reloc, line, false,
+                             inst_addr, reloc, filename, line, false,
                              CFS_OPTION_SILENT_MASK + 16) < 0) {
                 error = QString("error in LUI element of " + inst_base);
                 return -1;
             }
             inst_fields.insert(1, inst_fields.at(0));
             if (code_from_string(code + 1, buffsize - 4, "ORI", inst_fields, error,
-                             inst_addr + 4, reloc, line, false,
+                             inst_addr + 4, reloc, filename, line, false,
                              CFS_OPTION_SILENT_MASK + 0) < 0) {
                 error = QString("error in ORI element of " + inst_base);
                 return -1;
@@ -1353,7 +1353,8 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
 
 ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
                        QString str, QString &error, std::uint32_t inst_addr,
-                       RelocExpressionList *reloc, int line, bool pseudo_opt, int options)
+                       RelocExpressionList *reloc, QString filename, int line,
+                       bool pseudo_opt, int options)
 {
     int k = 0, l;
     while (k < str.count()) {
@@ -1379,7 +1380,7 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
     }
 
     return code_from_string(code, buffsize, inst_base, inst_fields, error, inst_addr,
-                            reloc, line, pseudo_opt, options);
+                            reloc, filename, line, pseudo_opt, options);
 }
 
 bool Instruction::update(std::int64_t val, RelocExpression *relocexp) {

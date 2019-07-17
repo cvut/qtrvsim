@@ -77,6 +77,7 @@ public:
     PeripSpiLed *peripheral_spi_led();
     LcdDisplay *peripheral_lcd_display();
     const SymbolTable *symbol_table(bool create = false);
+    SymbolTable *symbol_table_rw(bool create = false);
     void set_symbol(QString name, std::uint32_t value, std::uint32_t size,
                     unsigned char info = 0, unsigned char other = 0);
     const Core *core();

@@ -75,6 +75,12 @@ void SymbolTable::remove_symbol(QString name) {
     delete p_ste;
 }
 
+void SymbolTable::set_symbol(QString name, std::uint32_t value, std::uint32_t size,
+          unsigned char info, unsigned char other) {
+    remove_symbol(name);
+    add_symbol(name, value, size, info, other);
+}
+
 bool SymbolTable::name_to_value(std::uint32_t &value, QString name) const {
     SymbolTableEntry *p_ste = map_name_to_symbol.value(name);
     if (p_ste == nullptr) {
