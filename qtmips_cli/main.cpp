@@ -35,11 +35,15 @@
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
+#include <QFile>
+#include <QTextStream>
 #include <cctype>
 #include <iostream>
 #include <fstream>
 #include "tracer.h"
 #include "reporter.h"
+#include "msgreport.h"
+#include "simpleasm.h"
 
 using namespace machine;
 using namespace std;
@@ -49,9 +53,10 @@ void create_parser(QCommandLineParser &p) {
     p.addHelpOption();
     p.addVersionOption();
 
-    p.addPositionalArgument("FILE", "Input ELF executable file");
+    p.addPositionalArgument("FILE", "Input ELF executable file or assembler source");
 
     // p.addOptions({}); available only from Qt 5.4+
+    p.addOption({"asm", "Treat provided file argument as assembler source."});
     p.addOption({"pipelined", "Configure CPU to use five stage pipeline."});
     p.addOption({"no-delay-slot", "Disable jump delay slot."});
     p.addOption({{"trace-fetch", "tr-fetch"}, "Trace fetched instruction (for both pipelined and not core)."});
@@ -315,24 +320,62 @@ void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
     }
 }
 
+bool assemble(QtMipsMachine &machine, MsgReport &msgrep, QString filename) {
+    SymbolTableDb symtab(machine.symbol_table_rw(true));
+    machine::MemoryAccess *mem = machine.physical_address_space_rw();
+    if (mem == nullptr) {
+        return false;
+    }
+    machine.cache_sync();
+    SimpleAsm sasm;
+
+    sasm.connect(&sasm, SIGNAL(report_message(messagetype::Type,QString,int,int,QString,QString)),
+            &msgrep, SLOT(report_message(messagetype::Type,QString,int,int,QString,QString)));
+
+    sasm.setup(mem, &symtab, 0x80020000);
+
+    QFile input_file(filename);
+    if (!input_file.open(QIODevice::ReadOnly)) {
+        cout << "cannot open filename " << filename.toLocal8Bit().data() << endl;
+        return false;
+    }
+
+    QTextStream in(&input_file);
+    for (int ln = 1; !in.atEnd(); ln++) {
+        QString line = in.readLine();
+        sasm.process_line(line, filename, ln);
+    }
+    input_file.close();
+
+    return sasm.finish();
+}
+
 int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
     app.setApplicationName("qtmips_cli");
-    app.setApplicationVersion("0.1");
+    app.setApplicationVersion("0.7");
 
     QCommandLineParser p;
     create_parser(p);
     p.process(app);
 
+    bool asm_source = p.isSet("asm");
+
     MachineConfig cc;
     configure_machine(p, cc);
-    QtMipsMachine machine(cc, true);
+    QtMipsMachine machine(cc, !asm_source, !asm_source);
 
     Tracer tr(&machine);
     configure_tracer(p, tr);
 
     Reporter r(&app, &machine);
     configure_reporter(p, r, machine.symbol_table());
+
+    if (asm_source) {
+        MsgReport msgrep(&app);
+        if (!assemble(machine, msgrep, p.positionalArguments()[0]))
+            exit(1);
+    }
 
     load_ranges(machine, p.values("load-range"));
 

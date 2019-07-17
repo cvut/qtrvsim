@@ -701,7 +701,7 @@ void MainWindow::message_selected(messagetype::Type type, QString file, int line
 
 void MainWindow::compile_source() {
     SymbolTableDb symtab(machine->symbol_table_rw(true));
-    bool error_occured;
+    bool error_occured = false;
     if (current_srceditor == nullptr)
         return;
     if (machine == nullptr) {

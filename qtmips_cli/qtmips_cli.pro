@@ -33,8 +33,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         tracer.cpp \
-        reporter.cpp
+        reporter.cpp \
+        msgreport.cpp
 
 HEADERS += \
         tracer.h \
-        reporter.h
+        reporter.h \
+        msgreport.h
