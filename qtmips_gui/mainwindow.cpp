@@ -584,7 +584,14 @@ void MainWindow::open_source() {
     file_name = QFileDialog::getOpenFileName(this, tr("Open File"), "", "Source Files (*.asm *.S *.s)");
 
     if (!file_name.isEmpty()) {
-        SrcEditor *editor = new SrcEditor();
+        SrcEditor *editor = source_editor_for_file(file_name, false);
+        if (editor != nullptr) {
+            if (central_window != nullptr)
+                central_window->setCurrentWidget(editor);
+            return;
+        }
+        editor = new SrcEditor();
+
         if (editor->loadFile(file_name)) {
             add_src_editor_to_tabs(editor);
         } else {
