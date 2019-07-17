@@ -540,28 +540,42 @@ void MainWindow::update_open_file_list() {
     settings->setValue("openSrcFiles", open_src_files);
 }
 
+static int compare_filenames(const QString &filename1, const QString &filename2) {
+    QFileInfo fi1(filename1);
+    QFileInfo fi2(filename2);
+    QString canon1 = fi1.canonicalFilePath();
+    QString canon2 = fi2.canonicalFilePath();
+    if (!canon1.isEmpty() && (canon1 == canon2))
+        return 2;
+    if (filename1 == filename2)
+        return 1;
+    return 0;
+}
+
 SrcEditor *MainWindow::source_editor_for_file(QString filename, bool open) {
-    if ((central_window == nullptr) || (settings == nullptr))
+    if (central_window == nullptr)
         return nullptr;
-    bool found = false;
-    SrcEditor *editor = nullptr;
+    int found_match = 0;
+    SrcEditor *found_editor;
     for (int i = 0; i < central_window->count(); i++) {
         QWidget *w = central_window->widget(i);
-        editor = dynamic_cast<SrcEditor *>(w);
+        SrcEditor *editor = dynamic_cast<SrcEditor *>(w);
         if (editor == nullptr)
             continue;
-        if (editor->filename() == filename) {
-            found = true;
-            break;
+        int match = compare_filenames(filename, editor->filename());
+        if ((match > found_match) ||
+            ((editor == current_srceditor) && (match >= found_match))) {
+            found_editor = editor;
+            found_match = match;
         }
     }
-    if (found)
-        return editor;
+    if (found_match > 0)
+        return found_editor;
 
     if (!open)
         return nullptr;
 
-    editor = new SrcEditor();
+    SrcEditor *editor = new SrcEditor();
     if (!editor->loadFile(filename)) {
         delete editor;
         return nullptr;
