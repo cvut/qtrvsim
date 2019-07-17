@@ -224,11 +224,12 @@ void MainWindow::show_hide_coreview(bool show) {
     coreview->setScene(corescene);
 }
 
-void MainWindow::create_core(const machine::MachineConfig &config, bool load_executable) {
+void MainWindow::create_core(const machine::MachineConfig &config, bool load_executable,
+                             bool keep_memory) {
     // Create machine
     machine::QtMipsMachine *new_machine = new machine::QtMipsMachine(&config, true, load_executable);
 
-    if (!load_executable && (machine != nullptr)) {
+    if (keep_memory && (machine != nullptr)) {
         new_machine->memory_rw()->reset(*machine->memory());
     }
 
@@ -309,13 +310,13 @@ void MainWindow::new_machine() {
     ndialog->show();
 }
 
-void MainWindow::machine_reload() {
+void MainWindow::machine_reload(bool force_memory_reset) {
     if (machine == nullptr)
         return new_machine();
     bool load_executable = machine->executable_loaded();
     machine::MachineConfig cnf(&machine->config()); // We have to make local copy as create_core will delete current machine
     try {
-        create_core(cnf, load_executable);
+        create_core(cnf, load_executable, !load_executable && !force_memory_reset);
     } catch (const machine::QtMipsExceptionInput &e) {
         QMessageBox msg(this);
         msg.setText(e.msg(false));
@@ -714,20 +715,25 @@ void MainWindow::message_selected(messagetype::Type type, QString file, int line
 }
 
 void MainWindow::compile_source() {
-    SymbolTableDb symtab(machine->symbol_table_rw(true));
     bool error_occured = false;
     if (current_srceditor == nullptr)
         return;
+    if (machine != nullptr) {
+        if (machine->config().reset_at_compile())
+            machine_reload(true);
+    }
     if (machine == nullptr) {
         QMessageBox::critical(this, "QtMips Error", tr("No machine to store program."));
         return;
     }
+    SymbolTableDb symtab(machine->symbol_table_rw(true));
     machine::MemoryAccess *mem = machine->physical_address_space_rw();
     if (mem == nullptr) {
         QMessageBox::critical(this, "QtMips Error", tr("No physical addresspace to store program."));
         return;
     }
     QString filename = current_srceditor->filename();
+
     machine->cache_sync();
     SrcEditor *editor = current_srceditor;
     QTextDocument *doc = editor->document();

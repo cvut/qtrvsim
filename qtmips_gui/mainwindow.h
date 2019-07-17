@@ -64,7 +64,8 @@ public:
     ~MainWindow();
 
     void start();
-    void create_core(const machine::MachineConfig &config, bool load_executable = true);
+    void create_core(const machine::MachineConfig &config, bool load_executable = true,
+                     bool keep_memory = false);
 
     bool configured();
 
@@ -76,7 +77,7 @@ signals:
 public slots:
     // Actions signals
     void new_machine();
-    void machine_reload();
+    void machine_reload(bool force_memory_reset = false);
     void print_action();
     void new_source();
     void open_source();

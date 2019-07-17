@@ -66,6 +66,7 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     connect(ui->preset_no_pipeline_cache, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
     connect(ui->preset_pipelined_bare, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
     connect(ui->preset_pipelined, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
+    connect(ui->reset_at_compile, SIGNAL(clicked(bool)), this, SLOT(reset_at_compile_change(bool)));
 
     connect(ui->pipelined, SIGNAL(clicked(bool)), this, SLOT(pipelined_change(bool)));
     connect(ui->delay_slot, SIGNAL(clicked(bool)), this, SLOT(delay_slot_change(bool)));
@@ -126,7 +127,7 @@ void NewDialog::create() {
     MainWindow *prnt = (MainWindow*)parent();
 
     try {
-        prnt->create_core(*config);
+        prnt->create_core(*config, true, false);
     } catch (const machine::QtMipsExceptionInput &e) {
         QMessageBox msg(this);
         msg.setText(e.msg(false));
@@ -144,7 +145,7 @@ void NewDialog::create() {
 
 void NewDialog::create_empty() {
     MainWindow *prnt = (MainWindow*)parent();
-    prnt->create_core(*config, false);
+    prnt->create_core(*config, false, true);
     store_settings(); // Save to settings
     this->close();
 }
@@ -270,9 +271,14 @@ void NewDialog::osemu_fs_root_change(QString val) {
     config->set_osemu_fs_root(val);
 }
 
+void NewDialog::reset_at_compile_change(bool v) {
+    config->set_reset_at_compile(v);
+}
+
 void NewDialog::config_gui() {
     // Basic
     ui->elf_file->setText(config->elf());
+    ui->reset_at_compile->setChecked(config->reset_at_compile());
     // Core
     ui->pipelined->setChecked(config->pipelined());
     ui->delay_slot->setChecked(config->delay_slot());

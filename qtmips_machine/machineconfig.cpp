@@ -193,6 +193,7 @@ MachineConfig::MachineConfig() {
     osem_interrupt_stop = true;
     osem_exception_stop = true;
     osem_fs_root = "";
+    res_at_compile = true;
     elf_path = DF_ELF;
     cch_program = MachineConfigCache();
     cch_data = MachineConfigCache();
@@ -213,6 +214,7 @@ MachineConfig::MachineConfig(const MachineConfig *cc) {
     osem_interrupt_stop = cc->osemu_interrupt_stop();
     osem_exception_stop = cc->osemu_exception_stop();
     osem_fs_root = cc->osemu_fs_root();
+    res_at_compile = cc->reset_at_compile();
     elf_path = cc->elf();
     cch_program = cc->cache_program();
     cch_data = cc->cache_data();
@@ -235,6 +237,7 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     osem_interrupt_stop = sts->value(N("OsemuInterruptStop"), true).toBool();
     osem_exception_stop = sts->value(N("OsemuExceptionStop"), true).toBool();
     osem_fs_root = sts->value(N("OsemuFilesystemRoot"), "").toString();
+    res_at_compile = sts->value(N("ResetAtCompile"), true).toBool();
     elf_path = sts->value(N("Elf"), DF_ELF).toString();
     cch_program = MachineConfigCache(sts, N("ProgramCache_"));
     cch_data = MachineConfigCache(sts, N("DataCache_"));
@@ -253,6 +256,7 @@ void MachineConfig::store(QSettings *sts, const QString &prefix) {
     sts->setValue(N("OsemuInterruptStop"), osemu_interrupt_stop());
     sts->setValue(N("OsemuExceptionStop"), osemu_exception_stop());
     sts->setValue(N("OsemuFilesystemRoot"), osemu_fs_root());
+    sts->setValue(N("ResetAtCompile"), reset_at_compile());
     sts->setValue(N("Elf"), elf_path);
     cch_program.store(sts, N("ProgramCache_"));
     cch_data.store(sts, N("DataCache_"));
@@ -344,6 +348,10 @@ void MachineConfig::set_osemu_fs_root(QString v) {
     osem_fs_root = v;
 }
 
+void MachineConfig::set_reset_at_compile(bool v) {
+    res_at_compile = v;
+}
+
 void MachineConfig::set_elf(QString path) {
     elf_path = path;
 }
@@ -408,6 +416,10 @@ bool MachineConfig::osemu_exception_stop() const {
 
 QString MachineConfig::osemu_fs_root() const {
     return osem_fs_root;
+}
+
+bool MachineConfig::reset_at_compile() const {
+    return res_at_compile;
 }
 
 QString MachineConfig::elf() const {

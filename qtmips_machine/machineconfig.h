@@ -134,6 +134,8 @@ public:
     void set_osemu_interrupt_stop(bool);
     void set_osemu_exception_stop(bool);
     void set_osemu_fs_root(QString v);
+    // reset machine befor internal compile/reload after external make
+    void set_reset_at_compile(bool);
     // Set path to source elf file. This has to be set before core is initialized.
     void set_elf(QString path);
     // Configure cache
@@ -154,6 +156,7 @@ public:
     bool osemu_interrupt_stop() const;
     bool osemu_exception_stop() const;
     QString osemu_fs_root() const;
+    bool reset_at_compile() const;
     QString elf() const;
     const MachineConfigCache &cache_program() const;
     const MachineConfigCache &cache_data() const;
@@ -171,6 +174,7 @@ private:
     unsigned mem_acc_read, mem_acc_write, mem_acc_burst;
     bool osem_enable, osem_known_syscall_stop, osem_unknown_syscall_stop;
     bool osem_interrupt_stop, osem_exception_stop;
+    bool res_at_compile;
     QString osem_fs_root;
     QString elf_path;
     MachineConfigCache cch_program, cch_data;

@@ -79,6 +79,7 @@ private slots:
     void osemu_exception_stop_change(bool);
     void browse_osemu_fs_root();
     void osemu_fs_root_change(QString val);
+    void reset_at_compile_change(bool);
 
 private:
     Ui::NewDialog *ui;
