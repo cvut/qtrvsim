@@ -1386,8 +1386,6 @@ ssize_t Instruction::code_from_string(std::uint32_t *code, size_t buffsize,
 bool Instruction::update(std::int64_t val, RelocExpression *relocexp) {
     std::int64_t mask = (((std::int64_t)1 << relocexp->bits) - 1) << relocexp->lsb_bit;
     dt &= ~ mask;
-    if (relocexp->shift)
-        printf("reloc shift\n");
     val += relocexp->offset;
     if ((val & ((1 << relocexp->shift) - 1)) &&
         !(relocexp->options & CFS_OPTION_SILENT_MASK)) {
