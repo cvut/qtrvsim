@@ -35,10 +35,10 @@
 /* Based on Qt example released under BSD license */
 
 #include "QStringList"
-#include "highlighter.h"
+#include "highlighterasm.h"
 #include "instruction.h"
 
-Highlighter::Highlighter(QTextDocument *parent)
+HighlighterAsm::HighlighterAsm(QTextDocument *parent)
     : QSyntaxHighlighter(parent)
 {
     HighlightingRule rule;
@@ -111,7 +111,7 @@ Highlighter::Highlighter(QTextDocument *parent)
     //commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
 }
 
-void Highlighter::highlightBlock(const QString &text)
+void HighlighterAsm::highlightBlock(const QString &text)
 {
 #if QT_VERSION < QT_VERSION_CHECK(5, 7, 0)
     foreach(const HighlightingRule &rule, highlightingRules)

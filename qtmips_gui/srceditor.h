@@ -38,8 +38,8 @@
 
 #include <QTextEdit>
 #include <QString>
+#include <QSyntaxHighlighter>
 #include "qtmipsmachine.h"
-#include "highlighter.h"
 
 class SrcEditor : public QTextEdit {
     Q_OBJECT
@@ -56,7 +56,7 @@ public:
     void setCursorToLine(int ln);
     void setFileName(QString filename);
 private:
-    Highlighter *highlighter;
+    QSyntaxHighlighter *highlighter;
     void setup_common();
     QString fname;
     QString tname;

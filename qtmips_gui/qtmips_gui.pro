@@ -76,7 +76,7 @@ SOURCES += \
     hinttabledelegate.cpp \
     coreview/minimux.cpp \
     srceditor.cpp \
-    highlighter.cpp \
+    highlighterasm.cpp \
     messagesdock.cpp \
     messagesmodel.cpp \
     messagesview.cpp
@@ -124,7 +124,7 @@ HEADERS += \
     hinttabledelegate.h \
     coreview/minimux.h \
     srceditor.h \
-    highlighter.h \
+    highlighterasm.h \
     messagesdock.h \
     messagesmodel.h \
     messagesview.h

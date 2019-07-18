@@ -40,7 +40,7 @@
 #include <QTextBlock>
 
 #include "srceditor.h"
-#include "highlighter.h"
+#include "highlighterasm.h"
 
 void SrcEditor::setup_common() {
     QFont font;
@@ -49,7 +49,7 @@ void SrcEditor::setup_common() {
     font.setPointSize(10);
     setFont(font);
     tname = "Unknown";
-    highlighter = new Highlighter(document());
+    highlighter = new HighlighterAsm(document());
 }
 
 SrcEditor::SrcEditor(QWidget *parent) : Super(parent) {

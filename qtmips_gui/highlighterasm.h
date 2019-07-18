@@ -34,8 +34,8 @@
  ******************************************************************************/
 /* Based on Qt example released under BSD license */
 
-#ifndef HIGHLIGHTER_H
-#define HIGHLIGHTER_H
+#ifndef HIGHLIGHTERASM_H
+#define HIGHLIGHTERASM_H
 
 #include <QSyntaxHighlighter>
 #include <QTextCharFormat>
@@ -46,12 +46,12 @@ class QTextDocument;
 QT_END_NAMESPACE
 
 //! [0]
-class Highlighter : public QSyntaxHighlighter
+class HighlighterAsm : public QSyntaxHighlighter
 {
     Q_OBJECT
 
 public:
-    Highlighter(QTextDocument *parent = 0);
+    HighlighterAsm(QTextDocument *parent = 0);
 
 protected:
     void highlightBlock(const QString &text) override;
@@ -76,4 +76,4 @@ private:
 };
 //! [0]
 
-#endif // HIGHLIGHTER_H
+#endif // HIGHLIGHTERASM_H
