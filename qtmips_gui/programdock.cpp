@@ -72,7 +72,7 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
 
     QTableView *program_content = new ProgramTableView(0, settings);
     // program_content->setSizePolicy();
-    ProgramModel *program_model = new ProgramModel(0);
+    ProgramModel *program_model = new ProgramModel(this);
     program_content->setModel(program_model);
     program_content->verticalHeader()->hide();
     //program_content->setHorizontalHeader(program_model->);

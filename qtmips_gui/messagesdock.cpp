@@ -59,7 +59,7 @@ MessagesDock::MessagesDock(QWidget *parent, QSettings *settings) : Super(parent)
     QWidget *content = new QWidget();
 
     QListView *messages_content = new MessagesView(0, settings);
-    MessagesModel *messages_model = new MessagesModel(0);
+    MessagesModel *messages_model = new MessagesModel(this);
     messages_content->setModel(messages_model);
 
     QVBoxLayout *layout = new QVBoxLayout;

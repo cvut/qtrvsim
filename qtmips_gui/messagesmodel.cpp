@@ -62,6 +62,10 @@ MessagesModel::MessagesModel(QObject *parent) : Super(parent) {
 
 }
 
+MessagesModel::~MessagesModel() {
+    clear_messages();
+}
+
 int MessagesModel::rowCount(const QModelIndex & /*parent*/) const {
    return messages.count();
 }

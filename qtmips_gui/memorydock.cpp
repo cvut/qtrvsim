@@ -62,7 +62,7 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
 
     QTableView *memory_content = new MemoryTableView(0, settings);
     // memory_content->setSizePolicy();
-    MemoryModel *memory_model = new MemoryModel(0);
+    MemoryModel *memory_model = new MemoryModel(this);
     memory_content->setModel(memory_model);
     memory_content->verticalHeader()->hide();
     //memory_content->setHorizontalHeader(memory_model->);
