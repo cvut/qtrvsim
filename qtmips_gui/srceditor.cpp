@@ -41,6 +41,7 @@
 
 #include "srceditor.h"
 #include "highlighterasm.h"
+#include "highlighterc.h"
 
 void SrcEditor::setup_common() {
     QFont font;
@@ -76,6 +77,14 @@ void SrcEditor::setFileName(QString filename) {
     QFileInfo fi(filename);
     fname = filename;
     tname = fi.fileName();
+    delete highlighter;
+    highlighter = nullptr;
+    if ((fi.suffix() == "c") || (fi.suffix() == "C") ||
+        (fi.suffix() == "cpp") || ((fi.suffix() == "c++"))) {
+        highlighter = new HighlighterC(document());
+    } else {
+        highlighter = new HighlighterAsm(document());
+    }
 }
 
 

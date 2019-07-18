@@ -77,6 +77,7 @@ SOURCES += \
     coreview/minimux.cpp \
     srceditor.cpp \
     highlighterasm.cpp \
+    highlighterc.cpp \
     messagesdock.cpp \
     messagesmodel.cpp \
     messagesview.cpp
@@ -125,6 +126,7 @@ HEADERS += \
     coreview/minimux.h \
     srceditor.h \
     highlighterasm.h \
+    highlighterc.h \
     messagesdock.h \
     messagesmodel.h \
     messagesview.h
