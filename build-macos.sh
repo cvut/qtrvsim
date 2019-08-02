@@ -28,7 +28,7 @@ qmake \
 	-config release \
 	-recursive \
 	"$ROOT" \
-	"QMAKE_RPATHDIR += ../qtmips_machine ../qtmips_osemu" \
+	"QMAKE_RPATHDIR += ../qtmips_machine ../qtmips_osemu ../qtmips_asm" \
 	"INCLUDEPATH += /usr/local/Cellar/libelf/0.8.13_1/include/libelf /usr/local/Cellar/libelf/0.8.13_1/include" \
 	"LIBS += -L/usr/local/Cellar/libelf/0.8.13_1/lib -lelf" \
 	"QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.14"
