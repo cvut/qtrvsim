@@ -104,6 +104,7 @@
     <addaction name="actionMnemonicRegisters"/>
     <addaction name="actionShow_Symbol"/>
     <addaction name="actionCompileSource"/>
+    <addaction name="actionBuildExe"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -150,6 +151,7 @@
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
    <addaction name="actionCompileSource"/>
+   <addaction name="actionBuildExe"/>
   </widget>
   <action name="actionNewMachine">
    <property name="icon">
@@ -261,6 +263,24 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionBuildExe">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/build-256.png</normaloff>:/icons/build-256.png</iconset>
+   </property>
+   <property name="text">
+    <string>Build Executable</string>
+   </property>
+   <property name="toolTip">
+    <string>Build executable by external make</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
    </property>
   </action>
   <action name="actionExit">

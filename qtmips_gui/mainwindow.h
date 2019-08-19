@@ -39,6 +39,8 @@
 #include <QMainWindow>
 #include <QSettings>
 #include <QTabWidget>
+#include <QPointer>
+
 #include "ui_MainWindow.h"
 #include "newdialog.h"
 #include "coreview.h"
@@ -51,6 +53,7 @@
 #include "lcddisplaydock.h"
 #include "cop0dock.h"
 #include "messagesdock.h"
+#include "extprocess.h"
 
 #include "qtmipsmachine.h"
 #include "machineconfig.h"
@@ -60,7 +63,7 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
     void start();
@@ -77,7 +80,7 @@ signals:
 public slots:
     // Actions signals
     void new_machine();
-    void machine_reload(bool force_memory_reset = false);
+    void machine_reload(bool force_memory_reset = false, bool force_elf_load = false);
     void print_action();
     void new_source();
     void open_source();
@@ -85,6 +88,9 @@ public slots:
     void save_source_as();
     void close_source();
     void compile_source();
+    void build_execute();
+    void build_execute_no_check();
+    void build_execute_with_save(bool cancel, QStringList &tosavelist);
     void show_registers();
     void show_program();
     void show_memory();
@@ -117,6 +123,7 @@ protected:
 
 protected slots:
     void src_editor_save_to(QString filename);
+    void build_execute_finished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
     Ui::MainWindow *ui;
@@ -148,7 +155,9 @@ private:
     void show_dockwidget(QDockWidget *w, Qt::DockWidgetArea area = Qt::RightDockWidgetArea);
     void add_src_editor_to_tabs(SrcEditor *editor);
     void update_open_file_list();
+    bool modified_file_list(QStringList &list);
     SrcEditor *source_editor_for_file(QString filename, bool open);
+    QPointer<ExtProcess> build_process;
 };
 
 #endif // MAINWINDOW_H

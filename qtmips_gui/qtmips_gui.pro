@@ -80,7 +80,9 @@ SOURCES += \
     highlighterc.cpp \
     messagesdock.cpp \
     messagesmodel.cpp \
-    messagesview.cpp
+    messagesview.cpp \
+    extprocess.cpp \
+    savechangeddialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -129,7 +131,9 @@ HEADERS += \
     highlighterc.h \
     messagesdock.h \
     messagesmodel.h \
-    messagesview.h
+    messagesview.h \
+    extprocess.h \
+    savechangeddialog.h
 
 wasm: SOURCES += \
     qhtml5file_html5.cpp

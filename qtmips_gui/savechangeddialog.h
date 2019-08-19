@@ -33,34 +33,29 @@
  *
  ******************************************************************************/
 
-#ifndef SRCEDITOR_H
-#define SRCEDITOR_H
+#ifndef SAVECHANGED_H
+#define SAVECHANGED_H
 
-#include <QTextEdit>
-#include <QString>
-#include <QSyntaxHighlighter>
-#include "qtmipsmachine.h"
+#include <QDialog>
+#include <QList>
+#include <QStringList>
+#include <QStandardItemModel>
 
-class SrcEditor : public QTextEdit {
+class SaveChnagedDialog : public QDialog
+{
     Q_OBJECT
-    using Super = QTextEdit;
+
 public:
-    SrcEditor(const QString &text, QWidget *parent = nullptr);
-    SrcEditor(QWidget *parent = nullptr);
-    ~SrcEditor();
-    QString filename();
-    QString title();
-    bool loadFile(QString filename);
-    bool saveFile(QString filename = "");
-    bool loadByteArray(const QByteArray &content, QString filename = "");
-    void setCursorToLine(int ln);
-    void setFileName(QString filename);
-    bool isModified() const;
+    explicit SaveChnagedDialog(QStringList &changedlist, QWidget *parent= nullptr);
+    ~SaveChnagedDialog();
+signals:
+    void user_decision(bool cancel, QStringList &tosavelist);
+private slots:
+    void cancel_clicked();
+    void ignore_clicked();
+    void save_clicked();
 private:
-    QSyntaxHighlighter *highlighter;
-    void setup_common();
-    QString fname;
-    QString tname;
+    QStandardItemModel *model;
 };
 
-#endif // SRCEDITOR_H
+#endif // SAVECHANGED_H

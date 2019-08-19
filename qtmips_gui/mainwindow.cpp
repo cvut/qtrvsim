@@ -51,6 +51,8 @@
 #include "gotosymboldialog.h"
 #include "fixmatheval.h"
 #include "simpleasm.h"
+#include "extprocess.h"
+#include "savechangeddialog.h"
 
 #ifdef __EMSCRIPTEN__
 #include <QFileInfo>
@@ -120,6 +122,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->actionClose, SIGNAL(triggered(bool)), this, SLOT(close_source()));
     connect(ui->actionMnemonicRegisters, SIGNAL(triggered(bool)), this, SLOT(view_mnemonics_registers(bool)));
     connect(ui->actionCompileSource, SIGNAL(triggered(bool)), this, SLOT(compile_source()));
+    connect(ui->actionBuildExe, SIGNAL(triggered(bool)), this, SLOT(build_execute()));
     connect(ui->actionShow_Symbol, SIGNAL(triggered(bool)), this, SLOT(show_symbol_dialog()));
     connect(ui->actionRegisters, SIGNAL(triggered(bool)), this, SLOT(show_registers()));
     connect(ui->actionProgram_memory, SIGNAL(triggered(bool)), this, SLOT(show_program()));
@@ -164,6 +167,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
             delete(editor);
         }
     }
+
+#ifdef __EMSCRIPTEN__
+    ui->actionBuildExe->setEnabled(false);
+#endif
 }
 
 MainWindow::~MainWindow() {
@@ -310,10 +317,10 @@ void MainWindow::new_machine() {
     ndialog->show();
 }
 
-void MainWindow::machine_reload(bool force_memory_reset) {
+void MainWindow::machine_reload(bool force_memory_reset, bool force_elf_load) {
     if (machine == nullptr)
         return new_machine();
-    bool load_executable = machine->executable_loaded();
+    bool load_executable = force_elf_load || machine->executable_loaded();
     machine::MachineConfig cnf(&machine->config()); // We have to make local copy as create_core will delete current machine
     try {
         create_core(cnf, load_executable, !load_executable && !force_memory_reset);
@@ -334,7 +341,7 @@ void MainWindow::print_action() {
     QPrintDialog print_dialog(&printer, this);
     if (print_dialog.exec() == QDialog::Accepted) {
         QRectF scene_rect = corescene->sceneRect();
-        if (printer.outputFormat() == QPrinter::PdfFormat && scene_rect.height()) {
+        if (printer.outputFormat() == QPrinter::PdfFormat && (scene_rect.height() != 0)) {
             QPageLayout layout = printer.pageLayout();
             layout.setOrientation(QPageLayout::Portrait);
             QPageSize pagesize = layout.pageSize();
@@ -541,6 +548,27 @@ void MainWindow::update_open_file_list() {
     settings->setValue("openSrcFiles", open_src_files);
 }
 
+bool MainWindow::modified_file_list(QStringList &list) {
+    bool ret = false;
+    list.clear();
+    QStringList open_src_files;
+    if (central_window == nullptr)
+        return false;
+    for (int i = 0; i < central_window->count(); i++) {
+        QWidget *w = central_window->widget(i);
+        SrcEditor *editor = dynamic_cast<SrcEditor *>(w);
+        if (editor == nullptr)
+            continue;
+        if (editor->filename() == "")
+            continue;
+        if (!editor->isModified())
+            continue;
+        ret = true;
+        list.append(editor->filename());
+    }
+    return ret;
+}
+
 static int compare_filenames(const QString &filename1, const QString &filename2) {
     QFileInfo fi1(filename1);
     QFileInfo fi2(filename2);
@@ -557,7 +585,7 @@ SrcEditor *MainWindow::source_editor_for_file(QString filename, bool open) {
     if (central_window == nullptr)
         return nullptr;
     int found_match = 0;
-    SrcEditor *found_editor;
+    SrcEditor *found_editor = nullptr;
     for (int i = 0; i < central_window->count(); i++) {
         QWidget *w = central_window->widget(i);
         SrcEditor *editor = dynamic_cast<SrcEditor *>(w);
@@ -596,7 +624,7 @@ void MainWindow::open_source() {
 #ifndef __EMSCRIPTEN__
     QString file_name = "";
 
-    file_name = QFileDialog::getOpenFileName(this, tr("Open File"), "", "Source Files (*.asm *.S *.s)");
+    file_name = QFileDialog::getOpenFileName(this, tr("Open File"), "", "Source Files (*.asm *.S *.s *.c Makefile)");
 
     if (!file_name.isEmpty()) {
         SrcEditor *editor = source_editor_for_file(file_name, false);
@@ -705,6 +733,8 @@ void MainWindow::message_selected(messagetype::Type type, QString file, int line
     (void)text;
     (void)hint;
 
+    if (file.isEmpty())
+        return;
     SrcEditor *editor = source_editor_for_file(file, true);
     if (editor == nullptr)
         return;
@@ -757,4 +787,70 @@ void MainWindow::compile_source() {
 
     if (error_occured)
         show_messages();
+}
+
+void MainWindow::build_execute() {
+    QStringList list;
+    if (modified_file_list(list)) {
+        SaveChnagedDialog *dialog = new SaveChnagedDialog(list, this);
+        connect(dialog, SIGNAL(user_decision(bool,QStringList&)),
+                this, SLOT(build_execute_with_save(bool,QStringList&)));
+        dialog->open();
+    } else {
+        build_execute_no_check();
+    }
+}
+
+void MainWindow::build_execute_with_save(bool cancel, QStringList &tosavelist) {
+    if (cancel)
+        return;
+    for (const auto &fname : tosavelist) {
+        SrcEditor *editor = source_editor_for_file(fname, false);
+        editor->saveFile();
+    }
+    build_execute_no_check();
+}
+
+void MainWindow::build_execute_no_check() {
+    QString work_dir = "";
+    ExtProcess *proc;
+    ExtProcess *procptr = build_process;
+    if (procptr != nullptr) {
+        procptr->close();
+        procptr->deleteLater();
+    }
+
+    emit clear_messages();
+    show_messages();
+    proc = new ExtProcess(this);
+    build_process = procptr;
+    connect(proc, SIGNAL(report_message(messagetype::Type,QString,int,int,QString,QString)),
+            this, SIGNAL(report_message(messagetype::Type,QString,int,int,QString,QString)));
+    connect(proc, SIGNAL(finished(int,QProcess::ExitStatus)),
+            this, SLOT(build_execute_finished(int,QProcess::ExitStatus)));
+    if (current_srceditor != nullptr) {
+        if (!current_srceditor->filename().isEmpty()) {
+            QFileInfo fi(current_srceditor->filename());
+            work_dir = fi.dir().path();
+        }
+    }
+    if (work_dir.isEmpty() && (machine != nullptr)) {
+        if (!machine->config().elf().isEmpty()) {
+            QFileInfo fi(machine->config().elf());
+            work_dir = fi.dir().path();
+        }
+    }
+    if (!work_dir.isEmpty())
+        proc->setWorkingDirectory(work_dir);
+    proc->start("make", QProcess::Unbuffered | QProcess::ReadOnly);
+}
+
+void MainWindow::build_execute_finished(int exitCode, QProcess::ExitStatus exitStatus) {
+    if ((exitStatus != QProcess::NormalExit) || (exitCode != 0))
+        return;
+
+    if (machine != nullptr) {
+        if (machine->config().reset_at_compile())
+            machine_reload(true, true);
+    }
 }

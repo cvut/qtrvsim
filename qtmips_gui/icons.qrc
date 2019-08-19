@@ -16,5 +16,6 @@
         <file>icons/save.png</file>
         <file>icons/closetab.png</file>
         <file>icons/compfile-256.png</file>
+        <file>icons/build-256.png</file>
     </qresource>
 </RCC>

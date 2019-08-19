@@ -116,10 +116,16 @@ bool SrcEditor::saveFile(QString filename) {
     writer.setFormat("plaintext");
     bool success = writer.write(document());
     setFileName(filename);
+    if (success)
+        document()->setModified(false);
     return success;
 }
 
 void SrcEditor::setCursorToLine(int ln) {
     QTextCursor cursor(document()->findBlockByLineNumber(ln-1));
     setTextCursor(cursor);
+}
+
+bool SrcEditor::isModified() const {
+    return document()->isModified();
 }

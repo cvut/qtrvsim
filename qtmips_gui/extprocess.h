@@ -33,34 +33,31 @@
  *
  ******************************************************************************/
 
-#ifndef SRCEDITOR_H
-#define SRCEDITOR_H
+#ifndef MSGREPORT_H
+#define MSGREPORT_H
 
-#include <QTextEdit>
+#include <QProcess>
 #include <QString>
-#include <QSyntaxHighlighter>
-#include "qtmipsmachine.h"
+#include "messagetype.h"
 
-class SrcEditor : public QTextEdit {
+class ExtProcess : public QProcess {
     Q_OBJECT
-    using Super = QTextEdit;
+
+    using Super = QProcess;
+
 public:
-    SrcEditor(const QString &text, QWidget *parent = nullptr);
-    SrcEditor(QWidget *parent = nullptr);
-    ~SrcEditor();
-    QString filename();
-    QString title();
-    bool loadFile(QString filename);
-    bool saveFile(QString filename = "");
-    bool loadByteArray(const QByteArray &content, QString filename = "");
-    void setCursorToLine(int ln);
-    void setFileName(QString filename);
-    bool isModified() const;
-private:
-    QSyntaxHighlighter *highlighter;
-    void setup_common();
-    QString fname;
-    QString tname;
+    ExtProcess(QObject *parent = nullptr);
+
+signals:
+    void report_message(messagetype::Type type, QString file, int line, int column, QString text, QString hint);
+
+protected slots:
+    void process_output();
+    void report_started();
+    void report_finished(int exitCode, QProcess::ExitStatus exitStatus);
+
+protected:
+    QByteArray m_buffer;
 };
 
-#endif // SRCEDITOR_H
+#endif // MSGREPORT_H
