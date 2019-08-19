@@ -60,6 +60,7 @@
 #endif
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+    ignore_unsaved = false;
     machine = nullptr;
     corescene = nullptr;
     current_srceditor = nullptr;
@@ -431,10 +432,30 @@ void MainWindow::view_mnemonics_registers(bool enable) {
     program->request_update_all();
 }
 
-void MainWindow::closeEvent(QCloseEvent *event __attribute__((unused))) {
+void MainWindow::closeEvent(QCloseEvent *event) {
     settings->setValue("windowGeometry", saveGeometry());
     settings->setValue("windowState", saveState());
     settings->sync();
+
+    QStringList list;
+    if (modified_file_list(list) && !ignore_unsaved) {
+        SaveChnagedDialog *dialog = new SaveChnagedDialog(list, this);
+        connect(dialog, SIGNAL(user_decision(bool,QStringList&)),
+                this, SLOT(save_exit_or_ignore(bool,QStringList&)));
+        dialog->open();
+        event->ignore();
+    }
+}
+
+void MainWindow::save_exit_or_ignore(bool cancel, QStringList &tosavelist) {
+    if (cancel)
+        return;
+    for (const auto &fname : tosavelist) {
+        SrcEditor *editor = source_editor_for_file(fname, false);
+        editor->saveFile();
+    }
+    ignore_unsaved = true;
+    close();
 }
 
 void MainWindow::show_dockwidget(QDockWidget *dw, Qt::DockWidgetArea area) {

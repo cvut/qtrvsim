@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0+
+﻿// SPDX-License-Identifier: GPL-2.0+
 /*******************************************************************************
  * QtMips - MIPS 32-bit Architecture Subset Simulator
  *
@@ -116,6 +116,7 @@ public slots:
     void tab_widget_destroyed(QObject *obj);
     void view_mnemonics_registers(bool enable);
     void message_selected(messagetype::Type type, QString file, int line, int column, QString text, QString hint);
+    void save_exit_or_ignore(bool cancel, QStringList &tosavelist);
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -158,6 +159,7 @@ private:
     bool modified_file_list(QStringList &list);
     SrcEditor *source_editor_for_file(QString filename, bool open);
     QPointer<ExtProcess> build_process;
+    bool ignore_unsaved;
 };
 
 #endif // MAINWINDOW_H
