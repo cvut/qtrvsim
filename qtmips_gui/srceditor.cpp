@@ -132,6 +132,10 @@ bool SrcEditor::isModified() const {
     return document()->isModified();
 }
 
+void SrcEditor::setModified(bool val) {
+    document()->setModified(val);
+}
+
 void SrcEditor::setSaveAsRequired(bool val) {
     saveAsRequiredFl = val;
 }

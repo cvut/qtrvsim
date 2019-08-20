@@ -119,7 +119,7 @@ public slots:
     void tab_widget_destroyed(QObject *obj);
     void view_mnemonics_registers(bool enable);
     void message_selected(messagetype::Type type, QString file, int line, int column, QString text, QString hint);
-    void save_exit_or_ignore(bool cancel, QStringList &tosavelist);
+    void save_exit_or_ignore(bool cancel, QStringList tosavelist);
 
 protected:
     void closeEvent(QCloseEvent *event);

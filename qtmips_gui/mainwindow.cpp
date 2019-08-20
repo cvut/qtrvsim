@@ -452,15 +452,20 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
     QStringList list;
     if (modified_file_list(list, true) && !ignore_unsaved) {
-        SaveChnagedDialog *dialog = new SaveChnagedDialog(list, this);
-        connect(dialog, SIGNAL(user_decision(bool,QStringList&)),
-                this, SLOT(save_exit_or_ignore(bool,QStringList&)));
-        dialog->open();
         event->ignore();
+        SaveChnagedDialog *dialog = new SaveChnagedDialog(list, this);
+        int id = qMetaTypeId<QStringList>();
+        if(!QMetaType::isRegistered(id)) {
+                qRegisterMetaType<QStringList>();
+        }
+        connect(dialog, SIGNAL(user_decision(bool,QStringList)),
+                this, SLOT(save_exit_or_ignore(bool,QStringList)),
+                Qt::QueuedConnection);
+        dialog->open();
     }
 }
 
-void MainWindow::save_exit_or_ignore(bool cancel, QStringList &tosavelist) {
+void MainWindow::save_exit_or_ignore(bool cancel, QStringList tosavelist) {
     bool save_unnamed = false;
     if (cancel)
         return;
@@ -739,7 +744,7 @@ void MainWindow::save_source_as() {
     dialog->setMinimumSize(QSize(200, 100));
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     connect(dialog, SIGNAL(textValueSelected(QString)),
-            this, SLOT(src_editor_save_to(QString)));
+            this, SLOT(src_editor_save_to(QString)), Qt::QueuedConnection);
     dialog->open();
 #endif
 }
@@ -768,6 +773,7 @@ void MainWindow::save_source() {
 #else
      QHtml5File::save(current_srceditor->document()->toPlainText().toUtf8(),
                       current_srceditor->filename());
+     current_srceditor->setModified(false);
 #endif
 }
 
@@ -782,18 +788,13 @@ void MainWindow::close_source_check() {
     QMessageBox *msgbox = new QMessageBox(this);
     msgbox->setWindowTitle("Close unsaved source");
     msgbox->setText("Close unsaved source.");
-#ifndef __EMSCRIPTEN__
     msgbox->setInformativeText("Do you want to save your changes?");
     msgbox->setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-#else
-    msgbox->setInformativeText("Discard your changes or cancel close?");
-    msgbox->setStandardButtons(QMessageBox::Discard | QMessageBox::Cancel);
-#endif
     msgbox->setDefaultButton(QMessageBox::Save);
     msgbox->setMinimumSize(QSize(200, 150));
     msgbox->setAttribute(Qt::WA_DeleteOnClose);
     connect(msgbox, SIGNAL(finished(int)),
-            this, SLOT(close_source_decided(int)));
+            this, SLOT(close_source_decided(int)), Qt::QueuedConnection);
     msgbox->open();
 }
 

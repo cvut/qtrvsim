@@ -56,6 +56,7 @@ public:
     void setCursorToLine(int ln);
     void setFileName(QString filename);
     bool isModified() const;
+    void setModified(bool val);
     void setSaveAsRequired(bool val);
     bool saveAsRequired();
 private:
