@@ -45,6 +45,7 @@
 
 void SrcEditor::setup_common() {
     QFont font;
+    saveAsRequiredFl = true;
     font.setFamily("Courier");
     font.setFixedPitch(true);
     font.setPointSize(10);
@@ -75,6 +76,8 @@ QString SrcEditor::title() {
 
 void SrcEditor::setFileName(QString filename) {
     QFileInfo fi(filename);
+    saveAsRequiredFl = filename.isEmpty() || filename.startsWith(":/");
+
     fname = filename;
     tname = fi.fileName();
     delete highlighter;
@@ -86,7 +89,6 @@ void SrcEditor::setFileName(QString filename) {
         highlighter = new HighlighterAsm(document());
     }
 }
-
 
 bool SrcEditor::loadFile(QString filename) {
     QFile file(filename);
@@ -128,4 +130,12 @@ void SrcEditor::setCursorToLine(int ln) {
 
 bool SrcEditor::isModified() const {
     return document()->isModified();
+}
+
+void SrcEditor::setSaveAsRequired(bool val) {
+    saveAsRequiredFl = val;
+}
+
+bool SrcEditor::saveAsRequired() {
+    return saveAsRequiredFl;
 }

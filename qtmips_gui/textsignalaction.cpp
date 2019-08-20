@@ -33,37 +33,36 @@
  *
  ******************************************************************************/
 
-#ifndef SRCEDITOR_H
-#define SRCEDITOR_H
+#include <QApplication>
+#include "textsignalaction.h"
 
-#include <QTextEdit>
-#include <QString>
-#include <QSyntaxHighlighter>
-#include "qtmipsmachine.h"
+TextSignalAction::TextSignalAction(QObject *parent) : Super(parent) {
+    connect(this, SIGNAL(triggered(bool)), this, SLOT(process_triggered(bool)));
+}
 
-class SrcEditor : public QTextEdit {
-    Q_OBJECT
-    using Super = QTextEdit;
-public:
-    SrcEditor(const QString &text, QWidget *parent = nullptr);
-    SrcEditor(QWidget *parent = nullptr);
-    ~SrcEditor();
-    QString filename();
-    QString title();
-    bool loadFile(QString filename);
-    bool saveFile(QString filename = "");
-    bool loadByteArray(const QByteArray &content, QString filename = "");
-    void setCursorToLine(int ln);
-    void setFileName(QString filename);
-    bool isModified() const;
-    void setSaveAsRequired(bool val);
-    bool saveAsRequired();
-private:
-    QSyntaxHighlighter *highlighter;
-    void setup_common();
-    QString fname;
-    QString tname;
-    bool saveAsRequiredFl;
-};
+TextSignalAction::TextSignalAction(const QString &text, QObject *parent) :
+    Super(text, parent), signal_text(text) {
+    connect(this, SIGNAL(triggered(bool)), this, SLOT(process_triggered(bool)));
+}
 
-#endif // SRCEDITOR_H
+TextSignalAction::TextSignalAction(const QString &text, const QString &signal_text,
+                 QObject *parent) :
+    Super(text, parent), signal_text(signal_text) {
+    connect(this, SIGNAL(triggered(bool)), this, SLOT(process_triggered(bool)));
+}
+
+TextSignalAction::TextSignalAction(const QIcon &icon, const QString &text, QObject *parent) :
+    Super(icon, text, parent), signal_text(text) {
+    connect(this, SIGNAL(triggered(bool)), this, SLOT(process_triggered(bool)));
+}
+
+TextSignalAction::TextSignalAction(const QIcon &icon, const QString &text, const QString &signal_text,
+                 QObject *parent) :
+    Super(icon, text, parent), signal_text(signal_text) {
+    connect(this, SIGNAL(triggered(bool)), this, SLOT(process_triggered(bool)));
+}
+
+void TextSignalAction::process_triggered(bool checked) {
+    (void)checked;
+    emit activated(signal_text);
+}

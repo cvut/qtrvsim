@@ -89,6 +89,7 @@ public slots:
     void close_source();
     void close_source_check();
     void close_source_decided(int result);
+    void example_source(QString source_file);
     void compile_source();
     void build_execute();
     void build_execute_no_check();

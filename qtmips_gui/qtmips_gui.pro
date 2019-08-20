@@ -82,7 +82,8 @@ SOURCES += \
     messagesmodel.cpp \
     messagesview.cpp \
     extprocess.cpp \
-    savechangeddialog.cpp
+    savechangeddialog.cpp \
+    textsignalaction.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -133,7 +134,8 @@ HEADERS += \
     messagesmodel.h \
     messagesview.h \
     extprocess.h \
-    savechangeddialog.h
+    savechangeddialog.h \
+    textsignalaction.h
 
 wasm: SOURCES += \
     qhtml5file_html5.cpp
@@ -149,7 +151,8 @@ FORMS += \
     gotosymboldialog.ui
 
 RESOURCES += \
-        icons.qrc
+        icons.qrc \
+        samples.qrc
 
 # ICON is config specific to macOS
 # see https://doc.qt.io/qt-5/appicon.html#setting-the-application-icon-on-macos

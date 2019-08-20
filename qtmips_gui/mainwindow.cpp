@@ -53,6 +53,7 @@
 #include "simpleasm.h"
 #include "extprocess.h"
 #include "savechangeddialog.h"
+#include "textsignalaction.h"
 
 #ifdef __EMSCRIPTEN__
 #include <QFileInfo>
@@ -167,6 +168,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         } else {
             delete(editor);
         }
+    }
+
+    QDir samples_dir(":/samples");
+    for (QString fname: samples_dir.entryList(QDir::Files)) {
+        TextSignalAction *textsigac = new TextSignalAction(fname, ":/samples/" + fname);
+        ui->menuExamples->addAction(textsigac);
+        connect(textsigac, SIGNAL( activated(QString)), this, SLOT(example_source(QString)));
     }
 
 #ifdef __EMSCRIPTEN__
@@ -458,7 +466,7 @@ void MainWindow::save_exit_or_ignore(bool cancel, QStringList &tosavelist) {
         return;
     for (const auto &fname : tosavelist) {
         SrcEditor *editor = source_editor_for_file(fname, false);
-        if (fname.isEmpty()) {
+        if (editor->saveAsRequired()) {
             save_unnamed = true;
         } else if (editor != nullptr) {
             editor->saveFile();
@@ -470,7 +478,7 @@ void MainWindow::save_exit_or_ignore(bool cancel, QStringList &tosavelist) {
             SrcEditor *editor = dynamic_cast<SrcEditor *>(w);
             if (editor == nullptr)
                 continue;
-            if (!editor->filename().isEmpty())
+            if (!editor->saveAsRequired())
                 continue;
             central_window->setCurrentWidget(editor);
             save_source_as();
@@ -745,7 +753,7 @@ void MainWindow::src_editor_save_to(QString filename) {
 void MainWindow::save_source() {
     if (current_srceditor == nullptr)
         return;
-    if (current_srceditor->filename().isEmpty())
+    if (current_srceditor->saveAsRequired())
         return save_source_as();
 #ifndef __EMSCRIPTEN__
     if (!current_srceditor->saveFile()) {
@@ -783,7 +791,7 @@ void MainWindow::close_source_decided(int result) {
         return;
     SrcEditor *editor = current_srceditor;
     if (result == QMessageBox::Save) {
-        if (editor->filename().isEmpty()) {
+        if (editor->saveAsRequired()) {
             save_source_as();
             return;
         }
@@ -803,6 +811,19 @@ void MainWindow::close_source() {
         central_window->removeTab(idx);
     delete editor;
     update_open_file_list();
+}
+
+void MainWindow::example_source(QString source_file) {
+    SrcEditor *editor = new SrcEditor();
+
+    if (editor->loadFile(source_file)) {
+        editor->setSaveAsRequired(true);
+        add_src_editor_to_tabs(editor);
+        update_open_file_list();
+    } else {
+        QMessageBox::critical(this, "QtMips Error", tr("Cannot open example file '%1' for reading.").arg(source_file));
+        delete(editor);
+    }
 }
 
 void MainWindow::message_selected(messagetype::Type type, QString file, int line,

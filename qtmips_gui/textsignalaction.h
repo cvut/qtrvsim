@@ -33,37 +33,34 @@
  *
  ******************************************************************************/
 
-#ifndef SRCEDITOR_H
-#define SRCEDITOR_H
+#ifndef TEXTSIGNALACTION_H
+#define TEXTACTION_H
 
-#include <QTextEdit>
-#include <QString>
-#include <QSyntaxHighlighter>
-#include "qtmipsmachine.h"
+#include <QObject>
+#include <QAction>
 
-class SrcEditor : public QTextEdit {
+class TextSignalAction : public QAction
+{
     Q_OBJECT
-    using Super = QTextEdit;
+
+    using Super = QAction;
+
 public:
-    SrcEditor(const QString &text, QWidget *parent = nullptr);
-    SrcEditor(QWidget *parent = nullptr);
-    ~SrcEditor();
-    QString filename();
-    QString title();
-    bool loadFile(QString filename);
-    bool saveFile(QString filename = "");
-    bool loadByteArray(const QByteArray &content, QString filename = "");
-    void setCursorToLine(int ln);
-    void setFileName(QString filename);
-    bool isModified() const;
-    void setSaveAsRequired(bool val);
-    bool saveAsRequired();
-private:
-    QSyntaxHighlighter *highlighter;
-    void setup_common();
-    QString fname;
-    QString tname;
-    bool saveAsRequiredFl;
+    TextSignalAction(QObject *parent = nullptr);
+    TextSignalAction(const QString &text, QObject *parent = nullptr);
+    TextSignalAction(const QString &text, const QString &signal_text,
+                     QObject *parent = nullptr);
+    TextSignalAction(const QIcon &icon, const QString &text, QObject *parent = nullptr);
+    TextSignalAction(const QIcon &icon, const QString &text, const QString &signal_text,
+                     QObject *parent = nullptr);
+signals:
+    void activated(QString signal_text);
+
+protected slots:
+    void  process_triggered(bool checked);
+
+protected:
+    QString signal_text;
 };
 
-#endif // SRCEDITOR_H
+#endif // TEXTSIGNALACTION_H
