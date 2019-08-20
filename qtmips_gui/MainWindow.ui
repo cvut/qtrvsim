@@ -182,7 +182,7 @@
     <string>New source</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+N</string>
+    <string>Ctrl+F</string>
    </property>
   </action>
   <action name="actionOpen">
@@ -244,7 +244,7 @@
     <string>Close source</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+C</string>
+    <string>Ctrl+W</string>
    </property>
   </action>
   <action name="actionCompileSource">
@@ -262,7 +262,7 @@
     <string>Compile source and update memory</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+C</string>
+    <string>Ctrl+E</string>
    </property>
   </action>
   <action name="actionBuildExe">
@@ -506,7 +506,7 @@
     <string>Run at maximal speed, skip visualization for 100 msec</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+M</string>
+    <string>Ctrl+A</string>
    </property>
   </action>
   <action name="actionAboutQt">
