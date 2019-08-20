@@ -308,6 +308,79 @@ bool SimpleAsm::process_line(QString line, QString filename,
         }
         return true;
     }
+    if ((op == ".ASCII") || (op == ".ASCIZ")) {
+        bool append_zero = op == ".ASCIZ";
+        for (QString s: operands) {
+            if (s.count() < 2) {
+                error = "ascii empty string";
+                emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+                error_occured = true;
+                if (error_ptr != nullptr)
+                    *error_ptr = error;
+                return false;
+            }
+            if ((s.at(0) != '"') || (s.at(s.count() - 1) != '"')) {
+                error = "ascii missing quotes";
+                emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+                error_occured = true;
+                if (error_ptr != nullptr)
+                    *error_ptr = error;
+                return false;
+            }
+            s = s.mid(1, s.count() - 2);
+            for (pos = 0; pos < s.count(); pos++) {
+                QChar ch = s.at(pos);
+                if (ch == '\\') {
+                    ch = 0;
+                    if (pos + 1 < s.count()) switch(s.at(++pos).toLatin1()) {
+                        case '\\':
+                            ch = '\\';
+                            break;
+                        case 'r':
+                            ch = 0x0d;
+                            break;
+                        case 'n':
+                            ch = 0x0a;
+                            break;
+                        case 't':
+                            ch = 0x09;
+                            break;
+                        case 'b':
+                            ch = 0x08;
+                            break;
+                        case '"':
+                            ch = '"';
+                            break;
+                        default:
+                            ch = 0;
+                    }
+                    if (ch == '\0') {
+                        error = "ascii - incorrect escape sequence";
+                        emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+                        error_occured = true;
+                        if (error_ptr != nullptr)
+                            *error_ptr = error;
+                        return false;
+
+                    }
+                }
+                if (!fatal_occured)
+                    mem->write_byte(address, (uint8_t)ch.toLatin1());
+                address += 1;
+            }
+            if (append_zero) {
+                if (!fatal_occured)
+                    mem->write_byte(address, 0);
+                address += 1;
+            }
+        }
+        while (address & 3) {
+            if (!fatal_occured)
+                mem->write_byte(address, 0);
+            address += 1;
+        }
+        return true;
+    }
 
     std::uint32_t inst[2] = {0, 0};
     ssize_t size = machine::Instruction::code_from_string(inst, 8, op, operands, error,

@@ -50,7 +50,8 @@ HighlighterAsm::HighlighterAsm(QTextDocument *parent)
         QStringLiteral("\\.text\\b"), QStringLiteral("\\.data\\b"),
         QStringLiteral("\\.globl\\b"), QStringLiteral("\\.set\\b"),
         QStringLiteral("\\.equ\\b"), QStringLiteral("\\.end\\b"),
-        QStringLiteral("\\.ent\\b")
+        QStringLiteral("\\.ent\\b"), QStringLiteral("\\.ascii\\b"),
+        QStringLiteral("\\.asciz\\b")
     };
 
     for (const QString &pattern : keywordPatterns) {
