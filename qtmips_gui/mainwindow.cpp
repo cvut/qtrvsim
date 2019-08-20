@@ -782,10 +782,15 @@ void MainWindow::close_source_check() {
     QMessageBox *msgbox = new QMessageBox(this);
     msgbox->setWindowTitle("Close unsaved source");
     msgbox->setText("Close unsaved source.");
+#ifndef __EMSCRIPTEN__
     msgbox->setInformativeText("Do you want to save your changes?");
     msgbox->setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+#else
+    msgbox->setInformativeText("Discard your changes or cancel close?");
+    msgbox->setStandardButtons(QMessageBox::Discard | QMessageBox::Cancel);
+#endif
     msgbox->setDefaultButton(QMessageBox::Save);
-    msgbox->setMinimumSize(QSize(200, 100));
+    msgbox->setMinimumSize(QSize(200, 150));
     msgbox->setAttribute(Qt::WA_DeleteOnClose);
     connect(msgbox, SIGNAL(finished(int)),
             this, SLOT(close_source_decided(int)));

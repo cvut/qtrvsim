@@ -34,7 +34,7 @@
  ******************************************************************************/
 
 #ifndef TEXTSIGNALACTION_H
-#define TEXTACTION_H
+#define TEXTSIGNALACTION_H
 
 #include <QObject>
 #include <QAction>
