@@ -389,8 +389,12 @@ void MainWindow::show_symbol_dialog(){
     delete symnames;
     connect(gotosyboldialog, SIGNAL(program_focus_addr(std::uint32_t)),
             program, SIGNAL(focus_addr_with_save(std::uint32_t)));
+    connect(gotosyboldialog, SIGNAL(program_focus_addr(std::uint32_t)),
+            this, SLOT(show_program()));
     connect(gotosyboldialog, SIGNAL(memory_focus_addr(std::uint32_t)),
             memory, SIGNAL(focus_addr(std::uint32_t)));
+    connect(gotosyboldialog, SIGNAL(memory_focus_addr(std::uint32_t)),
+            this, SLOT(show_memory()));
     connect(gotosyboldialog, SIGNAL(obtain_value_for_name(std::uint32_t&,QString)),
             machine->symbol_table(), SLOT(name_to_value(std::uint32_t&,QString)));
     gotosyboldialog->setAttribute(Qt::WA_DeleteOnClose);
