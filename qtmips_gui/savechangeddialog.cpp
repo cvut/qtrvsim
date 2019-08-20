@@ -51,11 +51,20 @@ SaveChnagedDialog::SaveChnagedDialog(QStringList &changedlist, QWidget *parent) 
     setWindowTitle(tr("Save next modified files?"));
 
     model = new QStandardItemModel(this);
+    bool unknown_inserted = false;
 
     for ( const auto& fname : changedlist) {
         int row = model->rowCount();
         QStandardItem* item = new QStandardItem();
-        item->setText(fname);
+        item->setData(fname, Qt::UserRole);
+        if (!fname.isEmpty()) {
+            item->setText(fname);
+        } else {
+            if (!unknown_inserted) {
+                item->setText("Unknown");
+                unknown_inserted = true;
+            }
+        }
         item->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
         item->setCheckState(Qt::Checked);
         model->setItem(row, 0, item);
@@ -109,7 +118,7 @@ void SaveChnagedDialog::save_clicked() {
     QStringList list;
     for(int r = 0; r < model->rowCount(); ++r) {
         if (model->item(r)->checkState() == Qt::Checked)
-            list.append(model->item(r)->text());
+            list.append(model->item(r)->data(Qt::UserRole).toString());
     }
     emit user_decision(false, list);
     close();

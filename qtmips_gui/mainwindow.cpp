@@ -120,7 +120,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(ui->actionOpen, SIGNAL(triggered(bool)), this, SLOT(open_source()));
     connect(ui->actionSave, SIGNAL(triggered(bool)), this, SLOT(save_source()));
     connect(ui->actionSaveAs, SIGNAL(triggered(bool)), this, SLOT(save_source_as()));
-    connect(ui->actionClose, SIGNAL(triggered(bool)), this, SLOT(close_source()));
+    connect(ui->actionClose, SIGNAL(triggered(bool)), this, SLOT(close_source_check()));
     connect(ui->actionMnemonicRegisters, SIGNAL(triggered(bool)), this, SLOT(view_mnemonics_registers(bool)));
     connect(ui->actionCompileSource, SIGNAL(triggered(bool)), this, SLOT(compile_source()));
     connect(ui->actionBuildExe, SIGNAL(triggered(bool)), this, SLOT(build_execute()));
@@ -386,14 +386,15 @@ void MainWindow::show_symbol_dialog(){
         return;
     QStringList *symnames = machine->symbol_table()->names();
     GoToSymbolDialog *gotosyboldialog = new GoToSymbolDialog(this, *symnames);
+    delete symnames;
     connect(gotosyboldialog, SIGNAL(program_focus_addr(std::uint32_t)),
             program, SIGNAL(focus_addr_with_save(std::uint32_t)));
     connect(gotosyboldialog, SIGNAL(memory_focus_addr(std::uint32_t)),
             memory, SIGNAL(focus_addr(std::uint32_t)));
     connect(gotosyboldialog, SIGNAL(obtain_value_for_name(std::uint32_t&,QString)),
             machine->symbol_table(), SLOT(name_to_value(std::uint32_t&,QString)));
-    gotosyboldialog->exec();
-    delete symnames;
+    gotosyboldialog->setAttribute(Qt::WA_DeleteOnClose);
+    gotosyboldialog->open();
 }
 
 void MainWindow::about_qtmips()
@@ -438,7 +439,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     settings->sync();
 
     QStringList list;
-    if (modified_file_list(list) && !ignore_unsaved) {
+    if (modified_file_list(list, true) && !ignore_unsaved) {
         SaveChnagedDialog *dialog = new SaveChnagedDialog(list, this);
         connect(dialog, SIGNAL(user_decision(bool,QStringList&)),
                 this, SLOT(save_exit_or_ignore(bool,QStringList&)));
@@ -448,11 +449,29 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 void MainWindow::save_exit_or_ignore(bool cancel, QStringList &tosavelist) {
+    bool save_unnamed = false;
     if (cancel)
         return;
     for (const auto &fname : tosavelist) {
         SrcEditor *editor = source_editor_for_file(fname, false);
-        editor->saveFile();
+        if (fname.isEmpty()) {
+            save_unnamed = true;
+        } else if (editor != nullptr) {
+            editor->saveFile();
+        }
+    }
+    if (save_unnamed && (central_window != nullptr)) {
+        for (int i = 0; i < central_window->count(); i++) {
+            QWidget *w = central_window->widget(i);
+            SrcEditor *editor = dynamic_cast<SrcEditor *>(w);
+            if (editor == nullptr)
+                continue;
+            if (!editor->filename().isEmpty())
+                continue;
+            central_window->setCurrentWidget(editor);
+            save_source_as();
+            return;
+        }
     }
     ignore_unsaved = true;
     close();
@@ -569,7 +588,7 @@ void MainWindow::update_open_file_list() {
     settings->setValue("openSrcFiles", open_src_files);
 }
 
-bool MainWindow::modified_file_list(QStringList &list) {
+bool MainWindow::modified_file_list(QStringList &list, bool report_unnamed) {
     bool ret = false;
     list.clear();
     QStringList open_src_files;
@@ -580,7 +599,7 @@ bool MainWindow::modified_file_list(QStringList &list) {
         SrcEditor *editor = dynamic_cast<SrcEditor *>(w);
         if (editor == nullptr)
             continue;
-        if (editor->filename() == "")
+        if ((editor->filename() == "") && !report_unnamed)
             continue;
         if (!editor->isModified())
             continue;
@@ -732,6 +751,42 @@ void MainWindow::save_source() {
      QHtml5File::save(current_srceditor->document()->toPlainText().toUtf8(),
                       current_srceditor->filename());
 #endif
+}
+
+void MainWindow::close_source_check() {
+    if (current_srceditor == nullptr)
+        return;
+    SrcEditor *editor = current_srceditor;
+    if (!editor->isModified()) {
+        close_source();
+        return;
+    }
+    QMessageBox *msgbox = new QMessageBox(this);
+    msgbox->setWindowTitle("Close unsaved source");
+    msgbox->setText("Close unsaved source.");
+    msgbox->setInformativeText("Do you want to save your changes?");
+    msgbox->setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgbox->setDefaultButton(QMessageBox::Save);
+    msgbox->setMinimumSize(QSize(200, 100));
+    msgbox->setAttribute(Qt::WA_DeleteOnClose);
+    connect(msgbox, SIGNAL(finished(int)),
+            this, SLOT(close_source_decided(int)));
+    msgbox->open();
+}
+
+void MainWindow::close_source_decided(int result) {
+    if (current_srceditor == nullptr)
+        return;
+    SrcEditor *editor = current_srceditor;
+    if (result == QMessageBox::Save) {
+        if (editor->filename().isEmpty()) {
+            save_source_as();
+            return;
+        }
+    } else if (result != QMessageBox::Discard) {
+        return;
+    }
+    close_source();
 }
 
 void MainWindow::close_source() {

@@ -87,6 +87,8 @@ public slots:
     void save_source();
     void save_source_as();
     void close_source();
+    void close_source_check();
+    void close_source_decided(int result);
     void compile_source();
     void build_execute();
     void build_execute_no_check();
@@ -156,7 +158,7 @@ private:
     void show_dockwidget(QDockWidget *w, Qt::DockWidgetArea area = Qt::RightDockWidgetArea);
     void add_src_editor_to_tabs(SrcEditor *editor);
     void update_open_file_list();
-    bool modified_file_list(QStringList &list);
+    bool modified_file_list(QStringList &list, bool report_unnamed = false);
     SrcEditor *source_editor_for_file(QString filename, bool open);
     QPointer<ExtProcess> build_process;
     bool ignore_unsaved;
