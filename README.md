@@ -124,10 +124,23 @@ documentation in the [`docs`](docs) projects subdirectory.
 Integrated Assembler
 -------------------
 Basic integrated assembler is included in the simulator. It recognizes basic
-MIPS instructions and `la` and `li` pseudo instructions. Only `.word` and
-assembler `.orig` directives are recognized for now. Addresses are assigned
-to labels/symbols which are stored in symbol table. Addition, substraction,
-multiplication, divide and bitwise and and or are recognized.
+MIPS instructions and `la` and `li` pseudo instructions. Small subset of
+[GNU assembler](https://sourceware.org/binutils/docs/as/) directives is recognized as well.
+Next directives are recognized: `.word`, `.orig`, `.set`/`.equ`, `.ascii` and `.asciz`.
+Some other directives are simply ignored: `.data`, `.text`, `.globl`, `.end` and `.ent`.
+This allows to write code which can be compiled by both - integrated and full-featured
+assembler. Addresses are assigned to labels/symbols which are stored in symbol table.
+Addition, substraction, multiplication, divide and bitwise and and or are recognized.
+
+Support to call external make utility
+-------------------------------------
+The action "Build executable by external make" call "make" program. If the
+action is invoked and some of source editors selected in main windows
+tabs then the "make" is started in the corresponding directory. Else
+directory of last selected editor is chosen. If no editor is open then
+directory of last loaded ELF executable are used as "make" start path.
+If even that is not an option then default directory when the emulator
+has been started is used.
 
 Tests
 -----
