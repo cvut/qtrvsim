@@ -469,7 +469,13 @@ void MainWindow::save_exit_or_ignore(bool cancel, QStringList &tosavelist) {
         if (editor->saveAsRequired()) {
             save_unnamed = true;
         } else if (editor != nullptr) {
+#ifndef __EMSCRIPTEN__
             editor->saveFile();
+#else
+            central_window->setCurrentWidget(editor);
+            save_source();
+            return;
+#endif
         }
     }
     if (save_unnamed && (central_window != nullptr)) {
@@ -795,6 +801,7 @@ void MainWindow::close_source_decided(int result) {
             save_source_as();
             return;
         }
+        save_source();
     } else if (result != QMessageBox::Discard) {
         return;
     }
