@@ -148,8 +148,10 @@
    <addaction name="ips10"/>
    <addaction name="ipsUnlimited"/>
    <addaction name="ipsMax"/>
+   <addaction name="actionNew"/>
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
+   <addaction name="actionClose"/>
    <addaction name="actionCompileSource"/>
    <addaction name="actionBuildExe"/>
   </widget>
