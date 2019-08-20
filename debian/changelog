@@ -1,3 +1,28 @@
+qtmips (0.7.2) unstable; urgency=medium
+
+  * Debian package updated to version 0.7.2.
+  * More changes to use dialog open instead of exec (Emscripten does not support exec).
+  * Updates to RPM packaging and spec file to better follow Suse rules.
+  * Move fixmatheval and assembly compiler to separate library independent on Qt GUI API.
+  * Implemented message window to report compilation errors.
+  * Store operator text description in the fixmatheval operators tree.
+  * Simple assembler moved to separate class which is independent on Qt GUI API.
+  * Do not open editor twice for same filename.
+  * Enable CLI version to use simple assembler.
+  * Update editor search algorithm to prefer current editor for unnamed buffers.
+  * Add config option to reset machine before internal assembler starts.
+  * Include C language syntax highlighter for alternative sources editing.
+  * Action to execute external make command and ask for unsaved sources.
+  * Ask to save modified files on exit.
+  * Ask for modified source close and handle unnamed sources close.
+  * Replace shortcuts to not hide Ctrl+C and some others.
+  * Implemented ASCII and ASCIZ operations.
+  * Include actions New source and Close source on toolbar.
+  * Make program and memory window visible when address requested from symbol dialog.
+  * Add embedded examples menu and resources.
+
+ -- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Wed, 21 Aug 2019 00:13:06 +0200
+
 qtmips (0.7.1) unstable; urgency=medium
 
   * Debian package updated to version 0.7.1.
