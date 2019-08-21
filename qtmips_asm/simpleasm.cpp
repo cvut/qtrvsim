@@ -266,6 +266,68 @@ bool SimpleAsm::process_line(QString line, QString filename,
         address = value;
         return true;
     }
+    if ((op == ".SPACE") || (op == ".SKIP")) {
+        bool ok;
+        fixmatheval::FmeExpression expression;
+        fixmatheval::FmeValue value;
+        fixmatheval::FmeValue fill = 0;
+        if ((operands.count() != 1) && (operands.count() != 2)) {
+            error = ".space/.skip unexpected number of operands";
+            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            error_occured = true;
+            if (error_ptr != nullptr)
+                *error_ptr = error;
+            return false;
+        }
+        if (operands.count() > 1) {
+            ok = expression.parse(operands.at(1), error);
+            if (!ok) {
+                fatal_occured = true;
+                error = tr(".space/.skip %1 parse error.").arg(line);
+                emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+                error_occured = true;
+                if (error_ptr != nullptr)
+                    *error_ptr = error;
+                return false;
+            }
+            ok = expression.eval(fill, symtab, error);
+            if (!ok) {
+                fatal_occured = true;
+                error = tr(".space/.skip %1 evaluation error.").arg(line);
+                emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+                error_occured = true;
+                if (error_ptr != nullptr)
+                    *error_ptr = error;
+                return false;
+            }
+        }
+        ok = expression.parse(operands.at(0), error);
+        if (!ok) {
+            fatal_occured = true;
+            error = tr(".space/.skip %1 parse error.").arg(line);
+            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            error_occured = true;
+            if (error_ptr != nullptr)
+                *error_ptr = error;
+            return false;
+        }
+        ok = expression.eval(value, symtab, error);
+        if (!ok) {
+            fatal_occured = true;
+            error = tr(".space/.skip %1 evaluation error.").arg(line);
+            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            error_occured = true;
+            if (error_ptr != nullptr)
+                *error_ptr = error;
+            return false;
+        }
+        while (value-- > 0) {
+            if (!fatal_occured)
+                mem->write_byte(address, (uint8_t)fill);
+            address += 1;
+        }
+        return true;
+    }
     if ((op == ".EQU") || (op == ".SET")) {
         if ((operands.count() > 2) || (operands.count() < 1)) {
             error = tr(".set or .equ incorrect arguments number.");
