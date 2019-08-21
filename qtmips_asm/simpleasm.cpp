@@ -246,8 +246,7 @@ bool SimpleAsm::process_line(QString line, QString filename,
         ok = expression.parse(operands.at(0), error);
         if (!ok) {
             fatal_occured = true;
-            error = tr("line %1 .orig %2 parse error.")
-                    .arg(QString::number(line_number), line);
+            error = tr(".orig %1 parse error.").arg(line);
             emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
             if (error_ptr != nullptr)
@@ -255,13 +254,21 @@ bool SimpleAsm::process_line(QString line, QString filename,
             return false;
         }
         ok = expression.eval(value, symtab, error);
+        if (!ok) {
+            fatal_occured = true;
+            error = tr(".orig %1 evaluation error.").arg(line);
+            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            error_occured = true;
+            if (error_ptr != nullptr)
+                *error_ptr = error;
+            return false;
+        }
         address = value;
         return true;
     }
     if ((op == ".EQU") || (op == ".SET")) {
         if ((operands.count() > 2) || (operands.count() < 1)) {
-            error = tr("line %1 .set or .equ incorrect arguments number.")
-                    .arg(QString::number(line_number));
+            error = tr(".set or .equ incorrect arguments number.");
             emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
             if (error_ptr != nullptr)
@@ -279,8 +286,8 @@ bool SimpleAsm::process_line(QString line, QString filename,
             if (ok)
                 ok = expression.eval(value, symtab, error);
             if (!ok) {
-                error = tr("line %1 .set or .equ %2 parse error.")
-                           .arg(QString::number(line_number), operands.at(1));
+                error = tr(".set or .equ %1 parse error.")
+                           .arg(operands.at(1));
                 emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
                 error_occured = true;
                 if (error_ptr != nullptr)
@@ -289,23 +296,6 @@ bool SimpleAsm::process_line(QString line, QString filename,
             }
         }
         symtab->setSymbol(name, value, 0);
-        return true;
-    }
-    if (op == ".WORD") {
-        for (QString s: operands) {
-            s = s.simplified();
-            std::uint32_t val = 0;
-            int chars_taken;
-            val = string_to_uint64(s, 0, &chars_taken);
-            if (chars_taken != s.size()) {
-                val = 0;
-                reloc.append(new machine::RelocExpression(address, s, 0,
-                             -0xffffffff, 0xffffffff, 0, 32, 0, filename, line_number, 0));
-            }
-            if (!fatal_occured)
-                mem->write_word(address, val);
-            address += 4;
-        }
         return true;
     }
     if ((op == ".ASCII") || (op == ".ASCIZ")) {
@@ -374,10 +364,66 @@ bool SimpleAsm::process_line(QString line, QString filename,
                 address += 1;
             }
         }
-        while (address & 3) {
+        return true;
+    }
+    if (op == ".BYTE") {
+        bool ok;
+        for (QString s: operands) {
+            std::uint32_t val = 0;
+            int chars_taken;
+            val = string_to_uint64(s, 0, &chars_taken);
+            if (chars_taken != s.size()) {
+                fixmatheval::FmeExpression expression;
+                fixmatheval::FmeValue value;
+                ok = expression.parse(s, error);
+                if (!ok) {
+                    fatal_occured = true;
+                    error = tr(".byte %1 parse error.").arg(line);
+                    emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+                    error_occured = true;
+                    if (error_ptr != nullptr)
+                        *error_ptr = error;
+                    return false;
+                }
+                ok = expression.eval(value, symtab, error);
+                if (!ok) {
+                    fatal_occured = true;
+                    error = tr(".byte %1 evaluation error.").arg(line);
+                    emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+                    error_occured = true;
+                    if (error_ptr != nullptr)
+                        *error_ptr = error;
+                    return false;
+                }
+                val = (uint8_t)value;
+            }
             if (!fatal_occured)
-                mem->write_byte(address, 0);
+                mem->write_byte(address, (uint8_t)val);
             address += 1;
+        }
+        return true;
+    }
+
+    while (address & 3) {
+        if (!fatal_occured)
+            mem->write_byte(address, 0);
+        address += 1;
+    }
+
+    if (op == ".WORD") {
+        for (QString s: operands) {
+            s = s.simplified();
+            std::uint32_t val = 0;
+            int chars_taken;
+            val = string_to_uint64(s, 0, &chars_taken);
+            if (chars_taken != s.size()) {
+                val = 0;
+                reloc.append(new machine::RelocExpression(address, s, 0,
+                             -0xffffffff, 0xffffffff, 0, 32, 0, filename, line_number, 0));
+            }
+            if (!fatal_occured)
+                mem->write_word(address, val);
+            address += 4;
         }
         return true;
     }
@@ -387,8 +433,8 @@ bool SimpleAsm::process_line(QString line, QString filename,
                                              address, &reloc, filename, line_number, true);
 
     if (size < 0) {
-        error = tr("line %1 instruction %2 parse error - %3.")
-                .arg(QString::number(line_number), line, error);
+        error = tr("instruction %1 parse error - %2.")
+                .arg(line, error);
         emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
         error_occured = true;
         if (error_ptr != nullptr)
