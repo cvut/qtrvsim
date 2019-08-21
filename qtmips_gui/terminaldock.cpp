@@ -75,10 +75,16 @@ void TerminalDock::setup(machine::SerialPort *ser_port) {
 }
 
 void TerminalDock::tx_byte(unsigned int data) {
+    bool at_end = terminal_text->textCursor().atEnd();
     if (data == '\n')
         append_cursor->insertBlock();
     else
         append_cursor->insertText(QString(QChar(data)));
+    if (at_end) {
+        QTextCursor cursor = QTextCursor(terminal_text->document());
+        cursor.movePosition(QTextCursor::End);
+        terminal_text->setTextCursor(cursor);
+    }
 }
 
 void TerminalDock::tx_byte(int fd, unsigned int data)
