@@ -1,7 +1,7 @@
 QtMips
 ======
 
-[![build status](https://dev.azure.com/qtmips/qtmips/_apis/build/status/cvut.QtMips?branchName=master)](https://dev.azure.com/qtmips/QtMips/_build/latest?definitionId=1&branchName=master)
+[![OpenHub](https://www.openhub.net/p/QtMips/widgets/project_thin_badge?format=gif)](https://www.openhub.net/p/QtMips) [![build status](https://dev.azure.com/qtmips/qtmips/_apis/build/status/cvut.QtMips?branchName=master)](https://dev.azure.com/qtmips/QtMips/_build/latest?definitionId=1&branchName=master)
 
 MIPS CPU simulator for education purposes.
 
