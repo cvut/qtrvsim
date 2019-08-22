@@ -256,16 +256,9 @@ bool SimpleAsm::process_line(QString line, QString filename,
             error = QString("recursive include of file: \"%1\"").arg(incname);
             res = false;
         } else {
-            QFile incfile(incname);
-            if (!incfile.open(QFile::ReadOnly | QFile::Text)) {
-                error = QString("cannot open file: \"%1\"").arg(incname);
+            if (!process_file(incname, error_ptr)) {
                 res = false;
-            } else for (int ln = 1; !incfile.atEnd(); ln++) {
-                QString line = incfile.readLine();
-                if (!process_line(line, incname, ln, error_ptr)) {
-                    res = false;
-                    break;
-                }
+                error = QString("error in included file: \"%1\"").arg(incname);
             }
         }
         if (!res) {
@@ -565,6 +558,29 @@ bool SimpleAsm::process_line(QString line, QString filename,
         address += 4;
     }
     return true;
+}
+
+bool SimpleAsm::process_file(QString filename, QString *error_ptr) {
+    QString error;
+    bool res = true;
+    QFile srcfile(filename);
+    if (!srcfile.open(QFile::ReadOnly | QFile::Text)) {
+        error = QString("cannot open file: \"%1\"").arg(filename);
+        emit report_message(messagetype::MSG_ERROR, "", 0, 0, error, "");
+        error_occured = true;
+        if (error_ptr != nullptr)
+            *error_ptr = error;
+        return false;
+    }
+    for (int ln = 1; !srcfile.atEnd(); ln++) {
+        QString line = srcfile.readLine();
+        if ((line.count() > 0) && (line.at(line.count() - 1) == '\n'))
+            line.truncate(line.count() - 1);
+        if (!process_line(line, filename, ln, error_ptr))
+            res = false;
+    }
+    srcfile.close();
+    return res;
 }
 
 bool SimpleAsm::finish(QString *error_ptr) {

@@ -858,6 +858,19 @@ void MainWindow::message_selected(messagetype::Type type, QString file, int line
         central_window->setCurrentWidget(editor);
 }
 
+bool SimpleAsmWithEditorCheck::process_file(QString filename, QString *error_ptr) {
+    SrcEditor *editor = mainwindow->source_editor_for_file(filename, false);
+    if (editor == nullptr)
+        return Super::process_file(filename, error_ptr);
+    QTextDocument *doc = editor->document();
+    int ln = 1;
+    for ( QTextBlock block = doc->begin(); block.isValid(); block = block.next(), ln++) {
+        QString line = block.text();
+        process_line(line, filename, ln);
+    }
+    return !error_occured;
+}
+
 void MainWindow::compile_source() {
     bool error_occured = false;
     if (current_srceditor == nullptr)
@@ -883,7 +896,7 @@ void MainWindow::compile_source() {
     QTextDocument *doc = editor->document();
 
     emit clear_messages();
-    SimpleAsm sasm;
+    SimpleAsmWithEditorCheck sasm(this);
 
     connect(&sasm, SIGNAL(report_message(messagetype::Type,QString,int,int,QString,QString)),
             this, SIGNAL(report_message(messagetype::Type,QString,int,int,QString,QString)));

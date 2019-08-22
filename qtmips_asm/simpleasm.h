@@ -36,8 +36,8 @@
 #ifndef  SIMPLEASM_H
 #define  SIMPLEASM_H
 
-#include  <QString>
-#include  <QStringList>
+#include <QString>
+#include <QStringList>
 #include "fixmatheval.h"
 #include "qtmipsmachine.h"
 #include "messagetype.h"
@@ -71,11 +71,13 @@ public:
     void setup(machine::MemoryAccess *mem, SymbolTableDb *symtab, std::uint32_t address);
     bool process_line(QString line, QString filename = "",
                       int line_number = 0, QString *error_ptr = nullptr);
+    virtual bool process_file(QString filename, QString *error_ptr = nullptr);
     bool finish(QString *error_ptr = nullptr);
-private:
-    QStringList include_stack;
+protected:
     bool error_occured;
     bool fatal_occured;
+private:
+    QStringList include_stack;
     SymbolTableDb *symtab;
     machine::MemoryAccess *mem;
     machine::RelocExpressionList reloc;

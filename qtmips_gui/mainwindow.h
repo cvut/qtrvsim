@@ -58,10 +58,12 @@
 #include "qtmipsmachine.h"
 #include "machineconfig.h"
 #include "srceditor.h"
+#include "simpleasm.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
+    friend class SimpleAsmWithEditorCheck;
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -163,6 +165,18 @@ private:
     SrcEditor *source_editor_for_file(QString filename, bool open);
     QPointer<ExtProcess> build_process;
     bool ignore_unsaved;
+};
+
+class SimpleAsmWithEditorCheck : public SimpleAsm {
+    Q_OBJECT
+    using Super = SimpleAsm;
+
+public:
+    SimpleAsmWithEditorCheck(MainWindow *a_mainwindow, QObject *parent = nullptr) :
+        Super(parent), mainwindow(a_mainwindow) {}
+    bool process_file(QString filename, QString *error_ptr = nullptr) override;
+private:
+    MainWindow *mainwindow;
 };
 
 #endif // MAINWINDOW_H

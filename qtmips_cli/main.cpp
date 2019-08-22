@@ -334,18 +334,8 @@ bool assemble(QtMipsMachine &machine, MsgReport &msgrep, QString filename) {
 
     sasm.setup(mem, &symtab, 0x80020000);
 
-    QFile input_file(filename);
-    if (!input_file.open(QIODevice::ReadOnly)) {
-        cout << "cannot open filename " << filename.toLocal8Bit().data() << endl;
+    if (!sasm.process_file(filename))
         return false;
-    }
-
-    QTextStream in(&input_file);
-    for (int ln = 1; !in.atEnd(); ln++) {
-        QString line = in.readLine();
-        sasm.process_line(line, filename, ln);
-    }
-    input_file.close();
 
     return sasm.finish();
 }
