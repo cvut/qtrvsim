@@ -37,6 +37,7 @@
 #define  SIMPLEASM_H
 
 #include  <QString>
+#include  <QStringList>
 #include "fixmatheval.h"
 #include "qtmipsmachine.h"
 #include "messagetype.h"
@@ -72,6 +73,7 @@ public:
                       int line_number = 0, QString *error_ptr = nullptr);
     bool finish(QString *error_ptr = nullptr);
 private:
+    QStringList include_stack;
     bool error_occured;
     bool fatal_occured;
     SymbolTableDb *symtab;

@@ -34,6 +34,9 @@
  ******************************************************************************/
 
 #include <QObject>
+#include <QFile>
+#include <QDir>
+#include <QFileInfo>
 
 #include "simpleasm.h"
 
@@ -122,8 +125,14 @@ bool SimpleAsm::process_line(QString line, QString filename,
         if (!final)
             ch = line.at(pos);
         if (!in_quotes) {
-            if (ch == '#')
-                final = true;
+            if (ch == '#') {
+                if (line.mid(pos).startsWith("#include")) {
+                    if ((line.count() > pos + 8) && !line.at(pos + 8).isSpace())
+                        final = true;
+                } else {
+                    final = true;
+                }
+            }
             if (ch == ';')
                 final = true;
             if (ch == '/') {
@@ -226,6 +235,49 @@ bool SimpleAsm::process_line(QString line, QString filename,
         return true;
     }
 
+    if (op == "#INCLUDE") {
+        bool res = true;
+        QString incname;
+        if ((operands.count() != 1) || operands.at(0).isEmpty()) {
+            error = "the single file has to be specified for include";
+            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            error_occured = true;
+            if (error_ptr != nullptr)
+                *error_ptr = error;
+            return false;
+        }
+        incname = operands.at(0);
+        if (incname.at(0) == '"')
+            incname = incname.mid(1, incname.count() - 2);
+        QFileInfo fi(QFileInfo(filename).dir(), incname);
+        incname = fi.filePath();
+        include_stack.append(filename);
+        if (include_stack.contains(incname)) {
+            error = QString("recursive include of file: \"%1\"").arg(incname);
+            res = false;
+        } else {
+            QFile incfile(incname);
+            if (!incfile.open(QFile::ReadOnly | QFile::Text)) {
+                error = QString("cannot open file: \"%1\"").arg(incname);
+                res = false;
+            } else for (int ln = 1; !incfile.atEnd(); ln++) {
+                QString line = incfile.readLine();
+                if (!process_line(line, incname, ln, error_ptr)) {
+                    res = false;
+                    break;
+                }
+            }
+        }
+        if (!res) {
+            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            error_occured = true;
+            if (error_ptr != nullptr)
+                if (error_ptr->isEmpty())
+                    *error_ptr = error;
+        }
+        include_stack.removeLast();
+        return res;
+    }
     if ((op == ".DATA") || (op == ".TEXT") ||
         (op == ".GLOBL") || (op == ".END") ||
         (op == ".ENT")) {
@@ -387,6 +439,9 @@ bool SimpleAsm::process_line(QString line, QString filename,
                     if (pos + 1 < s.count()) switch(s.at(++pos).toLatin1()) {
                         case '\\':
                             ch = '\\';
+                            break;
+                        case '0':
+                            ch = 0x00;
                             break;
                         case 'r':
                             ch = 0x0d;
