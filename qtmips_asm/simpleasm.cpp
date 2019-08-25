@@ -114,6 +114,7 @@ bool SimpleAsm::process_line(QString line, QString filename,
     bool maybe_label = true;
     bool final = false;
     bool separator;
+    bool space_separated = false;
     int token_beg = -1;
     int token_last = -1;
     int operand_num = -1;
@@ -129,6 +130,11 @@ bool SimpleAsm::process_line(QString line, QString filename,
                 if (line.mid(pos).startsWith("#include")) {
                     if ((line.count() > pos + 8) && !line.at(pos + 8).isSpace())
                         final = true;
+                } else if (line.mid(pos).startsWith("#pragma")) {
+                    if ((line.count() > pos + 7) && !line.at(pos + 7).isSpace())
+                        final = true;
+                    else
+                        space_separated = true;
                 } else {
                     final = true;
                 }
@@ -140,7 +146,9 @@ bool SimpleAsm::process_line(QString line, QString filename,
                     if (line.at(pos + 1) == '/')
                         final = true;
             }
-            separator = final || (maybe_label && (ch == ':')) || ((operand_num >= 0) && (ch == ','));
+            separator = final || (maybe_label && (ch == ':')) ||
+                        ((operand_num >= 0) && ((ch == ',') ||
+                          (space_separated && ch.isSpace() && (token_beg != -1))));
             if (maybe_label && (ch == ':')) {
                 maybe_label = false;
                 if (token_beg == -1) {
@@ -235,6 +243,9 @@ bool SimpleAsm::process_line(QString line, QString filename,
         return true;
     }
 
+    if (op == "#PRAGMA") {
+        return process_pragma(operands, filename, line_number, error_ptr);
+    }
     if (op == "#INCLUDE") {
         bool res = true;
         QString incname;
@@ -632,4 +643,13 @@ bool SimpleAsm::finish(QString *error_ptr) {
     emit mem->external_change_notify(mem, 0, 0xffffffff, true);
 
     return !error_occured;
+}
+
+bool SimpleAsm::process_pragma(QStringList &operands, QString filename,
+                               int line_number, QString *error_ptr) {
+    (void)operands;
+    (void)filename;
+    (void)line_number;
+    (void)error_ptr;
+    return true;
 }

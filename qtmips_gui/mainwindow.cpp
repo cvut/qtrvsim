@@ -42,6 +42,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QTextDocument>
+#include <QMetaObject>
 #include <iostream>
 
 #include "mainwindow.h"
@@ -373,11 +374,12 @@ void MainWindow::print_action() {
 #endif // QTMIPS_WITH_PRINTING
 }
 
-#define SHOW_HANDLER(NAME, DEFAULT_AREA)  void MainWindow::show_##NAME() { \
+#define SHOW_HANDLER(NAME, DEFAULT_AREA) \
+    void MainWindow::show_##NAME() { \
         show_dockwidget(NAME, DEFAULT_AREA); \
     } \
 
-SHOW_HANDLER(registers, Qt::RightDockWidgetArea)
+SHOW_HANDLER(registers, Qt::TopDockWidgetArea)
 SHOW_HANDLER(program, Qt::LeftDockWidgetArea)
 SHOW_HANDLER(memory, Qt::RightDockWidgetArea)
 SHOW_HANDLER(cache_program, Qt::RightDockWidgetArea)
@@ -385,7 +387,7 @@ SHOW_HANDLER(cache_data, Qt::RightDockWidgetArea)
 SHOW_HANDLER(peripherals, Qt::RightDockWidgetArea)
 SHOW_HANDLER(terminal, Qt::RightDockWidgetArea)
 SHOW_HANDLER(lcd_display, Qt::RightDockWidgetArea)
-SHOW_HANDLER(cop0dock, Qt::RightDockWidgetArea)
+SHOW_HANDLER(cop0dock, Qt::TopDockWidgetArea)
 SHOW_HANDLER(messages, Qt::BottomDockWidgetArea)
 #undef SHOW_HANDLER
 
@@ -869,6 +871,73 @@ bool SimpleAsmWithEditorCheck::process_file(QString filename, QString *error_ptr
         process_line(line, filename, ln);
     }
     return !error_occured;
+}
+
+bool SimpleAsmWithEditorCheck::process_pragma(QStringList &operands, QString filename,
+                               int line_number, QString *error_ptr) {
+    (void)error_ptr;
+#if 0
+    static const QMap<QString, QDockWidget *MainWindow::*> pragma_how_map = {
+        {QString("registers"), static_cast<QDockWidget *MainWindow::*>(&MainWindow::registers)},
+    };
+#endif
+    if ((operands.count() < 2) || QString::compare(operands.at(0), "qtmips", Qt::CaseInsensitive))
+        return true;
+    QString op = operands.at(1).toLower();
+    if (op == "show") {
+        if (operands.count() < 3)
+            return true;
+        QString show_method = "show_" + operands.at(2);
+        QString show_method_sig = show_method + "()";
+        if (mainwindow->metaObject()->indexOfMethod(show_method_sig.toLatin1().data()) == -1) {
+            emit report_message(messagetype::MSG_WARNING, filename, line_number, 0,
+                                "#pragma qtmisp show - unknown object " + operands.at(2), "");
+            return true;
+        }
+        QMetaObject::invokeMethod(mainwindow, show_method.toLatin1().data());
+        return true;
+    }
+    if (op == "tab") {
+        if ((operands.count() < 3) || error_occured)
+            return true;
+        if (!QString::compare(operands.at(2), "core", Qt::CaseInsensitive) &&
+                (mainwindow->central_window != nullptr) && (mainwindow->coreview != nullptr)) {
+            mainwindow->central_window->setCurrentWidget(mainwindow->coreview);
+        }
+        return true;
+    }
+    if (op == "focus") {
+        bool ok;
+        if (operands.count() < 4)
+            return true;
+        fixmatheval::FmeExpression expression;
+        fixmatheval::FmeValue value;
+        QString error;
+        ok = expression.parse(operands.at(3), error);
+        if (!ok) {
+            emit report_message(messagetype::MSG_WARNING, filename, line_number, 0, "epression parse error " + error, "");
+            return true;
+        }
+        ok = expression.eval(value, symtab, error);
+        if (!ok) {
+            emit report_message(messagetype::MSG_WARNING, filename, line_number, 0, "epression evaluation error " + error, "");
+            return true;
+        }
+        if (!QString::compare(operands.at(2), "memory", Qt::CaseInsensitive) && (mainwindow->memory != nullptr)) {
+            QMetaObject::invokeMethod(mainwindow->memory, "focus_addr", Qt::AutoConnection, Q_ARG(std::uint32_t, value));
+            return true;
+        }
+        if (!QString::compare(operands.at(2), "program", Qt::CaseInsensitive) && (mainwindow->program != nullptr)) {
+            QMetaObject::invokeMethod(mainwindow->program, "focus_addr", Qt::AutoConnection, Q_ARG(std::uint32_t, value));
+            return true;
+        }
+        emit report_message(messagetype::MSG_WARNING, filename, line_number, 0,
+                            "unknown #pragma qtmisp focus unknown object " + operands.at(2), "");
+        return true;
+    }
+    emit report_message(messagetype::MSG_WARNING, filename, line_number, 0,
+                        "unknown #pragma qtmisp " + op, "");
+    return true;
 }
 
 void MainWindow::compile_source() {

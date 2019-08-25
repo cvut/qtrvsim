@@ -175,6 +175,9 @@ public:
     SimpleAsmWithEditorCheck(MainWindow *a_mainwindow, QObject *parent = nullptr) :
         Super(parent), mainwindow(a_mainwindow) {}
     bool process_file(QString filename, QString *error_ptr = nullptr) override;
+protected:
+    virtual bool process_pragma(QStringList &operands, QString filename = "",
+                        int line_number = 0, QString *error_ptr = nullptr) override;
 private:
     MainWindow *mainwindow;
 };

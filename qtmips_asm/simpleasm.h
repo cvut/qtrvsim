@@ -74,11 +74,13 @@ public:
     virtual bool process_file(QString filename, QString *error_ptr = nullptr);
     bool finish(QString *error_ptr = nullptr);
 protected:
+    virtual bool process_pragma(QStringList &operands, QString filename = "",
+                        int line_number = 0, QString *error_ptr = nullptr);
     bool error_occured;
     bool fatal_occured;
+    SymbolTableDb *symtab;
 private:
     QStringList include_stack;
-    SymbolTableDb *symtab;
     machine::MemoryAccess *mem;
     machine::RelocExpressionList reloc;
     std::uint32_t address;
