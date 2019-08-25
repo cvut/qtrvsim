@@ -1,3 +1,7 @@
+// Directives to make interresting windows visible
+#pragma qtmips show registers
+#pragma qtmips show memory
+
 .globl _start
 .set noat
 .set noreorder
@@ -24,3 +28,6 @@ src_val:
 	.word  0x12345678
 dst_val:
 	.word  0
+
+// Specify location to show in memory window
+#pragma qtmips focus memory src_val

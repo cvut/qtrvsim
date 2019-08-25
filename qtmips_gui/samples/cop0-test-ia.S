@@ -1,3 +1,9 @@
+// Directives to make interresting windows visible
+#pragma qtmips show terminal
+#pragma qtmips show registers
+#pragma qtmips show cop0dock
+#pragma qtmips show memory
+
 .set SERIAL_PORT_BASE,     0xffffc000
 
 .set SERP_RX_ST_REG_o,           0x00
@@ -11,7 +17,6 @@
 .set SERP_TX_ST_REG_IE_m,         0x2
 
 .set SERP_TX_DATA_REG_o,         0x0c
-
 
 .globl _start
 .set noat
@@ -72,3 +77,6 @@ rx_irq:
 	eret
 
 .end _start
+
+// if whole source compile is OK the switch to core tab
+#pragma qtmips tab core

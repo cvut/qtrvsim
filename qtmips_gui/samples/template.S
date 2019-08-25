@@ -10,6 +10,11 @@
 //      work:     http://www.pikron.com/
 //      license:  public domain
 
+// Directives to make interresting windows visible
+#pragma qtmips show terminal
+#pragma qtmips show registers
+#pragma qtmips show memory
+
 .globl _start
 .globl __start
 .set noreorder
@@ -107,3 +112,6 @@ end_char:	break			// stop continuous execution
 data_1:	.word	1, 2, 3, 4	// example how to fill data words
 
 text_1:	.asciz	"Hello word.\n"	// store zero terminated ASCII text
+
+// if whole source compile is OK the switch to core tab
+#pragma qtmips tab core
