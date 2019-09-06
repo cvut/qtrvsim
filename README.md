@@ -402,3 +402,9 @@ Limitations of the Implementation
 List of Actually Supported Instructions
 ---------------------------------------
 ADD ADDI ADDIU ADDU AND ANDI BEQ BEQL BGEZ BGEZAL BGEZALL BGEZL BGTZ BGTZL BLEZ BLEZL BLTZ BLTZAL BLTZALL BLTZL BNE BNEL BREAK CACHE CLO CLZ DIV DIVU ERET EXT INS J JAL JALR JR LB LBU LH LHU LL LUI LW LWC1 LWD1 LWL LWR MADD MADDU MFC0 MFHI MFLO MFMC0 MOVN MOVZ MSUB MSUBU MTC0 MTHI MTLO MUL MULT MULTU NOR OR ORI PREF RDHWR ROTR ROTRV SB SC SDC1 SEB SEH SH SLL SLLV SLT SLTI SLTIU SLTU SRA SRAV SRL SRLV SUB SUBU SW SWC1 SWL SWR SYNC SYNCI SYSCALL TEQ TEQI TGE TGEI TGEIU TGEU TLT TLTI TLTIU TLTU TNE TNEI WSBH XOR XORI 
+
+Links to Resources and Similar Projects
+---------------------------------------
+* SPIM/QtSPIM: A MIPS32 Simulator [http://spimsimulator.sourceforge.net/](http://spimsimulator.sourceforge.net/)
+* MARS: IDE with detailed help and hints [http://courses.missouristate.edu/KenVollmar/MARS/index.htm](http://courses.missouristate.edu/KenVollmar/MARS/index.htm)
+* EduMIPS64: 1x fixed and 3x FP pipelines [https://www.edumips.org/](https://www.edumips.org/)
