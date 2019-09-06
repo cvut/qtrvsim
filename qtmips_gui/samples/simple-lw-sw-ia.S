@@ -23,6 +23,7 @@ loop:
 	nop
 
 .data
+.org	0x2000
 
 src_val:
 	.word  0x12345678
