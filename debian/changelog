@@ -1,3 +1,16 @@
+qtmips (0.7.3) unstable; urgency=medium
+
+  * Debian package updated to version 0.7.3.
+  * Implemented SKIP/SPACE assembler directives.
+  * Add OpenHub statistic page link.
+  * Provide support for include directive in simple assembler.
+  * In include, use content from editor if file is already open.
+  * Add #pragma processing to integrated assembler and its usage to control windows.
+  * Use #pragma in examples to lower initial learning curve.
+  * samples: simple-lw-sw-ia.S: place data section to 0x2000 address.
+ 
+ -- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Thu, 12 Sep 2019 11:47:46 +0200
+
 qtmips (0.7.2) unstable; urgency=medium
 
   * Debian package updated to version 0.7.2.

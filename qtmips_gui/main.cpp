@@ -40,7 +40,7 @@
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
     app.setApplicationName("qtmips_gui");
-    app.setApplicationVersion("0.7.2");
+    app.setApplicationVersion("0.7.3");
 
     MainWindow w;
     w.start();
