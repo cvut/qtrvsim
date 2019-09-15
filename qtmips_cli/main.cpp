@@ -343,7 +343,7 @@ bool assemble(QtMipsMachine &machine, MsgReport &msgrep, QString filename) {
 int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
     app.setApplicationName("qtmips_cli");
-    app.setApplicationVersion("0.7");
+    app.setApplicationVersion("0.7.4");
 
     QCommandLineParser p;
     create_parser(p);
