@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "and.h"
+#include "coreview_colors.h"
 #include <cmath>
 
 using namespace coreview;
@@ -63,6 +64,10 @@ QRectF And::boundingRect() const {
 }
 
 void And::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
+    QPen pen = painter->pen();
+    pen.setColor(BLOCK_OUTLINE_COLOR);
+    painter->setPen(pen);
+
     qreal size = GAP * connectors.size();
     painter->drawLine(0, 0, 0, size);
     painter->drawLine(0, 0, size/2, 0);

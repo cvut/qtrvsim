@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "logicblock.h"
+#include "coreview_colors.h"
 #include "fontsize.h"
 #include <cmath>
 
@@ -79,6 +80,10 @@ QRectF LogicBlock::boundingRect() const {
 }
 
 void LogicBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
+    QPen pen = painter->pen();
+    pen.setColor(BLOCK_OUTLINE_COLOR);
+    painter->setPen(pen);
+
     painter->drawRoundedRect(box, RADIUS, RADIUS);
 }
 
