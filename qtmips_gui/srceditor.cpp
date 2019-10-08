@@ -59,6 +59,8 @@ void SrcEditor::setup_common() {
     p.setColor(QPalette::Inactive, QPalette::Base, Qt::white);
     p.setColor(QPalette::Disabled, QPalette::Base, Qt::white);
     setPalette(p);
+
+    setTextColor(Qt::black);
 }
 
 SrcEditor::SrcEditor(QWidget *parent) : Super(parent) {
