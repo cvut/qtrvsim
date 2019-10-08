@@ -35,6 +35,7 @@
 
 #include <QFile>
 #include <QFileInfo>
+#include <QPalette>
 #include <QTextDocumentWriter>
 #include <QTextCursor>
 #include <QTextBlock>
@@ -52,6 +53,12 @@ void SrcEditor::setup_common() {
     setFont(font);
     tname = "Unknown";
     highlighter = new HighlighterAsm(document());
+
+    QPalette p = palette();
+    p.setColor(QPalette::Active, QPalette::Base, Qt::white);
+    p.setColor(QPalette::Inactive, QPalette::Base, Qt::white);
+    p.setColor(QPalette::Disabled, QPalette::Base, Qt::white);
+    setPalette(p);
 }
 
 SrcEditor::SrcEditor(QWidget *parent) : Super(parent) {
