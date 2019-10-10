@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "value.h"
+#include "coreview_colors.h"
 #include "../fontsize.h"
 
 using namespace coreview;
@@ -73,6 +74,8 @@ void Value::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __at
     painter->setBackgroundMode(Qt::OpaqueMode);
     if (!frame)
         painter->setPen(QColor(Qt::white));
+    else
+        painter->setPen(QColor(BLOCK_OUTLINE_COLOR));
     painter->drawRect(rect);
     painter->setPen(QColor(Qt::black));
     painter->setBackgroundMode(Qt::TransparentMode);

@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "latch.h"
+#include "coreview_colors.h"
 #include <cmath>
 
 using namespace coreview;
@@ -76,6 +77,10 @@ QRectF Latch::boundingRect() const {
 }
 
 void Latch::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
+    QPen pen = painter->pen();
+    pen.setColor(BLOCK_OUTLINE_COLOR);
+    painter->setPen(pen);
+
     painter->drawRect(0, 0, WIDTH, height);
     // Now tick rectangle
     const QPointF tickPolygon[] = {

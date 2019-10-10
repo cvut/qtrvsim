@@ -234,6 +234,8 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     new_label("Stalls", 570, SC_HEIGHT - 14);
     NEW_V(630, SC_HEIGHT - 9, stall_c_value, false, 10, 0, 10, ' ', false);
 
+    setBackgroundBrush(QBrush(Qt::white));
+
     connect(regs, SIGNAL(open_registers()), this, SIGNAL(request_registers()));
     connect(mem_program, SIGNAL(open_mem()), this, SIGNAL(request_program_memory()));
     connect(mem_data, SIGNAL(open_mem()), this, SIGNAL(request_data_memory()));

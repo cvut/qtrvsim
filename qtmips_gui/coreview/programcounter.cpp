@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "programcounter.h"
+#include "coreview_colors.h"
 #include "fontsize.h"
 #include <cmath>
 
@@ -75,6 +76,10 @@ QRectF ProgramCounter::boundingRect() const {
 }
 
 void ProgramCounter::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
+    QPen pen = painter->pen();
+    pen.setColor(BLOCK_OUTLINE_COLOR);
+    painter->setPen(pen);
+
     painter->drawRect(0, 0, WIDTH, HEIGHT);
 }
 

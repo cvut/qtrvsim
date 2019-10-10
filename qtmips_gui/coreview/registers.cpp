@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "registers.h"
+#include "coreview_colors.h"
 #include "fontsize.h"
 #include <cmath>
 
@@ -81,6 +82,10 @@ QRectF Registers::boundingRect() const {
 }
 
 void Registers::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute((unused)), QWidget *widget __attribute((unused))) {
+    QPen pen = painter->pen();
+    pen.setColor(BLOCK_OUTLINE_COLOR);
+    painter->setPen(pen);
+
     painter->drawRect(0, 0, WIDTH, HEIGHT);
 }
 

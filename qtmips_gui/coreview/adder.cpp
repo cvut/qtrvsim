@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "adder.h"
+#include "coreview_colors.h"
 #include "fontsize.h"
 #include <cmath>
 
@@ -80,6 +81,11 @@ void Adder::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __at
         QPointF(DENT, HEIGHT / 2),
         QPointF(0, (HEIGHT / 2) - DENT)
     };
+
+    QPen pen = painter->pen();
+    pen.setColor(BLOCK_OUTLINE_COLOR);
+    painter->setPen(pen);
+
     painter->drawPolygon(poly, sizeof(poly) / sizeof(QPointF));
 }
 

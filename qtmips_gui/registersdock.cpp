@@ -71,6 +71,8 @@ static const QString labels[] = {
 };
 
 RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
+    static const QColor defaultTextColor(0, 0, 0);
+
     scrollarea = new QScrollArea(this);
     scrollarea->setWidgetResizable(true);
     widg = new StaticTable(scrollarea);
@@ -78,12 +80,18 @@ RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
     hi_highlighted = false;
     lo_highlighted = false;
 
+    pal_normal = palette();
+    pal_normal.setColor(QPalette::WindowText, defaultTextColor);
+
 #define INIT(X, LABEL) do{ \
         X = new QLabel("0x00000000", widg); \
         X->setFixedSize(X->sizeHint()); \
         X->setText(""); \
+	X->setPalette(pal_normal); \
         X->setTextInteractionFlags(Qt::TextSelectableByMouse); \
-        widg->addRow({new QLabel(LABEL, widg), X}); \
+	QLabel *l = new QLabel(LABEL, widg); \
+	l->setPalette(pal_normal); \
+        widg->addRow({l, X}); \
     } while(false)
 
     for (int i = 0; i < 32; i++)
@@ -98,10 +106,8 @@ RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
     setObjectName("Registers");
     setWindowTitle("Registers");
 
-    pal_normal = QPalette(gp[0]->palette());
-    pal_updated = QPalette(gp[0]->palette());
-    pal_read = QPalette(gp[0]->palette());
-    pal_normal.setColor(QPalette::WindowText, QColor(0, 0, 0));
+    pal_updated = pal_normal;
+    pal_read = pal_normal;
     pal_updated.setColor(QPalette::WindowText, QColor(240, 0, 0));
     pal_read.setColor(QPalette::WindowText, QColor(0, 0, 240));
 }
