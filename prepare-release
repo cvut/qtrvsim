@@ -16,6 +16,8 @@ V_DATE_RFC="$( date -R )"
 V_USER_NAME="$(git config user.name)"
 V_USER_EMAIL="$(git config user.email)"
 
+DEBIAN_NATIVE=1
+
 sed --in-place \
   -e 's#^\([\t ]*\)versionText = "Version [^"]*\\n";.*$#\1versionText = "Version '"$V_TXT"'\\n";#' \
   qtmips_gui/aboutdialog.cpp
@@ -23,6 +25,12 @@ sed --in-place \
 sed --in-place \
   -e 's#^\([\t ]*\)app.setApplicationVersion("[^"]*");.*$#\1app.setApplicationVersion("'"$V_TXT"'");#' \
   qtmips_gui/main.cpp
+
+sed --in-place \
+  -e 's#^\([\t ]*\)app.setApplicationVersion("[^"]*");.*$#\1app.setApplicationVersion("'"$V_TXT"'");#' \
+  qtmips_cli/main.cpp
+
+if [ $DEBIAN_NATIVE -eq 1 ] ; then
 
 if grep -q "qtmips ($V_TXT)" debian/changelog ; then
 sed --in-place \
@@ -41,17 +49,23 @@ cat debian/changelog >>debian/changelog.tmp
 mv debian/changelog.tmp debian/changelog
 fi
 
+nedit-nc debian/changelog
+
+fi # DEBIAN_NATIVE
+
 sed --in-place \
   -e 's#^\(Version:[\t ]*\)[^ ]\+ *$#\1'"$V_TXT"'#' \
   qtmips.spec
 
-nedit-nc debian/changelog
+if [ $DEBIAN_NATIVE -eq 1 ] ; then
 
 echo Press enter to continue
 read x
 
 git add debian/changelog qtmips_gui/aboutdialog.cpp \
         qtmips_gui/main.cpp qtmips.spec
+
+fi # DEBIAN_NATIVE
 
 echo >.git/GITGUI_MSG "Version updated to $V_TXT"
 
@@ -60,6 +74,16 @@ git gui
 git tag -d v$V_TXT
 
 git tag -s v$V_TXT
+
+if [ $DEBIAN_NATIVE -eq 0 ] ; then
+
+gbp import-ref --upstream-version=$V_TXT --upstream-tag=v$V_TXT --debian-branch=debian/master
+
+git checkout debian/master -- .
+
+gbp dch --debian-branch=debian/master --release
+
+fi # !DEBIAN_NATIVE
 
 rm -rf ../debian-test-build
 
