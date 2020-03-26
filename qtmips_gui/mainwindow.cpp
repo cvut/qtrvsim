@@ -72,6 +72,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     ui = new Ui::MainWindow();
     ui->setupUi(this);
     setWindowTitle("QtMips");
+    setDockNestingEnabled(true);
 
     central_window = new QTabWidget(this);
     this->setCentralWidget(central_window);
