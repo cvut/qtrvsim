@@ -59,6 +59,7 @@ void create_parser(QCommandLineParser &p) {
     p.addOption({"asm", "Treat provided file argument as assembler source."});
     p.addOption({"pipelined", "Configure CPU to use five stage pipeline."});
     p.addOption({"no-delay-slot", "Disable jump delay slot."});
+    p.addOption({"hazard-unit", "Specify hazard unit imeplementation [none|stall|forward].", "HUKIND"});
     p.addOption({{"trace-fetch", "tr-fetch"}, "Trace fetched instruction (for both pipelined and not core)."});
     p.addOption({{"trace-decode", "tr-decode"}, "Trace instruction in decode stage. (only for pipelined core)"});
     p.addOption({{"trace-execute", "tr-execute"}, "Trace instruction in execute stage. (only for pipelined core)"});
@@ -144,6 +145,15 @@ void configure_machine(QCommandLineParser &p, MachineConfig &cc) {
 
     cc.set_delay_slot(!p.isSet("no-delay-slot"));
     cc.set_pipelined(p.isSet("pipelined"));
+
+    siz = p.values("hazard-unit").size();
+    if (siz >= 1) {
+        QString hukind = p.values("hazard-unit").at(siz - 1).toLower();
+        if (!cc.set_hazard_unit(hukind)) {
+            std::cerr << "Unknown kind of hazard unit specified" << std::endl;
+            exit(1);
+        }
+    }
 
     siz = p.values("read-time").size();
     if (siz >= 1)

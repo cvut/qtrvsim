@@ -119,6 +119,7 @@ public:
     void set_delay_slot(bool);
     // Hazard unit
     void set_hazard_unit(enum HazardUnit);
+    bool set_hazard_unit(QString hukind);
     // Protect data memory from execution. Only program sections can be executed.
     void set_memory_execute_protection(bool);
     // Protect program memory from accidental writes.

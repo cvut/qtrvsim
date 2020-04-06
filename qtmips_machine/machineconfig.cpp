@@ -34,6 +34,7 @@
  ******************************************************************************/
 
 #include "machineconfig.h"
+#include <QMap>
 
 using namespace machine;
 
@@ -302,6 +303,19 @@ void MachineConfig::set_delay_slot(bool v) {
 
 void MachineConfig::set_hazard_unit(enum MachineConfig::HazardUnit hu)  {
     hunit = hu;
+}
+
+bool MachineConfig::set_hazard_unit(QString hukind) {
+    static QMap<QString, enum HazardUnit> hukind_map =  {
+        {"none",  HU_NONE},
+        {"stall", HU_STALL},
+        {"forward", HU_STALL_FORWARD},
+        {"stall-forward", HU_STALL_FORWARD},
+    };
+    if (!hukind_map.contains(hukind))
+        return false;
+    set_hazard_unit(hukind_map.value(hukind));
+    return true;
 }
 
 void MachineConfig::set_memory_execute_protection(bool v) {
