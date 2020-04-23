@@ -44,6 +44,7 @@
 #include "reporter.h"
 #include "msgreport.h"
 #include "simpleasm.h"
+#include "chariohandler.h"
 
 using namespace machine;
 using namespace std;
@@ -81,6 +82,8 @@ void create_parser(QCommandLineParser &p) {
     p.addOption({"read-time", "Memory read access time (cycles).", "RTIME"});
     p.addOption({"write-time", "Memory read access time (cycles).", "WTIME"});
     p.addOption({"burst-time", "Memory read access time (cycles).", "BTIME"});
+    p.addOption({{"serial-in", "serin"}, "File connected to the serial port input.", "FNAME"});
+    p.addOption({{"serial-out", "serout"}, "File connected to the serial port output.", "FNAME"});
 }
 
 void configure_cache(MachineConfigCache &cacheconf, QStringList cachearg, QString which) {
@@ -284,6 +287,58 @@ void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *s
     // TODO
 }
 
+void configure_serial_port(QCommandLineParser &p,  SerialPort *ser_port) {
+    int siz;
+    CharIOHandler *ser_in = nullptr;
+    CharIOHandler *ser_out = nullptr;
+
+    if (!ser_port)
+        return;
+
+    siz = p.values("serial-in").size();
+    if (siz >= 1) {
+        QIODevice::OpenMode mode = QFile::ReadOnly;
+        QFile *qf = new QFile(p.values("serial-in").at(siz - 1));
+        ser_in = new CharIOHandler(qf, ser_port);
+        siz = p.values("serial-out").size();
+        if (siz) {
+            if (p.values("serial-in").at(siz - 1) == p.values("serial-out").at(siz - 1)) {
+                mode = QFile::ReadWrite;
+                ser_out = ser_in;
+            }
+        }
+        if (!ser_in->open(mode)) {
+            cout << "Serial port input file cannot be open for read." << endl;
+            exit(1);
+        }
+    }
+
+    if (!ser_out) {
+        siz = p.values("serial-out").size();
+        if (siz >= 1) {
+            QFile *qf = new QFile(p.values("serial-out").at(siz - 1));
+            ser_out = new CharIOHandler(qf, ser_port);
+            if (!ser_out->open(QFile::WriteOnly)) {
+                cout << "Serial port output file cannot be open for write." << endl;
+                exit(1);
+            }
+        }
+    }
+
+    if (ser_in) {
+        ser_port->connect(ser_in, SIGNAL(readyRead()), ser_port, SLOT(rx_queue_check()));
+        ser_port->connect(ser_port, SIGNAL(rx_byte_pool(int,unsigned int&, bool&)),
+                          ser_in, SLOT(readBytePoll(int,unsigned int&, bool&)));
+        if (ser_in->bytesAvailable())
+            ser_port->rx_queue_check();
+    }
+
+    if (ser_out) {
+        ser_port->connect(ser_port, SIGNAL(tx_byte(unsigned int)),
+                          ser_out, SLOT(writeByte(unsigned int)));
+    }
+}
+
 void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
     foreach (QString range_arg, ranges) {
         std::uint32_t start;
@@ -370,6 +425,8 @@ int main(int argc, char *argv[]) {
 
     Reporter r(&app, &machine);
     configure_reporter(p, r, machine.symbol_table());
+
+    configure_serial_port(p, machine.serial_port());
 
     if (asm_source) {
         MsgReport msgrep(&app);

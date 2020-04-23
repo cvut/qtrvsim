@@ -34,9 +34,11 @@ SOURCES += \
         main.cpp \
         tracer.cpp \
         reporter.cpp \
-        msgreport.cpp
+        msgreport.cpp \
+        chariohandler.cpp
 
 HEADERS += \
         tracer.h \
         reporter.h \
-        msgreport.h
+        msgreport.h \
+        chariohandler.h
