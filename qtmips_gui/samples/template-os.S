@@ -49,7 +49,7 @@
 // MZ_APO education Zynq based board developed
 // by Petr Porazil and Pavel Pisa at PiKRON.com company
 
-.equ SPILED_REG_BASE        0xffffc100 // base of SPILED port region
+.equ SPILED_REG_BASE,       0xffffc100 // base of SPILED port region
 
 .equ SPILED_REG_LED_LINE,   0xffffc104 // 32 bit word mapped as output
 .equ SPILED_REG_LED_LINE_o,     0x0004 // Offset of the LED_LINE
