@@ -252,6 +252,9 @@ Following coprocessor 0 registers are recognized
 | $15,1  | EBase      | Exception vector base register |
 | $16,0  | Config     | Configuration registers |
 
+`mtc0` and `mfc0` are used to copy value from/to general puropose registers
+to/from comprocessor 0 register.
+
 Hardware/special registers implemented:
 
 | Number | Name       | Description |
@@ -269,7 +272,7 @@ is 0x80000180. The base can be changed (`EBase` register) and then PC is set
 to address EBase + 0x180. This is in accordance with MIPS release 1 and 2
 manuals.
 
-Enable bit 10 (interrupt mask) in the Status register. Ensure that bit
+Enable bit 11 (interrupt mask) in the Status register. Ensure that bit
 1 (`EXL`) is zero and bit 0 (`IE`) is set to one.
 
 Enable interrupt in the receiver status register (bit 1 of `SERP_RX_ST_REG`).
