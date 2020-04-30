@@ -252,6 +252,9 @@ Following coprocessor 0 registers are recognized
 | $15,1  | EBase      | Exception vector base register |
 | $16,0  | Config     | Configuration registers |
 
+`mtc0` and `mfc0` are used to copy value from/to general puropose registers
+to/from comprocessor 0 register.
+
 Hardware/special registers implemented:
 
 | Number | Name       | Description |
