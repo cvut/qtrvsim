@@ -47,16 +47,16 @@
 
 using namespace machine;
 
-ProgramLoader::ProgramLoader(const char *file) {
+ProgramLoader::ProgramLoader(QString file) : elf_file(file) {
     const GElf_Ehdr *elf_ehdr;
     // Initialize elf library
     if (elf_version(EV_CURRENT) == EV_NONE)
         throw QTMIPS_EXCEPTION(Input, "Elf library initialization failed", elf_errmsg(-1));
     // Open source file
-    if ((this->fd = open(file, O_RDONLY | O_BINARY, 0)) < 0)
+    if (!elf_file.open(QIODevice::ReadOnly | QIODevice::Unbuffered | QIODevice::ExistingOnly))
         throw QTMIPS_EXCEPTION(Input, QString("Can't open input elf file for reading (") + QString(file) + QString(")"), std::strerror(errno));
     // Initialize elf
-    if (!(this->elf = elf_begin(this->fd, ELF_C_READ, NULL)))
+    if (!(this->elf = elf_begin(elf_file.handle(), ELF_C_READ, NULL)))
         throw QTMIPS_EXCEPTION(Input, "Elf read begin failed", elf_errmsg(-1));
     // Check elf kind
     if (elf_kind(this->elf) != ELF_K_ELF)
@@ -95,13 +95,13 @@ ProgramLoader::ProgramLoader(const char *file) {
     // TODO instead of direct access should we be using sections and elf_data? And if so how to link program header and section?
 }
 
-ProgramLoader::ProgramLoader(QString file) : ProgramLoader(file.toStdString().c_str()) { }
+ProgramLoader::ProgramLoader(const char *file) : ProgramLoader(QString::fromLocal8Bit(file)) { }
 
 ProgramLoader::~ProgramLoader() {
     // Close elf
     elf_end(this->elf);
     // Close file
-    close(this->fd);
+    elf_file.close();
 }
 
 void ProgramLoader::to_memory(Memory *mem) {

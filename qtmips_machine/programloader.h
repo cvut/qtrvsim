@@ -44,6 +44,7 @@
 #include <qstring.h>
 #include <memory.h>
 #include "symboltable.h"
+#include <QFile>
 
 namespace machine {
 
@@ -58,7 +59,7 @@ public:
     std::uint32_t get_executable_entry();
     SymbolTable *get_symbol_table();
 private:
-    int fd;
+    QFile elf_file;
     Elf *elf;
     GElf_Ehdr hdr; // elf file header
     size_t n_secs; // number of sections in elf program header
