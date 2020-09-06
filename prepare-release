@@ -97,4 +97,6 @@ if [ -x  /usr/lib/obs-build/changelog2spec ] ; then
   /usr/lib/obs-build/changelog2spec debian/changelog >../qtmips.changes
 fi
 
+rm -f qtmips.pro.user*
+
 dpkg-buildpackage
