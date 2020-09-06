@@ -1,0 +1,32 @@
+app: QtMips
+
+build:
+  packages:
+    - linuxdeployqt
+    - pkgconfig(Qt5Core)
+    - pkgconfig(Qt5Widgets)
+    - pkgconfig(Qt5Test)
+    - pkgconfig(Qt5PrintSupport)
+    - libelf-devel
+
+script:
+  - cd $BUILD_SOURCE_DIR
+  - tar xf qtmips_*.tar.xz
+  - cd qtmips-*
+  - echo "#define RELEASE \"AppImage\"" > release.h
+  - qmake-qt5 qtmips.pro PREFIX=/usr
+  - make INSTALL_ROOT=$BUILD_APPDIR sub-qtmips_gui
+#  - make INSTALL_ROOT=$BUILD_APPDIR install
+  - mkdir -p $BUILD_APPDIR/usr/bin
+  - cp qtmips_gui/qtmips_gui $BUILD_APPDIR/usr/bin
+  - mkdir -p $BUILD_APPDIR/usr/share/applications
+  - cp data/qtmips.desktop $BUILD_APPDIR/usr/share/applications
+  - mkdir -p $BUILD_APPDIR/icons/hicolor/48x48/apps
+  - cp data/icons/qtmips_gui.png $BUILD_APPDIR/icons/hicolor/48x48/apps
+  - mkdir -p $BUILD_APPDIR/icons/hicolor/scalable/apps
+  - cp data/icons/qtmips_gui.svg $BUILD_APPDIR/icons/hicolor/scalable/apps
+  - unset QTDIR; unset QT_PLUGIN_PATH; unset LD_LIBRARY_PATH
+  - linuxdeployqt $BUILD_APPDIR/usr/share/applications/*.desktop -bundle-non-qt-libs -verbose=2 -no-strip
+
+#  - mkdir -p $BUILD_APPDIR/usr/share/metainfo
+#  - cp $BUILD_SOURCE_DIR/qtmips.appdata.xml $BUILD_APPDIR/usr/share/metainfo/qtmips.appdata.xml
