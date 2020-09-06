@@ -990,15 +990,15 @@ void MainWindow::build_execute() {
     QStringList list;
     if (modified_file_list(list)) {
         SaveChnagedDialog *dialog = new SaveChnagedDialog(list, this);
-        connect(dialog, SIGNAL(user_decision(bool,QStringList&)),
-                this, SLOT(build_execute_with_save(bool,QStringList&)));
+        connect(dialog, SIGNAL(user_decision(bool,QStringList)),
+                this, SLOT(build_execute_with_save(bool,QStringList)));
         dialog->open();
     } else {
         build_execute_no_check();
     }
 }
 
-void MainWindow::build_execute_with_save(bool cancel, QStringList &tosavelist) {
+void MainWindow::build_execute_with_save(bool cancel, QStringList tosavelist) {
     if (cancel)
         return;
     for (const auto &fname : tosavelist) {
