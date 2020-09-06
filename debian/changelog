@@ -1,3 +1,27 @@
+qtmips (0.7.5) unstable; urgency=medium
+
+  * Debian package updated to version 0.7.5.
+  * Improve UI compatbility with dark color schemes (by Michal Maly, MadCatX)
+  * prepare-release: document alternative Debian package preparation in quilt mode.
+  * Enable dock widows nesting to enable show cache + memory simultaneously (by Frantisek Vacek)
+  * AppImage build run (by Frantisek Vacek)
+  * qtmips_cli: add option to connect serial port input and output to file.
+  * samples: template-os.S template.S fixed SPILED_REG_BASE definition.
+  * README: add documentation how to modify comprocessor 0 regs (by Jan Kaisrlík)
+  * EADME.md: fix reference to uart rx interrupt mask (by Jan Kaisrlík)
+  * Fix open of ELF files using national alphabets in the path names on Windows.
+  * qtmips_gui: fix response to user decision to save modified file when make is invoked.
+
+ -- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Sun, 06 Sep 2020 13:16:34 +0200
+
+qtmips (0.7.4) unstable; urgency=medium
+
+  * Debian package updated to version 0.7.4.
+  * debian packaging: add git attribute to merge changelog.
+  * debian packaging: add watch file for GitHub QtMips repository.
+
+ -- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Sun, 15 Sep 2019 20:32:41 +0200
+
 qtmips (0.7.3) unstable; urgency=medium
 
   * Debian package updated to version 0.7.3.
