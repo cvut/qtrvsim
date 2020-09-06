@@ -52,8 +52,8 @@ ProgramLoader::ProgramLoader(QString file) : elf_file(file) {
     // Initialize elf library
     if (elf_version(EV_CURRENT) == EV_NONE)
         throw QTMIPS_EXCEPTION(Input, "Elf library initialization failed", elf_errmsg(-1));
-    // Open source file
-    if (!elf_file.open(QIODevice::ReadOnly | QIODevice::Unbuffered | QIODevice::ExistingOnly))
+    // Open source file - option QIODevice::ExistingOnly cannot be used on Qt <5.11
+    if (!elf_file.open(QIODevice::ReadOnly | QIODevice::Unbuffered))
         throw QTMIPS_EXCEPTION(Input, QString("Can't open input elf file for reading (") + QString(file) + QString(")"), std::strerror(errno));
     // Initialize elf
     if (!(this->elf = elf_begin(elf_file.handle(), ELF_C_READ, NULL)))
