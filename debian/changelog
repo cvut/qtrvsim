@@ -7,8 +7,8 @@ qtmips (0.7.5) unstable; urgency=medium
   * AppImage build run (by Frantisek Vacek)
   * qtmips_cli: add option to connect serial port input and output to file.
   * samples: template-os.S template.S fixed SPILED_REG_BASE definition.
-  * README: add documentation how to modify comprocessor 0 regs (by Jan Kaisrlík)
-  * EADME.md: fix reference to uart rx interrupt mask (by Jan Kaisrlík)
+  * README: add documentation how to modify comprocessor 0 regs (by Jan Kaisrlik)
+  * EADME.md: fix reference to uart rx interrupt mask (by Jan Kaisrlik)
   * Fix open of ELF files using national alphabets in the path names on Windows.
   * qtmips_gui: fix response to user decision to save modified file when make is invoked.
 
