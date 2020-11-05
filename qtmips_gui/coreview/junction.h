@@ -45,7 +45,7 @@ namespace coreview {
 
 class Junction : public QGraphicsItem {
 public:
-    Junction(bool point = true);
+    Junction(bool point = true, int dot_size = -1);
     ~Junction();
 
     QRectF boundingRect() const override;
@@ -57,6 +57,7 @@ public:
 private:
     QList<Connector*> cons;
     bool point;
+    int dot_size;
 };
 
 }

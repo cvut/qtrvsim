@@ -41,8 +41,11 @@ using namespace coreview;
 #define DOT_SIZE 4
 //////////////////////
 
-Junction::Junction(bool point) : QGraphicsItem(nullptr) {
+Junction::Junction(bool point, int dot_size) : QGraphicsItem(nullptr) {
     this->point = point;
+    if (dot_size < 0)
+        dot_size = DOT_SIZE;
+    this->dot_size = dot_size;
 }
 
 Junction::~Junction() {
@@ -52,7 +55,7 @@ Junction::~Junction() {
 
 QRectF Junction::boundingRect() const {
     if (point)
-        return QRectF(-DOT_SIZE/2, -DOT_SIZE/2, DOT_SIZE, DOT_SIZE);
+        return QRectF(-this->dot_size/2, -this->dot_size/2, this->dot_size, this->dot_size);
     else
         return QRectF();
 }
@@ -62,7 +65,7 @@ void Junction::paint(QPainter *painter, const QStyleOptionGraphicsItem *option _
         return;
     painter->setBrush(QBrush(QColor(0, 0, 0)));
     painter->setPen(QPen(Qt::NoPen)); // Disable pen (render only brush)
-    painter->drawEllipse(-DOT_SIZE/2, -DOT_SIZE/2, DOT_SIZE, DOT_SIZE);
+    painter->drawEllipse(-this->dot_size/2, -this->dot_size/2, this->dot_size, this->dot_size);
 }
 
 void Junction::setPos(qreal x, qreal y) {

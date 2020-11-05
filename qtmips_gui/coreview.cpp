@@ -114,7 +114,7 @@ CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine) : QGraphicsScene()
     NEW_MUX(ex.mux_imm, 470, 292, execute_alusrc_value, 2, true);
     NEW_MUX(ex.mux_regdest, 480, 370, execute_regdest_value, 2, true);
     // Memory
-    NEW(Junction, mm.j_addr, 570, mem_data->connector_address()->y());
+    NEW(Junction, mm.j_addr, 570, mem_data->connector_address()->y(), true, 8);
     static QMap<std::uint32_t, QString> excause_map =
         {{machine::EXCAUSE_NONE,     "NONE"},
          {machine::EXCAUSE_INT,      "INT"},
