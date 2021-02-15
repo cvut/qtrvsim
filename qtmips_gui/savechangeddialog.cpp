@@ -34,17 +34,17 @@
  ******************************************************************************/
 
 #include "savechangeddialog.h"
-#include <QTabWidget>
-#include <QVBoxLayout>
-#include <QPlainTextEdit>
+
 #include <QLabel>
+#include <QListView>
+#include <QPlainTextEdit>
 #include <QPushButton>
 #include <QStandardItem>
-#include <QListView>
+#include <QTabWidget>
+#include <QVBoxLayout>
 
-SaveChnagedDialog::SaveChnagedDialog(QStringList &changedlist, QWidget *parent) :
-    QDialog(parent)
-{
+SaveChnagedDialog::SaveChnagedDialog(QStringList &changedlist, QWidget *parent)
+    : QDialog(parent) {
     setAttribute(Qt::WA_DeleteOnClose);
     setAttribute(Qt::WA_ShowModal);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -53,9 +53,9 @@ SaveChnagedDialog::SaveChnagedDialog(QStringList &changedlist, QWidget *parent) 
     model = new QStandardItemModel(this);
     bool unknown_inserted = false;
 
-    for ( const auto& fname : changedlist) {
+    for (const auto &fname : changedlist) {
         int row = model->rowCount();
-        QStandardItem* item = new QStandardItem();
+        QStandardItem *item = new QStandardItem();
         item->setData(fname, Qt::UserRole);
         if (!fname.isEmpty()) {
             item->setText(fname);
@@ -84,12 +84,15 @@ SaveChnagedDialog::SaveChnagedDialog(QStringList &changedlist, QWidget *parent) 
     QPushButton *ignoreButton = new QPushButton(tr("&Ignore"), parent);
     QPushButton *saveButton = new QPushButton(tr("&Save"), parent);
     saveButton->setFocus();
-    connect(cancelButton, &QAbstractButton::clicked, this,
-            &SaveChnagedDialog::cancel_clicked);
-    connect(ignoreButton, &QAbstractButton::clicked, this,
-            &SaveChnagedDialog::ignore_clicked);
-    connect(saveButton, &QAbstractButton::clicked, this,
-            &SaveChnagedDialog::save_clicked);
+    connect(
+        cancelButton, &QAbstractButton::clicked, this,
+        &SaveChnagedDialog::cancel_clicked);
+    connect(
+        ignoreButton, &QAbstractButton::clicked, this,
+        &SaveChnagedDialog::ignore_clicked);
+    connect(
+        saveButton, &QAbstractButton::clicked, this,
+        &SaveChnagedDialog::save_clicked);
     hlBtn->addWidget(cancelButton);
     hlBtn->addStretch();
     hlBtn->addWidget(ignoreButton);
@@ -101,9 +104,7 @@ SaveChnagedDialog::SaveChnagedDialog(QStringList &changedlist, QWidget *parent) 
     setMinimumSize(400, 300);
 }
 
-SaveChnagedDialog::~SaveChnagedDialog()
-{
-}
+SaveChnagedDialog::~SaveChnagedDialog() = default;
 
 void SaveChnagedDialog::cancel_clicked() {
     QStringList list;
@@ -119,11 +120,11 @@ void SaveChnagedDialog::ignore_clicked() {
 
 void SaveChnagedDialog::save_clicked() {
     QStringList list;
-    for(int r = 0; r < model->rowCount(); ++r) {
-        if (model->item(r)->checkState() == Qt::Checked)
+    for (int r = 0; r < model->rowCount(); ++r) {
+        if (model->item(r)->checkState() == Qt::Checked) {
             list.append(model->item(r)->data(Qt::UserRole).toString());
+        }
     }
     emit user_decision(false, list);
     close();
 }
-

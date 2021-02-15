@@ -36,10 +36,11 @@
 #ifndef CONSTANT_H
 #define CONSTANT_H
 
-#include <QGraphicsObject>
-#include <QPainter>
-#include <QGraphicsSimpleTextItem>
 #include "connection.h"
+
+#include <QGraphicsObject>
+#include <QGraphicsSimpleTextItem>
+#include <QPainter>
 
 namespace coreview {
 
@@ -47,10 +48,13 @@ class Constant : public QGraphicsObject {
     Q_OBJECT
 public:
     Constant(const Connector *con, const QString &text);
-    ~Constant();
+    ~Constant() override;
 
     QRectF boundingRect() const override;
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void paint(
+        QPainter *painter,
+        const QStyleOptionGraphicsItem *option,
+        QWidget *widget) override;
 
     void set_text(const QString &text);
 
@@ -60,11 +64,11 @@ private slots:
 private:
     QGraphicsSimpleTextItem text;
     Connector *con_our;
-    Connection *conn;
+    Connection *conn {};
 
     void set_text_pos();
 };
 
-}
+} // namespace coreview
 
 #endif // CONSTANT_H

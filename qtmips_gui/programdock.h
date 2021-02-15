@@ -36,13 +36,14 @@
 #ifndef PROGRAMDOCK_H
 #define PROGRAMDOCK_H
 
+#include "peripheralsview.h"
+#include "qtmips_machine/qtmipsmachine.h"
+
+#include <QComboBox>
 #include <QDockWidget>
 #include <QLabel>
-#include <QComboBox>
-#include "peripheralsview.h"
-#include "qtmipsmachine.h"
 
-class ProgramDock : public QDockWidget  {
+class ProgramDock : public QDockWidget {
     Q_OBJECT
 
     using Super = QDockWidget;
@@ -54,19 +55,20 @@ public:
 
 signals:
     void machine_setup(machine::QtMipsMachine *machine);
-    void jump_to_pc(std::uint32_t);
-    void focus_addr(std::uint32_t);
-    void focus_addr_with_save(std::uint32_t);
-    void stage_addr_changed(uint stage, std::uint32_t addr);
+    void jump_to_pc(uint32_t);
+    void focus_addr(uint32_t);
+    void focus_addr_with_save(uint32_t);
+    void stage_addr_changed(uint stage, uint32_t addr);
     void request_update_all();
 public slots:
     void set_follow_inst(int);
-    void fetch_inst_addr(std::uint32_t addr);
-    void decode_inst_addr(std::uint32_t addr);
-    void execute_inst_addr(std::uint32_t addr);
-    void memory_inst_addr(std::uint32_t addr);
-    void writeback_inst_addr(std::uint32_t addr);
-    void report_error(QString error);
+    void fetch_inst_addr(uint32_t addr);
+    void decode_inst_addr(uint32_t addr);
+    void execute_inst_addr(uint32_t addr);
+    void memory_inst_addr(uint32_t addr);
+    void writeback_inst_addr(uint32_t addr);
+    void report_error(const QString &error);
+
 private:
     enum FollowSource {
         FOLLOWSRC_NONE,
@@ -80,7 +82,7 @@ private:
 
     void update_follow_position();
     enum FollowSource follow_source;
-    std::uint32_t follow_addr[FOLLOWSRC_COUNT];
+    uint32_t follow_addr[FOLLOWSRC_COUNT] {};
     QSettings *settings;
 };
 

@@ -36,28 +36,33 @@
 #ifndef COREVIEW_MINIMUX_H
 #define COREVIEW_MINIMUX_H
 
-#include <QGraphicsObject>
-#include "qtmipsexception.h"
 #include "connection.h"
+#include "qtmips_machine/qtmipsexception.h"
+
+#include <QGraphicsObject>
 
 namespace coreview {
 
-class MiniMux : public  QGraphicsObject {
+class MiniMux : public QGraphicsObject {
     Q_OBJECT
 public:
     MiniMux(unsigned size, bool ctl_up = false);
-    ~MiniMux();
+    ~MiniMux() override;
 
     QRectF boundingRect() const override;
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void paint(
+        QPainter *painter,
+        const QStyleOptionGraphicsItem *option,
+        QWidget *widget) override;
 
     void setPos(qreal x, qreal y);
-    const Connector *connector_ctl() const; // Control input
-    const Connector *connector_out() const; // Output
+    const Connector *connector_ctl() const;          // Control input
+    const Connector *connector_out() const;          // Output
     const Connector *connector_in(unsigned i) const; // Inputs
 
 public slots:
-    void set(std::uint32_t i); // Set what value should be set as connected (indexing from  1 where 0 is no line)
+    void set(uint32_t i); // Set what value should be set as connected
+                          // (indexing from  1 where 0 is no line)
 
 private:
     bool ctlfrom;
@@ -66,6 +71,6 @@ private:
     Connector *con_ctl, *con_out, **con_in;
 };
 
-}
+} // namespace coreview
 
 #endif // COREVIEW_MINIMUX_H

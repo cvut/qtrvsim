@@ -42,17 +42,18 @@
 
 #include <QtCore/QByteArray>
 #include <QtCore/QString>
-
 #include <functional>
 
 QT_BEGIN_NAMESPACE
 
 namespace QHtml5File {
 
-void load(const QString &accept, std::function<void(const QByteArray &, const QString &)> fileDataReady);
+void load(
+    const QString &accept,
+    std::function<void(const QByteArray &, const QString &)> fileDataReady);
 void save(const QByteArray &contents, const QString &fileNameHint);
 
-}
+} // namespace QHtml5File
 
 QT_END_NAMESPACE
 

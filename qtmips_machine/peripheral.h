@@ -36,12 +36,13 @@
 #ifndef SIMPLEPERIPHERAL_H
 #define SIMPLEPERIPHERAL_H
 
-#include <QObject>
-#include <QMap>
-#include <cstdint>
-#include <qtmipsexception.h>
 #include "machinedefs.h"
 #include "memory.h"
+#include "qtmipsexception.h"
+
+#include <QMap>
+#include <QObject>
+#include <cstdint>
 
 namespace machine {
 
@@ -49,17 +50,17 @@ class SimplePeripheral : public MemoryAccess {
     Q_OBJECT
 public:
     SimplePeripheral();
-    ~SimplePeripheral();
+    ~SimplePeripheral() override;
 
 signals:
-    void write_notification(std::uint32_t address, std::uint32_t value);
-    void read_notification(std::uint32_t address, std::uint32_t *value) const;
+    void write_notification(uint32_t address, uint32_t value);
+    void read_notification(uint32_t address, uint32_t *value) const;
 
 public:
-    bool wword(std::uint32_t address, std::uint32_t value);
-    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const;
+    bool wword(uint32_t address, uint32_t value) override;
+    uint32_t rword(uint32_t address, bool debug_access = false) const override;
 };
 
-}
+} // namespace machine
 
 #endif // SIMPLEPERIPHERAL_H

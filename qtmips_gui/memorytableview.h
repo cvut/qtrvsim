@@ -38,11 +38,10 @@
 
 #include <QObject>
 #include <QSettings>
-#include <QTableView>
 #include <QSharedPointer>
+#include <QTableView>
 
-class MemoryTableView : public QTableView
-{
+class MemoryTableView : public QTableView {
     Q_OBJECT
 
     using Super = QTableView;
@@ -52,24 +51,26 @@ public:
 
     void resizeEvent(QResizeEvent *event) override;
 signals:
-    void address_changed(std::uint32_t address);
+    void address_changed(uint32_t address);
     void adjust_scroll_pos_queue();
 public slots:
     void set_cell_size(int index);
-    void go_to_address(std::uint32_t address);
-    void focus_address(std::uint32_t address);
+    void go_to_address(uint32_t address);
+    void focus_address(uint32_t address);
     void recompute_columns();
+
 protected:
     void keyPressEvent(QKeyEvent *event) override;
 private slots:
     void adjust_scroll_pos_check();
     void adjust_scroll_pos_process();
+
 private:
-    void addr0_save_change(std::uint32_t val);
+    void addr0_save_change(uint32_t val);
     void adjustColumnCount();
     QSettings *settings;
 
-    std::uint32_t initial_address;
+    uint32_t initial_address;
     bool adjust_scroll_pos_in_progress;
 };
 

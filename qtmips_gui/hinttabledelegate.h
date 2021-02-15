@@ -39,16 +39,18 @@
 #include <QObject>
 #include <QStyledItemDelegate>
 
-class HintTableDelegate : public QStyledItemDelegate
-{
+class HintTableDelegate : public QStyledItemDelegate {
     Q_OBJECT
 
     using Super = QStyledItemDelegate;
 
 public:
-    HintTableDelegate(QWidget *parent = 0) : Super(parent) {}
-    QSize sizeHintForText(const QStyleOptionViewItem &option,
-                          const QModelIndex &index, const QString &str) const;
+    HintTableDelegate(QWidget *parent = nullptr) : Super(parent) {}
+
+    QSize sizeHintForText(
+        const QStyleOptionViewItem &option,
+        const QModelIndex &index,
+        const QString &str) const;
 };
 
 #endif // HINTTABLEDELEGATE_H

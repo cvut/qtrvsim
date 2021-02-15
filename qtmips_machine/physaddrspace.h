@@ -36,12 +36,13 @@
 #ifndef PHYSADDRSPACE_H
 #define PHYSADDRSPACE_H
 
-#include <QObject>
-#include <QMap>
-#include <cstdint>
-#include <qtmipsexception.h>
 #include "machinedefs.h"
 #include "memory.h"
+#include "qtmipsexception.h"
+
+#include <QMap>
+#include <QObject>
+#include <cstdint>
 
 namespace machine {
 
@@ -49,34 +50,46 @@ class PhysAddrSpace : public MemoryAccess {
     Q_OBJECT
 public:
     PhysAddrSpace();
-    ~PhysAddrSpace();
+    ~PhysAddrSpace() override;
 
-    bool wword(std::uint32_t address, std::uint32_t value) override;
-    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const override;
-    virtual std::uint32_t get_change_counter() const override;
+    bool wword(uint32_t address, uint32_t value) override;
+    uint32_t rword(uint32_t address, bool debug_access = false) const override;
+    uint32_t get_change_counter() const override;
 
-    bool insert_range(MemoryAccess *mem_acces, std::uint32_t start_addr, std::uint32_t last_addr, bool move_ownership);
+    bool insert_range(
+        MemoryAccess *mem_acces,
+        uint32_t start_addr,
+        uint32_t last_addr,
+        bool move_ownership);
     bool remove_range(MemoryAccess *mem_acces);
-    void clean_range(std::uint32_t start_addr, std::uint32_t last_addr);
-    enum LocationStatus location_status(std::uint32_t offset) const override;
+    void clean_range(uint32_t start_addr, uint32_t last_addr);
+    enum LocationStatus location_status(uint32_t offset) const override;
 private slots:
-    void range_external_change(const MemoryAccess *mem_access, std::uint32_t start_addr,
-                               std::uint32_t last_addr, bool external);
+    void range_external_change(
+        const MemoryAccess *mem_access,
+        uint32_t start_addr,
+        uint32_t last_addr,
+        bool external);
+
 private:
     class RangeDesc {
     public:
-         RangeDesc(MemoryAccess *mem_acces, std::uint32_t start_addr, std::uint32_t last_addr, bool owned);
-         std::uint32_t start_addr;
-         std::uint32_t last_addr;
-         MemoryAccess *mem_acces;
-         bool owned;
+        RangeDesc(
+            MemoryAccess *mem_acces,
+            uint32_t start_addr,
+            uint32_t last_addr,
+            bool owned);
+        uint32_t start_addr;
+        uint32_t last_addr;
+        MemoryAccess *mem_acces;
+        bool owned;
     };
-    QMap<std::uint32_t, RangeDesc *> ranges_by_addr;
-    QMap<MemoryAccess *, RangeDesc *> ranges_by_access;
-    RangeDesc *find_range(std::uint32_t address) const;
-    mutable std::uint32_t change_counter;
+    QMap<uint32_t, RangeDesc *> ranges_by_addr;
+    QMultiMap<MemoryAccess *, RangeDesc *> ranges_by_access;
+    RangeDesc *find_range(uint32_t address) const;
+    mutable uint32_t change_counter;
 };
 
-}
+} // namespace machine
 
 #endif // PHYSADDRSPACE_H

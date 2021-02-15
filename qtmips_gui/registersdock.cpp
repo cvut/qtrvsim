@@ -35,40 +35,10 @@
 
 #include "registersdock.h"
 
-static const QString labels[] = {
-    "zero",
-    "at",
-    "v0",
-    "v1",
-    "a0",
-    "a1",
-    "a2",
-    "a3",
-    "t0",
-    "t1",
-    "t2",
-    "t3",
-    "t4",
-    "t5",
-    "t6",
-    "t7",
-    "s0",
-    "s1",
-    "s2",
-    "s3",
-    "s4",
-    "s5",
-    "s6",
-    "s7",
-    "t8",
-    "t9",
-    "k0",
-    "k1",
-    "gp",
-    "sp",
-    "fp",
-    "ra"
-};
+static const QString labels[]
+    = { "zero", "at", "v0", "v1", "a0", "a1", "a2", "a3", "t0", "t1", "t2",
+        "t3",   "t4", "t5", "t6", "t7", "s0", "s1", "s2", "s3", "s4", "s5",
+        "s6",   "s7", "t8", "t9", "k0", "k1", "gp", "sp", "fp", "ra" };
 
 RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
     static const QColor defaultTextColor(0, 0, 0);
@@ -83,19 +53,23 @@ RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
     pal_normal = palette();
     pal_normal.setColor(QPalette::WindowText, defaultTextColor);
 
-#define INIT(X, LABEL) do{ \
-        X = new QLabel("0x00000000", widg); \
-        X->setFixedSize(X->sizeHint()); \
-        X->setText(""); \
-	X->setPalette(pal_normal); \
-        X->setTextInteractionFlags(Qt::TextSelectableByMouse); \
-	QLabel *l = new QLabel(LABEL, widg); \
-	l->setPalette(pal_normal); \
-        widg->addRow({l, X}); \
-    } while(false)
+#define INIT(X, LABEL)                                                         \
+    do {                                                                       \
+        (X) = new QLabel("0x00000000", widg);                                  \
+        (X)->setFixedSize((X)->sizeHint());                                    \
+        (X)->setText("");                                                      \
+        (X)->setPalette(pal_normal);                                           \
+        (X)->setTextInteractionFlags(Qt::TextSelectableByMouse);               \
+        QLabel *l = new QLabel(LABEL, widg);                                   \
+        l->setPalette(pal_normal);                                             \
+        widg->addRow({ l, X });                                                \
+    } while (false)
 
-    for (int i = 0; i < 32; i++)
-        INIT(gp[i], QString("$") + QString::number(i) + QString("/") + labels[i]);
+    for (int i = 0; i < 32; i++) {
+        INIT(
+            gp[i],
+            QString("$") + QString::number(i) + QString("/") + labels[i]);
+    }
     INIT(pc, "pc");
     INIT(lo, "lo");
     INIT(hi, "hi");
@@ -116,8 +90,9 @@ RegistersDock::~RegistersDock() {
     delete pc;
     delete hi;
     delete lo;
-    for (int i = 0; i < 32; i++)
-        delete gp[i];
+    for (auto &i : gp) {
+        delete i;
+    }
     delete widg;
     delete scrollarea;
 }
@@ -128,8 +103,9 @@ void RegistersDock::setup(machine::QtMipsMachine *machine) {
         pc->setText("");
         hi->setText("");
         lo->setText("");
-        for (int i = 0; i < 32; i++)
-            gp[i]->setText("");
+        for (auto &i : gp) {
+            i->setText("");
+        }
         return;
     }
 
@@ -139,43 +115,53 @@ void RegistersDock::setup(machine::QtMipsMachine *machine) {
     labelVal(pc, regs->read_pc());
     labelVal(hi, regs->read_hi_lo(true));
     labelVal(lo, regs->read_hi_lo(false));
-    for (int i = 0; i < 32; i++)
-      labelVal(gp[i], regs->read_gp(i));
+    for (int i = 0; i < 32; i++) {
+        labelVal(gp[i], regs->read_gp(i));
+    }
 
-    connect(regs, &machine::Registers::pc_update, this,
-            &RegistersDock::pc_changed);
-    connect(regs, &machine::Registers::gp_update, this,
-            &RegistersDock::gp_changed);
-    connect(regs, &machine::Registers::hi_lo_update, this,
-            &RegistersDock::hi_lo_changed);
+    connect(
+        regs, &machine::Registers::pc_update, this, &RegistersDock::pc_changed);
+    connect(
+        regs, &machine::Registers::gp_update, this, &RegistersDock::gp_changed);
+    connect(
+        regs, &machine::Registers::hi_lo_update, this,
+        &RegistersDock::hi_lo_changed);
     connect(regs, &machine::Registers::gp_read, this, &RegistersDock::gp_read);
-    connect(regs, &machine::Registers::hi_lo_read, this,
-            &RegistersDock::hi_lo_read);
-    connect(machine, &machine::QtMipsMachine::tick, this,
-            &RegistersDock::clear_highlights);
+    connect(
+        regs, &machine::Registers::hi_lo_read, this,
+        &RegistersDock::hi_lo_read);
+    connect(
+        machine, &machine::QtMipsMachine::tick, this,
+        &RegistersDock::clear_highlights);
 }
 
-void RegistersDock::pc_changed(std::uint32_t val) {
+void RegistersDock::pc_changed(uint32_t val) {
     labelVal(pc, val);
 }
 
-void RegistersDock::gp_changed(std::uint8_t i, std::uint32_t val) {
-    SANITY_ASSERT(i < 32, QString("RegistersDock received signal with invalid gp register: ") + QString::number(i));
+void RegistersDock::gp_changed(uint8_t i, uint32_t val) {
+    SANITY_ASSERT(
+        i < 32,
+        QString("RegistersDock received signal with invalid gp register: ")
+            + QString::number(i));
     labelVal(gp[i], val);
     gp[i]->setPalette(pal_updated);
     gp_highlighted |= 1 << i;
 }
 
-void RegistersDock::gp_read(std::uint8_t i, std::uint32_t val) {
+void RegistersDock::gp_read(uint8_t i, uint32_t val) {
     (void)val;
-    SANITY_ASSERT(i < 32, QString("RegistersDock received signal with invalid gp register: ") + QString::number(i));
+    SANITY_ASSERT(
+        i < 32,
+        QString("RegistersDock received signal with invalid gp register: ")
+            + QString::number(i));
     if (!(gp_highlighted & (1 << i))) {
         gp[i]->setPalette(pal_read);
         gp_highlighted |= 1 << i;
     }
 }
 
-void RegistersDock::hi_lo_changed(bool hi, std::uint32_t val) {
+void RegistersDock::hi_lo_changed(bool hi, uint32_t val) {
     if (hi) {
         labelVal(this->hi, val);
         this->hi->setPalette(pal_updated);
@@ -187,28 +173,33 @@ void RegistersDock::hi_lo_changed(bool hi, std::uint32_t val) {
     }
 }
 
-void RegistersDock::hi_lo_read(bool hi, std::uint32_t val) {
+void RegistersDock::hi_lo_read(bool hi, uint32_t val) {
     (void)val;
     if (hi) {
-        if (!hi_highlighted)
+        if (!hi_highlighted) {
             this->hi->setPalette(pal_read);
+        }
         hi_highlighted = true;
     } else {
-        if (!lo_highlighted)
+        if (!lo_highlighted) {
             this->lo->setPalette(pal_read);
+        }
         lo_highlighted = true;
     }
 }
 
 void RegistersDock::clear_highlights() {
-    if (hi_highlighted)
+    if (hi_highlighted) {
         this->hi->setPalette(pal_normal);
-    if (lo_highlighted)
+    }
+    if (lo_highlighted) {
         this->lo->setPalette(pal_normal);
+    }
     if (gp_highlighted != 0) {
         for (int i = 0; i < 32; i++) {
-            if (gp_highlighted & (1 << i))
+            if (gp_highlighted & (1 << i)) {
                 gp[i]->setPalette(pal_normal);
+            }
         }
     }
     gp_highlighted = 0;
@@ -216,7 +207,7 @@ void RegistersDock::clear_highlights() {
     lo_highlighted = false;
 }
 
-void RegistersDock::labelVal(QLabel *label, std::uint32_t value) {
+void RegistersDock::labelVal(QLabel *label, uint32_t value) {
     QString t = QString("0x") + QString::number(value, 16);
     label->setText(t);
 }

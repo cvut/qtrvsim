@@ -34,7 +34,9 @@
  ******************************************************************************/
 
 #include "cacheview.h"
+
 #include "fontsize.h"
+
 #include <cmath>
 
 //////////////////////
@@ -45,10 +47,14 @@
 #define LETTERW 7
 //////////////////////
 
+#include "qtmips_machine/cache.h"
+
 #include <iostream>
 using namespace std;
 
-CacheAddressBlock::CacheAddressBlock(const machine::Cache *cache, unsigned width) {
+CacheAddressBlock::CacheAddressBlock(
+    const machine::Cache *cache,
+    unsigned width) {
     rows = cache->config().sets();
     columns = cache->config().blocks();
     s_row = cache->config().sets() > 1 ? sqrt(cache->config().sets()) : 0;
@@ -62,15 +68,19 @@ CacheAddressBlock::CacheAddressBlock(const machine::Cache *cache, unsigned width
     row = 0;
     col = 0;
 
-    connect(cache, &machine::Cache::cache_update, this,
-            &CacheAddressBlock::cache_update);
+    connect(
+        cache, &machine::Cache::cache_update, this,
+        &CacheAddressBlock::cache_update);
 }
 
 QRectF CacheAddressBlock::boundingRect() const {
-    return QRectF(0, 0, width, 40);
+    return { 0, 0, static_cast<qreal>(width), 40 };
 }
 
-void CacheAddressBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+void CacheAddressBlock::paint(
+    QPainter *painter,
+    const QStyleOptionGraphicsItem *option,
+    QWidget *widget) {
     (void)option;
     (void)widget;
     QFont fnt;
@@ -80,30 +90,33 @@ void CacheAddressBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     unsigned wpos = 5;
     // Part used for tag (we expect that tag is always used)
     unsigned wid = s_tag == 0 ? 0 : ((s_tag / 4) + 1);
-    unsigned tag_center = wpos + wid*LETTERW/2 + 1;
-    QRectF rect(wpos, 16, wid*LETTERW + 2, ROW_HEIGHT);
+    unsigned tag_center = wpos + wid * LETTERW / 2 + 1;
+    QRectF rect(wpos, 16, wid * LETTERW + 2, ROW_HEIGHT);
     painter->drawRect(rect);
-    painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(tag, wid, 16, QChar('0')));
-    wpos += wid*LETTERW + 2;
+    painter->drawText(
+        rect, Qt::AlignCenter, QString("%1").arg(tag, wid, 16, QChar('0')));
+    wpos += wid * LETTERW + 2;
     // Part used for set
     unsigned row_center = wpos;
     if (s_row > 0) {
         wid = s_row == 0 ? 0 : ((s_row / 4) + 1);
-        row_center += wid*LETTERW/2 + 1;
-        rect = QRectF(wpos, 16, wid*LETTERW + 2, ROW_HEIGHT);
+        row_center += wid * LETTERW / 2 + 1;
+        rect = QRectF(wpos, 16, wid * LETTERW + 2, ROW_HEIGHT);
         painter->drawRect(rect);
-        painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(row, wid, 16, QChar('0')));
-        wpos += wid*LETTERW + 2;
+        painter->drawText(
+            rect, Qt::AlignCenter, QString("%1").arg(row, wid, 16, QChar('0')));
+        wpos += wid * LETTERW + 2;
     }
     // Part used for block
     unsigned col_center = wpos;
     if (s_col > 0) {
         wid = s_col == 0 ? 0 : ((s_col / 4) + 1);
-        col_center += wid*LETTERW/2 + 1;
-        rect = QRectF(wpos, 16, wid*LETTERW + 2, ROW_HEIGHT);
+        col_center += wid * LETTERW / 2 + 1;
+        rect = QRectF(wpos, 16, wid * LETTERW + 2, ROW_HEIGHT);
         painter->drawRect(rect);
-        painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(col, wid, 16, QChar('0')));
-        wpos += wid*LETTERW + 2;
+        painter->drawText(
+            rect, Qt::AlignCenter, QString("%1").arg(col, wid, 16, QChar('0')));
+        wpos += wid * LETTERW + 2;
     }
     // Part used for two lowers bits
     painter->setBrush(QBrush(QColor(Qt::gray)));
@@ -113,8 +126,10 @@ void CacheAddressBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem 
 
     // Pain address label
     painter->drawText(QRectF(5, 0, wpos - 5, 14), Qt::AlignCenter, "Address");
-    std::uint32_t addr = (((tag * rows) + row) * columns + col) * 4;
-    painter->drawText(QRectF(50, 0, wpos + 40, 14), Qt::AlignCenter, "0x" + QString("%1").arg(addr, 8, 16, QChar('0')));
+    uint32_t addr = (((tag * rows) + row) * columns + col) * 4;
+    painter->drawText(
+        QRectF(50, 0, wpos + 40, 14), Qt::AlignCenter,
+        "0x" + QString("%1").arg(addr, 8, 16, QChar('0')));
 
     QPen p;
     p.setWidth(2);
@@ -138,8 +153,15 @@ void CacheAddressBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     }
 }
 
-void CacheAddressBlock::cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty,
-                                     std::uint32_t tag, const std::uint32_t *data, bool write) {
+void CacheAddressBlock::cache_update(
+    unsigned associat,
+    unsigned set,
+    unsigned col,
+    bool valid,
+    bool dirty,
+    uint32_t tag,
+    const uint32_t *data,
+    bool write) {
     (void)associat;
     (void)valid;
     (void)dirty;
@@ -152,8 +174,11 @@ void CacheAddressBlock::cache_update(unsigned associat, unsigned set, unsigned c
     update();
 }
 
-
-CacheViewBlock::CacheViewBlock(const machine::Cache *cache, unsigned block , bool last) : QGraphicsObject(nullptr) {
+CacheViewBlock::CacheViewBlock(
+    const machine::Cache *cache,
+    unsigned block,
+    bool last)
+    : QGraphicsObject(nullptr) {
     islast = last;
     this->block = block;
     rows = cache->config().sets();
@@ -166,13 +191,15 @@ CacheViewBlock::CacheViewBlock(const machine::Cache *cache, unsigned block , boo
     QFont font;
     font.setPixelSize(FontSize::SIZE7);
 
-    validity = new QGraphicsSimpleTextItem*[rows];
-    if (cache->config().write_policy() == machine::MachineConfigCache::WP_BACK)
-        dirty = new QGraphicsSimpleTextItem*[rows];
-    else
+    validity = new QGraphicsSimpleTextItem *[rows];
+    if (cache->config().write_policy()
+        == machine::MachineConfigCache::WP_BACK) {
+        dirty = new QGraphicsSimpleTextItem *[rows];
+    } else {
         dirty = nullptr;
-    tag = new QGraphicsSimpleTextItem*[rows];
-    data = new QGraphicsSimpleTextItem**[rows];
+    }
+    tag = new QGraphicsSimpleTextItem *[rows];
+    data = new QGraphicsSimpleTextItem **[rows];
     int row_y = 1;
     for (unsigned i = 0; i < rows; i++) {
         int row_x = 2;
@@ -191,7 +218,7 @@ CacheViewBlock::CacheViewBlock(const machine::Cache *cache, unsigned block , boo
         tag[i]->setFont(font);
         row_x += DATA_WIDTH;
 
-        data[i] = new QGraphicsSimpleTextItem*[columns];
+        data[i] = new QGraphicsSimpleTextItem *[columns];
         for (unsigned y = 0; y < columns; y++) {
             data[i][y] = new QGraphicsSimpleTextItem(this);
             data[i][y]->setPos(row_x, row_y);
@@ -203,16 +230,19 @@ CacheViewBlock::CacheViewBlock(const machine::Cache *cache, unsigned block , boo
     }
 
     unsigned wd = 1;
-    QGraphicsSimpleTextItem *l_validity = new QGraphicsSimpleTextItem("V", this);
+    QGraphicsSimpleTextItem *l_validity
+        = new QGraphicsSimpleTextItem("V", this);
     l_validity->setFont(font);
     QRectF box = l_validity->boundingRect();
-    l_validity->setPos(wd + (VD_WIDTH - box.width())/2, -1 - box.height());
+    l_validity->setPos(wd + (VD_WIDTH - box.width()) / 2, -1 - box.height());
     wd += VD_WIDTH;
-    if (cache->config().write_policy() == machine::MachineConfigCache::WP_BACK) {
-        QGraphicsSimpleTextItem *l_dirty = new QGraphicsSimpleTextItem("D", this);
+    if (cache->config().write_policy()
+        == machine::MachineConfigCache::WP_BACK) {
+        QGraphicsSimpleTextItem *l_dirty
+            = new QGraphicsSimpleTextItem("D", this);
         l_dirty->setFont(font);
         box = l_dirty->boundingRect();
-        l_dirty->setPos(wd + (VD_WIDTH - box.width())/2, -1 - box.height());
+        l_dirty->setPos(wd + (VD_WIDTH - box.width()) / 2, -1 - box.height());
         wd += VD_WIDTH;
     }
     QGraphicsSimpleTextItem *l_tag = new QGraphicsSimpleTextItem("Tag", this);
@@ -223,49 +253,56 @@ CacheViewBlock::CacheViewBlock(const machine::Cache *cache, unsigned block , boo
     QGraphicsSimpleTextItem *l_data = new QGraphicsSimpleTextItem("Data", this);
     l_data->setFont(font);
     box = l_data->boundingRect();
-    l_data->setPos(wd + (columns * DATA_WIDTH - box.width()) / 2,
-                   -1 - box.height());
+    l_data->setPos(
+        wd + (columns * DATA_WIDTH - box.width()) / 2, -1 - box.height());
 
-    connect(cache, &machine::Cache::cache_update, this,
-            &CacheViewBlock::cache_update);
+    connect(
+        cache, &machine::Cache::cache_update, this,
+        &CacheViewBlock::cache_update);
 }
 
 CacheViewBlock::~CacheViewBlock() {
     delete[] validity;
-    if (dirty != nullptr)
-        delete[] dirty;
+    delete[] dirty;
     delete[] tag;
-    for (unsigned y = 0; y < rows; y++)
+    for (unsigned y = 0; y < rows; y++) {
         delete[] data[y];
+    }
     delete[] data;
 }
 
-QRectF CacheViewBlock::boundingRect() const  {
+QRectF CacheViewBlock::boundingRect() const {
     return QRectF(
-        -PENW / 2 - 11,
-        -PENW / 2 - 16,
-        VD_WIDTH + (dirty ? VD_WIDTH : 0) + DATA_WIDTH*(columns+1) + PENW + 12 + (columns > 1 ? 7 : 0),
-        ROW_HEIGHT*rows + PENW + 50
-    );
+        -PENW / 2 - 11, -PENW / 2 - 16,
+        VD_WIDTH + (dirty ? VD_WIDTH : 0) + DATA_WIDTH * (columns + 1) + PENW
+            + 12 + (columns > 1 ? 7 : 0),
+        ROW_HEIGHT * rows + PENW + 50);
 }
 
-void CacheViewBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused)))  {
+void CacheViewBlock::paint(
+    QPainter *painter,
+    const QStyleOptionGraphicsItem *option __attribute__((unused)),
+    QWidget *widget __attribute__((unused))) {
     // Draw horizontal lines
-    for (unsigned i = 0; i <= rows; i++)
-        painter->drawLine(0, i * ROW_HEIGHT, VD_WIDTH + (dirty ? VD_WIDTH : 0) + DATA_WIDTH*(columns + 1), i * ROW_HEIGHT);
+    for (unsigned i = 0; i <= rows; i++) {
+        painter->drawLine(
+            0, i * ROW_HEIGHT,
+            VD_WIDTH + (dirty ? VD_WIDTH : 0) + DATA_WIDTH * (columns + 1),
+            i * ROW_HEIGHT);
+    }
     // Draw vertical lines
-    painter->drawLine(0, 0, 0, rows*ROW_HEIGHT);
+    painter->drawLine(0, 0, 0, rows * ROW_HEIGHT);
     int c_width = VD_WIDTH;
-    painter->drawLine(c_width, 0, c_width, rows*ROW_HEIGHT);
+    painter->drawLine(c_width, 0, c_width, rows * ROW_HEIGHT);
     if (dirty) {
         c_width += VD_WIDTH;
-        painter->drawLine(c_width, 0, c_width, rows*ROW_HEIGHT);
+        painter->drawLine(c_width, 0, c_width, rows * ROW_HEIGHT);
     }
     c_width += DATA_WIDTH;
-    painter->drawLine(c_width, 0, c_width, rows*ROW_HEIGHT);
+    painter->drawLine(c_width, 0, c_width, rows * ROW_HEIGHT);
     for (unsigned i = 0; i < columns; i++) {
         c_width += DATA_WIDTH;
-        painter->drawLine(c_width, 0, c_width, rows*ROW_HEIGHT);
+        painter->drawLine(c_width, 0, c_width, rows * ROW_HEIGHT);
     }
 
     QPen p_wide, p;
@@ -275,99 +312,128 @@ void CacheViewBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     painter->setPen(p);
 
     // Tag compare
-    unsigned allright = (dirty ? 2 : 1)*VD_WIDTH + DATA_WIDTH*(columns  + 1);
-    unsigned bottom = ROW_HEIGHT*rows;
-    unsigned tag_center = (dirty ? 2 : 1)*VD_WIDTH + DATA_WIDTH/2;
+    unsigned allright = (dirty ? 2 : 1) * VD_WIDTH + DATA_WIDTH * (columns + 1);
+    unsigned bottom = ROW_HEIGHT * rows;
+    unsigned tag_center = (dirty ? 2 : 1) * VD_WIDTH + DATA_WIDTH / 2;
     painter->drawEllipse(QPointF(tag_center, bottom + 15), 5, 5);
-    painter->drawText(QRectF(tag_center - 5, bottom + 9.5, 10, 10), Qt::AlignCenter, "=");
+    painter->drawText(
+        QRectF(tag_center - 5, bottom + 9.5, 10, 10), Qt::AlignCenter, "=");
     painter->setPen(p_wide);
     painter->drawLine(tag_center, bottom, tag_center, bottom + 10);
     painter->setPen(p);
 
     // And
-    painter->drawLine(tag_center + 10, bottom + 25, tag_center + 10, bottom + 35);
-    painter->drawLine(tag_center + 10, bottom + 25, tag_center + 15, bottom + 25);
-    painter->drawLine(tag_center + 10, bottom + 35, tag_center + 15, bottom + 35);
+    painter->drawLine(
+        tag_center + 10, bottom + 25, tag_center + 10, bottom + 35);
+    painter->drawLine(
+        tag_center + 10, bottom + 25, tag_center + 15, bottom + 25);
+    painter->drawLine(
+        tag_center + 10, bottom + 35, tag_center + 15, bottom + 35);
     painter->drawArc(tag_center + 10, bottom + 25, 10, 10, 270 * 16, 180 * 16);
 
     // Connection from and to right
     painter->drawLine(tag_center + 20, bottom + 30, allright, bottom + 30);
     // Connection from valid to and
-    painter->drawLine(VD_WIDTH/2, bottom, VD_WIDTH/2, bottom + 32);
-    painter->drawLine(VD_WIDTH/2, bottom + 32, tag_center + 10, bottom + 32);
+    painter->drawLine(VD_WIDTH / 2, bottom, VD_WIDTH / 2, bottom + 32);
+    painter->drawLine(VD_WIDTH / 2, bottom + 32, tag_center + 10, bottom + 32);
     // Connection  from tag compare to and
     painter->drawLine(tag_center, bottom + 20, tag_center, bottom + 28);
     painter->drawLine(tag_center, bottom + 28, tag_center + 10, bottom + 28);
 
-    unsigned data_start = (dirty ? 2 : 1)*VD_WIDTH + DATA_WIDTH;
+    unsigned data_start = (dirty ? 2 : 1) * VD_WIDTH + DATA_WIDTH;
     if (columns > 1) {
         // Output mutex
-        const QPointF poly[] = {
-            QPointF(data_start, bottom + 10),
-            QPointF(data_start + columns*DATA_WIDTH , bottom + 10),
-            QPointF(data_start + columns*DATA_WIDTH - 10, bottom + 20),
-            QPointF(data_start + 10, bottom + 20)
-        };
+        const QPointF poly[]
+            = { QPointF(data_start, bottom + 10),
+                QPointF(data_start + columns * DATA_WIDTH, bottom + 10),
+                QPointF(data_start + columns * DATA_WIDTH - 10, bottom + 20),
+                QPointF(data_start + 10, bottom + 20) };
         painter->drawPolygon(poly, sizeof(poly) / sizeof(QPointF));
-        unsigned data_center = data_start + DATA_WIDTH*columns/2;
+        unsigned data_center = data_start + DATA_WIDTH * columns / 2;
         painter->setPen(p_wide);
         painter->drawLine(data_center, bottom + 20, data_center, bottom + 25);
         painter->drawLine(data_center, bottom + 25, allright, bottom + 25);
         for (unsigned i = 0; i < columns; i++) {
-            unsigned xpos = data_start + i*DATA_WIDTH + DATA_WIDTH/2;
+            unsigned xpos = data_start + i * DATA_WIDTH + DATA_WIDTH / 2;
             painter->drawLine(xpos, bottom, xpos, bottom + 10);
         }
 
         // Mutex source
         painter->drawLine(allright + 5, -16, allright + 5, bottom + 15);
-        painter->drawLine(allright + 5, bottom + 15, data_start + columns*DATA_WIDTH - 4, bottom + 15);
+        painter->drawLine(
+            allright + 5, bottom + 15, data_start + columns * DATA_WIDTH - 4,
+            bottom + 15);
         if (!islast)
-            painter->drawLine(allright + 5, bottom + 15, allright + 5, bottom + 40);
+            painter->drawLine(
+                allright + 5, bottom + 15, allright + 5, bottom + 40);
     } else {
         // Wire with data to right
         painter->setPen(p_wide);
-        painter->drawLine(data_start + DATA_WIDTH/2, bottom, data_start + DATA_WIDTH/2, bottom + 25);
-        painter->drawLine(data_start + DATA_WIDTH/2, bottom + 25, allright, bottom + 25);
+        painter->drawLine(
+            data_start + DATA_WIDTH / 2, bottom, data_start + DATA_WIDTH / 2,
+            bottom + 25);
+        painter->drawLine(
+            data_start + DATA_WIDTH / 2, bottom + 25, allright, bottom + 25);
     }
 
     // Connection with tag
     painter->setPen(p_wide);
     painter->drawLine(-9, -16, -9, bottom + 15);
     painter->drawLine(-9, bottom + 15, tag_center - 5, bottom + 15);
-    if (!islast)
+    if (!islast) {
         painter->drawLine(-9, bottom + 15, -9, bottom + 40);
+    }
 
     // Connection with row
     if (rows > 1) {
-        unsigned selected = ROW_HEIGHT*curr_row + ROW_HEIGHT/2;
+        unsigned selected = ROW_HEIGHT * curr_row + ROW_HEIGHT / 2;
         painter->drawLine(-5, -16, -5, islast ? selected : bottom + 40);
         painter->drawLine(-5, selected, 0, selected);
     }
 }
 
-void CacheViewBlock::cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty,
-                                  std::uint32_t tag, const std::uint32_t *data, bool write) {
+void CacheViewBlock::cache_update(
+    unsigned associat,
+    unsigned set,
+    unsigned col,
+    bool valid,
+    bool dirty,
+    uint32_t tag,
+    const uint32_t *data,
+    bool write) {
     (void)col;
     if (associat != block) {
-        if (last_highlighted)
+        if (last_highlighted) {
             this->data[last_set][last_col]->setBrush(QBrush(QColor(0, 0, 0)));
+        }
         last_highlighted = false;
         return; // Ignore blocks that are not us
     }
     validity[set]->setText(valid ? "1" : "0");
-    if (this->dirty)
+    if (this->dirty) {
         this->dirty[set]->setText(valid ? (dirty ? "1" : "0") : "");
+    }
     // TODO calculate correct size of tag
-    this->tag[set]->setText(valid ? QString("0x") + QString("%1").arg(tag, 8, 16, QChar('0')).toUpper() : "");
-    for (unsigned i = 0; i < columns; i++)
-        this->data[set][i]->setText(valid ? QString("0x") + QString("%1").arg(data[i], 8, 16, QChar('0')).toUpper() : "");
+    this->tag[set]->setText(
+        valid ? QString("0x")
+                    + QString("%1").arg(tag, 8, 16, QChar('0')).toUpper()
+              : "");
+    for (unsigned i = 0; i < columns; i++) {
+        this->data[set][i]->setText(
+            valid
+                ? QString("0x")
+                      + QString("%1").arg(data[i], 8, 16, QChar('0')).toUpper()
+                : "");
+    }
 
-    if (last_highlighted)
+    if (last_highlighted) {
         this->data[last_set][last_col]->setBrush(QBrush(QColor(0, 0, 0)));
-    if (write)
+    }
+    if (write) {
         this->data[set][col]->setBrush(QBrush(QColor(240, 0, 0)));
-    else
+    } else {
         this->data[set][col]->setBrush(QBrush(QColor(0, 0, 240)));
+    }
     last_highlighted = true;
 
     curr_row = set;
@@ -376,10 +442,9 @@ void CacheViewBlock::cache_update(unsigned associat, unsigned set, unsigned col,
     update();
 }
 
-
 CacheViewScene::CacheViewScene(const machine::Cache *cache) {
     associativity = cache->config().associativity();
-    block = new CacheViewBlock*[associativity];
+    block = new CacheViewBlock *[associativity];
     int offset = 0;
     for (unsigned i = 0; i < associativity; i++) {
         block[i] = new CacheViewBlock(cache, i, i >= (associativity - 1));
@@ -389,7 +454,7 @@ CacheViewScene::CacheViewScene(const machine::Cache *cache) {
     }
     ablock = new CacheAddressBlock(cache, block[0]->boundingRect().width());
     addItem(ablock);
-    ablock->setPos(0, -ablock->boundingRect().height() -16);
+    ablock->setPos(0, -ablock->boundingRect().height() - 16);
 }
 
 CacheViewScene::~CacheViewScene() {

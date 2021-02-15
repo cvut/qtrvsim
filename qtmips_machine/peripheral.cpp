@@ -37,15 +37,11 @@
 
 using namespace machine;
 
-SimplePeripheral::SimplePeripheral() {
+SimplePeripheral::SimplePeripheral() = default;
 
-}
+SimplePeripheral::~SimplePeripheral() = default;
 
-SimplePeripheral::~SimplePeripheral() {
-
-}
-
-bool SimplePeripheral::wword(std::uint32_t address, std::uint32_t value) {
+bool SimplePeripheral::wword(uint32_t address, uint32_t value) {
 #if 0
     printf("SimplePeripheral::wword address 0x%08lx data 0x%08lx\n",
            (unsigned long)address, (unsigned long)value);
@@ -55,9 +51,9 @@ bool SimplePeripheral::wword(std::uint32_t address, std::uint32_t value) {
     return true;
 }
 
-std::uint32_t SimplePeripheral::rword(std::uint32_t address, bool debug_access) const {
+uint32_t SimplePeripheral::rword(uint32_t address, bool debug_access) const {
     (void)debug_access;
-    std::uint32_t value = 0x12345678;
+    uint32_t value = 0x12345678;
 #if 0
     printf("SimplePeripheral::rword address 0x%08lx\n",
            (unsigned long)address);

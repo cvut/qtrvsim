@@ -36,22 +36,26 @@
 #ifndef COREVIEW_MEMORY_H
 #define COREVIEW_MEMORY_H
 
+#include "connection.h"
+#include "qtmips_machine/qtmipsmachine.h"
+
 #include <QGraphicsObject>
-#include <QPainter>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSimpleTextItem>
-#include <qtmipsmachine.h>
-#include "connection.h"
+#include <QPainter>
 
 namespace coreview {
 
-class Memory : public QGraphicsObject  {
+class Memory : public QGraphicsObject {
     Q_OBJECT
 public:
     Memory(bool cache_used, const machine::Cache *cache);
 
     QRectF boundingRect() const override;
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void paint(
+        QPainter *painter,
+        const QStyleOptionGraphicsItem *option,
+        QWidget *widget) override;
 
 signals:
     void open_mem();
@@ -64,7 +68,7 @@ private slots:
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 
-    void set_type(const QString&);
+    void set_type(const QString &);
 
     bool cache;
 
@@ -77,7 +81,7 @@ class ProgramMemory : public Memory {
     Q_OBJECT
 public:
     ProgramMemory(machine::QtMipsMachine *machine);
-    ~ProgramMemory();
+    ~ProgramMemory() override;
 
     void setPos(qreal x, qreal y);
 
@@ -92,7 +96,7 @@ class DataMemory : public Memory {
     Q_OBJECT
 public:
     DataMemory(machine::QtMipsMachine *machine);
-    ~DataMemory();
+    ~DataMemory() override;
 
     void setPos(qreal x, qreal y);
 
@@ -103,9 +107,10 @@ public:
     const Connector *connector_req_read() const;
 
 private:
-    Connector *con_address, *con_data_out, *con_data_in, *con_req_write, *con_req_read;
+    Connector *con_address, *con_data_out, *con_data_in, *con_req_write,
+        *con_req_read;
 };
 
-}
+} // namespace coreview
 
 #endif // MEMORY_H

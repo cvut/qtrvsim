@@ -36,19 +36,18 @@
 #ifndef CHARIOHANDLER_H
 #define CHARIOHANDLER_H
 
-#include <QObject>
 #include <QIODevice>
+#include <QObject>
 #include <QSet>
 
-class CharIOHandler : public QIODevice
-{
+class CharIOHandler : public QIODevice {
     Q_OBJECT
 
     using Super = QIODevice;
 
 public:
     explicit CharIOHandler(QIODevice *iodev, QObject *parent = nullptr);
-    virtual ~CharIOHandler() override;
+    ~CharIOHandler() override;
 
 public slots:
     void writeByte(unsigned int data);
@@ -59,23 +58,25 @@ public:
     void insertFd(const int &fd);
     void removeFd(const int &fd);
 
-    virtual bool isSequential() const override;
-    virtual bool open(OpenMode mode) override;
-    virtual void close() override;
-    virtual qint64 pos() const override;
-    virtual qint64 size() const override;
-    virtual bool seek(qint64 pos) override;
-    virtual bool atEnd() const override;
-    virtual bool reset() override;
-    virtual qint64 bytesAvailable() const override;
-    virtual qint64 bytesToWrite() const override;
-    virtual bool canReadLine() const override;
-    virtual bool waitForReadyRead(int msecs) override;
-    virtual bool waitForBytesWritten(int msecs) override;
+    bool isSequential() const override;
+    bool open(OpenMode mode) override;
+    void close() override;
+    qint64 pos() const override;
+    qint64 size() const override;
+    bool seek(qint64 pos) override;
+    bool atEnd() const override;
+    bool reset() override;
+    qint64 bytesAvailable() const override;
+    qint64 bytesToWrite() const override;
+    bool canReadLine() const override;
+    bool waitForReadyRead(int msecs) override;
+    bool waitForBytesWritten(int msecs) override;
+
 protected:
-    virtual qint64 	readData(char *data, qint64 maxSize) override;
-    virtual qint64 	readLineData(char *data, qint64 maxSize) override;
-    virtual qint64 	writeData(const char *data, qint64 maxSize) override;
+    qint64 readData(char *data, qint64 maxSize) override;
+    qint64 readLineData(char *data, qint64 maxSize) override;
+    qint64 writeData(const char *data, qint64 maxSize) override;
+
 private:
     QIODevice *iodev;
     bool fd_specific;

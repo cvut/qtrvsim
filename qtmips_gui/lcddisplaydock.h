@@ -36,10 +36,11 @@
 #ifndef LCDDISPLAYDOCK_H
 #define LCDDISPLAYDOCK_H
 
-#include <QDockWidget>
-#include <QBoxLayout>
 #include "lcddisplayview.h"
-#include "qtmipsmachine.h"
+#include "qtmips_machine/qtmipsmachine.h"
+
+#include <QBoxLayout>
+#include <QDockWidget>
 
 class LcdDisplayDock : public QDockWidget {
     Q_OBJECT
@@ -48,12 +49,12 @@ class LcdDisplayDock : public QDockWidget {
 
 public:
     LcdDisplayDock(QWidget *parent, QSettings *settings);
-    ~LcdDisplayDock();
-    virtual void resizeEvent(QResizeEvent *event) override;
+    ~LcdDisplayDock() override;
+    void resizeEvent(QResizeEvent *event) override;
 
     void setup(machine::LcdDisplay *lcd_display);
 
-//public slots:
+    // public slots:
 
 private:
     void update_layout(int w, int h);

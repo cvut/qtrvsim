@@ -28,7 +28,7 @@ unix: LIBS += \
         -Wl,-rpath,\'$${DOLAR}$${DOLAR}ORIGIN/../lib\' \
         # --enable-new-dtags \
 
-INCLUDEPATH += $$PWD/../qtmips_machine $$PWD/../qtmips_osemu $$PWD/../qtmips_asm
+INCLUDEPATH += $$PWD/..
 DEPENDPATH += $$PWD/../qtmips_machine $$PWD/../qtmips_osemu $$PWD/../qtmips_asm
 QMAKE_CXXFLAGS += -std=c++14
 QMAKE_CXXFLAGS_DEBUG += -ggdb

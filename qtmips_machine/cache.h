@@ -36,46 +36,63 @@
 #ifndef CACHE_H
 #define CACHE_H
 
-#include <memory.h>
-#include <machineconfig.h>
-#include <stdint.h>
-#include <time.h>
+#include "machineconfig.h"
+#include "memory.h"
+
+#include <cstdint>
+#include <ctime>
 
 namespace machine {
 
 class Cache : public MemoryAccess {
     Q_OBJECT
 public:
-    Cache(MemoryAccess *m, const MachineConfigCache *c, unsigned memory_access_penalty_r = 1,
-          unsigned memory_access_penalty_w = 1, unsigned memory_access_penalty_b = 0);
-    ~Cache();
+    Cache(
+        MemoryAccess *m,
+        const MachineConfigCache *c,
+        unsigned memory_access_penalty_r = 1,
+        unsigned memory_access_penalty_w = 1,
+        unsigned memory_access_penalty_b = 0);
+    ~Cache() override;
 
-    bool wword(std::uint32_t address, std::uint32_t value) override;
-    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const override;
-    virtual std::uint32_t get_change_counter() const override;
+    bool wword(uint32_t address, uint32_t value) override;
+    uint32_t rword(uint32_t address, bool debug_access = false) const override;
+    uint32_t get_change_counter() const override;
 
-    void flush(); // flush cache
+    void flush();         // flush cache
     void sync() override; // Same as flush
 
-    unsigned hit() const; // Number of recorded hits
-    unsigned miss() const; // Number of recorded misses
-    unsigned memory_reads() const; // Number backing/main memory reads
-    unsigned memory_writes() const; // Number backing/main memory writes
-    unsigned stalled_cycles() const; // Number of wasted cycles in memory waitin statistic
-    double speed_improvement() const; // Speed improvement in percents in comare with no used cache
-    double hit_rate() const; // Usage efficiency in percents
+    unsigned hit() const;            // Number of recorded hits
+    unsigned miss() const;           // Number of recorded misses
+    unsigned memory_reads() const;   // Number backing/main memory reads
+    unsigned memory_writes() const;  // Number backing/main memory writes
+    unsigned stalled_cycles() const; // Number of wasted cycles in memory waitin
+                                     // statistic
+    double speed_improvement() const; // Speed improvement in percents in comare
+                                      // with no used cache
+    double hit_rate() const;          // Usage efficiency in percents
 
     void reset(); // Reset whole state of cache
 
     const MachineConfigCache &config() const;
-    enum LocationStatus location_status(std::uint32_t address) const override;
+    enum LocationStatus location_status(uint32_t address) const override;
 
 signals:
     void hit_update(unsigned) const;
     void miss_update(unsigned) const;
-    void statistics_update(unsigned stalled_cycles, double speed_improv, double hit_rate) const;
-    void cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty,
-                      std::uint32_t tag, const std::uint32_t *data, bool write) const;
+    void statistics_update(
+        unsigned stalled_cycles,
+        double speed_improv,
+        double hit_rate) const;
+    void cache_update(
+        unsigned associat,
+        unsigned set,
+        unsigned col,
+        bool valid,
+        bool dirty,
+        uint32_t tag,
+        const uint32_t *data,
+        bool write) const;
     void memory_writes_update(unsigned) const;
     void memory_reads_update(unsigned) const;
 
@@ -83,41 +100,50 @@ private:
     MachineConfigCache cnf;
     MemoryAccess *mem;
     unsigned access_pen_r, access_pen_w, access_pen_b;
-    std::uint32_t uncached_start;
-    std::uint32_t uncached_last;
+    uint32_t uncached_start;
+    uint32_t uncached_last;
 
     struct cache_data {
         bool valid, dirty;
-        std::uint32_t tag;
-        std::uint32_t *data;
+        uint32_t tag;
+        uint32_t *data;
     };
     mutable struct cache_data **dt;
 
     union {
-        unsigned int ** lru; // Access time
-        unsigned **lfu; // Access count
-    } replc; // Data used for replacement policy
+        unsigned int **lru; // Access time
+        unsigned **lfu;     // Access count
+    } replc {};             // Data used for replacement policy
 
-    mutable unsigned hit_read, miss_read, hit_write, miss_write; // Hit and miss counters
-    mutable unsigned mem_reads, mem_writes, burst_reads, burst_writes; // Dirrect access to memory
-    mutable std::uint32_t change_counter;
+    mutable unsigned hit_read, miss_read, hit_write, miss_write; // Hit and miss
+                                                                 // counters
+    mutable unsigned mem_reads, mem_writes, burst_reads,
+        burst_writes; // Dirrect
+                      // access
+                      // to
+                      // memory
+    mutable uint32_t change_counter;
 
-    std::uint32_t debug_rword(std::uint32_t address) const;
-    bool access(std::uint32_t address, std::uint32_t *data, bool write, std::uint32_t value = 0) const;
+    uint32_t debug_rword(uint32_t address) const;
+    bool access(uint32_t address, uint32_t *data, bool write, uint32_t value = 0)
+        const;
     void kick(unsigned associat_indx, unsigned row) const;
-    std::uint32_t base_address(std::uint32_t tag, unsigned row) const;
+    uint32_t base_address(uint32_t tag, unsigned row) const;
     void update_statistics() const;
-    inline void compute_row_col_tag(std::uint32_t &row, std::uint32_t &col,
-                               std::uint32_t &tag, std::uint32_t address) const {
+    inline void compute_row_col_tag(
+        uint32_t &row,
+        uint32_t &col,
+        uint32_t &tag,
+        uint32_t address) const {
         address = address >> 2;
-        std::uint32_t ssize = cnf.blocks() * cnf.sets();
+        uint32_t ssize = cnf.blocks() * cnf.sets();
         tag = address / ssize;
-        std::uint32_t index = address % ssize;
+        uint32_t index = address % ssize;
         row = index / cnf.blocks();
         col = index % cnf.blocks();
     }
 };
 
-}
+} // namespace machine
 
 #endif // CACHE_H

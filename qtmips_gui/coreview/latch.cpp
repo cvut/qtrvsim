@@ -34,8 +34,8 @@
  ******************************************************************************/
 
 #include "latch.h"
+
 #include "coreview_colors.h"
-#include <cmath>
 
 using namespace coreview;
 
@@ -44,7 +44,8 @@ using namespace coreview;
 #define PENW 1
 //////////////////////
 
-Latch::Latch(machine::QtMipsMachine *machine, qreal height) : QGraphicsObject(nullptr) {
+Latch::Latch(machine::QtMipsMachine *machine, qreal height)
+    : QGraphicsObject(nullptr) {
     this->height = height;
 
     title = new QGraphicsSimpleTextItem(this);
@@ -76,18 +77,18 @@ QRectF Latch::boundingRect() const {
     return b;
 }
 
-void Latch::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
+void Latch::paint(
+    QPainter *painter,
+    const QStyleOptionGraphicsItem *option __attribute__((unused)),
+    QWidget *widget __attribute__((unused))) {
     QPen pen = painter->pen();
     pen.setColor(BLOCK_OUTLINE_COLOR);
     painter->setPen(pen);
 
     painter->drawRect(0, 0, WIDTH, height);
     // Now tick rectangle
-    const QPointF tickPolygon[] = {
-        QPointF(0, 0),
-        QPointF(WIDTH, 0),
-        QPointF(WIDTH/2, WIDTH/2)
-    };
+    const QPointF tickPolygon[]
+        = { QPointF(0, 0), QPointF(WIDTH, 0), QPointF(WIDTH / 2, WIDTH / 2) };
     painter->setBrush(QBrush(wedge_color()));
     painter->drawPolygon(tickPolygon, sizeof(tickPolygon) / sizeof(QPointF));
 }
@@ -104,7 +105,7 @@ void Latch::set_wedge_color(QColor &c) {
 void Latch::setTitle(const QString &str) {
     title->setText(str);
     QRectF box = title->boundingRect();
-    title->setPos(WIDTH/2 - box.width()/2, - box.height() - 1);
+    title->setPos(WIDTH / 2 - box.width() / 2, -box.height() - 1);
 }
 
 void Latch::setPos(qreal x, qreal y) {
@@ -116,8 +117,10 @@ void Latch::setPos(qreal x, qreal y) {
 }
 
 struct Latch::ConnectorPair Latch::new_connector(qreal cy) {
-    SANITY_ASSERT(cy < height, "Latch: Trying to create connector outside of latch height");
-    ConnectorPair cp;
+    SANITY_ASSERT(
+        cy < height,
+        "Latch: Trying to create connector outside of latch height");
+    ConnectorPair cp {};
     cp.in = new Connector(Connector::AX_X);
     cp.out = new Connector(Connector::AX_X);
     connectors.append(cp);

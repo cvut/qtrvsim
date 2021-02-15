@@ -33,16 +33,16 @@
  *
  ******************************************************************************/
 
+#include "srceditor.h"
+
+#include "highlighterasm.h"
+#include "highlighterc.h"
+
 #include <QFile>
 #include <QFileInfo>
 #include <QPalette>
-#include <QTextDocumentWriter>
 #include <QTextCursor>
-#include <QTextBlock>
-
-#include "srceditor.h"
-#include "highlighterasm.h"
-#include "highlighterc.h"
+#include <QTextDocumentWriter>
 
 void SrcEditor::setup_common() {
     QFont font;
@@ -67,7 +67,8 @@ SrcEditor::SrcEditor(QWidget *parent) : Super(parent) {
     setup_common();
 }
 
-SrcEditor::SrcEditor(const QString &text, QWidget *parent) : Super(text, parent) {
+SrcEditor::SrcEditor(const QString &text, QWidget *parent)
+    : Super(text, parent) {
     setup_common();
 }
 
@@ -83,7 +84,7 @@ QString SrcEditor::title() {
     return tname;
 }
 
-void SrcEditor::setFileName(QString filename) {
+void SrcEditor::setFileName(const QString &filename) {
     QFileInfo fi(filename);
     saveAsRequiredFl = filename.isEmpty() || filename.startsWith(":/");
 
@@ -91,15 +92,15 @@ void SrcEditor::setFileName(QString filename) {
     tname = fi.fileName();
     delete highlighter;
     highlighter = nullptr;
-    if ((fi.suffix() == "c") || (fi.suffix() == "C") ||
-        (fi.suffix() == "cpp") || ((fi.suffix() == "c++"))) {
+    if ((fi.suffix() == "c") || (fi.suffix() == "C") || (fi.suffix() == "cpp")
+        || ((fi.suffix() == "c++"))) {
         highlighter = new HighlighterC(document());
     } else {
         highlighter = new HighlighterAsm(document());
     }
 }
 
-bool SrcEditor::loadFile(QString filename) {
+bool SrcEditor::loadFile(const QString &filename) {
     QFile file(filename);
     if (file.open(QFile::ReadOnly | QFile::Text)) {
         setPlainText(file.readAll());
@@ -110,7 +111,9 @@ bool SrcEditor::loadFile(QString filename) {
     }
 }
 
-bool SrcEditor::loadByteArray(const QByteArray &content, QString filename) {
+bool SrcEditor::loadByteArray(
+    const QByteArray &content,
+    const QString &filename) {
     setPlainText(QString::fromUtf8(content.data(), content.size()));
     if (!filename.isEmpty()) {
         setFileName(filename);
@@ -119,21 +122,24 @@ bool SrcEditor::loadByteArray(const QByteArray &content, QString filename) {
 }
 
 bool SrcEditor::saveFile(QString filename) {
-    if (filename.isEmpty())
+    if (filename.isEmpty()) {
         filename = this->filename();
-    if (filename.isEmpty())
+    }
+    if (filename.isEmpty()) {
         return false;
+    }
     QTextDocumentWriter writer(filename);
     writer.setFormat("plaintext");
     bool success = writer.write(document());
     setFileName(filename);
-    if (success)
+    if (success) {
         document()->setModified(false);
+    }
     return success;
 }
 
 void SrcEditor::setCursorToLine(int ln) {
-    QTextCursor cursor(document()->findBlockByLineNumber(ln-1));
+    QTextCursor cursor(document()->findBlockByLineNumber(ln - 1));
     setTextCursor(cursor);
 }
 
@@ -149,6 +155,6 @@ void SrcEditor::setSaveAsRequired(bool val) {
     saveAsRequiredFl = val;
 }
 
-bool SrcEditor::saveAsRequired() {
+bool SrcEditor::saveAsRequired() const {
     return saveAsRequiredFl;
 }

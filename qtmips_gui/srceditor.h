@@ -36,35 +36,38 @@
 #ifndef SRCEDITOR_H
 #define SRCEDITOR_H
 
-#include <QTextEdit>
+#include "qtmips_machine/qtmipsmachine.h"
+
 #include <QString>
 #include <QSyntaxHighlighter>
-#include "qtmipsmachine.h"
+#include <QTextEdit>
 
 class SrcEditor : public QTextEdit {
     Q_OBJECT
     using Super = QTextEdit;
+
 public:
     SrcEditor(const QString &text, QWidget *parent = nullptr);
     SrcEditor(QWidget *parent = nullptr);
-    ~SrcEditor();
+    ~SrcEditor() override;
     QString filename();
     QString title();
-    bool loadFile(QString filename);
+    bool loadFile(const QString &filename);
     bool saveFile(QString filename = "");
-    bool loadByteArray(const QByteArray &content, QString filename = "");
+    bool loadByteArray(const QByteArray &content, const QString &filename = "");
     void setCursorToLine(int ln);
-    void setFileName(QString filename);
+    void setFileName(const QString &filename);
     bool isModified() const;
     void setModified(bool val);
     void setSaveAsRequired(bool val);
-    bool saveAsRequired();
+    bool saveAsRequired() const;
+
 private:
-    QSyntaxHighlighter *highlighter;
+    QSyntaxHighlighter *highlighter {};
     void setup_common();
     QString fname;
     QString tname;
-    bool saveAsRequiredFl;
+    bool saveAsRequiredFl {};
 };
 
 #endif // SRCEDITOR_H

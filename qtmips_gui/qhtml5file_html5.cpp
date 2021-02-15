@@ -39,13 +39,13 @@
 
 #include "qhtml5file.h"
 
-#include <qdebug.h>
-
 #include <emscripten.h>
 #include <emscripten/html5.h>
+#include <qdebug.h>
 
 //
-// This file implements file load via HTML file input element and file save via browser download.
+// This file implements file load via HTML file input element and file save via
+// browser download.
 //
 
 // Global user file data ready callback and C helper function. JavaScript will
@@ -53,8 +53,8 @@
 // the call to the current handler function. This means there can be only one
 // file open in proress at a given time.
 std::function<void(char *, size_t, const char *)> g_qtFileDataReadyCallback;
-extern "C" EMSCRIPTEN_KEEPALIVE void qt_callFileDataReady(char *content, size_t contentSize, const char *fileName)
-{
+extern "C" EMSCRIPTEN_KEEPALIVE void
+qt_callFileDataReady(char *content, size_t contentSize, const char *fileName) {
     if (g_qtFileDataReadyCallback == nullptr)
         return;
 
@@ -63,19 +63,23 @@ extern "C" EMSCRIPTEN_KEEPALIVE void qt_callFileDataReady(char *content, size_t 
 }
 
 namespace {
-    void loadFile(const char *accept, std::function<void(char *, size_t, const char *)> fileDataReady)
-    {
-        if (::g_qtFileDataReadyCallback)
-            puts("Warning: Concurrent loadFile() calls are not supported. Cancelling earlier call");
+void loadFile(
+    const char *accept,
+    std::function<void(char *, size_t, const char *)> fileDataReady) {
+    if (::g_qtFileDataReadyCallback)
+        puts("Warning: Concurrent loadFile() calls are not supported. "
+             "Cancelling earlier call");
 
-        // Call qt_callFileDataReady to make sure the emscripten linker does not
-        // optimize it away, which may happen if the function is called from JavaScript
-        // only. Set g_qtFileDataReadyCallback to null to make it a a no-op.
-        ::g_qtFileDataReadyCallback = nullptr;
-        ::qt_callFileDataReady(nullptr, 0, nullptr);
+    // Call qt_callFileDataReady to make sure the emscripten linker does not
+    // optimize it away, which may happen if the function is called from
+    // JavaScript only. Set g_qtFileDataReadyCallback to null to make it a a
+    // no-op.
+    ::g_qtFileDataReadyCallback = nullptr;
+    ::qt_callFileDataReady(nullptr, 0, nullptr);
 
-        ::g_qtFileDataReadyCallback = fileDataReady;
-        EM_ASM_({
+    ::g_qtFileDataReadyCallback = fileDataReady;
+    EM_ASM_(
+        {
             const accept = UTF8ToString($0);
 
             // Crate file file input which whil display the native file dialog
@@ -97,17 +101,20 @@ namespace {
                         const contentSize = reader.result.byteLength;
 
                         // Copy the file file content to the C++ heap.
-                        // Note: this could be simplified by passing the content as an
-                        // "array" type to ccall and then let it copy to C++ memory.
-                        // However, this built-in solution does not handle files larger
-                        // than ~15M (Chrome). Instead, allocate memory manually and
-                        // pass a pointer to the C++ side (which will free() it when done).
+                        // Note: this could be simplified by passing the content
+                        // as an "array" type to ccall and then let it copy to
+                        // C++ memory. However, this built-in solution does not
+                        // handle files larger than ~15M (Chrome). Instead,
+                        // allocate memory manually and pass a pointer to the
+                        // C++ side (which will free() it when done).
 
-                        // TODO: consider slice()ing the file to read it picewise and
-                        // then assembling it in a QByteArray on the C++ side.
+                        // TODO: consider slice()ing the file to read it
+                        // picewise and then assembling it in a QByteArray on
+                        // the C++ side.
 
                         const heapPointer = _malloc(contentSize);
-                        const heapBytes = new Uint8Array(Module.HEAPU8.buffer, heapPointer, contentSize);
+                        const heapBytes = new Uint8Array(
+                            Module.HEAPU8.buffer, heapPointer, contentSize);
                         heapBytes.set(contentArray);
 
                         // Null out the first data copy to enable GC
@@ -115,8 +122,10 @@ namespace {
                         contentArray = null;
 
                         // Call the C++ file data ready callback
-                        ccall("qt_callFileDataReady", null,
-                            ["number", "number", "string"], [heapPointer, contentSize, name]);
+                        ccall(
+                            "qt_callFileDataReady", null,
+                            [ "number", "number", "string" ],
+                            [ heapPointer, contentSize, name ]);
                     };
                     reader.readAsArrayBuffer(file);
                 }
@@ -128,22 +137,30 @@ namespace {
 
             // Trigger file dialog open
             fileElement.click();
+        },
+        accept);
+}
 
-        }, accept);
-    }
-
-    void saveFile(const char *contentPointer, size_t contentLength, const char *fileNameHint)
-    {
-        EM_ASM_({
-            // Make the file contents and file name hint accessible to Javascript: convert
-            // the char * to a JavaScript string and create a subarray view into the C heap.
+void saveFile(
+    const char *contentPointer,
+    size_t contentLength,
+    const char *fileNameHint) {
+    EM_ASM_(
+        {
+            // Make the file contents and file name hint accessible to
+            // Javascript: convert the char * to a JavaScript string and create
+            // a subarray view into the C heap.
             const contentPointer = $0;
             const contentLength = $1;
             const fileNameHint = UTF8ToString($2);
-            const fileContent = Module.HEAPU8.subarray(contentPointer, contentPointer + contentLength);
+            const fileContent = Module.HEAPU8.subarray(
+                contentPointer, contentPointer + contentLength);
 
             // Create a hidden download link and click it programatically
-            const fileblob = new Blob([fileContent], { type : "application/octet-stream" } );
+            const fileblob = new Blob([fileContent], {
+                type:
+                    "application/octet-stream"
+            });
             var link = document.createElement("a");
             document.body.appendChild(link);
             link.download = fileNameHint;
@@ -151,37 +168,42 @@ namespace {
             link.style = "display:none";
             link.click();
             document.body.removeChild(link);
-
-        }, contentPointer, contentLength, fileNameHint);
-    }
+        },
+        contentPointer, contentLength, fileNameHint);
 }
+} // namespace
 
 /*!
     \brief Read local file via file dialog.
 
-    Call this function to make the browser display an open-file dialog. This function
-    returns immediately, and \a fileDataReady is called when the user has selected a file
-    and the file contents has been read.
+    Call this function to make the browser display an open-file dialog. This
+   function returns immediately, and \a fileDataReady is called when the user
+   has selected a file and the file contents has been read.
 
-    \a The accept argument specifies which file types to accept, and must follow the
-    <input type="file"> html standard formatting, for example ".png, .jpg, .jpeg".
+    \a The accept argument specifies which file types to accept, and must follow
+   the <input type="file"> html standard formatting, for example ".png, .jpg,
+   .jpeg".
 
-    This function is implemented on Qt for WebAssembly only. A nonfunctional cross-
-    platform stub is provided so that code that uses it can compile on all platforms.
+    This function is implemented on Qt for WebAssembly only. A nonfunctional
+   cross- platform stub is provided so that code that uses it can compile on all
+   platforms.
 */
-void QHtml5File::load(const QString &accept, std::function<void(const QByteArray &, const QString &)> fileDataReady)
-{
-    loadFile(accept.toUtf8().constData(), [=](char *content, size_t size, const char *fileName) {
+void QHtml5File::load(
+    const QString &accept,
+    std::function<void(const QByteArray &, const QString &)> fileDataReady) {
+    loadFile(
+        accept.toUtf8().constData(),
+        [=](char *content, size_t size, const char *fileName) {
+            // Copy file data into QByteArray and free buffer that was allocated
+            // on the JavaScript side. We could have used
+            // QByteArray::fromRawData() to avoid the copy here, but that would
+            // make memory management awkward.
+            QByteArray qtFileContent(content, size);
+            free(content);
 
-        // Copy file data into QByteArray and free buffer that was allocated
-        // on the JavaScript side. We could have used QByteArray::fromRawData()
-        // to avoid the copy here, but that would make memory management awkward.
-        QByteArray qtFileContent(content, size);
-        free(content);
-
-        // Call user-supplied data ready callback
-        fileDataReady(qtFileContent, QString::fromUtf8(fileName));
-    });
+            // Call user-supplied data ready callback
+            fileDataReady(qtFileContent, QString::fromUtf8(fileName));
+        });
 }
 
 /*!
@@ -190,11 +212,12 @@ void QHtml5File::load(const QString &accept, std::function<void(const QByteArray
     Call this function to make the browser start a file download. The file
     will contains the given \a content, with a suggested \a fileNameHint.
 
-    This function is implemented on Qt for WebAssembly only. A nonfunctional cross-
-    platform stub is provided so that code that uses it can compile on all platforms.
+    This function is implemented on Qt for WebAssembly only. A nonfunctional
+   cross- platform stub is provided so that code that uses it can compile on all
+   platforms.
 */
-void QHtml5File::save(const QByteArray &content, const QString &fileNameHint)
-{
+void QHtml5File::save(const QByteArray &content, const QString &fileNameHint) {
     // Convert to C types and save
-    saveFile(content.constData(), content.size(), fileNameHint.toUtf8().constData());
+    saveFile(
+        content.constData(), content.size(), fileNameHint.toUtf8().constData());
 }

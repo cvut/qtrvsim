@@ -35,12 +35,12 @@
 
 #include "fixmatheval.h"
 
-#include "limits.h"
+#include <climits>
+#include <utility>
 
 using namespace fixmatheval;
 
-FmeSymbolDb::~FmeSymbolDb() {
-}
+FmeSymbolDb::~FmeSymbolDb() = default;
 
 bool FmeSymbolDb::getValue(FmeValue &value, QString name) {
     (void)value;
@@ -52,10 +52,9 @@ FmeNode::FmeNode(int priority) {
     prio = priority;
 }
 
-FmeNode::~FmeNode() {
-}
+FmeNode::~FmeNode() = default;
 
-int FmeNode::priority() {
+int FmeNode::priority() const {
     return prio;
 }
 
@@ -68,14 +67,11 @@ FmeNode *FmeNode::child() {
     return nullptr;
 }
 
-
 FmeNodeConstant::FmeNodeConstant(FmeValue value) : FmeNode(INT_MAX) {
     this->value = value;
 }
 
-FmeNodeConstant::~FmeNodeConstant() {
-
-}
+FmeNodeConstant::~FmeNodeConstant() = default;
 
 bool FmeNodeConstant::eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) {
     (void)symdb;
@@ -92,8 +88,7 @@ FmeNodeSymbol::FmeNodeSymbol(QString &name) : FmeNode(INT_MAX) {
     this->name = name;
 }
 
-FmeNodeSymbol::~FmeNodeSymbol() {
-}
+FmeNodeSymbol::~FmeNodeSymbol() = default;
 
 bool FmeNodeSymbol::eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) {
     if (!symdb) {
@@ -101,8 +96,9 @@ bool FmeNodeSymbol::eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) {
         return false;
     }
     bool ok = symdb->getValue(value, name);
-    if (!ok)
+    if (!ok) {
         error = QString("value for symbol \"%1\" not found").arg(name);
+    }
     return ok;
 }
 
@@ -110,24 +106,31 @@ QString FmeNodeSymbol::dump() {
     return name;
 }
 
-FmeNodeUnaryOp::FmeNodeUnaryOp(int priority, FmeValue (*op)(FmeValue &a),
-                               QString description) : FmeNode(priority) {
+FmeNodeUnaryOp::FmeNodeUnaryOp(
+    int priority,
+    FmeValue (*op)(FmeValue &a),
+    QString description)
+    : FmeNode(priority) {
     this->operand_a = nullptr;
     this->op = op;
-    this->description = description;
+    this->description = std::move(description);
 }
 
 FmeNodeUnaryOp::~FmeNodeUnaryOp() {
     delete operand_a;
 }
 
-bool FmeNodeUnaryOp::FmeNodeUnaryOp::eval(FmeValue &value, FmeSymbolDb *symdb,
-                                          QString &error) {
+bool FmeNodeUnaryOp::FmeNodeUnaryOp::eval(
+    FmeValue &value,
+    FmeSymbolDb *symdb,
+    QString &error) {
     FmeValue value_a;
-    if (!operand_a)
+    if (!operand_a) {
         return false;
-    if (!operand_a->eval(value_a, symdb, error))
+    }
+    if (!operand_a->eval(value_a, symdb, error)) {
         return false;
+    }
     value = op(value_a);
     return true;
 }
@@ -137,20 +140,25 @@ FmeNode *FmeNodeUnaryOp::child() {
 }
 
 bool FmeNodeUnaryOp::insert(FmeNode *node) {
-   operand_a = node;
-   return true;
+    operand_a = node;
+    return true;
 }
 
 QString FmeNodeUnaryOp::dump() {
-    return "(" + description + " " + (operand_a? operand_a->dump(): "nullptr") + ")";
+    return "(" + description + " " + (operand_a ? operand_a->dump() : "nullptr")
+           + ")";
 }
 
-FmeNodeBinaryOp::FmeNodeBinaryOp(int priority, FmeValue (*op)(FmeValue &a, FmeValue &b),
-                                 FmeNode *left, QString description) : FmeNode(priority) {
+FmeNodeBinaryOp::FmeNodeBinaryOp(
+    int priority,
+    FmeValue (*op)(FmeValue &a, FmeValue &b),
+    FmeNode *left,
+    QString description)
+    : FmeNode(priority) {
     this->operand_a = left;
     this->operand_b = nullptr;
     this->op = op;
-    this->description = description;
+    this->description = std::move(description);
 }
 
 FmeNodeBinaryOp::~FmeNodeBinaryOp() {
@@ -161,11 +169,13 @@ FmeNodeBinaryOp::~FmeNodeBinaryOp() {
 bool FmeNodeBinaryOp::eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) {
     FmeValue value_a;
     FmeValue value_b;
-    if (!operand_a || !operand_b)
+    if (!operand_a || !operand_b) {
         return false;
-    if (!operand_a->eval(value_a, symdb, error) ||
-        !operand_b->eval(value_b, symdb, error))
+    }
+    if (!operand_a->eval(value_a, symdb, error)
+        || !operand_b->eval(value_b, symdb, error)) {
         return false;
+    }
     value = op(value_a, value_b);
     return true;
 }
@@ -180,8 +190,8 @@ bool FmeNodeBinaryOp::insert(FmeNode *node) {
 }
 
 QString FmeNodeBinaryOp::dump() {
-    return "(" + (operand_a? operand_a->dump(): "nullptr") +
-            " " + description + " " + (operand_b? operand_b->dump(): "nullptr") + ")";
+    return "(" + (operand_a ? operand_a->dump() : "nullptr") + " " + description
+           + " " + (operand_b ? operand_b->dump() : "nullptr") + ")";
 }
 
 FmeExpression::FmeExpression() : FmeNode(0) {
@@ -200,24 +210,28 @@ bool FmeExpression::parse(const QString &expression, QString &error) {
     QString optxtx;
     for (i = 0; true; i++) {
         QChar ch = 0;
-        if (i < expression.size())
+        if (i < expression.size()) {
             ch = expression.at(i);
-        if(!(ch.isLetterOrNumber() || (ch == '_')) || (i >= expression.size())) {
+        }
+        if (!(ch.isLetterOrNumber() || (ch == '_'))
+            || (i >= expression.size())) {
             if (in_word) {
                 FmeNode *new_node = nullptr;
                 QString word = expression.mid(word_start, i - word_start);
                 if (word.at(0).isDigit()) {
                     new_node = new FmeNodeConstant(word.toLongLong(&ok, 0));
                     if (!ok) {
-                       error = QString("cannot convert \"%1\" to number").arg(word);
-                       break;
+                        error = QString("cannot convert \"%1\" to number")
+                                    .arg(word);
+                        break;
                     }
                 } else {
-                   new_node = new FmeNodeSymbol(word);
+                    new_node = new FmeNodeSymbol(word);
                 }
                 FmeNode *node;
                 FmeNode *child;
-                for (node = this; (child = node->child()) != nullptr; node = child);
+                for (node = this; (child = node->child()) != nullptr;
+                     node = child) {}
                 ok = node->insert(new_node);
                 if (!ok) {
                     error = QString("parse stuck at \"%1\"").arg(word);
@@ -226,13 +240,15 @@ bool FmeExpression::parse(const QString &expression, QString &error) {
 
                 in_word = false;
                 is_unary = false;
-                if (i >= expression.size())
+                if (i >= expression.size()) {
                     break;
+                }
             }
-            if (ch.isSpace())
+            if (ch.isSpace()) {
                 continue;
-            FmeValue (*binary_op)(FmeValue &a, FmeValue &b) = nullptr;
-            FmeValue (*unary_op)(FmeValue &a) = nullptr;
+            }
+            FmeValue (*binary_op)(FmeValue & a, FmeValue & b) = nullptr;
+            FmeValue (*unary_op)(FmeValue & a) = nullptr;
             int prio = base_prio;
 
             optxtx = ch;
@@ -244,28 +260,43 @@ bool FmeExpression::parse(const QString &expression, QString &error) {
                     prio += 90;
                     unary_op = [](FmeValue &a) -> FmeValue { return -a; };
                 } else {
-                    binary_op = [](FmeValue &a, FmeValue &b) -> FmeValue { return a - b; };
+                    binary_op = [](FmeValue &a, FmeValue &b) -> FmeValue {
+                        return a - b;
+                    };
                     prio += 20;
                 }
             } else if (ch == '+') {
-                if (is_unary)
+                if (is_unary) {
                     continue;
-                binary_op = [](FmeValue &a, FmeValue &b) -> FmeValue { return a + b; };
+                }
+                binary_op = [](FmeValue &a, FmeValue &b) -> FmeValue {
+                    return a + b;
+                };
                 prio += 20;
             } else if (ch == '*') {
-                binary_op = [](FmeValue &a, FmeValue &b) -> FmeValue { return a * b; };
+                binary_op = [](FmeValue &a, FmeValue &b) -> FmeValue {
+                    return a * b;
+                };
                 prio += 30;
             } else if (ch == '/') {
-                binary_op = [](FmeValue &a, FmeValue &b) -> FmeValue { return a / b; };
+                binary_op = [](FmeValue &a, FmeValue &b) -> FmeValue {
+                    return a / b;
+                };
                 prio += 30;
             } else if (ch == '|') {
-                binary_op = [](FmeValue &a, FmeValue &b) -> FmeValue { return a | b; };
+                binary_op = [](FmeValue &a, FmeValue &b) -> FmeValue {
+                    return a | b;
+                };
                 prio += 10;
             } else if (ch == '&') {
-                binary_op = [](FmeValue &a, FmeValue &b) -> FmeValue { return a & b; };
+                binary_op = [](FmeValue &a, FmeValue &b) -> FmeValue {
+                    return a & b;
+                };
                 prio += 15;
             } else if (ch == '^') {
-                binary_op = [](FmeValue &a, FmeValue &b) -> FmeValue { return a ^ b; };
+                binary_op = [](FmeValue &a, FmeValue &b) -> FmeValue {
+                    return a ^ b;
+                };
                 prio += 15;
             } else if (ch == '(') {
                 base_prio += 100;
@@ -277,22 +308,27 @@ bool FmeExpression::parse(const QString &expression, QString &error) {
                     break;
                 }
             } else {
-                error = QString("Unknow character \"%1\" in expression.").arg(ch);
+                error
+                    = QString("Unknow character \"%1\" in expression.").arg(ch);
                 ok = false;
                 break;
             }
             if ((binary_op != nullptr) || (unary_op != nullptr)) {
                 FmeNode *node;
                 FmeNode *child;
-                for (node = this; (child = node->child()) != nullptr; node = child) {
-                    if (child->priority() >= prio)
+                for (node = this; (child = node->child()) != nullptr;
+                     node = child) {
+                    if (child->priority() >= prio) {
                         break;
+                    }
                 }
                 if (binary_op != nullptr) {
-                    ok = node->insert(new FmeNodeBinaryOp(prio, binary_op, child, optxtx));
+                    ok = node->insert(
+                        new FmeNodeBinaryOp(prio, binary_op, child, optxtx));
                     is_unary = true;
                 } else {
-                    ok = node->insert(new FmeNodeUnaryOp(prio, unary_op, optxtx));
+                    ok = node->insert(
+                        new FmeNodeUnaryOp(prio, unary_op, optxtx));
                 }
                 if (!ok) {
                     error = QString("parse stuck at \"%1\"").arg(QString(ch));
@@ -300,8 +336,9 @@ bool FmeExpression::parse(const QString &expression, QString &error) {
                 }
             }
         } else {
-            if (!in_word)
+            if (!in_word) {
                 word_start = i;
+            }
             in_word = true;
         }
     }
@@ -315,8 +352,9 @@ FmeExpression::~FmeExpression() {
 }
 
 bool FmeExpression::eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) {
-    if (!root)
+    if (!root) {
         return false;
+    }
     return root->eval(value, symdb, error);
 }
 
@@ -330,6 +368,5 @@ FmeNode *FmeExpression::child() {
 }
 
 QString FmeExpression::dump() {
-    return "(" + (root? root->dump(): "nullptr") + ")";
+    return "(" + (root ? root->dump() : "nullptr") + ")";
 }
-

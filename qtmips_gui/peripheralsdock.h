@@ -36,13 +36,14 @@
 #ifndef PERIPHERALSDOCK_H
 #define PERIPHERALSDOCK_H
 
+#include "qtmips_machine/peripheral.h"
+#include "qtmips_machine/peripspiled.h"
+#include "qtmips_machine/qtmipsmachine.h"
+
 #include <QDockWidget>
-#include <QLabel>
 #include <QFormLayout>
+#include <QLabel>
 #include <peripheralsview.h>
-#include "peripspiled.h"
-#include "peripheral.h"
-#include "qtmipsmachine.h"
 
 class PeripheralsDock : public QDockWidget {
     Q_OBJECT
@@ -53,8 +54,8 @@ public:
 
 private:
     QVBoxLayout *layout_box;
-    QWidget *top_widget, *top_form;
-    QFormLayout *layout_top_form;
+    QWidget *top_widget, *top_form {};
+    QFormLayout *layout_top_form {};
     PeripheralsView *periph_view;
 };
 

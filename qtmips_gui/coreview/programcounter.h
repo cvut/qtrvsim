@@ -36,21 +36,25 @@
 #ifndef COREVIEW_PROGRAMCOUNTER_H
 #define COREVIEW_PROGRAMCOUNTER_H
 
+#include "connection.h"
+#include "qtmips_machine/qtmipsmachine.h"
+
 #include <QGraphicsObject>
 #include <QPainter>
-#include "qtmipsmachine.h"
-#include "connection.h"
 
 namespace coreview {
 
 class ProgramCounter : public QGraphicsObject {
-        Q_OBJECT
+    Q_OBJECT
 public:
     ProgramCounter(machine::QtMipsMachine *machine);
-    ~ProgramCounter();
+    ~ProgramCounter() override;
 
     QRectF boundingRect() const override;
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void paint(
+        QPainter *painter,
+        const QStyleOptionGraphicsItem *option,
+        QWidget *widget) override;
 
     void setPos(qreal x, qreal y);
     const Connector *connector_in() const;
@@ -58,13 +62,13 @@ public:
 
 signals:
     void open_program();
-    void jump_to_pc(std::uint32_t addr);
+    void jump_to_pc(uint32_t addr);
 
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 
 private slots:
-    void pc_update(std::uint32_t val);
+    void pc_update(uint32_t val);
 
 private:
     const machine::Registers *registers;
@@ -75,7 +79,6 @@ private:
     Connector *con_in, *con_out;
 };
 
-}
-
+} // namespace coreview
 
 #endif // COREVIEW_PROGRAMCOUNTER_H

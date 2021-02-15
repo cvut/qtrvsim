@@ -36,18 +36,22 @@
 #ifndef COREVIEW_ALU_H
 #define COREVIEW_ALU_H
 
-#include <QGraphicsItem>
 #include "connection.h"
+
+#include <QGraphicsItem>
 
 namespace coreview {
 
 class Alu : public QGraphicsItem {
 public:
     Alu();
-    ~Alu();
+    ~Alu() override;
 
     QRectF boundingRect() const override;
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void paint(
+        QPainter *painter,
+        const QStyleOptionGraphicsItem *option,
+        QWidget *widget) override;
 
     void setPos(qreal x, qreal y);
     const Connector *connector_in_a() const;
@@ -60,6 +64,6 @@ private:
     Connector *con_in_a, *con_in_b, *con_out, *con_ctl;
 };
 
-}
+} // namespace coreview
 
 #endif // COREVIEW_ALU_H

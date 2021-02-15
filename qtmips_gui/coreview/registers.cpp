@@ -34,8 +34,10 @@
  ******************************************************************************/
 
 #include "registers.h"
+
 #include "coreview_colors.h"
 #include "fontsize.h"
+
 #include <cmath>
 
 using namespace coreview;
@@ -62,7 +64,8 @@ Registers::Registers() : QGraphicsObject(nullptr), name("Registers", this) {
     name.setFont(font);
 
     QRectF name_box = name.boundingRect();
-    name.setPos(WIDTH/2 - name_box.width()/2, HEIGHT/2 - name_box.height()/2);
+    name.setPos(
+        WIDTH / 2 - name_box.width() / 2, HEIGHT / 2 - name_box.height() / 2);
 
     setPos(x(), y()); // set connector's position
 }
@@ -81,7 +84,10 @@ QRectF Registers::boundingRect() const {
     return QRectF(-PENW / 2, -PENW / 2, WIDTH + PENW, HEIGHT + PENW);
 }
 
-void Registers::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute((unused)), QWidget *widget __attribute((unused))) {
+void Registers::paint(
+    QPainter *painter,
+    const QStyleOptionGraphicsItem *option __attribute((unused)),
+    QWidget *widget __attribute((unused))) {
     QPen pen = painter->pen();
     pen.setColor(BLOCK_OUTLINE_COLOR);
     painter->setPen(pen);

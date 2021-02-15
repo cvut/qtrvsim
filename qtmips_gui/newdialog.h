@@ -36,13 +36,14 @@
 #ifndef NEWDIALOG_H
 #define NEWDIALOG_H
 
-#include <QDialog>
-#include <QSettings>
-#include <QFileDialog>
-#include <QMessageBox>
+#include "qtmips_machine/machineconfig.h"
 #include "ui_NewDialog.h"
 #include "ui_NewDialogCache.h"
-#include "machineconfig.h"
+
+#include <QDialog>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QSettings>
 
 class NewDialogCacheHandler;
 
@@ -50,12 +51,12 @@ class NewDialog : public QDialog {
     Q_OBJECT
 public:
     NewDialog(QWidget *parent, QSettings *settings);
-    ~NewDialog();
+    ~NewDialog() override;
 
-	void switch2custom();
+    void switch2custom();
 
 protected:
-    void closeEvent(QCloseEvent *);
+    void closeEvent(QCloseEvent *) override;
 
 private slots:
     void cancel();
@@ -82,8 +83,8 @@ private slots:
     void reset_at_compile_change(bool);
 
 private:
-    Ui::NewDialog *ui;
-    Ui::NewDialogCache *ui_cache_p, *ui_cache_d;
+    Ui::NewDialog *ui {};
+    Ui::NewDialogCache *ui_cache_p {}, *ui_cache_d {};
     QSettings *settings;
 
     machine::MachineConfig *config;
@@ -92,30 +93,30 @@ private:
     unsigned preset_number();
     void load_settings();
     void store_settings();
-	NewDialogCacheHandler *cache_handler_p, *cache_handler_d;
+    NewDialogCacheHandler *cache_handler_p {}, *cache_handler_d {};
 };
 
 class NewDialogCacheHandler : public QObject {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  NewDialogCacheHandler(NewDialog *nd, Ui::NewDialogCache *ui);
+    NewDialogCacheHandler(NewDialog *nd, Ui::NewDialogCache *ui);
 
-  void set_config(machine::MachineConfigCache *config);
+    void set_config(machine::MachineConfigCache *config);
 
-  void config_gui();
+    void config_gui();
 
 private slots:
-  void enabled(bool);
-  void numsets();
-	void blocksize();
-	void degreeassociativity();
-	void replacement(int);
-	void writeback(int);
+    void enabled(bool);
+    void numsets();
+    void blocksize();
+    void degreeassociativity();
+    void replacement(int);
+    void writeback(int);
 
 private:
-	NewDialog *nd;
-	Ui::NewDialogCache *ui;
-	machine::MachineConfigCache *config;
+    NewDialog *nd;
+    Ui::NewDialogCache *ui {};
+    machine::MachineConfigCache *config;
 };
 
 #endif // NEWDIALOG_H

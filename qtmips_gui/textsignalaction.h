@@ -36,11 +36,10 @@
 #ifndef TEXTSIGNALACTION_H
 #define TEXTSIGNALACTION_H
 
-#include <QObject>
 #include <QAction>
+#include <QObject>
 
-class TextSignalAction : public QAction
-{
+class TextSignalAction : public QAction {
     Q_OBJECT
 
     using Super = QAction;
@@ -48,16 +47,24 @@ class TextSignalAction : public QAction
 public:
     TextSignalAction(QObject *parent = nullptr);
     TextSignalAction(const QString &text, QObject *parent = nullptr);
-    TextSignalAction(const QString &text, const QString &signal_text,
-                     QObject *parent = nullptr);
-    TextSignalAction(const QIcon &icon, const QString &text, QObject *parent = nullptr);
-    TextSignalAction(const QIcon &icon, const QString &text, const QString &signal_text,
-                     QObject *parent = nullptr);
+    TextSignalAction(
+        const QString &text,
+        QString signal_text,
+        QObject *parent = nullptr);
+    TextSignalAction(
+        const QIcon &icon,
+        const QString &text,
+        QObject *parent = nullptr);
+    TextSignalAction(
+        const QIcon &icon,
+        const QString &text,
+        QString signal_text,
+        QObject *parent = nullptr);
 signals:
     void activated(QString signal_text);
 
 protected slots:
-    void  process_triggered(bool checked);
+    void process_triggered(bool checked);
 
 protected:
     QString signal_text;

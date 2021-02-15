@@ -1,21 +1,20 @@
 #ifndef PERIPHERALSVIEW_H
 #define PERIPHERALSVIEW_H
 
-#include <QWidget>
+#include "qtmips_machine/peripspiled.h"
 
-#include "peripspiled.h"
+#include <QWidget>
 
 namespace Ui {
 class PeripheralsView;
 }
 
-class PeripheralsView : public QWidget
-{
+class PeripheralsView : public QWidget {
     Q_OBJECT
 
 public:
-    explicit PeripheralsView(QWidget *parent = 0);
-    ~PeripheralsView();
+    explicit PeripheralsView(QWidget *parent = nullptr);
+    ~PeripheralsView() override;
 
     void setup(const machine::PeripSpiLed *perip_spi_led);
 
@@ -25,7 +24,7 @@ public slots:
     void led_rgb2_changed(uint val);
 
 private:
-    Ui::PeripheralsView *ui;
+    Ui::PeripheralsView *ui {};
 };
 
 #endif // PERIPHERALSVIEW_H

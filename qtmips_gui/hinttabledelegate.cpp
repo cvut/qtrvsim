@@ -33,11 +33,14 @@
  *
  ******************************************************************************/
 
-#include <QApplication>
 #include "hinttabledelegate.h"
 
-QSize HintTableDelegate::sizeHintForText(const QStyleOptionViewItem &option,
-                                   const QModelIndex &index, const QString &str) const {
+#include <QApplication>
+
+QSize HintTableDelegate::sizeHintForText(
+    const QStyleOptionViewItem &option,
+    const QModelIndex &index,
+    const QString &str) const {
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
     const QWidget *widget = option.widget;
@@ -46,5 +49,6 @@ QSize HintTableDelegate::sizeHintForText(const QStyleOptionViewItem &option,
     opt.features |= QStyleOptionViewItem::HasDisplay;
     opt.text = str;
 
-    return style->sizeFromContents(QStyle::CT_ItemViewItem, &opt, QSize(), widget);
+    return style->sizeFromContents(
+        QStyle::CT_ItemViewItem, &opt, QSize(), widget);
 }

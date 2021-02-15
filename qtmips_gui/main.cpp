@@ -33,17 +33,17 @@
  *
  ******************************************************************************/
 
-#include <QApplication>
-#include <QCommandLineParser>
 #include "mainwindow.h"
+
+#include <QApplication>
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
-    app.setApplicationName("qtmips_gui");
-    app.setApplicationVersion("0.7.5");
+    QApplication::setApplicationName("qtmips_gui");
+    QApplication::setApplicationVersion("0.7.5");
 
     MainWindow w;
     w.start();
 
-    return app.exec();
+    return QApplication::exec();
 }

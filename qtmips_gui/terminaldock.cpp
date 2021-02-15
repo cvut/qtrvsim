@@ -33,14 +33,16 @@
  *
  ******************************************************************************/
 
+#include "terminaldock.h"
+
+#include "qtmips_machine/serialport.h"
+
 #include <QString>
 #include <QTextBlock>
 #include <QTextCursor>
 
-#include "serialport.h"
-#include "terminaldock.h"
-
-TerminalDock::TerminalDock(QWidget *parent, QSettings *settings) : QDockWidget(parent) {
+TerminalDock::TerminalDock(QWidget *parent, QSettings *settings)
+    : QDockWidget(parent) {
     (void)settings;
     top_widget = new QWidget(this);
     setWidget(top_widget);
@@ -65,22 +67,27 @@ TerminalDock::~TerminalDock() {
 }
 
 void TerminalDock::setup(machine::SerialPort *ser_port) {
-  if (ser_port == nullptr)
-    return;
-  connect(ser_port, &machine::SerialPort::tx_byte, this,
-          QOverload<unsigned int>::of(&TerminalDock::tx_byte));
-  connect(ser_port, &machine::SerialPort::rx_byte_pool, this,
-          &TerminalDock::rx_byte_pool);
-  connect(input_edit, &QLineEdit::textChanged, ser_port,
-          &machine::SerialPort::rx_queue_check);
+    if (ser_port == nullptr) {
+        return;
+    }
+    connect(
+        ser_port, &machine::SerialPort::tx_byte, this,
+        QOverload<unsigned int>::of(&TerminalDock::tx_byte));
+    connect(
+        ser_port, &machine::SerialPort::rx_byte_pool, this,
+        &TerminalDock::rx_byte_pool);
+    connect(
+        input_edit, &QLineEdit::textChanged, ser_port,
+        &machine::SerialPort::rx_queue_check);
 }
 
 void TerminalDock::tx_byte(unsigned int data) {
     bool at_end = terminal_text->textCursor().atEnd();
-    if (data == '\n')
+    if (data == '\n') {
         append_cursor->insertBlock();
-    else
+    } else {
         append_cursor->insertText(QString(QChar(data)));
+    }
     if (at_end) {
         QTextCursor cursor = QTextCursor(terminal_text->document());
         cursor.movePosition(QTextCursor::End);
@@ -88,8 +95,7 @@ void TerminalDock::tx_byte(unsigned int data) {
     }
 }
 
-void TerminalDock::tx_byte(int fd, unsigned int data)
-{
+void TerminalDock::tx_byte(int fd, unsigned int data) {
     (void)fd;
     tx_byte(data);
 }

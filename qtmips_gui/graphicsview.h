@@ -36,11 +36,11 @@
 #ifndef GRAPHICSVIEW_H
 #define GRAPHICSVIEW_H
 
-#include <QGraphicsView>
 #include <QGraphicsScene>
-#include <QWheelEvent>
-#include <QResizeEvent>
+#include <QGraphicsView>
 #include <QKeyEvent>
+#include <QResizeEvent>
+#include <QWheelEvent>
 
 class GraphicsView : public QGraphicsView {
     Q_OBJECT

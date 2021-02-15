@@ -36,50 +36,61 @@
 #ifndef SYMBOLTABLE_H
 #define SYMBOLTABLE_H
 
-#include <QString>
-#include <QObject>
 #include <QMap>
 #include <QMultiMap>
+#include <QObject>
+#include <QString>
 #include <QStringList>
 
 namespace machine {
 
 class SymbolTableEntry {
     friend class SymbolTable;
-    SymbolTableEntry(QString name, std::uint32_t value, std::uint32_t size,
-                     unsigned char info = 0, unsigned char other = 0);
+    SymbolTableEntry(
+        QString name,
+        uint32_t value,
+        uint32_t size,
+        unsigned char info = 0,
+        unsigned char other = 0);
+
 protected:
     QString name;
-    std::uint32_t value;
-    std::uint32_t size;
+    uint32_t value;
+    uint32_t size;
     unsigned char info;
     unsigned char other;
 };
 
-class SymbolTable : public QObject
-{
+class SymbolTable : public QObject {
     Q_OBJECT
 public:
-    SymbolTable(QObject *parent = 0);
-    ~SymbolTable();
+    SymbolTable(QObject *parent = nullptr);
+    ~SymbolTable() override;
 
-    void add_symbol(QString name, std::uint32_t value, std::uint32_t size,
-              unsigned char info = 0, unsigned char other = 0);
-    void set_symbol(QString name, std::uint32_t value, std::uint32_t size,
-              unsigned char info = 0, unsigned char other = 0);
-    void remove_symbol(QString name);
+    void add_symbol(
+        const QString &name,
+        uint32_t value,
+        uint32_t size,
+        unsigned char info = 0,
+        unsigned char other = 0);
+    void set_symbol(
+        const QString &name,
+        uint32_t value,
+        uint32_t size,
+        unsigned char info = 0,
+        unsigned char other = 0);
+    void remove_symbol(const QString &name);
     QStringList *names() const;
 public slots:
-    bool name_to_value(std::uint32_t &value, QString name) const;
-    bool value_to_name(QString &name, std::uint32_t value) const;
+    bool name_to_value(uint32_t &value, const QString &name) const;
+    bool value_to_name(QString &name, uint32_t value) const;
 signals:
 
-
 private:
-    QMultiMap<std::uint32_t, SymbolTableEntry*> map_value_to_symbol;
-    QMap<QString, SymbolTableEntry*> map_name_to_symbol;
+    QMultiMap<uint32_t, SymbolTableEntry *> map_value_to_symbol;
+    QMap<QString, SymbolTableEntry *> map_name_to_symbol;
 };
 
-}
+} // namespace machine
 
 #endif // SYMBOLTABLE_H

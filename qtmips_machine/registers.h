@@ -45,38 +45,45 @@ class Registers : public QObject {
     Q_OBJECT
 public:
     Registers();
-    Registers(const Registers&);
+    Registers(const Registers &);
 
-    std::uint32_t read_pc() const; // Return current value of program counter
-    std::uint32_t pc_inc(); // Increment program counter by four bytes
-    std::uint32_t pc_jmp(std::int32_t offset); // Relative jump from current location in program counter
-    void pc_abs_jmp(std::uint32_t address); // Absolute jump in program counter (write to pc)
-    void pc_abs_jmp_28(std::uint32_t address); // Absolute jump in current 256MB section (basically J implementation)
+    uint32_t read_pc() const;        // Return current value of program counter
+    uint32_t pc_inc();               // Increment program counter by four bytes
+    uint32_t pc_jmp(int32_t offset); // Relative jump from current
+                                     // location in program counter
+    void pc_abs_jmp(uint32_t address);    // Absolute jump in program counter
+                                          // (write to pc)
+    void pc_abs_jmp_28(uint32_t address); // Absolute jump in current 256MB
+                                          // section (basically J
+                                          // implementation)
 
-    std::uint32_t read_gp(std::uint8_t i) const; // Read general-purpose register
-    void write_gp(std::uint8_t i, std::uint32_t value); // Write general-purpose register
-    std::uint32_t read_hi_lo(bool hi) const; // true - read HI / false - read LO
-    void write_hi_lo(bool hi, std::uint32_t value);
+    uint32_t read_gp(uint8_t i) const;        // Read general-purpose
+                                              // register
+    void write_gp(uint8_t i, uint32_t value); // Write general-purpose
+                                              // register
+    uint32_t read_hi_lo(bool hi) const; // true - read HI / false - read LO
+    void write_hi_lo(bool hi, uint32_t value);
 
-    bool operator ==(const Registers &c) const;
-    bool operator !=(const Registers &c) const;
+    bool operator==(const Registers &c) const;
+    bool operator!=(const Registers &c) const;
 
     void reset(); // Reset all values to zero (except pc)
 
 signals:
-    void pc_update(std::uint32_t val);
-    void gp_update(std::uint8_t i, std::uint32_t val);
-    void hi_lo_update(bool hi, std::uint32_t val);
-    void gp_read(std::uint8_t i, std::uint32_t val) const;
-    void hi_lo_read(bool hi, std::uint32_t val) const;
+    void pc_update(uint32_t val);
+    void gp_update(uint8_t i, uint32_t val);
+    void hi_lo_update(bool hi, uint32_t val);
+    void gp_read(uint8_t i, uint32_t val) const;
+    void hi_lo_read(bool hi, uint32_t val) const;
 
 private:
-    std::uint32_t gp[31]; // general-purpose registers ($0 is intentionally skipped)
-    std::uint32_t hi, lo;
-    std::uint32_t pc; // program counter
+    uint32_t gp[31] = { 0 }; // general-purpose registers ($0 is
+                             // intentionally skipped)
+    uint32_t hi {}, lo {};
+    uint32_t pc {}; // program counter
 };
 
-}
+} // namespace machine
 
 Q_DECLARE_METATYPE(machine::Registers)
 

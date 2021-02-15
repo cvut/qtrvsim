@@ -36,12 +36,13 @@
 #ifndef LOGICBLOCK_H
 #define LOGICBLOCK_H
 
-#include <QGraphicsObject>
-#include <QPainter>
-#include <QGraphicsSimpleTextItem>
-#include <QVector>
-#include <QObject>
 #include "connection.h"
+
+#include <QGraphicsObject>
+#include <QGraphicsSimpleTextItem>
+#include <QObject>
+#include <QPainter>
+#include <QVector>
 
 namespace coreview {
 
@@ -50,29 +51,32 @@ class LogicBlock : public QGraphicsObject {
 public:
     LogicBlock(QString name);
     LogicBlock(QVector<QString> name);
-    ~LogicBlock();
+    ~LogicBlock() override;
 
     QRectF boundingRect() const override;
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void paint(
+        QPainter *painter,
+        const QStyleOptionGraphicsItem *option,
+        QWidget *widget) override;
 
     void setPos(qreal x, qreal y);
     void setSize(qreal width, qreal height);
 
     // This creates new connector
-    // Position is determined by x and y in 0 to 1 range and is mapped to real size of this block
-    // Using x=y and x=-y coordinates is not supported
+    // Position is determined by x and y in 0 to 1 range and is mapped to real
+    // size of this block Using x=y and x=-y coordinates is not supported
     const Connector *new_connector(qreal x, qreal y);
 
 signals:
     void open_block();
 
 private:
-    QVector<QGraphicsSimpleTextItem*> text;
+    QVector<QGraphicsSimpleTextItem *> text;
     QRectF box;
 
     struct Con {
-        Connector *con;
-        qreal x, y;
+        Connector *con {};
+        qreal x {}, y {};
         QPointF p;
     };
     QVector<struct Con> connectors;
@@ -82,6 +86,6 @@ protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 };
 
-}
+} // namespace coreview
 
 #endif // LOGICBLOCK_H

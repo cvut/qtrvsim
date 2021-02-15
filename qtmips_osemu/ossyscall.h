@@ -36,35 +36,42 @@
 #ifndef OSSYCALL_H
 #define OSSYCALL_H
 
+#include "qtmips_machine/alu.h"
+#include "qtmips_machine/core.h"
+#include "qtmips_machine/instruction.h"
+#include "qtmips_machine/machineconfig.h"
+#include "qtmips_machine/qtmipsexception.h"
+#include "qtmips_machine/registers.h"
+
 #include <QObject>
 #include <QString>
 #include <QVector>
-#include <qtmipsexception.h>
-#include <machineconfig.h>
-#include <registers.h>
 #include <memory.h>
-#include <core.h>
-#include <instruction.h>
-#include <alu.h>
 
 namespace osemu {
 
-#define OSSYCALL_HANDLER_DECLARE(name) \
-int name(std::uint32_t &result, machine::Core *core, \
-               std::uint32_t syscall_num, \
-               std::uint32_t a1, std::uint32_t a2, std::uint32_t a3, \
-               std::uint32_t a4, std::uint32_t a5, std::uint32_t a6, \
-               std::uint32_t a7, std::uint32_t a8)
+#define OSSYCALL_HANDLER_DECLARE(name)                                         \
+    int name(                                                                  \
+        uint32_t &result, machine::Core *core, uint32_t syscall_num,           \
+        uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5,       \
+        uint32_t a6, uint32_t a7, uint32_t a8)
 
 class OsSyscallExceptionHandler : public machine::ExceptionHandler {
     Q_OBJECT
 public:
-    OsSyscallExceptionHandler(bool known_syscall_stop = false, bool unknown_syscall_stop = false,
-                              QString fs_root = "");
-    bool handle_exception(machine::Core *core, machine::Registers *regs,
-                          machine::ExceptionCause excause, std::uint32_t inst_addr,
-                          std::uint32_t next_addr, std::uint32_t jump_branch_pc,
-                          bool in_delay_slot, std::uint32_t mem_ref_addr);
+    OsSyscallExceptionHandler(
+        bool known_syscall_stop = false,
+        bool unknown_syscall_stop = false,
+        QString fs_root = "");
+    bool handle_exception(
+        machine::Core *core,
+        machine::Registers *regs,
+        machine::ExceptionCause excause,
+        uint32_t inst_addr,
+        uint32_t next_addr,
+        uint32_t jump_branch_pc,
+        bool in_delay_slot,
+        uint32_t mem_ref_addr);
     OSSYCALL_HANDLER_DECLARE(syscall_default_handler);
     OSSYCALL_HANDLER_DECLARE(do_sys_exit);
     OSSYCALL_HANDLER_DECLARE(do_sys_set_thread_area);
@@ -89,19 +96,29 @@ public:
 signals:
     void char_written(int fd, unsigned int val);
     void rx_byte_pool(int fd, unsigned int &data, bool &available);
+
 private:
     enum FdMapping {
         FD_UNUSED = -1,
         FD_INVALID = -1,
         FD_TERMINAL = -2,
     };
-    std::int32_t write_mem(machine::MemoryAccess *mem, std::uint32_t addr,
-                       const QVector<std::uint8_t> &data, std::uint32_t count);
-    std::int32_t read_mem(machine::MemoryAccess *mem, std::uint32_t addr,
-                       QVector<std::uint8_t> &data, std::uint32_t count);
-    std::int32_t write_io(int fd, const QVector<std::uint8_t> &data, std::uint32_t count);
-    std::int32_t read_io(int fd, QVector<std::uint8_t> &data, std::uint32_t count,
-                         bool add_nl_at_eof = false);
+    int32_t write_mem(
+        machine::MemoryAccess *mem,
+        uint32_t addr,
+        const QVector<uint8_t> &data,
+        uint32_t count);
+    int32_t read_mem(
+        machine::MemoryAccess *mem,
+        uint32_t addr,
+        QVector<uint8_t> &data,
+        uint32_t count);
+    int32_t write_io(int fd, const QVector<uint8_t> &data, uint32_t count);
+    int32_t read_io(
+        int fd,
+        QVector<uint8_t> &data,
+        uint32_t count,
+        bool add_nl_at_eof = false);
     int allocate_fd(int val = FD_UNUSED);
     int file_open(QString fname, int flags, int mode);
     int targetfd_to_fd(int targetfd);
@@ -109,9 +126,9 @@ private:
     QString filepath_to_host(QString path);
 
     QVector<int> fd_mapping;
-    std::uint32_t brk_limit;
-    std::uint32_t anonymous_base;
-    std::uint32_t anonymous_last;
+    uint32_t brk_limit;
+    uint32_t anonymous_base;
+    uint32_t anonymous_last;
     bool known_syscall_stop;
     bool unknown_syscall_stop;
     QString fs_root;
@@ -119,6 +136,6 @@ private:
 
 #undef OSSYCALL_HANDLER_DECLARE
 
-}
+} // namespace osemu
 
 #endif // OSSYCALL_H

@@ -33,30 +33,35 @@
  *
  ******************************************************************************/
 
-#include <QHeaderView>
-#include <QFontMetrics>
-#include <QScrollBar>
-#include <QKeyEvent>
-#include <QClipboard>
-#include <QApplication>
 #include "programtableview.h"
-#include "programmodel.h"
-#include "hinttabledelegate.h"
 
-ProgramTableView::ProgramTableView(QWidget *parent, QSettings *settings) : Super(parent) {
-  setItemDelegate(new HintTableDelegate);
-  connect(verticalScrollBar(), &QAbstractSlider::valueChanged, this,
-          &ProgramTableView::adjust_scroll_pos_check);
-  connect(this, &ProgramTableView::adjust_scroll_pos_queue, this,
-          &ProgramTableView::adjust_scroll_pos_process, Qt::QueuedConnection);
-  this->settings = settings;
-  initial_address = settings->value("ProgramViewAddr0", 0).toULongLong();
-  adjust_scroll_pos_in_progress = false;
-  need_addr0_save = false;
-  setTextElideMode(Qt::ElideNone);
+#include "hinttabledelegate.h"
+#include "programmodel.h"
+
+#include <QApplication>
+#include <QClipboard>
+#include <QFontMetrics>
+#include <QHeaderView>
+#include <QKeyEvent>
+#include <QScrollBar>
+
+ProgramTableView::ProgramTableView(QWidget *parent, QSettings *settings)
+    : Super(parent) {
+    setItemDelegate(new HintTableDelegate);
+    connect(
+        verticalScrollBar(), &QAbstractSlider::valueChanged, this,
+        &ProgramTableView::adjust_scroll_pos_check);
+    connect(
+        this, &ProgramTableView::adjust_scroll_pos_queue, this,
+        &ProgramTableView::adjust_scroll_pos_process, Qt::QueuedConnection);
+    this->settings = settings;
+    initial_address = settings->value("ProgramViewAddr0", 0).toULongLong();
+    adjust_scroll_pos_in_progress = false;
+    need_addr0_save = false;
+    setTextElideMode(Qt::ElideNone);
 }
 
-void ProgramTableView::addr0_save_change(std::uint32_t val) {
+void ProgramTableView::addr0_save_change(uint32_t val) {
     need_addr0_save = false;
     settings->setValue("ProgramViewAddr0", val);
 }
@@ -66,40 +71,46 @@ void ProgramTableView::adjustColumnCount() {
     int cwidth_dh;
     int totwidth;
 
-    ProgramModel *m = dynamic_cast<ProgramModel*>(model());
+    ProgramModel *m = dynamic_cast<ProgramModel *>(model());
 
-    if (m == nullptr)
+    if (m == nullptr) {
         return;
+    }
 
-    HintTableDelegate *delegate = dynamic_cast<HintTableDelegate*>(itemDelegate());
-    if (delegate == nullptr)
+    HintTableDelegate *delegate
+        = dynamic_cast<HintTableDelegate *>(itemDelegate());
+    if (delegate == nullptr) {
         return;
+    }
 
     idx = m->index(0, 0);
-    cwidth_dh = delegate->sizeHintForText(viewOptions(), idx,
-                                          "Bp").width() + 2;
+    cwidth_dh = delegate->sizeHintForText(viewOptions(), idx, "Bp").width() + 2;
     horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
     horizontalHeader()->resizeSection(0, cwidth_dh);
     totwidth = cwidth_dh;
 
     idx = m->index(0, 1);
-    cwidth_dh = delegate->sizeHintForText(viewOptions(), idx,
-                                          "0x00000000").width() + 2;
+    cwidth_dh
+        = delegate->sizeHintForText(viewOptions(), idx, "0x00000000").width()
+          + 2;
     horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
     horizontalHeader()->resizeSection(1, cwidth_dh);
     totwidth += cwidth_dh;
 
     idx = m->index(0, 2);
-    cwidth_dh = delegate->sizeHintForText(viewOptions(), idx,
-                                          "00000000").width() + 2;
+    cwidth_dh
+        = delegate->sizeHintForText(viewOptions(), idx, "00000000").width() + 2;
     horizontalHeader()->setSectionResizeMode(2, QHeaderView::Fixed);
     horizontalHeader()->resizeSection(2, cwidth_dh);
     totwidth += cwidth_dh;
 
     horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
     idx = m->index(0, 3);
-    totwidth += delegate->sizeHintForText(viewOptions(), idx,
-                                          "BEQ $18, $17, 0x80020058").width() + 2;
+    totwidth
+        += delegate
+               ->sizeHintForText(viewOptions(), idx, "BEQ $18, $17, 0x80020058")
+               .width()
+           + 2;
     totwidth += verticalHeader()->width();
     setColumnHidden(2, totwidth > width());
 
@@ -118,20 +129,22 @@ void ProgramTableView::adjust_scroll_pos_check() {
 
 void ProgramTableView::adjust_scroll_pos_process() {
     adjust_scroll_pos_in_progress = false;
-    std::uint32_t address;
-    ProgramModel *m = dynamic_cast<ProgramModel*>(model());
-    if (m == nullptr)
+    uint32_t address;
+    ProgramModel *m = dynamic_cast<ProgramModel *>(model());
+    if (m == nullptr) {
         return;
+    }
 
     QModelIndex prev_index = currentIndex();
-    std::uint32_t row_bytes = m->cellSizeBytes();
-    std::uint32_t index0_offset = m->getIndex0Offset();
+    uint32_t row_bytes = m->cellSizeBytes();
+    uint32_t index0_offset = m->getIndex0Offset();
 
     do {
         int row = rowAt(0);
         int prev_row = row;
         if (row < m->rowCount() / 8) {
-            if ((row == 0) && (index0_offset < row_bytes) && (index0_offset != 0)) {
+            if ((row == 0) && (index0_offset < row_bytes)
+                && (index0_offset != 0)) {
                 m->adjustRowAndOffset(row, 0);
             } else if (index0_offset >= row_bytes) {
                 m->get_row_address(address, row);
@@ -146,19 +159,20 @@ void ProgramTableView::adjust_scroll_pos_process() {
             break;
         }
         scrollTo(m->index(row, 0), QAbstractItemView::PositionAtTop);
-        setCurrentIndex(m->index(prev_index.row() + row - prev_row,
-                        prev_index.column()));
+        setCurrentIndex(
+            m->index(prev_index.row() + row - prev_row, prev_index.column()));
         emit m->update_all();
-    } while(0);
+    } while (false);
     m->get_row_address(address, rowAt(0));
-    if (need_addr0_save)
+    if (need_addr0_save) {
         addr0_save_change(address);
+    }
     emit address_changed(address);
 }
 
 void ProgramTableView::resizeEvent(QResizeEvent *event) {
-    ProgramModel *m = dynamic_cast<ProgramModel*>(model());
-    std::uint32_t address;
+    ProgramModel *m = dynamic_cast<ProgramModel *>(model());
+    uint32_t address;
     bool keep_row0 = false;
 
     if (m != nullptr) {
@@ -176,55 +190,60 @@ void ProgramTableView::resizeEvent(QResizeEvent *event) {
     }
 }
 
-void ProgramTableView::go_to_address_priv(std::uint32_t address) {
-    ProgramModel *m = dynamic_cast<ProgramModel*>(model());
+void ProgramTableView::go_to_address_priv(uint32_t address) {
+    ProgramModel *m = dynamic_cast<ProgramModel *>(model());
     int row;
-    if (m == nullptr)
+    if (m == nullptr) {
         return;
+    }
     m->adjustRowAndOffset(row, address);
-    scrollTo(m->index(row, 0),
-         QAbstractItemView::PositionAtTop);
+    scrollTo(m->index(row, 0), QAbstractItemView::PositionAtTop);
     setCurrentIndex(m->index(row, 1));
-    if (need_addr0_save)
+    if (need_addr0_save) {
         addr0_save_change(address);
+    }
     emit m->update_all();
 }
 
-void ProgramTableView::go_to_address(std::uint32_t address) {
+void ProgramTableView::go_to_address(uint32_t address) {
     need_addr0_save = true;
     go_to_address_priv(address);
 }
 
-void ProgramTableView::focus_address(std::uint32_t address) {
+void ProgramTableView::focus_address(uint32_t address) {
     int row;
-    ProgramModel *m = dynamic_cast<ProgramModel*>(model());
-    if (m == nullptr)
+    ProgramModel *m = dynamic_cast<ProgramModel *>(model());
+    if (m == nullptr) {
         return;
-    if (!m->get_row_for_address(row, address))
+    }
+    if (!m->get_row_for_address(row, address)) {
         go_to_address_priv(address);
-    if (!m->get_row_for_address(row, address))
+    }
+    if (!m->get_row_for_address(row, address)) {
         return;
+    }
     setCurrentIndex(m->index(row, 1));
 }
 
-void ProgramTableView::focus_address_with_save(std::uint32_t address) {
+void ProgramTableView::focus_address_with_save(uint32_t address) {
     need_addr0_save = true;
     focus_address(address);
 }
 
 void ProgramTableView::keyPressEvent(QKeyEvent *event) {
-    if(event->matches(QKeySequence::Copy)) {
-            QString text;
-            QItemSelectionRange range = selectionModel()->selection().first();
-            for (auto i = range.top(); i <= range.bottom(); ++i)
-            {
-                QStringList rowContents;
-                for (auto j = range.left(); j <= range.right(); ++j)
-                    rowContents << model()->index(i,j).data().toString();
-                text += rowContents.join("\t");
-                text += "\n";
+    if (event->matches(QKeySequence::Copy)) {
+        QString text;
+        QItemSelectionRange range = selectionModel()->selection().first();
+        for (auto i = range.top(); i <= range.bottom(); ++i) {
+            QStringList rowContents;
+            for (auto j = range.left(); j <= range.right(); ++j) {
+                rowContents << model()->index(i, j).data().toString();
             }
-            QApplication::clipboard()->setText(text);
-    } else
+            text += rowContents.join("\t");
+            text += "\n";
+        }
+        QApplication::clipboard()->setText(text);
+    } else {
         Super::keyPressEvent(event);
+    }
 }

@@ -34,9 +34,9 @@
  ******************************************************************************/
 
 #include "adder.h"
+
 #include "coreview_colors.h"
 #include "fontsize.h"
-#include <cmath>
 
 using namespace coreview;
 
@@ -52,7 +52,9 @@ Adder::Adder() : QGraphicsItem(nullptr), plus("+", this) {
     font.setPixelSize(FontSize::SIZE7);
     plus.setFont(font);
     QRectF plus_box = plus.boundingRect();
-    plus.setPos(DENT + (WIDTH-DENT)/2 - plus_box.width()/2, HEIGHT/2 - plus_box.height()/2);
+    plus.setPos(
+        DENT + (WIDTH - DENT) / 2 - plus_box.width() / 2,
+        HEIGHT / 2 - plus_box.height() / 2);
 
     con_in_a = new Connector(Connector::AX_X);
     con_in_b = new Connector(Connector::AX_X);
@@ -68,19 +70,20 @@ Adder::~Adder() {
 }
 
 QRectF Adder::boundingRect() const {
-    return QRectF(-PENW / 2, -PENW / 2, WIDTH + PENW, HEIGHT + PENW);
+    return { -PENW / 2, -PENW / 2, WIDTH + PENW, HEIGHT + PENW };
 }
 
-void Adder::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
-    const QPointF poly[] = {
-        QPointF(0, 0),
-        QPointF(WIDTH, WIDTH),
-        QPointF(WIDTH, HEIGHT - WIDTH),
-        QPointF(0, HEIGHT),
-        QPointF(0, (HEIGHT/2) + DENT),
-        QPointF(DENT, HEIGHT / 2),
-        QPointF(0, (HEIGHT / 2) - DENT)
-    };
+void Adder::paint(
+    QPainter *painter,
+    const QStyleOptionGraphicsItem *option __attribute__((unused)),
+    QWidget *widget __attribute__((unused))) {
+    const QPointF poly[] = { QPointF(0, 0),
+                             QPointF(WIDTH, WIDTH),
+                             QPointF(WIDTH, HEIGHT - WIDTH),
+                             QPointF(0, HEIGHT),
+                             QPointF(0, (HEIGHT / 2) + DENT),
+                             QPointF(DENT, HEIGHT / 2),
+                             QPointF(0, (HEIGHT / 2) - DENT) };
 
     QPen pen = painter->pen();
     pen.setColor(BLOCK_OUTLINE_COLOR);
@@ -92,10 +95,10 @@ void Adder::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __at
 void Adder::setPos(qreal x, qreal y) {
     QGraphicsItem::setPos(x, y);
 
-    qreal off = ((HEIGHT/2) - DENT) / 2;
+    qreal off = ((HEIGHT / 2) - DENT) / 2;
     con_in_a->setPos(x, y + off);
     con_in_b->setPos(x, y + HEIGHT - off);
-    con_out->setPos(x + WIDTH, y + HEIGHT/2);
+    con_out->setPos(x + WIDTH, y + HEIGHT / 2);
 }
 
 const Connector *Adder::connector_in_a() const {

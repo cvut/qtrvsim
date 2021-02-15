@@ -33,24 +33,21 @@
  *
  ******************************************************************************/
 
-#include <QWidget>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QTableView>
-#include <QComboBox>
-#include <QHeaderView>
-#include <QMessageBox>
-#include <QSettings>
-
 #include "messagesdock.h"
+
+#include "hexlineedit.h"
 #include "messagesmodel.h"
 #include "messagesview.h"
-#include "messagetype.h"
-#include "hexlineedit.h"
+#include "qtmips_asm/messagetype.h"
 
+#include <QHeaderView>
+#include <QSettings>
+#include <QVBoxLayout>
+#include <QWidget>
+#include <utility>
 
-
-MessagesDock::MessagesDock(QWidget *parent, QSettings *settings) : Super(parent) {
+MessagesDock::MessagesDock(QWidget *parent, QSettings *settings)
+    : Super(parent) {
     setObjectName("Messages");
     setWindowTitle("Messages");
 
@@ -58,7 +55,7 @@ MessagesDock::MessagesDock(QWidget *parent, QSettings *settings) : Super(parent)
 
     QWidget *content = new QWidget();
 
-    QListView *messages_content = new MessagesView(0, settings);
+    QListView *messages_content = new MessagesView(nullptr, settings);
     MessagesModel *messages_model = new MessagesModel(this);
     messages_content->setModel(messages_model);
 
@@ -69,19 +66,29 @@ MessagesDock::MessagesDock(QWidget *parent, QSettings *settings) : Super(parent)
 
     setWidget(content);
 
-    connect(this, &MessagesDock::report_message, messages_model,
-            &MessagesModel::insert_line);
-    connect(this, &MessagesDock::pass_clear_messages, messages_model,
-            &MessagesModel::clear_messages);
-    connect(messages_content, &QAbstractItemView::activated, messages_model,
-            &MessagesModel::activated);
-    connect(messages_model, &MessagesModel::message_selected, this,
-            &MessagesDock::message_selected);
+    connect(
+        this, &MessagesDock::report_message, messages_model,
+        &MessagesModel::insert_line);
+    connect(
+        this, &MessagesDock::pass_clear_messages, messages_model,
+        &MessagesModel::clear_messages);
+    connect(
+        messages_content, &QAbstractItemView::activated, messages_model,
+        &MessagesModel::activated);
+    connect(
+        messages_model, &MessagesModel::message_selected, this,
+        &MessagesDock::message_selected);
 }
 
-void MessagesDock::insert_line(messagetype::Type type, QString file, int line,
-                               int column, QString text, QString hint) {
-    report_message(type, file, line, column, text, hint);
+void MessagesDock::insert_line(
+    messagetype::Type type,
+    QString file,
+    int line,
+    int column,
+    QString text,
+    QString hint) {
+    report_message(
+        type, std::move(file), line, column, std::move(text), std::move(hint));
 }
 
 void MessagesDock::clear_messages() {

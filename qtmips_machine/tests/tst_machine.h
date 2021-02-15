@@ -36,6 +36,7 @@
 #ifndef TST_MACHINE_H
 #define TST_MACHINE_H
 
+#include <QtTest/QTest>
 #include <QtTest>
 
 class MachineTests : public QObject {
@@ -70,6 +71,10 @@ private Q_SLOTS:
     void alu_trap_overflow_data();
     void alu_except();
     void alu_except_data();
+    // Cache
+    // Core depends on cache, therefore it is tested first.
+    void cache_data();
+    void cache();
     // Core
     void singlecore_regs();
     void singlecore_regs_data();
@@ -99,9 +104,6 @@ private Q_SLOTS:
     void pipecore_wt_na_memory_tests();
     void pipecore_wt_a_memory_tests();
     void pipecore_wb_memory_tests();
-    // Cache
-    void cache_data();
-    void cache();
 };
 
 #endif // TST_MACHINE_H

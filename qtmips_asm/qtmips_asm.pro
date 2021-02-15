@@ -9,7 +9,7 @@ CONFIG(debug, debug|release) {
 TEMPLATE = lib
 CONFIG += staticlib
 
-INCLUDEPATH += $$PWD/../qtmips_machine $$PWD/../qtmips_osemu
+INCLUDEPATH += $$PWD/..
 DEPENDPATH += $$PWD/../qtmips_machine
 
 LIBS += -lelf

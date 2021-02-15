@@ -36,12 +36,13 @@
 #ifndef CACHEDOCK_H
 #define CACHEDOCK_H
 
-#include <QDockWidget>
-#include <QLabel>
-#include <QFormLayout>
 #include "cacheview.h"
 #include "graphicsview.h"
-#include "qtmipsmachine.h"
+#include "qtmips_machine/qtmipsmachine.h"
+
+#include <QDockWidget>
+#include <QFormLayout>
+#include <QLabel>
 
 class CacheDock : public QDockWidget {
     Q_OBJECT
@@ -55,7 +56,10 @@ private slots:
     void miss_update(unsigned);
     void memory_reads_update(unsigned val);
     void memory_writes_update(unsigned val);
-    void statistics_update(unsigned stalled_cycles, double speed_improv, double hit_rate);
+    void statistics_update(
+        unsigned stalled_cycles,
+        double speed_improv,
+        double hit_rate);
 
 private:
     QVBoxLayout *layout_box;

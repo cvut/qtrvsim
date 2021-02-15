@@ -52,6 +52,7 @@ HEADERS += \
     machineconfig.h \
     utils.h \
     machinedefs.h \
+    programloader.h \
     physaddrspace.h \
     peripheral.h \
     serialport.h \

@@ -36,19 +36,20 @@
 #ifndef TERMINALDOCK_H
 #define TERMINALDOCK_H
 
+#include "qtmips_machine/qtmipsmachine.h"
+
 #include <QDockWidget>
-#include <QLabel>
 #include <QFormLayout>
+#include <QLabel>
 #include <QLineEdit>
-#include <QTextEdit>
 #include <QTextCursor>
-#include "qtmipsmachine.h"
+#include <QTextEdit>
 
 class TerminalDock : public QDockWidget {
     Q_OBJECT
 public:
     TerminalDock(QWidget *parent, QSettings *settings);
-    ~TerminalDock();
+    ~TerminalDock() override;
 
     void setup(machine::SerialPort *ser_port);
 
@@ -60,8 +61,8 @@ public slots:
 private:
     QVBoxLayout *layout_box;
     QHBoxLayout *layout_bottom_box;
-    QWidget *top_widget, *top_form;
-    QFormLayout *layout_top_form;
+    QWidget *top_widget, *top_form {};
+    QFormLayout *layout_top_form {};
     QTextEdit *terminal_text;
     QTextCursor *append_cursor;
     QLineEdit *input_edit;

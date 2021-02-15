@@ -36,12 +36,13 @@
 #ifndef LCDDISPLAY_H
 #define LCDDISPLAY_H
 
-#include <QObject>
-#include <QMap>
-#include <cstdint>
-#include <qtmipsexception.h>
 #include "machinedefs.h"
 #include "memory.h"
+#include "qtmipsexception.h"
+
+#include <QMap>
+#include <QObject>
+#include <cstdint>
 
 namespace machine {
 
@@ -49,29 +50,29 @@ class LcdDisplay : public MemoryAccess {
     Q_OBJECT
 public:
     LcdDisplay();
-    ~LcdDisplay();
+    ~LcdDisplay() override;
 
 signals:
-    void write_notification(std::uint32_t address, std::uint32_t value);
-    void read_notification(std::uint32_t address, std::uint32_t *value) const;
+    void write_notification(uint32_t address, uint32_t value);
+    void read_notification(uint32_t address, uint32_t *value) const;
     void pixel_update(uint x, uint y, uint r, uint g, uint b);
 
 public:
-    bool wword(std::uint32_t address, std::uint32_t value) override;
-    std::uint32_t rword(std::uint32_t address, bool debug_access = false) const override;
-    virtual std::uint32_t get_change_counter() const override;
+    bool wword(uint32_t address, uint32_t value) override;
+    uint32_t rword(uint32_t address, bool debug_access = false) const override;
+    uint32_t get_change_counter() const override;
 
-    inline uint width() {
+    inline uint width() const {
         return fb_width;
     }
 
-    inline uint height() {
+    inline uint height() const {
         return fb_height;
     }
 
 private:
-    mutable std::uint32_t change_counter;
-    std::uint32_t pixel_address(uint x, uint y);
+    mutable uint32_t change_counter;
+    uint32_t pixel_address(uint x, uint y) const;
     uchar *fb_data;
     size_t fb_size;
     unsigned fb_bpp;
@@ -80,6 +81,6 @@ private:
     unsigned fb_linesize;
 };
 
-}
+} // namespace machine
 
 #endif // LCDDISPLAY_H

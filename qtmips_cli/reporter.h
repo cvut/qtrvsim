@@ -36,36 +36,37 @@
 #ifndef REPORTER_H
 #define REPORTER_H
 
-#include <QObject>
-#include <QVector>
-#include <QString>
+#include "qtmips_machine/qtmipsmachine.h"
+
 #include <QCoreApplication>
-#include "qtmipsmachine.h"
+#include <QObject>
+#include <QString>
 
 class Reporter : public QObject {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  Reporter(QCoreApplication *app, machine::QtMipsMachine *machine);
+    Reporter(QCoreApplication *app, machine::QtMipsMachine *machine);
 
-  void regs(); // Report status of registers
-  void cache_stats();
-  void cycles();
+    void regs(); // Report status of registers
+    void cache_stats();
+    void cycles();
 
-  enum FailReason {
-    FR_I = (1 << 0), // Unsupported Instruction
-    FR_A = (1<<1), // Unsupported ALU operation
-        FR_O = (1<<2), // Overflow/underflow of numerical operation
-        FR_J = (1<<3), // Unaligned jump
+    enum FailReason {
+        FR_I = (1 << 0), // Unsupported Instruction
+        FR_A = (1 << 1), // Unsupported ALU operation
+        FR_O = (1 << 2), // Overflow/underflow of numerical operation
+        FR_J = (1 << 3), // Unaligned jump
     };
-    static const enum FailReason FailAny = (enum FailReason)(FR_I | FR_A | FR_O | FR_J);
+    static const enum FailReason FailAny
+        = (enum FailReason)(FR_I | FR_A | FR_O | FR_J);
     void expect_fail(enum FailReason reason);
 
     struct DumpRange {
-        std::uint32_t start;
-        std::uint32_t len;
+        uint32_t start;
+        uint32_t len;
         QString fname;
     };
-    void add_dump_range(std::uint32_t start, std::uint32_t len, QString fname);
+    void add_dump_range(uint32_t start, uint32_t len, const QString &fname);
 
 private slots:
     void machine_exit();

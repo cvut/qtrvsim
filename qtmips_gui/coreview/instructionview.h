@@ -36,9 +36,10 @@
 #ifndef INSTRUCTIONVIEW_H
 #define INSTRUCTIONVIEW_H
 
+#include "qtmips_machine/qtmipsmachine.h"
+
 #include <QGraphicsObject>
 #include <QGraphicsSimpleTextItem>
-#include "qtmipsmachine.h"
 
 namespace coreview {
 
@@ -48,11 +49,17 @@ public:
     InstructionView(QColor bgnd = QColor(240, 240, 240));
 
     QRectF boundingRect() const override;
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void paint(
+        QPainter *painter,
+        const QStyleOptionGraphicsItem *option,
+        QWidget *widget) override;
 
 public slots:
-    void instruction_update(const machine::Instruction &i, std::uint32_t inst_addr,
-                            machine::ExceptionCause excause, bool valid);
+    void instruction_update(
+        const machine::Instruction &i,
+        uint32_t inst_addr,
+        machine::ExceptionCause excause,
+        bool valid);
 
 private:
     QGraphicsSimpleTextItem text;
@@ -61,6 +68,6 @@ private:
     bool valid;
 };
 
-}
+} // namespace coreview
 
 #endif // INSTRUCTIONVIEW_H

@@ -9,22 +9,22 @@ namespace Ui {
 class GoToSymbolDialog;
 }
 
-class GoToSymbolDialog : public QDialog
-{
+class GoToSymbolDialog : public QDialog {
     Q_OBJECT
 
 public:
     explicit GoToSymbolDialog(QWidget *parent, QStringList &symlist);
-    ~GoToSymbolDialog();
+    ~GoToSymbolDialog() override;
 signals:
-    void program_focus_addr(std::uint32_t);
-    void memory_focus_addr(std::uint32_t);
-    bool obtain_value_for_name(std::uint32_t &value, QString name) const;
+    void program_focus_addr(uint32_t);
+    void memory_focus_addr(uint32_t);
+    bool obtain_value_for_name(uint32_t &value, QString name) const;
 public slots:
     void show_prog();
     void show_mem();
+
 private:
-    Ui::GoToSymbolDialog *ui;
+    Ui::GoToSymbolDialog *ui {};
 };
 
 #endif // GOTOSYMBOLDIALOG_H

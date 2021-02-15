@@ -36,7 +36,7 @@
 #ifndef MACHINEDEFS_H
 #define MACHINEDEFS_H
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace machine {
 
@@ -58,21 +58,22 @@ enum AccessControl {
 };
 
 enum ExceptionCause {
-    EXCAUSE_NONE     =  0,  // Use zero as default value when no exception is pending
-    EXCAUSE_INT      =  1,  // Int is 0 on real CPU and in Cause regsiter
-    EXCAUSE_ADDRL    =  4,
-    EXCAUSE_ADDRS    =  5,
-    EXCAUSE_IBUS     =  6,
-    EXCAUSE_DBUS     =  7,
-    EXCAUSE_SYSCALL  =  8,
-    EXCAUSE_BREAK    =  9,
+    EXCAUSE_NONE = 0, // Use zero as default value when no exception is
+    // pending.
+    EXCAUSE_INT = 1, // Int is 0 on real CPU and in Cause register.
+    EXCAUSE_ADDRL = 4,
+    EXCAUSE_ADDRS = 5,
+    EXCAUSE_IBUS = 6,
+    EXCAUSE_DBUS = 7,
+    EXCAUSE_SYSCALL = 8,
+    EXCAUSE_BREAK = 9,
     EXCAUSE_OVERFLOW = 12,
-    EXCAUSE_TRAP     = 13,
-    EXCAUSE_HWBREAK  = 14,
-    EXCAUSE_COUNT    = 15,
+    EXCAUSE_TRAP = 13,
+    EXCAUSE_HWBREAK = 14,
+    EXCAUSE_COUNT = 15,
 };
 
-enum AluOp : std::uint8_t {
+enum AluOp : uint8_t {
     ALU_OP_NOP,
     ALU_OP_SLL,
     ALU_OP_SRL,
@@ -130,19 +131,20 @@ enum AluOp : std::uint8_t {
     ALU_OP_MFMC0,
     ALU_OP_ERET,
     ALU_OP_UNKNOWN,
-    ALU_OP_LAST // First impossible operation (just to be sure that we don't overflow)
+    ALU_OP_LAST // First impossible operation (just to be sure that we don't
+                // overflow)
 };
 
 enum LocationStatus {
-    LOCSTAT_NONE      = 0,
-    LOCSTAT_CACHED    = 1 << 0,
-    LOCSTAT_DIRTY     = 1 << 1,
+    LOCSTAT_NONE = 0,
+    LOCSTAT_CACHED = 1 << 0,
+    LOCSTAT_DIRTY = 1 << 1,
     LOCSTAT_READ_ONLY = 1 << 2,
-    LOCSTAT_ILLEGAL   = 1 << 3,
+    LOCSTAT_ILLEGAL = 1 << 3,
 };
 
-const std::uint32_t STAGEADDR_NONE = 0xffffffff;
+const uint32_t STAGEADDR_NONE = 0xffffffff;
 
-}
+} // namespace machine
 
 #endif // MACHINEDEFS_H

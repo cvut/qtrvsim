@@ -36,9 +36,10 @@
 #ifndef MSGREPORT_H
 #define MSGREPORT_H
 
+#include "qtmips_asm/messagetype.h"
+
 #include <QProcess>
 #include <QString>
-#include "messagetype.h"
 
 class ExtProcess : public QProcess {
     Q_OBJECT
@@ -49,7 +50,13 @@ public:
     ExtProcess(QObject *parent = nullptr);
 
 signals:
-    void report_message(messagetype::Type type, QString file, int line, int column, QString text, QString hint);
+    void report_message(
+        messagetype::Type type,
+        QString file,
+        int line,
+        int column,
+        QString text,
+        QString hint);
 
 protected slots:
     void process_output();

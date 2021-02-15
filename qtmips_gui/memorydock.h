@@ -36,12 +36,13 @@
 #ifndef MEMORYDOCK_H
 #define MEMORYDOCK_H
 
+#include "qtmips_machine/qtmipsmachine.h"
+
+#include <QComboBox>
 #include <QDockWidget>
 #include <QLabel>
-#include <QComboBox>
-#include "qtmipsmachine.h"
 
-class MemoryDock : public QDockWidget  {
+class MemoryDock : public QDockWidget {
     Q_OBJECT
 
     using Super = QDockWidget;
@@ -53,10 +54,9 @@ public:
 
 signals:
     void machine_setup(machine::QtMipsMachine *machine);
-    void focus_addr(std::uint32_t);
+    void focus_addr(uint32_t);
 
 private:
-
 };
 
 #endif // MEMORYDOCK_H

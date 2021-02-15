@@ -33,14 +33,14 @@
  *
  ******************************************************************************/
 
-#ifndef  FIXMATHEVAL_H
-#define  FIXMATHEVAL_H
+#ifndef FIXMATHEVAL_H
+#define FIXMATHEVAL_H
 
-#include  <QString>
+#include <QString>
 
 namespace fixmatheval {
 
-typedef std::int64_t FmeValue;
+typedef int64_t FmeValue;
 
 class FmeSymbolDb {
 public:
@@ -56,7 +56,8 @@ public:
     virtual bool insert(FmeNode *node);
     virtual FmeNode *child();
     virtual QString dump() = 0;
-    int priority();
+    int priority() const;
+
 private:
     int prio;
 };
@@ -64,9 +65,10 @@ private:
 class FmeNodeConstant : public FmeNode {
 public:
     FmeNodeConstant(FmeValue value);
-    virtual ~FmeNodeConstant();
-    virtual bool eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) override;
-    virtual QString dump() override;
+    ~FmeNodeConstant() override;
+    bool eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) override;
+    QString dump() override;
+
 private:
     FmeValue value;
 };
@@ -74,22 +76,26 @@ private:
 class FmeNodeSymbol : public FmeNode {
 public:
     FmeNodeSymbol(QString &name);
-    virtual ~FmeNodeSymbol();
-    virtual bool eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) override;
-    virtual QString dump() override;
+    ~FmeNodeSymbol() override;
+    bool eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) override;
+    QString dump() override;
+
 private:
     QString name;
 };
 
 class FmeNodeUnaryOp : public FmeNode {
 public:
-    FmeNodeUnaryOp(int priority, FmeValue (*op)(FmeValue &a),
-                   QString description = "??");
-    virtual ~FmeNodeUnaryOp();
-    virtual bool eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) override;
-    virtual bool insert(FmeNode *node) override;
-    virtual FmeNode *child() override;
-    virtual QString dump() override;
+    FmeNodeUnaryOp(
+        int priority,
+        FmeValue (*op)(FmeValue &a),
+        QString description = "??");
+    ~FmeNodeUnaryOp() override;
+    bool eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) override;
+    bool insert(FmeNode *node) override;
+    FmeNode *child() override;
+    QString dump() override;
+
 private:
     FmeValue (*op)(FmeValue &a);
     FmeNode *operand_a;
@@ -98,13 +104,17 @@ private:
 
 class FmeNodeBinaryOp : public FmeNode {
 public:
-    FmeNodeBinaryOp(int priority, FmeValue (*op)(FmeValue &a, FmeValue &b), FmeNode *left,
-                    QString description = "??");
-    virtual ~FmeNodeBinaryOp();
-    virtual bool eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) override;
-    virtual bool insert(FmeNode *node) override;
-    virtual FmeNode *child() override;
-    virtual QString dump() override;
+    FmeNodeBinaryOp(
+        int priority,
+        FmeValue (*op)(FmeValue &a, FmeValue &b),
+        FmeNode *left,
+        QString description = "??");
+    ~FmeNodeBinaryOp() override;
+    bool eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) override;
+    bool insert(FmeNode *node) override;
+    FmeNode *child() override;
+    QString dump() override;
+
 private:
     FmeValue (*op)(FmeValue &a, FmeValue &b);
     FmeNode *operand_a;
@@ -115,16 +125,17 @@ private:
 class FmeExpression : public FmeNode {
 public:
     FmeExpression();
-    virtual ~FmeExpression();
+    ~FmeExpression() override;
     virtual bool parse(const QString &expression, QString &error);
-    virtual bool eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) override;
-    virtual bool insert(FmeNode *node) override;
-    virtual FmeNode *child() override;
-    virtual QString dump() override;
+    bool eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) override;
+    bool insert(FmeNode *node) override;
+    FmeNode *child() override;
+    QString dump() override;
+
 private:
     FmeNode *root;
 };
 
-}
+} // namespace fixmatheval
 
 #endif /*FIXMATHEVAL*/

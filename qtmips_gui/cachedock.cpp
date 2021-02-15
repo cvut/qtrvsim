@@ -35,7 +35,8 @@
 
 #include "cachedock.h"
 
-CacheDock::CacheDock(QWidget *parent, const QString &type) : QDockWidget(parent) {
+CacheDock::CacheDock(QWidget *parent, const QString &type)
+    : QDockWidget(parent) {
     top_widget = new QWidget(this);
     setWidget(top_widget);
     layout_box = new QVBoxLayout(top_widget);
@@ -57,7 +58,7 @@ CacheDock::CacheDock(QWidget *parent, const QString &type) : QDockWidget(parent)
     layout_top_form->addRow("Memory stall cycles:", l_stalled);
     l_hit_rate = new QLabel("0.000%", top_form);
     layout_top_form->addRow("Hit rate:", l_hit_rate);
-    l_speed  = new QLabel("100%", top_form);
+    l_speed = new QLabel("100%", top_form);
     layout_top_form->addRow("Improved speed:", l_speed);
 
     graphicsview = new GraphicsView(top_widget);
@@ -81,21 +82,24 @@ void CacheDock::setup(const machine::Cache *cache) {
     l_hit_rate->setText("0.000%");
     l_speed->setText("100%");
     if (cache != nullptr) {
-      connect(cache, &machine::Cache::hit_update, this, &CacheDock::hit_update);
-      connect(cache, &machine::Cache::miss_update, this,
-              &CacheDock::miss_update);
-      connect(cache, &machine::Cache::memory_reads_update, this,
-              &CacheDock::memory_reads_update);
-      connect(cache, &machine::Cache::memory_writes_update, this,
-              &CacheDock::memory_writes_update);
-      connect(cache, &machine::Cache::statistics_update, this,
-              &CacheDock::statistics_update);
+        connect(
+            cache, &machine::Cache::hit_update, this, &CacheDock::hit_update);
+        connect(
+            cache, &machine::Cache::miss_update, this, &CacheDock::miss_update);
+        connect(
+            cache, &machine::Cache::memory_reads_update, this,
+            &CacheDock::memory_reads_update);
+        connect(
+            cache, &machine::Cache::memory_writes_update, this,
+            &CacheDock::memory_writes_update);
+        connect(
+            cache, &machine::Cache::statistics_update, this,
+            &CacheDock::statistics_update);
     }
     top_form->setVisible(cache != nullptr);
     no_cache->setVisible(!cache->config().enabled());
 
-    if (cachescene)
-        delete cachescene;
+    delete cachescene;
     cachescene = new CacheViewScene(cache);
     graphicsview->setScene(cachescene);
     graphicsview->setVisible(cache->config().enabled());
@@ -117,7 +121,10 @@ void CacheDock::memory_writes_update(unsigned val) {
     l_m_writes->setText(QString::number(val));
 }
 
-void CacheDock::statistics_update(unsigned stalled_cycles, double speed_improv, double hit_rate) {
+void CacheDock::statistics_update(
+    unsigned stalled_cycles,
+    double speed_improv,
+    double hit_rate) {
     l_stalled->setText(QString::number(stalled_cycles));
     l_hit_rate->setText(QString::number(hit_rate, 'f', 3) + QString("%"));
     l_speed->setText(QString::number(speed_improv, 'f', 0) + QString("%"));

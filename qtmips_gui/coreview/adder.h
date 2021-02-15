@@ -36,20 +36,24 @@
 #ifndef ADDER_H
 #define ADDER_H
 
-#include <QGraphicsItem>
-#include <QPainter>
-#include <QGraphicsSimpleTextItem>
 #include "connection.h"
+
+#include <QGraphicsItem>
+#include <QGraphicsSimpleTextItem>
+#include <QPainter>
 
 namespace coreview {
 
 class Adder : public QGraphicsItem {
 public:
     Adder();
-    ~Adder();
+    ~Adder() override;
 
     QRectF boundingRect() const override;
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void paint(
+        QPainter *painter,
+        const QStyleOptionGraphicsItem *option,
+        QWidget *widget) override;
 
     void setPos(qreal x, qreal y);
     const Connector *connector_in_a() const;
@@ -62,6 +66,6 @@ private:
     Connector *con_in_a, *con_in_b, *con_out;
 };
 
-}
+} // namespace coreview
 
 #endif // ADDER_H

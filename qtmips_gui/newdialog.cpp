@@ -34,12 +34,16 @@
  ******************************************************************************/
 
 #include "newdialog.h"
+
 #include "mainwindow.h"
-#include "qtmipsexception.h"
+#include "qtmips_machine/qtmipsexception.h"
+
+#include <utility>
 
 #ifdef __EMSCRIPTEN__
-#include <QFileInfo>
-#include "qhtml5file.h"
+    #include "qhtml5file.h"
+
+    #include <QFileInfo>
 #endif
 
 NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
@@ -57,63 +61,89 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     ui_cache_d = new Ui::NewDialogCache();
     ui_cache_d->setupUi(ui->tab_cache_data);
 
-    connect(ui->pushButton_start_empty, &QAbstractButton::clicked, this,
-            &NewDialog::create_empty);
-    connect(ui->pushButton_load, &QAbstractButton::clicked, this,
-            &NewDialog::create);
-    connect(ui->pushButton_cancel, &QAbstractButton::clicked, this,
-            &NewDialog::cancel);
-    connect(ui->pushButton_browse, &QAbstractButton::clicked, this,
-            &NewDialog::browse_elf);
-    connect(ui->elf_file, &QLineEdit::textChanged, this,
-            &NewDialog::elf_change);
-    connect(ui->preset_no_pipeline, &QAbstractButton::toggled, this,
-            &NewDialog::set_preset);
-    connect(ui->preset_no_pipeline_cache, &QAbstractButton::toggled, this,
-            &NewDialog::set_preset);
-    connect(ui->preset_pipelined_bare, &QAbstractButton::toggled, this,
-            &NewDialog::set_preset);
-    connect(ui->preset_pipelined, &QAbstractButton::toggled, this,
-            &NewDialog::set_preset);
-    connect(ui->reset_at_compile, &QAbstractButton::clicked, this,
-            &NewDialog::reset_at_compile_change);
+    connect(
+        ui->pushButton_start_empty, &QAbstractButton::clicked, this,
+        &NewDialog::create_empty);
+    connect(
+        ui->pushButton_load, &QAbstractButton::clicked, this,
+        &NewDialog::create);
+    connect(
+        ui->pushButton_cancel, &QAbstractButton::clicked, this,
+        &NewDialog::cancel);
+    connect(
+        ui->pushButton_browse, &QAbstractButton::clicked, this,
+        &NewDialog::browse_elf);
+    connect(
+        ui->elf_file, &QLineEdit::textChanged, this, &NewDialog::elf_change);
+    connect(
+        ui->preset_no_pipeline, &QAbstractButton::toggled, this,
+        &NewDialog::set_preset);
+    connect(
+        ui->preset_no_pipeline_cache, &QAbstractButton::toggled, this,
+        &NewDialog::set_preset);
+    connect(
+        ui->preset_pipelined_bare, &QAbstractButton::toggled, this,
+        &NewDialog::set_preset);
+    connect(
+        ui->preset_pipelined, &QAbstractButton::toggled, this,
+        &NewDialog::set_preset);
+    connect(
+        ui->reset_at_compile, &QAbstractButton::clicked, this,
+        &NewDialog::reset_at_compile_change);
 
-    connect(ui->pipelined, &QAbstractButton::clicked, this,
-            &NewDialog::pipelined_change);
-    connect(ui->delay_slot, &QAbstractButton::clicked, this,
-            &NewDialog::delay_slot_change);
-    connect(ui->hazard_unit, &QGroupBox::clicked, this,
-            &NewDialog::hazard_unit_change);
-    connect(ui->hazard_stall, &QAbstractButton::clicked, this,
-            &NewDialog::hazard_unit_change);
-    connect(ui->hazard_stall_forward, &QAbstractButton::clicked, this,
-            &NewDialog::hazard_unit_change);
+    connect(
+        ui->pipelined, &QAbstractButton::clicked, this,
+        &NewDialog::pipelined_change);
+    connect(
+        ui->delay_slot, &QAbstractButton::clicked, this,
+        &NewDialog::delay_slot_change);
+    connect(
+        ui->hazard_unit, &QGroupBox::clicked, this,
+        &NewDialog::hazard_unit_change);
+    connect(
+        ui->hazard_stall, &QAbstractButton::clicked, this,
+        &NewDialog::hazard_unit_change);
+    connect(
+        ui->hazard_stall_forward, &QAbstractButton::clicked, this,
+        &NewDialog::hazard_unit_change);
 
-    connect(ui->mem_protec_exec, &QAbstractButton::clicked, this,
-            &NewDialog::mem_protec_exec_change);
-    connect(ui->mem_protec_write, &QAbstractButton::clicked, this,
-            &NewDialog::mem_protec_write_change);
-    connect(ui->mem_time_read, QOverload<int>::of(&QSpinBox::valueChanged),
-            this, &NewDialog::mem_time_read_change);
-    connect(ui->mem_time_write, QOverload<int>::of(&QSpinBox::valueChanged),
-            this, &NewDialog::mem_time_write_change);
-    connect(ui->mem_time_burst, QOverload<int>::of(&QSpinBox::valueChanged),
-            this, &NewDialog::mem_time_burst_change);
+    connect(
+        ui->mem_protec_exec, &QAbstractButton::clicked, this,
+        &NewDialog::mem_protec_exec_change);
+    connect(
+        ui->mem_protec_write, &QAbstractButton::clicked, this,
+        &NewDialog::mem_protec_write_change);
+    connect(
+        ui->mem_time_read, QOverload<int>::of(&QSpinBox::valueChanged), this,
+        &NewDialog::mem_time_read_change);
+    connect(
+        ui->mem_time_write, QOverload<int>::of(&QSpinBox::valueChanged), this,
+        &NewDialog::mem_time_write_change);
+    connect(
+        ui->mem_time_burst, QOverload<int>::of(&QSpinBox::valueChanged), this,
+        &NewDialog::mem_time_burst_change);
 
-    connect(ui->osemu_enable, &QAbstractButton::clicked, this,
-            &NewDialog::osemu_enable_change);
-    connect(ui->osemu_known_syscall_stop, &QAbstractButton::clicked, this,
-            &NewDialog::osemu_known_syscall_stop_change);
-    connect(ui->osemu_unknown_syscall_stop, &QAbstractButton::clicked, this,
-            &NewDialog::osemu_unknown_syscall_stop_change);
-    connect(ui->osemu_interrupt_stop, &QAbstractButton::clicked, this,
-            &NewDialog::osemu_interrupt_stop_change);
-    connect(ui->osemu_exception_stop, &QAbstractButton::clicked, this,
-            &NewDialog::osemu_exception_stop_change);
-    connect(ui->osemu_fs_root_browse, &QAbstractButton::clicked, this,
-            &NewDialog::browse_osemu_fs_root);
-    connect(ui->osemu_fs_root, &QLineEdit::textChanged, this,
-            &NewDialog::osemu_fs_root_change);
+    connect(
+        ui->osemu_enable, &QAbstractButton::clicked, this,
+        &NewDialog::osemu_enable_change);
+    connect(
+        ui->osemu_known_syscall_stop, &QAbstractButton::clicked, this,
+        &NewDialog::osemu_known_syscall_stop_change);
+    connect(
+        ui->osemu_unknown_syscall_stop, &QAbstractButton::clicked, this,
+        &NewDialog::osemu_unknown_syscall_stop_change);
+    connect(
+        ui->osemu_interrupt_stop, &QAbstractButton::clicked, this,
+        &NewDialog::osemu_interrupt_stop_change);
+    connect(
+        ui->osemu_exception_stop, &QAbstractButton::clicked, this,
+        &NewDialog::osemu_exception_stop_change);
+    connect(
+        ui->osemu_fs_root_browse, &QAbstractButton::clicked, this,
+        &NewDialog::browse_osemu_fs_root);
+    connect(
+        ui->osemu_fs_root, &QLineEdit::textChanged, this,
+        &NewDialog::osemu_fs_root_change);
 
     cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d);
     cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p);
@@ -134,16 +164,17 @@ NewDialog::~NewDialog() {
 }
 
 void NewDialog::switch2custom() {
-	ui->preset_custom->setChecked(true);
-	config_gui();
+    ui->preset_custom->setChecked(true);
+    config_gui();
 }
 
 void NewDialog::closeEvent(QCloseEvent *) {
     load_settings(); // Reset from settings
     // Close main window if not already configured
-    MainWindow *prnt = (MainWindow*)parent();
-    if (!prnt->configured())
+    MainWindow *prnt = (MainWindow *)parent();
+    if (!prnt->configured()) {
         prnt->close();
+    }
 }
 
 void NewDialog::cancel() {
@@ -151,7 +182,7 @@ void NewDialog::cancel() {
 }
 
 void NewDialog::create() {
-    MainWindow *prnt = (MainWindow*)parent();
+    MainWindow *prnt = (MainWindow *)parent();
 
     try {
         prnt->create_core(*config, true, false);
@@ -159,7 +190,8 @@ void NewDialog::create() {
         QMessageBox msg(this);
         msg.setText(e.msg(false));
         msg.setIcon(QMessageBox::Critical);
-        msg.setToolTip("Please check that ELF executable really exists and is in correct format.");
+        msg.setToolTip("Please check that ELF executable really exists and is "
+                       "in correct format.");
         msg.setDetailedText(e.msg(true));
         msg.setWindowTitle("Error while initializing new machine");
         msg.exec();
@@ -171,12 +203,11 @@ void NewDialog::create() {
 }
 
 void NewDialog::create_empty() {
-    MainWindow *prnt = (MainWindow*)parent();
+    MainWindow *prnt = (MainWindow *)parent();
     prnt->create_core(*config, false, true);
     store_settings(); // Save to settings
     this->close();
 }
-
 
 void NewDialog::browse_elf() {
 #ifndef __EMSCRIPTEN__
@@ -189,21 +220,22 @@ void NewDialog::browse_elf() {
     }
     // Elf shouldn't have any other effect so we skip config_gui here
 #else
-    QHtml5File::load("*", [&](const QByteArray &content, const QString &fileName) {
-                QFileInfo fi(fileName);
-                QString elf_name = fi.fileName();
-                QFile file(elf_name);
-                file.open(QIODevice::WriteOnly | QIODevice::Truncate);
-                file.write(content);
-                file.close();
-                ui->elf_file->setText(elf_name);
-                config->set_elf(elf_name);
-            });
+    QHtml5File::load(
+        "*", [&](const QByteArray &content, const QString &fileName) {
+            QFileInfo fi(fileName);
+            QString elf_name = fi.fileName();
+            QFile file(elf_name);
+            file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+            file.write(content);
+            file.close();
+            ui->elf_file->setText(elf_name);
+            config->set_elf(elf_name);
+        });
 #endif
 }
 
 void NewDialog::elf_change(QString val) {
-    config->set_elf(val);
+    config->set_elf(std::move(val));
 }
 
 void NewDialog::set_preset() {
@@ -216,31 +248,34 @@ void NewDialog::set_preset() {
 
 void NewDialog::pipelined_change(bool val) {
     config->set_pipelined(val);
-	switch2custom();
+    switch2custom();
 }
 
 void NewDialog::delay_slot_change(bool val) {
     config->set_delay_slot(val);
-	switch2custom();
+    switch2custom();
 }
 
 void NewDialog::hazard_unit_change() {
     if (ui->hazard_unit->isChecked()) {
-        config->set_hazard_unit(ui->hazard_stall->isChecked() ? machine::MachineConfig::HU_STALL : machine::MachineConfig::HU_STALL_FORWARD);
-	} else {
+        config->set_hazard_unit(
+            ui->hazard_stall->isChecked()
+                ? machine::MachineConfig::HU_STALL
+                : machine::MachineConfig::HU_STALL_FORWARD);
+    } else {
         config->set_hazard_unit(machine::MachineConfig::HU_NONE);
-	}
-	switch2custom();
+    }
+    switch2custom();
 }
 
 void NewDialog::mem_protec_exec_change(bool v) {
     config->set_memory_execute_protection(v);
-	switch2custom();
+    switch2custom();
 }
 
 void NewDialog::mem_protec_write_change(bool v) {
     config->set_memory_write_protection(v);
-	switch2custom();
+    switch2custom();
 }
 
 void NewDialog::mem_time_read_change(int v) {
@@ -295,7 +330,7 @@ void NewDialog::browse_osemu_fs_root() {
 }
 
 void NewDialog::osemu_fs_root_change(QString val) {
-    config->set_osemu_fs_root(val);
+    config->set_osemu_fs_root(std::move(val));
 }
 
 void NewDialog::reset_at_compile_change(bool v) {
@@ -309,9 +344,12 @@ void NewDialog::config_gui() {
     // Core
     ui->pipelined->setChecked(config->pipelined());
     ui->delay_slot->setChecked(config->delay_slot());
-    ui->hazard_unit->setChecked(config->hazard_unit() != machine::MachineConfig::HU_NONE);
-    ui->hazard_stall->setChecked(config->hazard_unit() == machine::MachineConfig::HU_STALL);
-    ui->hazard_stall_forward->setChecked(config->hazard_unit() == machine::MachineConfig::HU_STALL_FORWARD);
+    ui->hazard_unit->setChecked(
+        config->hazard_unit() != machine::MachineConfig::HU_NONE);
+    ui->hazard_stall->setChecked(
+        config->hazard_unit() == machine::MachineConfig::HU_STALL);
+    ui->hazard_stall_forward->setChecked(
+        config->hazard_unit() == machine::MachineConfig::HU_STALL_FORWARD);
     // Memory
     ui->mem_protec_exec->setChecked(config->memory_execute_protection());
     ui->mem_protec_write->setChecked(config->memory_write_protection());
@@ -319,12 +357,14 @@ void NewDialog::config_gui() {
     ui->mem_time_write->setValue(config->memory_access_time_write());
     ui->mem_time_burst->setValue(config->memory_access_time_burst());
     // Cache
-	cache_handler_d->config_gui();
-	cache_handler_p->config_gui();
+    cache_handler_d->config_gui();
+    cache_handler_p->config_gui();
     // Operating system and exceptions
     ui->osemu_enable->setChecked(config->osemu_enable());
-    ui->osemu_known_syscall_stop->setChecked(config->osemu_known_syscall_stop());
-    ui->osemu_unknown_syscall_stop->setChecked(config->osemu_unknown_syscall_stop());
+    ui->osemu_known_syscall_stop->setChecked(
+        config->osemu_known_syscall_stop());
+    ui->osemu_unknown_syscall_stop->setChecked(
+        config->osemu_unknown_syscall_stop());
     ui->osemu_interrupt_stop->setChecked(config->osemu_interrupt_stop());
     ui->osemu_exception_stop->setChecked(config->osemu_exception_stop());
     ui->osemu_fs_root->setText(config->osemu_fs_root());
@@ -350,13 +390,12 @@ unsigned NewDialog::preset_number() {
 }
 
 void NewDialog::load_settings() {
-    if (config != nullptr)
-        delete config;
+    delete config;
 
     // Load config
     config = new machine::MachineConfig(settings);
-	cache_handler_d->set_config(config->access_cache_data());
-	cache_handler_p->set_config(config->access_cache_program());
+    cache_handler_d->set_config(config->access_cache_data());
+    cache_handler_p->set_config(config->access_cache_program());
 
     // Load preset
     unsigned preset = settings->value("Preset", 1).toUInt();
@@ -373,13 +412,11 @@ void NewDialog::load_settings() {
         case machine::CP_PIPE_NO_HAZARD:
             ui->preset_pipelined_bare->setChecked(true);
             break;
-        case machine::CP_PIPE:
-            ui->preset_pipelined->setChecked(true);
-            break;
+        case machine::CP_PIPE: ui->preset_pipelined->setChecked(true); break;
         }
     } else {
         ui->preset_custom->setChecked(true);
-	}
+    }
 
     config_gui();
 }
@@ -390,31 +427,39 @@ void NewDialog::store_settings() {
     // Presets are not stored in settings so we have to store them explicitly
     if (ui->preset_custom->isChecked()) {
         settings->setValue("Preset", 0);
-	} else {
+    } else {
         settings->setValue("Preset", preset_number());
-	}
+    }
 }
 
-NewDialogCacheHandler::NewDialogCacheHandler(NewDialog *nd, Ui::NewDialogCache *cui) {
-  this->nd = nd;
-  this->ui = cui;
-  this->config = nullptr;
-  connect(ui->enabled, &QGroupBox::clicked, this,
-          &NewDialogCacheHandler::enabled);
-  connect(ui->number_of_sets, &QAbstractSpinBox::editingFinished, this,
-          &NewDialogCacheHandler::numsets);
-  connect(ui->block_size, &QAbstractSpinBox::editingFinished, this,
-          &NewDialogCacheHandler::blocksize);
-  connect(ui->degree_of_associativity, &QAbstractSpinBox::editingFinished, this,
-          &NewDialogCacheHandler::degreeassociativity);
-  connect(ui->replacement_policy, QOverload<int>::of(&QComboBox::activated),
-          this, &NewDialogCacheHandler::replacement);
-  connect(ui->writeback_policy, QOverload<int>::of(&QComboBox::activated), this,
-          &NewDialogCacheHandler::writeback);
+NewDialogCacheHandler::NewDialogCacheHandler(
+    NewDialog *nd,
+    Ui::NewDialogCache *cui) {
+    this->nd = nd;
+    this->ui = cui;
+    this->config = nullptr;
+    connect(
+        ui->enabled, &QGroupBox::clicked, this,
+        &NewDialogCacheHandler::enabled);
+    connect(
+        ui->number_of_sets, &QAbstractSpinBox::editingFinished, this,
+        &NewDialogCacheHandler::numsets);
+    connect(
+        ui->block_size, &QAbstractSpinBox::editingFinished, this,
+        &NewDialogCacheHandler::blocksize);
+    connect(
+        ui->degree_of_associativity, &QAbstractSpinBox::editingFinished, this,
+        &NewDialogCacheHandler::degreeassociativity);
+    connect(
+        ui->replacement_policy, QOverload<int>::of(&QComboBox::activated), this,
+        &NewDialogCacheHandler::replacement);
+    connect(
+        ui->writeback_policy, QOverload<int>::of(&QComboBox::activated), this,
+        &NewDialogCacheHandler::writeback);
 }
 
 void NewDialogCacheHandler::set_config(machine::MachineConfigCache *config) {
-	this->config = config;
+    this->config = config;
 }
 
 void NewDialogCacheHandler::config_gui() {
@@ -427,31 +472,33 @@ void NewDialogCacheHandler::config_gui() {
 }
 
 void NewDialogCacheHandler::enabled(bool val) {
-	config->set_enabled(val);
-	nd->switch2custom();
+    config->set_enabled(val);
+    nd->switch2custom();
 }
 
 void NewDialogCacheHandler::numsets() {
-	config->set_sets(ui->number_of_sets->value());
-	nd->switch2custom();
+    config->set_sets(ui->number_of_sets->value());
+    nd->switch2custom();
 }
 
 void NewDialogCacheHandler::blocksize() {
-	config->set_blocks(ui->block_size->value());
-	nd->switch2custom();
+    config->set_blocks(ui->block_size->value());
+    nd->switch2custom();
 }
 
 void NewDialogCacheHandler::degreeassociativity() {
-	config->set_associativity(ui->degree_of_associativity->value());
-	nd->switch2custom();
+    config->set_associativity(ui->degree_of_associativity->value());
+    nd->switch2custom();
 }
 
 void NewDialogCacheHandler::replacement(int val) {
-	config->set_replacement_policy((enum machine::MachineConfigCache::ReplacementPolicy)val);
-	nd->switch2custom();
+    config->set_replacement_policy(
+        (enum machine::MachineConfigCache::ReplacementPolicy)val);
+    nd->switch2custom();
 }
 
 void NewDialogCacheHandler::writeback(int val) {
-	config->set_write_policy((enum machine::MachineConfigCache::WritePolicy)val);
-	nd->switch2custom();
+    config->set_write_policy(
+        (enum machine::MachineConfigCache::WritePolicy)val);
+    nd->switch2custom();
 }

@@ -34,8 +34,9 @@
  ******************************************************************************/
 
 #include "cop0state.h"
-#include "machinedefs.h"
+
 #include "core.h"
+#include "machinedefs.h"
 #include "qtmipsexception.h"
 
 using namespace machine;
@@ -49,19 +50,19 @@ static enum Cop0State::Cop0Registers cop0reg_map[32][8] = {
     /*1*/ {},
     /*2*/ {},
     /*3*/ {},
-    /*4*/ {Cop0State::Unsupported, Cop0State::Unsupported, Cop0State::UserLocal},
+    /*4*/ { Cop0State::Unsupported, Cop0State::Unsupported, Cop0State::UserLocal },
     /*5*/ {},
     /*6*/ {},
     /*7*/ {},
-    /*8*/ {Cop0State::BadVAddr},
-    /*9*/ {Cop0State::Count},
+    /*8*/ { Cop0State::BadVAddr },
+    /*9*/ { Cop0State::Count },
     /*10*/ {},
-    /*11*/ {Cop0State::Compare},
-    /*12*/ {Cop0State::Status},
-    /*13*/ {Cop0State::Cause},
-    /*14*/ {Cop0State::EPC},
-    /*15*/ {Cop0State::Unsupported, Cop0State::EBase},
-    /*16*/ {Cop0State::Config},
+    /*11*/ { Cop0State::Compare },
+    /*12*/ { Cop0State::Status },
+    /*13*/ { Cop0State::Cause },
+    /*14*/ { Cop0State::EPC },
+    /*15*/ { Cop0State::Unsupported, Cop0State::EBase },
+    /*16*/ { Cop0State::Config },
     /*17*/ {},
     /*18*/ {},
     /*19*/ {},
@@ -81,28 +82,39 @@ static enum Cop0State::Cop0Registers cop0reg_map[32][8] = {
 
 // sorry, unimplemented: non-trivial designated initializers not supported
 
-const Cop0State::cop0reg_desc_t Cop0State::cop0reg_desc[Cop0State::COP0REGS_CNT] = {
-    [Cop0State::Unsupported] = {"Unsupported", 0x00000000, 0x00000000,
-        &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-    [Cop0State::UserLocal] = {"UserLocal", 0xffffffff, 0x00000000,
-        &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_user_local},
-    [Cop0State::BadVAddr] = {"BadVAddr", 0x00000000, 0x00000000,
-        &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-    [Cop0State::Count] =    {"Count", 0xffffffff, 0x00000000,
-        &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_count_compare},
-    [Cop0State::Compare] =  {"Compare", 0xffffffff, 0x00000000,
-        &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_count_compare},
-    [Cop0State::Status] =   {"Status",  Status_IE | Status_IntMask, 0x00000000,
-        &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-    [Cop0State::Cause] =    {"Cause", 0x00000000, 0x00000000,
-        &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-    [Cop0State::EPC] =      {"EPC", 0xffffffff, 0x00000000,
-        &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-    [Cop0State::EBase] =    {"EBase", 0xfffffffc, 0x80000000,
-        &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-    [Cop0State::Config] =   {"Config", 0x00000000, 0x00000000,
-        &Cop0State::read_cop0reg_default, &Cop0State::write_cop0reg_default},
-};
+const Cop0State::cop0reg_desc_t Cop0State::cop0reg_desc[Cop0State::COP0REGS_CNT]
+    = {
+          [Cop0State::Unsupported] = { "Unsupported", 0x00000000, 0x00000000,
+                                       &Cop0State::read_cop0reg_default,
+                                       &Cop0State::write_cop0reg_default },
+          [Cop0State::UserLocal] = { "UserLocal", 0xffffffff, 0x00000000,
+                                     &Cop0State::read_cop0reg_default,
+                                     &Cop0State::write_cop0reg_user_local },
+          [Cop0State::BadVAddr] = { "BadVAddr", 0x00000000, 0x00000000,
+                                    &Cop0State::read_cop0reg_default,
+                                    &Cop0State::write_cop0reg_default },
+          [Cop0State::Count]
+          = { "Count", 0xffffffff, 0x00000000, &Cop0State::read_cop0reg_default,
+              &Cop0State::write_cop0reg_count_compare },
+          [Cop0State::Compare] = { "Compare", 0xffffffff, 0x00000000,
+                                   &Cop0State::read_cop0reg_default,
+                                   &Cop0State::write_cop0reg_count_compare },
+          [Cop0State::Status] = { "Status", Status_IE | Status_IntMask,
+                                  0x00000000, &Cop0State::read_cop0reg_default,
+                                  &Cop0State::write_cop0reg_default },
+          [Cop0State::Cause]
+          = { "Cause", 0x00000000, 0x00000000, &Cop0State::read_cop0reg_default,
+              &Cop0State::write_cop0reg_default },
+          [Cop0State::EPC]
+          = { "EPC", 0xffffffff, 0x00000000, &Cop0State::read_cop0reg_default,
+              &Cop0State::write_cop0reg_default },
+          [Cop0State::EBase]
+          = { "EBase", 0xfffffffc, 0x80000000, &Cop0State::read_cop0reg_default,
+              &Cop0State::write_cop0reg_default },
+          [Cop0State::Config] = { "Config", 0x00000000, 0x00000000,
+                                  &Cop0State::read_cop0reg_default,
+                                  &Cop0State::write_cop0reg_default },
+      };
 
 Cop0State::Cop0State(Core *core) : QObject() {
     this->core = core;
@@ -111,37 +123,54 @@ Cop0State::Cop0State(Core *core) : QObject() {
 
 Cop0State::Cop0State(const Cop0State &orig) : QObject() {
     this->core = orig.core;
-    for (int i = 0; i < COP0REGS_CNT; i++)
+    for (int i = 0; i < COP0REGS_CNT; i++) {
         this->cop0reg[i] = orig.read_cop0reg((enum Cop0Registers)i);
+    }
 }
 
 void Cop0State::setup_core(Core *core) {
     this->core = core;
 }
 
-std::uint32_t Cop0State::read_cop0reg(std::uint8_t rd, std::uint8_t sel) const {
-    SANITY_ASSERT(rd < 32, QString("Trying to read from cop0 register ") + QString(rd) + ',' + QString(sel));
-    SANITY_ASSERT(sel < 8, QString("Trying to read from cop0 register ") + QString(rd) + ',' + QString(sel));
+uint32_t Cop0State::read_cop0reg(uint8_t rd, uint8_t sel) const {
+    SANITY_ASSERT(
+        rd < 32, QString("Trying to read from cop0 register ") + QString(rd)
+                     + ',' + QString(sel));
+    SANITY_ASSERT(
+        sel < 8, QString("Trying to read from cop0 register ") + QString(rd)
+                     + ',' + QString(sel));
     enum Cop0Registers reg = cop0reg_map[rd][sel];
-    SANITY_ASSERT(reg != 0, QString("Cop0 register ") + QString(rd) + ',' + QString(sel) + "unsupported");
+    SANITY_ASSERT(
+        reg != 0, QString("Cop0 register ") + QString(rd) + ',' + QString(sel)
+                      + "unsupported");
     return read_cop0reg(reg);
 }
 
-void Cop0State::write_cop0reg(std::uint8_t rd, std::uint8_t sel, std::uint32_t value) {
-    SANITY_ASSERT(rd < 32, QString("Trying to write to cop0 register ") + QString(rd) + ',' + QString(sel));
-    SANITY_ASSERT(sel < 8, QString("Trying to write to cop0 register ") + QString(rd) + ',' + QString(sel));
+void Cop0State::write_cop0reg(uint8_t rd, uint8_t sel, uint32_t value) {
+    SANITY_ASSERT(
+        rd < 32, QString("Trying to write to cop0 register ") + QString(rd)
+                     + ',' + QString(sel));
+    SANITY_ASSERT(
+        sel < 8, QString("Trying to write to cop0 register ") + QString(rd)
+                     + ',' + QString(sel));
     enum Cop0Registers reg = cop0reg_map[rd][sel];
-    SANITY_ASSERT(reg != 0, QString("Cop0 register ") + QString(rd) + ',' + QString(sel) + "unsupported");
+    SANITY_ASSERT(
+        reg != 0, QString("Cop0 register ") + QString(rd) + ',' + QString(sel)
+                      + "unsupported");
     write_cop0reg(reg, value);
 }
 
-std::uint32_t Cop0State::read_cop0reg(enum Cop0Registers reg) const {
-    SANITY_ASSERT(reg != Unsupported && reg < COP0REGS_CNT, QString("Trying to read from cop0 register ") + QString(reg));
+uint32_t Cop0State::read_cop0reg(enum Cop0Registers reg) const {
+    SANITY_ASSERT(
+        reg != Unsupported && reg < COP0REGS_CNT,
+        QString("Trying to read from cop0 register ") + QString(reg));
     return (this->*cop0reg_desc[reg].reg_read)(reg);
 }
 
-void Cop0State::write_cop0reg(enum Cop0Registers reg, std::uint32_t value) {
-    SANITY_ASSERT(reg != Unsupported && reg < COP0REGS_CNT, QString("Trying to write to cop0 register ") + QString(reg));
+void Cop0State::write_cop0reg(enum Cop0Registers reg, uint32_t value) {
+    SANITY_ASSERT(
+        reg != Unsupported && reg < COP0REGS_CNT,
+        QString("Trying to write to cop0 register ") + QString(reg));
     (this->*cop0reg_desc[reg].reg_write)(reg, value);
 }
 
@@ -149,28 +178,31 @@ QString Cop0State::cop0reg_name(enum Cop0Registers reg) {
     return QString(cop0reg_desc[(int)reg].name);
 }
 
-std::uint32_t Cop0State::read_cop0reg_default(enum Cop0Registers reg) const {
-    std::uint32_t val;
+uint32_t Cop0State::read_cop0reg_default(enum Cop0Registers reg) const {
+    uint32_t val;
     val = cop0reg[(int)reg];
     emit cop0reg_read(reg, val);
     return val;
 }
 
-void Cop0State::write_cop0reg_default(enum Cop0Registers reg, std::uint32_t value) {
-    std::uint32_t mask = cop0reg_desc[(int)reg].write_mask;
+void Cop0State::write_cop0reg_default(enum Cop0Registers reg, uint32_t value) {
+    uint32_t mask = cop0reg_desc[(int)reg].write_mask;
     cop0reg[(int)reg] = (value & mask) | (cop0reg[(int)reg] & ~mask);
     emit cop0reg_update(reg, cop0reg[(int)reg]);
 }
 
 bool Cop0State::operator==(const Cop0State &c) const {
-    for (int i = 0; i < COP0REGS_CNT; i++)
-        if (read_cop0reg((enum Cop0Registers)i) != c.read_cop0reg((enum Cop0Registers)i))
+    for (int i = 0; i < COP0REGS_CNT; i++) {
+        if (read_cop0reg((enum Cop0Registers)i)
+            != c.read_cop0reg((enum Cop0Registers)i)) {
             return false;
+        }
+    }
     return true;
 }
 
 bool Cop0State::operator!=(const Cop0State &c) const {
-    return ! this->operator==(c);
+    return !this->operator==(c);
 }
 
 void Cop0State::reset() {
@@ -181,31 +213,37 @@ void Cop0State::reset() {
     last_core_cycles = 0;
 }
 
-void Cop0State::update_execption_cause(enum ExceptionCause excause, bool in_delay_slot) {
-    if (in_delay_slot)
+void Cop0State::update_execption_cause(
+    enum ExceptionCause excause,
+    bool in_delay_slot) {
+    if (in_delay_slot) {
         cop0reg[(int)Cause] |= 0x80000000;
-    else
+    } else {
         cop0reg[(int)Cause] &= ~0x80000000;
+    }
     cop0reg[(int)Cause] &= ~0x0000007f;
-    if (excause != EXCAUSE_INT)
+    if (excause != EXCAUSE_INT) {
         cop0reg[(int)Cause] |= (int)excause << 2;
+    }
     emit cop0reg_update(Cause, cop0reg[(int)Cause]);
 }
 
 void Cop0State::set_interrupt_signal(uint irq_num, bool active) {
-    std::uint32_t mask;
-    if (irq_num >= 8)
+    uint32_t mask;
+    if (irq_num >= 8) {
         return;
+    }
     mask = Status_Int0 << irq_num;
-    if (active)
+    if (active) {
         cop0reg[(int)Cause] |= mask;
-    else
+    } else {
         cop0reg[(int)Cause] &= ~mask;
+    }
     emit cop0reg_update(Cause, cop0reg[(int)Cause]);
 }
 
 bool Cop0State::core_interrupt_request() {
-    std::uint32_t irqs;
+    uint32_t irqs;
 
     update_count_and_compare_irq();
 
@@ -213,46 +251,52 @@ bool Cop0State::core_interrupt_request() {
     irqs &= cop0reg[(int)Cause];
     irqs &= Status_IntMask;
 
-    return !!(irqs && cop0reg[(int)Status] & Status_IntMask &&
-           !(cop0reg[(int)Status] & Status_EXL) &&
-           !(cop0reg[(int)Status] & Status_ERL));
+    return irqs && cop0reg[(int)Status] & Status_IntMask
+           && !(cop0reg[(int)Status] & Status_EXL)
+           && !(cop0reg[(int)Status] & Status_ERL);
 }
 
 void Cop0State::set_status_exl(bool value) {
-    if (value)
+    if (value) {
         cop0reg[(int)Status] |= Status_EXL;
-    else
+    } else {
         cop0reg[(int)Status] &= ~Status_EXL;
+    }
     emit cop0reg_update(Status, cop0reg[(int)Status]);
 }
 
-std::uint32_t Cop0State::exception_pc_address() {
+uint32_t Cop0State::exception_pc_address() {
     return cop0reg[(int)EBase] + 0x180;
 }
 
-void Cop0State::write_cop0reg_count_compare(enum Cop0Registers reg, std::uint32_t value) {
+void Cop0State::write_cop0reg_count_compare(
+    enum Cop0Registers reg,
+    uint32_t value) {
     set_interrupt_signal(COUNTER_IRQ_LEVEL, false);
     write_cop0reg_default(reg, value);
 }
 
 void Cop0State::update_count_and_compare_irq() {
-    std::uint32_t core_cycles;
-    std::uint32_t count_orig;
-    if (core == nullptr)
+    uint32_t core_cycles;
+    uint32_t count_orig;
+    if (core == nullptr) {
         return;
+    }
     count_orig = cop0reg[(int)Count];
     core_cycles = core->cycles();
     cop0reg[(int)Count] += core_cycles - last_core_cycles;
     last_core_cycles = core_cycles;
     emit cop0reg_update(Count, cop0reg[(int)Count]);
 
-    if ((std::int32_t)(cop0reg[(int)Compare] - count_orig) > 0 &&
-        (std::int32_t)(cop0reg[(int)Compare] - cop0reg[(int)Count]) <= 0)
+    if ((int32_t)(cop0reg[(int)Compare] - count_orig) > 0
+        && (int32_t)(cop0reg[(int)Compare] - cop0reg[(int)Count]) <= 0) {
         set_interrupt_signal(COUNTER_IRQ_LEVEL, true);
+    }
 }
 
-void Cop0State::write_cop0reg_user_local(enum Cop0Registers reg, std::uint32_t value) {
+void Cop0State::write_cop0reg_user_local(enum Cop0Registers reg, uint32_t value) {
     write_cop0reg_default(reg, value);
-    if (core != nullptr)
+    if (core != nullptr) {
         core->set_c0_userlocal(value);
+    }
 }

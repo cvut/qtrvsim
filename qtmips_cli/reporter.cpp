@@ -34,28 +34,32 @@
  ******************************************************************************/
 
 #include "reporter.h"
-#include <iostream>
+
 #include <fstream>
 #include <iomanip>
-#include <typeinfo>
-#include <qtmipsexception.h>
+#include <iostream>
+#include <string>
+#include <utility>
 
 using namespace machine;
 using namespace std;
 
 Reporter::Reporter(QCoreApplication *app, QtMipsMachine *machine) : QObject() {
-  this->app = app;
-  this->machine = machine;
+    this->app = app;
+    this->machine = machine;
 
-  connect(machine, &QtMipsMachine::program_exit, this, &Reporter::machine_exit);
-  connect(machine, &QtMipsMachine::program_trap, this, &Reporter::machine_trap);
-  connect(machine->core(), &Core::stop_on_exception_reached, this,
-          &Reporter::machine_exception_reached);
+    connect(
+        machine, &QtMipsMachine::program_exit, this, &Reporter::machine_exit);
+    connect(
+        machine, &QtMipsMachine::program_trap, this, &Reporter::machine_trap);
+    connect(
+        machine->core(), &Core::stop_on_exception_reached, this,
+        &Reporter::machine_exception_reached);
 
-  e_regs = false;
-  e_cache_stats = false;
-  e_cycles = false;
-  e_fail = (enum FailReason)0;
+    e_regs = false;
+    e_cache_stats = false;
+    e_cycles = false;
+    e_fail = (enum FailReason)0;
 }
 
 void Reporter::regs() {
@@ -74,17 +78,21 @@ void Reporter::expect_fail(enum FailReason reason) {
     e_fail = (enum FailReason)(e_fail | reason);
 }
 
-void Reporter::add_dump_range(std::uint32_t start, std::uint32_t len, QString fname) {
-    dump_ranges.append({start, len, fname});
+void Reporter::add_dump_range(
+    uint32_t start,
+    uint32_t len,
+    const QString &fname) {
+    dump_ranges.append({ start, len, std::move(fname) });
 }
 
 void Reporter::machine_exit() {
     report();
     if (e_fail != 0) {
         cout << "Machine was expected to fail but it didn't." << endl;
-        app->exit(1);
-    } else
-        app->exit();
+        QCoreApplication::exit(1);
+    } else {
+        QCoreApplication::exit();
+    }
 }
 
 void Reporter::machine_exception_reached() {
@@ -121,32 +129,32 @@ void Reporter::machine_exception_reached() {
     case EXCAUSE_HWBREAK:
         cout << "Machine stopped on HWBREAK exception." << endl;
         break;
-    default:
-        break;
+    default: break;
     }
     report();
-    app->exit();
+    QCoreApplication::exit();
 }
 
 void Reporter::machine_trap(QtMipsException &e) {
     report();
 
     bool expected = false;
-    auto& etype = typeid(e);
-    if (etype == typeid(QtMipsExceptionUnsupportedInstruction))
+    auto &etype = typeid(e);
+    if (etype == typeid(QtMipsExceptionUnsupportedInstruction)) {
         expected = e_fail & FR_I;
-    else if (etype == typeid(QtMipsExceptionUnsupportedAluOperation))
+    } else if (etype == typeid(QtMipsExceptionUnsupportedAluOperation)) {
         expected = e_fail & FR_A;
-    else if (etype == typeid(QtMipsExceptionOverflow))
+    } else if (etype == typeid(QtMipsExceptionOverflow)) {
         expected = e_fail & FR_O;
-    else if (etype == typeid(QtMipsExceptionUnalignedJump))
+    } else if (etype == typeid(QtMipsExceptionUnalignedJump)) {
         expected = e_fail & FR_J;
+    }
 
     cout << "Machine trapped: " << e.msg(false).toStdString() << endl;
-    app->exit(expected ? 0 : 1);
+    QCoreApplication::exit(expected ? 0 : 1);
 }
 
-static void out_hex(ostream &out, std::uint64_t val, int digits) {
+static void out_hex(ostream &out, uint64_t val, int digits) {
     std::ios_base::fmtflags saveflg(out.flags());
     char prevfill = out.fill('0');
     out.setf(ios::hex, ios::basefield);
@@ -165,10 +173,11 @@ void Reporter::report() {
         for (int i = 0; i < 32; i++) {
             cout << "R" << i << ":0x";
             out_hex(cout, machine->registers()->read_gp(i), 8);
-            if (i != 31)
+            if (i != 31) {
                 cout << " ";
-            else
+            } else {
                 cout << endl;
+            }
         }
         cout << "HI:0x";
         out_hex(cout, machine->registers()->read_hi_lo(true), 8);
@@ -176,46 +185,62 @@ void Reporter::report() {
         out_hex(cout, machine->registers()->read_hi_lo(false), 8);
         cout << endl;
         for (int i = 1; i < Cop0State::COP0REGS_CNT; i++) {
-            cout << Cop0State::cop0reg_name((Cop0State::Cop0Registers)i).toLocal8Bit().data() << ":0x";
-            out_hex(cout, machine->cop0state()->read_cop0reg((Cop0State::Cop0Registers)i), 8);
-            if (i != Cop0State::COP0REGS_CNT - 1)
+            cout << Cop0State::cop0reg_name((Cop0State::Cop0Registers)i)
+                        .toLocal8Bit()
+                        .data()
+                 << ":0x";
+            out_hex(
+                cout,
+                machine->cop0state()->read_cop0reg((Cop0State::Cop0Registers)i),
+                8);
+            if (i != Cop0State::COP0REGS_CNT - 1) {
                 cout << " ";
-            else
+            } else {
                 cout << endl;
+            }
         }
-    }
-    if (e_cache_stats) {
-        cout << "Cache statistics report:" << endl;
-        cout << "i-cache:reads:" << machine->cache_program()->memory_reads() << endl;
-        cout << "i-cache:hit:" << machine->cache_program()->hit() << endl;
-        cout << "i-cache:miss:" << machine->cache_program()->miss() << endl;
-        cout << "i-cache:hit-rate:" << machine->cache_program()->hit_rate() << endl;
-        cout << "i-cache:stalled-cycles:" << machine->cache_program()->stalled_cycles() << endl;
-        cout << "i-cache:improved-speed:" << machine->cache_program()->speed_improvement() << endl;
-        cout << "d-cache:reads:" << machine->cache_data()->memory_reads() << endl;
-        cout << "d-cache:writes:" << machine->cache_data()->memory_writes() << endl;
-        cout << "d-cache:hit:" << machine->cache_data()->hit() << endl;
-        cout << "d-cache:miss:" << machine->cache_data()->miss() << endl;
-        cout << "d-cache:hit-rate:" << machine->cache_data()->hit_rate() << endl;
-        cout << "d-cache:stalled-cycles:" << machine->cache_data()->stalled_cycles() << endl;
-        cout << "d-cache:improved-speed:" << machine->cache_data()->speed_improvement() << endl;
-    }
-    if (e_cycles) {
-        cout << "cycles:" << machine->core()->cycles() << endl;
-        cout << "stalls:" << machine->core()->stalls() << endl;
-    }
-    foreach (DumpRange range, dump_ranges) {
-        ofstream out;
-        out.open(range.fname.toLocal8Bit().data(), ios::out | ios::trunc);
-        std::int32_t start = range.start & ~3;
-        std::int32_t end = range.start + range.len;
-        if (end < start)
-            end = 0xffffffff;
-        for (std::int32_t addr = start; addr < end; addr += 4) {
-            out << "0x";
-            out_hex(out, machine->memory()->read_word(addr), 8);
-            out << endl;
+        if (e_cache_stats) {
+            cout << "Cache statistics report:" << endl;
+            cout << "i-cache:reads:" << machine->cache_program()->memory_reads()
+                 << endl;
+            cout << "i-cache:hit:" << machine->cache_program()->hit() << endl;
+            cout << "i-cache:miss:" << machine->cache_program()->miss() << endl;
+            cout << "i-cache:hit-rate:" << machine->cache_program()->hit_rate()
+                 << endl;
+            cout << "i-cache:stalled-cycles:"
+                 << machine->cache_program()->stalled_cycles() << endl;
+            cout << "i-cache:improved-speed:"
+                 << machine->cache_program()->speed_improvement() << endl;
+            cout << "d-cache:reads:" << machine->cache_data()->memory_reads()
+                 << endl;
+            cout << "d-cache:writes:" << machine->cache_data()->memory_writes()
+                 << endl;
+            cout << "d-cache:hit:" << machine->cache_data()->hit() << endl;
+            cout << "d-cache:miss:" << machine->cache_data()->miss() << endl;
+            cout << "d-cache:hit-rate:" << machine->cache_data()->hit_rate()
+                 << endl;
+            cout << "d-cache:stalled-cycles:"
+                 << machine->cache_data()->stalled_cycles() << endl;
+            cout << "d-cache:improved-speed:"
+                 << machine->cache_data()->speed_improvement() << endl;
         }
-        out.close();
+        if (e_cycles) {
+            cout << "cycles:" << machine->core()->cycles() << endl;
+            cout << "stalls:" << machine->core()->stalls() << endl;
+        }
+        foreach (DumpRange range, dump_ranges) {
+            ofstream out;
+            out.open(range.fname.toLocal8Bit().data(), ios::out | ios::trunc);
+            int32_t start = range.start & ~3;
+            int32_t end = range.start + range.len;
+            if (end < start)
+                end = 0xffffffff;
+            for (int32_t addr = start; addr < end; addr += 4) {
+                out << "0x";
+                out_hex(out, machine->memory()->read_word(addr), 8);
+                out << endl;
+            }
+            out.close();
+        }
     }
 }

@@ -36,11 +36,12 @@
 #ifndef MSGREPORT_H
 #define MSGREPORT_H
 
-#include <QObject>
-#include <QVector>
-#include <QString>
+#include "qtmips_asm/messagetype.h"
+
 #include <QCoreApplication>
-#include "messagetype.h"
+#include <QObject>
+#include <QString>
+#include <QVector>
 
 class MsgReport : public QObject {
     Q_OBJECT
@@ -51,8 +52,13 @@ public:
     MsgReport(QCoreApplication *app);
 
 public slots:
-    void report_message(messagetype::Type type, QString file, int line, int column, QString text, QString hint);
-
+    static void report_message(
+        messagetype::Type type,
+        const QString &file,
+        int line,
+        int column,
+        const QString &text,
+        const QString &hint);
 };
 
 #endif // MSGREPORT_H

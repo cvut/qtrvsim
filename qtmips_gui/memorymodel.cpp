@@ -33,12 +33,13 @@
  *
  ******************************************************************************/
 
-#include <QBrush>
-
 #include "memorymodel.h"
 
+#include <QBrush>
+
 MemoryModel::MemoryModel(QObject *parent)
-    : Super(parent), data_font("Monospace") {
+    : Super(parent)
+    , data_font("Monospace") {
     cell_size = CELLSIZE_WORD;
     cells_per_row = 1;
     index0_offset = 0;
@@ -50,39 +51,44 @@ MemoryModel::MemoryModel(QObject *parent)
 }
 
 const machine::MemoryAccess *MemoryModel::mem_access() const {
-    if (machine == nullptr)
+    if (machine == nullptr) {
         return nullptr;
-    if (machine->physical_address_space() != nullptr)
+    }
+    if (machine->physical_address_space() != nullptr) {
         return machine->physical_address_space();
+    }
     return machine->memory();
 }
 
 machine::MemoryAccess *MemoryModel::mem_access_rw() const {
-    if (machine == nullptr)
+    if (machine == nullptr) {
         return nullptr;
-    if (machine->physical_address_space_rw() != nullptr)
+    }
+    if (machine->physical_address_space_rw() != nullptr) {
         return machine->physical_address_space_rw();
+    }
     return machine->memory_rw();
 }
 
 int MemoryModel::rowCount(const QModelIndex & /*parent*/) const {
-   // std::uint64_t rows = (0x2000 + cells_per_row - 1) / cells_per_row;
-   return 750;
+    // std::uint64_t rows = (0x2000 + cells_per_row - 1) / cells_per_row;
+    return 750;
 }
 
 int MemoryModel::columnCount(const QModelIndex & /*parent*/) const {
     return cells_per_row + 1;
 }
 
-QVariant MemoryModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
-    if(orientation == Qt::Horizontal) {
-        if(role == Qt::DisplayRole) {
-            if(section == 0) {
+QVariant MemoryModel::headerData(
+    int section,
+    Qt::Orientation orientation,
+    int role) const {
+    if (orientation == Qt::Horizontal) {
+        if (role == Qt::DisplayRole) {
+            if (section == 0) {
                 return tr("Address");
-            }
-            else {
-                std::uint32_t addr = (section - 1) * cellSizeBytes();
+            } else {
+                uint32_t addr = (section - 1) * cellSizeBytes();
                 QString ret = "+" + QString::number(addr, 10);
                 return ret;
             }
@@ -92,40 +98,38 @@ QVariant MemoryModel::headerData(int section, Qt::Orientation orientation, int r
 }
 
 QVariant MemoryModel::data(const QModelIndex &index, int role) const {
-    if (role == Qt::DisplayRole || role == Qt::EditRole)
-    {
+    if (role == Qt::DisplayRole || role == Qt::EditRole) {
         QString s, t;
-        std::uint32_t address;
-        std::uint32_t data;
+        uint32_t address;
+        uint32_t data;
         const machine::MemoryAccess *mem;
-        if (!get_row_address(address, index.row()))
+        if (!get_row_address(address, index.row())) {
             return QString("");
+        }
         if (index.column() == 0) {
             t = QString::number(address, 16);
             s.fill('0', 8 - t.count());
             return "0x" + s + t.toUpper();
         }
-        if (machine == nullptr)
+        if (machine == nullptr) {
             return QString("");
+        }
         mem = mem_access();
-        if (mem == nullptr)
+        if (mem == nullptr) {
             return QString("");
-        if ((access_through_cache > 0) && (machine->cache_data() != nullptr))
+        }
+        if ((access_through_cache > 0) && (machine->cache_data() != nullptr)) {
             mem = machine->cache_data();
+        }
         address += cellSizeBytes() * (index.column() - 1);
-        if (address < index0_offset)
+        if (address < index0_offset) {
             return QString("");
+        }
         switch (cell_size) {
-        case CELLSIZE_BYTE:
-            data = mem->read_byte(address, true);
-            break;
-        case CELLSIZE_HWORD:
-            data = mem->read_hword(address, true);
-            break;
+        case CELLSIZE_BYTE: data = mem->read_byte(address, true); break;
+        case CELLSIZE_HWORD: data = mem->read_hword(address, true); break;
         default:
-        case CELLSIZE_WORD:
-            data = mem->read_word(address, true);
-            break;
+        case CELLSIZE_WORD: data = mem->read_word(address, true); break;
         }
 
         t = QString::number(data, 16);
@@ -144,10 +148,11 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
         return t;
     }
     if (role == Qt::BackgroundRole) {
-        std::uint32_t address;
-        if (!get_row_address(address, index.row()) ||
-            machine == nullptr || index.column() == 0)
+        uint32_t address;
+        if (!get_row_address(address, index.row()) || machine == nullptr
+            || index.column() == 0) {
             return QVariant();
+        }
         address += cellSizeBytes() * (index.column() - 1);
         if (machine->cache_data() != nullptr) {
             machine::LocationStatus loc_stat;
@@ -162,23 +167,26 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
         }
         return QVariant();
     }
-    if (role==Qt::FontRole)
-            return data_font;
+    if (role == Qt::FontRole) {
+        return data_font;
+    }
     return QVariant();
 }
 
 void MemoryModel::setup(machine::QtMipsMachine *machine) {
-  this->machine = machine;
-  if (machine != nullptr) {
-    connect(machine, &machine::QtMipsMachine::post_tick, this,
+    this->machine = machine;
+    if (machine != nullptr) {
+        connect(
+            machine, &machine::QtMipsMachine::post_tick, this,
             &MemoryModel::check_for_updates);
-  }
-  if (mem_access() != nullptr) {
-    connect(mem_access(), &machine::MemoryAccess::external_change_notify, this,
+    }
+    if (mem_access() != nullptr) {
+        connect(
+            mem_access(), &machine::MemoryAccess::external_change_notify, this,
             &MemoryModel::check_for_updates);
-  }
-  emit update_all();
-  emit setup_done();
+    }
+    emit update_all();
+    emit setup_done();
 }
 
 void MemoryModel::setCellsPerRow(unsigned int cells) {
@@ -200,8 +208,10 @@ void MemoryModel::update_all() {
     mem = mem_access();
     if (mem != nullptr) {
         memory_change_counter = mem->get_change_counter();
-        if (machine->cache_data() != nullptr)
-            cache_data_change_counter = machine->cache_data()->get_change_counter();
+        if (machine->cache_data() != nullptr) {
+            cache_data_change_counter
+                = machine->cache_data()->get_change_counter();
+        }
     }
     emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
 }
@@ -210,31 +220,36 @@ void MemoryModel::check_for_updates() {
     bool need_update = false;
     const machine::MemoryAccess *mem;
     mem = mem_access();
-    if (mem == nullptr)
+    if (mem == nullptr) {
         return;
-
-    if (memory_change_counter != mem->get_change_counter())
-        need_update = true;
-    if (machine->cache_data() != nullptr) {
-        if (cache_data_change_counter != machine->cache_data()->get_change_counter())
-            need_update = true;
     }
-    if (!need_update)
+
+    if (memory_change_counter != mem->get_change_counter()) {
+        need_update = true;
+    }
+    if (machine->cache_data() != nullptr) {
+        if (cache_data_change_counter
+            != machine->cache_data()->get_change_counter()) {
+            need_update = true;
+        }
+    }
+    if (!need_update) {
         return;
+    }
     update_all();
 }
 
-bool MemoryModel::adjustRowAndOffset(int &row, std::uint32_t address) {
+bool MemoryModel::adjustRowAndOffset(int &row, uint32_t address) {
     row = rowCount() / 2;
     address -= address % cellSizeBytes();
-    std::uint32_t row_bytes = cells_per_row * cellSizeBytes();
-    std::uint32_t diff = row * row_bytes;
+    uint32_t row_bytes = cells_per_row * cellSizeBytes();
+    uint32_t diff = row * row_bytes;
     if (diff > address) {
         row = address / row_bytes;
         if (row == 0) {
             index0_offset = 0;
         } else {
-           index0_offset = address - row * row_bytes;
+            index0_offset = address - row * row_bytes;
         }
     } else {
         index0_offset = address - diff;
@@ -248,42 +263,45 @@ void MemoryModel::cached_access(int cached) {
 }
 
 Qt::ItemFlags MemoryModel::flags(const QModelIndex &index) const {
-    if (index.column() == 0)
+    if (index.column() == 0) {
         return QAbstractTableModel::flags(index);
-    else
+    } else {
         return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
+    }
 }
 
-bool MemoryModel::setData(const QModelIndex & index, const QVariant & value, int role) {
-    if (role == Qt::EditRole)
-    {
+bool MemoryModel::setData(
+    const QModelIndex &index,
+    const QVariant &value,
+    int role) {
+    if (role == Qt::EditRole) {
         bool ok;
-        std::uint32_t address;
+        uint32_t address;
         machine::MemoryAccess *mem;
-        std::uint32_t data = value.toString().toULong(&ok, 16);
-        if (!ok)
+        uint32_t data = value.toString().toULong(&ok, 16);
+        if (!ok) {
             return false;
-        if (!get_row_address(address, index.row()))
+        }
+        if (!get_row_address(address, index.row())) {
             return false;
-        if (index.column() == 0 || machine == nullptr)
+        }
+        if (index.column() == 0 || machine == nullptr) {
             return false;
+        }
         mem = mem_access_rw();
-        if (mem == nullptr)
+        if (mem == nullptr) {
             return false;
-        if ((access_through_cache > 0) && (machine->cache_data_rw() != nullptr))
+        }
+        if ((access_through_cache > 0)
+            && (machine->cache_data_rw() != nullptr)) {
             mem = machine->cache_data_rw();
+        }
         address += cellSizeBytes() * (index.column() - 1);
         switch (cell_size) {
-        case CELLSIZE_BYTE:
-            mem->write_byte(address, data);
-            break;
-        case CELLSIZE_HWORD:
-            mem->write_hword(address, data);
-            break;
+        case CELLSIZE_BYTE: mem->write_byte(address, data); break;
+        case CELLSIZE_HWORD: mem->write_hword(address, data); break;
         default:
-        case CELLSIZE_WORD:
-            mem->write_word(address, data);
-            break;
+        case CELLSIZE_WORD: mem->write_word(address, data); break;
         }
     }
     return true;

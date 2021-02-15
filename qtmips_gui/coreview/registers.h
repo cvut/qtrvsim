@@ -36,10 +36,11 @@
 #ifndef COREVIEW_REGISTERS_H
 #define COREVIEW_REGISTERS_H
 
-#include <QGraphicsObject>
-#include <QPainter>
-#include <QGraphicsSimpleTextItem>
 #include "connection.h"
+
+#include <QGraphicsObject>
+#include <QGraphicsSimpleTextItem>
+#include <QPainter>
 
 namespace coreview {
 
@@ -47,10 +48,13 @@ class Registers : public QGraphicsObject {
     Q_OBJECT
 public:
     Registers();
-    ~Registers();
+    ~Registers() override;
 
     QRectF boundingRect() const override;
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void paint(
+        QPainter *painter,
+        const QStyleOptionGraphicsItem *option,
+        QWidget *widget) override;
 
     void setPos(qreal x, qreal y);
     const Connector *connector_read1() const;
@@ -74,6 +78,6 @@ private:
     QGraphicsSimpleTextItem name;
 };
 
-}
+} // namespace coreview
 
 #endif // COREVIEW_REGISTERS_H

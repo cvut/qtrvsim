@@ -35,17 +35,17 @@
 
 #include "serialport.h"
 
-#define SERP_RX_ST_REG_o           0x00
-#define SERP_RX_ST_REG_READY_m      0x1
-#define SERP_RX_ST_REG_IE_m         0x2
+#define SERP_RX_ST_REG_o 0x00
+#define SERP_RX_ST_REG_READY_m 0x1
+#define SERP_RX_ST_REG_IE_m 0x2
 
-#define SERP_RX_DATA_REG_o         0x04
+#define SERP_RX_DATA_REG_o 0x04
 
-#define SERP_TX_ST_REG_o           0x08
-#define SERP_TX_ST_REG_READY_m      0x1
-#define SERP_TX_ST_REG_IE_m         0x2
+#define SERP_TX_ST_REG_o 0x08
+#define SERP_TX_ST_REG_READY_m 0x1
+#define SERP_TX_ST_REG_IE_m 0x2
 
-#define SERP_TX_DATA_REG_o         0x0c
+#define SERP_TX_DATA_REG_o 0x0c
 
 using namespace machine;
 
@@ -54,15 +54,13 @@ SerialPort::SerialPort() {
     rx_st_reg = 0;
     rx_data_reg = 0;
     tx_st_reg = 0;
-    tx_irq_level = 2;  // HW Interrupt 0
-    rx_irq_level = 3;  // HW Interrupt 1
+    tx_irq_level = 2; // HW Interrupt 0
+    rx_irq_level = 3; // HW Interrupt 1
     tx_irq_active = false;
     rx_irq_active = false;
 }
 
-SerialPort::~SerialPort() {
-
-}
+SerialPort::~SerialPort() = default;
 
 void SerialPort::pool_rx_byte() const {
     unsigned int byte = 0;
@@ -79,7 +77,7 @@ void SerialPort::pool_rx_byte() const {
     }
 }
 
-bool SerialPort::wword(std::uint32_t address, std::uint32_t value) {
+bool SerialPort::wword(uint32_t address, uint32_t value) {
 #if 0
     printf("SerialPort::wword address 0x%08lx data 0x%08lx\n",
            (unsigned long)address, (unsigned long)value);
@@ -106,9 +104,9 @@ bool SerialPort::wword(std::uint32_t address, std::uint32_t value) {
     return true;
 }
 
-std::uint32_t SerialPort::rword(std::uint32_t address, bool debug_access) const {
+uint32_t SerialPort::rword(uint32_t address, bool debug_access) const {
     (void)debug_access;
-    std::uint32_t value = 0x00000000;
+    uint32_t value = 0x00000000;
 #if 0
     printf("SerialPort::rword address 0x%08lx\n",
            (unsigned long)address);
@@ -125,17 +123,15 @@ std::uint32_t SerialPort::rword(std::uint32_t address, bool debug_access) const 
             if (!debug_access) {
                 rx_st_reg &= ~SERP_RX_ST_REG_READY_m;
                 update_rx_irq();
-                emit external_change_notify(this, SERP_RX_ST_REG_o,
-                                            SERP_RX_DATA_REG_o + 3, true);
+                emit external_change_notify(
+                    this, SERP_RX_ST_REG_o, SERP_RX_DATA_REG_o + 3, true);
             }
         } else {
             value = 0;
         }
         rx_queue_check_internal();
         break;
-    case SERP_TX_ST_REG_o:
-        value = tx_st_reg | SERP_TX_ST_REG_READY_m;
-        break;
+    case SERP_TX_ST_REG_o: value = tx_st_reg | SERP_TX_ST_REG_READY_m; break;
     }
 
     emit read_notification(address, &value);
@@ -143,7 +139,7 @@ std::uint32_t SerialPort::rword(std::uint32_t address, bool debug_access) const 
     return value;
 }
 
-std::uint32_t SerialPort::get_change_counter() const {
+uint32_t SerialPort::get_change_counter() const {
     return change_counter;
 }
 
@@ -168,13 +164,14 @@ void SerialPort::update_tx_irq() const {
 }
 
 void SerialPort::rx_queue_check_internal() const {
-    if (rx_st_reg & SERP_RX_ST_REG_IE_m)
+    if (rx_st_reg & SERP_RX_ST_REG_IE_m) {
         pool_rx_byte();
+    }
     update_rx_irq();
 }
 
 void SerialPort::rx_queue_check() const {
     rx_queue_check_internal();
-    emit external_change_notify(this, SERP_RX_ST_REG_o,
-                                SERP_RX_DATA_REG_o + 3, true);
+    emit external_change_notify(
+        this, SERP_RX_ST_REG_o, SERP_RX_DATA_REG_o + 3, true);
 }

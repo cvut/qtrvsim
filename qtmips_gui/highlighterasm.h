@@ -37,28 +37,26 @@
 #ifndef HIGHLIGHTERASM_H
 #define HIGHLIGHTERASM_H
 
+#include <QRegularExpression>
 #include <QSyntaxHighlighter>
 #include <QTextCharFormat>
-#include <QRegularExpression>
 
 QT_BEGIN_NAMESPACE
 class QTextDocument;
 QT_END_NAMESPACE
 
 //! [0]
-class HighlighterAsm : public QSyntaxHighlighter
-{
+class HighlighterAsm : public QSyntaxHighlighter {
     Q_OBJECT
 
 public:
-    HighlighterAsm(QTextDocument *parent = 0);
+    HighlighterAsm(QTextDocument *parent = nullptr);
 
 protected:
     void highlightBlock(const QString &text) override;
 
 private:
-    struct HighlightingRule
-    {
+    struct HighlightingRule {
         QRegularExpression pattern;
         QTextCharFormat format;
     };

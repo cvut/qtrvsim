@@ -36,12 +36,12 @@
 #ifndef CACHEVIEW_H
 #define CACHEVIEW_H
 
-#include <QGraphicsView>
-#include <QGraphicsScene>
-#include <QGraphicsObject>
 #include "graphicsview.h"
-#include "qtmipsmachine.h"
+#include "qtmips_machine/qtmipsmachine.h"
 
+#include <QGraphicsObject>
+#include <QGraphicsScene>
+#include <QGraphicsView>
 
 class CacheAddressBlock : public QGraphicsObject {
     Q_OBJECT
@@ -50,11 +50,21 @@ public:
 
     QRectF boundingRect() const override;
 
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void paint(
+        QPainter *painter,
+        const QStyleOptionGraphicsItem *option,
+        QWidget *widget) override;
 
 private slots:
-    void cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty,
-                      std::uint32_t tag, const std::uint32_t *data, bool write);
+    void cache_update(
+        unsigned associat,
+        unsigned set,
+        unsigned col,
+        bool valid,
+        bool dirty,
+        uint32_t tag,
+        const uint32_t *data,
+        bool write);
 
 private:
     unsigned rows, columns;
@@ -67,15 +77,25 @@ class CacheViewBlock : public QGraphicsObject {
     Q_OBJECT
 public:
     CacheViewBlock(const machine::Cache *cache, unsigned block, bool last);
-    ~CacheViewBlock();
+    ~CacheViewBlock() override;
 
     QRectF boundingRect() const override;
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void paint(
+        QPainter *painter,
+        const QStyleOptionGraphicsItem *option,
+        QWidget *widget) override;
 
 private slots:
-    virtual void cache_update(unsigned associat, unsigned set, unsigned col, bool valid, bool dirty,
-                      std::uint32_t tag, const std::uint32_t *data, bool write);
+    virtual void cache_update(
+        unsigned associat,
+        unsigned set,
+        unsigned col,
+        bool valid,
+        bool dirty,
+        uint32_t tag,
+        const uint32_t *data,
+        bool write);
 
 private:
     bool islast;
@@ -92,7 +112,7 @@ class CacheViewScene : public QGraphicsScene {
     Q_OBJECT
 public:
     CacheViewScene(const machine::Cache *cache);
-    ~CacheViewScene();
+    ~CacheViewScene() override;
 
 private:
     unsigned associativity;

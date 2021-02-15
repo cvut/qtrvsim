@@ -51,46 +51,47 @@ LcdDisplay::LcdDisplay() {
     }
     need_bytes = fb_linesize * fb_height;
 
-    if (fb_size <= need_bytes)
+    if (fb_size <= need_bytes) {
         fb_size = need_bytes;
+    }
 
     fb_data = new uchar[fb_size];
     std::fill(fb_data, fb_data + fb_size, 0);
 }
 
 LcdDisplay::~LcdDisplay() {
-    if (fb_data != nullptr)
-        delete[] fb_data;
+    delete[] fb_data;
 }
 
-std::uint32_t LcdDisplay::pixel_address(uint x, uint y)
-{
-    std::uint32_t address;
+uint32_t LcdDisplay::pixel_address(uint x, uint y) const {
+    uint32_t address;
     address = y * fb_linesize;
-    if (fb_bpp > 12)
+    if (fb_bpp > 12) {
         address += x * ((fb_bpp + 7) >> 3);
-    else
+    } else {
         address += x * fb_bpp / 8;
+    }
 
     return address;
 }
 
-
-bool LcdDisplay::wword(std::uint32_t address, std::uint32_t value) {
+bool LcdDisplay::wword(uint32_t address, uint32_t value) {
     address &= ~3;
     uint x, y, r, g, b;
-    std::uint32_t c;
-    std::uint32_t last_addr = address + 3;
-    std::uint32_t pixel_addr;
+    uint32_t c;
+    uint32_t last_addr = address + 3;
+    uint32_t pixel_addr;
 
-    if (address + 3 >= fb_size)
-        return 0;
+    if (address + 3 >= fb_size) {
+        return false;
+    }
 #if 0
     printf("LcdDisplay::wword address 0x%08lx data 0x%08lx\n",
            (unsigned long)address, (unsigned long)value);
 #endif
-    if (value == rword(address, true))
+    if (value == rword(address, true)) {
         return false;
+    }
 
     fb_data[address + 0] = (value >> 24) & 0xff;
     fb_data[address + 1] = (value >> 16) & 0xff;
@@ -100,10 +101,11 @@ bool LcdDisplay::wword(std::uint32_t address, std::uint32_t value) {
     change_counter++;
 
     y = address / fb_linesize;
-    if (fb_bpp > 12)
+    if (fb_bpp > 12) {
         x = (address - y * fb_linesize) / ((fb_bpp + 7) >> 3);
-    else
+    } else {
         x = (address - y * fb_linesize) * 8 / fb_bpp;
+    }
 
     while ((pixel_addr = pixel_address(x, y)) <= last_addr) {
         c = fb_data[pixel_addr] << 8;
@@ -126,18 +128,19 @@ bool LcdDisplay::wword(std::uint32_t address, std::uint32_t value) {
     return true;
 }
 
-std::uint32_t LcdDisplay::rword(std::uint32_t address, bool debug_access) const {
+uint32_t LcdDisplay::rword(uint32_t address, bool debug_access) const {
     address &= ~3;
     (void)debug_access;
-    std::uint32_t value;
+    uint32_t value;
 
-    if (address + 3 >= fb_size)
+    if (address + 3 >= fb_size) {
         return 0;
+    }
 
-    value = (std::uint32_t)fb_data[address + 0] << 24;
-    value |= (std::uint32_t)fb_data[address + 1] << 16;
-    value |= (std::uint32_t)fb_data[address + 2] << 8;
-    value |= (std::uint32_t)fb_data[address + 3] << 0;
+    value = (uint32_t)fb_data[address + 0] << 24;
+    value |= (uint32_t)fb_data[address + 1] << 16;
+    value |= (uint32_t)fb_data[address + 2] << 8;
+    value |= (uint32_t)fb_data[address + 3] << 0;
 
 #if 0
     printf("LcdDisplay::rword address 0x%08lx data 0x%08lx\n",
@@ -149,6 +152,6 @@ std::uint32_t LcdDisplay::rword(std::uint32_t address, bool debug_access) const 
     return value;
 }
 
-std::uint32_t LcdDisplay::get_change_counter() const {
+uint32_t LcdDisplay::get_change_counter() const {
     return change_counter;
 }

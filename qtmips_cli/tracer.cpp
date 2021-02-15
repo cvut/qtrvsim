@@ -34,16 +34,18 @@
  ******************************************************************************/
 
 #include "tracer.h"
+
 #include <iostream>
-#include <qtmipsexception.h>
+#include <string>
 
 using namespace std;
 using namespace machine;
 
 Tracer::Tracer(QtMipsMachine *machine) {
     this->machine = machine;
-    for (unsigned i = 0; i < 32; i++)
-        gp_regs[i] = false;
+    for (bool &gp_reg : gp_regs) {
+        gp_reg = false;
+    }
     r_hi = false;
     r_lo = false;
 
@@ -53,94 +55,121 @@ Tracer::Tracer(QtMipsMachine *machine) {
 }
 
 #define CON(VAR, FROM, SIG, SLT)                                               \
-  do {                                                                         \
-    if (!VAR) {                                                                \
-      connect(FROM, SIG, this, SLT);                                           \
-      VAR = true;                                                              \
-    }                                                                          \
-  } while (false)
+    do {                                                                       \
+        if (!(VAR)) {                                                          \
+            connect(FROM, SIG, this, SLT);                                     \
+            (VAR) = true;                                                      \
+        }                                                                      \
+    } while (false)
 
 void Tracer::fetch() {
-  CON(con_fetch, machine->core(), &Core::instruction_fetched,
-      &Tracer::instruction_fetch);
+    CON(con_fetch, machine->core(), &Core::instruction_fetched,
+        &Tracer::instruction_fetch);
 }
 
 void Tracer::decode() {
-  CON(con_decode, machine->core(), &Core::instruction_decoded,
-      &Tracer::instruction_decode);
+    CON(con_decode, machine->core(), &Core::instruction_decoded,
+        &Tracer::instruction_decode);
 }
 
 void Tracer::execute() {
-  CON(con_execute, machine->core(), &Core::instruction_executed,
-      &Tracer::instruction_execute);
+    CON(con_execute, machine->core(), &Core::instruction_executed,
+        &Tracer::instruction_execute);
 }
 
 void Tracer::memory() {
-  CON(con_memory, machine->core(), &Core::instruction_memory,
-      &Tracer::instruction_memory);
+    CON(con_memory, machine->core(), &Core::instruction_memory,
+        &Tracer::instruction_memory);
 }
 
 void Tracer::writeback() {
-  CON(con_writeback, machine->core(), &Core::instruction_writeback,
-      &Tracer::instruction_writeback);
+    CON(con_writeback, machine->core(), &Core::instruction_writeback,
+        &Tracer::instruction_writeback);
 }
 
 void Tracer::reg_pc() {
-  CON(con_regs_pc, machine->registers(), &Registers::pc_update,
-      &Tracer::regs_pc_update);
+    CON(con_regs_pc, machine->registers(), &Registers::pc_update,
+        &Tracer::regs_pc_update);
 }
 
-void Tracer::reg_gp(std::uint8_t i) {
-  SANITY_ASSERT(i <= 32, "Trying to trace invalid gp.");
-  CON(con_regs_gp, machine->registers(), &Registers::gp_update,
-      &Tracer::regs_gp_update);
-  gp_regs[i] = true;
+void Tracer::reg_gp(uint8_t i) {
+    SANITY_ASSERT(i <= 32, "Trying to trace invalid gp.");
+    CON(con_regs_gp, machine->registers(), &Registers::gp_update,
+        &Tracer::regs_gp_update);
+    gp_regs[i] = true;
 }
 
 void Tracer::reg_lo() {
-  CON(con_regs_hi_lo, machine->registers(), &Registers::hi_lo_update,
-      &Tracer::regs_hi_lo_update);
-  r_lo = true;
+    CON(con_regs_hi_lo, machine->registers(), &Registers::hi_lo_update,
+        &Tracer::regs_hi_lo_update);
+    r_lo = true;
 }
 
 void Tracer::reg_hi() {
-  CON(con_regs_hi_lo, machine->registers(), &Registers::hi_lo_update,
-      &Tracer::regs_hi_lo_update);
-  r_hi = true;
+    CON(con_regs_hi_lo, machine->registers(), &Registers::hi_lo_update,
+        &Tracer::regs_hi_lo_update);
+    r_hi = true;
 }
 
-void Tracer::instruction_fetch(const Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause, bool valid) {
-    cout << "Fetch: " << (excause != EXCAUSE_NONE? "!": "") << (valid? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
+void Tracer::instruction_fetch(
+    const Instruction &inst,
+    uint32_t inst_addr,
+    ExceptionCause excause,
+    bool valid) {
+    cout << "Fetch: " << (excause != EXCAUSE_NONE ? "!" : "")
+         << (valid ? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
 }
 
-void Tracer::instruction_decode(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause, bool valid) {
-    cout << "Decode: " << (excause != EXCAUSE_NONE? "!": "") << (valid? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
+void Tracer::instruction_decode(
+    const machine::Instruction &inst,
+    uint32_t inst_addr,
+    ExceptionCause excause,
+    bool valid) {
+    cout << "Decode: " << (excause != EXCAUSE_NONE ? "!" : "")
+         << (valid ? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
 }
 
-void Tracer::instruction_execute(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause, bool valid) {
-    cout << "Execute: " << (excause != EXCAUSE_NONE? "!": "") << (valid? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
+void Tracer::instruction_execute(
+    const machine::Instruction &inst,
+    uint32_t inst_addr,
+    ExceptionCause excause,
+    bool valid) {
+    cout << "Execute: " << (excause != EXCAUSE_NONE ? "!" : "")
+         << (valid ? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
 }
 
-void Tracer::instruction_memory(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause, bool valid) {
-    cout << "Memory: " << (excause != EXCAUSE_NONE? "!": "") << (valid? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
+void Tracer::instruction_memory(
+    const machine::Instruction &inst,
+    uint32_t inst_addr,
+    ExceptionCause excause,
+    bool valid) {
+    cout << "Memory: " << (excause != EXCAUSE_NONE ? "!" : "")
+         << (valid ? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
 }
 
-void Tracer::instruction_writeback(const machine::Instruction &inst, uint32_t inst_addr, ExceptionCause excause, bool valid) {
-    cout << "Writeback: " << (excause != EXCAUSE_NONE? "!": "") << (valid? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
+void Tracer::instruction_writeback(
+    const machine::Instruction &inst,
+    uint32_t inst_addr,
+    ExceptionCause excause,
+    bool valid) {
+    cout << "Writeback: " << (excause != EXCAUSE_NONE ? "!" : "")
+         << (valid ? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
 }
 
-void Tracer::regs_pc_update(std::uint32_t val) {
+void Tracer::regs_pc_update(uint32_t val) {
     cout << "PC:" << hex << val << endl;
 }
 
-void Tracer::regs_gp_update(std::uint8_t i, std::uint32_t val) {
-    if (gp_regs[i])
+void Tracer::regs_gp_update(uint8_t i, uint32_t val) {
+    if (gp_regs[i]) {
         cout << "GP" << dec << (unsigned)i << ":" << hex << val << endl;
+    }
 }
 
-void Tracer::regs_hi_lo_update(bool hi, std::uint32_t val) {
-    if (hi && r_hi)
+void Tracer::regs_hi_lo_update(bool hi, uint32_t val) const {
+    if (hi && r_hi) {
         cout << "HI:" << hex << val << endl;
-    else if (!hi && r_lo)
+    } else if (!hi && r_lo) {
         cout << "LO:" << hex << val << endl;
+    }
 }

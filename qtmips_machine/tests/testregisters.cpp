@@ -33,9 +33,9 @@
  *
  ******************************************************************************/
 
+#include "qtmips_machine/qtmipsexception.h"
+#include "qtmips_machine/registers.h"
 #include "tst_machine.h"
-#include <qtmipsexception.h>
-#include <registers.h>
 
 using namespace machine;
 
@@ -73,7 +73,8 @@ void MachineTests::registers_pc() {
     QCOMPARE(r.read_pc(), (unsigned)0x80020100);
 #ifdef QVERIFY_EXCEPTION_THROWN
     QVERIFY_EXCEPTION_THROWN(r.pc_jmp(0x1), QtMipsExceptionUnalignedJump);
-    QVERIFY_EXCEPTION_THROWN(r.pc_abs_jmp(0x80020101), QtMipsExceptionUnalignedJump);
+    QVERIFY_EXCEPTION_THROWN(
+        r.pc_abs_jmp(0x80020101), QtMipsExceptionUnalignedJump);
 #endif
 }
 

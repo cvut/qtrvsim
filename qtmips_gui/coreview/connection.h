@@ -46,8 +46,8 @@ class Connector : public QObject {
     Q_OBJECT
 public:
     enum Axis {
-        AX_X, // X axis
-        AX_Y, // Y axis
+        AX_X,  // X axis
+        AX_Y,  // Y axis
         AX_XY, // X=Y axis (45°)
         AX_MXY // X=-Y axis (-45°)
     };
@@ -55,7 +55,7 @@ public:
     Connector(enum Axis axis = AX_X);
 
     void setPos(qreal x, qreal y);
-    void setPos(const QPointF&);
+    void setPos(const QPointF &);
 
     enum Axis axis() const;
     qreal x() const;
@@ -79,10 +79,13 @@ public:
     Connection(const Connector *start, const Connector *end);
 
     QRectF boundingRect() const override;
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void paint(
+        QPainter *painter,
+        const QStyleOptionGraphicsItem *option,
+        QWidget *widget) override;
 
     void setHasText(bool has);
-    void setText(QString val);
+    void setText(const QString &val);
 
     virtual void setAxes(QVector<QLineF>);
 
@@ -91,7 +94,7 @@ private slots:
     void moved_end(QLineF);
 
 protected:
-    QGraphicsSimpleTextItem *value;
+    QGraphicsSimpleTextItem *value {};
     QVector<QPointF> points;
     QLineF ax_start, ax_end;
     QVector<QLineF> break_axes;
@@ -107,22 +110,25 @@ protected:
 class Bus : public Connection {
 public:
     Bus(const Connector *start, const Connector *end, unsigned width = 4);
-    ~Bus();
+    ~Bus() override;
 
-    void setAxes(QVector<QLineF>);
+    void setAxes(QVector<QLineF>) override;
 
     // This creates connector snapped to closes point to x,y that is on bus
-    const Connector *new_connector(qreal x, qreal y, enum Connector::Axis = Connector::AX_X);
-    const Connector *new_connector(const QPointF&, enum Connector::Axis = Connector::AX_X);
+    const Connector *
+    new_connector(qreal x, qreal y, enum Connector::Axis = Connector::AX_X);
+    const Connector *
+    new_connector(const QPointF &, enum Connector::Axis = Connector::AX_X);
 
 protected:
     struct con_pos {
-        Connector *c;
+        Connector *c {};
         QPointF p;
     };
     QVector<struct con_pos> conns;
     void conns_update();
-    // TODO because of this we have to overload setAxis function and update that in there
+    // TODO because of this we have to overload setAxis function and update that
+    // in there
 };
 
 class Signal : public Connection {
@@ -138,6 +144,6 @@ public:
 #define CON_AXIS_X(Y) QLineF(QPointF(0, Y), QPointF(1, Y))
 #define CON_AXIS_Y(X) QLineF(QPointF(X, 0), QPointF(X, 1))
 
-}
+} // namespace coreview
 
 #endif // COREVIEW_CONNECTION_H

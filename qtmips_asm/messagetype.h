@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef  MESSAGETYPE_H
-#define  MESSAGETYPE_H
+#ifndef MESSAGETYPE_H
+#define MESSAGETYPE_H
 
 namespace messagetype {
 

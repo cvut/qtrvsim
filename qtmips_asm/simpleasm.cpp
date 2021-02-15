@@ -33,47 +33,54 @@
  *
  ******************************************************************************/
 
-#include <QObject>
-#include <QFile>
-#include <QDir>
-#include <QFileInfo>
-
 #include "simpleasm.h"
 
-using namespace fixmatheval;
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QObject>
+#include <QString>
+#include <utility>
 
+using namespace fixmatheval;
 
 SymbolTableDb::SymbolTableDb(machine::SymbolTable *symtab) {
     this->symtab = symtab;
 }
 
 bool SymbolTableDb::getValue(fixmatheval::FmeValue &value, QString name) {
-    std::uint32_t val;
-    if (!symtab->name_to_value(val, name))
+    uint32_t val;
+    if (!symtab->name_to_value(val, name)) {
         return false;
+    }
     value = val;
     return true;
 }
 
-void SymbolTableDb::setSymbol(QString name, std::uint32_t value, std::uint32_t size,
-          unsigned char info, unsigned char other) {
+void SymbolTableDb::setSymbol(
+    const QString &name,
+    uint32_t value,
+    uint32_t size,
+    unsigned char info,
+    unsigned char other) {
     symtab->set_symbol(name, value, size, info, other);
 }
 
-
-std::uint64_t SimpleAsm::string_to_uint64(QString str, int base,
-                                      int *chars_taken) {
+uint64_t
+SimpleAsm::string_to_uint64(const QString &str, int base, int *chars_taken) {
     int i;
-    std::int64_t val;
+    int64_t val;
     char *p, *r;
     char cstr[str.count() + 1];
-    for (i = 0; i < str.count(); i++)
+    for (i = 0; i < str.count(); i++) {
         cstr[i] = str.at(i).toLatin1();
+    }
     cstr[i] = 0;
     p = cstr;
     val = std::strtoll(p, &r, base);
-    if (chars_taken != nullptr)
+    if (chars_taken != nullptr) {
         *chars_taken = r - p;
+    }
     return val;
 }
 
@@ -95,15 +102,20 @@ void SimpleAsm::clear() {
     fatal_occured = false;
 }
 
-void SimpleAsm::setup(machine::MemoryAccess *mem, SymbolTableDb *symtab,
-                      std::uint32_t address) {
+void SimpleAsm::setup(
+    machine::MemoryAccess *mem,
+    SymbolTableDb *symtab,
+    uint32_t address) {
     this->mem = mem;
     this->symtab = symtab;
     this->address = address;
 }
 
-bool SimpleAsm::process_line(QString line, QString filename,
-                             int line_number, QString *error_ptr) {
+bool SimpleAsm::process_line(
+    const QString &line,
+    const QString &filename,
+    int line_number,
+    QString *error_ptr) {
     QString error;
     QString label = "";
     QString op = "";
@@ -121,89 +133,119 @@ bool SimpleAsm::process_line(QString line, QString filename,
 
     for (pos = 0; pos <= line.count(); pos++) {
         QChar ch = ' ';
-        if (pos >= line.count())
+        if (pos >= line.count()) {
             final = true;
-        if (!final)
+        }
+        if (!final) {
             ch = line.at(pos);
+        }
         if (!in_quotes) {
             if (ch == '#') {
                 if (line.mid(pos).startsWith("#include")) {
-                    if ((line.count() > pos + 8) && !line.at(pos + 8).isSpace())
+                    if ((line.count() > pos + 8)
+                        && !line.at(pos + 8).isSpace()) {
                         final = true;
+                    }
                 } else if (line.mid(pos).startsWith("#pragma")) {
-                    if ((line.count() > pos + 7) && !line.at(pos + 7).isSpace())
+                    if ((line.count() > pos + 7)
+                        && !line.at(pos + 7).isSpace()) {
                         final = true;
-                    else
+                    } else {
                         space_separated = true;
+                    }
                 } else {
                     final = true;
                 }
             }
-            if (ch == ';')
+            if (ch == ';') {
                 final = true;
-            if (ch == '/') {
-                if (pos + 1 < line.count())
-                    if (line.at(pos + 1) == '/')
-                        final = true;
             }
-            separator = final || (maybe_label && (ch == ':')) ||
-                        ((operand_num >= 0) && ((ch == ',') ||
-                          (space_separated && ch.isSpace() && (token_beg != -1))));
+            if (ch == '/') {
+                if (pos + 1 < line.count()) {
+                    if (line.at(pos + 1) == '/') {
+                        final = true;
+                    }
+                }
+            }
+            separator = final || (maybe_label && (ch == ':'))
+                        || ((operand_num >= 0)
+                            && ((ch == ',')
+                                || (space_separated && ch.isSpace()
+                                    && (token_beg != -1))));
             if (maybe_label && (ch == ':')) {
                 maybe_label = false;
                 if (token_beg == -1) {
                     error = "empty label";
-                    emit report_message(messagetype::MSG_ERROR, filename, line_number, pos, error, "");
+                    emit report_message(
+                        messagetype::MSG_ERROR, filename, line_number, pos,
+                        error, "");
                     error_occured = true;
-                    if (error_ptr != nullptr)
+                    if (error_ptr != nullptr) {
                         *error_ptr = error;
+                    }
                     return false;
                 }
                 label = line.mid(token_beg, token_last - token_beg + 1);
                 token_beg = -1;
-            } else if (((!ch.isSpace() && (token_beg >= 0) && (token_last < pos - 1)) ||
-                    final) && (operand_num == -1)) {
+            } else if (
+                ((!ch.isSpace() && (token_beg >= 0) && (token_last < pos - 1))
+                 || final)
+                && (operand_num == -1)) {
                 maybe_label = false;
-                if (token_beg != -1)
-                    op = line.mid(token_beg, token_last - token_beg + 1).toUpper();
+                if (token_beg != -1) {
+                    op = line.mid(token_beg, token_last - token_beg + 1)
+                             .toUpper();
+                }
                 token_beg = -1;
                 operand_num = 0;
                 if (ch == ',') {
                     error = "empty first operand";
-                    emit report_message(messagetype::MSG_ERROR, filename, line_number, pos, error, "");
+                    emit report_message(
+                        messagetype::MSG_ERROR, filename, line_number, pos,
+                        error, "");
                     error_occured = true;
-                    if (error_ptr != nullptr)
+                    if (error_ptr != nullptr) {
                         *error_ptr = error;
+                    }
                     return false;
                 }
             } else if (separator || final) {
                 if (token_beg == -1) {
                     error = "empty operand";
-                    emit report_message(messagetype::MSG_ERROR, filename, line_number, pos, error, "");
+                    emit report_message(
+                        messagetype::MSG_ERROR, filename, line_number, pos,
+                        error, "");
                     error_occured = true;
-                    if (error_ptr != nullptr)
+                    if (error_ptr != nullptr) {
                         *error_ptr = error;
+                    }
                     return false;
                 }
-                operands.append(line.mid(token_beg, token_last - token_beg + 1));
+                operands.append(
+                    line.mid(token_beg, token_last - token_beg + 1));
                 token_beg = -1;
                 operand_num++;
             }
-            if (final)
+            if (final) {
                 break;
+            }
             if (!ch.isSpace() && !separator) {
-                if (token_beg == -1)
+                if (token_beg == -1) {
                     token_beg = pos;
+                }
                 token_last = pos;
             }
             backslash = false;
             if (ch == '"') {
                 if (operand_num == -1) {
                     error = "unexpected quoted text";
-                    emit report_message(messagetype::MSG_ERROR, filename, line_number, pos, error, "");
+                    emit report_message(
+                        messagetype::MSG_ERROR, filename, line_number, pos,
+                        error, "");
                     error_occured = true;
-                    if (error_ptr != nullptr)
+                    if (error_ptr != nullptr) {
                         *error_ptr = error;
+                    }
                     return false;
                 }
                 in_quotes = true;
@@ -212,18 +254,23 @@ bool SimpleAsm::process_line(QString line, QString filename,
             token_last = pos;
             if (final) {
                 error = "unterminated quoted text";
-                emit report_message(messagetype::MSG_ERROR, filename, line_number, pos, error, "");
+                emit report_message(
+                    messagetype::MSG_ERROR, filename, line_number, pos, error,
+                    "");
                 error_occured = true;
-                if (error_ptr != nullptr)
+                if (error_ptr != nullptr) {
                     *error_ptr = error;
+                }
                 return false;
             }
-            if ((ch == '"') && !backslash)
+            if ((ch == '"') && !backslash) {
                 in_quotes = false;
-            if ((ch == '\\')  && !backslash)
-                 backslash = true;
-            else
+            }
+            if ((ch == '\\') && !backslash) {
+                backslash = true;
+            } else {
                 backslash = false;
+            }
         }
     }
 
@@ -234,10 +281,12 @@ bool SimpleAsm::process_line(QString line, QString filename,
     if (op.isEmpty()) {
         if (operands.count() != 0) {
             error = "operands for empty operation";
-            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(
+                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr)
+            if (error_ptr != nullptr) {
                 *error_ptr = error;
+            }
             return false;
         }
         return true;
@@ -251,15 +300,18 @@ bool SimpleAsm::process_line(QString line, QString filename,
         QString incname;
         if ((operands.count() != 1) || operands.at(0).isEmpty()) {
             error = "the single file has to be specified for include";
-            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(
+                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr)
+            if (error_ptr != nullptr) {
                 *error_ptr = error;
+            }
             return false;
         }
         incname = operands.at(0);
-        if (incname.at(0) == '"')
+        if (incname.at(0) == '"') {
             incname = incname.mid(1, incname.count() - 2);
+        }
         QFileInfo fi(QFileInfo(filename).dir(), incname);
         incname = fi.filePath();
         include_stack.append(filename);
@@ -273,18 +325,20 @@ bool SimpleAsm::process_line(QString line, QString filename,
             }
         }
         if (!res) {
-            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(
+                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr)
-                if (error_ptr->isEmpty())
+            if (error_ptr != nullptr) {
+                if (error_ptr->isEmpty()) {
                     *error_ptr = error;
+                }
+            }
         }
         include_stack.removeLast();
         return res;
     }
-    if ((op == ".DATA") || (op == ".TEXT") ||
-        (op == ".GLOBL") || (op == ".END") ||
-        (op == ".ENT")) {
+    if ((op == ".DATA") || (op == ".TEXT") || (op == ".GLOBL") || (op == ".END")
+        || (op == ".ENT")) {
         return true;
     }
     if (op == ".ORG") {
@@ -293,30 +347,36 @@ bool SimpleAsm::process_line(QString line, QString filename,
         fixmatheval::FmeValue value;
         if (operands.count() != 1) {
             error = ".org unexpected number of operands";
-            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(
+                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr)
+            if (error_ptr != nullptr) {
                 *error_ptr = error;
+            }
             return false;
         }
         ok = expression.parse(operands.at(0), error);
         if (!ok) {
             fatal_occured = true;
             error = tr(".orig %1 parse error.").arg(line);
-            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(
+                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr)
+            if (error_ptr != nullptr) {
                 *error_ptr = error;
+            }
             return false;
         }
         ok = expression.eval(value, symtab, error);
         if (!ok) {
             fatal_occured = true;
             error = tr(".orig %1 evaluation error.").arg(line);
-            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(
+                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr)
+            if (error_ptr != nullptr) {
                 *error_ptr = error;
+            }
             return false;
         }
         address = value;
@@ -329,10 +389,12 @@ bool SimpleAsm::process_line(QString line, QString filename,
         fixmatheval::FmeValue fill = 0;
         if ((operands.count() != 1) && (operands.count() != 2)) {
             error = ".space/.skip unexpected number of operands";
-            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(
+                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr)
+            if (error_ptr != nullptr) {
                 *error_ptr = error;
+            }
             return false;
         }
         if (operands.count() > 1) {
@@ -340,20 +402,26 @@ bool SimpleAsm::process_line(QString line, QString filename,
             if (!ok) {
                 fatal_occured = true;
                 error = tr(".space/.skip %1 parse error.").arg(line);
-                emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+                emit report_message(
+                    messagetype::MSG_ERROR, filename, line_number, 0, error,
+                    "");
                 error_occured = true;
-                if (error_ptr != nullptr)
+                if (error_ptr != nullptr) {
                     *error_ptr = error;
+                }
                 return false;
             }
             ok = expression.eval(fill, symtab, error);
             if (!ok) {
                 fatal_occured = true;
                 error = tr(".space/.skip %1 evaluation error.").arg(line);
-                emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+                emit report_message(
+                    messagetype::MSG_ERROR, filename, line_number, 0, error,
+                    "");
                 error_occured = true;
-                if (error_ptr != nullptr)
+                if (error_ptr != nullptr) {
                     *error_ptr = error;
+                }
                 return false;
             }
         }
@@ -361,25 +429,30 @@ bool SimpleAsm::process_line(QString line, QString filename,
         if (!ok) {
             fatal_occured = true;
             error = tr(".space/.skip %1 parse error.").arg(line);
-            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(
+                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr)
+            if (error_ptr != nullptr) {
                 *error_ptr = error;
+            }
             return false;
         }
         ok = expression.eval(value, symtab, error);
         if (!ok) {
             fatal_occured = true;
             error = tr(".space/.skip %1 evaluation error.").arg(line);
-            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(
+                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr)
+            if (error_ptr != nullptr) {
                 *error_ptr = error;
+            }
             return false;
         }
         while (value-- > 0) {
-            if (!fatal_occured)
+            if (!fatal_occured) {
                 mem->write_byte(address, (uint8_t)fill);
+            }
             address += 1;
         }
         return true;
@@ -387,29 +460,35 @@ bool SimpleAsm::process_line(QString line, QString filename,
     if ((op == ".EQU") || (op == ".SET")) {
         if ((operands.count() > 2) || (operands.count() < 1)) {
             error = tr(".set or .equ incorrect arguments number.");
-            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(
+                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr)
+            if (error_ptr != nullptr) {
                 *error_ptr = error;
+            }
             return false;
         }
         QString name = operands.at(0).trimmed();
-        if ((name == "noat") || (name == "noreored"))
+        if ((name == "noat") || (name == "noreored")) {
             return true;
+        }
         bool ok;
         fixmatheval::FmeValue value = 1;
         if (operands.count() > 1) {
             fixmatheval::FmeExpression expression;
             ok = expression.parse(operands.at(1), error);
-            if (ok)
+            if (ok) {
                 ok = expression.eval(value, symtab, error);
+            }
             if (!ok) {
-                error = tr(".set or .equ %1 parse error.")
-                           .arg(operands.at(1));
-                emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+                error = tr(".set or .equ %1 parse error.").arg(operands.at(1));
+                emit report_message(
+                    messagetype::MSG_ERROR, filename, line_number, 0, error,
+                    "");
                 error_occured = true;
-                if (error_ptr != nullptr)
+                if (error_ptr != nullptr) {
                     *error_ptr = error;
+                }
                 return false;
             }
         }
@@ -418,21 +497,27 @@ bool SimpleAsm::process_line(QString line, QString filename,
     }
     if ((op == ".ASCII") || (op == ".ASCIZ")) {
         bool append_zero = op == ".ASCIZ";
-        for (QString s: operands) {
+        for (QString s : operands) {
             if (s.count() < 2) {
                 error = "ascii empty string";
-                emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+                emit report_message(
+                    messagetype::MSG_ERROR, filename, line_number, 0, error,
+                    "");
                 error_occured = true;
-                if (error_ptr != nullptr)
+                if (error_ptr != nullptr) {
                     *error_ptr = error;
+                }
                 return false;
             }
             if ((s.at(0) != '"') || (s.at(s.count() - 1) != '"')) {
                 error = "ascii missing quotes";
-                emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+                emit report_message(
+                    messagetype::MSG_ERROR, filename, line_number, 0, error,
+                    "");
                 error_occured = true;
-                if (error_ptr != nullptr)
+                if (error_ptr != nullptr) {
                     *error_ptr = error;
+                }
                 return false;
             }
             s = s.mid(1, s.count() - 2);
@@ -440,48 +525,39 @@ bool SimpleAsm::process_line(QString line, QString filename,
                 QChar ch = s.at(pos);
                 if (ch == '\\') {
                     ch = 0;
-                    if (pos + 1 < s.count()) switch(s.at(++pos).toLatin1()) {
-                        case '\\':
-                            ch = '\\';
-                            break;
-                        case '0':
-                            ch = 0x00;
-                            break;
-                        case 'r':
-                            ch = 0x0d;
-                            break;
-                        case 'n':
-                            ch = 0x0a;
-                            break;
-                        case 't':
-                            ch = 0x09;
-                            break;
-                        case 'b':
-                            ch = 0x08;
-                            break;
-                        case '"':
-                            ch = '"';
-                            break;
-                        default:
-                            ch = 0;
+                    if (pos + 1 < s.count()) {
+                        switch (s.at(++pos).toLatin1()) {
+                        case '\\': ch = '\\'; break;
+                        case '0': ch = 0x00; break;
+                        case 'r': ch = 0x0d; break;
+                        case 'n': ch = 0x0a; break;
+                        case 't': ch = 0x09; break;
+                        case 'b': ch = 0x08; break;
+                        case '"': ch = '"'; break;
+                        default: ch = 0;
+                        }
                     }
                     if (ch == '\0') {
                         error = "ascii - incorrect escape sequence";
-                        emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+                        emit report_message(
+                            messagetype::MSG_ERROR, filename, line_number, 0,
+                            error, "");
                         error_occured = true;
-                        if (error_ptr != nullptr)
+                        if (error_ptr != nullptr) {
                             *error_ptr = error;
+                        }
                         return false;
-
                     }
                 }
-                if (!fatal_occured)
+                if (!fatal_occured) {
                     mem->write_byte(address, (uint8_t)ch.toLatin1());
+                }
                 address += 1;
             }
             if (append_zero) {
-                if (!fatal_occured)
+                if (!fatal_occured) {
                     mem->write_byte(address, 0);
+                }
                 address += 1;
             }
         }
@@ -489,8 +565,8 @@ bool SimpleAsm::process_line(QString line, QString filename,
     }
     if (op == ".BYTE") {
         bool ok;
-        for (QString s: operands) {
-            std::uint32_t val = 0;
+        for (const QString &s : operands) {
+            uint32_t val = 0;
             int chars_taken;
             val = string_to_uint64(s, 0, &chars_taken);
             if (chars_taken != s.size()) {
@@ -500,72 +576,85 @@ bool SimpleAsm::process_line(QString line, QString filename,
                 if (!ok) {
                     fatal_occured = true;
                     error = tr(".byte %1 parse error.").arg(line);
-                    emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+                    emit report_message(
+                        messagetype::MSG_ERROR, filename, line_number, 0, error,
+                        "");
                     error_occured = true;
-                    if (error_ptr != nullptr)
+                    if (error_ptr != nullptr) {
                         *error_ptr = error;
+                    }
                     return false;
                 }
                 ok = expression.eval(value, symtab, error);
                 if (!ok) {
                     fatal_occured = true;
                     error = tr(".byte %1 evaluation error.").arg(line);
-                    emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+                    emit report_message(
+                        messagetype::MSG_ERROR, filename, line_number, 0, error,
+                        "");
                     error_occured = true;
-                    if (error_ptr != nullptr)
+                    if (error_ptr != nullptr) {
                         *error_ptr = error;
+                    }
                     return false;
                 }
                 val = (uint8_t)value;
             }
-            if (!fatal_occured)
+            if (!fatal_occured) {
                 mem->write_byte(address, (uint8_t)val);
+            }
             address += 1;
         }
         return true;
     }
 
     while (address & 3) {
-        if (!fatal_occured)
+        if (!fatal_occured) {
             mem->write_byte(address, 0);
+        }
         address += 1;
     }
 
     if (op == ".WORD") {
-        for (QString s: operands) {
+        for (QString s : operands) {
             s = s.simplified();
-            std::uint32_t val = 0;
+            uint32_t val = 0;
             int chars_taken;
             val = string_to_uint64(s, 0, &chars_taken);
             if (chars_taken != s.size()) {
                 val = 0;
-                reloc.append(new machine::RelocExpression(address, s, 0,
-                             -0xffffffff, 0xffffffff, 0, 32, 0, filename, line_number, 0));
+                reloc.append(new machine::RelocExpression(
+                    address, s, 0, -0xffffffff, 0xffffffff, 0, 32, 0, filename,
+                    line_number, 0));
             }
-            if (!fatal_occured)
+            if (!fatal_occured) {
                 mem->write_word(address, val);
+            }
             address += 4;
         }
         return true;
     }
 
-    std::uint32_t inst[2] = {0, 0};
-    ssize_t size = machine::Instruction::code_from_string(inst, 8, op, operands, error,
-                                             address, &reloc, filename, line_number, true);
+    uint32_t inst[2] = { 0, 0 };
+    ssize_t size = machine::Instruction::code_from_string(
+        inst, 8, op, operands, error, address, &reloc, filename, line_number,
+        true);
 
     if (size < 0) {
-        error = tr("instruction %1 parse error - %2.")
-                .arg(line, error);
-        emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+        error = tr("instruction %1 parse error - %2.").arg(line, error);
+        emit report_message(
+            messagetype::MSG_ERROR, filename, line_number, 0, error, "");
         error_occured = true;
-        if (error_ptr != nullptr)
+        if (error_ptr != nullptr) {
             *error_ptr = error;
+        }
         return false;
     }
-    std::uint32_t *p = inst;
+    uint32_t *p = inst;
     for (ssize_t l = 0; l < size; l += 4) {
-        if (!fatal_occured)
+        if (!fatal_occured) {
             mem->write_word(address, *(p++));
+        }
         address += 4;
     }
     return true;
@@ -579,16 +668,19 @@ bool SimpleAsm::process_file(QString filename, QString *error_ptr) {
         error = QString("cannot open file: \"%1\"").arg(filename);
         emit report_message(messagetype::MSG_ERROR, "", 0, 0, error, "");
         error_occured = true;
-        if (error_ptr != nullptr)
+        if (error_ptr != nullptr) {
             *error_ptr = error;
+        }
         return false;
     }
     for (int ln = 1; !srcfile.atEnd(); ln++) {
         QString line = srcfile.readLine();
-        if ((line.count() > 0) && (line.at(line.count() - 1) == '\n'))
+        if ((line.count() > 0) && (line.at(line.count() - 1) == '\n')) {
             line.truncate(line.count() - 1);
-        if (!process_line(line, filename, ln, error_ptr))
+        }
+        if (!process_line(line, filename, ln, error_ptr)) {
             res = false;
+        }
     }
     srcfile.close();
     return res;
@@ -596,13 +688,15 @@ bool SimpleAsm::process_file(QString filename, QString *error_ptr) {
 
 bool SimpleAsm::finish(QString *error_ptr) {
     bool error_reported = false;
-    foreach(machine::RelocExpression *r, reloc) {
+    foreach (machine::RelocExpression *r, reloc) {
         QString error;
         fixmatheval::FmeExpression expression;
         if (!expression.parse(r->expression, error)) {
-            error = tr("expression parse error %1 at line %2, expression %3.")
-                    .arg(error, QString::number(r->line), expression.dump());
-            emit report_message(messagetype::MSG_ERROR, r->filename, r->line, 0, error, "");
+            error
+                = tr("expression parse error %1 at line %2, expression %3.")
+                      .arg(error, QString::number(r->line), expression.dump());
+            emit report_message(
+                messagetype::MSG_ERROR, r->filename, r->line, 0, error, "");
             if (error_ptr != nullptr && !error_reported)
                 *error_ptr = error;
             error_occured = true;
@@ -610,22 +704,34 @@ bool SimpleAsm::finish(QString *error_ptr) {
         } else {
             fixmatheval::FmeValue value;
             if (!expression.eval(value, symtab, error)) {
-                error = tr("expression evalution error %1 at line %2 , expression %3.")
-                        .arg(error, QString::number(r->line), expression.dump());
-                emit report_message(messagetype::MSG_ERROR, r->filename, r->line, 0, error, "");
+                error = tr("expression evalution error %1 at line %2 , "
+                           "expression %3.")
+                            .arg(
+                                error, QString::number(r->line),
+                                expression.dump());
+                emit report_message(
+                    messagetype::MSG_ERROR, r->filename, r->line, 0, error, "");
                 if (error_ptr != nullptr && !error_reported)
                     *error_ptr = error;
                 error_occured = true;
                 error_reported = true;
             } else {
-                if (false)
-                    emit report_message(messagetype::MSG_INFO, r->filename, r->line, 0,
-                                   expression.dump() + " -> " + QString::number(value), "");
+                if (false) {
+                    emit report_message(
+                        messagetype::MSG_INFO, r->filename, r->line, 0,
+                        expression.dump() + " -> " + QString::number(value),
+                        "");
+                }
                 machine::Instruction inst(mem->read_word(r->location, true));
                 if (!inst.update(value, r)) {
-                    error = tr("instruction update error %1 at line %2, expression %3 -> value %4.")
-                            .arg(error, QString::number(r->line), expression.dump(), QString::number(value));
-                    emit report_message(messagetype::MSG_ERROR, r->filename, r->line, 0, error, "");
+                    error = tr("instruction update error %1 at line %2, "
+                               "expression %3 -> value %4.")
+                                .arg(
+                                    error, QString::number(r->line),
+                                    expression.dump(), QString::number(value));
+                    emit report_message(
+                        messagetype::MSG_ERROR, r->filename, r->line, 0, error,
+                        "");
                     if (error_ptr != nullptr && !error_reported)
                         *error_ptr = error;
                     error_occured = true;
@@ -645,8 +751,11 @@ bool SimpleAsm::finish(QString *error_ptr) {
     return !error_occured;
 }
 
-bool SimpleAsm::process_pragma(QStringList &operands, QString filename,
-                               int line_number, QString *error_ptr) {
+bool SimpleAsm::process_pragma(
+    QStringList &operands,
+    QString filename,
+    int line_number,
+    QString *error_ptr) {
     (void)operands;
     (void)filename;
     (void)line_number;

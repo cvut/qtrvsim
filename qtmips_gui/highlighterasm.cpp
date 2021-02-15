@@ -34,26 +34,25 @@
  ******************************************************************************/
 /* Based on Qt example released under BSD license */
 
-#include "QStringList"
 #include "highlighterasm.h"
-#include "instruction.h"
+
+#include "QStringList"
+#include "qtmips_machine/instruction.h"
 
 HighlighterAsm::HighlighterAsm(QTextDocument *parent)
-    : QSyntaxHighlighter(parent)
-{
+    : QSyntaxHighlighter(parent) {
     HighlightingRule rule;
 
     keywordFormat.setForeground(Qt::darkBlue);
     keywordFormat.setFontWeight(QFont::Bold);
-    const QString keywordPatterns[] = {
-        QStringLiteral("\\.org\\b"), QStringLiteral("\\.word\\b"),
-        QStringLiteral("\\.text\\b"), QStringLiteral("\\.data\\b"),
-        QStringLiteral("\\.globl\\b"), QStringLiteral("\\.set\\b"),
-        QStringLiteral("\\.equ\\b"), QStringLiteral("\\.end\\b"),
-        QStringLiteral("\\.ent\\b"), QStringLiteral("\\.ascii\\b"),
-        QStringLiteral("\\.asciz\\b"), QStringLiteral("\\.byte\\b"),
-        QStringLiteral("\\.skip\\b"), QStringLiteral("\\.space\\b")
-    };
+    const QString keywordPatterns[]
+        = { QStringLiteral("\\.org\\b"),   QStringLiteral("\\.word\\b"),
+            QStringLiteral("\\.text\\b"),  QStringLiteral("\\.data\\b"),
+            QStringLiteral("\\.globl\\b"), QStringLiteral("\\.set\\b"),
+            QStringLiteral("\\.equ\\b"),   QStringLiteral("\\.end\\b"),
+            QStringLiteral("\\.ent\\b"),   QStringLiteral("\\.ascii\\b"),
+            QStringLiteral("\\.asciz\\b"), QStringLiteral("\\.byte\\b"),
+            QStringLiteral("\\.skip\\b"),  QStringLiteral("\\.space\\b") };
 
     for (const QString &pattern : keywordPatterns) {
         rule.pattern = QRegularExpression(pattern);
@@ -103,28 +102,29 @@ HighlighterAsm::HighlighterAsm(QTextDocument *parent)
     rule.format = quotationFormat;
     highlightingRules.append(rule);
 
-    //functionFormat.setFontItalic(true);
-    //functionFormat.setForeground(Qt::blue);
-    //rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
-    //rule.format = functionFormat;
-    //highlightingRules.append(rule);
+    // functionFormat.setFontItalic(true);
+    // functionFormat.setForeground(Qt::blue);
+    // rule.pattern =
+    // QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
+    // rule.format = functionFormat; highlightingRules.append(rule);
 
-    //commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
-    //commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
+    // commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
+    // commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
 }
 
-void HighlighterAsm::highlightBlock(const QString &text)
-{
+void HighlighterAsm::highlightBlock(const QString &text) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 7, 0)
-    foreach(const HighlightingRule &rule, highlightingRules)
+    foreach (const HighlightingRule &rule, highlightingRules)
 #else
     for (const HighlightingRule &rule : qAsConst(highlightingRules))
 #endif
     {
-        QRegularExpressionMatchIterator matchIterator = rule.pattern.globalMatch(text);
+        QRegularExpressionMatchIterator matchIterator
+            = rule.pattern.globalMatch(text);
         while (matchIterator.hasNext()) {
             QRegularExpressionMatch match = matchIterator.next();
-            setFormat(match.capturedStart(), match.capturedLength(), rule.format);
+            setFormat(
+                match.capturedStart(), match.capturedLength(), rule.format);
         }
     }
     setCurrentBlockState(0);

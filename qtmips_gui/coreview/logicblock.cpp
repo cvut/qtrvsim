@@ -34,8 +34,10 @@
  ******************************************************************************/
 
 #include "logicblock.h"
+
 #include "coreview_colors.h"
 #include "fontsize.h"
+
 #include <cmath>
 
 using namespace coreview;
@@ -47,7 +49,8 @@ using namespace coreview;
 #define PENW 1
 //////////////////////
 
-LogicBlock::LogicBlock(QString name) : LogicBlock(QVector<QString>({name})) { }
+LogicBlock::LogicBlock(QString name) : LogicBlock(QVector<QString>({ name })) {
+}
 
 LogicBlock::LogicBlock(QVector<QString> name) : QGraphicsObject(nullptr) {
     QFont font;
@@ -59,13 +62,13 @@ LogicBlock::LogicBlock(QVector<QString> name) : QGraphicsObject(nullptr) {
         t->setFont(font);
         text.append(t);
         QRectF t_box = t->boundingRect();
-        t->setPos(-t_box.width()/2, h + LINE_OFFSET);
+        t->setPos(-t_box.width() / 2, h + LINE_OFFSET);
         h += t_box.height() + LINE_OFFSET;
         if (w < t_box.width())
             w = t_box.width();
     }
 
-    box = QRectF(-w/2 - GAP, -GAP, w + (2*GAP), h + (2*GAP));
+    box = QRectF(-w / 2 - GAP, -GAP, w + (2 * GAP), h + (2 * GAP));
 }
 
 LogicBlock::~LogicBlock() {
@@ -76,10 +79,15 @@ LogicBlock::~LogicBlock() {
 }
 
 QRectF LogicBlock::boundingRect() const {
-    return QRectF(box.x() - PENW/2, box.y() - PENW/2, box.width() + PENW, box.height() + PENW);
+    return QRectF(
+        box.x() - PENW / 2, box.y() - PENW / 2, box.width() + PENW,
+        box.height() + PENW);
 }
 
-void LogicBlock::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))) {
+void LogicBlock::paint(
+    QPainter *painter,
+    const QStyleOptionGraphicsItem *option __attribute__((unused)),
+    QWidget *widget __attribute__((unused))) {
     QPen pen = painter->pen();
     pen.setColor(BLOCK_OUTLINE_COLOR);
     painter->setPen(pen);
@@ -96,10 +104,11 @@ void LogicBlock::setPos(qreal x, qreal y) {
 }
 
 void LogicBlock::setSize(qreal width, qreal height) {
-    box.setX(-width/2 - GAP);
-    box.setWidth(width + (2*GAP));
-    box.setHeight(height + (2*GAP));
-    for (int i = 0; i < connectors.size(); i++) { // Update point for all connectors
+    box.setX(-width / 2 - GAP);
+    box.setWidth(width + (2 * GAP));
+    box.setHeight(height + (2 * GAP));
+    for (int i = 0; i < connectors.size(); i++) { // Update point for all
+                                                  // connectors
         struct Con &c = connectors[i];
         c.p = con_pos(c.x, c.y);
     }
@@ -118,14 +127,11 @@ const Connector *LogicBlock::new_connector(qreal x, qreal y) {
     else
         y = sign(y);
 
-    // Note: we are using here that 0 and M_PI is same angle but different orientation (but we ignore orientation for now)
-    Connector *c = new Connector(fabs(x) > fabs(y) ? Connector::AX_X : Connector::AX_Y);
-    connectors.append({
-        .con = c,
-        .x = x,
-        .y = y,
-        .p = con_pos(x, y)
-    });
+    // Note: we are using here that 0 and M_PI is same angle but different
+    // orientation (but we ignore orientation for now)
+    Connector *c
+        = new Connector(fabs(x) > fabs(y) ? Connector::AX_X : Connector::AX_Y);
+    connectors.append({ .con = c, .x = x, .y = y, .p = con_pos(x, y) });
     setPos(this->x(), this->y()); // Update connector position
     return c;
 }
@@ -133,7 +139,7 @@ const Connector *LogicBlock::new_connector(qreal x, qreal y) {
 QPointF LogicBlock::con_pos(qreal x, qreal y) {
     qreal px, py;
     px = (box.right() - GAP) * x;
-    py = (box.bottom()/2 - GAP) * (y + 1) + GAP;
+    py = (box.bottom() / 2 - GAP) * (y + 1) + GAP;
     if (fabs(x) == 1)
         px += GAP * sign(x);
     if (fabs(y) == 1)

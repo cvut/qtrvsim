@@ -36,26 +36,25 @@
 #ifndef ABOUTDIALOG_H
 #define ABOUTDIALOG_H
 
-#include <random>
-#include <array>
-
 #include <QDialog>
 #include <QVBoxLayout>
+#include <array>
+#include <random>
 
 class QString;
 class QTextBrowser;
 
-class AboutDialog : public QDialog  {
-   Q_OBJECT
+class AboutDialog : public QDialog {
+    Q_OBJECT
 
 public:
-  AboutDialog(QWidget *parent = 0);
+    AboutDialog(QWidget *parent = nullptr);
 
 private:
-  QVBoxLayout *all;
-  QTextBrowser *authorsBrowser;
+    QVBoxLayout *all;
+    QTextBrowser *authorsBrowser {};
 
-  int prevTab;
+    int prevTab;
 };
 
 #endif

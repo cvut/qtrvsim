@@ -35,19 +35,27 @@
 
 #include "symboltable.h"
 
+#include <utility>
+
 using namespace machine;
 
-SymbolTableEntry::SymbolTableEntry(QString name, std::uint32_t value,
-            std::uint32_t size, unsigned char info, unsigned char other) {
-    this->name = name;
+SymbolTableEntry::SymbolTableEntry(
+    QString name,
+    uint32_t value,
+    uint32_t size,
+    unsigned char info,
+    unsigned char other) {
+    this->name = std::move(name);
     this->value = value;
     this->size = size;
     this->info = info;
     this->other = other;
 }
 
-SymbolTable::SymbolTable(QObject *parent) : QObject(parent),
-                          map_value_to_symbol(), map_name_to_symbol() {
+SymbolTable::SymbolTable(QObject *parent)
+    : QObject(parent)
+    , map_value_to_symbol()
+    , map_name_to_symbol() {
 }
 
 SymbolTable::~SymbolTable() {
@@ -59,29 +67,39 @@ SymbolTable::~SymbolTable() {
     }
 }
 
-void SymbolTable::add_symbol(QString name, std::uint32_t value, std::uint32_t size,
-          unsigned char info, unsigned char other) {
-    SymbolTableEntry *p_ste = new SymbolTableEntry(name, value, size, info, other);
+void SymbolTable::add_symbol(
+    const QString &name,
+    uint32_t value,
+    uint32_t size,
+    unsigned char info,
+    unsigned char other) {
+    SymbolTableEntry *p_ste
+        = new SymbolTableEntry(name, value, size, info, other);
     map_value_to_symbol.insert(value, p_ste);
     map_name_to_symbol.insert(name, p_ste);
 }
 
-void SymbolTable::remove_symbol(QString name) {
+void SymbolTable::remove_symbol(const QString &name) {
     SymbolTableEntry *p_ste = map_name_to_symbol.value(name);
-    if (p_ste == nullptr)
+    if (p_ste == nullptr) {
         return;
+    }
     map_name_to_symbol.remove(name);
     map_value_to_symbol.remove(p_ste->value, p_ste);
     delete p_ste;
 }
 
-void SymbolTable::set_symbol(QString name, std::uint32_t value, std::uint32_t size,
-          unsigned char info, unsigned char other) {
+void SymbolTable::set_symbol(
+    const QString &name,
+    uint32_t value,
+    uint32_t size,
+    unsigned char info,
+    unsigned char other) {
     remove_symbol(name);
     add_symbol(name, value, size, info, other);
 }
 
-bool SymbolTable::name_to_value(std::uint32_t &value, QString name) const {
+bool SymbolTable::name_to_value(uint32_t &value, const QString &name) const {
     SymbolTableEntry *p_ste = map_name_to_symbol.value(name);
     if (p_ste == nullptr) {
         value = 0;
@@ -91,7 +109,7 @@ bool SymbolTable::name_to_value(std::uint32_t &value, QString name) const {
     return true;
 }
 
-bool SymbolTable::value_to_name(QString &name, std::uint32_t value) const {
+bool SymbolTable::value_to_name(QString &name, uint32_t value) const {
     SymbolTableEntry *p_ste = map_value_to_symbol.value(value);
     if (p_ste == nullptr) {
         name = "";

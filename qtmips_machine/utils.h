@@ -38,12 +38,12 @@
 
 #include <cstdint>
 
-#if  __GNUC__ >= 7
-#define FALLTROUGH  __attribute__((fallthrough));
+#if __GNUC__ >= 7
+    #define FALLTROUGH __attribute__((fallthrough));
 #else
-#define FALLTROUGH
+    #define FALLTROUGH
 #endif
 
-std::uint32_t sign_extend(std::uint16_t);
+uint32_t sign_extend(uint16_t);
 
 #endif // UTILS_H

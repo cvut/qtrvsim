@@ -34,8 +34,9 @@
  ******************************************************************************/
 
 #include "value.h"
-#include "coreview_colors.h"
+
 #include "../fontsize.h"
+#include "coreview_colors.h"
 
 using namespace coreview;
 
@@ -43,8 +44,14 @@ using namespace coreview;
 #define LETWIDTH 7
 
 // TODO orientation
-Value::Value(bool vertical, unsigned width, std::uint32_t init_val,
-             unsigned a_base, QChar fillchr, bool frame) : QGraphicsObject(nullptr) {
+Value::Value(
+    bool vertical,
+    unsigned width,
+    uint32_t init_val,
+    unsigned a_base,
+    QChar fillchr,
+    bool frame)
+    : QGraphicsObject(nullptr) {
     wid = width;
     val = init_val;
     base = a_base;
@@ -54,28 +61,40 @@ Value::Value(bool vertical, unsigned width, std::uint32_t init_val,
 }
 
 QRectF Value::boundingRect() const {
-    if (vertical)
-        return QRectF(-LETWIDTH/2 - 1, -HEIGHT*(int)wid/2 - 1, LETWIDTH + 2, HEIGHT*wid + 2);
-    else
-        return QRectF(-(LETWIDTH*(int)wid)/2 - 1, -HEIGHT/2 - 1, LETWIDTH*wid + 2, HEIGHT + 2);
+    if (vertical) {
+        return { -LETWIDTH / 2.0 - 1.0, -HEIGHT * (int)wid / 2.0 - 1.0,
+                 LETWIDTH + 2, HEIGHT * wid + 2.0 };
+    } else {
+        return { -(LETWIDTH * (int)wid) / 2.0 - 1.0, -HEIGHT / 2.0 - 1.0,
+                 LETWIDTH * wid + 2.0, HEIGHT + 2.0 };
+    }
 }
 
-void Value::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __attribute__((unused)), QWidget *widget __attribute__((unused))){
+void Value::paint(
+    QPainter *painter,
+    const QStyleOptionGraphicsItem *option __attribute__((unused)),
+    QWidget *widget __attribute__((unused))) {
     QFont f;
     f.setPixelSize(FontSize::SIZE7);
     painter->setFont(f);
 
     QRectF rect;
-    if (vertical)
-        rect = QRectF(-LETWIDTH/2 - 0.5, -(HEIGHT*(int)wid)/2 - 0.5, LETWIDTH + 1, HEIGHT*wid + 1);
-    else
-        rect = QRectF(-(LETWIDTH*(int)wid)/2 - 0.5, -HEIGHT/2 - 0.5, LETWIDTH*wid + 1, HEIGHT + 1);
+    if (vertical) {
+        rect = QRectF(
+            -LETWIDTH / 2 - 0.5, -(HEIGHT * (int)wid) / 2 - 0.5, LETWIDTH + 1,
+            HEIGHT * wid + 1);
+    } else {
+        rect = QRectF(
+            -(LETWIDTH * (int)wid) / 2 - 0.5, -HEIGHT / 2 - 0.5,
+            LETWIDTH * wid + 1, HEIGHT + 1);
+    }
     painter->setBrush(QBrush(QColor(Qt::white)));
     painter->setBackgroundMode(Qt::OpaqueMode);
-    if (!frame)
+    if (!frame) {
         painter->setPen(QColor(Qt::white));
-    else
+    } else {
         painter->setPen(QColor(BLOCK_OUTLINE_COLOR));
+    }
     painter->drawRect(rect);
     painter->setPen(QColor(Qt::black));
     painter->setBackgroundMode(Qt::TransparentMode);
@@ -87,11 +106,12 @@ void Value::paint(QPainter *painter, const QStyleOptionGraphicsItem *option __at
             // TODO this is probably broken (it is offseted)
             rect.translate(0, HEIGHT);
         }
-    } else
+    } else {
         painter->drawText(rect, Qt::AlignCenter, str);
+    }
 }
 
-void Value::value_update(std::uint32_t val)  {
+void Value::value_update(uint32_t val) {
     this->val = val;
     update();
 }

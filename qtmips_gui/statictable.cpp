@@ -34,10 +34,18 @@
  ******************************************************************************/
 
 #include "statictable.h"
-#include <QPainter>
-#include <qtmipsexception.h>
 
-StaticTableLayout::StaticTableLayout(QWidget *parent, int margin, int horizontal_big_spacing, int horizontal_small_spacing, int vertical_spacing) : QLayout(parent) {
+#include "qtmips_machine/qtmipsexception.h"
+
+#include <QPainter>
+
+StaticTableLayout::StaticTableLayout(
+    QWidget *parent,
+    int margin,
+    int horizontal_big_spacing,
+    int horizontal_small_spacing,
+    int vertical_spacing)
+    : QLayout(parent) {
     setContentsMargins(margin, margin, margin, margin);
     bhspace = horizontal_big_spacing;
     shspace = horizontal_small_spacing;
@@ -85,11 +93,12 @@ QSize StaticTableLayout::minimumSize() const {
     for (int i = 0; i < items.size(); i++) {
         QSize ss;
         for (int y = 0; y < items[i].size(); y++) {
-            ss = cch_minSize.size.expandedTo(items[i][y]->minimumSize() + QSize(shspace, 0));
+            ss = cch_minSize.size.expandedTo(
+                items[i][y]->minimumSize() + QSize(shspace, 0));
         }
         cch_minSize.size = cch_minSize.size.expandedTo(ss - QSize(shspace, 0));
     }
-    cch_minSize.size += QSize(2*margin(), 2*margin());
+    cch_minSize.size += QSize(2 * margin(), 2 * margin());
     return cch_minSize.size;
 }
 
@@ -106,23 +115,26 @@ void StaticTableLayout::addItem(QLayoutItem *item __attribute__((unused))) {
     // Just implement it but it does nothing
 }
 
-QLayoutItem *StaticTableLayout::itemAt(int index __attribute__((unused))) const {
-    return nullptr; // This is just dummy implementation to satisfy reimplementation
+QLayoutItem *StaticTableLayout::itemAt(int index
+                                       __attribute__((unused))) const {
+    return nullptr; // This is just dummy implementation to satisfy
+                    // reimplementation
 }
 
 QLayoutItem *StaticTableLayout::takeAt(int index __attribute__((unused))) {
-    return nullptr; // This is just dummy implementation to satisfy reimplementation
+    return nullptr; // This is just dummy implementation to satisfy
+                    // reimplementation
 }
 
 int StaticTableLayout::count() const {
     return items.size();
 }
 
-void StaticTableLayout::addRow(QList<QWidget*> w) {
+void StaticTableLayout::addRow(const QList<QWidget *> &w) {
     items.append(list2vec(w));
 }
 
-void StaticTableLayout::insertRow(QList<QWidget*> w, int i) {
+void StaticTableLayout::insertRow(const QList<QWidget *> &w, int i) {
     items.insert(i, list2vec(w));
 }
 
@@ -153,56 +165,70 @@ void StaticTableLayout::itemRect(QRect &rect, QVector<int> &separators, int i) {
     getContentsMargins(&left, &top, &right, &bottom);
 
     int x = left;
+
     for (int s = 0; s < col; s++) {
-        for (int t = 0; t < row_widths[s].size(); t++)
+        for (int t = 0; t < row_widths[s].size(); t++) {
             x += row_widths[s][t] + shspace;
+        }
         x += bhspace - shspace;
     }
-    if (col > 0) // otherwise we are on left edge and there was no previous column so no big space
-        x -= bhspace/2;
+    if (col > 0) { // otherwise we are on left edge and there was no previous
+                   // column so no big space
+        x -= bhspace / 2;
+    }
     int y = top + (row * (row_height + vspace));
 
     int width = 0;
     for (int t = 0; t < row_widths[col].size(); t++) {
         width += row_widths[col][t] + shspace;
-        separators.append(width - shspace/2);
+        separators.append(width - shspace / 2);
     }
-    if (col <= 0)
-        width -= bhspace/2;
+    if (col <= 0) {
+        width -= bhspace / 2;
+    }
 
-    rect = QRect(x, y - vspace/2, width - shspace + bhspace, row_height + vspace);
-    separators.removeLast(); // drop last separator as that one we don't want to see
+    rect = QRect(
+        x, y - vspace / 2, width - shspace + bhspace, row_height + vspace);
+    separators.removeLast(); // drop last separator as that one we don't want to
+                             // see
 }
 
 int StaticTableLayout::columns() {
     return row_widths.size();
 }
 
-int StaticTableLayout::real_row_height() {
+int StaticTableLayout::real_row_height() const {
     return row_height + vspace;
 }
 
 int StaticTableLayout::layout_count_approx(const QRect &rect) const {
     if (items.size() <= 0 || rect.width() < rect.height())
         return 1;
-    // Note: for some reason (probably optimalisation) when qlabel is not visible it reports 0 size. So we have to found at least one that is visible
-    // !items[vis][0]->widget()->isVisible()
+    // Note: for some reason (probably optimalisation) when qlabel is not
+    // visible it reports 0 size. So we have to found at least one that is
+    // visible !items[vis][0]->widget()->isVisible()
     int vis = 0;
-    while (items[vis].size() <= 0 || items[vis][0]->widget()->sizeHint().width() == 0) {
+    while (items[vis].size() <= 0
+           || items[vis][0]->widget()->sizeHint().width() == 0) {
         vis++;
         if (vis >= items.size())
-            return 1; // If none is visible then just say that it has to be single column
+            return 1; // If none is visible then just say that it has to be
+                      // single column
     }
 
     int w = 0;
     for (int i = 0; i < items[vis].size(); i++)
         w += items[vis][i]->sizeHint().width() + shspace;
-    w -= shspace; // subtract latest spacing
-    int width = rect.right() / w; // Note: this always rounds down so this always founds maximal possible count
+    w -= shspace;                  // subtract latest spacing
+    int width = rect.right() / w;  // Note: this always rounds down so this
+                                   // always founds maximal possible count
     return width <= 0 ? 1 : width; // We have to fit at least one column
 }
 
-int StaticTableLayout::layout_size(int &row_h, QList<QList<int>> &row_w, int count) const {
+int StaticTableLayout::layout_size(
+    int &row_h,
+    QList<QList<int>> &row_w,
+    int count) const {
     row_h = 0;
     row_w.clear();
     int col = 0;
@@ -219,19 +245,27 @@ int StaticTableLayout::layout_size(int &row_h, QList<QList<int>> &row_w, int cou
         if (++col >= count)
             col = 0;
     }
-    SANITY_ASSERT(row_w.size() <= count, "We should end up with maximum of count columns");
+    SANITY_ASSERT(
+        row_w.size() <= count,
+        "We should end up with maximum of count columns");
 
     int w = 0;
-    for (int i = 0; i < row_w.size(); i++) {
-        for (int y = 0; y < row_w[i].size(); y++)
-            w += row_w[i][y] + shspace;
-        w += bhspace - shspace; // subtract latest small spacing and add big spacing
+    for (auto &i : row_w) {
+        for (int y = 0; y < i.size(); y++) {
+            w += i[y] + shspace;
+        }
+        w += bhspace - shspace; // subtract latest small spacing and add big
+                                // spacing
     }
     w -= bhspace; // subtract latest big spacing
     return w;
 }
 
-void StaticTableLayout::layout_parms(QRect &rect, int &row_h, QList<QList<int>> &row_w, int &count) const {
+void StaticTableLayout::layout_parms(
+    QRect &rect,
+    int &row_h,
+    QList<QList<int>> &row_w,
+    int &count) const {
     int left, top, right, bottom;
     getContentsMargins(&left, &top, &right, &bottom);
     rect = rect.adjusted(left, top, -right, -bottom);
@@ -239,13 +273,15 @@ void StaticTableLayout::layout_parms(QRect &rect, int &row_h, QList<QList<int>> 
     // Firt let's do orientation count only on first line
     count = layout_count_approx(rect);
     while (layout_size(row_h, row_w, count) > rect.right() && count > 1) {
-        // Not using orientation count go down if we can't fit (if we can then just be happy with what we have)
+        // Not using orientation count go down if we can't fit (if we can then
+        // just be happy with what we have)
         count--;
     }
 }
 
 void StaticTableLayout::do_layout(const QRect &rect) {
-    if (cch_do_layout.size == rect.size() && cch_do_layout.count == items.size())
+    if (cch_do_layout.size == rect.size()
+        && cch_do_layout.count == items.size())
         // No effective change so don't do layout
         return;
     cch_do_layout.size = rect.size();
@@ -286,11 +322,11 @@ int StaticTableLayout::layout_height(int width) const {
     return (row_h + vspace) * ((items.size() + count - 1) / count);
 }
 
-QVector<QLayoutItem*> StaticTableLayout::list2vec(QList<QWidget*> w) {
-    QVector<QLayoutItem*> v;
-    for (int i = 0; i < w.size(); i++) {
-        addChildWidget(w[i]);
-        v.append(new QWidgetItem(w[i]));
+QVector<QLayoutItem *> StaticTableLayout::list2vec(QList<QWidget *> w) {
+    QVector<QLayoutItem *> v;
+    for (auto &i : w) {
+        addChildWidget(i);
+        v.append(new QWidgetItem(i));
     }
     return v;
 }
@@ -303,11 +339,11 @@ int StaticTable::count() {
     return layout.count();
 }
 
-void StaticTable::addRow(QList<QWidget*> w) {
+void StaticTable::addRow(const QList<QWidget *> &w) {
     layout.addRow(w);
 }
 
-void StaticTable::insertRow(QList<QWidget*> w, int i) {
+void StaticTable::insertRow(const QList<QWidget *> &w, int i) {
     layout.insertRow(w, i);
 }
 
@@ -327,7 +363,7 @@ int StaticTable::row_size() {
     return layout.real_row_height();
 }
 
-void StaticTable::paintEvent(QPaintEvent*) {
+void StaticTable::paintEvent(QPaintEvent *) {
     if (layout.columns() <= 0) // Don't paint unless we have at least one column
         return;
 
@@ -348,12 +384,12 @@ void StaticTable::paintEvent(QPaintEvent*) {
         layout.itemRect(rect, separators, i);
 
         int x = rect.left(); // just to store x
-        if (col <= 0) // this is left most row
+        if (col <= 0)        // this is left most row
             rect.setLeft(-2);
         if (col >= (layout.columns() - 1))
             rect.setRight(width());
         if (row <= 0)
-            rect.setTop(-2);;
+            rect.setTop(-2);
 
         p.drawRect(rect);
 
@@ -362,5 +398,4 @@ void StaticTable::paintEvent(QPaintEvent*) {
             p.drawLine(sep_x, rect.top(), sep_x, rect.bottom());
         }
     }
-
 }

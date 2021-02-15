@@ -48,15 +48,18 @@ void GraphicsView::setScene(QGraphicsScene *scene) {
 
 void GraphicsView::resizeEvent(QResizeEvent *event) {
     Super::resizeEvent(event);
-    if ((width() != prev_height) || (height() != prev_width))
+    if ((width() != prev_height) || (height() != prev_width)) {
         update_scale();
+    }
 }
 
 void GraphicsView::update_scale() {
-    if (scene() == nullptr)
+    if (scene() == nullptr) {
         return; // Skip if we have no scene
+    }
 
-    // Note: there is somehow three pixels error when viewing so we have to always compensate
+    // Note: there is somehow three pixels error when viewing so we have to
+    // always compensate
     const int w = scene()->width() + 3;
     const int h = scene()->height() + 3;
     prev_height = width();
@@ -96,12 +99,12 @@ void GraphicsView::wheelEvent(QWheelEvent *event) {
 
 void GraphicsView::keyPressEvent(QKeyEvent *event) {
     qreal factor = 1.1;
-    if (event->matches(QKeySequence::ZoomIn) ||
-        (event->key() == Qt::Key_Equal) ||
-        (event->key() == Qt::Key_Plus)) {
+    if (event->matches(QKeySequence::ZoomIn) || (event->key() == Qt::Key_Equal)
+        || (event->key() == Qt::Key_Plus)) {
         scale(factor, factor);
-    } else if (event->matches(QKeySequence::ZoomOut) ||
-               (event->key() == Qt::Key_Minus)) {
+    } else if (
+        event->matches(QKeySequence::ZoomOut)
+        || (event->key() == Qt::Key_Minus)) {
         scale(1 / factor, 1 / factor);
     } else {
         Super::keyPressEvent(event);

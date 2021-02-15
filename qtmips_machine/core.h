@@ -36,14 +36,15 @@
 #ifndef CORE_H
 #define CORE_H
 
+#include "alu.h"
+#include "cop0state.h"
+#include "instruction.h"
+#include "machineconfig.h"
+#include "memory.h"
+#include "qtmipsexception.h"
+#include "registers.h"
+
 #include <QObject>
-#include <qtmipsexception.h>
-#include <machineconfig.h>
-#include <registers.h>
-#include <cop0state.h>
-#include <memory.h>
-#include <instruction.h>
-#include <alu.h>
 
 namespace machine {
 
@@ -52,30 +53,46 @@ class Core;
 class ExceptionHandler : public QObject {
     Q_OBJECT
 public:
-    virtual bool handle_exception(Core *core, Registers *regs,
-                          ExceptionCause excause, std::uint32_t inst_addr,
-                          std::uint32_t next_addr, std::uint32_t jump_branch_pc,
-                          bool in_delay_slot, std::uint32_t mem_ref_addr) =  0;
+    virtual bool handle_exception(
+        Core *core,
+        Registers *regs,
+        ExceptionCause excause,
+        uint32_t inst_addr,
+        uint32_t next_addr,
+        uint32_t jump_branch_pc,
+        bool in_delay_slot,
+        uint32_t mem_ref_addr)
+        = 0;
 };
 
 class StopExceptionHandler : public ExceptionHandler {
     Q_OBJECT
 public:
-    bool handle_exception(Core *core, Registers *regs,
-                          ExceptionCause excause, std::uint32_t inst_addr,
-                          std::uint32_t next_addr, std::uint32_t jump_branch_pc,
-                          bool in_delay_slot, std::uint32_t mem_ref_addr);
+    bool handle_exception(
+        Core *core,
+        Registers *regs,
+        ExceptionCause excause,
+        uint32_t inst_addr,
+        uint32_t next_addr,
+        uint32_t jump_branch_pc,
+        bool in_delay_slot,
+        uint32_t mem_ref_addr) override;
 };
 
 class Core : public QObject {
     Q_OBJECT
 public:
-    Core(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
-         unsigned int min_cache_row_size = 1, Cop0State *cop0state = nullptr);
-    ~Core();
+    Core(
+        Registers *regs,
+        MemoryAccess *mem_program,
+        MemoryAccess *mem_data,
+        unsigned int min_cache_row_size = 1,
+        Cop0State *cop0state = nullptr);
+    ~Core() override;
 
     void step(bool skip_break = false); // Do single step
-    void reset(); // Reset core (only core, memory and registers has to be reseted separately)
+    void reset(); // Reset core (only core, memory and registers has to be
+                  // reseted separately)
 
     unsigned cycles() const; // Returns number of executed cycles
     unsigned stalls() const; // Returns number of stall cycles
@@ -84,91 +101,117 @@ public:
     Cop0State *get_cop0state();
     MemoryAccess *get_mem_data();
     MemoryAccess *get_mem_program();
-    void register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler);
-    void insert_hwbreak(std::uint32_t address);
-    void remove_hwbreak(std::uint32_t address);
-    bool is_hwbreak(std::uint32_t address);
+    void register_exception_handler(
+        ExceptionCause excause,
+        ExceptionHandler *exhandler);
+    void insert_hwbreak(uint32_t address);
+    void remove_hwbreak(uint32_t address);
+    bool is_hwbreak(uint32_t address);
     void set_stop_on_exception(enum ExceptionCause excause, bool value);
     bool get_stop_on_exception(enum ExceptionCause excause) const;
     void set_step_over_exception(enum ExceptionCause excause, bool value);
     bool get_step_over_exception(enum ExceptionCause excause) const;
 
-    void set_c0_userlocal(std::uint32_t address);
+    void set_c0_userlocal(uint32_t address);
 
     enum ForwardFrom {
-        FORWARD_NONE   = 0b00,
+        FORWARD_NONE = 0b00,
         FORWARD_FROM_W = 0b01,
         FORWARD_FROM_M = 0b10,
     };
 
 signals:
-    void instruction_fetched(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause, bool valid);
-    void instruction_decoded(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause, bool valid);
-    void instruction_executed(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause, bool valid);
-    void instruction_memory(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause, bool valid);
-    void instruction_writeback(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause, bool valid);
-    void instruction_program_counter(const machine::Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause, bool valid);
+    void instruction_fetched(
+        const machine::Instruction &inst,
+        uint32_t inst_addr,
+        ExceptionCause excause,
+        bool valid);
+    void instruction_decoded(
+        const machine::Instruction &inst,
+        uint32_t inst_addr,
+        ExceptionCause excause,
+        bool valid);
+    void instruction_executed(
+        const machine::Instruction &inst,
+        uint32_t inst_addr,
+        ExceptionCause excause,
+        bool valid);
+    void instruction_memory(
+        const machine::Instruction &inst,
+        uint32_t inst_addr,
+        ExceptionCause excause,
+        bool valid);
+    void instruction_writeback(
+        const machine::Instruction &inst,
+        uint32_t inst_addr,
+        ExceptionCause excause,
+        bool valid);
+    void instruction_program_counter(
+        const machine::Instruction &inst,
+        uint32_t inst_addr,
+        ExceptionCause excause,
+        bool valid);
 
-    void fetch_inst_addr_value(std::uint32_t);
-    void fetch_jump_reg_value(std::uint32_t);
-    void fetch_jump_value(std::uint32_t);
-    void fetch_branch_value(std::uint32_t);
-    void decode_inst_addr_value(std::uint32_t);
-    void decode_instruction_value(std::uint32_t);
-    void decode_reg1_value(std::uint32_t);
-    void decode_reg2_value(std::uint32_t);
-    void decode_immediate_value(std::uint32_t);
-    void decode_regw_value(std::uint32_t);
-    void decode_memtoreg_value(std::uint32_t);
-    void decode_memwrite_value(std::uint32_t);
-    void decode_memread_value(std::uint32_t);
-    void decode_alusrc_value(std::uint32_t);
-    void decode_regdest_value(std::uint32_t);
-    void decode_rs_num_value(std::uint32_t);
-    void decode_rt_num_value(std::uint32_t);
-    void decode_rd_num_value(std::uint32_t);
-    void decode_regd31_value(std::uint32_t);
-    void forward_m_d_rs_value(std::uint32_t);
-    void forward_m_d_rt_value(std::uint32_t);
-    void execute_inst_addr_value(std::uint32_t);
-    void execute_alu_value(std::uint32_t);
-    void execute_reg1_value(std::uint32_t);
-    void execute_reg2_value(std::uint32_t);
-    void execute_reg1_ff_value(std::uint32_t);
-    void execute_reg2_ff_value(std::uint32_t);
-    void execute_immediate_value(std::uint32_t);
-    void execute_regw_value(std::uint32_t);
-    void execute_memtoreg_value(std::uint32_t);
-    void execute_memwrite_value(std::uint32_t);
-    void execute_memread_value(std::uint32_t);
-    void execute_alusrc_value(std::uint32_t);
-    void execute_regdest_value(std::uint32_t);
-    void execute_regw_num_value(std::uint32_t);
-    void execute_stall_forward_value(std::uint32_t);
-    void execute_rs_num_value(std::uint32_t);
-    void execute_rt_num_value(std::uint32_t);
-    void execute_rd_num_value(std::uint32_t);
-    void memory_inst_addr_value(std::uint32_t);
-    void memory_alu_value(std::uint32_t);
-    void memory_rt_value(std::uint32_t);
-    void memory_mem_value(std::uint32_t);
-    void memory_regw_value(std::uint32_t);
-    void memory_memtoreg_value(std::uint32_t);
-    void memory_memwrite_value(std::uint32_t);
-    void memory_memread_value(std::uint32_t);
-    void memory_regw_num_value(std::uint32_t);
-    void memory_excause_value(std::uint32_t);
-    void writeback_inst_addr_value(std::uint32_t);
-    void writeback_value(std::uint32_t);
-    void writeback_memtoreg_value(std::uint32_t);
-    void writeback_regw_value(std::uint32_t);
-    void writeback_regw_num_value(std::uint32_t);
+    void fetch_inst_addr_value(uint32_t);
+    void fetch_jump_reg_value(uint32_t);
+    void fetch_jump_value(uint32_t);
+    void fetch_branch_value(uint32_t);
+    void decode_inst_addr_value(uint32_t);
+    void decode_instruction_value(uint32_t);
+    void decode_reg1_value(uint32_t);
+    void decode_reg2_value(uint32_t);
+    void decode_immediate_value(uint32_t);
+    void decode_regw_value(uint32_t);
+    void decode_memtoreg_value(uint32_t);
+    void decode_memwrite_value(uint32_t);
+    void decode_memread_value(uint32_t);
+    void decode_alusrc_value(uint32_t);
+    void decode_regdest_value(uint32_t);
+    void decode_rs_num_value(uint32_t);
+    void decode_rt_num_value(uint32_t);
+    void decode_rd_num_value(uint32_t);
+    void decode_regd31_value(uint32_t);
+    void forward_m_d_rs_value(uint32_t);
+    void forward_m_d_rt_value(uint32_t);
+    void execute_inst_addr_value(uint32_t);
+    void execute_alu_value(uint32_t);
+    void execute_reg1_value(uint32_t);
+    void execute_reg2_value(uint32_t);
+    void execute_reg1_ff_value(uint32_t);
+    void execute_reg2_ff_value(uint32_t);
+    void execute_immediate_value(uint32_t);
+    void execute_regw_value(uint32_t);
+    void execute_memtoreg_value(uint32_t);
+    void execute_memwrite_value(uint32_t);
+    void execute_memread_value(uint32_t);
+    void execute_alusrc_value(uint32_t);
+    void execute_regdest_value(uint32_t);
+    void execute_regw_num_value(uint32_t);
+    void execute_stall_forward_value(uint32_t);
+    void execute_rs_num_value(uint32_t);
+    void execute_rt_num_value(uint32_t);
+    void execute_rd_num_value(uint32_t);
+    void memory_inst_addr_value(uint32_t);
+    void memory_alu_value(uint32_t);
+    void memory_rt_value(uint32_t);
+    void memory_mem_value(uint32_t);
+    void memory_regw_value(uint32_t);
+    void memory_memtoreg_value(uint32_t);
+    void memory_memwrite_value(uint32_t);
+    void memory_memread_value(uint32_t);
+    void memory_regw_num_value(uint32_t);
+    void memory_excause_value(uint32_t);
+    void writeback_inst_addr_value(uint32_t);
+    void writeback_value(uint32_t);
+    void writeback_memtoreg_value(uint32_t);
+    void writeback_regw_value(uint32_t);
+    void writeback_regw_num_value(uint32_t);
 
-    void hu_stall_value(std::uint32_t);
-    void branch_forward_value(std::uint32_t);
+    void hu_stall_value(uint32_t);
+    void branch_forward_value(uint32_t);
 
-    void cycle_c_value(std::uint32_t);
-    void stall_c_value(std::uint32_t);
+    void cycle_c_value(uint32_t);
+    void stall_c_value(uint32_t);
 
     void stop_on_exception_reached();
 
@@ -176,10 +219,15 @@ protected:
     virtual void do_step(bool skip_break = false) = 0;
     virtual void do_reset() = 0;
 
-    bool handle_exception(Core *core, Registers *regs,
-                     ExceptionCause excause, std::uint32_t inst_addr,
-                     std::uint32_t next_addr, std::uint32_t jump_branch_pc,
-                     bool in_delay_slot, std::uint32_t mem_ref_addr);
+    bool handle_exception(
+        Core *core,
+        Registers *regs,
+        ExceptionCause excause,
+        uint32_t inst_addr,
+        uint32_t next_addr,
+        uint32_t jump_branch_pc,
+        bool in_delay_slot,
+        uint32_t mem_ref_addr);
 
     Registers *regs;
     Cop0State *cop0state;
@@ -188,7 +236,7 @@ protected:
     ExceptionHandler *ex_default_handler;
 
     struct dtFetch {
-        Instruction inst; // Loaded instruction
+        Instruction inst;   // Loaded instruction
         uint32_t inst_addr; // Address of instruction
         enum ExceptionCause excause;
         bool in_delay_slot;
@@ -196,12 +244,14 @@ protected:
     };
     struct dtDecode {
         Instruction inst;
-        bool memread; // If memory should be read
+        bool memread;  // If memory should be read
         bool memwrite; // If memory should write input
-        bool alusrc; // If second value to alu is immediate value (rt used otherwise)
-        bool regd; // If rd is used (otherwise rt is used for write target)
-        bool regd31; // Use R31 as destionation for JAL
-        bool regwrite; // If output should be written back to register (which one depends on regd)
+        bool alusrc;   // If second value to alu is immediate value (rt used
+                       // otherwise)
+        bool regd;     // If rd is used (otherwise rt is used for write target)
+        bool regd31;   // Use R31 as destionation for JAL
+        bool regwrite; // If output should be written back to register (which
+                       // one depends on regd)
         bool alu_req_rs; // requires rs value for ALU
         bool alu_req_rt; // requires rt value for ALU or SW
         bool bjr_req_rs; // requires rs for beq, bne, blez, bgtz, jr nad jalr
@@ -211,17 +261,19 @@ protected:
         bool bj_not;     // negate branch condition
         bool bgt_blez;   // BGTZ/BLEZ instead of BGEZ/BLTZ
         bool nb_skip_ds; // Skip delay slot if branch is not taken
-        bool forward_m_d_rs; // forwarding required for beq, bne, blez, bgtz, jr nad jalr
+        bool forward_m_d_rs; // forwarding required for beq, bne, blez, bgtz, jr
+                             // nad jalr
         bool forward_m_d_rt; // forwarding required for beq, bne
-        enum AluOp aluop; // Decoded ALU operation
+        enum AluOp aluop;    // Decoded ALU operation
         enum AccessControl memctl; // Decoded memory access type
-        std::uint8_t num_rs; // Number of the register s
-        std::uint8_t num_rt; // Number of the register t
-        std::uint8_t num_rd; // Number of the register d
-        std::uint32_t val_rs; // Value from register rs
-        std::uint32_t val_rt; // Value from register rt
-        std::uint32_t immediate_val; // zero or sign-extended immediate value
-        std::uint8_t rwrite; // Writeback register (multiplexed between rt and rd according to regd)
+        uint8_t num_rs;            // Number of the register s
+        uint8_t num_rt;            // Number of the register t
+        uint8_t num_rd;            // Number of the register d
+        uint32_t val_rs;           // Value from register rs
+        uint32_t val_rt;           // Value from register rt
+        uint32_t immediate_val;    // zero or sign-extended immediate value
+        uint8_t rwrite; // Writeback register (multiplexed between rt and
+                        // rd according to regd)
         ForwardFrom ff_rs;
         ForwardFrom ff_rt;
         uint32_t inst_addr; // Address of instruction
@@ -237,9 +289,10 @@ protected:
         bool memwrite;
         bool regwrite;
         enum AccessControl memctl;
-        std::uint32_t val_rt;
-        std::uint8_t rwrite; // Writeback register (multiplexed between rt and rd according to regd)
-        std::uint32_t alu_val; // Result of ALU execution
+        uint32_t val_rt;
+        uint8_t rwrite;     // Writeback register (multiplexed between rt and
+                            // rd according to regd)
+        uint32_t alu_val;   // Result of ALU execution
         uint32_t inst_addr; // Address of instruction
         enum ExceptionCause excause;
         bool in_delay_slot;
@@ -250,9 +303,9 @@ protected:
         Instruction inst;
         bool memtoreg;
         bool regwrite;
-        std::uint8_t rwrite;
-        std::uint32_t towrite_val;
-        std::uint32_t mem_addr; // Address used to access memory
+        uint8_t rwrite;
+        uint32_t towrite_val;
+        uint32_t mem_addr;  // Address used to access memory
         uint32_t inst_addr; // Address of instruction
         enum ExceptionCause excause;
         bool in_delay_slot;
@@ -261,16 +314,20 @@ protected:
     };
 
     struct dtFetch fetch(bool skip_break = false);
-    struct dtDecode decode(const struct dtFetch&);
-    struct dtExecute execute(const struct dtDecode&);
-    struct dtMemory memory(const struct dtExecute&);
-    void writeback(const struct dtMemory&);
-    bool handle_pc(const struct dtDecode&);
+    struct dtDecode decode(const struct dtFetch &);
+    struct dtExecute execute(const struct dtDecode &);
+    struct dtMemory memory(const struct dtExecute &);
+    void writeback(const struct dtMemory &);
+    bool handle_pc(const struct dtDecode &);
 
-    enum ExceptionCause memory_special(enum AccessControl memctl,
-                           int mode, bool memread, bool memwrite,
-                           std::uint32_t &towrite_val,
-                           std::uint32_t rt_value, std::uint32_t mem_addr);
+    enum ExceptionCause memory_special(
+        enum AccessControl memctl,
+        int mode,
+        bool memread,
+        bool memwrite,
+        uint32_t &towrite_val,
+        uint32_t rt_value,
+        uint32_t mem_addr);
 
     // Initialize structures to NOPE instruction
     void dtFetchInit(struct dtFetch &dt);
@@ -280,45 +337,56 @@ protected:
 
 protected:
     unsigned int stall_c;
+
 private:
-    struct hwBreak{
-        hwBreak(std::uint32_t addr);
-        std::uint32_t addr;
+    struct hwBreak {
+        hwBreak(uint32_t addr);
+        uint32_t addr;
         unsigned int flags;
         unsigned int count;
     };
     unsigned int cycle_c;
     unsigned int min_cache_row_size;
-    std::uint32_t hwr_userlocal;
-    QMap<std::uint32_t, hwBreak *> hw_breaks;
-    bool stop_on_exception[EXCAUSE_COUNT];
-    bool step_over_exception[EXCAUSE_COUNT];
+    uint32_t hwr_userlocal;
+    QMap<uint32_t, hwBreak *> hw_breaks;
+    bool stop_on_exception[EXCAUSE_COUNT] {};
+    bool step_over_exception[EXCAUSE_COUNT] {};
 };
 
 class CoreSingle : public Core {
 public:
-    CoreSingle(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data, bool jmp_delay_slot,
-               unsigned int min_cache_row_size = 1, Cop0State *cop0state = nullptr);
-    ~CoreSingle();
+    CoreSingle(
+        Registers *regs,
+        MemoryAccess *mem_program,
+        MemoryAccess *mem_data,
+        bool jmp_delay_slot,
+        unsigned int min_cache_row_size = 1,
+        Cop0State *cop0state = nullptr);
+    ~CoreSingle() override;
 
 protected:
-    void do_step(bool skip_break = false);
-    void do_reset();
+    void do_step(bool skip_break = false) override;
+    void do_reset() override;
 
 private:
     struct Core::dtFetch *dt_f;
-    std::uint32_t prev_inst_addr;
+    uint32_t prev_inst_addr {};
 };
 
 class CorePipelined : public Core {
 public:
-    CorePipelined(Registers *regs, MemoryAccess *mem_program, MemoryAccess *mem_data,
-                  enum MachineConfig::HazardUnit hazard_unit = MachineConfig::HU_STALL_FORWARD,
-                  unsigned int min_cache_row_size = 1, Cop0State *cop0state = nullptr);
+    CorePipelined(
+        Registers *regs,
+        MemoryAccess *mem_program,
+        MemoryAccess *mem_data,
+        enum MachineConfig::HazardUnit hazard_unit
+        = MachineConfig::HU_STALL_FORWARD,
+        unsigned int min_cache_row_size = 1,
+        Cop0State *cop0state = nullptr);
 
 protected:
-    void do_step(bool skip_break = false);
-    void do_reset();
+    void do_step(bool skip_break = false) override;
+    void do_reset() override;
 
 private:
     struct Core::dtFetch dt_f;
@@ -329,6 +397,6 @@ private:
     enum MachineConfig::HazardUnit hazard_unit;
 };
 
-}
+} // namespace machine
 
 #endif // CORE_H

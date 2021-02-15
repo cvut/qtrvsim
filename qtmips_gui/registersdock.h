@@ -36,41 +36,42 @@
 #ifndef REGISTERSDOCK_H
 #define REGISTERSDOCK_H
 
-#include <QDockWidget>
-#include <QLabel>
-#include <QFormLayout>
-#include <QScrollArea>
-#include <QPropertyAnimation>
-#include <QPalette>
-#include "qtmipsmachine.h"
+#include "qtmips_machine/qtmipsmachine.h"
 #include "statictable.h"
+
+#include <QDockWidget>
+#include <QFormLayout>
+#include <QLabel>
+#include <QPalette>
+#include <QPropertyAnimation>
+#include <QScrollArea>
 
 class RegistersDock : public QDockWidget {
     Q_OBJECT
 public:
     RegistersDock(QWidget *parent);
-    ~RegistersDock();
+    ~RegistersDock() override;
 
     void setup(machine::QtMipsMachine *machine);
 
 private slots:
-    void pc_changed(std::uint32_t val);
-    void gp_changed(std::uint8_t i, std::uint32_t val);
-    void hi_lo_changed(bool hi, std::uint32_t val);
-    void gp_read(std::uint8_t i, std::uint32_t val);
-    void hi_lo_read(bool hi, std::uint32_t val);
+    void pc_changed(uint32_t val);
+    void gp_changed(uint8_t i, uint32_t val);
+    void hi_lo_changed(bool hi, uint32_t val);
+    void gp_read(uint8_t i, uint32_t val);
+    void hi_lo_read(bool hi, uint32_t val);
     void clear_highlights();
 
 private:
     StaticTable *widg;
     QScrollArea *scrollarea;
 
-    QLabel *pc;
-    QLabel *hi;
-    QLabel *lo;
-    QLabel *gp[32];
+    QLabel *pc {};
+    QLabel *hi {};
+    QLabel *lo {};
+    QLabel *gp[32] {};
 
-    std::uint32_t gp_highlighted;
+    uint32_t gp_highlighted;
     bool hi_highlighted;
     bool lo_highlighted;
 
@@ -78,7 +79,7 @@ private:
     QPalette pal_updated;
     QPalette pal_read;
 
-    void labelVal(QLabel *label, std::uint32_t val);
+    void labelVal(QLabel *label, uint32_t val);
 };
 
 #endif // REGISTERSDOCK_H

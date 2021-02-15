@@ -34,7 +34,9 @@
  ******************************************************************************/
 
 #include "machineconfig.h"
+
 #include <QMap>
+#include <utility>
 
 using namespace machine;
 
@@ -79,16 +81,20 @@ MachineConfigCache::MachineConfigCache(const MachineConfigCache *cc) {
 
 #define N(STR) (prefix + QString(STR))
 
-MachineConfigCache::MachineConfigCache(const QSettings *sts, const QString &prefix) {
+MachineConfigCache::MachineConfigCache(
+    const QSettings *sts,
+    const QString &prefix) {
     en = sts->value(N("Enabled"), DFC_EN).toBool();
     n_sets = sts->value(N("Sets"), DFC_SETS).toUInt();
     n_blocks = sts->value(N("Blocks"), DFC_BLOCKS).toUInt();
     d_associativity = sts->value(N("Associativity"), DFC_ASSOC).toUInt();
-    replac_pol = (enum ReplacementPolicy)sts->value(N("Replacement"), DFC_REPLAC).toUInt();
+    replac_pol
+        = (enum ReplacementPolicy)sts->value(N("Replacement"), DFC_REPLAC)
+              .toUInt();
     write_pol = (enum WritePolicy)sts->value(N("Write"), DFC_WRITE).toUInt();
 }
 
-void MachineConfigCache::store(QSettings *sts, const QString &prefix) {
+void MachineConfigCache::store(QSettings *sts, const QString &prefix) const {
     sts->setValue(N("Enabled"), enabled());
     sts->setValue(N("Sets"), sets());
     sts->setValue(N("Blocks"), blocks());
@@ -111,8 +117,7 @@ void MachineConfigCache::preset(enum ConfigPresets p) {
         set_write_policy(WP_THROUGH_NOALLOC);
         break;
     case CP_SINGLE:
-    case CP_PIPE_NO_HAZARD:
-        set_enabled(false);
+    case CP_PIPE_NO_HAZARD: set_enabled(false);
     }
 }
 
@@ -156,7 +161,8 @@ unsigned MachineConfigCache::associativity() const {
     return d_associativity;
 }
 
-enum MachineConfigCache::ReplacementPolicy MachineConfigCache::replacement_policy() const {
+enum MachineConfigCache::ReplacementPolicy
+MachineConfigCache::replacement_policy() const {
     return replac_pol;
 }
 
@@ -166,12 +172,8 @@ enum MachineConfigCache::WritePolicy MachineConfigCache::write_policy() const {
 
 bool MachineConfigCache::operator==(const MachineConfigCache &c) const {
 #define CMP(GETTER) (GETTER)() == (c.GETTER)()
-    return CMP(enabled) && \
-            CMP(sets) && \
-            CMP(blocks) && \
-            CMP(associativity) && \
-            CMP(replacement_policy) && \
-            CMP(write_policy);
+    return CMP(enabled) && CMP(sets) && CMP(blocks) && CMP(associativity)
+           && CMP(replacement_policy) && CMP(write_policy);
 #undef CMP
 }
 
@@ -227,14 +229,18 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     pipeline = sts->value(N("Pipelined"), DF_PIPELINE).toBool();
     delayslot = sts->value(N("DelaySlot"), DF_DELAYSLOT).toBool();
     hunit = (enum HazardUnit)sts->value(N("HazardUnit"), DF_HUNIT).toUInt();
-    exec_protect = sts->value(N("MemoryExecuteProtection"), DF_EXEC_PROTEC).toBool();
-    write_protect = sts->value(N("MemoryWriteProtection"), DF_WRITE_PROTEC).toBool();
+    exec_protect
+        = sts->value(N("MemoryExecuteProtection"), DF_EXEC_PROTEC).toBool();
+    write_protect
+        = sts->value(N("MemoryWriteProtection"), DF_WRITE_PROTEC).toBool();
     mem_acc_read = sts->value(N("MemoryRead"), DF_MEM_ACC_READ).toUInt();
     mem_acc_write = sts->value(N("MemoryWrite"), DF_MEM_ACC_WRITE).toUInt();
     mem_acc_burst = sts->value(N("MemoryBurts"), DF_MEM_ACC_BURST).toUInt();
     osem_enable = sts->value(N("OsemuEnable"), true).toBool();
-    osem_known_syscall_stop = sts->value(N("OsemuKnownSyscallStop"), true).toBool();
-    osem_unknown_syscall_stop = sts->value(N("OsemuUnknownSyscallStop"), true).toBool();
+    osem_known_syscall_stop
+        = sts->value(N("OsemuKnownSyscallStop"), true).toBool();
+    osem_unknown_syscall_stop
+        = sts->value(N("OsemuUnknownSyscallStop"), true).toBool();
     osem_interrupt_stop = sts->value(N("OsemuInterruptStop"), true).toBool();
     osem_exception_stop = sts->value(N("OsemuExceptionStop"), true).toBool();
     osem_fs_root = sts->value(N("OsemuFilesystemRoot"), "").toString();
@@ -266,7 +272,8 @@ void MachineConfig::store(QSettings *sts, const QString &prefix) {
 #undef N
 
 void MachineConfig::preset(enum ConfigPresets p) {
-    // Note: we set just a minimal subset to get preset (preserving as much of hidden configuration as possible)
+    // Note: we set just a minimal subset to get preset (preserving as much of
+    // hidden configuration as possible)
     switch (p) {
     case CP_SINGLE:
     case CP_SINGLE_CACHE:
@@ -301,19 +308,20 @@ void MachineConfig::set_delay_slot(bool v) {
     delayslot = v;
 }
 
-void MachineConfig::set_hazard_unit(enum MachineConfig::HazardUnit hu)  {
+void MachineConfig::set_hazard_unit(enum MachineConfig::HazardUnit hu) {
     hunit = hu;
 }
 
-bool MachineConfig::set_hazard_unit(QString hukind) {
-    static QMap<QString, enum HazardUnit> hukind_map =  {
-        {"none",  HU_NONE},
-        {"stall", HU_STALL},
-        {"forward", HU_STALL_FORWARD},
-        {"stall-forward", HU_STALL_FORWARD},
+bool MachineConfig::set_hazard_unit(const QString &hukind) {
+    static QMap<QString, enum HazardUnit> hukind_map = {
+        { "none", HU_NONE },
+        { "stall", HU_STALL },
+        { "forward", HU_STALL_FORWARD },
+        { "stall-forward", HU_STALL_FORWARD },
     };
-    if (!hukind_map.contains(hukind))
+    if (!hukind_map.contains(hukind)) {
         return false;
+    }
     set_hazard_unit(hukind_map.value(hukind));
     return true;
 }
@@ -359,7 +367,7 @@ void MachineConfig::set_osemu_exception_stop(bool v) {
 }
 
 void MachineConfig::set_osemu_fs_root(QString v) {
-    osem_fs_root = v;
+    osem_fs_root = std::move(v);
 }
 
 void MachineConfig::set_reset_at_compile(bool v) {
@@ -367,7 +375,7 @@ void MachineConfig::set_reset_at_compile(bool v) {
 }
 
 void MachineConfig::set_elf(QString path) {
-    elf_path = path;
+    elf_path = std::move(path);
 }
 
 void MachineConfig::set_cache_program(const MachineConfigCache &c) {
@@ -458,17 +466,11 @@ MachineConfigCache *MachineConfig::access_cache_data() {
 
 bool MachineConfig::operator==(const MachineConfig &c) const {
 #define CMP(GETTER) (GETTER)() == (c.GETTER)()
-    return CMP(pipelined) && \
-            CMP(delay_slot) && \
-            CMP(hazard_unit) && \
-            CMP(memory_execute_protection) && \
-            CMP(memory_write_protection) && \
-            CMP(memory_access_time_read) && \
-            CMP(memory_access_time_write) && \
-            CMP(memory_access_time_burst) && \
-            CMP(elf) && \
-            CMP(cache_program) && \
-            CMP(cache_data);
+    return CMP(pipelined) && CMP(delay_slot) && CMP(hazard_unit)
+           && CMP(memory_execute_protection) && CMP(memory_write_protection)
+           && CMP(memory_access_time_read) && CMP(memory_access_time_write)
+           && CMP(memory_access_time_burst) && CMP(elf) && CMP(cache_program)
+           && CMP(cache_data);
 #undef CMP
 }
 

@@ -33,18 +33,21 @@
  *
  ******************************************************************************/
 
-#include <QCoreApplication>
+#include "chariohandler.h"
+#include "msgreport.h"
+#include "qtmips_asm/simpleasm.h"
+#include "qtmips_machine/machineconfig.h"
+#include "reporter.h"
+#include "tracer.h"
+
 #include <QCommandLineParser>
+#include <QCoreApplication>
 #include <QFile>
 #include <QTextStream>
 #include <cctype>
-#include <iostream>
 #include <fstream>
-#include "tracer.h"
-#include "reporter.h"
-#include "msgreport.h"
-#include "simpleasm.h"
-#include "chariohandler.h"
+#include <iostream>
+#include <utility>
 
 using namespace machine;
 using namespace std;
@@ -54,84 +57,138 @@ void create_parser(QCommandLineParser &p) {
     p.addHelpOption();
     p.addVersionOption();
 
-    p.addPositionalArgument("FILE", "Input ELF executable file or assembler source");
+    p.addPositionalArgument(
+        "FILE", "Input ELF executable file or assembler source");
 
     // p.addOptions({}); available only from Qt 5.4+
-    p.addOption({"asm", "Treat provided file argument as assembler source."});
-    p.addOption({"pipelined", "Configure CPU to use five stage pipeline."});
-    p.addOption({"no-delay-slot", "Disable jump delay slot."});
-    p.addOption({"hazard-unit", "Specify hazard unit imeplementation [none|stall|forward].", "HUKIND"});
-    p.addOption({{"trace-fetch", "tr-fetch"}, "Trace fetched instruction (for both pipelined and not core)."});
-    p.addOption({{"trace-decode", "tr-decode"}, "Trace instruction in decode stage. (only for pipelined core)"});
-    p.addOption({{"trace-execute", "tr-execute"}, "Trace instruction in execute stage. (only for pipelined core)"});
-    p.addOption({{"trace-memory", "tr-memory"}, "Trace instruction in memory stage. (only for pipelined core)"});
-    p.addOption({{"trace-writeback", "tr-writeback"}, "Trace instruction in write back stage. (only for pipelined core)"});
-    p.addOption({{"trace-pc", "tr-pc"}, "Print program counter register changes."});
-    p.addOption({{"trace-gp", "tr-gp"}, "Print general purpose register changes. You can use * for all registers.", "REG"});
-    p.addOption({{"trace-lo", "tr-lo"}, "Print LO register changes."});
-    p.addOption({{"trace-hi", "tr-hi"}, "Print HI register changes."});
-    p.addOption({{"dump-registers", "d-regs"}, "Dump registers state at program exit."});
-    p.addOption({"dump-cache-stats", "Dump cache statistics at program exit."});
-    p.addOption({"dump-cycles", "Dump number of CPU cycles till program end."});
-    p.addOption({"dump-range", "Dump memory range.", "START,LENGTH,FNAME"});
-    p.addOption({"load-range", "Load memory range.", "START,FNAME"});
-    p.addOption({"expect-fail", "Expect that program causes CPU trap and fail if it doesn't."});
-    p.addOption({"fail-match", "Program should exit with exactly this CPU TRAP. Possible values are I(unsupported Instruction), A(Unsupported ALU operation), O(Overflow/underflow) and J(Unaligned Jump). You can freely combine them. Using this implies expect-fail option.", "TRAP"});
-    p.addOption({"d-cache", "Data cache. Format policy,sets,words_in_blocks,associativity where policy is random/lru/lfu", "DCACHE"});
-    p.addOption({"i-cache", "Instruction cache. Format policy,sets,words_in_blocks,associativity where policy is random/lru/lfu", "ICACHE"});
-    p.addOption({"read-time", "Memory read access time (cycles).", "RTIME"});
-    p.addOption({"write-time", "Memory read access time (cycles).", "WTIME"});
-    p.addOption({"burst-time", "Memory read access time (cycles).", "BTIME"});
-    p.addOption({{"serial-in", "serin"}, "File connected to the serial port input.", "FNAME"});
-    p.addOption({{"serial-out", "serout"}, "File connected to the serial port output.", "FNAME"});
+    p.addOption({ "asm", "Treat provided file argument as assembler source." });
+    p.addOption({ "pipelined", "Configure CPU to use five stage pipeline." });
+    p.addOption({ "no-delay-slot", "Disable jump delay slot." });
+    p.addOption({ "hazard-unit",
+                  "Specify hazard unit imeplementation [none|stall|forward].",
+                  "HUKIND" });
+    p.addOption(
+        { { "trace-fetch", "tr-fetch" },
+          "Trace fetched instruction (for both pipelined and not core)." });
+    p.addOption(
+        { { "trace-decode", "tr-decode" },
+          "Trace instruction in decode stage. (only for pipelined core)" });
+    p.addOption(
+        { { "trace-execute", "tr-execute" },
+          "Trace instruction in execute stage. (only for pipelined core)" });
+    p.addOption(
+        { { "trace-memory", "tr-memory" },
+          "Trace instruction in memory stage. (only for pipelined core)" });
+    p.addOption(
+        { { "trace-writeback", "tr-writeback" },
+          "Trace instruction in write back stage. (only for pipelined core)" });
+    p.addOption(
+        { { "trace-pc", "tr-pc" }, "Print program counter register changes." });
+    p.addOption({ { "trace-gp", "tr-gp" },
+                  "Print general purpose register changes. You can use * for "
+                  "all registers.",
+                  "REG" });
+    p.addOption({ { "trace-lo", "tr-lo" }, "Print LO register changes." });
+    p.addOption({ { "trace-hi", "tr-hi" }, "Print HI register changes." });
+    p.addOption({ { "dump-registers", "d-regs" },
+                  "Dump registers state at program exit." });
+    p.addOption(
+        { "dump-cache-stats", "Dump cache statistics at program exit." });
+    p.addOption(
+        { "dump-cycles", "Dump number of CPU cycles till program end." });
+    p.addOption({ "dump-range", "Dump memory range.", "START,LENGTH,FNAME" });
+    p.addOption({ "load-range", "Load memory range.", "START,FNAME" });
+    p.addOption(
+        { "expect-fail",
+          "Expect that program causes CPU trap and fail if it doesn't." });
+    p.addOption(
+        { "fail-match",
+          "Program should exit with exactly this CPU TRAP. Possible values are "
+          "I(unsupported Instruction), A(Unsupported ALU operation), "
+          "O(Overflow/underflow) and J(Unaligned Jump). You can freely combine "
+          "them. Using this implies expect-fail option.",
+          "TRAP" });
+    p.addOption(
+        { "d-cache",
+          "Data cache. Format policy,sets,words_in_blocks,associativity where "
+          "policy is random/lru/lfu",
+          "DCACHE" });
+    p.addOption(
+        { "i-cache",
+          "Instruction cache. Format policy,sets,words_in_blocks,associativity "
+          "where policy is random/lru/lfu",
+          "ICACHE" });
+    p.addOption({ "read-time", "Memory read access time (cycles).", "RTIME" });
+    p.addOption({ "write-time", "Memory read access time (cycles).", "WTIME" });
+    p.addOption({ "burst-time", "Memory read access time (cycles).", "BTIME" });
+    p.addOption({ { "serial-in", "serin" },
+                  "File connected to the serial port input.",
+                  "FNAME" });
+    p.addOption({ { "serial-out", "serout" },
+                  "File connected to the serial port output.",
+                  "FNAME" });
 }
 
-void configure_cache(MachineConfigCache &cacheconf, QStringList cachearg, QString which) {
-    if (cachearg.size() < 1)
+void configure_cache(
+    MachineConfigCache &cacheconf,
+    const QStringList &cachearg,
+    const QString &which) {
+    if (cachearg.empty()) {
         return;
+    }
     cacheconf.set_enabled(true);
     QStringList pieces = cachearg.at(cachearg.size() - 1).split(",");
     if (pieces.size() < 3) {
-        std::cerr << "Parameters for " << which.toLocal8Bit().data() << " cache incorrect (correct lru,4,2,2,wb)." << std::endl;
+        std::cerr << "Parameters for " << which.toLocal8Bit().data()
+                  << " cache incorrect (correct lru,4,2,2,wb)." << std::endl;
         exit(1);
     }
     if (pieces.at(0).size() < 1) {
-        std::cerr << "Policy for " << which.toLocal8Bit().data() << " cache is incorrect." << std::endl;
+        std::cerr << "Policy for " << which.toLocal8Bit().data()
+                  << " cache is incorrect." << std::endl;
         exit(1);
     }
     if (!pieces.at(0).at(0).isDigit()) {
-        if (pieces.at(0).toLower() == "random")
+        if (pieces.at(0).toLower() == "random") {
             cacheconf.set_replacement_policy(MachineConfigCache::RP_RAND);
-        else if (pieces.at(0).toLower() == "lru")
+        } else if (pieces.at(0).toLower() == "lru") {
             cacheconf.set_replacement_policy(MachineConfigCache::RP_LRU);
-        else if (pieces.at(0).toLower() == "lfu")
+        } else if (pieces.at(0).toLower() == "lfu") {
             cacheconf.set_replacement_policy(MachineConfigCache::RP_LFU);
-        else {
-            std::cerr << "Policy for " << which.toLocal8Bit().data() << " cache is incorrect." << std::endl;
+        } else {
+            std::cerr << "Policy for " << which.toLocal8Bit().data()
+                      << " cache is incorrect." << std::endl;
             exit(1);
         }
         pieces.removeFirst();
     }
     if (pieces.size() < 3) {
-        std::cerr << "Parameters for " << which.toLocal8Bit().data() << " cache incorrect (correct lru,4,2,2,wb)." << std::endl;
+        std::cerr << "Parameters for " << which.toLocal8Bit().data()
+                  << " cache incorrect (correct lru,4,2,2,wb)." << std::endl;
         exit(1);
     }
     cacheconf.set_sets(pieces.at(0).toLong());
     cacheconf.set_blocks(pieces.at(1).toLong());
     cacheconf.set_associativity(pieces.at(2).toLong());
-    if (cacheconf.sets() == 0 || cacheconf.blocks() == 0 || cacheconf.associativity() == 0) {
-        std::cerr << "Parameters for " << which.toLocal8Bit().data() << " cache cannot have zero component." << std::endl;
+    if (cacheconf.sets() == 0 || cacheconf.blocks() == 0
+        || cacheconf.associativity() == 0) {
+        std::cerr << "Parameters for " << which.toLocal8Bit().data()
+                  << " cache cannot have zero component." << std::endl;
         exit(1);
     }
     if (pieces.size() > 3) {
-        if (pieces.at(3).toLower() == "wb")
+        if (pieces.at(3).toLower() == "wb") {
             cacheconf.set_write_policy(MachineConfigCache::WP_BACK);
-        else if (pieces.at(3).toLower() == "wt" || pieces.at(3).toLower() == "wtna")
+        } else if (
+            pieces.at(3).toLower() == "wt"
+            || pieces.at(3).toLower() == "wtna") {
             cacheconf.set_write_policy(MachineConfigCache::WP_THROUGH_NOALLOC);
-        else if (pieces.at(3).toLower() == "wta")
+        } else if (pieces.at(3).toLower() == "wta") {
             cacheconf.set_write_policy(MachineConfigCache::WP_THROUGH_ALLOC);
-        else {
-            std::cerr << "Write policy for " << which.toLocal8Bit().data() << " cache is incorrect (correct wb/wt/wtna/wta)." << std::endl;
+        } else {
+            std::cerr << "Write policy for " << which.toLocal8Bit().data()
+                      << " cache is incorrect (correct wb/wt/wtna/wta)."
+                      << std::endl;
             exit(1);
         }
     }
@@ -159,99 +216,116 @@ void configure_machine(QCommandLineParser &p, MachineConfig &cc) {
     }
 
     siz = p.values("read-time").size();
-    if (siz >= 1)
-        cc.set_memory_access_time_read(p.values("read-time").at(siz - 1).toLong());
+    if (siz >= 1) {
+        cc.set_memory_access_time_read(
+            p.values("read-time").at(siz - 1).toLong());
+    }
     siz = p.values("write-time").size();
-    if (siz >= 1)
-        cc.set_memory_access_time_write(p.values("write-time").at(siz - 1).toLong());
+    if (siz >= 1) {
+        cc.set_memory_access_time_write(
+            p.values("write-time").at(siz - 1).toLong());
+    }
     siz = p.values("burst-time").size();
-    if (siz >= 1)
-        cc.set_memory_access_time_burst(p.values("burst-time").at(siz - 1).toLong());
+    if (siz >= 1) {
+        cc.set_memory_access_time_burst(
+            p.values("burst-time").at(siz - 1).toLong());
+    }
 
     configure_cache(*cc.access_cache_data(), p.values("d-cache"), "data");
-    configure_cache(*cc.access_cache_program(), p.values("i-cache"), "instruction");
+    configure_cache(
+        *cc.access_cache_program(), p.values("i-cache"), "instruction");
 }
 
 void configure_tracer(QCommandLineParser &p, Tracer &tr) {
-    if (p.isSet("trace-fetch"))
+    if (p.isSet("trace-fetch")) {
         tr.fetch();
+    }
     if (p.isSet("pipelined")) { // Following are added only if we have stages
-        if (p.isSet("trace-decode"))
+        if (p.isSet("trace-decode")) {
             tr.decode();
-        if (p.isSet("trace-execute"))
+        }
+        if (p.isSet("trace-execute")) {
             tr.execute();
-        if (p.isSet("trace-memory"))
+        }
+        if (p.isSet("trace-memory")) {
             tr.memory();
-        if (p.isSet("trace-writeback"))
+        }
+        if (p.isSet("trace-writeback")) {
             tr.writeback();
+        }
     }
 
-    if (p.isSet("trace-pc"))
+    if (p.isSet("trace-pc")) {
         tr.reg_pc();
+    }
 
     QStringList gps = p.values("trace-gp");
     for (int i = 0; i < gps.size(); i++) {
         if (gps[i] == "*") {
-            for (int y = 0; y < 32; y++)
+            for (int y = 0; y < 32; y++) {
                 tr.reg_gp(y);
+            }
         } else {
             bool res;
             int num = gps[i].toInt(&res);
             if (res && num <= 32) {
                 tr.reg_gp(num);
             } else {
-                cout << "Unknown register number given for trace-gp: " << gps[i].toStdString() << endl;
+                cout << "Unknown register number given for trace-gp: "
+                     << gps[i].toStdString() << endl;
                 exit(1);
             }
         }
     }
 
-    if (p.isSet("trace-lo"))
+    if (p.isSet("trace-lo")) {
         tr.reg_lo();
-    if (p.isSet("trace-hi"))
+    }
+    if (p.isSet("trace-hi")) {
         tr.reg_hi();
+    }
 
     // TODO
 }
 
-void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *symtab) {
-    if (p.isSet("dump-registers"))
+void configure_reporter(
+    QCommandLineParser &p,
+    Reporter &r,
+    const SymbolTable *symtab) {
+    if (p.isSet("dump-registers")) {
         r.regs();
-    if (p.isSet("dump-cache-stats"))
+    }
+    if (p.isSet("dump-cache-stats")) {
         r.cache_stats();
-    if (p.isSet("dump-cycles"))
+    }
+    if (p.isSet("dump-cycles")) {
         r.cycles();
+    }
 
     QStringList fail = p.values("fail-match");
     for (int i = 0; i < fail.size(); i++) {
         for (int y = 0; y < fail[i].length(); y++) {
             enum Reporter::FailReason reason;
             switch (tolower(fail[i].toStdString()[y])) {
-            case 'i':
-                reason = Reporter::FR_I;
-                break;
-            case 'a':
-                reason = Reporter::FR_A;
-                break;
-            case 'o':
-                reason = Reporter::FR_O;
-                break;
-            case 'j':
-                reason = Reporter::FR_J;
-                break;
+            case 'i': reason = Reporter::FR_I; break;
+            case 'a': reason = Reporter::FR_A; break;
+            case 'o': reason = Reporter::FR_O; break;
+            case 'j': reason = Reporter::FR_J; break;
             default:
-                cout << "Unknown fail condition: " << fail[i].toStdString()[y] << endl;
+                cout << "Unknown fail condition: " << fail[i].toStdString()[y]
+                     << endl;
                 exit(1);
             }
             r.expect_fail(reason);
         }
     }
-    if (p.isSet("expect-fail") && !p.isSet("fail-match"))
+    if (p.isSet("expect-fail") && !p.isSet("fail-match")) {
         r.expect_fail(Reporter::FailAny);
+    }
 
     foreach (QString range_arg, p.values("dump-range")) {
-        std::uint32_t start;
-        std::uint32_t len;
+        uint32_t start;
+        uint32_t len;
         bool ok1 = true;
         bool ok2 = true;
         QString str;
@@ -287,13 +361,14 @@ void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *s
     // TODO
 }
 
-void configure_serial_port(QCommandLineParser &p,  SerialPort *ser_port) {
+void configure_serial_port(QCommandLineParser &p, SerialPort *ser_port) {
     int siz;
     CharIOHandler *ser_in = nullptr;
     CharIOHandler *ser_out = nullptr;
 
-    if (!ser_port)
+    if (!ser_port) {
         return;
+    }
 
     siz = p.values("serial-in").size();
     if (siz >= 1) {
@@ -302,7 +377,8 @@ void configure_serial_port(QCommandLineParser &p,  SerialPort *ser_port) {
         ser_in = new CharIOHandler(qf, ser_port);
         siz = p.values("serial-out").size();
         if (siz) {
-            if (p.values("serial-in").at(siz - 1) == p.values("serial-out").at(siz - 1)) {
+            if (p.values("serial-in").at(siz - 1)
+                == p.values("serial-out").at(siz - 1)) {
                 mode = QFile::ReadWrite;
                 ser_out = ser_in;
             }
@@ -319,30 +395,35 @@ void configure_serial_port(QCommandLineParser &p,  SerialPort *ser_port) {
             QFile *qf = new QFile(p.values("serial-out").at(siz - 1));
             ser_out = new CharIOHandler(qf, ser_port);
             if (!ser_out->open(QFile::WriteOnly)) {
-                cout << "Serial port output file cannot be open for write." << endl;
+                cout << "Serial port output file cannot be open for write."
+                     << endl;
                 exit(1);
             }
         }
     }
 
     if (ser_in) {
-      QObject::connect(ser_in, &QIODevice::readyRead, ser_port,
-                       &SerialPort::rx_queue_check);
-      QObject::connect(ser_port, &SerialPort::rx_byte_pool, ser_in,
-                       &CharIOHandler::readBytePoll);
-      if (ser_in->bytesAvailable())
-        ser_port->rx_queue_check();
+        QObject::connect(
+            ser_in, &QIODevice::readyRead, ser_port,
+            &SerialPort::rx_queue_check);
+        QObject::connect(
+            ser_port, &SerialPort::rx_byte_pool, ser_in,
+            &CharIOHandler::readBytePoll);
+        if (ser_in->bytesAvailable()) {
+            ser_port->rx_queue_check();
+        }
     }
 
     if (ser_out) {
-      QObject::connect(ser_port, &SerialPort::tx_byte, ser_out,
-                       QOverload<unsigned>::of(&CharIOHandler::writeByte));
+        QObject::connect(
+            ser_port, &SerialPort::tx_byte, ser_out,
+            QOverload<unsigned>::of(&CharIOHandler::writeByte));
     }
 }
 
 void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
     foreach (QString range_arg, ranges) {
-        std::uint32_t start;
+        uint32_t start;
         bool ok = true;
         QString str;
         int comma1 = range_arg.indexOf(",");
@@ -351,7 +432,8 @@ void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
             exit(1);
         }
         str = range_arg.mid(0, comma1);
-        if (str.size() >= 1 && !str.at(0).isDigit() && machine.symbol_table() != nullptr) {
+        if (str.size() >= 1 && !str.at(0).isDigit()
+            && machine.symbol_table() != nullptr) {
             ok = machine.symbol_table()->name_to_value(start, str);
         } else {
             start = str.toULong(&ok, 0);
@@ -361,17 +443,17 @@ void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
             exit(1);
         }
         ifstream in;
-        std::uint32_t val;
-        std::uint32_t addr = start;
+        uint32_t val;
+        uint32_t addr = start;
         in.open(range_arg.mid(comma1 + 1).toLocal8Bit().data(), ios::in);
         start = start & ~3;
-        for (std::string line; getline(in, line); )
-        {
+        for (std::string line; getline(in, line);) {
             size_t endpos = line.find_last_not_of(" \t\n");
             size_t startpos = line.find_first_not_of(" \t\n");
             size_t idx;
-            if (std::string::npos == endpos)
+            if (std::string::npos == endpos) {
                 continue;
+            }
             line = line.substr(0, endpos + 1);
             line = line.substr(startpos);
             val = stoul(line, &idx, 0);
@@ -387,29 +469,30 @@ void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
 }
 
 bool assemble(QtMipsMachine &machine, MsgReport &msgrep, QString filename) {
-  SymbolTableDb symtab(machine.symbol_table_rw(true));
-  machine::MemoryAccess *mem = machine.physical_address_space_rw();
-  if (mem == nullptr) {
-    return false;
-  }
-  machine.cache_sync();
-  SimpleAsm sasm;
+    SymbolTableDb symtab(machine.symbol_table_rw(true));
+    machine::MemoryAccess *mem = machine.physical_address_space_rw();
+    if (mem == nullptr) {
+        return false;
+    }
+    machine.cache_sync();
+    SimpleAsm sasm;
 
-  sasm.connect(&sasm, &SimpleAsm::report_message, &msgrep,
-               &MsgReport::report_message);
+    SimpleAsm::connect(
+        &sasm, &SimpleAsm::report_message, &msgrep, &MsgReport::report_message);
 
-  sasm.setup(mem, &symtab, 0x80020000);
+    sasm.setup(mem, &symtab, 0x80020000);
 
-  if (!sasm.process_file(filename))
-    return false;
+    if (!sasm.process_file(std::move(filename))) {
+        return false;
+    }
 
-  return sasm.finish();
+    return sasm.finish();
 }
 
 int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
-    app.setApplicationName("qtmips_cli");
-    app.setApplicationVersion("0.7.5");
+    QCoreApplication::setApplicationName("qtmips_cli");
+    QCoreApplication::setApplicationVersion("0.7.5");
 
     QCommandLineParser p;
     create_parser(p);
@@ -431,12 +514,13 @@ int main(int argc, char *argv[]) {
 
     if (asm_source) {
         MsgReport msgrep(&app);
-        if (!assemble(machine, msgrep, p.positionalArguments()[0]))
+        if (!assemble(machine, msgrep, p.positionalArguments()[0])) {
             exit(1);
+        }
     }
 
     load_ranges(machine, p.values("load-range"));
 
     machine.play();
-    return app.exec();
+    return QCoreApplication::exec();
 }
