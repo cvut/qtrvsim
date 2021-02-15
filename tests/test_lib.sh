@@ -20,6 +20,9 @@ echo_fail() {
 TOOLCHAIN_SYS=false
 TOOLCHAIN="mips-elf-"
 
+# Enviromental variable passing additional options to qmake, like compiler to use.
+QMAKE_OPTIONS=${QMAKE_OPTIONS:-""}
+
 while [ $# -gt 0 ]; do
 	case "$1" in
 		-\?|-h|--help)
@@ -101,8 +104,8 @@ qtmips_make() {
 	mkdir -p "$BUILD_DIR"
 	local ORIG="$(pwd)"
 	cd "$BUILD_DIR"
-	qtchooser -run-tool=qmake -qt=5 "$PROJECT_ROOT" || echo_fail "QtMips qmake failed!"
-	make "$@" || echo_fail "QtMips build failed! (target: $@)"
+	qmake "$PROJECT_ROOT" "CONFIG+=debug" $QMAKE_OPTIONS || echo_fail "QtMips qmake failed!"
+	make "$@" "-j$(nproc)" -s  || echo_fail "QtMips build failed! (target: $@)"
 	cd "$ORIG"
 }
 

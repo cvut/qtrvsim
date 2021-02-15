@@ -4,7 +4,8 @@ QT -= gui
 TARGET = tst_machine
 CONFIG += console
 CONFIG -= app_bundle
-CONFIG += c++11
+CONFIG += c++14
+CONFIG += sanitizer sanitize_address
 
 TEMPLATE = app
 
@@ -23,8 +24,11 @@ unix: LIBS += \
         # --enable-new-dtags \
 
 INCLUDEPATH += $$PWD/..
+INCLUDEPATH += $$PWD/.
 DEPENDPATH += $$PWD/..
-QMAKE_CXXFLAGS += -std=c++0x
+QMAKE_CXXFLAGS += -std=c++14
+QMAKE_CXXFLAGS_DEBUG += -Wno-c99-designator
+QMAKE_CXXFLAGS_RELEASE += -Wno-c99-designator
 
 DEFINES += QT_DEPRECATED_WARNINGS
 

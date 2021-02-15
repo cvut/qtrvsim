@@ -2,7 +2,7 @@
 TEST_NAME="machine-unit-test"
 
 # Load common test shell functions
-. "$(dirname "$0")/../test.sh"
+. "$(dirname "$0")/../test_lib.sh"
 
 # Build tests binary
 qtmips_make sub-qtmips_machine-tests

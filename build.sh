@@ -2,14 +2,31 @@
 set -e
 
 ROOT="$(dirname "$(readlink -f "$0")")"
+BUILDDIR=${BUILDDIR:-build}
+# Run qmake in debug mode.
+# Uses enviromental variable for convenience (permanent setting).
+DEBUG=${DEBUG:-false}
+# Extra debug options passed to qmake. For example use different compiler.
+# Uses enviromental variable for convenience (permanent setting).
+QMAKE_OPTIONS=${QMAKE_OPTIONS:-""}
 
-mkdir -p build
-cd build
+mkdir -p "$BUILDDIR"
+cd "$BUILDDIR"
+
 
 # Compile
-qtchooser -run-tool=qmake -qt=5 -recursive "$ROOT" "QMAKE_RPATHDIR += ../qtmips_machine ../qtmips_osemu ../qtmips_asm"
-make sub-qtmips_cli sub-qtmips_gui # Note: we are building these to to not build tests
+if $DEBUG
+then
+  echo "Running debug build with options: $QMAKE_OPTIONS..."
+  qmake .. "CONFIG += debug force_debug_info" $QMAKE_OPTIONS
+else
+  echo "Running release build..."
+  qmake ..
+fi
 
+make "-j$(nproc)" -s
+
+cd "$ROOT"
 # Link executables to more suitable place
-ln -fs qtmips_cli/qtmips_cli cli
-ln -fs qtmips_gui/qtmips_gui gui
+ln -fs "$BUILDDIR/qtmips_cli/qtmips_cli" cli
+ln -fs "$BUILDDIR/qtmips_gui/qtmips_gui" gui
