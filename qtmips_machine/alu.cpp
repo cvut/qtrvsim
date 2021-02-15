@@ -79,20 +79,20 @@ static inline uint32_t alu_op_clz(uint32_t n) {
 
 static inline uint64_t alu_read_hi_lo_64bit(Registers *regs) {
     uint64_t val;
-    val = regs->read_hi_lo(false);
-    val |= (uint64_t)regs->read_hi_lo(true) << 32;
+    val = regs->read_hi_lo(false).as_u64();
+    val |= regs->read_hi_lo(true).as_u64() << 32U;
     return val;
 }
 
 static inline void alu_write_hi_lo_64bit(Registers *regs, uint64_t val) {
     regs->write_hi_lo(false, (uint32_t)(val & 0xffffffff));
-    regs->write_hi_lo(true, (uint32_t)(val >> 32));
+    regs->write_hi_lo(true, (uint32_t)(val >> 32U));
 }
 
-uint32_t machine::alu_operate(
+RegisterValue machine::alu_operate(
     enum AluOp operation,
-    uint32_t s,
-    uint32_t t,
+    RegisterValue s,
+    RegisterValue t,
     uint8_t sa,
     uint8_t sz,
     Registers *regs,
@@ -105,151 +105,157 @@ uint32_t machine::alu_operate(
 
     switch (operation) {
     case ALU_OP_NOP: return 0;
-    case ALU_OP_SLL: return t << sa;
-    case ALU_OP_SRL: return t >> sa;
+    case ALU_OP_SLL: return t.as_u32() << sa;
+    case ALU_OP_SRL: return t.as_u32() >> sa;
     case ALU_OP_ROTR:
         if (!sa) {
-            return t;
+            return t.as_u32();
         }
-        return (t >> sa) | (t << (32 - sa));
+        return (t.as_u32() >> sa) | (t.as_u32() << (32U - sa));
     case ALU_OP_SRA:
         // Note: This might be broken with some compilers but works with gcc
-        return (int32_t)t >> sa;
-    case ALU_OP_SLLV: return t << (s & 0x1f);
-    case ALU_OP_SRLV: return t >> (s & 0x1f);
+        return t.as_i32() >> sa;
+    case ALU_OP_SLLV: return t.as_u32() << (s.as_u32() & 0x1fU);
+    case ALU_OP_SRLV: return t.as_u32() >> (s.as_u32() & 0x1fU);
     case ALU_OP_ROTRV:
-        u32_val = s & 0x1f;
+        u32_val = s.as_u32() & 0x1fU;
         if (!u32_val) {
-            return t;
+            return t.as_u32();
         }
-        return (t >> u32_val) | (t << (32 - u32_val));
+        return (t.as_u32() >> u32_val) | (t.as_u32() << (32 - u32_val));
     case ALU_OP_SRAV:
         // Note: same note as in case of SRA
-        return (int32_t)t >> (s & 0x1f);
+        return t.as_i32() >> (s.as_u32() & 0x1fU);
     case ALU_OP_MOVZ:
         // Signal discard of result when condition is not true
-        discard = t != 0;
+        discard = (t.as_u32() != 0);
         return discard ? 0 : s;
     case ALU_OP_MOVN:
-        // Same note as for MOVZ applies here
-        discard = t == 0;
+        // Same note as MOVZ
+        discard = (t.as_u32() == 0);
         return discard ? 0 : s;
     case ALU_OP_MFHI: return regs->read_hi_lo(true);
     case ALU_OP_MTHI: regs->write_hi_lo(true, s); return 0x0;
     case ALU_OP_MFLO: return regs->read_hi_lo(false);
     case ALU_OP_MTLO: regs->write_hi_lo(false, s); return 0x0;
     case ALU_OP_MULT:
-        s64_val = (int64_t)(int32_t)s * (int32_t)t;
+        s64_val = (int64_t)s.as_i32() * t.as_i32();
         alu_write_hi_lo_64bit(regs, (uint64_t)s64_val);
         return 0x0;
     case ALU_OP_MULTU:
-        u64_val = (uint64_t)s * t;
+        u64_val = (uint64_t)s.as_u32() * t.as_u32();
         alu_write_hi_lo_64bit(regs, u64_val);
         return 0x0;
     case ALU_OP_DIV:
-        if (t == 0) {
+        if (t.as_u32() == 0) {
             regs->write_hi_lo(false, 0);
             regs->write_hi_lo(true, 0);
             return 0;
         }
-        regs->write_hi_lo(false, (uint32_t)((int32_t)s / (int32_t)t));
-        regs->write_hi_lo(true, (uint32_t)((int32_t)s % (int32_t)t));
+        regs->write_hi_lo(false, (uint32_t)(s.as_i32() / t.as_i32()));
+        regs->write_hi_lo(true, (uint32_t)(s.as_i32() % t.as_i32()));
         return 0x0;
     case ALU_OP_DIVU:
-        if (t == 0) {
+        if (t.as_u32() == 0) {
             regs->write_hi_lo(false, 0);
             regs->write_hi_lo(true, 0);
             return 0;
         }
-        regs->write_hi_lo(false, s / t);
-        regs->write_hi_lo(true, s % t);
+        regs->write_hi_lo(false, s.as_u32() / t.as_u32());
+        regs->write_hi_lo(true, s.as_u32() % t.as_u32());
         return 0x0;
     case ALU_OP_ADD:
         /* s(31) ^ ~t(31) ... same signs on input  */
         /* (s + t)(31) ^ s(31)  ... different sign on output */
-        if (((s ^ ~t) & ((s + t) ^ s)) & 0x80000000) {
+        if (((s.as_u32() ^ ~t.as_u32())
+             & ((s.as_u32() + t.as_u32()) ^ s.as_u32()))
+            & 0x80000000) {
             excause = EXCAUSE_OVERFLOW;
         }
         FALLTROUGH
-    case ALU_OP_ADDU: return s + t;
+    case ALU_OP_ADDU: return s.as_u32() + t.as_u32();
     case ALU_OP_SUB:
         /* s(31) ^ t(31) ... differnt signd on input */
         /* (s - t)(31) ^ ~s(31)  <> 0 ... otput sign differs from s  */
-        if (((s ^ t) & ((s - t) ^ s)) & 0x80000000) {
+        if (((s.as_u32() ^ t.as_u32())
+             & ((s.as_u32() - t.as_u32()) ^ s.as_u32()))
+            & 0x80000000) {
             excause = EXCAUSE_OVERFLOW;
         }
         FALLTROUGH
-    case ALU_OP_SUBU: return s - t;
-    case ALU_OP_AND: return s & t;
-    case ALU_OP_OR: return s | t;
-    case ALU_OP_XOR: return s ^ t;
-    case ALU_OP_NOR: return ~(s | t);
+    case ALU_OP_SUBU: return s.as_u32() - t.as_u32();
+    case ALU_OP_AND: return s.as_u32() & t.as_u32();
+    case ALU_OP_OR: return s.as_u32() | t.as_u32();
+    case ALU_OP_XOR: return s.as_u32() ^ t.as_u32();
+    case ALU_OP_NOR: return ~(s.as_u32() | t.as_u32());
     case ALU_OP_SLT:
         // Note: this is in two's complement so there is difference in unsigned
         // and signed compare
-        return ((int32_t)s < (int32_t)t) ? 1 : 0;
-    case ALU_OP_SLTU: return (s < t) ? 1 : 0;
-    case ALU_OP_MUL: return (uint32_t)((int32_t)s * (int32_t)t);
+        return (s.as_i32() < t.as_i32()) ? 1 : 0;
+    case ALU_OP_SLTU: return (s.as_u32() < t.as_u32()) ? 1 : 0;
+    case ALU_OP_MUL: return (uint32_t)(s.as_i32() * t.as_i32());
     case ALU_OP_MADD:
         s64_val = (int64_t)alu_read_hi_lo_64bit(regs);
-        s64_val += (int64_t)(int32_t)s * (int32_t)t;
+        s64_val += (int64_t)s.as_i32() * t.as_i32();
         alu_write_hi_lo_64bit(regs, (uint64_t)s64_val);
         return 0x0;
     case ALU_OP_MADDU:
         u64_val = alu_read_hi_lo_64bit(regs);
-        u64_val += (uint64_t)s * t;
+        u64_val += (uint64_t)s.as_u32() * t.as_u32();
         alu_write_hi_lo_64bit(regs, u64_val);
         return 0x0;
     case ALU_OP_MSUB:
         s64_val = (int64_t)alu_read_hi_lo_64bit(regs);
-        s64_val -= (int64_t)(int32_t)s * (int32_t)t;
+        s64_val -= (int64_t)s.as_i32() * t.as_i32();
         alu_write_hi_lo_64bit(regs, (uint64_t)s64_val);
         return 0x0;
     case ALU_OP_MSUBU:
         u64_val = alu_read_hi_lo_64bit(regs);
-        u64_val -= (uint64_t)s * t;
+        u64_val -= (uint64_t)s.as_u32() * t.as_u32();
         alu_write_hi_lo_64bit(regs, u64_val);
         return 0x0;
     case ALU_OP_TGE:
-        if ((int32_t)s >= (int32_t)t) {
+        if (s.as_i32() >= t.as_i32()) {
             excause = EXCAUSE_TRAP;
         }
         return 0;
     case ALU_OP_TGEU:
-        if (s >= t) {
+        if (s.as_u32() >= t.as_u32()) {
             excause = EXCAUSE_TRAP;
         }
         return 0;
     case ALU_OP_TLT:
-        if ((int32_t)s < (int32_t)t) {
+        if (s.as_i32() < t.as_i32()) {
             excause = EXCAUSE_TRAP;
         }
         return 0;
     case ALU_OP_TLTU:
-        if (s < t) {
+        if (s.as_u32() < t.as_u32()) {
             excause = EXCAUSE_TRAP;
         }
         return 0;
     case ALU_OP_TEQ:
-        if (s == t) {
+        if (s.as_u32() == t.as_u32()) {
             excause = EXCAUSE_TRAP;
         }
         return 0;
     case ALU_OP_TNE:
-        if (s != t) {
+        if (s.as_u32() != t.as_u32()) {
             excause = EXCAUSE_TRAP;
         }
         return 0;
-    case ALU_OP_LUI: return t << 16;
-    case ALU_OP_WSBH: return ((t << 8) & 0xff00ff00) | ((t >> 8) & 0x00ff00ff);
-    case ALU_OP_SEB: return (uint32_t)(int32_t)(int8_t)t;
-    case ALU_OP_SEH: return (uint32_t)(int32_t)(int16_t)t;
-    case ALU_OP_EXT: return (s >> sa) & ((1 << (sz + 1)) - 1);
+    case ALU_OP_LUI: return t.as_u32() << 16U;
+    case ALU_OP_WSBH:
+        return ((t.as_u32() << 8U) & 0xff00ff00)
+               | ((t.as_u32() >> 8U) & 0x00ff00ffU);
+    case ALU_OP_SEB: return (uint32_t)(int32_t)(int8_t)t.as_u32();
+    case ALU_OP_SEH: return (uint32_t)(int32_t)(int16_t)t.as_u32();
+    case ALU_OP_EXT: return (s.as_u32() >> sa) & ((1 << (sz + 1)) - 1);
     case ALU_OP_INS:
         u32_val = (1 << (sz + 1)) - 1;
-        return ((s & u32_val) << sa) | (t & ~(u32_val << sa));
-    case ALU_OP_CLZ: return alu_op_clz(s);
-    case ALU_OP_CLO: return alu_op_clz(~s);
+        return ((s.as_u32() & u32_val) << sa) | (t.as_u32() & ~(u32_val << sa));
+    case ALU_OP_CLZ: return alu_op_clz(s.as_u32());
+    case ALU_OP_CLO: return alu_op_clz(~s.as_u32());
     case ALU_OP_PASS_T: // Pass s argument without change for JAL
         return t;
     case ALU_OP_BREAK:

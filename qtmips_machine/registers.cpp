@@ -52,11 +52,9 @@ Registers::Registers() : QObject() {
 
 Registers::Registers(const Registers &orig) : QObject() {
     this->pc = orig.read_pc();
-    for (uint8_t i = 0; i < 31; i++) {
-        this->gp[i] = orig.read_gp(i + 1);
-    }
     this->lo = orig.read_hi_lo(false);
     this->hi = orig.read_hi_lo(true);
+    this->gp = orig.gp;
 }
 
 uint32_t Registers::read_pc() const {
@@ -94,60 +92,51 @@ void Registers::pc_abs_jmp_28(uint32_t address) {
     this->pc_abs_jmp((pc & 0xF0000000) | (address & 0x0FFFFFFF));
 }
 
-uint32_t Registers::read_gp(uint8_t i) const {
-    uint32_t value;
-    SANITY_ASSERT(
-        i < 32, QString("Trying to read from register ") + QString(i));
-    if (!i) { // $0 always reads as 0
-        return 0;
+RegisterValue Registers::read_gp(RegisterId reg) const {
+    if (reg.data == 0) {
+        return { 0 }; // $0 always reads as 0
     }
-    value = this->gp[i - 1];
-    emit gp_read(i, value);
+
+    RegisterValue value = this->gp.at(reg.data);
+    emit gp_read(reg, value.as_u32());
     return value;
 }
 
-void Registers::write_gp(uint8_t i, uint32_t value) {
-    SANITY_ASSERT(i < 32, QString("Trying to write to register ") + QString(i));
-    if (i == 0) { // Skip write to $0
-        return;
+void Registers::write_gp(RegisterId reg, RegisterValue value) {
+    if (reg.data == 0) {
+        return; // Skip write to $0
     }
-    this->gp[i - 1] = value;
-    emit gp_update(i, value);
+
+    this->gp.at(reg.data) = value;
+    emit gp_update(reg, value.as_u32());
 }
 
-uint32_t Registers::read_hi_lo(bool is_hi) const {
-    uint32_t value;
-    if (is_hi) {
-        value = hi;
-    } else {
-        value = lo;
-    }
-    emit hi_lo_read(is_hi, value);
+RegisterValue Registers::read_hi_lo(bool is_hi) const {
+    RegisterValue value = is_hi ? hi : lo;
+    emit hi_lo_read(is_hi, value.as_u32());
     return value;
 }
 
-void Registers::write_hi_lo(bool is_hi, uint32_t value) {
+void Registers::write_hi_lo(bool is_hi, RegisterValue value) {
     if (is_hi) {
         hi = value;
     } else {
         lo = value;
     }
-    emit hi_lo_update(is_hi, value);
+    emit hi_lo_update(is_hi, value.as_u32());
 }
 
 bool Registers::operator==(const Registers &c) const {
     if (read_pc() != c.read_pc()) {
         return false;
     }
-    for (uint8_t i = 0; i < 31; i++) {
-        if (read_gp(i) != c.read_gp(i)) {
-            return false;
-        }
-    }
-    if (read_hi_lo(false) != c.read_hi_lo(false)) {
+    if (this->gp != c.gp) {
         return false;
     }
-    if (read_hi_lo(true) != c.read_hi_lo(true)) {
+    if (read_hi_lo(false).as_u32() != c.read_hi_lo(false).as_u32()) {
+        return false;
+    }
+    if (read_hi_lo(true).as_u32() != c.read_hi_lo(true).as_u32()) {
         return false;
     }
     return true;
@@ -162,7 +151,8 @@ void Registers::reset() {
     for (int i = 1; i < 32; i++) {
         write_gp(i, 0);
     }
-    write_gp(29, SP_INIT); // initialize to safe RAM area - corresponds to Linux
+    write_gp(29_reg, SP_INIT); // initialize to safe RAM area - corresponds to
+                               // Linux
     write_hi_lo(false, 0);
     write_hi_lo(true, 0);
 }

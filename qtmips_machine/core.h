@@ -42,6 +42,7 @@
 #include "machineconfig.h"
 #include "memory.h"
 #include "qtmipsexception.h"
+#include "register_value.h"
 #include "registers.h"
 
 #include <QObject>
@@ -269,8 +270,8 @@ protected:
         uint8_t num_rs;            // Number of the register s
         uint8_t num_rt;            // Number of the register t
         uint8_t num_rd;            // Number of the register d
-        uint32_t val_rs;           // Value from register rs
-        uint32_t val_rt;           // Value from register rt
+        RegisterValue val_rs;      // Value from register rs
+        RegisterValue val_rt;      // Value from register rt
         uint32_t immediate_val;    // zero or sign-extended immediate value
         uint8_t rwrite; // Writeback register (multiplexed between rt and
                         // rd according to regd)
@@ -289,11 +290,11 @@ protected:
         bool memwrite;
         bool regwrite;
         enum AccessControl memctl;
-        uint32_t val_rt;
-        uint8_t rwrite;     // Writeback register (multiplexed between rt and
-                            // rd according to regd)
-        uint32_t alu_val;   // Result of ALU execution
-        uint32_t inst_addr; // Address of instruction
+        RegisterValue val_rt;
+        uint8_t rwrite;
+        // Writeback register (multiplexed between rt and rd according to regd)
+        RegisterValue alu_val; // Result of ALU execution
+        uint32_t inst_addr;    // Address of instruction
         enum ExceptionCause excause;
         bool in_delay_slot;
         bool stop_if;
@@ -304,7 +305,7 @@ protected:
         bool memtoreg;
         bool regwrite;
         uint8_t rwrite;
-        uint32_t towrite_val;
+        RegisterValue towrite_val;
         uint32_t mem_addr;  // Address used to access memory
         uint32_t inst_addr; // Address of instruction
         enum ExceptionCause excause;
@@ -325,8 +326,8 @@ protected:
         int mode,
         bool memread,
         bool memwrite,
-        uint32_t &towrite_val,
-        uint32_t rt_value,
+        RegisterValue &towrite_val,
+        RegisterValue rt_value,
         uint32_t mem_addr);
 
     // Initialize structures to NOPE instruction

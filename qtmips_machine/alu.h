@@ -37,6 +37,7 @@
 #define ALU_H
 
 #include "machinedefs.h"
+#include "register_value.h"
 #include "registers.h"
 
 #include <QObject>
@@ -56,10 +57,10 @@ namespace machine {
 // and hi registers (those are not accessed from core it self but from alu
 // directly Returned value is commonly saved to rt/rd or any other way passed
 // trough core
-uint32_t alu_operate(
+RegisterValue alu_operate(
     enum AluOp operation,
-    uint32_t s,
-    uint32_t t,
+    RegisterValue s,
+    RegisterValue t,
     uint8_t sa,
     uint8_t sz,
     Registers *regs,

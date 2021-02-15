@@ -113,10 +113,10 @@ void RegistersDock::setup(machine::QtMipsMachine *machine) {
 
     // Load values
     labelVal(pc, regs->read_pc());
-    labelVal(hi, regs->read_hi_lo(true));
-    labelVal(lo, regs->read_hi_lo(false));
+    labelVal(hi, regs->read_hi_lo(true).as_u32());
+    labelVal(lo, regs->read_hi_lo(false).as_u32());
     for (int i = 0; i < 32; i++) {
-        labelVal(gp[i], regs->read_gp(i));
+        labelVal(gp[i], regs->read_gp(i).as_u32());
     }
 
     connect(
@@ -139,41 +139,43 @@ void RegistersDock::pc_changed(uint32_t val) {
     labelVal(pc, val);
 }
 
-void RegistersDock::gp_changed(uint8_t i, uint32_t val) {
+void RegistersDock::gp_changed(
+    machine::RegisterId i,
+    machine::RegisterValue val) {
     SANITY_ASSERT(
-        i < 32,
+        i.data < 32,
         QString("RegistersDock received signal with invalid gp register: ")
-            + QString::number(i));
-    labelVal(gp[i], val);
-    gp[i]->setPalette(pal_updated);
-    gp_highlighted |= 1 << i;
+            + QString::number(i.data));
+    labelVal(gp[i.data], val.as_u32());
+    gp[i.data]->setPalette(pal_updated);
+    gp_highlighted |= 1 << i.data;
 }
 
-void RegistersDock::gp_read(uint8_t i, uint32_t val) {
+void RegistersDock::gp_read(machine::RegisterId i, machine::RegisterValue val) {
     (void)val;
     SANITY_ASSERT(
-        i < 32,
+        i.data < 32,
         QString("RegistersDock received signal with invalid gp register: ")
-            + QString::number(i));
-    if (!(gp_highlighted & (1 << i))) {
-        gp[i]->setPalette(pal_read);
-        gp_highlighted |= 1 << i;
+            + QString::number(i.data));
+    if (!(gp_highlighted & (1 << i.data))) {
+        gp[i.data]->setPalette(pal_read);
+        gp_highlighted |= 1 << i.data;
     }
 }
 
-void RegistersDock::hi_lo_changed(bool hi, uint32_t val) {
+void RegistersDock::hi_lo_changed(bool hi, machine::RegisterValue val) {
     if (hi) {
-        labelVal(this->hi, val);
+        labelVal(this->hi, val.as_u32());
         this->hi->setPalette(pal_updated);
         hi_highlighted = true;
     } else {
-        labelVal(lo, val);
+        labelVal(lo, val.as_u32());
         this->lo->setPalette(pal_updated);
         lo_highlighted = true;
     }
 }
 
-void RegistersDock::hi_lo_read(bool hi, uint32_t val) {
+void RegistersDock::hi_lo_read(bool hi, machine::RegisterValue val) {
     (void)val;
     if (hi) {
         if (!hi_highlighted) {

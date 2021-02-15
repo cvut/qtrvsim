@@ -37,10 +37,12 @@
 #define COP0STATE_H
 
 #include "machinedefs.h"
+#include "register_value.h"
 
 #include <QObject>
 #include <QString>
 #include <cstdint>
+
 namespace machine {
 
 class Core;
@@ -76,14 +78,15 @@ public:
     Cop0State(Core *core = nullptr);
     Cop0State(const Cop0State &);
 
-    uint32_t read_cop0reg(enum Cop0Registers reg) const;
-    uint32_t read_cop0reg(uint8_t rd, uint8_t sel) const; // Read coprocessor 0
-                                                          // register
-    void write_cop0reg(enum Cop0Registers reg, uint32_t value);
+    std::uint32_t read_cop0reg(enum Cop0Registers reg) const;
+    std::uint32_t
+    read_cop0reg(std::uint8_t rd, std::uint8_t sel) const; // Read coprocessor 0
+                                                           // register
+    void write_cop0reg(enum Cop0Registers reg, RegisterValue value);
     void write_cop0reg(
-        uint8_t reg,
-        uint8_t sel,
-        uint32_t value); // Write coprocessor 0 register
+        std::uint8_t reg,
+        std::uint8_t sel,
+        RegisterValue value); // Write coprocessor 0 register
     static QString cop0reg_name(enum Cop0Registers reg);
 
     bool operator==(const Cop0State &c) const;

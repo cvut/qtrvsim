@@ -92,11 +92,10 @@ void Tracer::reg_pc() {
         &Tracer::regs_pc_update);
 }
 
-void Tracer::reg_gp(uint8_t i) {
-    SANITY_ASSERT(i <= 32, "Trying to trace invalid gp.");
+void Tracer::reg_gp(RegisterId i) {
     CON(con_regs_gp, machine->registers(), &Registers::gp_update,
         &Tracer::regs_gp_update);
-    gp_regs[i] = true;
+    gp_regs[i.data] = true;
 }
 
 void Tracer::reg_lo() {
@@ -160,16 +159,17 @@ void Tracer::regs_pc_update(uint32_t val) {
     cout << "PC:" << hex << val << endl;
 }
 
-void Tracer::regs_gp_update(uint8_t i, uint32_t val) {
-    if (gp_regs[i]) {
-        cout << "GP" << dec << (unsigned)i << ":" << hex << val << endl;
+void Tracer::regs_gp_update(RegisterId i, RegisterValue val) {
+    if (gp_regs[i.data]) {
+        cout << "GP" << dec << (unsigned)i.data << ":" << hex << val.as_u32()
+             << endl;
     }
 }
 
-void Tracer::regs_hi_lo_update(bool hi, uint32_t val) const {
+void Tracer::regs_hi_lo_update(bool hi, RegisterValue val) const {
     if (hi && r_hi) {
-        cout << "HI:" << hex << val << endl;
+        cout << "HI:" << hex << val.as_u32() << endl;
     } else if (!hi && r_lo) {
-        cout << "LO:" << hex << val << endl;
+        cout << "LO:" << hex << val.as_u32() << endl;
     }
 }

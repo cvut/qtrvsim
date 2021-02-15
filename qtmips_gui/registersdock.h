@@ -56,10 +56,10 @@ public:
 
 private slots:
     void pc_changed(uint32_t val);
-    void gp_changed(uint8_t i, uint32_t val);
-    void hi_lo_changed(bool hi, uint32_t val);
-    void gp_read(uint8_t i, uint32_t val);
-    void hi_lo_read(bool hi, uint32_t val);
+    void gp_changed(machine::RegisterId i, machine::RegisterValue val);
+    void hi_lo_changed(bool hi, machine::RegisterValue val);
+    void gp_read(machine::RegisterId i, machine::RegisterValue val);
+    void hi_lo_read(bool hi, machine::RegisterValue val);
     void clear_highlights();
 
 private:

@@ -1074,11 +1074,12 @@ bool OsSyscallExceptionHandler::handle_exception(
     uint32_t jump_branch_pc,
     bool in_delay_slot,
     uint32_t mem_ref_addr) {
-    unsigned int syscall_num = regs->read_gp(2);
+    unsigned int syscall_num = regs->read_gp(2).as_u32();
     const mips_syscall_desc_t *sdesc;
-    uint32_t a1 = 0, a2 = 0, a3 = 0, a4 = 0, a5 = 0, a6 = 0, a7 = 0, a8 = 0;
-    uint32_t sp = regs->read_gp(29);
-    uint32_t result;
+    RegisterValue a1 = 0, a2 = 0, a3 = 0, a4 = 0, a5 = 0, a6 = 0, a7 = 0,
+                  a8 = 0;
+    uint32_t sp = uint32_t(regs->read_gp(29).as_u32());
+    std::uint32_t result;
     int status;
 
     MemoryAccess *mem_data = core->get_mem_data();
@@ -1130,23 +1131,26 @@ bool OsSyscallExceptionHandler::handle_exception(
 #if 1
     printf(
         "Syscall %s number %d/0x%x a1 %ld a2 %ld a3 %ld a4 %ld\n", sdesc->name,
-        syscall_num, syscall_num, (unsigned long)a1, (unsigned long)a2,
-        (unsigned long)a3, (unsigned long)a4);
+        syscall_num, syscall_num, a1.as_u64(), a2.as_u64(), a3.as_u64(),
+        a4.as_u64());
 
 #endif
     status = (this->*sdesc->handler)(
-        result, core, syscall_num, a1, a2, a3, a4, a5, a6, a7, a8);
-    if (known_syscall_stop)
+        result, core, syscall_num, a1.as_u32(), a2.as_u32(), a3.as_u32(),
+        a4.as_u32(), a5.as_u32(), a6.as_u32(), a7.as_u32(), a8.as_u32());
+    if (known_syscall_stop) {
         emit core->stop_on_exception_reached();
+    }
 
     regs->write_gp(7, status);
-    if (status < 0)
+    if (status < 0) {
         regs->write_gp(2, status);
-    else
+    } else {
         regs->write_gp(2, result);
+    }
 
     return true;
-};
+}
 
 int32_t OsSyscallExceptionHandler::write_mem(
     machine::MemoryAccess *mem,
@@ -1968,9 +1972,9 @@ int OsSyscallExceptionHandler::do_spim_sbrk(
 
     uint32_t increment = a1;
     increment = (increment + 15) & ~15;
-    ;
+
     brk_limit = (brk_limit + 15) & ~15;
-    ;
+
     result = brk_limit;
     brk_limit += increment;
 
