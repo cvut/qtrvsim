@@ -44,16 +44,16 @@
 #include "hinttabledelegate.h"
 
 ProgramTableView::ProgramTableView(QWidget *parent, QSettings *settings) : Super(parent) {
-    setItemDelegate(new HintTableDelegate);
-    connect(verticalScrollBar() , SIGNAL(valueChanged(int)),
-            this, SLOT(adjust_scroll_pos_check()));
-    connect(this , SIGNAL(adjust_scroll_pos_queue()),
-            this, SLOT(adjust_scroll_pos_process()), Qt::QueuedConnection);
-    this->settings = settings;
-    initial_address = settings->value("ProgramViewAddr0", 0).toULongLong();
-    adjust_scroll_pos_in_progress = false;
-    need_addr0_save = false;
-    setTextElideMode(Qt::ElideNone);
+  setItemDelegate(new HintTableDelegate);
+  connect(verticalScrollBar(), &QAbstractSlider::valueChanged, this,
+          &ProgramTableView::adjust_scroll_pos_check);
+  connect(this, &ProgramTableView::adjust_scroll_pos_queue, this,
+          &ProgramTableView::adjust_scroll_pos_process, Qt::QueuedConnection);
+  this->settings = settings;
+  initial_address = settings->value("ProgramViewAddr0", 0).toULongLong();
+  adjust_scroll_pos_in_progress = false;
+  need_addr0_save = false;
+  setTextElideMode(Qt::ElideNone);
 }
 
 void ProgramTableView::addr0_save_change(std::uint32_t val) {

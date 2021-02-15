@@ -93,17 +93,19 @@ PhysAddrSpace::RangeDesc *PhysAddrSpace::find_range(std::uint32_t address) const
 }
 
 bool PhysAddrSpace::insert_range(MemoryAccess *mem_acces, std::uint32_t start_addr, std::uint32_t last_addr, bool move_ownership) {
-    RangeDesc *p_range = new RangeDesc(mem_acces, start_addr, last_addr, move_ownership);
-    auto i = ranges_by_addr.lowerBound(start_addr);
-    if (i != ranges_by_addr.end()) {
-        if (i.value()->start_addr <= last_addr && i.value()->last_addr >= start_addr)
-            return false;
-    }
-    ranges_by_addr.insert(last_addr, p_range);
-    ranges_by_access.insertMulti(mem_acces, p_range);
-    connect(mem_acces, SIGNAL(external_change_notify(const MemoryAccess*,std::uint32_t,std::uint32_t,bool)),
-            this, SLOT(range_external_change(const MemoryAccess*,std::uint32_t,std::uint32_t,bool)));
-    return true;
+  RangeDesc *p_range =
+      new RangeDesc(mem_acces, start_addr, last_addr, move_ownership);
+  auto i = ranges_by_addr.lowerBound(start_addr);
+  if (i != ranges_by_addr.end()) {
+    if (i.value()->start_addr <= last_addr &&
+        i.value()->last_addr >= start_addr)
+      return false;
+  }
+  ranges_by_addr.insert(last_addr, p_range);
+  ranges_by_access.insertMulti(mem_acces, p_range);
+  connect(mem_acces, &MemoryAccess::external_change_notify, this,
+          &PhysAddrSpace::range_external_change);
+  return true;
 }
 
 bool PhysAddrSpace::remove_range(MemoryAccess *mem_acces) {

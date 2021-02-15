@@ -44,17 +44,18 @@ using namespace machine;
 using namespace std;
 
 Reporter::Reporter(QCoreApplication *app, QtMipsMachine *machine) : QObject() {
-    this->app = app;
-    this->machine = machine;
+  this->app = app;
+  this->machine = machine;
 
-    connect(machine, SIGNAL(program_exit()), this, SLOT(machine_exit()));
-    connect(machine, SIGNAL(program_trap(machine::QtMipsException&)), this, SLOT(machine_trap(machine::QtMipsException&)));
-    connect(machine->core(), SIGNAL(stop_on_exception_reached()), this, SLOT(machine_exception_reached()));
+  connect(machine, &QtMipsMachine::program_exit, this, &Reporter::machine_exit);
+  connect(machine, &QtMipsMachine::program_trap, this, &Reporter::machine_trap);
+  connect(machine->core(), &Core::stop_on_exception_reached, this,
+          &Reporter::machine_exception_reached);
 
-    e_regs = false;
-    e_cache_stats = false;
-    e_cycles = false;
-    e_fail = (enum FailReason)0;
+  e_regs = false;
+  e_cache_stats = false;
+  e_cycles = false;
+  e_fail = (enum FailReason)0;
 }
 
 void Reporter::regs() {

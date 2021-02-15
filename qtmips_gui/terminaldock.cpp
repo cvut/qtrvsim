@@ -65,13 +65,14 @@ TerminalDock::~TerminalDock() {
 }
 
 void TerminalDock::setup(machine::SerialPort *ser_port) {
-    if (ser_port == nullptr)
-        return;
-    connect(ser_port, SIGNAL(tx_byte(uint)), this, SLOT(tx_byte(uint)));
-    connect(ser_port, SIGNAL(rx_byte_pool(int,uint&,bool&)),
-            this, SLOT(rx_byte_pool(int,uint&,bool&)));
-    connect(input_edit, SIGNAL(textChanged(QString)),
-            ser_port, SLOT(rx_queue_check()));
+  if (ser_port == nullptr)
+    return;
+  connect(ser_port, &machine::SerialPort::tx_byte, this,
+          QOverload<unsigned int>::of(&TerminalDock::tx_byte));
+  connect(ser_port, &machine::SerialPort::rx_byte_pool, this,
+          &TerminalDock::rx_byte_pool);
+  connect(input_edit, &QLineEdit::textChanged, ser_port,
+          &machine::SerialPort::rx_queue_check);
 }
 
 void TerminalDock::tx_byte(unsigned int data) {

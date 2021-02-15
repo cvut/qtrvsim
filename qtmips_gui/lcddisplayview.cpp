@@ -17,18 +17,18 @@ LcdDisplayView::~LcdDisplayView() {
 }
 
 void LcdDisplayView::setup(machine::LcdDisplay *lcd_display) {
-    if (lcd_display == nullptr)
-        return;
-    connect(lcd_display, SIGNAL(pixel_update(uint,uint,uint,uint,uint)),
-            this, SLOT(pixel_update(uint,uint,uint,uint,uint)));
-    if (fb_pixels != nullptr)
-        delete fb_pixels;
-    fb_pixels = nullptr;
-    fb_pixels = new QImage(lcd_display->width(),
-                           lcd_display->height(), QImage::Format_RGB32);
-    fb_pixels->fill(qRgb(0, 0, 0));
-    update_scale();
-    update();
+  if (lcd_display == nullptr)
+    return;
+  connect(lcd_display, &machine::LcdDisplay::pixel_update, this,
+          &LcdDisplayView::pixel_update);
+  if (fb_pixels != nullptr)
+    delete fb_pixels;
+  fb_pixels = nullptr;
+  fb_pixels = new QImage(lcd_display->width(), lcd_display->height(),
+                         QImage::Format_RGB32);
+  fb_pixels->fill(qRgb(0, 0, 0));
+  update_scale();
+  update();
 }
 
 void LcdDisplayView::pixel_update(uint x, uint y, uint r, uint g, uint b) {

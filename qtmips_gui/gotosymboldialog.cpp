@@ -1,17 +1,17 @@
 #include "gotosymboldialog.h"
 #include "ui_gotosymboldialog.h"
 
-GoToSymbolDialog::GoToSymbolDialog(QWidget *parent, QStringList &symlist) :
-    QDialog(parent),
-    ui(new Ui::GoToSymbolDialog)
-{
-    ui->setupUi(this);
+GoToSymbolDialog::GoToSymbolDialog(QWidget *parent, QStringList &symlist)
+    : QDialog(parent), ui(new Ui::GoToSymbolDialog) {
+  ui->setupUi(this);
 
-    connect(ui->pushShowProg, SIGNAL(clicked()), this, SLOT(show_prog()));
-    connect(ui->pushShowMem, SIGNAL(clicked()), this, SLOT(show_mem()));
-    connect(ui->pushClose, SIGNAL(clicked()), this, SLOT(close()));
+  connect(ui->pushShowProg, &QAbstractButton::clicked, this,
+          &GoToSymbolDialog::show_prog);
+  connect(ui->pushShowMem, &QAbstractButton::clicked, this,
+          &GoToSymbolDialog::show_mem);
+  connect(ui->pushClose, &QAbstractButton::clicked, this, &QWidget::close);
 
-    ui->listSymbols->addItems(symlist);
+  ui->listSymbols->addItems(symlist);
 }
 
 GoToSymbolDialog::~GoToSymbolDialog()

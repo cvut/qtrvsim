@@ -60,17 +60,18 @@ HexLineEdit::HexLineEdit(QWidget *parent, int digits, int base, QString prefix):
     case 0:
     default:
         mask += "H";
-        dmask = 'h';
-        break;
+      dmask = 'h';
+      break;
     }
     if (digits > 1)
-        t.fill(dmask, digits  - 1);
+      t.fill(dmask, digits - 1);
 
     mask += t;
 
     setInputMask(mask);
 
-    connect(this, SIGNAL(editingFinished()), this, SLOT(on_edit_finished()));
+    connect(this, &QLineEdit::editingFinished, this,
+            &HexLineEdit::on_edit_finished);
 
     set_value(0);
 }

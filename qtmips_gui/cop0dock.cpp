@@ -88,13 +88,15 @@ void Cop0Dock::setup(machine::QtMipsMachine *machine) {
     const machine::Cop0State *cop0state = machine->cop0state();
 
     for (int i = 1; i < machine::Cop0State::COP0REGS_CNT; i++)
-        labelVal(cop0reg[i], cop0state->read_cop0reg((machine::Cop0State::Cop0Registers)i));
+      labelVal(cop0reg[i],
+               cop0state->read_cop0reg((machine::Cop0State::Cop0Registers)i));
 
-    connect(cop0state, &machine::Cop0State::cop0reg_update,
-            this, &Cop0Dock::cop0reg_changed);
-    connect(cop0state, &machine::Cop0State::cop0reg_read,
-            this, &Cop0Dock::cop0reg_read);
-    connect(machine, SIGNAL(tick()), this, SLOT(clear_highlights()));
+    connect(cop0state, &machine::Cop0State::cop0reg_update, this,
+            &Cop0Dock::cop0reg_changed);
+    connect(cop0state, &machine::Cop0State::cop0reg_read, this,
+            &Cop0Dock::cop0reg_read);
+    connect(machine, &machine::QtMipsMachine::tick, this,
+            &Cop0Dock::clear_highlights);
 }
 
 void Cop0Dock::cop0reg_changed(enum machine::Cop0State::Cop0Registers reg, std::uint32_t val) {

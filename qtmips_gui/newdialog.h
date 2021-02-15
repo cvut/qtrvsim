@@ -95,18 +95,18 @@ private:
 	NewDialogCacheHandler *cache_handler_p, *cache_handler_d;
 };
 
-class NewDialogCacheHandler : QObject {
-	Q_OBJECT
+class NewDialogCacheHandler : public QObject {
+  Q_OBJECT
 public:
-	NewDialogCacheHandler(NewDialog *nd, Ui::NewDialogCache *ui);
+  NewDialogCacheHandler(NewDialog *nd, Ui::NewDialogCache *ui);
 
-    void set_config(machine::MachineConfigCache *config);
+  void set_config(machine::MachineConfigCache *config);
 
-    void config_gui();
+  void config_gui();
 
 private slots:
-	void enabled(bool);
-	void numsets();
+  void enabled(bool);
+  void numsets();
 	void blocksize();
 	void degreeassociativity();
 	void replacement(int);

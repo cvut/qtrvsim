@@ -58,7 +58,7 @@ Latch::Latch(machine::QtMipsMachine *machine, qreal height) : QGraphicsObject(nu
     wedge_animation->setEndValue(QColor(255, 255, 255));
     wedge_clr = QColor(255, 255, 255);
 
-    connect(machine, SIGNAL(tick()), this, SLOT(tick()));
+    connect(machine, &machine::QtMipsMachine::tick, this, &Latch::tick);
 }
 
 Latch::~Latch() {

@@ -84,9 +84,12 @@ SaveChnagedDialog::SaveChnagedDialog(QStringList &changedlist, QWidget *parent) 
     QPushButton *ignoreButton = new QPushButton(tr("&Ignore"), parent);
     QPushButton *saveButton = new QPushButton(tr("&Save"), parent);
     saveButton->setFocus();
-    connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancel_clicked()));
-    connect(ignoreButton, SIGNAL(clicked()), this, SLOT(ignore_clicked()));
-    connect(saveButton, SIGNAL(clicked()), this, SLOT(save_clicked()));
+    connect(cancelButton, &QAbstractButton::clicked, this,
+            &SaveChnagedDialog::cancel_clicked);
+    connect(ignoreButton, &QAbstractButton::clicked, this,
+            &SaveChnagedDialog::ignore_clicked);
+    connect(saveButton, &QAbstractButton::clicked, this,
+            &SaveChnagedDialog::save_clicked);
     hlBtn->addWidget(cancelButton);
     hlBtn->addStretch();
     hlBtn->addWidget(ignoreButton);

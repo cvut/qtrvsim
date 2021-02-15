@@ -70,14 +70,14 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
     follow_inst->addItem("Follow writeback");
     follow_inst->setCurrentIndex((int)follow_source);
 
-    QTableView *program_content = new ProgramTableView(0, settings);
+    ProgramTableView *program_content = new ProgramTableView(0, settings);
     // program_content->setSizePolicy();
     ProgramModel *program_model = new ProgramModel(this);
     program_content->setModel(program_model);
     program_content->verticalHeader()->hide();
     //program_content->setHorizontalHeader(program_model->);
 
-    QLineEdit *go_edit = new HexLineEdit(0, 8, 16, "0x");
+    HexLineEdit *go_edit = new HexLineEdit(0, 8, 16, "0x");
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(follow_inst);
@@ -88,25 +88,30 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
 
     setWidget(content);
 
-    connect(this, &ProgramDock::machine_setup, program_model, &ProgramModel::setup);
-    connect(go_edit, SIGNAL(value_edit_finished(std::uint32_t)),
-            program_content, SLOT(go_to_address(std::uint32_t)));
-    connect(program_content, SIGNAL(address_changed(std::uint32_t)),
-            go_edit, SLOT(set_value(std::uint32_t)));
-    connect(this, SIGNAL(jump_to_pc(std::uint32_t)),
-            program_content, SLOT(go_to_address(std::uint32_t)));
-    connect(follow_inst, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(set_follow_inst(int)));
-    connect(this, SIGNAL(focus_addr(std::uint32_t)),
-            program_content, SLOT(focus_address(std::uint32_t)));
-    connect(this, SIGNAL(focus_addr_with_save(std::uint32_t)),
-            program_content, SLOT(focus_address_with_save(std::uint32_t)));
-    connect(program_content, SIGNAL(doubleClicked(QModelIndex)),
-            program_model, SLOT(toggle_hw_break(QModelIndex)));
-    connect(this, SIGNAL(stage_addr_changed(uint,std::uint32_t)),
-            program_model, SLOT(update_stage_addr(uint,std::uint32_t)));
-    connect(program_model, SIGNAL(report_error(QString)), this, SLOT(report_error(QString)));
-    connect(this, SIGNAL(request_update_all()), program_model, SLOT(update_all()));
+    connect(this, &ProgramDock::machine_setup, program_model,
+            &ProgramModel::setup);
+    connect(go_edit, &HexLineEdit::value_edit_finished, program_content,
+            [program_content](uint32_t value) {
+              program_content->go_to_address(value);
+            });
+    connect(program_content, &ProgramTableView::address_changed, go_edit,
+            &HexLineEdit::set_value);
+    connect(this, &ProgramDock::jump_to_pc, program_content,
+            &ProgramTableView::go_to_address);
+    connect(follow_inst, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &ProgramDock::set_follow_inst);
+    connect(this, &ProgramDock::focus_addr, program_content,
+            &ProgramTableView::focus_address);
+    connect(this, &ProgramDock::focus_addr_with_save, program_content,
+            &ProgramTableView::focus_address_with_save);
+    connect(program_content, &QAbstractItemView::doubleClicked, program_model,
+            &ProgramModel::toggle_hw_break);
+    connect(this, &ProgramDock::stage_addr_changed, program_model,
+            &ProgramModel::update_stage_addr);
+    connect(program_model, &ProgramModel::report_error, this,
+            &ProgramDock::report_error);
+    connect(this, &ProgramDock::request_update_all, program_model,
+            &ProgramModel::update_all);
 }
 
 void ProgramDock::setup(machine::QtMipsMachine *machine) {

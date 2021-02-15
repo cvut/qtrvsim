@@ -128,7 +128,7 @@ AboutDialog::AboutDialog(QWidget *parent)
 
   QPushButton *okButton = new QPushButton(tr("&OK"), parent);
   okButton->setFocus();
-  connect(okButton, SIGNAL(clicked()), this, SLOT(close()));
+  connect(okButton, &QAbstractButton::clicked, this, &QWidget::close);
   hlBtn->addStretch();
   hlBtn->addWidget(okButton);
 

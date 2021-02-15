@@ -69,12 +69,14 @@ MessagesDock::MessagesDock(QWidget *parent, QSettings *settings) : Super(parent)
 
     setWidget(content);
 
-    connect(this, SIGNAL(report_message(messagetype::Type,QString,int,int,QString,QString)),
-    messages_model, SLOT(insert_line(messagetype::Type,QString,int,int,QString,QString)));
-    connect(this, SIGNAL(pass_clear_messages()), messages_model, SLOT(clear_messages()));
-    connect(messages_content, SIGNAL(activated(QModelIndex)), messages_model, SLOT(activated(QModelIndex)));
-    connect(messages_model, SIGNAL(message_selected(messagetype::Type,QString,int,int,QString,QString)),
-            this, SIGNAL(message_selected(messagetype::Type,QString,int,int,QString,QString)));
+    connect(this, &MessagesDock::report_message, messages_model,
+            &MessagesModel::insert_line);
+    connect(this, &MessagesDock::pass_clear_messages, messages_model,
+            &MessagesModel::clear_messages);
+    connect(messages_content, &QAbstractItemView::activated, messages_model,
+            &MessagesModel::activated);
+    connect(messages_model, &MessagesModel::message_selected, this,
+            &MessagesDock::message_selected);
 }
 
 void MessagesDock::insert_line(messagetype::Type type, QString file, int line,

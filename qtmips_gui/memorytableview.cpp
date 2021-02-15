@@ -44,15 +44,15 @@
 #include "hinttabledelegate.h"
 
 MemoryTableView::MemoryTableView(QWidget *parent, QSettings *settings) : Super(parent) {
-    setItemDelegate(new HintTableDelegate);
-    connect(verticalScrollBar() , SIGNAL(valueChanged(int)),
-            this, SLOT(adjust_scroll_pos_check()));
-    connect(this , SIGNAL(adjust_scroll_pos_queue()),
-            this, SLOT(adjust_scroll_pos_process()), Qt::QueuedConnection);
-    this->settings = settings;
-    initial_address = settings->value("DataViewAddr0", 0).toULongLong();
-    adjust_scroll_pos_in_progress = false;
-    setTextElideMode(Qt::ElideNone);
+  setItemDelegate(new HintTableDelegate);
+  connect(verticalScrollBar(), &QAbstractSlider::valueChanged, this,
+          &MemoryTableView::adjust_scroll_pos_check);
+  connect(this, &MemoryTableView::adjust_scroll_pos_queue, this,
+          &MemoryTableView::adjust_scroll_pos_process, Qt::QueuedConnection);
+  this->settings = settings;
+  initial_address = settings->value("DataViewAddr0", 0).toULongLong();
+  adjust_scroll_pos_in_progress = false;
+  setTextElideMode(Qt::ElideNone);
 }
 
 void MemoryTableView::addr0_save_change(std::uint32_t val) {

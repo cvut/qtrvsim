@@ -326,16 +326,17 @@ void configure_serial_port(QCommandLineParser &p,  SerialPort *ser_port) {
     }
 
     if (ser_in) {
-        ser_port->connect(ser_in, SIGNAL(readyRead()), ser_port, SLOT(rx_queue_check()));
-        ser_port->connect(ser_port, SIGNAL(rx_byte_pool(int,unsigned int&, bool&)),
-                          ser_in, SLOT(readBytePoll(int,unsigned int&, bool&)));
-        if (ser_in->bytesAvailable())
-            ser_port->rx_queue_check();
+      QObject::connect(ser_in, &QIODevice::readyRead, ser_port,
+                       &SerialPort::rx_queue_check);
+      QObject::connect(ser_port, &SerialPort::rx_byte_pool, ser_in,
+                       &CharIOHandler::readBytePoll);
+      if (ser_in->bytesAvailable())
+        ser_port->rx_queue_check();
     }
 
     if (ser_out) {
-        ser_port->connect(ser_port, SIGNAL(tx_byte(unsigned int)),
-                          ser_out, SLOT(writeByte(unsigned int)));
+      QObject::connect(ser_port, &SerialPort::tx_byte, ser_out,
+                       QOverload<unsigned>::of(&CharIOHandler::writeByte));
     }
 }
 
@@ -386,23 +387,23 @@ void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
 }
 
 bool assemble(QtMipsMachine &machine, MsgReport &msgrep, QString filename) {
-    SymbolTableDb symtab(machine.symbol_table_rw(true));
-    machine::MemoryAccess *mem = machine.physical_address_space_rw();
-    if (mem == nullptr) {
-        return false;
-    }
-    machine.cache_sync();
-    SimpleAsm sasm;
+  SymbolTableDb symtab(machine.symbol_table_rw(true));
+  machine::MemoryAccess *mem = machine.physical_address_space_rw();
+  if (mem == nullptr) {
+    return false;
+  }
+  machine.cache_sync();
+  SimpleAsm sasm;
 
-    sasm.connect(&sasm, SIGNAL(report_message(messagetype::Type,QString,int,int,QString,QString)),
-            &msgrep, SLOT(report_message(messagetype::Type,QString,int,int,QString,QString)));
+  sasm.connect(&sasm, &SimpleAsm::report_message, &msgrep,
+               &MsgReport::report_message);
 
-    sasm.setup(mem, &symtab, 0x80020000);
+  sasm.setup(mem, &symtab, 0x80020000);
 
-    if (!sasm.process_file(filename))
-        return false;
+  if (!sasm.process_file(filename))
+    return false;
 
-    return sasm.finish();
+  return sasm.finish();
 }
 
 int main(int argc, char *argv[]) {

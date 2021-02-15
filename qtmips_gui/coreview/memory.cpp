@@ -60,19 +60,21 @@ Memory::Memory(bool cache_used, const machine::Cache *cch) : QGraphicsObject(nul
 
     name.setPos(WIDTH/2 - name.boundingRect().width()/2, HEIGHT - (HEIGHT - CACHE_HEIGHT)/2);
     if (cache) {
-        const QRectF &cache_t_b = cache_t.boundingRect();
-        cache_t.setPos(WIDTH/2 - cache_t_b.width()/2, 1);
-        const QRectF &cache_hit_b = cache_hit_t.boundingRect();
-        cache_hit_t.setPos(WIDTH/20, cache_t_b.height() + 2);
-        cache_miss_t.setPos(WIDTH/20, cache_t_b.height() + cache_hit_b.height() + 3);
+      const QRectF &cache_t_b = cache_t.boundingRect();
+      cache_t.setPos(WIDTH / 2 - cache_t_b.width() / 2, 1);
+      const QRectF &cache_hit_b = cache_hit_t.boundingRect();
+      cache_hit_t.setPos(WIDTH / 20, cache_t_b.height() + 2);
+      cache_miss_t.setPos(WIDTH / 20,
+                          cache_t_b.height() + cache_hit_b.height() + 3);
     }
 
     cache_t.setVisible(cache);
     cache_hit_t.setVisible(cache);
     cache_miss_t.setVisible(cache);
 
-    connect(cch, SIGNAL(hit_update(uint)), this, SLOT(cache_hit_update(uint)));
-    connect(cch, SIGNAL(miss_update(uint)), this, SLOT(cache_miss_update(uint)));
+    connect(cch, &machine::Cache::hit_update, this, &Memory::cache_hit_update);
+    connect(cch, &machine::Cache::miss_update, this,
+            &Memory::cache_miss_update);
 
     setPos(x(), y()); // set connector's position
 }

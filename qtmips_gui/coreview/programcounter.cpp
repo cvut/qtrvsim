@@ -49,21 +49,23 @@ using namespace coreview;
 ProgramCounter::ProgramCounter(machine::QtMipsMachine *machine) : QGraphicsObject(nullptr), name("PC", this), value(this) {
     registers = machine->registers();
 
-    QFont font;
+  QFont font;
 
-    font.setPixelSize(FontSize::SIZE7);
-    name.setPos(WIDTH/2 - name.boundingRect().width()/2, 0);
-    name.setFont(font);
-    font.setPointSize(FontSize::SIZE8);
-    value.setText(QString("0x") + QString::number(machine->registers()->read_pc(), 16));
-    value.setPos(1, HEIGHT - value.boundingRect().height());
-    value.setFont(font);
+  font.setPixelSize(FontSize::SIZE7);
+  name.setPos(WIDTH / 2 - name.boundingRect().width() / 2, 0);
+  name.setFont(font);
+  font.setPointSize(FontSize::SIZE8);
+  value.setText(QString("0x") +
+                QString::number(machine->registers()->read_pc(), 16));
+  value.setPos(1, HEIGHT - value.boundingRect().height());
+  value.setFont(font);
 
-    connect(machine->registers(), SIGNAL(pc_update(std::uint32_t)), this, SLOT(pc_update(std::uint32_t)));
+  connect(machine->registers(), &machine::Registers::pc_update, this,
+          &ProgramCounter::pc_update);
 
-    con_in = new Connector(Connector::AX_Y);
-    con_out = new Connector(Connector::AX_Y);
-    setPos(x(), y()); // To set initial connectors positions
+  con_in = new Connector(Connector::AX_Y);
+  con_out = new Connector(Connector::AX_Y);
+  setPos(x(), y()); // To set initial connectors positions
 }
 
 ProgramCounter::~ProgramCounter() {

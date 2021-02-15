@@ -175,10 +175,11 @@ void ProgramModel::setup(machine::QtMipsMachine *machine) {
     for (int i = 0 ; i < STAGEADDR_COUNT; i++)
         stage_addr[i] = machine::STAGEADDR_NONE;
     if (machine != nullptr)
-        connect(machine, SIGNAL(post_tick()), this, SLOT(check_for_updates()));
+      connect(machine, &machine::QtMipsMachine::post_tick, this,
+              &ProgramModel::check_for_updates);
     if (mem_access() != nullptr)
-        connect(mem_access(), SIGNAL(external_change_notify(const MemoryAccess*,std::uint32_t,std::uint32_t,bool)),
-                this, SLOT(check_for_updates()));
+      connect(mem_access(), &machine::MemoryAccess::external_change_notify,
+              this, &ProgramModel::check_for_updates);
     emit update_all();
 }
 

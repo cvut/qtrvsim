@@ -81,11 +81,15 @@ void CacheDock::setup(const machine::Cache *cache) {
     l_hit_rate->setText("0.000%");
     l_speed->setText("100%");
     if (cache != nullptr) {
-        connect(cache, SIGNAL(hit_update(uint)), this, SLOT(hit_update(uint)));
-        connect(cache, SIGNAL(miss_update(uint)), this, SLOT(miss_update(uint)));
-        connect(cache, SIGNAL(memory_reads_update(uint)), this, SLOT(memory_reads_update(uint)));
-        connect(cache, SIGNAL(memory_writes_update(uint)), this, SLOT(memory_writes_update(uint)));
-        connect(cache, SIGNAL(statistics_update(uint,double,double)), this, SLOT(statistics_update(uint,double,double)));
+      connect(cache, &machine::Cache::hit_update, this, &CacheDock::hit_update);
+      connect(cache, &machine::Cache::miss_update, this,
+              &CacheDock::miss_update);
+      connect(cache, &machine::Cache::memory_reads_update, this,
+              &CacheDock::memory_reads_update);
+      connect(cache, &machine::Cache::memory_writes_update, this,
+              &CacheDock::memory_writes_update);
+      connect(cache, &machine::Cache::statistics_update, this,
+              &CacheDock::statistics_update);
     }
     top_form->setVisible(cache != nullptr);
     no_cache->setVisible(!cache->config().enabled());

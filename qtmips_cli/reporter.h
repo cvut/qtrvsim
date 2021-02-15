@@ -42,18 +42,18 @@
 #include <QCoreApplication>
 #include "qtmipsmachine.h"
 
-class Reporter : QObject {
-    Q_OBJECT
+class Reporter : public QObject {
+  Q_OBJECT
 public:
-    Reporter(QCoreApplication *app, machine::QtMipsMachine *machine);
+  Reporter(QCoreApplication *app, machine::QtMipsMachine *machine);
 
-    void regs(); // Report status of registers
-    void cache_stats();
-    void cycles();
+  void regs(); // Report status of registers
+  void cache_stats();
+  void cycles();
 
-    enum FailReason {
-        FR_I = (1<<0), // Unsupported Instruction
-        FR_A = (1<<1), // Unsupported ALU operation
+  enum FailReason {
+    FR_I = (1 << 0), // Unsupported Instruction
+    FR_A = (1<<1), // Unsupported ALU operation
         FR_O = (1<<2), // Overflow/underflow of numerical operation
         FR_J = (1<<3), // Unaligned jump
     };

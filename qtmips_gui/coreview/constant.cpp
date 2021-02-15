@@ -44,14 +44,15 @@ using namespace coreview;
 //////////////////////
 
 Constant::Constant(const Connector *con, const QString &text) : QGraphicsObject(nullptr), text(text, this) {
-    QFont font;
-    font.setPixelSize(FontSize::SIZE7);
-    this->text.setFont(font);
+  QFont font;
+  font.setPixelSize(FontSize::SIZE7);
+  this->text.setFont(font);
 
-    con_our = new Connector(Connector::AX_X);
-    conn = new Bus(con_our, con, 2);
-    connect(con, SIGNAL(updated(QPointF)), this, SLOT(ref_con_updated(QPointF)));
-    ref_con_updated(con->point()); // update initial connector position
+  con_our = new Connector(Connector::AX_X);
+  conn = new Bus(con_our, con, 2);
+  connect(con, QOverload<QPointF>::of(&Connector::updated), this,
+          &Constant::ref_con_updated);
+  ref_con_updated(con->point()); // update initial connector position
 }
 
 Constant::~Constant() {

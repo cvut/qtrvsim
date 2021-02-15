@@ -44,11 +44,12 @@
 using namespace std;
 
 ExtProcess::ExtProcess(QObject *parent) : Super(parent) {
-    setProcessChannelMode(QProcess::MergedChannels);
-    connect(this, SIGNAL(readyReadStandardOutput()), this, SLOT(process_output()));
-    connect(this, SIGNAL(finished(int,QProcess::ExitStatus)),
-            this, SLOT(report_finished(int,QProcess::ExitStatus)));
-    connect(this, SIGNAL(started()), this, SLOT(report_started()));
+  setProcessChannelMode(QProcess::MergedChannels);
+  connect(this, &QProcess::readyReadStandardOutput, this,
+          &ExtProcess::process_output);
+  connect(this, QOverload<int, ExitStatus>::of(&QProcess::finished), this,
+          &ExtProcess::report_finished);
+  connect(this, &QProcess::started, this, &ExtProcess::report_started);
 }
 
 void ExtProcess::report_finished(int exitCode, QProcess::ExitStatus exitStatus) {

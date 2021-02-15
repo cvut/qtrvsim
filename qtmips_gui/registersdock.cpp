@@ -140,14 +140,19 @@ void RegistersDock::setup(machine::QtMipsMachine *machine) {
     labelVal(hi, regs->read_hi_lo(true));
     labelVal(lo, regs->read_hi_lo(false));
     for (int i = 0; i < 32; i++)
-        labelVal(gp[i], regs->read_gp(i));
+      labelVal(gp[i], regs->read_gp(i));
 
-    connect(regs, SIGNAL(pc_update(std::uint32_t)), this, SLOT(pc_changed(std::uint32_t)));
-    connect(regs, SIGNAL(gp_update(std::uint8_t,std::uint32_t)), this, SLOT(gp_changed(std::uint8_t,std::uint32_t)));
-    connect(regs, SIGNAL(hi_lo_update(bool,std::uint32_t)), this, SLOT(hi_lo_changed(bool,std::uint32_t)));
-    connect(regs, SIGNAL(gp_read(std::uint8_t,std::uint32_t)), this, SLOT(gp_read(std::uint8_t,std::uint32_t)));
-    connect(regs, SIGNAL(hi_lo_read(bool,std::uint32_t)), this, SLOT(hi_lo_read(bool,std::uint32_t)));
-    connect(machine, SIGNAL(tick()), this, SLOT(clear_highlights()));
+    connect(regs, &machine::Registers::pc_update, this,
+            &RegistersDock::pc_changed);
+    connect(regs, &machine::Registers::gp_update, this,
+            &RegistersDock::gp_changed);
+    connect(regs, &machine::Registers::hi_lo_update, this,
+            &RegistersDock::hi_lo_changed);
+    connect(regs, &machine::Registers::gp_read, this, &RegistersDock::gp_read);
+    connect(regs, &machine::Registers::hi_lo_read, this,
+            &RegistersDock::hi_lo_read);
+    connect(machine, &machine::QtMipsMachine::tick, this,
+            &RegistersDock::clear_highlights);
 }
 
 void RegistersDock::pc_changed(std::uint32_t val) {

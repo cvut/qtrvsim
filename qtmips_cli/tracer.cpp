@@ -52,54 +52,61 @@ Tracer::Tracer(QtMipsMachine *machine) {
     con_regs_hi_lo = false;
 }
 
-#define CON_RAW(VAR, FROM, SIG, SLT) do { \
-        if (!VAR) { \
-            connect(FROM, SIG, this, SLT); \
-            VAR = true;\
-        }\
-    } while(false)
-
-#define CON(VAR, FROM, SIG, SLT) \
-          CON_RAW(VAR, FROM, SIGNAL(SIG), SLOT(SLT))
+#define CON(VAR, FROM, SIG, SLT)                                               \
+  do {                                                                         \
+    if (!VAR) {                                                                \
+      connect(FROM, SIG, this, SLT);                                           \
+      VAR = true;                                                              \
+    }                                                                          \
+  } while (false)
 
 void Tracer::fetch() {
-    CON_RAW(con_fetch, machine->core(), &Core::instruction_fetched, &Tracer::instruction_fetch);
+  CON(con_fetch, machine->core(), &Core::instruction_fetched,
+      &Tracer::instruction_fetch);
 }
 
 void Tracer::decode() {
-    CON_RAW(con_decode, machine->core(), &Core::instruction_decoded, &Tracer::instruction_decode);
+  CON(con_decode, machine->core(), &Core::instruction_decoded,
+      &Tracer::instruction_decode);
 }
 
 void Tracer::execute() {
-    CON_RAW(con_execute, machine->core(), &Core::instruction_executed, &Tracer::instruction_execute);
+  CON(con_execute, machine->core(), &Core::instruction_executed,
+      &Tracer::instruction_execute);
 }
 
 void Tracer::memory() {
-    CON_RAW(con_memory, machine->core(), &Core::instruction_memory, &Tracer::instruction_memory);
+  CON(con_memory, machine->core(), &Core::instruction_memory,
+      &Tracer::instruction_memory);
 }
 
 void Tracer::writeback() {
-    CON_RAW(con_writeback, machine->core(), &Core::instruction_writeback, &Tracer::instruction_writeback);
+  CON(con_writeback, machine->core(), &Core::instruction_writeback,
+      &Tracer::instruction_writeback);
 }
 
 void Tracer::reg_pc() {
-    CON(con_regs_pc, machine->registers(), pc_update(std::uint32_t), regs_pc_update(std::uint32_t));
+  CON(con_regs_pc, machine->registers(), &Registers::pc_update,
+      &Tracer::regs_pc_update);
 }
 
 void Tracer::reg_gp(std::uint8_t i) {
-    SANITY_ASSERT(i <= 32, "Trying to trace invalid gp.");
-    CON(con_regs_gp, machine->registers(), gp_update(std::uint8_t,std::uint32_t), regs_gp_update(std::uint8_t,std::uint32_t));
-    gp_regs[i] = true;
+  SANITY_ASSERT(i <= 32, "Trying to trace invalid gp.");
+  CON(con_regs_gp, machine->registers(), &Registers::gp_update,
+      &Tracer::regs_gp_update);
+  gp_regs[i] = true;
 }
 
 void Tracer::reg_lo() {
-    CON(con_regs_hi_lo, machine->registers(), hi_lo_update(bool hi, std::uint32_t val), regs_hi_lo_update(bool hi, std::uint32_t val));
-    r_lo = true;
+  CON(con_regs_hi_lo, machine->registers(), &Registers::hi_lo_update,
+      &Tracer::regs_hi_lo_update);
+  r_lo = true;
 }
 
 void Tracer::reg_hi() {
-    CON(con_regs_hi_lo, machine->registers(), hi_lo_update(bool hi, std::uint32_t val), regs_hi_lo_update(bool hi, std::uint32_t val));
-    r_hi = true;
+  CON(con_regs_hi_lo, machine->registers(), &Registers::hi_lo_update,
+      &Tracer::regs_hi_lo_update);
+  r_hi = true;
 }
 
 void Tracer::instruction_fetch(const Instruction &inst, std::uint32_t inst_addr, ExceptionCause excause, bool valid) {

@@ -69,8 +69,8 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc, bool load_symtab, bool loa
     ser_port = new SerialPort();
     addressapce_insert_range(ser_port, 0xffffc000, 0xffffc03f, true);
     addressapce_insert_range(ser_port, 0xffff0000, 0xffff003f, false);
-    connect(ser_port, SIGNAL(signal_interrupt(uint,bool)),
-            this, SIGNAL(set_interrupt_signal(uint,bool)));
+    connect(ser_port, &SerialPort::signal_interrupt, this,
+            &QtMipsMachine::set_interrupt_signal);
 
     perip_spi_led = new PeripSpiLed();
     addressapce_insert_range(perip_spi_led, 0xffffc100, 0xffffc1ff, true);
@@ -78,38 +78,42 @@ QtMipsMachine::QtMipsMachine(const MachineConfig &cc, bool load_symtab, bool loa
     perip_lcd_display = new LcdDisplay();
     addressapce_insert_range(perip_lcd_display, 0xffe00000, 0xffe4afff, true);
 
-    cch_program = new Cache(cpu_mem, &cc.cache_program(), cc.memory_access_time_read(),
-                            cc.memory_access_time_write(), cc.memory_access_time_burst());
-    cch_data = new Cache(cpu_mem, &cc.cache_data(), cc.memory_access_time_read(),
-                         cc.memory_access_time_write(), cc.memory_access_time_burst());
+    cch_program =
+        new Cache(cpu_mem, &cc.cache_program(), cc.memory_access_time_read(),
+                  cc.memory_access_time_write(), cc.memory_access_time_burst());
+    cch_data =
+        new Cache(cpu_mem, &cc.cache_data(), cc.memory_access_time_read(),
+                  cc.memory_access_time_write(), cc.memory_access_time_burst());
 
     unsigned int min_cache_row_size = 16;
     if (cc.cache_data().enabled())
         min_cache_row_size = cc.cache_data().blocks() * 4;
     if (cc.cache_program().enabled() &&
         cc.cache_program().blocks() < min_cache_row_size)
-        min_cache_row_size = cc.cache_program().blocks() * 4;
+      min_cache_row_size = cc.cache_program().blocks() * 4;
 
     cop0st = new Cop0State();
 
     if (cc.pipelined())
-        cr = new CorePipelined(regs, cch_program, cch_data, cc.hazard_unit(),
-                               min_cache_row_size, cop0st);
+      cr = new CorePipelined(regs, cch_program, cch_data, cc.hazard_unit(),
+                             min_cache_row_size, cop0st);
     else
-        cr = new CoreSingle(regs, cch_program, cch_data, cc.delay_slot(),
-                            min_cache_row_size, cop0st);
-    connect(this, SIGNAL(set_interrupt_signal(uint,bool)),
-            cop0st, SLOT(set_interrupt_signal(uint,bool)));
+      cr = new CoreSingle(regs, cch_program, cch_data, cc.delay_slot(),
+                          min_cache_row_size, cop0st);
+    connect(this, &QtMipsMachine::set_interrupt_signal, cop0st,
+            &Cop0State::set_interrupt_signal);
 
     run_t = new QTimer(this);
     set_speed(0); // In default run as fast as possible
-    connect(run_t, SIGNAL(timeout()), this, SLOT(step_timer()));
+    connect(run_t, &QTimer::timeout, this, &QtMipsMachine::step_timer);
 
     for (int i = 0; i < EXCAUSE_COUNT; i++) {
-         if (i != EXCAUSE_INT && i != EXCAUSE_BREAK && i != EXCAUSE_HWBREAK) {
-             set_stop_on_exception((enum ExceptionCause)i, cc.osemu_exception_stop());
-             set_step_over_exception((enum ExceptionCause)i, cc.osemu_exception_stop());
-         }
+      if (i != EXCAUSE_INT && i != EXCAUSE_BREAK && i != EXCAUSE_HWBREAK) {
+        set_stop_on_exception((enum ExceptionCause)i,
+                              cc.osemu_exception_stop());
+        set_step_over_exception((enum ExceptionCause)i,
+                                cc.osemu_exception_stop());
+      }
     }
 
     set_stop_on_exception(EXCAUSE_INT, cc.osemu_interrupt_stop());

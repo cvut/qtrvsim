@@ -60,14 +60,14 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     cached_access->addItem("Direct", 0);
     cached_access->addItem("Cached", 1);
 
-    QTableView *memory_content = new MemoryTableView(0, settings);
+    MemoryTableView *memory_content = new MemoryTableView(0, settings);
     // memory_content->setSizePolicy();
     MemoryModel *memory_model = new MemoryModel(this);
     memory_content->setModel(memory_model);
     memory_content->verticalHeader()->hide();
     //memory_content->setHorizontalHeader(memory_model->);
 
-    QLineEdit *go_edit = new HexLineEdit(0, 8, 16, "0x");
+    HexLineEdit *go_edit = new HexLineEdit(0, 8, 16, "0x");
 
     QHBoxLayout *layout_top = new QHBoxLayout;
     layout_top->addWidget(cell_size);
@@ -82,18 +82,22 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
 
     setWidget(content);
 
-    connect(this, &MemoryDock::machine_setup, memory_model, &MemoryModel::setup);
-    connect(cell_size, SIGNAL(currentIndexChanged(int)),
-            memory_content, SLOT(set_cell_size(int)));
-    connect(cached_access, SIGNAL(currentIndexChanged(int)),
-            memory_model, SLOT(cached_access(int)));
-    connect(go_edit, SIGNAL(value_edit_finished(std::uint32_t)),
-            memory_content, SLOT(go_to_address(std::uint32_t)));
-    connect(memory_content, SIGNAL(address_changed(std::uint32_t)),
-            go_edit, SLOT(set_value(std::uint32_t)));
-    connect(this, SIGNAL(focus_addr(std::uint32_t)),
-            memory_content, SLOT(focus_address(std::uint32_t)));
-    connect(memory_model, SIGNAL(setup_done()), memory_content, SLOT(recompute_columns()));
+    connect(this, &MemoryDock::machine_setup, memory_model,
+            &MemoryModel::setup);
+    connect(cell_size, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            memory_content, &MemoryTableView::set_cell_size);
+    connect(cached_access, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            memory_model, &MemoryModel::cached_access);
+    connect(go_edit, &HexLineEdit::value_edit_finished, memory_content,
+            [memory_content](uint32_t value) {
+              memory_content->go_to_address(value);
+            });
+    connect(memory_content, &MemoryTableView::address_changed, go_edit,
+            [go_edit](std::uint32_t addr) { go_edit->set_value(addr); });
+    connect(this, &MemoryDock::focus_addr, memory_content,
+            &MemoryTableView::focus_address);
+    connect(memory_model, &MemoryModel::setup_done, memory_content,
+            &MemoryTableView::recompute_columns);
 }
 
 void MemoryDock::setup(machine::QtMipsMachine *machine) {

@@ -57,39 +57,66 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     ui_cache_d = new Ui::NewDialogCache();
     ui_cache_d->setupUi(ui->tab_cache_data);
 
-    connect(ui->pushButton_start_empty, SIGNAL(clicked(bool)), this, SLOT(create_empty()));
-    connect(ui->pushButton_load, SIGNAL(clicked(bool)), this, SLOT(create()));
-    connect(ui->pushButton_cancel, SIGNAL(clicked(bool)), this, SLOT(cancel()));
-    connect(ui->pushButton_browse, SIGNAL(clicked(bool)), this, SLOT(browse_elf()));
-    connect(ui->elf_file, SIGNAL(textChanged(QString)), this, SLOT(elf_change(QString)));
-    connect(ui->preset_no_pipeline, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
-    connect(ui->preset_no_pipeline_cache, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
-    connect(ui->preset_pipelined_bare, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
-    connect(ui->preset_pipelined, SIGNAL(toggled(bool)), this, SLOT(set_preset()));
-    connect(ui->reset_at_compile, SIGNAL(clicked(bool)), this, SLOT(reset_at_compile_change(bool)));
+    connect(ui->pushButton_start_empty, &QAbstractButton::clicked, this,
+            &NewDialog::create_empty);
+    connect(ui->pushButton_load, &QAbstractButton::clicked, this,
+            &NewDialog::create);
+    connect(ui->pushButton_cancel, &QAbstractButton::clicked, this,
+            &NewDialog::cancel);
+    connect(ui->pushButton_browse, &QAbstractButton::clicked, this,
+            &NewDialog::browse_elf);
+    connect(ui->elf_file, &QLineEdit::textChanged, this,
+            &NewDialog::elf_change);
+    connect(ui->preset_no_pipeline, &QAbstractButton::toggled, this,
+            &NewDialog::set_preset);
+    connect(ui->preset_no_pipeline_cache, &QAbstractButton::toggled, this,
+            &NewDialog::set_preset);
+    connect(ui->preset_pipelined_bare, &QAbstractButton::toggled, this,
+            &NewDialog::set_preset);
+    connect(ui->preset_pipelined, &QAbstractButton::toggled, this,
+            &NewDialog::set_preset);
+    connect(ui->reset_at_compile, &QAbstractButton::clicked, this,
+            &NewDialog::reset_at_compile_change);
 
-    connect(ui->pipelined, SIGNAL(clicked(bool)), this, SLOT(pipelined_change(bool)));
-    connect(ui->delay_slot, SIGNAL(clicked(bool)), this, SLOT(delay_slot_change(bool)));
-    connect(ui->hazard_unit, SIGNAL(clicked(bool)), this, SLOT(hazard_unit_change()));
-    connect(ui->hazard_stall, SIGNAL(clicked(bool)), this, SLOT(hazard_unit_change()));
-    connect(ui->hazard_stall_forward, SIGNAL(clicked(bool)), this, SLOT(hazard_unit_change()));
+    connect(ui->pipelined, &QAbstractButton::clicked, this,
+            &NewDialog::pipelined_change);
+    connect(ui->delay_slot, &QAbstractButton::clicked, this,
+            &NewDialog::delay_slot_change);
+    connect(ui->hazard_unit, &QGroupBox::clicked, this,
+            &NewDialog::hazard_unit_change);
+    connect(ui->hazard_stall, &QAbstractButton::clicked, this,
+            &NewDialog::hazard_unit_change);
+    connect(ui->hazard_stall_forward, &QAbstractButton::clicked, this,
+            &NewDialog::hazard_unit_change);
 
-    connect(ui->mem_protec_exec, SIGNAL(clicked(bool)), this, SLOT(mem_protec_exec_change(bool)));
-    connect(ui->mem_protec_write, SIGNAL(clicked(bool)), this, SLOT(mem_protec_write_change(bool)));
-    connect(ui->mem_time_read, SIGNAL(valueChanged(int)), this, SLOT(mem_time_read_change(int)));
-    connect(ui->mem_time_write, SIGNAL(valueChanged(int)), this, SLOT(mem_time_write_change(int)));
-    connect(ui->mem_time_burst, SIGNAL(valueChanged(int)), this, SLOT(mem_time_burst_change(int)));
+    connect(ui->mem_protec_exec, &QAbstractButton::clicked, this,
+            &NewDialog::mem_protec_exec_change);
+    connect(ui->mem_protec_write, &QAbstractButton::clicked, this,
+            &NewDialog::mem_protec_write_change);
+    connect(ui->mem_time_read, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, &NewDialog::mem_time_read_change);
+    connect(ui->mem_time_write, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, &NewDialog::mem_time_write_change);
+    connect(ui->mem_time_burst, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, &NewDialog::mem_time_burst_change);
 
-    connect(ui->osemu_enable, SIGNAL(clicked(bool)), this, SLOT(osemu_enable_change(bool)));
-    connect(ui->osemu_known_syscall_stop, SIGNAL(clicked(bool)), this, SLOT(osemu_known_syscall_stop_change(bool)));
-    connect(ui->osemu_unknown_syscall_stop, SIGNAL(clicked(bool)), this, SLOT(osemu_unknown_syscall_stop_change(bool)));
-    connect(ui->osemu_interrupt_stop, SIGNAL(clicked(bool)), this, SLOT(osemu_interrupt_stop_change(bool)));
-    connect(ui->osemu_exception_stop, SIGNAL(clicked(bool)), this, SLOT(osemu_exception_stop_change(bool)));
-    connect(ui->osemu_fs_root_browse, SIGNAL(clicked(bool)), this, SLOT(browse_osemu_fs_root()));
-    connect(ui->osemu_fs_root, SIGNAL(textChanged(QString)), this, SLOT(osemu_fs_root_change(QString)));
+    connect(ui->osemu_enable, &QAbstractButton::clicked, this,
+            &NewDialog::osemu_enable_change);
+    connect(ui->osemu_known_syscall_stop, &QAbstractButton::clicked, this,
+            &NewDialog::osemu_known_syscall_stop_change);
+    connect(ui->osemu_unknown_syscall_stop, &QAbstractButton::clicked, this,
+            &NewDialog::osemu_unknown_syscall_stop_change);
+    connect(ui->osemu_interrupt_stop, &QAbstractButton::clicked, this,
+            &NewDialog::osemu_interrupt_stop_change);
+    connect(ui->osemu_exception_stop, &QAbstractButton::clicked, this,
+            &NewDialog::osemu_exception_stop_change);
+    connect(ui->osemu_fs_root_browse, &QAbstractButton::clicked, this,
+            &NewDialog::browse_osemu_fs_root);
+    connect(ui->osemu_fs_root, &QLineEdit::textChanged, this,
+            &NewDialog::osemu_fs_root_change);
 
-	cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d);
-	cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p);
+    cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d);
+    cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p);
 
     // TODO remove this block when protections are implemented
     ui->mem_protec_exec->setVisible(false);
@@ -369,15 +396,21 @@ void NewDialog::store_settings() {
 }
 
 NewDialogCacheHandler::NewDialogCacheHandler(NewDialog *nd, Ui::NewDialogCache *cui) {
-	this->nd = nd;
-	this->ui = cui;
-	this->config = nullptr;
-	connect(ui->enabled, SIGNAL(clicked(bool)), this, SLOT(enabled(bool)));
-	connect(ui->number_of_sets, SIGNAL(editingFinished()), this, SLOT(numsets()));
-	connect(ui->block_size, SIGNAL(editingFinished()), this, SLOT(blocksize()));
-	connect(ui->degree_of_associativity, SIGNAL(editingFinished()), this, SLOT(degreeassociativity()));
-	connect(ui->replacement_policy, SIGNAL(activated(int)), this, SLOT(replacement(int)));
-	connect(ui->writeback_policy, SIGNAL(activated(int)), this, SLOT(writeback(int)));
+  this->nd = nd;
+  this->ui = cui;
+  this->config = nullptr;
+  connect(ui->enabled, &QGroupBox::clicked, this,
+          &NewDialogCacheHandler::enabled);
+  connect(ui->number_of_sets, &QAbstractSpinBox::editingFinished, this,
+          &NewDialogCacheHandler::numsets);
+  connect(ui->block_size, &QAbstractSpinBox::editingFinished, this,
+          &NewDialogCacheHandler::blocksize);
+  connect(ui->degree_of_associativity, &QAbstractSpinBox::editingFinished, this,
+          &NewDialogCacheHandler::degreeassociativity);
+  connect(ui->replacement_policy, QOverload<int>::of(&QComboBox::activated),
+          this, &NewDialogCacheHandler::replacement);
+  connect(ui->writeback_policy, QOverload<int>::of(&QComboBox::activated), this,
+          &NewDialogCacheHandler::writeback);
 }
 
 void NewDialogCacheHandler::set_config(machine::MachineConfigCache *config) {

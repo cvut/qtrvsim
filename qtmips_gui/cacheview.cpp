@@ -54,15 +54,16 @@ CacheAddressBlock::CacheAddressBlock(const machine::Cache *cache, unsigned width
     s_row = cache->config().sets() > 1 ? sqrt(cache->config().sets()) : 0;
     this->width = width;
     s_col = cache->config().blocks() > 1 ? sqrt(cache->config().blocks()) : 0;
-    s_tag = 30 - s_row - s_col; // 32 bits - 2 unused  and then every bit used for different index
+    s_tag = 30 - s_row - s_col; // 32 bits - 2 unused  and then every bit used
+                                // for different index
     this->width = width;
 
     tag = 0;
     row = 0;
     col = 0;
 
-    connect(cache, SIGNAL(cache_update(uint,uint,uint,bool,bool,std::uint32_t,const std::uint32_t*,bool)),
-            this, SLOT(cache_update(uint,uint,uint,bool,bool,std::uint32_t,const std::uint32_t*,bool)));
+    connect(cache, &machine::Cache::cache_update, this,
+            &CacheAddressBlock::cache_update);
 }
 
 QRectF CacheAddressBlock::boundingRect() const {
@@ -217,15 +218,16 @@ CacheViewBlock::CacheViewBlock(const machine::Cache *cache, unsigned block , boo
     QGraphicsSimpleTextItem *l_tag = new QGraphicsSimpleTextItem("Tag", this);
     l_tag->setFont(font);
     box = l_tag->boundingRect();
-    l_tag->setPos(wd + (DATA_WIDTH - box.width())/2 , -1 - box.height());
+    l_tag->setPos(wd + (DATA_WIDTH - box.width()) / 2, -1 - box.height());
     wd += DATA_WIDTH;
     QGraphicsSimpleTextItem *l_data = new QGraphicsSimpleTextItem("Data", this);
     l_data->setFont(font);
     box = l_data->boundingRect();
-    l_data->setPos(wd + (columns*DATA_WIDTH - box.width())/2 , -1 - box.height());
+    l_data->setPos(wd + (columns * DATA_WIDTH - box.width()) / 2,
+                   -1 - box.height());
 
-    connect(cache, SIGNAL(cache_update(uint,uint,uint,bool,bool,std::uint32_t,const std::uint32_t*,bool)),
-            this, SLOT(cache_update(uint,uint,uint,bool,bool,std::uint32_t,const std::uint32_t*,bool)));
+    connect(cache, &machine::Cache::cache_update, this,
+            &CacheViewBlock::cache_update);
 }
 
 CacheViewBlock::~CacheViewBlock() {
