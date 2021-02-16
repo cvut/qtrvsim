@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -e
 
 ROOT="$(dirname "$(readlink -f "$0")")"

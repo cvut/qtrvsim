@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 TEST_NAME="machine-unit-test"
 
 # Load common test shell functions

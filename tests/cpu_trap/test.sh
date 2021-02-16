@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 TEST_NAME="cpu_trap"
 
 # Load common test shell functions

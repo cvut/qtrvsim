@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 TEST_NAME="registers"
 
 # Load common test shell functions

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # This script compiles compilation tools for mips to be used with qtmips
 set -e
 
