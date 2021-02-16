@@ -130,7 +130,7 @@ void create_parser(QCommandLineParser &p) {
 }
 
 void configure_cache(
-    MachineConfigCache &cacheconf,
+    CacheConfig &cacheconf,
     const QStringList &cachearg,
     const QString &which) {
     if (cachearg.empty()) {
@@ -150,11 +150,11 @@ void configure_cache(
     }
     if (!pieces.at(0).at(0).isDigit()) {
         if (pieces.at(0).toLower() == "random") {
-            cacheconf.set_replacement_policy(MachineConfigCache::RP_RAND);
+            cacheconf.set_replacement_policy(CacheConfig::RP_RAND);
         } else if (pieces.at(0).toLower() == "lru") {
-            cacheconf.set_replacement_policy(MachineConfigCache::RP_LRU);
+            cacheconf.set_replacement_policy(CacheConfig::RP_LRU);
         } else if (pieces.at(0).toLower() == "lfu") {
-            cacheconf.set_replacement_policy(MachineConfigCache::RP_LFU);
+            cacheconf.set_replacement_policy(CacheConfig::RP_LFU);
         } else {
             std::cerr << "Policy for " << which.toLocal8Bit().data()
                       << " cache is incorrect." << std::endl;
@@ -167,10 +167,10 @@ void configure_cache(
                   << " cache incorrect (correct lru,4,2,2,wb)." << std::endl;
         exit(1);
     }
-    cacheconf.set_sets(pieces.at(0).toLong());
-    cacheconf.set_blocks(pieces.at(1).toLong());
+    cacheconf.set_set_count(pieces.at(0).toLong());
+    cacheconf.set_block_size(pieces.at(1).toLong());
     cacheconf.set_associativity(pieces.at(2).toLong());
-    if (cacheconf.sets() == 0 || cacheconf.blocks() == 0
+    if (cacheconf.set_count() == 0 || cacheconf.block_size() == 0
         || cacheconf.associativity() == 0) {
         std::cerr << "Parameters for " << which.toLocal8Bit().data()
                   << " cache cannot have zero component." << std::endl;
@@ -178,13 +178,13 @@ void configure_cache(
     }
     if (pieces.size() > 3) {
         if (pieces.at(3).toLower() == "wb") {
-            cacheconf.set_write_policy(MachineConfigCache::WP_BACK);
+            cacheconf.set_write_policy(CacheConfig::WP_BACK);
         } else if (
             pieces.at(3).toLower() == "wt"
             || pieces.at(3).toLower() == "wtna") {
-            cacheconf.set_write_policy(MachineConfigCache::WP_THROUGH_NOALLOC);
+            cacheconf.set_write_policy(CacheConfig::WP_THROUGH_NOALLOC);
         } else if (pieces.at(3).toLower() == "wta") {
-            cacheconf.set_write_policy(MachineConfigCache::WP_THROUGH_ALLOC);
+            cacheconf.set_write_policy(CacheConfig::WP_THROUGH_ALLOC);
         } else {
             std::cerr << "Write policy for " << which.toLocal8Bit().data()
                       << " cache is incorrect (correct wb/wt/wtna/wta)."

@@ -38,21 +38,44 @@
 
 #include "machineconfig.h"
 #include "memory.h"
+#include "memory/cache/cache_policy.h"
+#include "memory/cache/cache_types.h"
 
 #include <cstdint>
-#include <ctime>
+#include <memory>
 
 namespace machine {
 
+constexpr size_t BLOCK_ITEM_SIZE = sizeof(uint32_t);
+
+/**
+ * NOTE ON TERMINILOGY:
+ * N-way set associative cache consist of N ways (where N is degree
+ * of associtivity). Arguments requesting N are called `associativity` of the
+ * cache. Each way consist of blocks. (When we want to highlight, that we talk
+ * about data + management tags, we speek of cache line. When we speek about
+ * location of block within a way, we use the term `row`. Each block consits of
+ * some number of basic storage units (here `uint32_t`). To locate a single unit
+ * withing block, we use therm `col` (as column).
+ *
+ * Set is consists of all block on the same row accross the ways.
+ *
+ * We can imagine a cache as 3D array indexed via triple (`way`, `row`, `col`).
+ * Row and col are derived from part of a address deterministically. The rest
+ * of the address is called `tag`. Set is obtained via linear search and placing
+ * into cache, it is determined by cache replacement policy
+ * (see `memory/cache/cache_policy.h`).
+ */
 class Cache : public MemoryAccess {
     Q_OBJECT
 public:
     Cache(
-        MemoryAccess *m,
-        const MachineConfigCache *c,
-        unsigned memory_access_penalty_r = 1,
-        unsigned memory_access_penalty_w = 1,
-        unsigned memory_access_penalty_b = 0);
+        MemoryAccess *memory,
+        const CacheConfig *config,
+        uint32_t memory_access_penalty_r = 1,
+        uint32_t memory_access_penalty_w = 1,
+        uint32_t memory_access_penalty_b = 0);
+
     ~Cache() override;
 
     bool wword(uint32_t address, uint32_t value) override;
@@ -62,86 +85,87 @@ public:
     void flush();         // flush cache
     void sync() override; // Same as flush
 
-    unsigned hit() const;            // Number of recorded hits
-    unsigned miss() const;           // Number of recorded misses
-    unsigned memory_reads() const;   // Number backing/main memory reads
-    unsigned memory_writes() const;  // Number backing/main memory writes
-    unsigned stalled_cycles() const; // Number of wasted cycles in memory waitin
-                                     // statistic
-    double speed_improvement() const; // Speed improvement in percents in comare
-                                      // with no used cache
-    double hit_rate() const;          // Usage efficiency in percents
+    uint32_t get_hit_count() const;       // Number of recorded hits
+    uint32_t get_miss_count() const;      // Number of recorded misses
+    uint32_t get_read_count() const;      // Number backing/main memory reads
+    uint32_t get_write_count() const;     // Number backing/main memory writes
+    uint32_t get_stall_count() const;     // Number of wasted cycles in
+                                          // memory waiting statistic
+    double get_speed_improvement() const; // Speed improvement in percents in
+                                          // comare with no used cache
+    double get_hit_rate() const;          // Usage efficiency in percents
 
     void reset(); // Reset whole state of cache
 
-    const MachineConfigCache &config() const;
+    const CacheConfig &get_config() const;
+
     enum LocationStatus location_status(uint32_t address) const override;
 
 signals:
-    void hit_update(unsigned) const;
-    void miss_update(unsigned) const;
+
+    void hit_update(uint32_t) const;
+
+    void miss_update(uint32_t) const;
+
     void statistics_update(
-        unsigned stalled_cycles,
+        uint32_t stalled_cycles,
         double speed_improv,
         double hit_rate) const;
     void cache_update(
-        unsigned associat,
-        unsigned set,
-        unsigned col,
+        size_t way,
+        size_t row,
+        size_t col,
         bool valid,
         bool dirty,
-        uint32_t tag,
+        size_t tag,
         const uint32_t *data,
         bool write) const;
-    void memory_writes_update(unsigned) const;
-    void memory_reads_update(unsigned) const;
+
+    void memory_writes_update(uint32_t) const;
+
+    void memory_reads_update(uint32_t) const;
 
 private:
-    MachineConfigCache cnf;
-    MemoryAccess *mem;
-    unsigned access_pen_r, access_pen_w, access_pen_b;
-    uint32_t uncached_start;
-    uint32_t uncached_last;
+    const CacheConfig cache_config;
+    MemoryAccess *const mem = nullptr;
+    const uint32_t uncached_start;
+    const uint32_t uncached_last;
+    const uint32_t access_pen_r, access_pen_w, access_pen_b;
+    const std::unique_ptr<CachePolicy> replacement_policy;
 
-    struct cache_data {
-        bool valid, dirty;
-        uint32_t tag;
-        uint32_t *data;
-    };
-    mutable struct cache_data **dt;
+    mutable std::vector<std::vector<CacheLine>> dt;
 
-    union {
-        unsigned int **lru; // Access time
-        unsigned **lfu;     // Access count
-    } replc {};             // Data used for replacement policy
+    mutable uint32_t hit_read = 0, miss_read = 0, hit_write = 0, miss_write = 0,
+                     mem_reads = 0, mem_writes = 0, burst_reads = 0,
+                     burst_writes = 0, change_counter = 0;
 
-    mutable unsigned hit_read, miss_read, hit_write, miss_write; // Hit and miss
-                                                                 // counters
-    mutable unsigned mem_reads, mem_writes, burst_reads,
-        burst_writes; // Dirrect
-                      // access
-                      // to
-                      // memory
-    mutable uint32_t change_counter;
+    void debug_read(uint32_t source, void *destination, size_t size) const;
+
+    uint32_t calc_base_address(size_t tag, size_t row) const;
 
     uint32_t debug_rword(uint32_t address) const;
+
     bool access(uint32_t address, uint32_t *data, bool write, uint32_t value = 0)
         const;
-    void kick(unsigned associat_indx, unsigned row) const;
+
+    void kick(size_t way, size_t row) const;
+
     uint32_t base_address(uint32_t tag, unsigned row) const;
-    void update_statistics() const;
-    inline void compute_row_col_tag(
-        uint32_t &row,
-        uint32_t &col,
-        uint32_t &tag,
-        uint32_t address) const {
-        address = address >> 2;
-        uint32_t ssize = cnf.blocks() * cnf.sets();
-        tag = address / ssize;
-        uint32_t index = address % ssize;
-        row = index / cnf.blocks();
-        col = index % cnf.blocks();
-    }
+
+    void update_all_statistics() const;
+
+    CacheLocation compute_location(uint32_t address) const;
+
+    /**
+     * Searches for given tag in a set
+     *
+     * @param loc       requested location in cache
+     * @return          associatity index of found block, max index + 1 if not
+     * found
+     */
+    size_t find_block_index(const CacheLocation &loc) const;
+
+    bool is_in_uncached_area(uint32_t source) const;
 };
 
 } // namespace machine

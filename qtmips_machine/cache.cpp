@@ -35,138 +35,66 @@
 
 #include "cache.h"
 
-using namespace machine;
+#include "memory/cache/cache_types.h"
+
+namespace machine {
 
 Cache::Cache(
-    MemoryAccess *m,
-    const MachineConfigCache *cc,
-    unsigned memory_access_penalty_r,
-    unsigned memory_access_penalty_w,
-    unsigned memory_access_penalty_b)
-    : cnf(cc) {
-    mem = m;
-    access_pen_r = memory_access_penalty_r;
-    access_pen_w = memory_access_penalty_w;
-    access_pen_b = memory_access_penalty_b;
-    uncached_start = 0xf0000000;
-    uncached_last = 0xffffffff;
-    // Zero hit and miss rate
-    hit_read = 0;
-    hit_write = 0;
-    miss_read = 0;
-    miss_write = 0;
-    mem_reads = 0;
-    mem_writes = 0;
-    burst_reads = 0;
-    burst_writes = 0;
-    dt = nullptr;
-    replc.lfu = nullptr;
-    replc.lru = nullptr;
-    change_counter = 0;
-
-    // Skip any other initialization if cache is disabled
-    if (!cc->enabled()) {
+    MemoryAccess *memory,
+    const CacheConfig *config,
+    uint32_t memory_access_penalty_r,
+    uint32_t memory_access_penalty_w,
+    uint32_t memory_access_penalty_b)
+    : cache_config(config)
+    , mem(memory)
+    , uncached_start(0xf0000000)
+    , uncached_last(0xfffffffe)
+    , access_pen_r(memory_access_penalty_r)
+    , access_pen_w(memory_access_penalty_w)
+    , access_pen_b(memory_access_penalty_b)
+    , replacement_policy(CachePolicy::get_policy_instance(config)) {
+    // Skip memory allocation if cache is disabled
+    if (!config->enabled()) {
         return;
     }
 
-    // Allocate cache data structure
-    dt = new struct cache_data *[cc->associativity()];
-    for (unsigned i = 0; i < cc->associativity(); i++) {
-        dt[i] = new cache_data[cc->sets()];
-        for (unsigned y = 0; y < cc->sets(); y++) {
-            dt[i][y].valid = false;
-            dt[i][y].dirty = false;
-            dt[i][y].data = new uint32_t[cc->blocks()];
-        }
-    }
-    // Allocate replacement policy data
-    switch (cnf.replacement_policy()) {
-    case MachineConfigCache::RP_LFU:
-        replc.lfu = new unsigned *[cnf.sets()];
-        for (unsigned int row = 0; row < cnf.sets(); row++) {
-            replc.lfu[row] = new unsigned[cnf.associativity()];
-            for (unsigned int i = 0; i < cnf.associativity(); i++) {
-                replc.lfu[row][i] = 0;
-            }
-        }
-        break;
-    case MachineConfigCache::RP_LRU:
-        replc.lru = new unsigned int *[cnf.sets()];
-        for (unsigned int row = 0; row < cnf.sets(); row++) {
-            replc.lru[row] = new unsigned int[cnf.associativity()];
-            for (unsigned int i = 0; i < cnf.associativity(); i++) {
-                replc.lru[row][i] = i;
-            }
-        }
-        break;
-    case MachineConfigCache::RP_RAND:
-    default: break;
-    }
+    dt.resize(
+        config->associativity(),
+        std::vector<CacheLine>(
+            config->set_count(),
+            { .valid = false,
+              .dirty = false,
+              .tag = 0,
+              .data = std::vector<uint32_t>(config->block_size()) }));
 }
 
-Cache::~Cache() {
-    if (dt != nullptr) {
-        for (unsigned i = 0; i < cnf.associativity(); i++) {
-            if (dt[i]) {
-                for (unsigned y = 0; y < cnf.sets(); y++) {
-                    { delete[] dt[i][y].data; }
-                }
-                delete[] dt[i];
-            }
-        }
-        delete[] dt;
-    }
-    switch (cnf.replacement_policy()) {
-    case MachineConfigCache::RP_LFU:
-        if (replc.lfu == nullptr) {
-            break;
-        }
-        for (unsigned row = 0; row < cnf.sets(); row++) {
-            delete[] replc.lfu[row];
-        }
-        delete[] replc.lfu;
-        break;
-    case MachineConfigCache::RP_LRU:
-        if (replc.lru == nullptr) {
-            break;
-        }
-        for (unsigned row = 0; row < cnf.sets(); row++) {
-            delete[] replc.lru[row];
-        }
-        delete[] replc.lru;
-    default: break;
-    }
-}
+Cache::~Cache() = default;
 
 bool Cache::wword(uint32_t address, uint32_t value) {
-    bool changed;
-
-    if (!cnf.enabled()
-        || (address >= uncached_start && address <= uncached_last)) {
+    if (!cache_config.enabled() || is_in_uncached_area(address)) {
         mem_writes++;
         emit memory_writes_update(mem_writes);
-        update_statistics();
+        update_all_statistics();
         return mem->write_word(address, value);
     }
 
     uint32_t data;
-    changed = access(address, &data, true, value);
+    const bool changed = access(address, &data, true, value);
 
-    if (cnf.write_policy() != MachineConfigCache::WP_BACK) {
+    if (cache_config.write_policy() != CacheConfig::WP_BACK) {
         mem_writes++;
         emit memory_writes_update(mem_writes);
-        update_statistics();
+        update_all_statistics();
         return mem->write_word(address, value);
     }
     return changed;
 }
 
 uint32_t Cache::rword(uint32_t address, bool debug_access) const {
-    if (!cnf.enabled()
-        || (address >= uncached_start && address <= uncached_last)) {
+    if (!cache_config.enabled() || is_in_uncached_area(address)) {
         mem_reads++;
         emit memory_reads_update(mem_reads);
-        update_statistics();
+        update_all_statistics();
         return mem->read_word(address, debug_access);
     }
 
@@ -181,96 +109,45 @@ uint32_t Cache::rword(uint32_t address, bool debug_access) const {
     return data;
 }
 
-uint32_t Cache::get_change_counter() const {
-    return change_counter;
+bool Cache::is_in_uncached_area(uint32_t source) const {
+    return (source >= uncached_start && source <= uncached_last);
 }
 
 void Cache::flush() {
-    if (!cnf.enabled()) {
+    if (!cache_config.enabled()) {
         return;
     }
 
-    for (unsigned as = cnf.associativity(); as-- > 0;) {
-        for (unsigned st = 0; st < cnf.sets(); st++) {
-            if (dt[as][st].valid) {
-                kick(as, st);
-                emit cache_update(as, st, 0, false, false, 0, nullptr, false);
+    for (size_t way = 0; way < cache_config.associativity(); way += 1) {
+        for (size_t set_index = 0; set_index < cache_config.set_count();
+             set_index += 1) {
+            if (dt[way][set_index].valid) {
+                kick(way, set_index);
+                emit cache_update(
+                    way, set_index, 0, false, false, 0, nullptr, false);
             }
         }
     }
     change_counter++;
-    update_statistics();
+    update_all_statistics();
 }
 
 void Cache::sync() {
     flush();
 }
 
-unsigned Cache::hit() const {
-    return hit_read + hit_write;
-}
-
-unsigned Cache::miss() const {
-    return miss_read + miss_write;
-}
-
-unsigned Cache::memory_reads() const {
-    return mem_reads;
-}
-
-unsigned Cache::memory_writes() const {
-    return mem_writes;
-}
-
-unsigned Cache::stalled_cycles() const {
-    unsigned st_cycles
-        = mem_reads * (access_pen_r - 1) + mem_writes * (access_pen_w - 1);
-    if (access_pen_b != 0) {
-        st_cycles -= burst_reads * (access_pen_r - access_pen_b)
-                     + burst_writes * (access_pen_w - access_pen_b);
-    }
-    return st_cycles;
-}
-
-double Cache::speed_improvement() const {
-    unsigned lookup_time;
-    unsigned mem_access_time;
-    unsigned comp = hit_read + hit_write + miss_read + miss_write;
-    if (comp == 0) {
-        return 100.0;
-    }
-    lookup_time = hit_read + miss_read;
-    if (cnf.write_policy() == MachineConfigCache::WP_BACK) {
-        lookup_time += hit_write + miss_write;
-    }
-    mem_access_time = mem_reads * access_pen_r + mem_writes * access_pen_w;
-    if (access_pen_b != 0) {
-        mem_access_time -= burst_reads * (access_pen_r - access_pen_b)
-                           + burst_writes * (access_pen_w - access_pen_b);
-    }
-    return (double)((miss_read + hit_read) * access_pen_r + (miss_write + hit_write) * access_pen_w)
-           / (double)(lookup_time + mem_access_time) * 100;
-}
-
-double Cache::hit_rate() const {
-    unsigned comp = hit_read + hit_write + miss_read + miss_write;
-    if (comp == 0) {
-        return 0.0;
-    }
-    return (double)(hit_read + hit_write) / (double)comp * 100.0;
-}
-
 void Cache::reset() {
     // Set all cells to invalid
-    if (cnf.enabled()) {
-        for (unsigned as = 0; as < cnf.associativity(); as++) {
-            for (unsigned st = 0; st < cnf.sets(); st++) {
-                dt[as][st].valid = false;
+    if (cache_config.enabled()) {
+        for (auto &set : dt) {
+            for (auto &block : set) {
+                block.valid = false;
             }
         }
+        // Note: We don't have to zero replacement policy data as those are
+        // zeroed when first used on invalid cell.
     }
-    // Note: we don't have to zero replacement policy data as those are zeroed
-    // when first used on invalid cell Zero hit and miss rate
+
     hit_read = 0;
     hit_write = 0;
     miss_read = 0;
@@ -279,116 +156,58 @@ void Cache::reset() {
     mem_writes = 0;
     burst_reads = 0;
     burst_writes = 0;
-    // Trigger signals
-    emit hit_update(hit());
-    emit miss_update(miss());
-    emit memory_reads_update(memory_reads());
-    emit memory_writes_update(memory_writes());
-    update_statistics();
-    if (cnf.enabled()) {
-        for (unsigned as = 0; as < cnf.associativity(); as++) {
-            for (unsigned st = 0; st < cnf.sets(); st++) {
-                emit cache_update(as, st, 0, false, false, 0, nullptr, false);
+
+    emit hit_update(get_hit_count());
+    emit miss_update(get_miss_count());
+    emit memory_reads_update(get_read_count());
+    emit memory_writes_update(get_write_count());
+    update_all_statistics();
+
+    if (cache_config.enabled()) {
+        for (size_t way = 0; way < cache_config.associativity(); way++) {
+            for (size_t set_index = 0; set_index < cache_config.set_count();
+                 set_index++) {
+                emit cache_update(
+                    way, set_index, 0, false, false, 0, nullptr, false);
             }
         }
     }
-}
-
-const MachineConfigCache &Cache::config() const {
-    return cnf;
-}
-
-enum LocationStatus Cache::location_status(uint32_t address) const {
-    uint32_t row, col, tag;
-    compute_row_col_tag(row, col, tag, address);
-
-    if (cnf.enabled()) {
-        for (unsigned indx = 0; indx < cnf.associativity(); indx++) {
-            if (dt[indx][row].valid && dt[indx][row].tag == tag) {
-                if (dt[indx][row].dirty
-                    && cnf.write_policy() == MachineConfigCache::WP_BACK) {
-                    return (enum LocationStatus)(
-                        LOCSTAT_CACHED | LOCSTAT_DIRTY);
-                } else {
-                    return (enum LocationStatus)LOCSTAT_CACHED;
-                }
-            }
-        }
-    }
-    return mem->location_status(address);
 }
 
 uint32_t Cache::debug_rword(uint32_t address) const {
-    uint32_t row, col, tag;
-    compute_row_col_tag(row, col, tag, address);
-    for (unsigned indx = 0; indx < cnf.associativity(); indx++) {
-        if (dt[indx][row].valid && dt[indx][row].tag == tag) {
-            return dt[indx][row].data[col];
-        }
-    }
+    CacheLocation loc = compute_location(address);
+    for (size_t way = 0; way < cache_config.associativity(); way++)
+        if (dt[way][loc.row].valid && dt[way][loc.row].tag == loc.tag)
+            return dt[way][loc.row].data[loc.col];
     return 0;
 }
 
 bool Cache::access(uint32_t address, uint32_t *data, bool write, uint32_t value)
     const {
-    bool changed = false;
-    uint32_t row, col, tag;
-    compute_row_col_tag(row, col, tag, address);
+    const CacheLocation loc = compute_location(address);
+    size_t way = find_block_index(loc);
 
-    unsigned indx = 0;
-    // Try to locate exact block
-    while (indx < cnf.associativity()
-           && (!dt[indx][row].valid || dt[indx][row].tag != tag)) {
-        indx++;
-    }
-    // Need to find new block
-    if (indx >= cnf.associativity()) {
-        // if write through we do not need to alloecate cache line does not
+    // search failed - cache miss
+    if (way >= cache_config.associativity()) {
+        // if write through we do not need to allocate cache line does not
         // allocate
         if (write
-            && cnf.write_policy() == MachineConfigCache::WP_THROUGH_NOALLOC) {
+            && cache_config.write_policy() == CacheConfig::WP_THROUGH_NOALLOC) {
             miss_write++;
-            emit miss_update(miss());
-            update_statistics();
+            emit miss_update(get_miss_count());
+            update_all_statistics();
             return false;
         }
-        // We have to kick something
-        switch (cnf.replacement_policy()) {
-        case MachineConfigCache::RP_RAND:
-            indx = rand() % cnf.associativity();
-            break;
-        case MachineConfigCache::RP_LRU: {
-            indx = replc.lru[row][0];
-            break;
-        }
-        case MachineConfigCache::RP_LFU: {
-            unsigned lowest = replc.lfu[row][0];
-            indx = 0;
-            for (unsigned i = 1; i < cnf.associativity(); i++) {
-                if (!dt[i][row].valid) {
-                    indx = i;
-                    break;
-                }
-                if (lowest > replc.lfu[row][i]) {
-                    lowest = replc.lfu[row][i];
-                    indx = i;
-                }
-            }
-            break;
-        }
-        }
-    }
-    SANITY_ASSERT(
-        indx < cnf.associativity(),
-        "Probably unimplemented replacement policy");
 
-    struct cache_data &cd = dt[indx][row];
+        way = replacement_policy->select_way_to_evict(loc.row);
+        kick(way, loc.row);
 
-    // Verify if we are not replacing
-    if (cd.valid && cd.tag != tag) {
-        kick(indx, row);
-        change_counter++;
+        SANITY_ASSERT(
+            way < cache_config.associativity(),
+            "Probably unimplemented replacement policy");
     }
+
+    struct CacheLine &cd = dt[way][loc.row];
 
     // Update statistics and otherwise read from memory
     if (cd.valid) {
@@ -397,108 +216,189 @@ bool Cache::access(uint32_t address, uint32_t *data, bool write, uint32_t value)
         } else {
             hit_read++;
         }
-        emit hit_update(hit());
-        update_statistics();
+        emit hit_update(get_hit_count());
+        update_all_statistics();
     } else {
         if (write) {
             miss_write++;
         } else {
             miss_read++;
         }
-        emit miss_update(miss());
-        for (unsigned i = 0; i < cnf.blocks(); i++) {
-            cd.data[i] = mem->read_word(base_address(tag, row) + (4 * i));
+        emit miss_update(get_miss_count());
+        for (size_t i = 0; i < cache_config.block_size(); i++) {
+            cd.data[i]
+                = mem->read_word(calc_base_address(loc.tag, loc.row) + (4 * i));
             change_counter++;
         }
-        mem_reads += cnf.blocks();
-        burst_reads += cnf.blocks() - 1;
+        mem_reads += cache_config.block_size();
+        burst_reads += cache_config.block_size() - 1;
         emit memory_reads_update(mem_reads);
-        update_statistics();
+        update_all_statistics();
     }
 
-    // Update replcement data
-    switch (cnf.replacement_policy()) {
-    case MachineConfigCache::RP_LRU: {
-        unsigned next_asi = indx;
-        int i = cnf.associativity() - 1;
-        unsigned tmp_asi = replc.lru[row][i];
-        while (tmp_asi != indx) {
-            SANITY_ASSERT(
-                i >= 0, "LRU lost the way from priority queue - access");
-            tmp_asi = replc.lru[row][i];
-            replc.lru[row][i] = next_asi;
-            next_asi = tmp_asi;
-            i--;
-        }
-        break;
-    }
-    case MachineConfigCache::RP_LFU:
-        if (cd.valid) {
-            replc.lfu[row][indx]++;
-        } else {
-            replc.lfu[row][indx] = 0;
-        }
-        break;
-    default: break;
-    }
+    replacement_policy->update_stats(way, loc.row, cd.valid);
 
     cd.valid = true; // We either write to it or we read from memory. Either way
                      // it's valid when we leave Cache class
     cd.dirty = cd.dirty || write;
-    cd.tag = tag;
-    *data = cd.data[col];
+    cd.tag = loc.tag;
+    *data = cd.data[loc.col];
 
+    bool changed = false;
     if (write) {
-        changed = cd.data[col] != value;
-        cd.data[col] = value;
+        changed = cd.data[loc.col] != value;
+        cd.data[loc.col] = value;
     }
 
     emit cache_update(
-        indx, row, col, cd.valid, cd.dirty, cd.tag, cd.data, write);
+        way, loc.row, loc.col, cd.valid, cd.dirty, cd.tag, cd.data.data(),
+        write);
     if (changed) {
         change_counter++;
     }
     return changed;
 }
 
-void Cache::kick(unsigned associat_indx, unsigned row) const {
-    struct cache_data &cd = dt[associat_indx][row];
-    if (cd.dirty && cnf.write_policy() == MachineConfigCache::WP_BACK) {
-        for (unsigned i = 0; i < cnf.blocks(); i++) {
-            mem->write_word(base_address(cd.tag, row) + (4 * i), cd.data[i]);
-        }
-        mem_writes += cnf.blocks();
-        burst_writes += cnf.blocks() - 1;
+size_t Cache::find_block_index(const CacheLocation &loc) const {
+    uint32_t index = 0;
+    while (
+        index < cache_config.associativity()
+        && (!dt[index][loc.row].valid || dt[index][loc.row].tag != loc.tag)) {
+        index++;
+    }
+    return index;
+}
+
+void Cache::kick(size_t way, size_t row) const {
+    struct CacheLine &cd = dt[way][row];
+    if (cd.dirty && cache_config.write_policy() == CacheConfig::WP_BACK) {
+        for (unsigned i = 0; i < cache_config.block_size(); i++)
+            mem->write_word(
+                calc_base_address(cd.tag, row) + (4 * i), cd.data[i]);
+        mem_writes += cache_config.block_size();
+        burst_writes += cache_config.block_size() - 1;
         emit memory_writes_update(mem_writes);
     }
     cd.valid = false;
     cd.dirty = false;
 
-    switch (cnf.replacement_policy()) {
-    case MachineConfigCache::RP_LRU: {
-        unsigned next_asi = associat_indx;
-        unsigned tmp_asi = replc.lru[row][0];
-        int i = 1;
-        while (tmp_asi != associat_indx) {
-            SANITY_ASSERT(
-                i < (int)cnf.associativity(),
-                "LRU lost the way from priority queue - kick");
-            tmp_asi = replc.lru[row][i];
-            replc.lru[row][i] = next_asi;
-            next_asi = tmp_asi;
-            i++;
+    change_counter++;
+
+    replacement_policy->update_stats(way, row, false);
+}
+
+void Cache::update_all_statistics() const {
+    emit statistics_update(
+        get_stall_count(), get_speed_improvement(), get_hit_rate());
+}
+
+uint32_t Cache::calc_base_address(size_t tag, size_t row) const {
+    return (
+        (tag * cache_config.set_count() + row) * cache_config.block_size()
+        * BLOCK_ITEM_SIZE);
+}
+
+CacheLocation Cache::compute_location(uint32_t address) const {
+    // Get address in multiples of 4 byte (basic storage unit size) amd get the
+    // reminder to addreess individual byte.
+    auto word_index = address / BLOCK_ITEM_SIZE;
+    auto byte = address % BLOCK_ITEM_SIZE;
+    // Associativity does not incluence location (hit will be on the
+    // same place in each way). Lets therefore assume associtivty degree 1.
+    // Same address modulo `way_size_words` will alias (up to associativity).
+    auto way_size_words = cache_config.set_count() * cache_config.block_size();
+    // Index in a way, when rows and cols would be rearranged into 1D array.
+    auto index_in_way = word_index % way_size_words;
+    auto tag = word_index / way_size_words;
+
+    return { .row = index_in_way / cache_config.block_size(),
+             .col = index_in_way % cache_config.block_size(),
+             .tag = tag,
+             .byte = byte };
+}
+
+enum LocationStatus Cache::location_status(uint32_t address) const {
+    const CacheLocation loc = compute_location(address);
+
+    if (cache_config.enabled()) {
+        for (auto const &set : dt) {
+            auto const &block = set[loc.row];
+
+            if (block.valid && block.tag == loc.tag) {
+                if (block.dirty
+                    && cache_config.write_policy() == CacheConfig::WP_BACK) {
+                    return (enum LocationStatus)(
+                        LOCSTAT_CACHED | LOCSTAT_DIRTY);
+                } else {
+                    return LOCSTAT_CACHED;
+                }
+            }
         }
-        break;
     }
-    case MachineConfigCache::RP_LFU: replc.lfu[row][associat_indx] = 0; break;
-    default: break;
-    }
+    return mem->location_status(address);
 }
 
-uint32_t Cache::base_address(uint32_t tag, unsigned row) const {
-    return ((tag * cnf.blocks() * cnf.sets()) + (row * cnf.blocks())) << 2;
+const CacheConfig &Cache::get_config() const {
+    return cache_config;
 }
 
-void Cache::update_statistics() const {
-    emit statistics_update(stalled_cycles(), speed_improvement(), hit_rate());
+uint32_t Cache::get_change_counter() const {
+    return change_counter;
 }
+
+uint32_t Cache::get_hit_count() const {
+    return hit_read + hit_write;
+}
+
+uint32_t Cache::get_miss_count() const {
+    return miss_read + miss_write;
+}
+
+uint32_t Cache::get_read_count() const {
+    return mem_reads;
+}
+
+uint32_t Cache::get_write_count() const {
+    return mem_writes;
+}
+
+uint32_t Cache::get_stall_count() const {
+    uint32_t st_cycles
+        = mem_reads * (access_pen_r - 1) + mem_writes * (access_pen_w - 1);
+    if (access_pen_b != 0) {
+        st_cycles -= burst_reads * (access_pen_r - access_pen_b)
+                     + burst_writes * (access_pen_w - access_pen_b);
+    }
+    return st_cycles;
+}
+
+double Cache::get_speed_improvement() const {
+    uint32_t lookup_time;
+    uint32_t mem_access_time;
+    uint32_t comp = hit_read + hit_write + miss_read + miss_write;
+    if (comp == 0) {
+        return 100.0;
+    }
+    lookup_time = hit_read + miss_read;
+    if (cache_config.write_policy() == CacheConfig::WP_BACK) {
+        lookup_time += hit_write + miss_write;
+    }
+    mem_access_time = mem_reads * access_pen_r + mem_writes * access_pen_w;
+    if (access_pen_b != 0) {
+        mem_access_time -= burst_reads * (access_pen_r - access_pen_b)
+                           + burst_writes * (access_pen_w - access_pen_b);
+    }
+    return (
+        (double)((miss_read + hit_read) * access_pen_r + (miss_write + hit_write) * access_pen_w)
+        / (double)(lookup_time + mem_access_time) * 100);
+}
+
+double Cache::get_hit_rate() const {
+    uint32_t comp = hit_read + hit_write + miss_read + miss_write;
+    if (comp == 0) {
+        return 0.0;
+    }
+    return (double)(hit_read + hit_write) / (double)comp * 100.0;
+}
+
+} // namespace machine

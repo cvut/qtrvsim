@@ -458,14 +458,14 @@ NewDialogCacheHandler::NewDialogCacheHandler(
         &NewDialogCacheHandler::writeback);
 }
 
-void NewDialogCacheHandler::set_config(machine::MachineConfigCache *config) {
+void NewDialogCacheHandler::set_config(machine::CacheConfig *config) {
     this->config = config;
 }
 
 void NewDialogCacheHandler::config_gui() {
     ui->enabled->setChecked(config->enabled());
-    ui->number_of_sets->setValue(config->sets());
-    ui->block_size->setValue(config->blocks());
+    ui->number_of_sets->setValue(config->set_count());
+    ui->block_size->setValue(config->block_size());
     ui->degree_of_associativity->setValue(config->associativity());
     ui->replacement_policy->setCurrentIndex((int)config->replacement_policy());
     ui->writeback_policy->setCurrentIndex((int)config->write_policy());
@@ -477,12 +477,12 @@ void NewDialogCacheHandler::enabled(bool val) {
 }
 
 void NewDialogCacheHandler::numsets() {
-    config->set_sets(ui->number_of_sets->value());
+    config->set_set_count(ui->number_of_sets->value());
     nd->switch2custom();
 }
 
 void NewDialogCacheHandler::blocksize() {
-    config->set_blocks(ui->block_size->value());
+    config->set_block_size(ui->block_size->value());
     nd->switch2custom();
 }
 
@@ -493,12 +493,11 @@ void NewDialogCacheHandler::degreeassociativity() {
 
 void NewDialogCacheHandler::replacement(int val) {
     config->set_replacement_policy(
-        (enum machine::MachineConfigCache::ReplacementPolicy)val);
+        (enum machine::CacheConfig::ReplacementPolicy)val);
     nd->switch2custom();
 }
 
 void NewDialogCacheHandler::writeback(int val) {
-    config->set_write_policy(
-        (enum machine::MachineConfigCache::WritePolicy)val);
+    config->set_write_policy((enum machine::CacheConfig::WritePolicy)val);
     nd->switch2custom();
 }

@@ -951,13 +951,13 @@ void MachineTests::pipecore_wt_na_memory_tests() {
     QFETCH(Registers, reg_res);
     QFETCH(Memory, mem_init);
     QFETCH(Memory, mem_res);
-    MachineConfigCache cache_conf;
+    CacheConfig cache_conf;
     cache_conf.set_enabled(true);
-    cache_conf.set_sets(2);          // Number of sets
-    cache_conf.set_blocks(1);        // Number of blocks
+    cache_conf.set_set_count(2);     // Number of sets
+    cache_conf.set_block_size(1);    // Number of blocks
     cache_conf.set_associativity(2); // Degree of associativity
-    cache_conf.set_replacement_policy(MachineConfigCache::RP_LRU);
-    cache_conf.set_write_policy(MachineConfigCache::WP_THROUGH_NOALLOC);
+    cache_conf.set_replacement_policy(CacheConfig::RP_LRU);
+    cache_conf.set_write_policy(CacheConfig::WP_THROUGH_NOALLOC);
     Cache i_cache(&mem_init, &cache_conf);
     Cache d_cache(&mem_init, &cache_conf);
     CorePipelined core(
@@ -971,13 +971,13 @@ void MachineTests::pipecore_wt_a_memory_tests() {
     QFETCH(Registers, reg_res);
     QFETCH(Memory, mem_init);
     QFETCH(Memory, mem_res);
-    MachineConfigCache cache_conf;
+    CacheConfig cache_conf;
     cache_conf.set_enabled(true);
-    cache_conf.set_sets(2);          // Number of sets
-    cache_conf.set_blocks(1);        // Number of blocks
+    cache_conf.set_set_count(2);     // Number of sets
+    cache_conf.set_block_size(1);    // Number of blocks
     cache_conf.set_associativity(2); // Degree of associativity
-    cache_conf.set_replacement_policy(MachineConfigCache::RP_LRU);
-    cache_conf.set_write_policy(MachineConfigCache::WP_THROUGH_ALLOC);
+    cache_conf.set_replacement_policy(CacheConfig::RP_LRU);
+    cache_conf.set_write_policy(CacheConfig::WP_THROUGH_ALLOC);
     Cache i_cache(&mem_init, &cache_conf);
     Cache d_cache(&mem_init, &cache_conf);
     CorePipelined core(
@@ -991,13 +991,13 @@ void MachineTests::pipecore_wb_memory_tests() {
     QFETCH(Registers, reg_res);
     QFETCH(Memory, mem_init);
     QFETCH(Memory, mem_res);
-    MachineConfigCache cache_conf;
+    CacheConfig cache_conf;
     cache_conf.set_enabled(true);
-    cache_conf.set_sets(4);          // Number of sets
-    cache_conf.set_blocks(2);        // Number of blocks
+    cache_conf.set_set_count(4);     // Number of sets
+    cache_conf.set_block_size(2);    // Number of blocks
     cache_conf.set_associativity(2); // Degree of associativity
-    cache_conf.set_replacement_policy(MachineConfigCache::RP_LRU);
-    cache_conf.set_write_policy(MachineConfigCache::WP_BACK);
+    cache_conf.set_replacement_policy(CacheConfig::RP_LRU);
+    cache_conf.set_write_policy(CacheConfig::WP_BACK);
     Cache i_cache(&mem_init, &cache_conf);
     Cache d_cache(&mem_init, &cache_conf);
     CorePipelined core(

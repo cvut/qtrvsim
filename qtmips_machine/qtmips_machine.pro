@@ -30,14 +30,14 @@ SOURCES += \
     cache.cpp \
     alu.cpp \
     machineconfig.cpp \
-    utils.cpp \
     physaddrspace.cpp \
     peripheral.cpp \
     serialport.cpp \
     peripspiled.cpp \
     lcddisplay.cpp \
     symboltable.cpp \
-    cop0state.cpp
+    cop0state.cpp \
+    memory/cache/cache_policy.cpp
 
 HEADERS += \
     qtmipsmachine.h \
@@ -59,4 +59,6 @@ HEADERS += \
     peripspiled.h \
     lcddisplay.h \
     symboltable.h \
-    cop0state.h
+    cop0state.h \
+    memory/cache/cache_policy.h \
+    memory/cache/cache_types.h

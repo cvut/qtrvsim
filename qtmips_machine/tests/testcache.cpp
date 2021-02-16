@@ -39,27 +39,27 @@
 using namespace machine;
 
 void MachineTests::cache_data() {
-    QTest::addColumn<MachineConfigCache>("cache_c");
+    QTest::addColumn<CacheConfig>("cache_c");
     QTest::addColumn<unsigned>("hit");
     QTest::addColumn<unsigned>("miss");
 
-    MachineConfigCache cache_c;
-    cache_c.set_write_policy(MachineConfigCache::WP_THROUGH_ALLOC);
+    CacheConfig cache_c;
+    cache_c.set_write_policy(CacheConfig::WP_THROUGH_ALLOC);
     cache_c.set_enabled(true);
-    cache_c.set_sets(8);
-    cache_c.set_blocks(1);
+    cache_c.set_set_count(8);
+    cache_c.set_block_size(1);
     cache_c.set_associativity(1);
     QTest::newRow("Directly mapped") << cache_c << (unsigned)3 << (unsigned)7;
-    cache_c.set_sets(1);
-    cache_c.set_blocks(8);
+    cache_c.set_set_count(1);
+    cache_c.set_block_size(8);
     QTest::newRow("Wide") << cache_c << (unsigned)5 << (unsigned)5;
-    cache_c.set_sets(4);
-    cache_c.set_blocks(4);
+    cache_c.set_set_count(4);
+    cache_c.set_block_size(4);
     QTest::newRow("Square") << cache_c << (unsigned)4 << (unsigned)6;
 }
 
 void MachineTests::cache() {
-    QFETCH(MachineConfigCache, cache_c);
+    QFETCH(CacheConfig, cache_c);
     QFETCH(unsigned, hit);
     QFETCH(unsigned, miss);
 
@@ -85,6 +85,6 @@ void MachineTests::cache() {
     QCOMPARE(m.read_word(0x700), (uint32_t)0x23);
 
     // Verify counts
-    QCOMPARE(cch.hit(), hit);
-    QCOMPARE(cch.miss(), miss);
+    QCOMPARE(cch.get_hit_count(), hit);
+    QCOMPARE(cch.get_miss_count(), miss);
 }

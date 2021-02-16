@@ -55,11 +55,15 @@ using namespace std;
 CacheAddressBlock::CacheAddressBlock(
     const machine::Cache *cache,
     unsigned width) {
-    rows = cache->config().sets();
-    columns = cache->config().blocks();
-    s_row = cache->config().sets() > 1 ? sqrt(cache->config().sets()) : 0;
+    rows = cache->get_config().set_count();
+    columns = cache->get_config().block_size();
+    s_row = cache->get_config().set_count() > 1
+                ? sqrt(cache->get_config().set_count())
+                : 0;
     this->width = width;
-    s_col = cache->config().blocks() > 1 ? sqrt(cache->config().blocks()) : 0;
+    s_col = cache->get_config().block_size() > 1
+                ? sqrt(cache->get_config().block_size())
+                : 0;
     s_tag = 30 - s_row - s_col; // 32 bits - 2 unused  and then every bit used
                                 // for different index
     this->width = width;
@@ -181,8 +185,8 @@ CacheViewBlock::CacheViewBlock(
     : QGraphicsObject(nullptr) {
     islast = last;
     this->block = block;
-    rows = cache->config().sets();
-    columns = cache->config().blocks();
+    rows = cache->get_config().set_count();
+    columns = cache->get_config().block_size();
     curr_row = 0;
     last_set = 0;
     last_col = 0;
@@ -192,8 +196,7 @@ CacheViewBlock::CacheViewBlock(
     font.setPixelSize(FontSize::SIZE7);
 
     validity = new QGraphicsSimpleTextItem *[rows];
-    if (cache->config().write_policy()
-        == machine::MachineConfigCache::WP_BACK) {
+    if (cache->get_config().write_policy() == machine::CacheConfig::WP_BACK) {
         dirty = new QGraphicsSimpleTextItem *[rows];
     } else {
         dirty = nullptr;
@@ -236,8 +239,7 @@ CacheViewBlock::CacheViewBlock(
     QRectF box = l_validity->boundingRect();
     l_validity->setPos(wd + (VD_WIDTH - box.width()) / 2, -1 - box.height());
     wd += VD_WIDTH;
-    if (cache->config().write_policy()
-        == machine::MachineConfigCache::WP_BACK) {
+    if (cache->get_config().write_policy() == machine::CacheConfig::WP_BACK) {
         QGraphicsSimpleTextItem *l_dirty
             = new QGraphicsSimpleTextItem("D", this);
         l_dirty->setFont(font);
@@ -443,7 +445,7 @@ void CacheViewBlock::cache_update(
 }
 
 CacheViewScene::CacheViewScene(const machine::Cache *cache) {
-    associativity = cache->config().associativity();
+    associativity = cache->get_config().associativity();
     block = new CacheViewBlock *[associativity];
     int offset = 0;
     for (unsigned i = 0; i < associativity; i++) {

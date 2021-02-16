@@ -201,28 +201,38 @@ void Reporter::report() {
         }
         if (e_cache_stats) {
             cout << "Cache statistics report:" << endl;
-            cout << "i-cache:reads:" << machine->cache_program()->memory_reads()
+            cout << "i-cache:reads:"
+                 << machine->cache_program()->get_read_count() << endl;
+            cout << "i-cache:hit:" << machine->cache_program()->get_hit_count()
                  << endl;
-            cout << "i-cache:hit:" << machine->cache_program()->hit() << endl;
-            cout << "i-cache:miss:" << machine->cache_program()->miss() << endl;
-            cout << "i-cache:hit-rate:" << machine->cache_program()->hit_rate()
-                 << endl;
+            cout << "i-cache:miss:"
+                 << machine->cache_program()->get_miss_count() << endl;
+            cout << "i-cache:hit-rate:"
+                 << machine->cache_program()->get_hit_rate() << endl;
             cout << "i-cache:stalled-cycles:"
-                 << machine->cache_program()->stalled_cycles() << endl;
+                 << machine->cache_program()->get_stall_count() << endl;
             cout << "i-cache:improved-speed:"
-                 << machine->cache_program()->speed_improvement() << endl;
-            cout << "d-cache:reads:" << machine->cache_data()->memory_reads()
+                 << machine->cache_program()->get_speed_improvement() << endl;
+            cout << "d-cache:reads:" << machine->cache_data()->get_read_count()
                  << endl;
-            cout << "d-cache:writes:" << machine->cache_data()->memory_writes()
+            cout << "d-cache:writes:"
+                 << machine->cache_data()->get_write_count() << endl;
+            cout << "d-cache:hit:" << machine->cache_data()->get_hit_count()
                  << endl;
-            cout << "d-cache:hit:" << machine->cache_data()->hit() << endl;
-            cout << "d-cache:miss:" << machine->cache_data()->miss() << endl;
-            cout << "d-cache:hit-rate:" << machine->cache_data()->hit_rate()
+            cout << "d-cache:miss:" << machine->cache_data()->get_miss_count()
+                 << endl;
+            cout << "d-cache:hit-rate:" << machine->cache_data()->get_hit_rate()
                  << endl;
             cout << "d-cache:stalled-cycles:"
-                 << machine->cache_data()->stalled_cycles() << endl;
+                 << machine->cache_data()->get_stall_count() << endl;
             cout << "d-cache:improved-speed:"
-                 << machine->cache_data()->speed_improvement() << endl;
+                 << machine->cache_data()->get_speed_improvement() << endl;
+        }
+        if (e_cycles) {
+            cout << "d-cache:stalled-cycles:"
+                 << machine->cache_data()->get_stall_count() << endl;
+            cout << "d-cache:improved-speed:"
+                 << machine->cache_data()->get_speed_improvement() << endl;
         }
         if (e_cycles) {
             cout << "cycles:" << machine->core()->cycles() << endl;

@@ -48,11 +48,11 @@ enum ConfigPresets {
     CP_PIPE            // Full pipelined cpu
 };
 
-class MachineConfigCache {
+class CacheConfig {
 public:
-    MachineConfigCache();
-    MachineConfigCache(const MachineConfigCache *cc);
-    MachineConfigCache(const QSettings *, const QString &prefix = "");
+    CacheConfig();
+    CacheConfig(const CacheConfig *cc);
+    CacheConfig(const QSettings *, const QString &prefix = "");
 
     void store(QSettings *, const QString &prefix = "") const;
 
@@ -72,21 +72,22 @@ public:
 
     // If cache should be used or not
     void set_enabled(bool);
-    void set_sets(unsigned);          // Number of sets
-    void set_blocks(unsigned);        // Number of blocks
-    void set_associativity(unsigned); // Degree of associativity
+    void set_set_count(unsigned);     // Number of sets
+    void set_block_size(unsigned);    // Number of uint32_t in block
+    void set_associativity(unsigned); // Degree of associativity (number of
+                                      // ways)
     void set_replacement_policy(enum ReplacementPolicy);
     void set_write_policy(enum WritePolicy);
 
     bool enabled() const;
-    unsigned sets() const;
-    unsigned blocks() const;
+    unsigned set_count() const;
+    unsigned block_size() const;
     unsigned associativity() const;
     enum ReplacementPolicy replacement_policy() const;
     enum WritePolicy write_policy() const;
 
-    bool operator==(const MachineConfigCache &c) const;
-    bool operator!=(const MachineConfigCache &c) const;
+    bool operator==(const CacheConfig &c) const;
+    bool operator!=(const CacheConfig &c) const;
 
 private:
     bool en;
@@ -139,8 +140,8 @@ public:
     // initialized.
     void set_elf(QString path);
     // Configure cache
-    void set_cache_program(const MachineConfigCache &);
-    void set_cache_data(const MachineConfigCache &);
+    void set_cache_program(const CacheConfig &);
+    void set_cache_data(const CacheConfig &);
 
     bool pipelined() const;
     bool delay_slot() const;
@@ -158,11 +159,11 @@ public:
     QString osemu_fs_root() const;
     bool reset_at_compile() const;
     QString elf() const;
-    const MachineConfigCache &cache_program() const;
-    const MachineConfigCache &cache_data() const;
+    const CacheConfig &cache_program() const;
+    const CacheConfig &cache_data() const;
 
-    MachineConfigCache *access_cache_program();
-    MachineConfigCache *access_cache_data();
+    CacheConfig *access_cache_program();
+    CacheConfig *access_cache_data();
 
     bool operator==(const MachineConfig &c) const;
     bool operator!=(const MachineConfig &c) const;
@@ -177,11 +178,11 @@ private:
     bool res_at_compile;
     QString osem_fs_root;
     QString elf_path;
-    MachineConfigCache cch_program, cch_data;
+    CacheConfig cch_program, cch_data;
 };
 
 } // namespace machine
 
-Q_DECLARE_METATYPE(machine::MachineConfigCache)
+Q_DECLARE_METATYPE(machine::CacheConfig)
 
 #endif // MACHINECONFIG_H

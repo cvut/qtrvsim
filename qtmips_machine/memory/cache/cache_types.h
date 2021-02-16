@@ -12,6 +12,8 @@
  *
  * Copyright (c) 2017-2019 Karel Koci<cynerd@email.cz>
  * Copyright (c) 2019      Pavel Pisa <pisa@cmp.felk.cvut.cz>
+ * Copyright (c) 2020      Jakub Dupak <dupak.jakub@gmail.com>
+ * Copyright (c) 2020      Max Hollmann <hollmmax@fel.cvut.cz>
  *
  * Faculty of Electrical Engineering (http://www.fel.cvut.cz)
  * Czech Technical University        (http://www.cvut.cz/)
@@ -33,8 +35,38 @@
  *
  ******************************************************************************/
 
-#include "utils.h"
+#ifndef QTMIPS_CACHE_TYPES_H
+#define QTMIPS_CACHE_TYPES_H
 
-uint32_t sign_extend(uint16_t v) {
-    return ((v & 0x8000) ? 0xFFFF0000 : 0) | v;
-}
+#include <cstdint>
+
+namespace machine {
+
+/**
+ * Tetermines location of address in single way of cache. This mean, where given
+ * addrees should be stored, if present.
+ */
+struct CacheLocation {
+    size_t row;
+    size_t col;
+    size_t tag;
+    size_t byte;
+};
+
+/**
+ * Single cache line. Appropriate cache block is stored in `data`.
+ */
+struct CacheLine {
+    bool valid, dirty;
+    size_t tag;
+    std::vector<uint32_t> data;
+};
+
+/**
+ * This is preffer over bool (write = true|false) for better readability.
+ */
+enum AccessType { READ, WRITE };
+
+} // namespace machine
+
+#endif // QTMIPS_CACHE_TYPES_H
