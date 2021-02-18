@@ -36,10 +36,12 @@
 #ifndef REGISTERS_H
 #define REGISTERS_H
 
+#include "memory/address.h"
 #include "qtmipsexception.h"
 #include "register_value.h"
 
 #include <QObject>
+#include <array>
 #include <cstdint>
 
 namespace machine {
@@ -47,7 +49,7 @@ namespace machine {
 /**
  * General-purpose register count
  */
-static constexpr size_t REGISTER_COUNT = 32;
+static const size_t REGISTER_COUNT = 32;
 
 /**
  * General-purpose register identifier
@@ -57,7 +59,7 @@ public:
     // TODO: Should this constructor allow implicit conversion?
     inline RegisterId(uint8_t value);
 
-    const uint8_t data;
+    uint8_t data;
 };
 
 inline RegisterId::RegisterId(uint8_t value) : data(value) {
@@ -84,15 +86,15 @@ public:
     Registers();
     Registers(const Registers &);
 
-    uint32_t read_pc() const;        // Return current value of program counter
-    uint32_t pc_inc();               // Increment program counter by four bytes
-    uint32_t pc_jmp(int32_t offset); // Relative jump from current
-                                     // location in program counter
-    void pc_abs_jmp(uint32_t address);    // Absolute jump in program counter
-                                          // (write to pc)
-    void pc_abs_jmp_28(uint32_t address); // Absolute jump in current 256MB
-                                          // section (basically J
-                                          // implementation)
+    Address read_pc() const;          // Return current value of program counter
+    Address pc_inc();                 // Increment program counter by four bytes
+    Address pc_jmp(int32_t offset);   // Relative jump from current
+                                      // location in
+                                      // program counter
+    void pc_abs_jmp(Address address); // Absolute jump in program counter (write
+                                      // to pc)
+    void pc_abs_jmp_28(Address address); // Absolute jump in current 256MB
+                                         // section (basically J implementation)
 
     RegisterValue read_gp(RegisterId reg) const;        // Read general-purpose
                                                         // register
@@ -107,7 +109,7 @@ public:
     void reset(); // Reset all values to zero (except pc)
 
 signals:
-    void pc_update(uint32_t val);
+    void pc_update(Address val);
     void gp_update(RegisterId reg, RegisterValue val);
     void hi_lo_update(bool hi, RegisterValue val);
     void gp_read(RegisterId reg, RegisterValue val) const;
@@ -122,7 +124,7 @@ private:
      */
     std::array<RegisterValue, REGISTER_COUNT> gp {};
     RegisterValue hi {}, lo {};
-    uint32_t pc {}; // program counter
+    Address pc {}; // program counter
 };
 
 } // namespace machine

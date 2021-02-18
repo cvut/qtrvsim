@@ -61,7 +61,8 @@ ProgramCounter::ProgramCounter(machine::QtMipsMachine *machine)
     name.setFont(font);
     font.setPointSize(FontSize::SIZE8);
     value.setText(
-        QString("0x") + QString::number(machine->registers()->read_pc(), 16));
+        QString("0x")
+        + QString::number(machine->registers()->read_pc().get_raw(), 16));
     value.setPos(1, HEIGHT - value.boundingRect().height());
     value.setFont(font);
 
@@ -114,6 +115,6 @@ void ProgramCounter::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event
     emit jump_to_pc(registers->read_pc());
 }
 
-void ProgramCounter::pc_update(uint32_t val) {
-    value.setText(QString("0x") + QString::number(val, 16));
+void ProgramCounter::pc_update(machine::Address val) {
+    value.setText(QString("0x") + QString::number(val.get_raw(), 16));
 }

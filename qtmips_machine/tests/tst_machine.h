@@ -37,7 +37,7 @@
 #define TST_MACHINE_H
 
 #include <QtTest/QTest>
-#include <QtTest>
+#include <cstdint>
 
 class MachineTests : public QObject {
     Q_OBJECT
@@ -55,10 +55,10 @@ private Q_SLOTS:
     void memory_section_data();
     void memory_endian();
     void memory_compare();
-    void memory_write_ctl();
     void memory_write_ctl_data();
-    void memory_read_ctl();
+    void memory_write_ctl();
     void memory_read_ctl_data();
+    void memory_read_ctl();
     // Program loader
     void program_loader();
     // Instruction

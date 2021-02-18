@@ -25,13 +25,14 @@ void LcdDisplayView::setup(machine::LcdDisplay *lcd_display) {
     { delete fb_pixels; }
     fb_pixels = nullptr;
     fb_pixels = new QImage(
-        lcd_display->width(), lcd_display->height(), QImage::Format_RGB32);
+        lcd_display->get_width(), lcd_display->get_height(),
+        QImage::Format_RGB32);
     fb_pixels->fill(qRgb(0, 0, 0));
     update_scale();
     update();
 }
 
-void LcdDisplayView::pixel_update(uint x, uint y, uint r, uint g, uint b) {
+void LcdDisplayView::pixel_update(size_t x, size_t y, uint r, uint g, uint b) {
     int x1, y1, x2, y2;
     if (fb_pixels != nullptr) {
         fb_pixels->setPixel(x, y, qRgb(r, g, b));

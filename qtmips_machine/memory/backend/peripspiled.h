@@ -12,6 +12,8 @@
  *
  * Copyright (c) 2017-2019 Karel Koci<cynerd@email.cz>
  * Copyright (c) 2019      Pavel Pisa <pisa@cmp.felk.cvut.cz>
+ * Copyright (c) 2020      Jakub Dupak <dupak.jakub@gmail.com>
+ * Copyright (c) 2020      Max Hollmann <hollmmax@fel.cvut.cz>
  *
  * Faculty of Electrical Engineering (http://www.fel.cvut.cz)
  * Czech Technical University        (http://www.cvut.cz/)
@@ -37,7 +39,8 @@
 #define PERIPSPILED_H
 
 #include "machinedefs.h"
-#include "memory.h"
+#include "memory/backend/backend_memory.h"
+#include "memory/memory_utils.h"
 #include "qtmipsexception.h"
 
 #include <QMap>
@@ -46,15 +49,15 @@
 
 namespace machine {
 
-class PeripSpiLed : public MemoryAccess {
+class PeripSpiLed final : public BackendMemory {
     Q_OBJECT
 public:
-    PeripSpiLed();
+    explicit PeripSpiLed();
     ~PeripSpiLed() override;
 
 signals:
-    void write_notification(uint32_t address, uint32_t value);
-    void read_notification(uint32_t address, uint32_t *value) const;
+    void write_notification(Offset address, uint32_t value) const;
+    void read_notification(Offset address, uint32_t value) const;
 
     void led_line_changed(uint val) const;
     void led_rgb1_changed(uint val) const;
@@ -69,21 +72,31 @@ public slots:
     void blue_knob_push(bool state);
 
 public:
-    bool wword(uint32_t address, uint32_t value) override;
-    uint32_t rword(uint32_t address, bool debug_access = false) const override;
-    uint32_t get_change_counter() const override;
+    WriteResult write(
+        Offset destination,
+        const void *source,
+        size_t size,
+        WriteOptions options) override;
+
+    ReadResult read(
+        void *destination,
+        Offset source,
+        size_t size,
+        ReadOptions options) const override;
+
+    LocationStatus location_status(Offset offset) const override;
 
 private:
-    void knob_update_notify(uint32_t val, uint32_t mask, int shift);
+    uint32_t read_reg(Offset source) const;
+    bool write_reg(Offset destination, uint32_t value);
+    void knob_update_notify(uint32_t val, uint32_t mask, size_t shift);
 
-    mutable uint32_t change_counter;
-    uint32_t spiled_reg_led_line;
-    uint32_t spiled_reg_led_rgb1;
-    uint32_t spiled_reg_led_rgb2;
-    uint32_t spiled_reg_led_kbdwr_direct;
-
-    uint32_t spiled_reg_kbdrd_knobs_direct;
-    uint32_t spiled_reg_knobs_8bit;
+    uint32_t spiled_reg_led_line = 0;
+    uint32_t spiled_reg_led_rgb1 = 0;
+    uint32_t spiled_reg_led_rgb2 = 0;
+    uint32_t spiled_reg_led_kbdwr_direct = 0;
+    uint32_t spiled_reg_kbdrd_knobs_direct = 0;
+    uint32_t spiled_reg_knobs_8bit = 0;
 };
 
 } // namespace machine

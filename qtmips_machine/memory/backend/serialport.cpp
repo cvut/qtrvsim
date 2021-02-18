@@ -12,6 +12,8 @@
  *
  * Copyright (c) 2017-2019 Karel Koci<cynerd@email.cz>
  * Copyright (c) 2019      Pavel Pisa <pisa@cmp.felk.cvut.cz>
+ * Copyright (c) 2020      Jakub Dupak <dupak.jakub@gmail.com>
+ * Copyright (c) 2020      Max Hollmann <hollmmax@fel.cvut.cz>
  *
  * Faculty of Electrical Engineering (http://www.fel.cvut.cz)
  * Czech Technical University        (http://www.cvut.cz/)
@@ -33,24 +35,23 @@
  *
  ******************************************************************************/
 
-#include "serialport.h"
+#include "memory/backend/serialport.h"
 
-#define SERP_RX_ST_REG_o 0x00
-#define SERP_RX_ST_REG_READY_m 0x1
-#define SERP_RX_ST_REG_IE_m 0x2
+namespace machine {
 
-#define SERP_RX_DATA_REG_o 0x04
+constexpr Offset SERP_RX_ST_REG_o = 0x00u;
+constexpr Offset SERP_RX_ST_REG_READY_m = 0x1u;
+constexpr Offset SERP_RX_ST_REG_IE_m = 0x2u;
 
-#define SERP_TX_ST_REG_o 0x08
-#define SERP_TX_ST_REG_READY_m 0x1
-#define SERP_TX_ST_REG_IE_m 0x2
+constexpr Offset SERP_RX_DATA_REG_o = 0x04u;
 
-#define SERP_TX_DATA_REG_o 0x0c
+constexpr Offset SERP_TX_ST_REG_o = 0x08u;
+constexpr Offset SERP_TX_ST_REG_READY_m = 0x1u;
+constexpr Offset SERP_TX_ST_REG_IE_m = 0x2u;
 
-using namespace machine;
+constexpr Offset SERP_TX_DATA_REG_o = 0xcu;
 
 SerialPort::SerialPort() {
-    change_counter = 0;
     rx_st_reg = 0;
     rx_data_reg = 0;
     tx_st_reg = 0;
@@ -77,89 +78,39 @@ void SerialPort::pool_rx_byte() const {
     }
 }
 
-bool SerialPort::wword(uint32_t address, uint32_t value) {
-#if 0
-    printf("SerialPort::wword address 0x%08lx data 0x%08lx\n",
-           (unsigned long)address, (unsigned long)value);
-#endif
-    emit write_notification(address, value);
-
-    switch (address & ~3) {
-    case SERP_RX_ST_REG_o:
-        rx_st_reg &= ~SERP_RX_ST_REG_IE_m;
-        rx_st_reg |= value & SERP_RX_ST_REG_IE_m;
-        rx_queue_check_internal();
-        update_rx_irq();
-        break;
-    case SERP_TX_ST_REG_o:
-        tx_st_reg &= ~SERP_TX_ST_REG_IE_m;
-        tx_st_reg |= value & SERP_TX_ST_REG_IE_m;
-        update_tx_irq();
-        break;
-    case SERP_TX_DATA_REG_o:
-        emit tx_byte(value & 0xff);
-        update_tx_irq();
-        break;
-    }
-    return true;
+WriteResult SerialPort::write(
+    Offset destination,
+    const void *source,
+    size_t size,
+    WriteOptions options) {
+    UNUSED(options)
+    return write_by_u32(
+        destination, source, size,
+        [&](Offset src) {
+            UNUSED(src);
+            return 0;
+        },
+        [&](Offset src, uint32_t value) {
+            return write_reg(src, byteswap(value));
+        });
 }
 
-uint32_t SerialPort::rword(uint32_t address, bool debug_access) const {
-    (void)debug_access;
-    uint32_t value = 0x00000000;
-#if 0
-    printf("SerialPort::rword address 0x%08lx\n",
-           (unsigned long)address);
-#endif
-    switch (address & ~3) {
-    case SERP_RX_ST_REG_o:
-        pool_rx_byte();
-        value = rx_st_reg;
-        break;
-    case SERP_RX_DATA_REG_o:
-        pool_rx_byte();
-        if (rx_st_reg & SERP_RX_ST_REG_READY_m) {
-            value = rx_data_reg;
-            if (!debug_access) {
-                rx_st_reg &= ~SERP_RX_ST_REG_READY_m;
-                update_rx_irq();
-                emit external_change_notify(
-                    this, SERP_RX_ST_REG_o, SERP_RX_DATA_REG_o + 3, true);
-            }
-        } else {
-            value = 0;
-        }
-        rx_queue_check_internal();
-        break;
-    case SERP_TX_ST_REG_o: value = tx_st_reg | SERP_TX_ST_REG_READY_m; break;
-    }
-
-    emit read_notification(address, &value);
-
-    return value;
-}
-
-uint32_t SerialPort::get_change_counter() const {
-    return change_counter;
+ReadResult SerialPort::read(
+    void *destination,
+    Offset source,
+    size_t size,
+    ReadOptions options) const {
+    return read_by_u32(destination, source, size, [&](Offset src) {
+        return byteswap(read_reg(src, options.debug));
+    });
 }
 
 void SerialPort::update_rx_irq() const {
-    bool active = !!(rx_st_reg & SERP_RX_ST_REG_IE_m);
-    active &= !!(rx_st_reg & SERP_RX_ST_REG_READY_m);
+    bool active = (rx_st_reg & SERP_RX_ST_REG_IE_m) != 0;
+    active &= (rx_st_reg & SERP_RX_ST_REG_READY_m) != 0;
     if (active != rx_irq_active) {
         rx_irq_active = active;
-        change_counter++;
         emit signal_interrupt(rx_irq_level, active);
-    }
-}
-
-void SerialPort::update_tx_irq() const {
-    bool active = !!(tx_st_reg & SERP_TX_ST_REG_IE_m);
-    active &= !!(tx_st_reg & SERP_TX_ST_REG_READY_m);
-    if (active != tx_irq_active) {
-        tx_irq_active = active;
-        change_counter++;
-        emit signal_interrupt(tx_irq_level, active);
     }
 }
 
@@ -172,6 +123,102 @@ void SerialPort::rx_queue_check_internal() const {
 
 void SerialPort::rx_queue_check() const {
     rx_queue_check_internal();
-    emit external_change_notify(
+    emit external_backend_change_notify(
         this, SERP_RX_ST_REG_o, SERP_RX_DATA_REG_o + 3, true);
 }
+
+void SerialPort::update_tx_irq() const {
+    bool active = (tx_st_reg & SERP_TX_ST_REG_IE_m) != 0;
+    active &= (tx_st_reg & SERP_TX_ST_REG_READY_m) != 0;
+    if (active != tx_irq_active) {
+        tx_irq_active = active;
+        emit signal_interrupt(tx_irq_level, active);
+    }
+}
+
+uint32_t SerialPort::read_reg(Offset source, bool debug) const {
+    Q_ASSERT((source & 3U) == 0); // uint32_t alligned
+
+    uint32_t value = 0;
+
+    switch (source) {
+    case SERP_RX_ST_REG_o:
+        pool_rx_byte();
+        value = rx_st_reg;
+        break;
+    case SERP_RX_DATA_REG_o:
+        pool_rx_byte();
+        if (rx_st_reg & SERP_RX_ST_REG_READY_m) {
+            value = rx_data_reg;
+            if (!debug) {
+                rx_st_reg &= ~SERP_RX_ST_REG_READY_m;
+                update_rx_irq();
+                emit external_backend_change_notify(
+                    this, SERP_RX_ST_REG_o, SERP_RX_DATA_REG_o + 3, true);
+            }
+        } else {
+            value = 0;
+        }
+        rx_queue_check_internal();
+        break;
+    case SERP_TX_ST_REG_o: value = tx_st_reg | SERP_TX_ST_REG_READY_m; break;
+    default:
+        printf(
+            "WARNING: Serial port - read out of range (at 0x%ld).\n", source);
+        break;
+    }
+
+    emit read_notification(source, value);
+
+    return value;
+}
+
+uint32_t SerialPort::get_change_counter() const {
+    return change_counter;
+}
+
+bool SerialPort::write_reg(Offset destination, uint32_t value) {
+    Q_ASSERT((destination & 3U) == 0); // uint32_t alligned
+
+    bool changed = [&]() {
+        switch (destination & ~3U) {
+        case SERP_RX_ST_REG_o:
+            rx_st_reg &= ~SERP_RX_ST_REG_IE_m;
+            rx_st_reg |= value & SERP_RX_ST_REG_IE_m;
+            rx_queue_check_internal();
+            update_rx_irq();
+            return true;
+        case SERP_TX_ST_REG_o:
+            tx_st_reg &= ~SERP_TX_ST_REG_IE_m;
+            tx_st_reg |= value & SERP_TX_ST_REG_IE_m;
+            update_tx_irq();
+            return true;
+        case SERP_TX_DATA_REG_o:
+            emit tx_byte(value & 0xffu);
+            update_tx_irq();
+            return true;
+        default:
+            printf(
+                "WARNING: Serial port - write out of range (at 0x%ld).\n",
+                destination);
+            return false;
+        }
+    }();
+
+    emit write_notification(destination, value);
+
+    return changed;
+}
+LocationStatus SerialPort::location_status(Offset offset) const {
+    switch (offset & ~3U) {
+    case SERP_RX_ST_REG_o: FALLTROUGH
+    case SERP_RX_DATA_REG_o: FALLTROUGH
+    case SERP_TX_DATA_REG_o: {
+        return LOCSTAT_NONE;
+    }
+    default: {
+        return LOCSTAT_ILLEGAL;
+    }
+    }
+}
+} // namespace machine

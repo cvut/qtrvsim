@@ -146,10 +146,7 @@ uint32_t Cop0State::read_cop0reg(uint8_t rd, uint8_t sel) const {
     return read_cop0reg(reg);
 }
 
-void Cop0State::write_cop0reg(
-    std::uint8_t rd,
-    std::uint8_t sel,
-    RegisterValue value) {
+void Cop0State::write_cop0reg(uint8_t rd, uint8_t sel, RegisterValue value) {
     SANITY_ASSERT(
         rd < 32, QString("Trying to write to cop0 register ") + QString(rd)
                      + ',' + QString(sel));
@@ -268,8 +265,8 @@ void Cop0State::set_status_exl(bool value) {
     emit cop0reg_update(Status, cop0reg[(int)Status]);
 }
 
-uint32_t Cop0State::exception_pc_address() {
-    return cop0reg[(int)EBase] + 0x180;
+Address Cop0State::exception_pc_address() {
+    return Address(cop0reg[(int)EBase] + 0x180);
 }
 
 void Cop0State::write_cop0reg_count_compare(
@@ -286,7 +283,7 @@ void Cop0State::update_count_and_compare_irq() {
         return;
     }
     count_orig = cop0reg[(int)Count];
-    core_cycles = core->cycles();
+    core_cycles = core->get_cycle_count();
     cop0reg[(int)Count] += core_cycles - last_core_cycles;
     last_core_cycles = core_cycles;
     emit cop0reg_update(Count, cop0reg[(int)Count]);

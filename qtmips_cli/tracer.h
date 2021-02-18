@@ -37,6 +37,7 @@
 #define TRACER_H
 
 #include "qtmips_machine/instruction.h"
+#include "qtmips_machine/memory/address.h"
 #include "qtmips_machine/qtmipsmachine.h"
 
 #include <QObject>
@@ -61,31 +62,31 @@ public:
 private slots:
     void instruction_fetch(
         const machine::Instruction &inst,
-        uint32_t inst_addr,
+        machine::Address inst_addr,
         machine::ExceptionCause excause,
         bool valid);
     void instruction_decode(
         const machine::Instruction &inst,
-        uint32_t inst_addr,
+        machine::Address inst_addr,
         machine::ExceptionCause excause,
         bool valid);
     void instruction_execute(
         const machine::Instruction &inst,
-        uint32_t inst_addr,
+        machine::Address inst_addr,
         machine::ExceptionCause excause,
         bool valid);
     void instruction_memory(
         const machine::Instruction &inst,
-        uint32_t inst_addr,
+        machine::Address inst_addr,
         machine::ExceptionCause excause,
         bool valid);
     void instruction_writeback(
         const machine::Instruction &inst,
-        uint32_t inst_addr,
+        machine::Address inst_addr,
         machine::ExceptionCause excause,
         bool valid);
 
-    void regs_pc_update(uint32_t val);
+    void regs_pc_update(machine::Address val);
     void regs_gp_update(machine::RegisterId i, machine::RegisterValue val);
     void regs_hi_lo_update(bool hi, machine::RegisterValue val) const;
 

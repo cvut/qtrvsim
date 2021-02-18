@@ -37,8 +37,8 @@
 
 #include "cache_policy.h"
 
-#include "../../qtmipsexception.h"
-#include "../../utils.h"
+#include "qtmipsexception.h"
+#include "utils.h"
 
 namespace machine {
 
@@ -102,6 +102,10 @@ size_t CachePolicyLRU::select_way_to_evict(size_t row) const {
     return stats.at(row).at(0);
 }
 
+CachePolicyLFU::CachePolicyLFU(size_t associativity, size_t set_count) {
+    stats.resize(set_count, std::vector<uint32_t>(associativity, 0));
+}
+
 void CachePolicyLFU::update_stats(size_t way, size_t row, bool is_valid) {
     auto &stat_item = stats.at(row).at(way);
 
@@ -115,7 +119,7 @@ void CachePolicyLFU::update_stats(size_t way, size_t row, bool is_valid) {
 size_t CachePolicyLFU::select_way_to_evict(size_t row) const {
     size_t lowest = stats.at(row).at(0);
     size_t index = 0;
-    for (size_t i = 1; i < stats.size(); i++) {
+    for (size_t i = 0; i < stats.size(); i++) {
         if (stats.at(row).at(i) == 0) {
             // Only invalid blocks have zero stat
             return i;
@@ -126,10 +130,6 @@ size_t CachePolicyLFU::select_way_to_evict(size_t row) const {
         }
     }
     return index;
-}
-
-CachePolicyLFU::CachePolicyLFU(size_t associativity, size_t set_count) {
-    stats.resize(set_count, std::vector<uint32_t>(associativity, 0));
 }
 
 void CachePolicyRAND::update_stats(size_t way, size_t row, bool is_valid) {

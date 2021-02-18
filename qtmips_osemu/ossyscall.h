@@ -41,6 +41,7 @@
 #include "qtmips_machine/instruction.h"
 #include "qtmips_machine/machineconfig.h"
 #include "qtmips_machine/memory/backend/memory.h"
+#include "qtmips_machine/memory/frontend_memory.h"
 #include "qtmips_machine/qtmipsexception.h"
 #include "qtmips_machine/registers.h"
 
@@ -59,7 +60,7 @@ namespace osemu {
 class OsSyscallExceptionHandler : public machine::ExceptionHandler {
     Q_OBJECT
 public:
-    OsSyscallExceptionHandler(
+    explicit OsSyscallExceptionHandler(
         bool known_syscall_stop = false,
         bool unknown_syscall_stop = false,
         QString fs_root = "");
@@ -67,11 +68,11 @@ public:
         machine::Core *core,
         machine::Registers *regs,
         machine::ExceptionCause excause,
-        uint32_t inst_addr,
-        uint32_t next_addr,
-        uint32_t jump_branch_pc,
+        machine::Address inst_addr,
+        machine::Address next_addr,
+        machine::Address jump_branch_pc,
         bool in_delay_slot,
-        uint32_t mem_ref_addr);
+        machine::Address mem_ref_addr) override;
     OSSYCALL_HANDLER_DECLARE(syscall_default_handler);
     OSSYCALL_HANDLER_DECLARE(do_sys_exit);
     OSSYCALL_HANDLER_DECLARE(do_sys_set_thread_area);
@@ -104,13 +105,13 @@ private:
         FD_TERMINAL = -2,
     };
     int32_t write_mem(
-        machine::MemoryAccess *mem,
-        uint32_t addr,
+        machine::FrontendMemory *mem,
+        machine::Address addr,
         const QVector<uint8_t> &data,
         uint32_t count);
     int32_t read_mem(
-        machine::MemoryAccess *mem,
-        uint32_t addr,
+        machine::FrontendMemory *mem,
+        machine::Address addr,
         QVector<uint8_t> &data,
         uint32_t count);
     int32_t write_io(int fd, const QVector<uint8_t> &data, uint32_t count);

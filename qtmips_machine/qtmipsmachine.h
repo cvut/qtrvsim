@@ -50,13 +50,14 @@
 
 #include <QObject>
 #include <QTimer>
+#include <cstdint>
 
 namespace machine {
 
 class QtMipsMachine : public QObject {
     Q_OBJECT
 public:
-    QtMipsMachine(
+    explicit QtMipsMachine(
         const MachineConfig &cc,
         bool load_symtab = false,
         bool load_executable = true);
@@ -73,8 +74,8 @@ public:
     const Cache *cache_data();
     Cache *cache_data_rw();
     void cache_sync();
-    const PhysAddrSpace *physical_address_space();
-    PhysAddrSpace *physical_address_space_rw();
+    const MemoryDataBus *memory_data_bus();
+    MemoryDataBus *memory_data_bus_rw();
     SerialPort *serial_port();
     PeripSpiLed *peripheral_spi_led();
     LcdDisplay *peripheral_lcd_display();
@@ -104,15 +105,15 @@ public:
     void register_exception_handler(
         ExceptionCause excause,
         ExceptionHandler *exhandler);
-    bool addressapce_insert_range(
-        MemoryAccess *mem_acces,
-        uint32_t start_addr,
-        uint32_t last_addr,
+    bool memory_bus_insert_range(
+        BackendMemory *mem_acces,
+        Address start_addr,
+        Address last_addr,
         bool move_ownership);
 
-    void insert_hwbreak(uint32_t address);
-    void remove_hwbreak(uint32_t address);
-    bool is_hwbreak(uint32_t address);
+    void insert_hwbreak(Address address);
+    void remove_hwbreak(Address address);
+    bool is_hwbreak(Address address);
     void set_stop_on_exception(enum ExceptionCause excause, bool value);
     bool get_stop_on_exception(enum ExceptionCause excause) const;
     void set_step_over_exception(enum ExceptionCause excause, bool value);
@@ -142,7 +143,7 @@ private:
 
     Registers *regs;
     Memory *mem, *mem_program_only;
-    PhysAddrSpace *physaddrspace;
+    MemoryDataBus *data_bus;
     SerialPort *ser_port;
     PeripSpiLed *perip_spi_led;
     LcdDisplay *perip_lcd_display;
@@ -154,7 +155,7 @@ private:
     unsigned int time_chunk {};
 
     SymbolTable *symtab;
-    uint32_t program_end;
+    Address program_end;
     enum Status stat;
     void set_status(enum Status st);
 };

@@ -36,6 +36,8 @@
 #ifndef PROGRAMTABLEVIEW_H
 #define PROGRAMTABLEVIEW_H
 
+#include "qtmips_machine/memory/address.h"
+
 #include <QObject>
 #include <QSettings>
 #include <QSharedPointer>
@@ -54,9 +56,9 @@ signals:
     void address_changed(uint32_t address);
     void adjust_scroll_pos_queue();
 public slots:
-    void go_to_address(uint32_t address);
-    void focus_address(uint32_t address);
-    void focus_address_with_save(uint32_t address);
+    void go_to_address(machine::Address address);
+    void focus_address(machine::Address address);
+    void focus_address_with_save(machine::Address address);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -65,12 +67,12 @@ private slots:
     void adjust_scroll_pos_process();
 
 private:
-    void go_to_address_priv(uint32_t address);
-    void addr0_save_change(uint32_t val);
+    void go_to_address_priv(machine::Address address);
+    void addr0_save_change(machine::Address val);
     void adjustColumnCount();
     QSettings *settings;
 
-    uint32_t initial_address;
+    machine::Address initial_address;
     bool adjust_scroll_pos_in_progress;
     bool need_addr0_save;
 };

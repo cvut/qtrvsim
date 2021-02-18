@@ -48,7 +48,7 @@ QtMipsMachine::QtMipsMachine(
     bool load_executable)
     : QObject()
     , mcnf(&cc) {
-    MemoryAccess *cpu_mem;
+    FrontendMemory *cpu_mem;
     stat = ST_READY;
     symtab = nullptr;
 
@@ -61,32 +61,35 @@ QtMipsMachine::QtMipsMachine(
             symtab = program.get_symbol_table();
         }
         program_end = program.end();
-        if (program.get_executable_entry()) {
+        if (program.get_executable_entry() != 0x0_addr) {
             regs->pc_abs_jmp(program.get_executable_entry());
         }
         mem = new Memory(*mem_program_only);
     } else {
-        program_end = 0xf0000000;
+        program_end = 0xf0000000_addr;
         mem_program_only = nullptr;
         mem = new Memory();
     }
 
-    physaddrspace = new PhysAddrSpace();
-    physaddrspace->insert_range(mem, 0x00000000, 0xefffffff, false);
-    cpu_mem = physaddrspace;
+    data_bus = new MemoryDataBus();
+    data_bus->insert_device_to_range(
+        mem, 0x00000000_addr, 0xefffffff_addr, false);
+    cpu_mem = data_bus;
 
     ser_port = new SerialPort();
-    addressapce_insert_range(ser_port, 0xffffc000, 0xffffc03f, true);
-    addressapce_insert_range(ser_port, 0xffff0000, 0xffff003f, false);
+    memory_bus_insert_range(ser_port, 0xffffc000_addr, 0xffffc03f_addr, true);
+    memory_bus_insert_range(ser_port, 0xffff0000_addr, 0xffff003f_addr, false);
     connect(
         ser_port, &SerialPort::signal_interrupt, this,
         &QtMipsMachine::set_interrupt_signal);
 
     perip_spi_led = new PeripSpiLed();
-    addressapce_insert_range(perip_spi_led, 0xffffc100, 0xffffc1ff, true);
+    memory_bus_insert_range(
+        perip_spi_led, 0xffffc100_addr, 0xffffc1ff_addr, true);
 
     perip_lcd_display = new LcdDisplay();
-    addressapce_insert_range(perip_lcd_display, 0xffe00000, 0xffe4afff, true);
+    memory_bus_insert_range(
+        perip_lcd_display, 0xffe00000_addr, 0xffe4afff_addr, true);
 
     cch_program = new Cache(
         cpu_mem, &cc.cache_program(), cc.memory_access_time_read(),
@@ -152,8 +155,8 @@ QtMipsMachine::~QtMipsMachine() {
     cch_program = nullptr;
     delete cch_data;
     cch_data = nullptr;
-    delete physaddrspace;
-    physaddrspace = nullptr;
+    delete data_bus;
+    data_bus = nullptr;
     delete mem_program_only;
     mem_program_only = nullptr;
     delete symtab;
@@ -206,12 +209,12 @@ void QtMipsMachine::cache_sync() {
     }
 }
 
-const PhysAddrSpace *QtMipsMachine::physical_address_space() {
-    return physaddrspace;
+const MemoryDataBus *QtMipsMachine::memory_data_bus() {
+    return data_bus;
 }
 
-PhysAddrSpace *QtMipsMachine::physical_address_space_rw() {
-    return physaddrspace;
+MemoryDataBus *QtMipsMachine::memory_data_bus_rw() {
+    return data_bus;
 }
 
 SerialPort *QtMipsMachine::serial_port() {
@@ -246,7 +249,7 @@ void QtMipsMachine::set_symbol(
     if (symtab == nullptr) {
         symtab = new SymbolTable;
     }
-    symtab->set_symbol(name, value, size, info, other);
+    symtab->set_symbol(std::move(name), value, size, info, other);
 }
 
 const Core *QtMipsMachine::core() {
@@ -305,7 +308,7 @@ void QtMipsMachine::step_internal(bool skip_break) {
         QTime start_time = QTime::currentTime();
         do {
             cr->step(skip_break);
-        } while (time_chunk != 0 && stat == ST_BUSY && skip_break == false
+        } while (time_chunk != 0 && stat == ST_BUSY && !skip_break
                  && start_time.msecsTo(QTime::currentTime()) < (int)time_chunk);
     } catch (QtMipsException &e) {
         run_t->stop();
@@ -361,31 +364,31 @@ void QtMipsMachine::register_exception_handler(
     }
 }
 
-bool QtMipsMachine::addressapce_insert_range(
-    MemoryAccess *mem_acces,
-    uint32_t start_addr,
-    uint32_t last_addr,
+bool QtMipsMachine::memory_bus_insert_range(
+    BackendMemory *mem_acces,
+    Address start_addr,
+    Address last_addr,
     bool move_ownership) {
-    if (physaddrspace == nullptr) {
+    if (data_bus == nullptr) {
         return false;
     }
-    return physaddrspace->insert_range(
+    return data_bus->insert_device_to_range(
         mem_acces, start_addr, last_addr, move_ownership);
 }
 
-void QtMipsMachine::insert_hwbreak(uint32_t address) {
+void QtMipsMachine::insert_hwbreak(Address address) {
     if (cr != nullptr) {
         cr->insert_hwbreak(address);
     }
 }
 
-void QtMipsMachine::remove_hwbreak(uint32_t address) {
+void QtMipsMachine::remove_hwbreak(Address address) {
     if (cr != nullptr) {
         cr->remove_hwbreak(address);
     }
 }
 
-bool QtMipsMachine::is_hwbreak(uint32_t address) {
+bool QtMipsMachine::is_hwbreak(Address address) {
     if (cr != nullptr) {
         return cr->is_hwbreak(address);
     }

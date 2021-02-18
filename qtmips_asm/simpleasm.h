@@ -38,6 +38,7 @@
 
 #include "fixmatheval.h"
 #include "messagetype.h"
+#include "qtmips_machine/memory/frontend_memory.h"
 #include "qtmips_machine/qtmipsmachine.h"
 
 #include <QString>
@@ -80,8 +81,10 @@ public:
     static uint64_t
     string_to_uint64(const QString &str, int base, int *chars_taken = nullptr);
     void clear();
-    void
-    setup(machine::MemoryAccess *mem, SymbolTableDb *symtab, uint32_t address);
+    void setup(
+        machine::FrontendMemory *mem,
+        SymbolTableDb *symtab,
+        machine::Address address);
     bool process_line(
         const QString &line,
         const QString &filename = "",
@@ -102,9 +105,9 @@ protected:
 
 private:
     QStringList include_stack;
-    machine::MemoryAccess *mem {};
+    machine::FrontendMemory *mem {};
     machine::RelocExpressionList reloc;
-    uint32_t address {};
+    machine::Address address {};
 };
 
 #endif /*SIMPLEASM_H*/

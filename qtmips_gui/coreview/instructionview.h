@@ -57,7 +57,7 @@ public:
 public slots:
     void instruction_update(
         const machine::Instruction &i,
-        uint32_t inst_addr,
+        machine::Address inst_addr,
         machine::ExceptionCause excause,
         bool valid);
 

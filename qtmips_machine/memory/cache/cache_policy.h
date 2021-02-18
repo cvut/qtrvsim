@@ -38,8 +38,8 @@
 #ifndef QTMIPS_CACHE_POLICY_H
 #define QTMIPS_CACHE_POLICY_H
 
-#include "../../machineconfig.h"
-#include "cache_types.h"
+#include "machineconfig.h"
+#include "memory/cache/cache_types.h"
 
 #include <cstdint>
 #include <cstdlib>
@@ -130,8 +130,7 @@ public:
      * @param associativity     degree of associativity
      */
     explicit CachePolicyRAND(size_t associativity)
-        : associativity(associativity) {
-    }
+        : associativity(associativity) {}
 
     size_t select_way_to_evict(size_t row) const final;
 

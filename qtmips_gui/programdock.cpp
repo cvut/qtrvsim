@@ -56,8 +56,8 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
                         ->value("ProgramViewFollowSource", FOLLOWSRC_FETCH)
                         .toInt();
 
-    for (unsigned int &i : follow_addr) {
-        i = 0;
+    for (auto &i : follow_addr) {
+        i = machine::Address::null();
     }
 
     QWidget *content = new QWidget();
@@ -94,7 +94,7 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
     connect(
         go_edit, &HexLineEdit::value_edit_finished, program_content,
         [program_content](uint32_t value) {
-            program_content->go_to_address(value);
+            program_content->go_to_address(machine::Address(value));
         });
     connect(
         program_content, &ProgramTableView::address_changed, go_edit,
@@ -126,14 +126,14 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
 }
 
 void ProgramDock::setup(machine::QtMipsMachine *machine) {
-    uint32_t pc;
+    machine::Address pc;
     emit machine_setup(machine);
     if (machine == nullptr) {
         return;
     }
     pc = machine->registers()->read_pc();
-    for (unsigned int &i : follow_addr) {
-        i = pc;
+    for (machine::Address &address : follow_addr) {
+        address = pc;
     }
     update_follow_position();
 }
@@ -144,7 +144,7 @@ void ProgramDock::set_follow_inst(int follow) {
     update_follow_position();
 }
 
-void ProgramDock::fetch_inst_addr(uint32_t addr) {
+void ProgramDock::fetch_inst_addr(machine::Address addr) {
     if (addr != machine::STAGEADDR_NONE) {
         follow_addr[FOLLOWSRC_FETCH] = addr;
     }
@@ -154,7 +154,7 @@ void ProgramDock::fetch_inst_addr(uint32_t addr) {
     }
 }
 
-void ProgramDock::decode_inst_addr(uint32_t addr) {
+void ProgramDock::decode_inst_addr(machine::Address addr) {
     if (addr != machine::STAGEADDR_NONE) {
         follow_addr[FOLLOWSRC_DECODE] = addr;
     }
@@ -164,7 +164,7 @@ void ProgramDock::decode_inst_addr(uint32_t addr) {
     }
 }
 
-void ProgramDock::execute_inst_addr(uint32_t addr) {
+void ProgramDock::execute_inst_addr(machine::Address addr) {
     if (addr != machine::STAGEADDR_NONE) {
         follow_addr[FOLLOWSRC_EXECUTE] = addr;
     }
@@ -174,7 +174,7 @@ void ProgramDock::execute_inst_addr(uint32_t addr) {
     }
 }
 
-void ProgramDock::memory_inst_addr(uint32_t addr) {
+void ProgramDock::memory_inst_addr(machine::Address addr) {
     if (addr != machine::STAGEADDR_NONE) {
         follow_addr[FOLLOWSRC_MEMORY] = addr;
     }
@@ -184,7 +184,7 @@ void ProgramDock::memory_inst_addr(uint32_t addr) {
     }
 }
 
-void ProgramDock::writeback_inst_addr(uint32_t addr) {
+void ProgramDock::writeback_inst_addr(machine::Address addr) {
     if (addr != machine::STAGEADDR_NONE) {
         follow_addr[FOLLOWSRC_WRITEBACK] = addr;
     }

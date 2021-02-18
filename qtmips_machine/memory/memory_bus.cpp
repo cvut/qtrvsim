@@ -35,145 +35,232 @@
 
 #include "memory/memory_bus.h"
 
+#include "memory/memory_utils.h"
+
 using namespace machine;
 
-PhysAddrSpace::PhysAddrSpace() {
-    change_counter = 0;
-}
+MemoryDataBus::MemoryDataBus() = default;
 
-PhysAddrSpace::~PhysAddrSpace() {
-    while (!ranges_by_access.isEmpty()) {
-        RangeDesc *p_range = ranges_by_addr.first();
-        ranges_by_addr.remove(p_range->last_addr);
-        ranges_by_access.remove(p_range->mem_acces);
-        if (p_range->owned) {
-            delete p_range->mem_acces;
+MemoryDataBus::~MemoryDataBus() {
+    ranges_by_addr.clear(); // No stored values are owned.
+    auto iter = ranges_by_device.begin();
+    while (iter != ranges_by_device.end()) {
+        const RangeDesc *range = iter.value();
+        iter = ranges_by_device.erase(iter); // Advances the iterator.
+        if (range->owns_device) {
+            delete range->device;
         }
-        delete p_range;
+        delete range;
     }
 }
 
-bool PhysAddrSpace::wword(uint32_t address, uint32_t value) {
-    bool changed;
-    RangeDesc *p_range = find_range(address);
-    if (p_range == nullptr) {
-        return false;
+WriteResult MemoryDataBus::write(
+    Address destination,
+    const void *source,
+    size_t size,
+    WriteOptions options) {
+    return repeat_access_until_completed<WriteResult>(
+        destination, source, size, options,
+        [this](Address dst, const void *src, size_t s, WriteOptions opt)
+            -> WriteResult { return write_single(dst, src, s, opt); });
+}
+
+WriteResult MemoryDataBus::write_single(
+    Address destination,
+    const void *source,
+    size_t size,
+    WriteOptions options) {
+    const RangeDesc *range = find_range(Address(destination));
+    if (range == nullptr) {
+        // Write to unused address range - no devices it present.
+        // This could produce a fault but for simplicity, we will
+        // just ignore the write.
+        return (WriteResult) { .n_bytes = 0, .changed = false };
     }
-    changed
-        = p_range->mem_acces->write_word(address - p_range->start_addr, value);
-    if (changed) {
+    WriteResult result = range->device->write(
+        destination - range->start_addr, source, size, options);
+
+    if (result.changed) {
         change_counter++;
     }
-    return changed;
+
+    return result;
 }
 
-uint32_t PhysAddrSpace::rword(uint32_t address, bool debug_access) const {
-    const RangeDesc *p_range = find_range(address);
+ReadResult MemoryDataBus::read(
+    void *destination,
+    Address source,
+    size_t size,
+    ReadOptions options) const {
+    return repeat_access_until_completed<ReadResult>(
+        destination, source, size, options,
+        [this](void *dst, Address src, size_t s, ReadOptions opt)
+            -> ReadResult { return read_single(dst, src, s, opt); });
+}
+
+ReadResult MemoryDataBus::read_single(
+    void *destination,
+    Address source,
+    size_t size,
+    ReadOptions options) const {
+    const RangeDesc *p_range = find_range(Address(source));
     if (p_range == nullptr) {
-        return 0x00000000;
+        // Write to unused address range, no devices it present.
+        // This could produce a fault but for simplicity, we will
+        // consider unused ranges to be constantly zero.
+        memset(destination, 0, size);
+        return (ReadResult) { .n_bytes = size };
     }
-    return p_range->mem_acces->read_word(
-        address - p_range->start_addr, debug_access);
+
+    return p_range->device->read(
+        destination, source - p_range->start_addr, size, options);
 }
 
-uint32_t PhysAddrSpace::get_change_counter() const {
+uint32_t MemoryDataBus::get_change_counter() const {
     return change_counter;
 }
 
-enum LocationStatus PhysAddrSpace::location_status(uint32_t address) const {
-    const RangeDesc *p_range = find_range(address);
-    if (p_range == nullptr) {
+enum LocationStatus MemoryDataBus::location_status(Address address) const {
+    const RangeDesc *range = find_range(address);
+    if (range == nullptr) {
         return LOCSTAT_ILLEGAL;
     }
-    return p_range->mem_acces->location_status(address - p_range->start_addr);
+    return range->device->location_status(address - range->start_addr);
 }
 
-PhysAddrSpace::RangeDesc *PhysAddrSpace::find_range(uint32_t address) const {
-    PhysAddrSpace::RangeDesc *p_range;
-    auto i = ranges_by_addr.lowerBound(address);
-    if (i == ranges_by_addr.end()) {
+const MemoryDataBus::RangeDesc *
+MemoryDataBus::find_range(Address address) const {
+    // lowerBound finds range what has highest key (which is range->last_addr)
+    // less then or equal to address.
+    // See comment in insert_device_to_range for description, why this works.
+    auto iter = ranges_by_addr.lowerBound(address);
+    if (iter == ranges_by_addr.end()) {
         return nullptr;
     }
-    p_range = i.value();
-    if (address >= p_range->start_addr && address <= p_range->last_addr) {
-        return p_range;
+
+    const RangeDesc *range = iter.value();
+    if (address >= range->start_addr && address <= range->last_addr) {
+        return range;
     }
+
     return nullptr;
 }
 
-bool PhysAddrSpace::insert_range(
-    MemoryAccess *mem_acces,
-    uint32_t start_addr,
-    uint32_t last_addr,
+bool MemoryDataBus::insert_device_to_range(
+    BackendMemory *device,
+    Address start_addr,
+    Address last_addr,
     bool move_ownership) {
-    RangeDesc *p_range
-        = new RangeDesc(mem_acces, start_addr, last_addr, move_ownership);
-    auto i = ranges_by_addr.lowerBound(start_addr);
-    if (i != ranges_by_addr.end()) {
-        if (i.value()->start_addr <= last_addr
-            && i.value()->last_addr >= start_addr) {
-            return false;
-        }
-    }
-    ranges_by_addr.insert(last_addr, p_range);
-    ranges_by_access.insert(mem_acces, p_range);
-    connect(
-        mem_acces, &MemoryAccess::external_change_notify, this,
-        &PhysAddrSpace::range_external_change);
-    return true;
-}
-
-bool PhysAddrSpace::remove_range(MemoryAccess *mem_acces) {
-    RangeDesc *p_range = ranges_by_access.take(mem_acces);
-    if (p_range == nullptr) {
+    auto iter = ranges_by_addr.lowerBound(start_addr);
+    if (iter != ranges_by_addr.end()
+        && iter.value()->overlaps(start_addr, last_addr)) {
+        // Some part of requested range in already taken.
         return false;
     }
-    ranges_by_addr.remove(p_range->last_addr);
-    if (p_range->owned) {
-        delete p_range->mem_acces;
-    }
-    delete p_range;
+    auto *range = new RangeDesc(device, start_addr, last_addr, move_ownership);
+
+    // Why are we using last address as key?
+    //
+    // QMap can return greatest lower key (lowerBound), so by indexing by last
+    // address we can simply search any address within range. If searched
+    // address is in given range, it is larger the previous range last address
+    // and smaller or equal than the last address of its. This way we find the
+    // last address of desired range in QMap red black tree and retrieve the
+    // rang. Finally we just make sure, that the found range contains the
+    // searched address for case that range is not present.
+    ranges_by_addr.insert(last_addr, range);
+    ranges_by_device.insert(device, range);
+    connect(
+        device, &BackendMemory::external_backend_change_notify, this,
+        &MemoryDataBus::range_backend_external_change);
     return true;
 }
 
-void PhysAddrSpace::clean_range(uint32_t start_addr, uint32_t last_addr) {
-    auto i = ranges_by_addr.lowerBound(start_addr);
-    while (i != ranges_by_addr.end()) {
-        RangeDesc *p_range = i.value();
-        i++;
-        if (p_range->start_addr <= last_addr) {
-            remove_range(p_range->mem_acces);
+bool MemoryDataBus::remove_device(BackendMemory *device) {
+    const RangeDesc *range = ranges_by_device.take(device);
+    if (range == nullptr) {
+        return false; // Device not present.
+    }
+
+    ranges_by_addr.remove(range->last_addr);
+    if (range->owns_device) {
+        delete range->device;
+    }
+    delete range;
+
+    return true;
+}
+
+void MemoryDataBus::clean_range(Address start_addr, Address last_addr) {
+    for (auto iter = ranges_by_addr.lowerBound(start_addr);
+         iter != ranges_by_addr.end(); iter++) {
+        const RangeDesc *range = iter.value();
+        if (range->start_addr <= last_addr) {
+            remove_device(range->device);
         } else {
             break;
         }
     }
 }
 
-void PhysAddrSpace::range_external_change(
-    const MemoryAccess *mem_access,
-    uint32_t start_addr,
-    uint32_t last_addr,
+void MemoryDataBus::range_backend_external_change(
+    const BackendMemory *device,
+    Offset start_offset,
+    Offset last_offset,
     bool external) {
     if (external) {
         change_counter++;
     }
-    auto i = ranges_by_access.find(const_cast<MemoryAccess *>(mem_access));
-    while (i != ranges_by_access.end() && i.key() == mem_access) {
-        RangeDesc *p_range = i.value();
-        ++i;
+    // We only use device here for lookup, so const_cast is safe as find takes
+    // it by const reference .
+    for (auto i = ranges_by_device.find(const_cast<BackendMemory *>(device));
+         i != ranges_by_device.end(); i++) {
+        const RangeDesc *range = i.value();
         emit external_change_notify(
-            this, start_addr + p_range->start_addr,
-            last_addr + p_range->start_addr, external);
+            this, range->start_addr + start_offset,
+            std::max(range->start_addr + last_offset, range->last_addr),
+            external);
     }
 }
 
-PhysAddrSpace::RangeDesc::RangeDesc(
-    MemoryAccess *mem_acces,
-    uint32_t start_addr,
-    uint32_t last_addr,
-    bool owned) {
-    this->mem_acces = mem_acces;
-    this->start_addr = start_addr;
-    this->last_addr = last_addr;
-    this->owned = owned;
+MemoryDataBus::RangeDesc::RangeDesc(
+    BackendMemory *device,
+    Address start_addr,
+    Address last_addr,
+    bool owns_device)
+    : device(device)
+    , start_addr(start_addr)
+    , last_addr(last_addr)
+    , owns_device(owns_device) {}
+
+bool MemoryDataBus::RangeDesc::contains(Address address) const {
+    return start_addr <= address && address <= last_addr;
+}
+
+bool MemoryDataBus::RangeDesc::overlaps(Address start, Address last) const {
+    return contains(start) || contains(last);
+}
+
+TrivialBus::TrivialBus(BackendMemory *backend_memory)
+    : device(backend_memory) {}
+
+WriteResult TrivialBus::write(
+    Address destination,
+    const void *source,
+    size_t size,
+    WriteOptions options) {
+    change_counter += 1; // Counter is mandatory by the frontend interface.
+    return device->write(destination.get_raw(), source, size, options);
+}
+
+ReadResult TrivialBus::read(
+    void *destination,
+    Address source,
+    size_t size,
+    ReadOptions options) const {
+    return device->read(destination, source.get_raw(), size, options);
+}
+
+uint32_t TrivialBus::get_change_counter() const {
+    return change_counter;
 }

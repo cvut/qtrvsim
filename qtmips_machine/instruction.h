@@ -87,8 +87,9 @@ enum InstructionFlags {
 };
 
 struct RelocExpression {
+    // TODO is location a address
     inline RelocExpression(
-        int32_t location,
+        Address location,
         QString expression,
         int64_t offset,
         int64_t min,
@@ -111,7 +112,7 @@ struct RelocExpression {
         this->line = line;
         this->options = options;
     }
-    int32_t location;
+    Address location;
     QString expression;
     int64_t offset;
     int64_t min;
@@ -129,7 +130,7 @@ typedef QVector<RelocExpression *> RelocExpressionList;
 class Instruction {
 public:
     Instruction();
-    Instruction(uint32_t inst);
+    explicit Instruction(uint32_t inst);
     Instruction(
         uint8_t opcode,
         uint8_t rs,
@@ -141,8 +142,8 @@ public:
         uint8_t opcode,
         uint8_t rs,
         uint8_t rt,
-        uint16_t immediate);                       // Type I
-    Instruction(uint8_t opcode, uint32_t address); // Type J
+        uint16_t immediate);                      // Type I
+    Instruction(uint8_t opcode, Address address); // Type J
     Instruction(const Instruction &);
 
     enum Type { T_R, T_I, T_J, T_UNKNOWN };
@@ -155,7 +156,7 @@ public:
     uint8_t funct() const;
     uint8_t cop0sel() const;
     uint16_t immediate() const;
-    uint32_t address() const;
+    Address address() const;
     uint32_t data() const;
     enum Type type() const;
     enum InstructionFlags flags() const;
@@ -174,7 +175,7 @@ public:
     bool operator!=(const Instruction &c) const;
     Instruction &operator=(const Instruction &c);
 
-    QString to_str(int32_t inst_addr = 0) const;
+    QString to_str(Address inst_addr = Address::null()) const;
 
     static ssize_t code_from_string(
         uint32_t *code,
@@ -182,7 +183,7 @@ public:
         const QString &inst_base,
         QStringList &inst_fields,
         QString &error,
-        uint32_t inst_addr = 0,
+        Address inst_addr = Address::null(),
         RelocExpressionList *reloc = nullptr,
         const QString &filename = "",
         int line = 0,
@@ -194,7 +195,7 @@ public:
         size_t buffsize,
         QString str,
         QString &error,
-        uint32_t inst_addr = 0,
+        Address inst_addr = Address::null(),
         RelocExpressionList *reloc = nullptr,
         const QString &filename = "",
         int line = 0,

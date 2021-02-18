@@ -1149,7 +1149,7 @@ void MainWindow::compile_source() {
         return;
     }
     SymbolTableDb symtab(machine->symbol_table_rw(true));
-    machine::MemoryAccess *mem = machine->physical_address_space_rw();
+    machine::FrontendMemory *mem = machine->memory_data_bus_rw();
     if (mem == nullptr) {
         QMessageBox::critical(
             this, "QtMips Error",
@@ -1168,7 +1168,7 @@ void MainWindow::compile_source() {
     connect(
         &sasm, &SimpleAsm::report_message, this, &MainWindow::report_message);
 
-    sasm.setup(mem, &symtab, 0x80020000);
+    sasm.setup(mem, &symtab, machine::Address(0x80020000));
 
     int ln = 1;
     for (QTextBlock block = doc->begin(); block.isValid();

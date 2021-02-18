@@ -12,6 +12,8 @@ CONFIG += staticlib
 INCLUDEPATH += $$PWD/..
 INCLUDEPATH += $$PWD/../qtmips_machine
 DEPENDPATH += $$PWD/../qtmips_machine
+QMAKE_CXXFLAGS_DEBUG += -fsanitize=address -fno-omit-frame-pointer
+QMAKE_LFLAGS_DEBUG += -fsanitize=address
 
 LIBS += -lelf
 QMAKE_CXXFLAGS += -std=c++14

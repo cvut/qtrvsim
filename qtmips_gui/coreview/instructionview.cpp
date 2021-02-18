@@ -38,6 +38,7 @@
 #include "fontsize.h"
 #include "qtmips_machine/instruction.h"
 #include "qtmips_machine/machinedefs.h"
+#include "qtmips_machine/memory/address.h"
 
 #include <QFont>
 #include <QPainter>
@@ -62,7 +63,9 @@ InstructionView::InstructionView(QColor bgnd)
     this->bgnd = std::move(bgnd);
     valid = false;
     // Initialize to NOP
-    instruction_update(machine::Instruction(), 0, machine::EXCAUSE_NONE, false);
+    instruction_update(
+        machine::Instruction(), machine::Address::null(), machine::EXCAUSE_NONE,
+        false);
 }
 
 QRectF InstructionView::boundingRect() const {
@@ -88,7 +91,7 @@ void InstructionView::paint(
 
 void InstructionView::instruction_update(
     const machine::Instruction &i,
-    uint32_t inst_addr,
+    machine::Address inst_addr,
     machine::ExceptionCause excause,
     bool valid) {
     this->valid = valid;

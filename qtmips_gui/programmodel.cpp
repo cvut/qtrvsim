@@ -36,39 +36,42 @@
 #include "programmodel.h"
 
 #include <QBrush>
+#include <QtGui/qbrush.h>
 
 ProgramModel::ProgramModel(QObject *parent)
     : Super(parent)
     , data_font("Monospace") {
-    index0_offset = 0;
+    index0_offset = machine::Address::null();
     data_font.setStyleHint(QFont::TypeWriter);
     machine = nullptr;
     memory_change_counter = 0;
     cache_program_change_counter = 0;
-    for (unsigned int &i : stage_addr) {
+    for (auto &i : stage_addr) {
         i = machine::STAGEADDR_NONE;
     }
     stages_need_update = false;
 }
 
-const machine::MemoryAccess *ProgramModel::mem_access() const {
+const machine::FrontendMemory *ProgramModel::mem_access() const {
     if (machine == nullptr) {
         return nullptr;
     }
-    if (machine->physical_address_space() != nullptr) {
-        return machine->physical_address_space();
+    if (machine->memory_data_bus() != nullptr) {
+        return machine->memory_data_bus();
     }
-    return machine->memory();
+    throw std::logic_error("Use of backend memory in frontend."); // TODO
+    //    return machine->memory();
 }
 
-machine::MemoryAccess *ProgramModel::mem_access_rw() const {
+machine::FrontendMemory *ProgramModel::mem_access_rw() const {
     if (machine == nullptr) {
         return nullptr;
     }
-    if (machine->physical_address_space_rw() != nullptr) {
-        return machine->physical_address_space_rw();
+    if (machine->memory_data_bus_rw() != nullptr) {
+        return machine->memory_data_bus_rw();
     }
-    return machine->memory_rw();
+    throw std::logic_error("Use of backend memory in frontend."); // TODO
+    //    return machine->memory_rw();
 }
 
 int ProgramModel::rowCount(const QModelIndex & /*parent*/) const {
@@ -78,7 +81,6 @@ int ProgramModel::rowCount(const QModelIndex & /*parent*/) const {
 int ProgramModel::columnCount(const QModelIndex & /*parent*/) const {
     return 4;
 }
-
 QVariant ProgramModel::headerData(
     int section,
     Qt::Orientation orientation,
@@ -98,17 +100,17 @@ QVariant ProgramModel::headerData(
 }
 
 QVariant ProgramModel::data(const QModelIndex &index, int role) const {
-    const machine::MemoryAccess *mem;
+    const machine::FrontendMemory *mem;
 
     if (role == Qt::DisplayRole || role == Qt::EditRole) {
         QString s, t;
-        uint32_t address;
+        machine::Address address;
         if (!get_row_address(address, index.row())) {
             return QString("");
         }
 
         if (index.column() == 1) {
-            t = QString::number(address, 16);
+            t = QString::number(address.get_raw(), 16);
             s.fill('0', 8 - t.count());
             return "0x" + s + t.toUpper();
         }
@@ -118,7 +120,7 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
             return QString(" ");
         }
 
-        machine::Instruction inst(mem->read_word(address));
+        machine::Instruction inst(mem->read_u32(address));
 
         switch (index.column()) {
         case 0:
@@ -136,7 +138,7 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
         }
     }
     if (role == Qt::BackgroundRole) {
-        uint32_t address;
+        machine::Address address;
         if (!get_row_address(address, index.row()) || machine == nullptr) {
             return QVariant();
         }
@@ -178,7 +180,7 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
 
 void ProgramModel::setup(machine::QtMipsMachine *machine) {
     this->machine = machine;
-    for (unsigned int &i : stage_addr) {
+    for (auto &i : stage_addr) {
         i = machine::STAGEADDR_NONE;
     }
     if (machine != nullptr) {
@@ -188,14 +190,14 @@ void ProgramModel::setup(machine::QtMipsMachine *machine) {
     }
     if (mem_access() != nullptr) {
         connect(
-            mem_access(), &machine::MemoryAccess::external_change_notify, this,
-            &ProgramModel::check_for_updates);
+            mem_access(), &machine::FrontendMemory::external_change_notify,
+            this, &ProgramModel::check_for_updates);
     }
     emit update_all();
 }
 
 void ProgramModel::update_all() {
-    const machine::MemoryAccess *mem;
+    const machine::FrontendMemory *mem;
     mem = mem_access();
     if (mem != nullptr) {
         memory_change_counter = mem->get_change_counter();
@@ -210,7 +212,7 @@ void ProgramModel::update_all() {
 
 void ProgramModel::check_for_updates() {
     bool need_update = stages_need_update;
-    const machine::MemoryAccess *mem;
+    const machine::FrontendMemory *mem;
     mem = mem_access();
     if (mem == nullptr) {
         return;
@@ -231,15 +233,15 @@ void ProgramModel::check_for_updates() {
     update_all();
 }
 
-bool ProgramModel::adjustRowAndOffset(int &row, uint32_t address) {
+bool ProgramModel::adjustRowAndOffset(int &row, machine::Address address) {
     row = rowCount() / 2;
-    address -= address % cellSizeBytes();
+    address -= address.get_raw() % cellSizeBytes();
     uint32_t row_bytes = cellSizeBytes();
     uint32_t diff = row * row_bytes;
-    if (diff > address) {
-        row = address / row_bytes;
+    if (diff > address.get_raw()) {
+        row = address.get_raw() / row_bytes;
         if (row == 0) {
-            index0_offset = 0;
+            index0_offset = machine::Address::null();
         } else {
             index0_offset = address - row * row_bytes;
         }
@@ -250,7 +252,7 @@ bool ProgramModel::adjustRowAndOffset(int &row, uint32_t address) {
 }
 
 void ProgramModel::toggle_hw_break(const QModelIndex &index) {
-    uint32_t address;
+    machine::Address address;
     if (index.column() != 0 || machine == nullptr) {
         return;
     }
@@ -282,9 +284,9 @@ bool ProgramModel::setData(
     if (role == Qt::EditRole) {
         bool ok;
         QString error;
-        uint32_t address;
+        machine::Address address;
         uint32_t data;
-        machine::MemoryAccess *mem;
+        machine::FrontendMemory *mem;
         if (!get_row_address(address, index.row())) {
             return false;
         }
@@ -301,7 +303,7 @@ bool ProgramModel::setData(
             if (!ok) {
                 return false;
             }
-            mem->write_word(address, data);
+            mem->write_u32(address, data);
             break;
         case 3:
             if (machine::Instruction::code_from_string(
@@ -312,7 +314,7 @@ bool ProgramModel::setData(
 
                 return false;
             }
-            mem->write_word(address, data);
+            mem->write_u32(address, data);
             break;
         default: return false;
         }
@@ -320,7 +322,7 @@ bool ProgramModel::setData(
     return true;
 }
 
-void ProgramModel::update_stage_addr(uint stage, uint32_t addr) {
+void ProgramModel::update_stage_addr(uint stage, machine::Address addr) {
     if (stage < STAGEADDR_COUNT) {
         if (stage_addr[stage] != addr) {
             stage_addr[stage] = addr;

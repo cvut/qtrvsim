@@ -12,6 +12,8 @@
  *
  * Copyright (c) 2017-2019 Karel Koci<cynerd@email.cz>
  * Copyright (c) 2019      Pavel Pisa <pisa@cmp.felk.cvut.cz>
+ * Copyright (c) 2020-2021 Jakub Dupak <dupakjak@fel.cvut.cz>
+ * Copyright (c) 2020-2021 Max Hollmann <hollmmax@fel.cvut.cz>
  *
  * Faculty of Electrical Engineering (http://www.fel.cvut.cz)
  * Czech Technical University        (http://www.cvut.cz/)
@@ -37,9 +39,9 @@
 #define CACHE_H
 
 #include "machineconfig.h"
-#include "memory/backend/memory.h"
 #include "memory/cache/cache_policy.h"
 #include "memory/cache/cache_types.h"
+#include "memory/frontend_memory.h"
 
 #include <cstdint>
 #include <memory>
@@ -66,11 +68,11 @@ constexpr size_t BLOCK_ITEM_SIZE = sizeof(uint32_t);
  * into cache, it is determined by cache replacement policy
  * (see `memory/cache/cache_policy.h`).
  */
-class Cache : public MemoryAccess {
+class Cache : public FrontendMemory {
     Q_OBJECT
 public:
     Cache(
-        MemoryAccess *memory,
+        FrontendMemory *memory,
         const CacheConfig *config,
         uint32_t memory_access_penalty_r = 1,
         uint32_t memory_access_penalty_w = 1,
@@ -78,8 +80,18 @@ public:
 
     ~Cache() override;
 
-    bool wword(uint32_t address, uint32_t value) override;
-    uint32_t rword(uint32_t address, bool debug_access = false) const override;
+    WriteResult write(
+        Address destination,
+        const void *source,
+        size_t size,
+        WriteOptions options) override;
+
+    ReadResult read(
+        void *destination,
+        Address source,
+        size_t size,
+        ReadOptions options) const override;
+
     uint32_t get_change_counter() const override;
 
     void flush();         // flush cache
@@ -99,14 +111,11 @@ public:
 
     const CacheConfig &get_config() const;
 
-    enum LocationStatus location_status(uint32_t address) const override;
+    enum LocationStatus location_status(Address address) const override;
 
 signals:
-
     void hit_update(uint32_t) const;
-
     void miss_update(uint32_t) const;
-
     void statistics_update(
         uint32_t stalled_cycles,
         double speed_improv,
@@ -120,16 +129,14 @@ signals:
         size_t tag,
         const uint32_t *data,
         bool write) const;
-
     void memory_writes_update(uint32_t) const;
-
     void memory_reads_update(uint32_t) const;
 
 private:
     const CacheConfig cache_config;
-    MemoryAccess *const mem = nullptr;
-    const uint32_t uncached_start;
-    const uint32_t uncached_last;
+    FrontendMemory *const mem = nullptr;
+    const Address uncached_start;
+    const Address uncached_last;
     const uint32_t access_pen_r, access_pen_w, access_pen_b;
     const std::unique_ptr<CachePolicy> replacement_policy;
 
@@ -139,22 +146,21 @@ private:
                      mem_reads = 0, mem_writes = 0, burst_reads = 0,
                      burst_writes = 0, change_counter = 0;
 
-    void debug_read(uint32_t source, void *destination, size_t size) const;
+    void debug_read(Address source, void *destination, size_t size) const;
 
-    uint32_t calc_base_address(size_t tag, size_t row) const;
-
-    uint32_t debug_rword(uint32_t address) const;
-
-    bool access(uint32_t address, uint32_t *data, bool write, uint32_t value = 0)
-        const;
+    bool access(
+        Address address,
+        void *buffer,
+        size_t size,
+        AccessType access_type) const;
 
     void kick(size_t way, size_t row) const;
 
-    uint32_t base_address(uint32_t tag, unsigned row) const;
+    Address calc_base_address(size_t tag, size_t row) const;
 
     void update_all_statistics() const;
 
-    CacheLocation compute_location(uint32_t address) const;
+    CacheLocation compute_location(Address address) const;
 
     /**
      * Searches for given tag in a set
@@ -165,7 +171,17 @@ private:
      */
     size_t find_block_index(const CacheLocation &loc) const;
 
-    bool is_in_uncached_area(uint32_t source) const;
+    bool is_in_uncached_area(Address source) const;
+
+    /**
+     * RW access to cache may span multiple blocks but it needs to be
+     * performed per block.
+     * This functions calculated the size, that will have to be performed by
+     * repeated access (recursive call of `access` method).
+     */
+    size_t calculate_overflow_to_next_blocks(
+        size_t access_size,
+        const CacheLocation &loc) const;
 };
 
 } // namespace machine

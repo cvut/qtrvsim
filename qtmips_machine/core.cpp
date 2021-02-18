@@ -42,8 +42,8 @@ using namespace machine;
 
 Core::Core(
     Registers *regs,
-    MemoryAccess *mem_program,
-    MemoryAccess *mem_data,
+    FrontendMemory *mem_program,
+    FrontendMemory *mem_data,
     unsigned int min_cache_row_size,
     Cop0State *cop0state)
     : ex_handlers()
@@ -83,11 +83,11 @@ void Core::reset() {
     do_reset();
 }
 
-unsigned Core::cycles() const {
+unsigned Core::get_cycle_count() const {
     return cycle_c;
 }
 
-unsigned Core::stalls() const {
+unsigned Core::get_stall_count() const {
     return stall_c;
 }
 
@@ -99,30 +99,29 @@ Cop0State *Core::get_cop0state() {
     return cop0state;
 }
 
-MemoryAccess *Core::get_mem_data() {
+FrontendMemory *Core::get_mem_data() {
     return mem_data;
 }
 
-MemoryAccess *Core::get_mem_program() {
+FrontendMemory *Core::get_mem_program() {
     return mem_program;
 }
 
-Core::hwBreak::hwBreak(uint32_t addr) {
-    this->addr = addr;
+Core::hwBreak::hwBreak(Address addr) : addr(addr) {
     flags = 0;
     count = 0;
 }
 
-void Core::insert_hwbreak(uint32_t address) {
+void Core::insert_hwbreak(Address address) {
     hw_breaks.insert(address, new hwBreak(address));
 }
 
-void Core::remove_hwbreak(uint32_t address) {
+void Core::remove_hwbreak(Address address) {
     hwBreak *hwbrk = hw_breaks.take(address);
-    { delete hwbrk; }
+    delete hwbrk;
 }
 
-bool Core::is_hwbreak(uint32_t address) {
+bool Core::is_hwbreak(Address address) {
     hwBreak *hwbrk = hw_breaks.value(address);
     return hwbrk != nullptr;
 }
@@ -147,7 +146,7 @@ void Core::register_exception_handler(
     ExceptionCause excause,
     ExceptionHandler *exhandler) {
     if (excause == EXCAUSE_NONE) {
-        { delete ex_default_handler; }
+        delete ex_default_handler;
         ex_default_handler = exhandler;
     } else {
         ExceptionHandler *old = ex_handlers.take(excause);
@@ -160,11 +159,11 @@ bool Core::handle_exception(
     Core *core,
     Registers *regs,
     ExceptionCause excause,
-    uint32_t inst_addr,
-    uint32_t next_addr,
-    uint32_t jump_branch_pc,
+    Address inst_addr,
+    Address next_addr,
+    Address jump_branch_pc,
     bool in_delay_slot,
-    uint32_t mem_ref_addr) {
+    Address mem_ref_addr) {
     bool ret = false;
     if (excause == EXCAUSE_HWBREAK) {
         if (in_delay_slot) {
@@ -176,9 +175,9 @@ bool Core::handle_exception(
 
     if (cop0state != nullptr) {
         if (in_delay_slot) {
-            cop0state->write_cop0reg(Cop0State::EPC, jump_branch_pc);
+            cop0state->write_cop0reg(Cop0State::EPC, jump_branch_pc.get_raw());
         } else {
-            cop0state->write_cop0reg(Cop0State::EPC, inst_addr);
+            cop0state->write_cop0reg(Cop0State::EPC, inst_addr.get_raw());
         }
         cop0state->update_execption_cause(excause, in_delay_slot);
         if (cop0state->read_cop0reg(Cop0State::EBase) != 0
@@ -221,11 +220,12 @@ enum ExceptionCause Core::memory_special(
     bool memwrite,
     RegisterValue &towrite_val,
     RegisterValue rt_value,
-    uint32_t mem_addr) {
+    Address mem_addr) {
+    UNUSED(mode)
+
     uint32_t mask;
     uint32_t shift;
     uint32_t temp;
-    (void)mode;
 
     switch (memctl) {
     case AC_CACHE_OP:
@@ -236,41 +236,41 @@ enum ExceptionCause Core::memory_special(
         if (!memwrite) {
             break;
         }
-        mem_data->write_ctl(AC_WORD, mem_addr, rt_value.as_u32());
+        mem_data->write_u32(mem_addr, rt_value.as_u32());
         towrite_val = 1;
         break;
     case AC_LOAD_LINKED:
         if (!memread) {
             break;
         }
-        towrite_val = mem_data->read_ctl(AC_WORD, mem_addr);
+        towrite_val = mem_data->read_u32(mem_addr);
         break;
     case AC_WORD_RIGHT:
         if (memwrite) {
-            shift = (3 - (mem_addr & 3)) << 3;
+            shift = (3u - (mem_addr.get_raw() & 3u)) << 3;
             mask = 0xffffffff << shift;
-            temp = mem_data->read_ctl(AC_WORD, mem_addr & ~3);
+            temp = mem_data->read_u32(mem_addr & ~3u);
             temp = (temp & ~mask) | (rt_value.as_u32() << shift);
-            mem_data->write_ctl(AC_WORD, mem_addr & ~3, temp);
+            mem_data->write_u32(mem_addr & ~3u, temp);
         } else {
-            shift = (3 - (mem_addr & 3)) << 3;
+            shift = (3u - (mem_addr.get_raw() & 3u)) << 3;
             mask = 0xffffffff >> shift;
-            towrite_val = mem_data->read_ctl(AC_WORD, mem_addr & ~3);
+            towrite_val = mem_data->read_u32(mem_addr & ~3u);
             towrite_val
                 = (towrite_val.as_u32() >> shift) | (rt_value.as_u32() & ~mask);
         }
         break;
     case AC_WORD_LEFT:
         if (memwrite) {
-            shift = (mem_addr & 3) << 3;
+            shift = (mem_addr.get_raw() & 3u) << 3;
             mask = 0xffffffff >> shift;
-            temp = mem_data->read_ctl(AC_WORD, mem_addr & ~3);
+            temp = mem_data->read_u32(mem_addr & ~3);
             temp = (temp & ~mask) | (rt_value.as_u32() >> shift);
-            mem_data->write_ctl(AC_WORD, mem_addr & ~3, temp);
+            mem_data->write_u32(mem_addr & ~3, temp);
         } else {
-            shift = (mem_addr & 3) << 3;
+            shift = (mem_addr.get_raw() & 3u) << 3;
             mask = 0xffffffff << shift;
-            towrite_val = mem_data->read_ctl(AC_WORD, mem_addr & ~3);
+            towrite_val = mem_data->read_u32(mem_addr & ~3);
             towrite_val
                 = (towrite_val.as_u32() << shift) | (rt_value.as_u32() & ~mask);
         }
@@ -283,8 +283,8 @@ enum ExceptionCause Core::memory_special(
 
 struct Core::dtFetch Core::fetch(bool skip_break) {
     enum ExceptionCause excause = EXCAUSE_NONE;
-    uint32_t inst_addr = regs->read_pc();
-    Instruction inst(mem_program->read_word(inst_addr));
+    Address inst_addr = Address(regs->read_pc());
+    Instruction inst(mem_program->read_u32(inst_addr));
 
     if (!skip_break) {
         hwBreak *brk = hw_breaks.value(inst_addr);
@@ -338,7 +338,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     // requires rs for beq, bne, blez, bgtz, jr nad jalr
     bool bjr_req_rs = flags & IMF_BJR_REQ_RS;
     if (flags & IMF_PC8_TO_RT) {
-        val_rt = dt.inst_addr + 8;
+        val_rt = (dt.inst_addr + 8).get_raw();
     }
     // requires rt for beq, bne
     bool bjr_req_rt = flags & IMF_BJR_REQ_RT;
@@ -371,7 +371,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     emit decode_regd31_value(regd31);
 
     if (regd31) {
-        val_rt = dt.inst_addr + 8;
+        val_rt = (dt.inst_addr + 8).get_raw();
     }
 
     rwrite = regd31 ? 31 : regd ? num_rd : num_rt;
@@ -490,7 +490,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
             }
             break;
         case ALU_OP_ERET:
-            regs->pc_abs_jmp(cop0state->read_cop0reg(Cop0State::EPC));
+            regs->pc_abs_jmp(Address(cop0state->read_cop0reg(Cop0State::EPC)));
             if (cop0state != nullptr) {
                 cop0state->set_status_exl(false);
             }
@@ -544,12 +544,12 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
 
 struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
     RegisterValue towrite_val = dt.alu_val;
-    uint32_t mem_addr = dt.alu_val.as_u32();
-    enum ExceptionCause excause = dt.excause;
+    Address mem_addr = Address(dt.alu_val.as_u32());
     bool memread = dt.memread;
     bool memwrite = dt.memwrite;
     bool regwrite = dt.regwrite;
 
+    enum ExceptionCause excause = dt.excause;
     if (excause == EXCAUSE_NONE) {
         if (dt.memctl > AC_LAST_REGULAR) {
             excause = memory_special(
@@ -557,7 +557,7 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
                 dt.val_rt, mem_addr);
         } else {
             if (memwrite) {
-                mem_data->write_ctl(dt.memctl, mem_addr, dt.val_rt.as_u32());
+                mem_data->write_ctl(dt.memctl, mem_addr, dt.val_rt);
             }
             if (memread) {
                 towrite_val = mem_data->read_ctl(dt.memctl, mem_addr);
@@ -621,7 +621,7 @@ bool Core::handle_pc(const struct dtDecode &dt) {
             emit fetch_jump_value(true);
             emit fetch_jump_reg_value(false);
         } else {
-            regs->pc_abs_jmp(dt.val_rs.as_u32());
+            regs->pc_abs_jmp(Address(dt.val_rs.as_u32()));
             emit fetch_jump_value(false);
             emit fetch_jump_reg_value(true);
         }
@@ -673,7 +673,8 @@ void Core::dtDecodeInit(struct dtDecode &dt) {
     dt.alusrc = false;
     dt.regd = false;
     dt.regwrite = false;
-    dt.bjr_req_rs = false; // requires rs for beq, bne, blez, bgtz, jr nad jalr
+    dt.bjr_req_rs = false; // requires rs for beq, bne, blez, bgtz, jr nad
+                           // jalr
     dt.bjr_req_rt = false; // requires rt for beq, bne
     dt.jump = false;
     dt.bj_not = false;
@@ -720,7 +721,7 @@ void Core::dtMemoryInit(struct dtMemory &dt) {
     dt.regwrite = false;
     dt.rwrite = false;
     dt.towrite_val = 0;
-    dt.mem_addr = 0;
+    dt.mem_addr = 0x0_addr;
     dt.excause = EXCAUSE_NONE;
     dt.in_delay_slot = false;
     dt.stop_if = false;
@@ -729,8 +730,8 @@ void Core::dtMemoryInit(struct dtMemory &dt) {
 
 CoreSingle::CoreSingle(
     Registers *regs,
-    MemoryAccess *mem_program,
-    MemoryAccess *mem_data,
+    FrontendMemory *mem_program,
+    FrontendMemory *mem_data,
     bool jmp_delay_slot,
     unsigned int min_cache_row_size,
     Cop0State *cop0state)
@@ -744,7 +745,7 @@ CoreSingle::CoreSingle(
 }
 
 CoreSingle::~CoreSingle() {
-    { delete dt_f; }
+    delete dt_f;
 }
 
 void CoreSingle::do_step(bool skip_break) {
@@ -772,7 +773,8 @@ void CoreSingle::do_step(bool skip_break) {
             dt_f->in_delay_slot = branch_taken;
             if (d.nb_skip_ds && !branch_taken) {
                 // Discard processing of instruction in delay slot
-                // for BEQL, BNEL, BLEZL, BGTZL, BLTZL, BGEZL, BLTZALL, BGEZALL
+                // for BEQL, BNEL, BLEZL, BGTZL, BLTZL, BGEZL, BLTZALL,
+                // BGEZALL
                 dtFetchInit(*dt_f);
             }
         }
@@ -793,15 +795,15 @@ void CoreSingle::do_step(bool skip_break) {
 void CoreSingle::do_reset() {
     if (dt_f != nullptr) {
         Core::dtFetchInit(*dt_f);
-        dt_f->inst_addr = 0;
+        dt_f->inst_addr = Address::null();
     }
-    prev_inst_addr = 0;
+    prev_inst_addr = Address::null();
 }
 
 CorePipelined::CorePipelined(
     Registers *regs,
-    MemoryAccess *mem_program,
-    MemoryAccess *mem_data,
+    FrontendMemory *mem_program,
+    FrontendMemory *mem_data,
     enum MachineConfig::HazardUnit hazard_unit,
     unsigned int min_cache_row_size,
     Cop0State *cop0state)
@@ -814,7 +816,7 @@ void CorePipelined::do_step(bool skip_break) {
     bool stall = false;
     bool branch_stall = false;
     bool excpt_in_progress;
-    uint32_t jump_branch_pc = dt_m.inst_addr;
+    Address jump_branch_pc = dt_m.inst_addr;
 
     // Process stages
     writeback(dt_m);
@@ -856,8 +858,8 @@ void CorePipelined::do_step(bool skip_break) {
     dt_d.ff_rt = FORWARD_NONE;
 
     if (hazard_unit != MachineConfig::HU_NONE) {
-        // Note: We make exception with $0 as that has no effect when written
-        // and is used in nop instruction
+        // Note: We make exception with $0 as that has no effect when
+        // written and is used in nop instruction
 
 #define HAZARD(STAGE)                                                          \
     ((STAGE).regwrite && (STAGE).rwrite != 0                                   \
@@ -993,24 +995,24 @@ void CorePipelined::do_step(bool skip_break) {
 
 void CorePipelined::do_reset() {
     dtFetchInit(dt_f);
-    dt_f.inst_addr = 0;
+    dt_f.inst_addr = 0x0_addr;
     dtDecodeInit(dt_d);
-    dt_d.inst_addr = 0;
+    dt_d.inst_addr = 0x0_addr;
     dtExecuteInit(dt_e);
-    dt_e.inst_addr = 0;
+    dt_e.inst_addr = 0x0_addr;
     dtMemoryInit(dt_m);
-    dt_m.inst_addr = 0;
+    dt_m.inst_addr = 0x0_addr;
 }
 
 bool StopExceptionHandler::handle_exception(
     Core *core,
     Registers *regs,
     ExceptionCause excause,
-    uint32_t inst_addr,
-    uint32_t next_addr,
-    uint32_t jump_branch_pc,
+    Address inst_addr,
+    Address next_addr,
+    Address jump_branch_pc,
     bool in_delay_slot,
-    uint32_t mem_ref_addr) {
+    Address mem_ref_addr) {
 #if 0
     printf("Exception cause %d instruction PC 0x%08lx next PC 0x%08lx jump branch PC 0x%08lx "
            "in_delay_slot %d registers PC 0x%08lx mem ref 0x%08lx\n",

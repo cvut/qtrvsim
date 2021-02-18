@@ -35,6 +35,7 @@
 
 #include "registers.h"
 
+#include "memory/address.h"
 #include "qtmipsexception.h"
 
 using namespace machine;
@@ -42,8 +43,8 @@ using namespace machine;
 // TODO should this be configurable?
 //////////////////////////////////////////////////////////////////////////////
 /// Program counter initial value
-#define PC_INIT 0x80020000
-#define SP_INIT 0xbfffff00
+#define PC_INIT 0x80020000_addr
+#define SP_INIT 0xbfffff00_addr
 //////////////////////////////////////////////////////////////////////////////
 
 Registers::Registers() : QObject() {
@@ -57,17 +58,17 @@ Registers::Registers(const Registers &orig) : QObject() {
     this->gp = orig.gp;
 }
 
-uint32_t Registers::read_pc() const {
+Address Registers::read_pc() const {
     return this->pc;
 }
 
-uint32_t Registers::pc_inc() {
+Address Registers::pc_inc() {
     this->pc += 4;
     emit pc_update(this->pc);
     return this->pc;
 }
 
-uint32_t Registers::pc_jmp(int32_t offset) {
+Address Registers::pc_jmp(int32_t offset) {
     if (offset % 4) {
         throw QTMIPS_EXCEPTION(
             UnalignedJump, "Trying to jump by unaligned offset",
@@ -78,18 +79,18 @@ uint32_t Registers::pc_jmp(int32_t offset) {
     return this->pc;
 }
 
-void Registers::pc_abs_jmp(uint32_t address) {
-    if (address % 4) {
+void Registers::pc_abs_jmp(machine::Address address) {
+    if (address.get_raw() % 4) {
         throw QTMIPS_EXCEPTION(
             UnalignedJump, "Trying to jump to unaligned address",
-            QString::number(address, 16));
+            QString::number(address.get_raw(), 16));
     }
     this->pc = address;
     emit pc_update(this->pc);
 }
 
-void Registers::pc_abs_jmp_28(uint32_t address) {
-    this->pc_abs_jmp((pc & 0xF0000000) | (address & 0x0FFFFFFF));
+void Registers::pc_abs_jmp_28(Address address) {
+    this->pc_abs_jmp((pc & 0xF0000000) | (address & 0x0FFFFFFF).get_raw());
 }
 
 RegisterValue Registers::read_gp(RegisterId reg) const {
@@ -151,8 +152,8 @@ void Registers::reset() {
     for (int i = 1; i < 32; i++) {
         write_gp(i, 0);
     }
-    write_gp(29_reg, SP_INIT); // initialize to safe RAM area - corresponds to
-                               // Linux
+    write_gp(29_reg, SP_INIT.get_raw()); // initialize to safe RAM area -
+                                         // corresponds to Linux
     write_hi_lo(false, 0);
     write_hi_lo(true, 0);
 }

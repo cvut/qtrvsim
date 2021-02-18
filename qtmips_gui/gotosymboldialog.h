@@ -1,6 +1,8 @@
 #ifndef GOTOSYMBOLDIALOG_H
 #define GOTOSYMBOLDIALOG_H
 
+#include "qtmips_machine/memory/address.h"
+
 #include <QDialog>
 #include <QList>
 #include <QStringList>
@@ -16,8 +18,8 @@ public:
     explicit GoToSymbolDialog(QWidget *parent, QStringList &symlist);
     ~GoToSymbolDialog() override;
 signals:
-    void program_focus_addr(uint32_t);
-    void memory_focus_addr(uint32_t);
+    void program_focus_addr(machine::Address);
+    void memory_focus_addr(machine::Address);
     bool obtain_value_for_name(uint32_t &value, QString name) const;
 public slots:
     void show_prog();

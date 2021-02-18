@@ -41,8 +41,8 @@
 
 #include <QFile>
 #include <cstdint>
+#include <elf.h>
 #include <gelf.h>
-#include <libelf.h>
 #include <qstring.h>
 #include <qvector.h>
 #include <unistd.h>
@@ -51,14 +51,15 @@ namespace machine {
 
 class ProgramLoader {
 public:
-    ProgramLoader(const char *file);
-    ProgramLoader(const QString &file);
+    explicit ProgramLoader(const char *file);
+    explicit ProgramLoader(const QString &file);
     ~ProgramLoader();
 
-    void to_memory(Memory *mem); // Writes all loaded sections to memory
-    uint32_t end(); // Return address after which there is no more code for
-                    // sure
-    uint32_t get_executable_entry() const;
+    void to_memory(Memory *mem); // Writes all loaded sections to memory TODO:
+                                 // really to memory ???
+    Address end(); // Return address after which there is no more code for
+                   // sure
+    Address get_executable_entry() const;
     SymbolTable *get_symbol_table();
 
 private:
@@ -68,7 +69,7 @@ private:
     size_t n_secs {};    // number of sections in elf program header
     Elf32_Phdr *phdrs;   // program section headers
     QVector<size_t> map; // external index to phdrs index
-    uint32_t executable_entry;
+    Address executable_entry;
 };
 
 } // namespace machine

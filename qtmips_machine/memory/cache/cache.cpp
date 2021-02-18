@@ -12,6 +12,8 @@
  *
  * Copyright (c) 2017-2019 Karel Koci<cynerd@email.cz>
  * Copyright (c) 2019      Pavel Pisa <pisa@cmp.felk.cvut.cz>
+ * Copyright (c) 2020-2021 Jakub Dupak <dupakjak@fel.cvut.cz>
+ * Copyright (c) 2020-2021 Max Hollmann <hollmmax@fel.cvut.cz>
  *
  * Faculty of Electrical Engineering (http://www.fel.cvut.cz)
  * Czech Technical University        (http://www.cvut.cz/)
@@ -33,22 +35,22 @@
  *
  ******************************************************************************/
 
-#include "cache.h"
+#include "memory/cache/cache.h"
 
 #include "memory/cache/cache_types.h"
 
 namespace machine {
 
 Cache::Cache(
-    MemoryAccess *memory,
+    FrontendMemory *memory,
     const CacheConfig *config,
     uint32_t memory_access_penalty_r,
     uint32_t memory_access_penalty_w,
     uint32_t memory_access_penalty_b)
     : cache_config(config)
     , mem(memory)
-    , uncached_start(0xf0000000)
-    , uncached_last(0xfffffffe)
+    , uncached_start(0xf0000000_addr)
+    , uncached_last(0xfffffffe_addr)
     , access_pen_r(memory_access_penalty_r)
     , access_pen_w(memory_access_penalty_w)
     , access_pen_b(memory_access_penalty_b)
@@ -70,46 +72,62 @@ Cache::Cache(
 
 Cache::~Cache() = default;
 
-bool Cache::wword(uint32_t address, uint32_t value) {
-    if (!cache_config.enabled() || is_in_uncached_area(address)) {
+WriteResult Cache::write(
+    Address destination,
+    const void *source,
+    size_t size,
+    WriteOptions options) {
+    if (!cache_config.enabled() || is_in_uncached_area(destination)
+        || is_in_uncached_area(destination + size)) {
         mem_writes++;
         emit memory_writes_update(mem_writes);
         update_all_statistics();
-        return mem->write_word(address, value);
+        return mem->write(destination, source, size, options);
     }
 
-    uint32_t data;
-    const bool changed = access(address, &data, true, value);
+    // FIXME: Get rid of the cast
+    // access is mosttly the same for read and write but one needs to write
+    // to the address
+    const bool changed
+        = access(destination, const_cast<void *>(source), size, WRITE);
 
     if (cache_config.write_policy() != CacheConfig::WP_BACK) {
         mem_writes++;
         emit memory_writes_update(mem_writes);
         update_all_statistics();
-        return mem->write_word(address, value);
+        return mem->write(destination, source, size, options);
     }
-    return changed;
+
+    return { .n_bytes = size, .changed = changed };
 }
 
-uint32_t Cache::rword(uint32_t address, bool debug_access) const {
-    if (!cache_config.enabled() || is_in_uncached_area(address)) {
+ReadResult Cache::read(
+    void *destination,
+    Address source,
+    size_t size,
+    ReadOptions options) const {
+    if (!cache_config.enabled() || is_in_uncached_area(source)
+        || is_in_uncached_area(source + size)) {
         mem_reads++;
         emit memory_reads_update(mem_reads);
         update_all_statistics();
-        return mem->read_word(address, debug_access);
+        return mem->read(destination, source, size, options);
     }
 
-    if (debug_access) {
-        if (!(location_status(address) & LOCSTAT_CACHED)) {
-            return mem->read_word(address, debug_access);
+    if (options.debug) {
+        if (!(location_status(source) & LOCSTAT_CACHED)) {
+            mem->read(destination, source, size, options);
+        } else {
+            debug_read(source, destination, size);
         }
-        return debug_rword(address);
+        return {};
     }
-    uint32_t data;
-    access(address, &data, false);
-    return data;
-}
 
-bool Cache::is_in_uncached_area(uint32_t source) const {
+    access(source, destination, size, READ);
+
+    return {};
+}
+bool Cache::is_in_uncached_area(Address source) const {
     return (source >= uncached_start && source <= uncached_last);
 }
 
@@ -118,13 +136,14 @@ void Cache::flush() {
         return;
     }
 
-    for (size_t way = 0; way < cache_config.associativity(); way += 1) {
+    for (size_t assoc_index = 0; assoc_index < cache_config.associativity();
+         assoc_index += 1) {
         for (size_t set_index = 0; set_index < cache_config.set_count();
              set_index += 1) {
-            if (dt[way][set_index].valid) {
-                kick(way, set_index);
+            if (dt[assoc_index][set_index].valid) {
+                kick(assoc_index, set_index);
                 emit cache_update(
-                    way, set_index, 0, false, false, 0, nullptr, false);
+                    assoc_index, set_index, 0, false, false, 0, nullptr, false);
             }
         }
     }
@@ -164,26 +183,38 @@ void Cache::reset() {
     update_all_statistics();
 
     if (cache_config.enabled()) {
-        for (size_t way = 0; way < cache_config.associativity(); way++) {
+        for (size_t assoc_index = 0; assoc_index < cache_config.associativity();
+             assoc_index++) {
             for (size_t set_index = 0; set_index < cache_config.set_count();
                  set_index++) {
                 emit cache_update(
-                    way, set_index, 0, false, false, 0, nullptr, false);
+                    assoc_index, set_index, 0, false, false, 0, nullptr, false);
             }
         }
     }
 }
 
-uint32_t Cache::debug_rword(uint32_t address) const {
-    CacheLocation loc = compute_location(address);
-    for (size_t way = 0; way < cache_config.associativity(); way++)
-        if (dt[way][loc.row].valid && dt[way][loc.row].tag == loc.tag)
-            return dt[way][loc.row].data[loc.col];
-    return 0;
+void Cache::debug_read(Address source, void *destination, size_t size) const {
+    CacheLocation loc = compute_location(source);
+    for (size_t assoc_index = 0; assoc_index < cache_config.associativity();
+         assoc_index++) {
+        if (dt[assoc_index][loc.row].valid
+            && dt[assoc_index][loc.row].tag == loc.tag) {
+            memcpy(
+                destination,
+                (byte *)&dt[assoc_index][loc.row].data[loc.col] + loc.byte,
+                size);
+            return;
+        }
+    }
+    memset(destination, 0, size); // TODO is this correct
 }
 
-bool Cache::access(uint32_t address, uint32_t *data, bool write, uint32_t value)
-    const {
+bool Cache::access(
+    Address address,
+    void *buffer,
+    size_t size,
+    AccessType access_type) const {
     const CacheLocation loc = compute_location(address);
     size_t way = find_block_index(loc);
 
@@ -191,12 +222,23 @@ bool Cache::access(uint32_t address, uint32_t *data, bool write, uint32_t value)
     if (way >= cache_config.associativity()) {
         // if write through we do not need to allocate cache line does not
         // allocate
-        if (write
+        if (access_type == WRITE
             && cache_config.write_policy() == CacheConfig::WP_THROUGH_NOALLOC) {
             miss_write++;
             emit miss_update(get_miss_count());
             update_all_statistics();
-            return false;
+
+            const size_t size_overflow
+                = calculate_overflow_to_next_blocks(size, loc);
+            if (size_overflow > 0) {
+                const size_t size_within_block = size - size_overflow;
+                return access(
+                    address + size_within_block,
+                    (byte *)buffer + size_within_block, size_overflow,
+                    access_type);
+            } else {
+                return false;
+            }
         }
 
         way = replacement_policy->select_way_to_evict(loc.row);
@@ -211,7 +253,7 @@ bool Cache::access(uint32_t address, uint32_t *data, bool write, uint32_t value)
 
     // Update statistics and otherwise read from memory
     if (cd.valid) {
-        if (write) {
+        if (access_type == WRITE) {
             hit_write++;
         } else {
             hit_read++;
@@ -219,17 +261,22 @@ bool Cache::access(uint32_t address, uint32_t *data, bool write, uint32_t value)
         emit hit_update(get_hit_count());
         update_all_statistics();
     } else {
-        if (write) {
+        if (access_type == WRITE) {
             miss_write++;
         } else {
             miss_read++;
         }
         emit miss_update(get_miss_count());
-        for (size_t i = 0; i < cache_config.block_size(); i++) {
-            cd.data[i]
-                = mem->read_word(calc_base_address(loc.tag, loc.row) + (4 * i));
-            change_counter++;
-        }
+
+        mem->read(
+            cd.data.data(), calc_base_address(loc.tag, loc.row),
+            cache_config.block_size() * BLOCK_ITEM_SIZE, { .debug = false });
+
+        cd.valid = true;
+        cd.dirty = false;
+        cd.tag = loc.tag;
+
+        change_counter += cache_config.block_size();
         mem_reads += cache_config.block_size();
         burst_reads += cache_config.block_size() - 1;
         emit memory_reads_update(mem_reads);
@@ -238,32 +285,57 @@ bool Cache::access(uint32_t address, uint32_t *data, bool write, uint32_t value)
 
     replacement_policy->update_stats(way, loc.row, cd.valid);
 
-    cd.valid = true; // We either write to it or we read from memory. Either way
-                     // it's valid when we leave Cache class
-    cd.dirty = cd.dirty || write;
-    cd.tag = loc.tag;
-    *data = cd.data[loc.col];
+    const size_t size_overflow = calculate_overflow_to_next_blocks(size, loc);
+    const size_t size_within_block = size - size_overflow;
 
     bool changed = false;
-    if (write) {
-        changed = cd.data[loc.col] != value;
-        cd.data[loc.col] = value;
+
+    if (access_type == READ) {
+        memcpy(buffer, (byte *)&cd.data[loc.col] + loc.byte, size_within_block);
+    } else if (access_type == WRITE) {
+        cd.dirty = true;
+        changed = memcmp(
+                      (byte *)&cd.data[loc.col] + loc.byte, buffer,
+                      size_within_block)
+                  != 0;
+        if (changed) {
+            memcpy(
+                ((byte *)&cd.data[loc.col]) + loc.byte, buffer,
+                size_within_block);
+            change_counter++;
+        }
+    }
+    const auto last_affected_col
+        = (loc.col * BLOCK_ITEM_SIZE + size_within_block) / BLOCK_ITEM_SIZE;
+    for (auto col = loc.col; col < last_affected_col; col++) {
+        emit cache_update(
+            way, loc.row, col, cd.valid, cd.dirty, cd.tag, cd.data.data(),
+            access_type);
     }
 
-    emit cache_update(
-        way, loc.row, loc.col, cd.valid, cd.dirty, cd.tag, cd.data.data(),
-        write);
-    if (changed) {
-        change_counter++;
+    if (size_overflow > 0) {
+        // If access overlaps single cache row, perform access to next row.
+        changed |= access(
+            address + size_within_block, (byte *)buffer + size_within_block,
+            size_overflow, access_type);
     }
+
     return changed;
+}
+size_t Cache::calculate_overflow_to_next_blocks(
+    size_t access_size,
+    const CacheLocation &loc) const {
+    return std::max(
+        (ssize_t)(loc.col * BLOCK_ITEM_SIZE + loc.byte + access_size)
+            - (ssize_t)(cache_config.block_size() * BLOCK_ITEM_SIZE),
+        { 0 });
 }
 
 size_t Cache::find_block_index(const CacheLocation &loc) const {
     uint32_t index = 0;
     while (
         index < cache_config.associativity()
-        && (!dt[index][loc.row].valid || dt[index][loc.row].tag != loc.tag)) {
+        and (!dt[index][loc.row].valid or dt[index][loc.row].tag != loc.tag)) {
         index++;
     }
     return index;
@@ -272,9 +344,9 @@ size_t Cache::find_block_index(const CacheLocation &loc) const {
 void Cache::kick(size_t way, size_t row) const {
     struct CacheLine &cd = dt[way][row];
     if (cd.dirty && cache_config.write_policy() == CacheConfig::WP_BACK) {
-        for (unsigned i = 0; i < cache_config.block_size(); i++)
-            mem->write_word(
-                calc_base_address(cd.tag, row) + (4 * i), cd.data[i]);
+        mem->write(
+            calc_base_address(cd.tag, row), cd.data.data(),
+            cache_config.block_size() * BLOCK_ITEM_SIZE, {});
         mem_writes += cache_config.block_size();
         burst_writes += cache_config.block_size() - 1;
         emit memory_writes_update(mem_writes);
@@ -292,19 +364,19 @@ void Cache::update_all_statistics() const {
         get_stall_count(), get_speed_improvement(), get_hit_rate());
 }
 
-uint32_t Cache::calc_base_address(size_t tag, size_t row) const {
-    return (
+Address Cache::calc_base_address(size_t tag, size_t row) const {
+    return Address(
         (tag * cache_config.set_count() + row) * cache_config.block_size()
         * BLOCK_ITEM_SIZE);
 }
 
-CacheLocation Cache::compute_location(uint32_t address) const {
-    // Get address in multiples of 4 byte (basic storage unit size) amd get the
-    // reminder to addreess individual byte.
-    auto word_index = address / BLOCK_ITEM_SIZE;
-    auto byte = address % BLOCK_ITEM_SIZE;
-    // Associativity does not incluence location (hit will be on the
-    // same place in each way). Lets therefore assume associtivty degree 1.
+CacheLocation Cache::compute_location(Address address) const {
+    // Get address in multiples of 4 bytes (basic storage unit size) and get the
+    // reminder to address individual byte within basic storage unit.
+    auto word_index = address.get_raw() / BLOCK_ITEM_SIZE;
+    auto byte = address.get_raw() % BLOCK_ITEM_SIZE;
+    // Associativity does not influence location (hit will be on the
+    // same place in each way). Lets therefore assume associativity degree 1.
     // Same address modulo `way_size_words` will alias (up to associativity).
     auto way_size_words = cache_config.set_count() * cache_config.block_size();
     // Index in a way, when rows and cols would be rearranged into 1D array.
@@ -317,7 +389,7 @@ CacheLocation Cache::compute_location(uint32_t address) const {
              .byte = byte };
 }
 
-enum LocationStatus Cache::location_status(uint32_t address) const {
+enum LocationStatus Cache::location_status(Address address) const {
     const CacheLocation loc = compute_location(address);
 
     if (cache_config.enabled()) {

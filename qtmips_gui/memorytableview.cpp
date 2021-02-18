@@ -55,13 +55,14 @@ MemoryTableView::MemoryTableView(QWidget *parent, QSettings *settings)
         this, &MemoryTableView::adjust_scroll_pos_queue, this,
         &MemoryTableView::adjust_scroll_pos_process, Qt::QueuedConnection);
     this->settings = settings;
-    initial_address = settings->value("DataViewAddr0", 0).toULongLong();
+    initial_address
+        = machine::Address(settings->value("DataViewAddr0", 0).toULongLong());
     adjust_scroll_pos_in_progress = false;
     setTextElideMode(Qt::ElideNone);
 }
 
-void MemoryTableView::addr0_save_change(uint32_t val) {
-    settings->setValue("DataViewAddr0", val);
+void MemoryTableView::addr0_save_change(machine::Address val) {
+    settings->setValue("DataViewAddr0", qint64(val.get_raw()));
 }
 
 void MemoryTableView::adjustColumnCount() {
@@ -81,7 +82,7 @@ void MemoryTableView::adjustColumnCount() {
         QFontMetrics fm(*m->getFont());
         idx = m->index(0, 0);
         // int width0_dh = itemDelegate(idx)->sizeHint(viewOptions(),
-        // idx).width() + 2;
+        // idx).get_width() + 2;
         int width0_dh
             = delegate->sizeHintForText(viewOptions(), idx, "0x00000000").width()
               + 2;
@@ -116,9 +117,9 @@ void MemoryTableView::adjustColumnCount() {
             horizontalHeader()->setSectionResizeMode(i, QHeaderView::Fixed);
             horizontalHeader()->resizeSection(i, width1);
         }
-        if (initial_address != 0) {
+        if (!initial_address.is_null()) {
             go_to_address(initial_address);
-            initial_address = 0;
+            initial_address = machine::Address::null();
         }
     }
 }
@@ -128,7 +129,7 @@ void MemoryTableView::recompute_columns() {
 }
 
 void MemoryTableView::set_cell_size(int index) {
-    uint32_t address;
+    machine::Address address;
     int row;
     bool keep_row0 = false;
     MemoryModel *m = dynamic_cast<MemoryModel *>(model());
@@ -152,23 +153,24 @@ void MemoryTableView::adjust_scroll_pos_check() {
 
 void MemoryTableView::adjust_scroll_pos_process() {
     adjust_scroll_pos_in_progress = false;
-    uint32_t address;
+    machine::Address address;
     MemoryModel *m = dynamic_cast<MemoryModel *>(model());
     if (m == nullptr) {
         return;
     }
 
     QModelIndex prev_index = currentIndex();
-    uint32_t row_bytes = m->cellSizeBytes() * m->cellsPerRow();
-    uint32_t index0_offset = m->getIndex0Offset();
+    machine::Address row_bytes
+        = machine::Address(m->cellSizeBytes() * m->cellsPerRow());
+    machine::Address index0_offset = m->getIndex0Offset();
 
     do {
         int row = rowAt(0);
         int prev_row = row;
         if (row < m->rowCount() / 8) {
             if ((row == 0) && (index0_offset < row_bytes)
-                && (index0_offset != 0)) {
-                m->adjustRowAndOffset(row, 0);
+                && (!index0_offset.is_null())) {
+                m->adjustRowAndOffset(row, machine::Address::null());
             } else if (index0_offset > row_bytes) {
                 m->get_row_address(address, row);
                 m->adjustRowAndOffset(row, address);
@@ -193,11 +195,11 @@ void MemoryTableView::adjust_scroll_pos_process() {
 
 void MemoryTableView::resizeEvent(QResizeEvent *event) {
     MemoryModel *m = dynamic_cast<MemoryModel *>(model());
-    uint32_t address;
+    machine::Address address;
     bool keep_row0 = false;
 
     if (m != nullptr) {
-        if (initial_address == 0) {
+        if (initial_address.is_null()) {
             keep_row0 = m->get_row_address(address, rowAt(0));
         } else {
             address = initial_address;
@@ -206,12 +208,12 @@ void MemoryTableView::resizeEvent(QResizeEvent *event) {
     Super::resizeEvent(event);
     adjustColumnCount();
     if (keep_row0) {
-        initial_address = 0;
+        initial_address = machine::Address::null();
         go_to_address(address);
     }
 }
 
-void MemoryTableView::go_to_address(uint32_t address) {
+void MemoryTableView::go_to_address(machine::Address address) {
     MemoryModel *m = dynamic_cast<MemoryModel *>(model());
     int row;
     if (m == nullptr) {
@@ -224,7 +226,7 @@ void MemoryTableView::go_to_address(uint32_t address) {
     emit m->update_all();
 }
 
-void MemoryTableView::focus_address(uint32_t address) {
+void MemoryTableView::focus_address(machine::Address address) {
     int row;
     MemoryModel *m = dynamic_cast<MemoryModel *>(model());
     if (m == nullptr) {

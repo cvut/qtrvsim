@@ -33,11 +33,11 @@ SOURCES += \
     memory/cache/cache.cpp \
     memory/cache/cache_policy.cpp \
     memory/memory_bus.cpp \
+    memory/frontend_memory.cpp \
     memory/backend/memory.cpp \
     memory/backend/peripspiled.cpp \
-    memory/backend/lcddisplay.cpp \
-    memory/backend/peripheral.cpp \
-    memory/backend/serialport.cpp
+    memory/backend/serialport.cpp \
+    memory/backend/lcddisplay.cpp
 
 HEADERS += \
     qtmipsmachine.h \
@@ -50,14 +50,18 @@ HEADERS += \
     machineconfig.h \
     utils.h \
     machinedefs.h \
+    programloader.h \
     symboltable.h \
     cop0state.h \
+    memory/backend/memory.h \
     memory/cache/cache.h \
     memory/cache/cache_policy.h \
     memory/cache/cache_types.h \
+    memory/memory_utils.h \
     memory/memory_bus.h \
-    memory/backend/memory.h \
+    memory/frontend_memory.h \
     memory/backend/peripspiled.h \
     memory/backend/lcddisplay.h \
     memory/backend/peripheral.h \
     memory/backend/serialport.h \
+    memory/backend/backend_memory.h

@@ -12,6 +12,8 @@
  *
  * Copyright (c) 2017-2019 Karel Koci<cynerd@email.cz>
  * Copyright (c) 2019      Pavel Pisa <pisa@cmp.felk.cvut.cz>
+ * Copyright (c) 2020      Jakub Dupak <dupak.jakub@gmail.com>
+ * Copyright (c) 2020      Max Hollmann <hollmmax@fel.cvut.cz>
  *
  * Faculty of Electrical Engineering (http://www.fel.cvut.cz)
  * Czech Technical University        (http://www.cvut.cz/)
@@ -33,113 +35,121 @@
  *
  ******************************************************************************/
 
-#include "peripspiled.h"
+#include "memory/backend/peripspiled.h"
 
 using namespace machine;
 
-#define SPILED_REG_LED_LINE_o 0x004
-#define SPILED_REG_LED_RGB1_o 0x010
-#define SPILED_REG_LED_RGB2_o 0x014
-#define SPILED_REG_LED_KBDWR_DIRECT_o 0x018
+constexpr size_t SPILED_REG_LED_LINE_o = 0x004;
+constexpr size_t SPILED_REG_LED_RGB1_o = 0x010;
+constexpr size_t SPILED_REG_LED_RGB2_o = 0x014;
+constexpr size_t SPILED_REG_LED_KBDWR_DIRECT_o = 0x018;
 
-#define SPILED_REG_KBDRD_KNOBS_DIRECT_o 0x020
-#define SPILED_REG_KNOBS_8BIT_o 0x024
+constexpr size_t SPILED_REG_KBDRD_KNOBS_DIRECT_o = 0x020;
+constexpr size_t SPILED_REG_KNOBS_8BIT_o = 0x024;
 
-PeripSpiLed::PeripSpiLed() {
-    change_counter = 0;
-
-    spiled_reg_led_line = 0;
-    spiled_reg_led_rgb1 = 0;
-    spiled_reg_led_rgb2 = 0;
-    spiled_reg_led_kbdwr_direct = 0;
-
-    spiled_reg_kbdrd_knobs_direct = 0;
-    spiled_reg_knobs_8bit = 0;
-}
+PeripSpiLed::PeripSpiLed() = default;
 
 PeripSpiLed::~PeripSpiLed() = default;
 
-bool PeripSpiLed::wword(uint32_t address, uint32_t value) {
-    bool changed = false;
-#if 0
-    printf("PeripSpiLed::wword address 0x%08lx data 0x%08lx\n",
-           (unsigned long)address, (unsigned long)value);
-#endif
-    switch (address & ~3) {
-    case SPILED_REG_LED_LINE_o:
-        if (spiled_reg_led_line == value) {
-            break;
-        }
-        spiled_reg_led_line = value;
-        emit led_line_changed(value);
-        break;
-    case SPILED_REG_LED_RGB1_o:
-        if (spiled_reg_led_rgb1 == value) {
-            break;
-        }
-        spiled_reg_led_rgb1 = value;
-        emit led_rgb1_changed(value);
-        break;
-    case SPILED_REG_LED_RGB2_o:
-        if (spiled_reg_led_rgb2 == value) {
-            break;
-        }
-        spiled_reg_led_rgb2 = value;
-        emit led_rgb2_changed(value);
-        break;
-    default: break;
-    }
-
-    emit write_notification(address, value);
-
-    if (changed) {
-        change_counter++;
-    }
-    return changed;
+WriteResult PeripSpiLed::write(
+    Offset destination,
+    const void *source,
+    size_t size,
+    WriteOptions options) {
+    UNUSED(options)
+    return write_by_u32(
+        destination, source, size,
+        [&](Offset src) { return byteswap(read_reg(src)); },
+        [&](Offset src, uint32_t value) {
+            return write_reg(src, byteswap(value));
+        });
 }
 
-uint32_t PeripSpiLed::rword(uint32_t address, bool debug_access) const {
-    (void)debug_access;
-    uint32_t value = 0x00000000;
+ReadResult PeripSpiLed::read(
+    void *destination,
+    Offset source,
+    size_t size,
+    ReadOptions options) const {
+    UNUSED(options)
+    return read_by_u32(destination, source, size, [&](Offset src) {
+        return byteswap(read_reg(src));
+    });
+}
 
-    switch (address & ~3) {
-    case SPILED_REG_LED_LINE_o: value = spiled_reg_led_line; break;
-    case SPILED_REG_LED_RGB1_o: value = spiled_reg_led_rgb1; break;
-    case SPILED_REG_LED_RGB2_o: value = spiled_reg_led_rgb2; break;
-    case SPILED_REG_LED_KBDWR_DIRECT_o:
-        value = spiled_reg_led_kbdwr_direct;
-        break;
-    case SPILED_REG_KBDRD_KNOBS_DIRECT_o:
-        value = spiled_reg_kbdrd_knobs_direct;
-        break;
-    case SPILED_REG_KNOBS_8BIT_o: value = spiled_reg_knobs_8bit; break;
-    default: break;
-    }
+uint32_t PeripSpiLed::read_reg(Offset source) const {
+    Q_ASSERT((source & 3U) == 0); // uint32_t alligned
+    uint32_t value = [&]() {
+        switch (source) {
+        case SPILED_REG_LED_LINE_o: return spiled_reg_led_line;
+        case SPILED_REG_LED_RGB1_o: return spiled_reg_led_rgb1;
+        case SPILED_REG_LED_RGB2_o: return spiled_reg_led_rgb2;
+        case SPILED_REG_LED_KBDWR_DIRECT_o: return spiled_reg_led_kbdwr_direct;
+        case SPILED_REG_KBDRD_KNOBS_DIRECT_o:
+            return spiled_reg_kbdrd_knobs_direct;
+        case SPILED_REG_KNOBS_8BIT_o: return spiled_reg_knobs_8bit;
+        default:
+            // Todo show this to user as this is failure of supplied program
+            printf("[WARNING] PeripSpiLed: read to non-readable location.\n");
+            return 0u;
+        }
+    }();
 
-    emit read_notification(address, &value);
-
-#if 0
-    printf("PeripSpiLed::rword address 0x%08lx value 0x%08lx\n",
-           (unsigned long)address, (unsigned long)value);
-#endif
+    emit read_notification(source, value);
 
     return value;
 }
 
-uint32_t PeripSpiLed::get_change_counter() const {
-    return change_counter;
+bool PeripSpiLed::write_reg(Offset destination, uint32_t value) {
+    Q_ASSERT((destination & 3U) == 0); // uint32_t alligned
+
+    bool changed = [&]() {
+        switch (destination) {
+        case SPILED_REG_LED_LINE_o: {
+            if (spiled_reg_led_line != value) {
+                spiled_reg_led_line = value;
+                emit led_line_changed(spiled_reg_led_line);
+                return true;
+            }
+            return false;
+        }
+        case SPILED_REG_LED_RGB1_o:
+            if (spiled_reg_led_rgb1 != value) {
+                spiled_reg_led_rgb1 = value;
+                emit led_rgb1_changed(spiled_reg_led_rgb1);
+                return true;
+            }
+            return false;
+        case SPILED_REG_LED_RGB2_o:
+            if (spiled_reg_led_rgb2 != value) {
+                spiled_reg_led_rgb2 = value;
+                emit led_rgb2_changed(spiled_reg_led_rgb2);
+                return true;
+            }
+            return false;
+        default:
+            // Todo show this to user as this is failure of supplied program
+            printf("[WARNING] PeripSpiLed: write to non-writable location.\n");
+            return false;
+        }
+    }();
+
+    emit write_notification(destination, value);
+
+    return changed;
 }
 
-void PeripSpiLed::knob_update_notify(uint32_t val, uint32_t mask, int shift) {
+void PeripSpiLed::knob_update_notify(uint32_t val, uint32_t mask, size_t shift) {
     mask <<= shift;
     val <<= shift;
+
     if (!((spiled_reg_knobs_8bit ^ val) & mask)) {
         return;
     }
+
     spiled_reg_knobs_8bit &= ~mask;
     spiled_reg_knobs_8bit |= val;
-    change_counter++;
-    emit external_change_notify(
+
+    emit external_backend_change_notify(
         this, SPILED_REG_KNOBS_8BIT_o, SPILED_REG_KNOBS_8BIT_o + 3, true);
 }
 
@@ -165,4 +175,21 @@ void PeripSpiLed::green_knob_push(bool state) {
 
 void PeripSpiLed::blue_knob_push(bool state) {
     knob_update_notify(state ? 1 : 0, 1, 24);
+}
+LocationStatus PeripSpiLed::location_status(Offset offset) const {
+    switch (offset & ~3U) {
+    case SPILED_REG_LED_LINE_o: FALLTROUGH
+    case SPILED_REG_LED_RGB1_o: FALLTROUGH
+    case SPILED_REG_LED_RGB2_o: {
+        return LOCSTAT_NONE;
+    }
+    case SPILED_REG_LED_KBDWR_DIRECT_o: FALLTROUGH
+    case SPILED_REG_KBDRD_KNOBS_DIRECT_o: FALLTROUGH
+    case SPILED_REG_KNOBS_8BIT_o: {
+        return LOCSTAT_READ_ONLY;
+    }
+    default: {
+        return LOCSTAT_ILLEGAL;
+    }
+    }
 }

@@ -35,8 +35,8 @@
 
 #include "value.h"
 
-#include "../fontsize.h"
 #include "coreview_colors.h"
+#include "fontsize.h"
 
 using namespace coreview;
 

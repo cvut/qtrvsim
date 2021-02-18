@@ -36,6 +36,7 @@
 #ifndef MEMORYDOCK_H
 #define MEMORYDOCK_H
 
+#include "qtmips_machine/memory/address.h"
 #include "qtmips_machine/qtmipsmachine.h"
 
 #include <QComboBox>
@@ -54,7 +55,7 @@ public:
 
 signals:
     void machine_setup(machine::QtMipsMachine *machine);
-    void focus_addr(uint32_t);
+    void focus_addr(machine::Address);
 
 private:
 };

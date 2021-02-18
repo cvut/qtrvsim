@@ -35,7 +35,9 @@
 
 #include "qtmips_machine/core.h"
 #include "qtmips_machine/machineconfig.h"
+#include "qtmips_machine/memory/backend/memory.h"
 #include "qtmips_machine/memory/cache/cache.h"
+#include "qtmips_machine/memory/memory_bus.h"
 #include "tst_machine.h"
 
 #include <QVector>
@@ -195,12 +197,17 @@ void MachineTests::singlecore_regs() {
     QFETCH(Registers, res);
 
     Memory mem; // Just memory (it shouldn't be used here except instruction)
-    mem.write_word(res.read_pc(), i.data()); // Store single instruction
-                                             // (anything else should be 0 so
-                                             // NOP effectively)
-    Memory mem_used(mem);                    // Create memory copy
+    TrivialBus mem_frontend(&mem);
+    memory_write_u32(&mem, res.read_pc().get_raw(), i.data()); // Store single
+                                                               // instruction
+                                                               // (anything else
+                                                               // should be 0 so
+                                                               // NOP
+                                                               // effectively)
+    Memory mem_used(mem); // Create memory copy
+    TrivialBus mem_used_frontend(&mem);
 
-    CoreSingle core(&init, &mem_used, &mem_used, true);
+    CoreSingle core(&init, &mem_used_frontend, &mem_used_frontend, true);
     core.step(); // Single step should be enought as this is risc without
                  // pipeline
     core.step();
@@ -209,7 +216,6 @@ void MachineTests::singlecore_regs() {
     res.pc_inc(); // We did single step	so increment program counter accordingly
     QCOMPARE(init, res); // After doing changes from initial state this should
                          // be same state as in case of passed expected result
-    QCOMPARE(mem, mem_used); // There should be no change in memory
 }
 
 void MachineTests::pipecore_regs() {
@@ -218,15 +224,20 @@ void MachineTests::pipecore_regs() {
     QFETCH(Registers, res);
 
     Memory mem; // Just memory (it shouldn't be used here except instruction)
-    mem.write_word(res.read_pc(), i.data()); // Store single instruction
-                                             // (anything else should be 0 so
-                                             // NOP effectively)
+    TrivialBus mem_frontend(&mem);
+    memory_write_u32(&mem, res.read_pc().get_raw(), i.data()); // Store single
+                                                               // instruction
+                                                               // (anything else
+                                                               // should be 0 so
+                                                               // NOP
+                                                               // effectively)
 
     Memory mem_used(mem);
+    TrivialBus mem_used_frontend(&mem_used);
 
     res.pc_jmp(0x14);
 
-    CorePipelined core(&init, &mem_used, &mem_used);
+    CorePipelined core(&init, &mem_used_frontend, &mem_used_frontend);
     for (int i = 0; i < 5; i++) {
         core.step(); // Fire steps for five pipelines stages
     }
@@ -241,7 +252,7 @@ void MachineTests::pipecore_regs() {
 static void core_jmp_data() {
     QTest::addColumn<Instruction>("i");
     QTest::addColumn<Registers>("regs");
-    QTest::addColumn<uint32_t>("pc");
+    QTest::addColumn<uint64_t>("pc");
 
     Registers regs;
     regs.write_gp(14, -22);
@@ -249,23 +260,25 @@ static void core_jmp_data() {
     regs.write_gp(16, -22);
     regs.write_gp(12, 0x80040000);
     QTest::newRow("B") << Instruction(4, 0, 0, 61) << regs
-                       << regs.read_pc() + 4 + (61 << 2);
+                       << regs.read_pc().get_raw() + 4 + (61 << 2);
     QTest::newRow("BEQ") << Instruction(4, 14, 16, 61) << regs
-                         << regs.read_pc() + 4 + (61 << 2);
-    QTest::newRow("BEQ-BACK")
-        << Instruction(4, 14, 16, -4) << regs << regs.read_pc() + 4 - 16;
+                         << regs.read_pc().get_raw() + 4 + (61 << 2);
+    QTest::newRow("BEQ-BACK") << Instruction(4, 14, 16, -4) << regs
+                              << regs.read_pc().get_raw() + 4 - 16;
     QTest::newRow("BNE") << Instruction(5, 14, 15, 61) << regs
-                         << regs.read_pc() + 4 + (61 << 2);
+                         << regs.read_pc().get_raw() + 4 + (61 << 2);
     QTest::newRow("BGEZ") << Instruction(1, 15, 1, 61) << regs
-                          << regs.read_pc() + 4 + (61 << 2);
+                          << regs.read_pc().get_raw() + 4 + (61 << 2);
     QTest::newRow("BGTZ") << Instruction(7, 15, 0, 61) << regs
-                          << regs.read_pc() + 4 + (61 << 2);
+                          << regs.read_pc().get_raw() + 4 + (61 << 2);
     QTest::newRow("BLEZ") << Instruction(6, 14, 0, 61) << regs
-                          << regs.read_pc() + 4 + (61 << 2);
+                          << regs.read_pc().get_raw() + 4 + (61 << 2);
     QTest::newRow("BLTZ") << Instruction(1, 14, 0, 61) << regs
-                          << regs.read_pc() + 4 + (61 << 2);
-    QTest::newRow("J") << Instruction(2, 24) << regs << 0x80000000 + (24 << 2);
-    QTest::newRow("JR") << Instruction(0, 12, 0, 0, 0, 8) << regs << 0x80040000;
+                          << regs.read_pc().get_raw() + 4 + (61 << 2);
+    QTest::newRow("J") << Instruction(2, Address(24)) << regs
+                       << Address(0x80000000).get_raw() + (24 << 2);
+    QTest::newRow("JR") << Instruction(0, 12, 0, 0, 0, 8) << regs
+                        << Address(0x80040000).get_raw();
 }
 
 void MachineTests::singlecore_jmp_data() {
@@ -279,19 +292,21 @@ void MachineTests::pipecore_jmp_data() {
 void MachineTests::singlecore_jmp() {
     QFETCH(Instruction, i);
     QFETCH(Registers, regs);
-    QFETCH(uint32_t, pc);
+    QFETCH(uint64_t, pc);
 
     Memory mem;
-    mem.write_word(regs.read_pc(), i.data());
+    TrivialBus mem_frontend(&mem);
+    memory_write_u32(&mem, regs.read_pc().get_raw(), i.data());
     Memory mem_used(mem);
+    TrivialBus mem_used_frontend(&mem_used);
     Registers regs_used(regs);
 
-    CoreSingle core(&regs_used, &mem_used, &mem_used, true);
+    CoreSingle core(&regs_used, &mem_used_frontend, &mem_used_frontend, true);
     core.step();
     QCOMPARE(regs.read_pc() + 4, regs_used.read_pc()); // First execute delay
                                                        // slot
     core.step();
-    QCOMPARE(pc, regs_used.read_pc()); // Now do jump
+    QCOMPARE(pc, regs_used.read_pc().get_raw()); // Now do jump
 
     QCOMPARE(mem, mem_used);              // There should be no change in memory
     regs_used.pc_abs_jmp(regs.read_pc()); // Reset program counter before we do
@@ -302,26 +317,29 @@ void MachineTests::singlecore_jmp() {
 void MachineTests::pipecore_jmp() {
     QFETCH(Instruction, i);
     QFETCH(Registers, regs);
-    QFETCH(uint32_t, pc);
+    QFETCH(uint64_t, pc);
 
     Memory mem;
-    mem.write_word(regs.read_pc(), i.data());
+    TrivialBus mem_frontend(&mem);
+    memory_write_u32(&mem, regs.read_pc().get_raw(), i.data());
     Memory mem_used(mem);
+    TrivialBus mem_used_frontend(&mem_used);
     Registers regs_used(regs);
 
-    CorePipelined core(&regs_used, &mem_used, &mem_used);
+    CorePipelined core(&regs_used, &mem_used_frontend, &mem_used_frontend);
     core.step();
     QCOMPARE(regs.read_pc() + 4, regs_used.read_pc()); // First just fetch
     core.step();
-    QCOMPARE(pc, regs_used.read_pc()); // Now do jump
+    QCOMPARE(pc, regs_used.read_pc().get_raw()); // Now do jump
     for (int i = 0; i < 3; i++) {
         core.step(); // Follow up with three other steps to complete pipeline to
     }
     // be sure that instruction has no side effects
 
-    QCOMPARE(mem, mem_used);   // There should be no change in memory
-    regs.pc_abs_jmp(pc + 12);  // Set reference pc to three more instructions
-                               // later (where regs_used should be)
+    QCOMPARE(mem, mem_used);           // There should be no change in memory
+    regs.pc_abs_jmp(Address(pc + 12)); // Set reference pc to three more
+                                       // instructions later (where regs_used
+                                       // should be)
     QCOMPARE(regs, regs_used); // There should be no change in registers now
                                // (except pc)
 }
@@ -336,7 +354,7 @@ static void core_mem_data() {
     // Load
     {
         Memory mem;
-        mem.write_word(0x24, 0xA3242526);
+        memory_write_u32(&mem, 0x24, 0xA3242526);
         Registers regs;
         regs.write_gp(1, 0x22);
         Registers regs_res(regs);
@@ -362,14 +380,14 @@ static void core_mem_data() {
         regs.write_gp(1, 0x22);
         regs.write_gp(21, 0x23242526);
         Memory mem;
-        mem.write_byte(0x24, 0x26); // Note: store least significant byte
+        memory_write_u8(&mem, 0x24, 0x26); // Note: store least significant byte
         QTest::newRow("SB")
             << Instruction(40, 1, 21, 0x2) << regs << regs << Memory() << mem;
-        mem.write_hword(0x24, 0x2526);
+        memory_write_u16(&mem, 0x24, 0x2526);
         QTest::newRow("SH")
             << Instruction(41, 1, 21, 0x2) << regs << regs << Memory() << mem;
-        mem.write_word(0x24, 0x23242526);
-        QTest::newRow("SH")
+        memory_write_u32(&mem, 0x24, 0x23242526);
+        QTest::newRow("SW")
             << Instruction(43, 1, 21, 0x2) << regs << regs << Memory() << mem;
     }
 }
@@ -390,10 +408,11 @@ void MachineTests::singlecore_mem() {
     QFETCH(Memory, mem_res);
 
     // Write instruction to both memories
-    mem_init.write_word(regs_init.read_pc(), i.data());
-    mem_res.write_word(regs_init.read_pc(), i.data());
+    memory_write_u32(&mem_init, regs_init.read_pc().get_raw(), i.data());
+    memory_write_u32(&mem_res, regs_init.read_pc().get_raw(), i.data());
 
-    CoreSingle core(&regs_init, &mem_init, &mem_init, true);
+    TrivialBus mem_init_frontend(&mem_init);
+    CoreSingle core(&regs_init, &mem_init_frontend, &mem_init_frontend, true);
     core.step();
     core.step();
 
@@ -411,10 +430,11 @@ void MachineTests::pipecore_mem() {
     QFETCH(Memory, mem_res);
 
     // Write instruction to both memories
-    mem_init.write_word(regs_init.read_pc(), i.data());
-    mem_res.write_word(regs_init.read_pc(), i.data());
+    memory_write_u32(&mem_init, regs_init.read_pc().get_raw(), i.data());
+    memory_write_u32(&mem_res, regs_init.read_pc().get_raw(), i.data());
 
-    CorePipelined core(&regs_init, &mem_init, &mem_init);
+    TrivialBus mem_init_frontend(&mem_init);
+    CorePipelined core(&regs_init, &mem_init_frontend, &mem_init_frontend);
     for (int i = 0; i < 5; i++) {
         core.step(); // Fire steps for five pipelines stages
     }
@@ -450,7 +470,7 @@ static void core_alu_forward_data() {
             0x00000000, // nop
         };
         Registers regs_init;
-        regs_init.pc_abs_jmp(0x80020000);
+        regs_init.pc_abs_jmp(0x80020000_addr);
         Registers regs_res(regs_init);
         regs_res.write_gp(1, 0x2222);
         regs_res.write_gp(2, 3);
@@ -498,7 +518,7 @@ static void core_alu_forward_data() {
             0x00000000, // nop
         };
         Registers regs_init;
-        regs_init.pc_abs_jmp(0x80020000);
+        regs_init.pc_abs_jmp(0x80020000_addr);
         Registers regs_res(regs_init);
         regs_res.write_gp(1, 0x00000000);
         regs_res.write_gp(2, 0xffffabcd);
@@ -511,7 +531,7 @@ static void core_alu_forward_data() {
         regs_res.write_gp(16, 0x00007777);
         regs_res.write_gp(17, 0xffffabcd);
         regs_res.write_gp(31, 0x80020038);
-        regs_res.pc_abs_jmp(0x80020060);
+        regs_res.pc_abs_jmp(0x80020060_addr);
         QTest::newRow("j_jal_jalr") << code << regs_init << regs_res;
     }
 
@@ -540,7 +560,7 @@ static void core_alu_forward_data() {
             0x00000000, // nop
         };
         Registers regs_init;
-        regs_init.pc_abs_jmp(0x80020000);
+        regs_init.pc_abs_jmp(0x80020000_addr);
         Registers regs_res(regs_init);
         uint32_t val_a = 0x12345678;
         uint32_t val_b = 0xabcdef01;
@@ -617,7 +637,7 @@ static void core_alu_forward_data() {
             0x00000000, // nop
         };
         Registers regs_init;
-        regs_init.pc_abs_jmp(0x80020000);
+        regs_init.pc_abs_jmp(0x80020000_addr);
         Registers regs_res(regs_init);
         regs_res.write_gp(1, 2);
         regs_res.write_gp(2, 1);
@@ -649,11 +669,11 @@ static void run_code_fragment(
     Memory &mem_init,
     Memory &mem_res,
     QVector<uint32_t> &code) {
-    uint32_t addr = reg_init.read_pc();
+    uint64_t addr = reg_init.read_pc().get_raw();
 
     foreach (uint32_t i, code) {
-        mem_init.write_word(addr, i);
-        mem_res.write_word(addr, i);
+        memory_write_u32(&mem_init, addr, i);
+        memory_write_u32(&mem_res, addr, i);
         addr += 4;
     }
 
@@ -679,8 +699,10 @@ void MachineTests::singlecore_alu_forward() {
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
     Memory mem_init;
+    TrivialBus mem_init_frontend(&mem_init);
     Memory mem_res;
-    CoreSingle core(&reg_init, &mem_init, &mem_init, true);
+    TrivialBus mem_res_frontend(&mem_res);
+    CoreSingle core(&reg_init, &mem_init_frontend, &mem_init_frontend, true);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -689,9 +711,12 @@ void MachineTests::pipecore_alu_forward() {
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
     Memory mem_init;
+    TrivialBus mem_init_frontend(&mem_init);
     Memory mem_res;
+    TrivialBus mem_res_frontend(&mem_res);
     CorePipelined core(
-        &reg_init, &mem_init, &mem_init, MachineConfig::HU_STALL_FORWARD);
+        &reg_init, &mem_init_frontend, &mem_init_frontend,
+        MachineConfig::HU_STALL_FORWARD);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -700,9 +725,12 @@ void MachineTests::pipecorestall_alu_forward() {
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
     Memory mem_init;
+    TrivialBus mem_init_frontend(&mem_init);
     Memory mem_res;
+    TrivialBus mem_res_frontend(&mem_res);
     CorePipelined core(
-        &reg_init, &mem_init, &mem_init, MachineConfig::HU_STALL);
+        &reg_init, &mem_init_frontend, &mem_init_frontend,
+        MachineConfig::HU_STALL);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -770,7 +798,7 @@ static void core_memory_tests_data() {
         QVector<uint32_t> data_res { 1, 1, 2, 3,  4,  5,  6, 6,
                                      8, 9, 9, 10, 11, 12, 15 };
         Registers regs_init;
-        regs_init.pc_abs_jmp(0x80020000);
+        regs_init.pc_abs_jmp(0x80020000_addr);
         Registers regs_res(regs_init);
         regs_res.write_gp(1, 0x38);
         regs_res.write_gp(16, 0x3c);
@@ -784,13 +812,13 @@ static void core_memory_tests_data() {
         Memory mem_init;
         addr = 0x1000;
         foreach (uint32_t i, data_init) {
-            mem_init.write_word(addr, i);
+            memory_write_u32(&mem_init, addr, i);
             addr += 4;
         }
         Memory mem_res;
         addr = 0x1000;
         foreach (uint32_t i, data_res) {
-            mem_res.write_word(addr, i);
+            memory_write_u32(&mem_res, addr, i);
             addr += 4;
         }
         QTest::newRow("cache_insert_sort")
@@ -850,7 +878,7 @@ static void core_memory_tests_data() {
             // mem:
         };
         Registers regs_init;
-        regs_init.pc_abs_jmp(0x80020000);
+        regs_init.pc_abs_jmp(0x80020000_addr);
         Registers regs_res(regs_init);
 
         regs_res.write_gp(2, 0xaabbcc01);
@@ -884,7 +912,7 @@ static void core_memory_tests_data() {
                                       0x191a1b1c, 0x1d1e1f10, 0x21222324,
                                       0x25262728, 0x292a2b2c, 0x2d2e2f20 };
         foreach (uint32_t i, data_init) {
-            mem_init.write_word(addr, i);
+            memory_write_u32(&mem_init, addr, i);
             addr += 4;
         }
         Memory mem_res;
@@ -894,7 +922,7 @@ static void core_memory_tests_data() {
                                      0x19aabbcc, 0x1d1eaabb, 0x212223aa,
                                      0x25262728, 0x292a2b2c, 0x2d2e2f20 };
         foreach (uint32_t i, data_res) {
-            mem_res.write_word(addr, i);
+            memory_write_u32(&mem_res, addr, i);
             addr += 4;
         }
 
@@ -930,7 +958,9 @@ void MachineTests::singlecore_memory_tests() {
     QFETCH(Registers, reg_res);
     QFETCH(Memory, mem_init);
     QFETCH(Memory, mem_res);
-    CoreSingle core(&reg_init, &mem_init, &mem_init, true);
+    TrivialBus mem_init_frontend(&mem_init);
+    TrivialBus mem_res_frontend(&mem_res);
+    CoreSingle core(&reg_init, &mem_init_frontend, &mem_init_frontend, true);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -940,8 +970,11 @@ void MachineTests::pipecore_nc_memory_tests() {
     QFETCH(Registers, reg_res);
     QFETCH(Memory, mem_init);
     QFETCH(Memory, mem_res);
+    TrivialBus mem_init_frontend(&mem_init);
+    TrivialBus mem_res_frontend(&mem_res);
     CorePipelined core(
-        &reg_init, &mem_init, &mem_init, MachineConfig::HU_STALL_FORWARD);
+        &reg_init, &mem_init_frontend, &mem_init_frontend,
+        MachineConfig::HU_STALL_FORWARD);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -951,6 +984,8 @@ void MachineTests::pipecore_wt_na_memory_tests() {
     QFETCH(Registers, reg_res);
     QFETCH(Memory, mem_init);
     QFETCH(Memory, mem_res);
+    TrivialBus mem_init_frontend(&mem_init);
+    TrivialBus mem_res_frontend(&mem_res);
     CacheConfig cache_conf;
     cache_conf.set_enabled(true);
     cache_conf.set_set_count(2);     // Number of sets
@@ -958,8 +993,9 @@ void MachineTests::pipecore_wt_na_memory_tests() {
     cache_conf.set_associativity(2); // Degree of associativity
     cache_conf.set_replacement_policy(CacheConfig::RP_LRU);
     cache_conf.set_write_policy(CacheConfig::WP_THROUGH_NOALLOC);
-    Cache i_cache(&mem_init, &cache_conf);
-    Cache d_cache(&mem_init, &cache_conf);
+
+    Cache i_cache(&mem_init_frontend, &cache_conf);
+    Cache d_cache(&mem_init_frontend, &cache_conf);
     CorePipelined core(
         &reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
@@ -971,6 +1007,8 @@ void MachineTests::pipecore_wt_a_memory_tests() {
     QFETCH(Registers, reg_res);
     QFETCH(Memory, mem_init);
     QFETCH(Memory, mem_res);
+    TrivialBus mem_init_frontend(&mem_init);
+    TrivialBus mem_res_frontend(&mem_res);
     CacheConfig cache_conf;
     cache_conf.set_enabled(true);
     cache_conf.set_set_count(2);     // Number of sets
@@ -978,8 +1016,8 @@ void MachineTests::pipecore_wt_a_memory_tests() {
     cache_conf.set_associativity(2); // Degree of associativity
     cache_conf.set_replacement_policy(CacheConfig::RP_LRU);
     cache_conf.set_write_policy(CacheConfig::WP_THROUGH_ALLOC);
-    Cache i_cache(&mem_init, &cache_conf);
-    Cache d_cache(&mem_init, &cache_conf);
+    Cache i_cache(&mem_init_frontend, &cache_conf);
+    Cache d_cache(&mem_init_frontend, &cache_conf);
     CorePipelined core(
         &reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
@@ -991,6 +1029,8 @@ void MachineTests::pipecore_wb_memory_tests() {
     QFETCH(Registers, reg_res);
     QFETCH(Memory, mem_init);
     QFETCH(Memory, mem_res);
+    TrivialBus mem_init_frontend(&mem_init);
+    TrivialBus mem_res_frontend(&mem_res);
     CacheConfig cache_conf;
     cache_conf.set_enabled(true);
     cache_conf.set_set_count(4);     // Number of sets
@@ -998,8 +1038,8 @@ void MachineTests::pipecore_wb_memory_tests() {
     cache_conf.set_associativity(2); // Degree of associativity
     cache_conf.set_replacement_policy(CacheConfig::RP_LRU);
     cache_conf.set_write_policy(CacheConfig::WP_BACK);
-    Cache i_cache(&mem_init, &cache_conf);
-    Cache d_cache(&mem_init, &cache_conf);
+    Cache i_cache(&mem_init_frontend, &cache_conf);
+    Cache d_cache(&mem_init_frontend, &cache_conf);
     CorePipelined core(
         &reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);

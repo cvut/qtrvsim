@@ -120,7 +120,7 @@ bool SymbolTable::value_to_name(QString &name, uint32_t value) const {
 }
 
 QStringList *SymbolTable::names() const {
-    QStringList *l = new QStringList();
+    auto *l = new QStringList();
 
     auto i = map_name_to_symbol.begin();
     while (i != map_name_to_symbol.end()) {

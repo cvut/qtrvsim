@@ -41,6 +41,7 @@
 #include <QCoreApplication>
 #include <QObject>
 #include <QString>
+#include <QVector>
 
 class Reporter : public QObject {
     Q_OBJECT

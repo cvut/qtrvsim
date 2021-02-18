@@ -36,7 +36,8 @@
 #ifndef SERIALPORT_H
 #define SERIALPORT_H
 
-#include "peripheral.h"
+#include "memory/backend/backend_memory.h"
+#include "memory/backend/peripheral.h"
 #include "qtmipsexception.h"
 
 #include <QMap>
@@ -45,7 +46,7 @@
 
 namespace machine {
 
-class SerialPort : public MemoryAccess {
+class SerialPort : public BackendMemory {
     Q_OBJECT
 public:
     SerialPort();
@@ -54,21 +55,33 @@ public:
 signals:
     void tx_byte(unsigned int data);
     void rx_byte_pool(int fd, unsigned int &data, bool &available) const;
-    void write_notification(uint32_t address, uint32_t value);
-    void read_notification(uint32_t address, uint32_t *value) const;
+    void write_notification(Offset address, uint32_t value);
+    void read_notification(Offset address, uint32_t value) const;
     void signal_interrupt(uint irq_level, bool active) const;
 
 public slots:
     void rx_queue_check() const;
 
 public:
-    bool wword(uint32_t address, uint32_t value) override;
-    uint32_t rword(uint32_t address, bool debug_access = false) const override;
-    uint32_t get_change_counter() const override;
+    WriteResult write(
+        Offset destination,
+        const void *source,
+        size_t size,
+        WriteOptions options) override;
+
+    ReadResult read(
+        void *destination,
+        Offset source,
+        size_t size,
+        ReadOptions options) const override;
+
+    LocationStatus location_status(Offset offset) const override;
 
 private:
+    uint32_t read_reg(Offset source, bool debug = false) const;
+    bool write_reg(Offset destination, uint32_t value);
     void rx_queue_check_internal() const;
-    mutable uint32_t change_counter;
+    mutable uint32_t change_counter {};
     void pool_rx_byte() const;
     void update_rx_irq() const;
     void update_tx_irq() const;
@@ -79,6 +92,7 @@ private:
     uint8_t rx_irq_level;
     mutable bool tx_irq_active;
     mutable bool rx_irq_active;
+    uint32_t get_change_counter() const;
 };
 
 } // namespace machine

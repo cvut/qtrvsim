@@ -12,6 +12,8 @@
  *
  * Copyright (c) 2017-2019 Karel Koci<cynerd@email.cz>
  * Copyright (c) 2019      Pavel Pisa <pisa@cmp.felk.cvut.cz>
+ * Copyright (c) 2020      Jakub Dupak <dupak.jakub@gmail.com>
+ * Copyright (c) 2020      Max Hollmann <hollmmax@fel.cvut.cz>
  *
  * Faculty of Electrical Engineering (http://www.fel.cvut.cz)
  * Czech Technical University        (http://www.cvut.cz/)
@@ -33,7 +35,7 @@
  *
  ******************************************************************************/
 
-#include "peripheral.h"
+#include "memory/backend/peripheral.h"
 
 using namespace machine;
 
@@ -41,25 +43,34 @@ SimplePeripheral::SimplePeripheral() = default;
 
 SimplePeripheral::~SimplePeripheral() = default;
 
-bool SimplePeripheral::wword(uint32_t address, uint32_t value) {
-#if 0
-    printf("SimplePeripheral::wword address 0x%08lx data 0x%08lx\n",
-           (unsigned long)address, (unsigned long)value);
-#endif
-    emit write_notification(address, value);
+WriteResult SimplePeripheral::write(
+    Offset destination,
+    const void *source,
+    size_t size,
+    WriteOptions options) {
+    UNUSED(source)
+    UNUSED(options)
 
-    return true;
+    // Write to dummy periphery is nop
+
+    emit write_notification(destination, size);
+
+    return { size, false };
 }
 
-uint32_t SimplePeripheral::rword(uint32_t address, bool debug_access) const {
-    (void)debug_access;
-    uint32_t value = 0x12345678;
-#if 0
-    printf("SimplePeripheral::rword address 0x%08lx\n",
-           (unsigned long)address);
-#endif
+ReadResult SimplePeripheral::read(
+    void *destination,
+    Offset source,
+    size_t size,
+    ReadOptions options) const {
+    UNUSED(options)
 
-    emit read_notification(address, &value);
+    memset(destination, 0x12, size); // Random value
 
-    return value;
+    emit read_notification(source, size);
+
+    return { size };
+}
+LocationStatus SimplePeripheral::location_status(Offset offset) const {
+    return LOCSTAT_NONE;
 }

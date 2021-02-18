@@ -63,7 +63,7 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     bool
     setData(const QModelIndex &index, const QVariant &value, int role) override;
-    bool adjustRowAndOffset(int &row, uint32_t address);
+    bool adjustRowAndOffset(int &row, machine::Address address);
     void update_all();
 
     void setCellsPerRow(unsigned int cells);
@@ -76,7 +76,7 @@ public:
         return &data_font;
     }
 
-    inline uint32_t getIndex0Offset() const {
+    inline machine::Address getIndex0Offset() const {
         return index0_offset;
     }
 
@@ -88,11 +88,11 @@ public:
         }
         return 0;
     }
-    inline bool get_row_address(uint32_t &address, int row) const {
+    inline bool get_row_address(machine::Address &address, int row) const {
         address = index0_offset + (row * cells_per_row * cellSizeBytes());
         return address >= index0_offset;
     }
-    inline bool get_row_for_address(int &row, uint32_t address) const {
+    inline bool get_row_for_address(int &row, machine::Address address) const {
         if (address < index0_offset) {
             row = -1;
             return false;
@@ -116,11 +116,11 @@ signals:
     void setup_done();
 
 private:
-    const machine::MemoryAccess *mem_access() const;
-    machine::MemoryAccess *mem_access_rw() const;
+    const machine::FrontendMemory *mem_access() const;
+    machine::FrontendMemory *mem_access_rw() const;
     enum MemoryCellSize cell_size;
     unsigned int cells_per_row;
-    uint32_t index0_offset;
+    machine::Address index0_offset;
     QFont data_font;
     machine::QtMipsMachine *machine;
     uint32_t memory_change_counter;

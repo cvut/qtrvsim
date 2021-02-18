@@ -112,7 +112,7 @@ void RegistersDock::setup(machine::QtMipsMachine *machine) {
     const machine::Registers *regs = machine->registers();
 
     // Load values
-    labelVal(pc, regs->read_pc());
+    labelVal(pc, regs->read_pc().get_raw());
     labelVal(hi, regs->read_hi_lo(true).as_u32());
     labelVal(lo, regs->read_hi_lo(false).as_u32());
     for (int i = 0; i < 32; i++) {
@@ -135,8 +135,8 @@ void RegistersDock::setup(machine::QtMipsMachine *machine) {
         &RegistersDock::clear_highlights);
 }
 
-void RegistersDock::pc_changed(uint32_t val) {
-    labelVal(pc, val);
+void RegistersDock::pc_changed(machine::Address val) {
+    labelVal(pc, val.get_raw());
 }
 
 void RegistersDock::gp_changed(

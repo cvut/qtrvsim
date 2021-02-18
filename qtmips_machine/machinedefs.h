@@ -36,25 +36,28 @@
 #ifndef MACHINEDEFS_H
 #define MACHINEDEFS_H
 
+#include "memory/address.h"
+
 #include <cstdint>
+#include <qmetatype.h>
 
 namespace machine {
 
 enum AccessControl {
     AC_NONE,
-    AC_BYTE,
-    AC_HALFWORD,
-    AC_WORD,
-    AC_BYTE_UNSIGNED,
-    AC_HALFWORD_UNSIGNED,
+    AC_I8,
+    AC_I16,
+    AC_U32,
+    AC_U8,
+    AC_U16,
     AC_LOAD_LINKED,
     AC_STORE_CONDITIONAL,
     AC_WORD_RIGHT,
     AC_WORD_LEFT,
     AC_CACHE_OP,
 
-    AC_FIRST_REGULAR = AC_BYTE,
-    AC_LAST_REGULAR = AC_HALFWORD_UNSIGNED,
+    AC_FIRST_REGULAR = AC_I8,
+    AC_LAST_REGULAR = AC_U16,
 };
 
 enum ExceptionCause {
@@ -143,8 +146,10 @@ enum LocationStatus {
     LOCSTAT_ILLEGAL = 1 << 3,
 };
 
-const uint32_t STAGEADDR_NONE = 0xffffffff;
+const Address STAGEADDR_NONE = 0xffffffff_addr;
 
 } // namespace machine
+
+Q_DECLARE_METATYPE(machine::AccessControl)
 
 #endif // MACHINEDEFS_H

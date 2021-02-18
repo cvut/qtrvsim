@@ -35,16 +35,16 @@
  *
  ******************************************************************************/
 
-#ifndef QTMIPS_CACHE_TYPES_H
-#define QTMIPS_CACHE_TYPES_H
+#ifndef CACHE_TYPES_H
+#define CACHE_TYPES_H
 
 #include <cstdint>
 
 namespace machine {
 
 /**
- * Tetermines location of address in single way of cache. This mean, where given
- * addrees should be stored, if present.
+ * Determiners location of address in single way of cache. This mean, where
+ * given addresses should be stored, if present.
  */
 struct CacheLocation {
     size_t row;
@@ -63,10 +63,17 @@ struct CacheLine {
 };
 
 /**
- * This is preffer over bool (write = true|false) for better readability.
+ * This is preferred over bool (write = true|false) for better readability.
  */
 enum AccessType { READ, WRITE };
 
+inline const char *to_string(AccessType a) {
+    switch (a) {
+    case READ: return "READ";
+    case WRITE: return "WRITE";
+    }
+}
+
 } // namespace machine
 
-#endif // QTMIPS_CACHE_TYPES_H
+#endif // CACHE_TYPES_H

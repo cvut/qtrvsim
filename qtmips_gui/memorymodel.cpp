@@ -42,7 +42,7 @@ MemoryModel::MemoryModel(QObject *parent)
     , data_font("Monospace") {
     cell_size = CELLSIZE_WORD;
     cells_per_row = 1;
-    index0_offset = 0;
+    index0_offset = machine::Address::null();
     data_font.setStyleHint(QFont::TypeWriter);
     machine = nullptr;
     memory_change_counter = 0;
@@ -50,28 +50,30 @@ MemoryModel::MemoryModel(QObject *parent)
     access_through_cache = 0;
 }
 
-const machine::MemoryAccess *MemoryModel::mem_access() const {
+const machine::FrontendMemory *MemoryModel::mem_access() const {
     if (machine == nullptr) {
         return nullptr;
     }
-    if (machine->physical_address_space() != nullptr) {
-        return machine->physical_address_space();
+    if (machine->memory_data_bus() != nullptr) {
+        return machine->memory_data_bus();
     }
-    return machine->memory();
+    //    return machine->memory(); // TODO is this a problem?
+    throw std::logic_error("No memory available on machine");
 }
 
-machine::MemoryAccess *MemoryModel::mem_access_rw() const {
+machine::FrontendMemory *MemoryModel::mem_access_rw() const {
     if (machine == nullptr) {
         return nullptr;
     }
-    if (machine->physical_address_space_rw() != nullptr) {
-        return machine->physical_address_space_rw();
+    if (machine->memory_data_bus_rw() != nullptr) {
+        return machine->memory_data_bus_rw();
     }
-    return machine->memory_rw();
+    //    return machine->memory_rw(); // TODO can delete?
+    throw std::logic_error("No memory available on machine");
 }
 
 int MemoryModel::rowCount(const QModelIndex & /*parent*/) const {
-    // std::uint64_t rows = (0x2000 + cells_per_row - 1) / cells_per_row;
+    // uint64_t rows = (0x2000 + cells_per_row - 1) / cells_per_row;
     return 750;
 }
 
@@ -100,14 +102,14 @@ QVariant MemoryModel::headerData(
 QVariant MemoryModel::data(const QModelIndex &index, int role) const {
     if (role == Qt::DisplayRole || role == Qt::EditRole) {
         QString s, t;
-        uint32_t address;
+        machine::Address address;
         uint32_t data;
-        const machine::MemoryAccess *mem;
+        const machine::FrontendMemory *mem;
         if (!get_row_address(address, index.row())) {
             return QString("");
         }
         if (index.column() == 0) {
-            t = QString::number(address, 16);
+            t = QString::number(address.get_raw(), 16);
             s.fill('0', 8 - t.count());
             return "0x" + s + t.toUpper();
         }
@@ -126,10 +128,10 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
             return QString("");
         }
         switch (cell_size) {
-        case CELLSIZE_BYTE: data = mem->read_byte(address, true); break;
-        case CELLSIZE_HWORD: data = mem->read_hword(address, true); break;
+        case CELLSIZE_BYTE: data = mem->read_u8(address, true); break;
+        case CELLSIZE_HWORD: data = mem->read_u16(address, true); break;
         default:
-        case CELLSIZE_WORD: data = mem->read_word(address, true); break;
+        case CELLSIZE_WORD: data = mem->read_u32(address, true); break;
         }
 
         t = QString::number(data, 16);
@@ -148,7 +150,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
         return t;
     }
     if (role == Qt::BackgroundRole) {
-        uint32_t address;
+        machine::Address address;
         if (!get_row_address(address, index.row()) || machine == nullptr
             || index.column() == 0) {
             return QVariant();
@@ -182,8 +184,8 @@ void MemoryModel::setup(machine::QtMipsMachine *machine) {
     }
     if (mem_access() != nullptr) {
         connect(
-            mem_access(), &machine::MemoryAccess::external_change_notify, this,
-            &MemoryModel::check_for_updates);
+            mem_access(), &machine::FrontendMemory::external_change_notify,
+            this, &MemoryModel::check_for_updates);
     }
     emit update_all();
     emit setup_done();
@@ -198,13 +200,13 @@ void MemoryModel::setCellsPerRow(unsigned int cells) {
 void MemoryModel::set_cell_size(int index) {
     beginResetModel();
     cell_size = (enum MemoryCellSize)index;
-    index0_offset -= index0_offset % cellSizeBytes();
+    index0_offset -= index0_offset.get_raw() % cellSizeBytes();
     endResetModel();
     emit cell_size_changed();
 }
 
 void MemoryModel::update_all() {
-    const machine::MemoryAccess *mem;
+    const machine::FrontendMemory *mem;
     mem = mem_access();
     if (mem != nullptr) {
         memory_change_counter = mem->get_change_counter();
@@ -218,7 +220,7 @@ void MemoryModel::update_all() {
 
 void MemoryModel::check_for_updates() {
     bool need_update = false;
-    const machine::MemoryAccess *mem;
+    const machine::FrontendMemory *mem;
     mem = mem_access();
     if (mem == nullptr) {
         return;
@@ -239,15 +241,15 @@ void MemoryModel::check_for_updates() {
     update_all();
 }
 
-bool MemoryModel::adjustRowAndOffset(int &row, uint32_t address) {
+bool MemoryModel::adjustRowAndOffset(int &row, machine::Address address) {
     row = rowCount() / 2;
-    address -= address % cellSizeBytes();
+    address -= address.get_raw() % cellSizeBytes();
     uint32_t row_bytes = cells_per_row * cellSizeBytes();
     uint32_t diff = row * row_bytes;
-    if (diff > address) {
-        row = address / row_bytes;
+    if (machine::Address(diff) > address) {
+        row = address.get_raw() / row_bytes;
         if (row == 0) {
-            index0_offset = 0;
+            index0_offset = machine::Address::null();
         } else {
             index0_offset = address - row * row_bytes;
         }
@@ -276,8 +278,8 @@ bool MemoryModel::setData(
     int role) {
     if (role == Qt::EditRole) {
         bool ok;
-        uint32_t address;
-        machine::MemoryAccess *mem;
+        machine::Address address;
+        machine::FrontendMemory *mem;
         uint32_t data = value.toString().toULong(&ok, 16);
         if (!ok) {
             return false;
@@ -298,10 +300,10 @@ bool MemoryModel::setData(
         }
         address += cellSizeBytes() * (index.column() - 1);
         switch (cell_size) {
-        case CELLSIZE_BYTE: mem->write_byte(address, data); break;
-        case CELLSIZE_HWORD: mem->write_hword(address, data); break;
+        case CELLSIZE_BYTE: mem->write_u8(address, data); break;
+        case CELLSIZE_HWORD: mem->write_u16(address, data); break;
         default:
-        case CELLSIZE_WORD: mem->write_word(address, data); break;
+        case CELLSIZE_WORD: mem->write_u32(address, data); break;
         }
     }
     return true;

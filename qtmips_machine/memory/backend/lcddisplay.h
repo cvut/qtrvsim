@@ -12,6 +12,8 @@
  *
  * Copyright (c) 2017-2019 Karel Koci<cynerd@email.cz>
  * Copyright (c) 2019      Pavel Pisa <pisa@cmp.felk.cvut.cz>
+ * Copyright (c) 2020      Jakub Dupak <dupak.jakub@gmail.com>
+ * Copyright (c) 2020      Max Hollmann <hollmmax@fel.cvut.cz>
  *
  * Faculty of Electrical Engineering (http://www.fel.cvut.cz)
  * Czech Technical University        (http://www.cvut.cz/)
@@ -37,7 +39,7 @@
 #define LCDDISPLAY_H
 
 #include "machinedefs.h"
-#include "memory.h"
+#include "memory/backend/backend_memory.h"
 #include "qtmipsexception.h"
 
 #include <QMap>
@@ -46,39 +48,66 @@
 
 namespace machine {
 
-class LcdDisplay : public MemoryAccess {
+class LcdDisplay final : public BackendMemory {
     Q_OBJECT
 public:
-    LcdDisplay();
+    explicit LcdDisplay();
     ~LcdDisplay() override;
 
 signals:
-    void write_notification(uint32_t address, uint32_t value);
-    void read_notification(uint32_t address, uint32_t *value) const;
-    void pixel_update(uint x, uint y, uint r, uint g, uint b);
+    void write_notification(Offset offset, uint32_t value) const;
+    void read_notification(Offset offset, uint32_t value) const;
+    void pixel_update(size_t x, size_t y, uint r, uint g, uint b);
 
 public:
-    bool wword(uint32_t address, uint32_t value) override;
-    uint32_t rword(uint32_t address, bool debug_access = false) const override;
-    uint32_t get_change_counter() const override;
+    WriteResult write(
+        Offset destination,
+        const void *source,
+        size_t size,
+        WriteOptions options) override;
 
-    inline uint width() const {
+    ReadResult read(
+        void *destination,
+        Offset source,
+        size_t size,
+        ReadOptions options) const override;
+
+    LocationStatus location_status(Offset offset) const override;
+
+    /**
+     * @return  framebuffer width in pixels
+     */
+    inline constexpr size_t get_width() const {
         return fb_width;
     }
 
-    inline uint height() const {
+    /**
+     * @return  framebuffer height in pixels
+     */
+    inline constexpr size_t get_height() const {
         return fb_height;
     }
 
 private:
-    mutable uint32_t change_counter;
-    uint32_t pixel_address(uint x, uint y) const;
-    uchar *fb_data;
-    size_t fb_size;
-    unsigned fb_bpp;
-    unsigned fb_width;
-    unsigned fb_height;
-    unsigned fb_linesize;
+    /**
+     * Read HW register - allows only 32bit alligned access.
+     */
+    uint32_t read_reg(Offset source) const;
+
+    /**
+     * Write HW register - allows only 32bit alligned access.
+     */
+    bool write_reg(Offset destination, uint32_t value);
+
+    size_t get_fb_line_size() const;
+    size_t get_fb_size_bytes() const;
+    size_t get_address_from_pixel(size_t x, size_t y) const;
+    std::tuple<size_t, size_t> get_pixel_from_address(size_t address) const;
+
+    const size_t fb_width;  //> Width in pixels
+    const size_t fb_height; //> Height in pixels
+    const size_t fb_bits_per_pixel;
+    std::vector<byte> fb_data;
 };
 
 } // namespace machine

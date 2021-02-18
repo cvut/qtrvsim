@@ -12,6 +12,8 @@
  *
  * Copyright (c) 2017-2019 Karel Koci<cynerd@email.cz>
  * Copyright (c) 2019      Pavel Pisa <pisa@cmp.felk.cvut.cz>
+ * Copyright (c) 2020      Jakub Dupak <dupak.jakub@gmail.com>
+ * Copyright (c) 2020      Max Hollmann <hollmmax@fel.cvut.cz>
  *
  * Faculty of Electrical Engineering (http://www.fel.cvut.cz)
  * Czech Technical University        (http://www.cvut.cz/)
@@ -35,85 +37,101 @@
 
 #include "lcddisplay.h"
 
-using namespace machine;
-
-LcdDisplay::LcdDisplay() {
-    change_counter = 0;
-    size_t need_bytes;
-    fb_size = 0x4b000;
-    fb_bpp = 16;
-    fb_width = 480;
-    fb_height = 320;
-    if (fb_bpp > 12) {
-        fb_linesize = ((fb_bpp + 7) >> 3) * fb_width;
-    } else {
-        fb_linesize = (fb_bpp * fb_width + 7) >> 3;
-    }
-    need_bytes = fb_linesize * fb_height;
-
-    if (fb_size <= need_bytes) {
-        fb_size = need_bytes;
-    }
-
-    fb_data = new uchar[fb_size];
-    std::fill(fb_data, fb_data + fb_size, 0);
-}
-
-LcdDisplay::~LcdDisplay() {
-    delete[] fb_data;
-}
-
-uint32_t LcdDisplay::pixel_address(uint x, uint y) const {
-    uint32_t address;
-    address = y * fb_linesize;
-    if (fb_bpp > 12) {
-        address += x * ((fb_bpp + 7) >> 3);
-    } else {
-        address += x * fb_bpp / 8;
-    }
-
-    return address;
-}
-
-bool LcdDisplay::wword(uint32_t address, uint32_t value) {
-    address &= ~3;
-    uint x, y, r, g, b;
-    uint32_t c;
-    uint32_t last_addr = address + 3;
-    uint32_t pixel_addr;
-
-    if (address + 3 >= fb_size) {
-        return false;
-    }
-#if 0
-    printf("LcdDisplay::wword address 0x%08lx data 0x%08lx\n",
-           (unsigned long)address, (unsigned long)value);
+#ifdef DEBUG_LCD
+    #undef DEBUG_LCD
+    #define DEBUG_LCD true
+#else
+    #define DEBUG_LCD false
 #endif
-    if (value == rword(address, true)) {
+
+namespace machine {
+
+LcdDisplay::LcdDisplay()
+    : fb_width(480)
+    , fb_height(320)
+    , fb_bits_per_pixel(16)
+    , fb_data(get_fb_size_bytes(), 0) {}
+
+LcdDisplay::~LcdDisplay() = default;
+
+WriteResult LcdDisplay::write(
+    Offset destination,
+    const void *source,
+    size_t size,
+    WriteOptions options) {
+    UNUSED(options)
+    return write_by_u32(
+        destination, source, size, [&](Offset src) { return read_reg(src); },
+        [&](Offset src, uint32_t value) { return write_reg(src, value); });
+}
+
+ReadResult LcdDisplay::read(
+    void *destination,
+    Offset source,
+    size_t size,
+    ReadOptions options) const {
+    UNUSED(options)
+    return read_by_u32(
+        destination, source, size, [&](Offset src) { return read_reg(src); });
+}
+
+uint32_t LcdDisplay::read_reg(Offset source) const {
+    Q_ASSERT((source & 3U) == 0); // uint32_t alligned
+
+    if (source + 3 >= get_fb_size_bytes()) {
+        return 0;
+    }
+
+    uint32_t value;
+    memcpy(&value, &fb_data[source], sizeof(value));
+
+    // TODO Switch to if constexpr as soon as we have cpp17.
+    if (DEBUG_LCD) {
+        printf(
+            "LcdDisplay::readreg address 0x%08lx data 0x%08lx\n",
+            (unsigned long)source, (unsigned long)value);
+    }
+
+    emit read_notification(source, value);
+    return value;
+}
+
+bool LcdDisplay::write_reg(Offset destination, uint32_t value) {
+    Q_ASSERT((destination & 3U) == 0); // uint32_t aligned
+
+    if (destination + 3 >= get_fb_size_bytes()) {
+        printf("WARNING: LCD display - read out of range.");
         return false;
     }
 
-    fb_data[address + 0] = (value >> 24) & 0xff;
-    fb_data[address + 1] = (value >> 16) & 0xff;
-    fb_data[address + 2] = (value >> 8) & 0xff;
-    fb_data[address + 3] = (value >> 0) & 0xff;
-
-    change_counter++;
-
-    y = address / fb_linesize;
-    if (fb_bpp > 12) {
-        x = (address - y * fb_linesize) / ((fb_bpp + 7) >> 3);
-    } else {
-        x = (address - y * fb_linesize) * 8 / fb_bpp;
+    // TODO Switch to if constexpr as soon as we have cpp17.
+    if (DEBUG_LCD) {
+        printf(
+            "LcdDisplay::write_reg address 0x%08lx data 0x%08lx\n",
+            (unsigned long)destination, (unsigned long)value);
     }
 
-    while ((pixel_addr = pixel_address(x, y)) <= last_addr) {
-        c = fb_data[pixel_addr] << 8;
-        c |= fb_data[pixel_addr + 1];
+    if (read_reg(destination) == value) {
+        return false;
+    }
 
-        r = ((c >> 11) & 0x1f) << 3;
-        g = ((c >> 5) & 0x3f) << 2;
-        b = ((c >> 0) & 0x1f) << 3;
+    memcpy(&fb_data[destination], &value, sizeof(value));
+
+    size_t x, y;
+    std::tie(x, y) = get_pixel_from_address(destination);
+
+    const uint32_t last_addr = destination + 3;
+    uint32_t pixel_addr;
+    uint32_t pixek_data;
+    uint r, g, b;
+
+    while ((pixel_addr = get_address_from_pixel(x, y)) <= last_addr) {
+        pixek_data = fb_data[pixel_addr] << 8u;
+        pixek_data |= fb_data[pixel_addr + 1];
+
+        r = ((pixek_data >> 11u) & 0x1fu) << 3u;
+        g = ((pixek_data >> 5u) & 0x3fu) << 2u;
+        b = ((pixek_data >> 0u) & 0x1fu) << 3u;
 
         emit pixel_update(x, y, r, g, b);
 
@@ -123,35 +141,45 @@ bool LcdDisplay::wword(uint32_t address, uint32_t value) {
         }
     }
 
-    emit write_notification(address, value);
+    emit write_notification(destination, value);
 
     return true;
 }
 
-uint32_t LcdDisplay::rword(uint32_t address, bool debug_access) const {
-    address &= ~3;
-    (void)debug_access;
-    uint32_t value;
-
-    if (address + 3 >= fb_size) {
-        return 0;
+size_t LcdDisplay::get_address_from_pixel(size_t x, size_t y) const {
+    size_t address = y * get_fb_line_size();
+    if (fb_bits_per_pixel > 12) {
+        address += x * divide_and_ceil(fb_bits_per_pixel, 8u);
+    } else {
+        address += x * fb_bits_per_pixel / 8;
     }
 
-    value = (uint32_t)fb_data[address + 0] << 24;
-    value |= (uint32_t)fb_data[address + 1] << 16;
-    value |= (uint32_t)fb_data[address + 2] << 8;
-    value |= (uint32_t)fb_data[address + 3] << 0;
-
-#if 0
-    printf("LcdDisplay::rword address 0x%08lx data 0x%08lx\n",
-           (unsigned long)address, (unsigned long)value);
-#endif
-
-    emit read_notification(address, &value);
-
-    return value;
+    return address;
 }
 
-uint32_t LcdDisplay::get_change_counter() const {
-    return change_counter;
+std::tuple<size_t, size_t>
+LcdDisplay::get_pixel_from_address(size_t address) const {
+    size_t y = address / get_fb_line_size();
+    size_t x = (fb_bits_per_pixel > 12)
+                   ? (address - y * get_fb_line_size())
+                         / ((fb_bits_per_pixel + 7) >> 3u)
+                   : (address - y * get_fb_line_size()) * 8 / fb_bits_per_pixel;
+    return std::make_tuple(x, y);
 }
+
+size_t LcdDisplay::get_fb_line_size() const {
+    return (fb_bits_per_pixel > 12) ? ((fb_bits_per_pixel + 7) >> 3u) * fb_width
+                                    : (fb_bits_per_pixel * fb_width + 7) >> 3u;
+}
+
+size_t LcdDisplay::get_fb_size_bytes() const {
+    return get_fb_line_size() * fb_height;
+}
+LocationStatus LcdDisplay::location_status(Offset offset) const {
+    if ((offset | ~3u) >= get_fb_size_bytes()) {
+        return LOCSTAT_ILLEGAL;
+    }
+    return LOCSTAT_NONE;
+}
+
+} // namespace machine

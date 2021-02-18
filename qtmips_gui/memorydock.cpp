@@ -95,11 +95,13 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     connect(
         go_edit, &HexLineEdit::value_edit_finished, memory_content,
         [memory_content](uint32_t value) {
-            memory_content->go_to_address(value);
+            memory_content->go_to_address(machine::Address(value));
         });
     connect(
         memory_content, &MemoryTableView::address_changed, go_edit,
-        [go_edit](uint32_t addr) { go_edit->set_value(addr); });
+        [go_edit](machine::Address addr) {
+            go_edit->set_value(addr.get_raw());
+        });
     connect(
         this, &MemoryDock::focus_addr, memory_content,
         &MemoryTableView::focus_address);

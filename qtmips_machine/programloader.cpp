@@ -81,7 +81,8 @@ ProgramLoader::ProgramLoader(const QString &file) : elf_file(file) {
         throw QTMIPS_EXCEPTION(
             Input, "Getting elf file header failed", elf_errmsg(-1));
     }
-    executable_entry = elf_ehdr->e_entry;
+
+    executable_entry = Address(elf_ehdr->e_entry);
     // Check elf file format, executable expected, nothing else.
     if (this->hdr.e_type != ET_EXEC) {
         throw QTMIPS_EXCEPTION(Input, "Invalid input file type", "");
@@ -135,39 +136,40 @@ ProgramLoader::~ProgramLoader() {
     elf_file.close();
 }
 
-void ProgramLoader::to_memory(Memory *mem) {
+void ProgramLoader::to_memory(Memory *mem) { // TODO Why are you writing to raw
+                                             // memory
     // Load program to memory (just dump it byte by byte)
-    for (int i = 0; i < this->map.size(); i++) {
-        uint32_t base_address = this->phdrs[this->map[i]].p_vaddr;
+    for (size_t phdrs_i : this->map) {
+        uint32_t base_address = this->phdrs[phdrs_i].p_vaddr;
         char *f = elf_rawfile(this->elf, nullptr);
-        size_t phdrs_i = this->map[i];
         for (unsigned y = 0; y < this->phdrs[phdrs_i].p_filesz; y++) {
-            mem->write_byte(
-                base_address + y,
-                (uint8_t)f[this->phdrs[phdrs_i].p_offset + y]);
+            const auto buffer = (uint8_t)f[this->phdrs[phdrs_i].p_offset + y];
+            memory_write_u8(mem, base_address + y, buffer);
+            // TODO Why not by words
         }
     }
 }
 
-uint32_t ProgramLoader::end() {
+Address ProgramLoader::end() {
     uint32_t last = 0;
     // Go trough all sections and found out last one
-    for (int i = 0; i < this->map.size(); i++) {
-        Elf32_Phdr *phdr = &(this->phdrs[this->map[i]]);
+    for (size_t i : this->map) {
+        Elf32_Phdr *phdr = &(this->phdrs[i]);
         if ((phdr->p_vaddr + phdr->p_filesz) > last) {
             last = phdr->p_vaddr + phdr->p_filesz;
         }
     }
-    return last + 0x10; // We add offset so we are sure that also pipeline is
-                        // empty
+    return Address(last + 0x10); // We add offset so we are sure that also
+                                 // pipeline is empty TODO propagate address
+                                 // deeper
 }
 
-uint32_t ProgramLoader::get_executable_entry() const {
+Address ProgramLoader::get_executable_entry() const {
     return executable_entry;
 }
 
 SymbolTable *ProgramLoader::get_symbol_table() {
-    SymbolTable *p_st = new SymbolTable();
+    auto *p_st = new SymbolTable();
     Elf_Scn *scn = nullptr;
     GElf_Shdr shdr;
     Elf_Data *data;

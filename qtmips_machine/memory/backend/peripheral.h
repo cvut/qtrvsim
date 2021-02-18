@@ -12,6 +12,8 @@
  *
  * Copyright (c) 2017-2019 Karel Koci<cynerd@email.cz>
  * Copyright (c) 2019      Pavel Pisa <pisa@cmp.felk.cvut.cz>
+ * Copyright (c) 2020      Jakub Dupak <dupak.jakub@gmail.com>
+ * Copyright (c) 2020      Max Hollmann <hollmmax@fel.cvut.cz>
  *
  * Faculty of Electrical Engineering (http://www.fel.cvut.cz)
  * Czech Technical University        (http://www.cvut.cz/)
@@ -37,7 +39,9 @@
 #define SIMPLEPERIPHERAL_H
 
 #include "machinedefs.h"
-#include "memory.h"
+#include "memory/backend/backend_memory.h"
+#include "memory/backend/memory.h"
+#include "memory/memory_utils.h"
 #include "qtmipsexception.h"
 
 #include <QMap>
@@ -46,19 +50,30 @@
 
 namespace machine {
 
-class SimplePeripheral : public MemoryAccess {
+class SimplePeripheral final : public BackendMemory {
     Q_OBJECT
 public:
-    SimplePeripheral();
+    explicit SimplePeripheral();
     ~SimplePeripheral() override;
 
 signals:
-    void write_notification(uint32_t address, uint32_t value);
-    void read_notification(uint32_t address, uint32_t *value) const;
+    void write_notification(Offset address, size_t size) const;
+    void read_notification(Offset address, size_t size) const;
 
 public:
-    bool wword(uint32_t address, uint32_t value) override;
-    uint32_t rword(uint32_t address, bool debug_access = false) const override;
+    WriteResult write(
+        Offset destination,
+        const void *source,
+        size_t size,
+        WriteOptions options) override;
+
+    ReadResult read(
+        void *destination,
+        Offset source,
+        size_t size,
+        ReadOptions options) const override;
+
+    LocationStatus location_status(Offset offset) const override;
 };
 
 } // namespace machine

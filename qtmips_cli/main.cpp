@@ -461,7 +461,9 @@ void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
                 cout << "cannot parse load range data." << endl;
                 exit(1);
             }
-            machine.memory_rw()->write_word(addr, val);
+            machine.memory_rw()->write(
+                addr, &val, sizeof(val),
+                WriteOptions()); // TODO: Is this really the right offset
             addr += 4;
         }
         in.close();
@@ -470,7 +472,7 @@ void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
 
 bool assemble(QtMipsMachine &machine, MsgReport &msgrep, QString filename) {
     SymbolTableDb symtab(machine.symbol_table_rw(true));
-    machine::MemoryAccess *mem = machine.physical_address_space_rw();
+    machine::FrontendMemory *mem = machine.memory_data_bus_rw();
     if (mem == nullptr) {
         return false;
     }
@@ -480,7 +482,7 @@ bool assemble(QtMipsMachine &machine, MsgReport &msgrep, QString filename) {
     SimpleAsm::connect(
         &sasm, &SimpleAsm::report_message, &msgrep, &MsgReport::report_message);
 
-    sasm.setup(mem, &symtab, 0x80020000);
+    sasm.setup(mem, &symtab, 0x80020000_addr);
 
     if (!sasm.process_file(std::move(filename))) {
         return false;

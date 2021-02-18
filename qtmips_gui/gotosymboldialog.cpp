@@ -25,11 +25,11 @@ GoToSymbolDialog::~GoToSymbolDialog() {
 void GoToSymbolDialog::show_prog() {
     uint32_t address = 0;
     emit obtain_value_for_name(address, ui->listSymbols->currentItem()->text());
-    emit program_focus_addr(address);
+    emit program_focus_addr(machine::Address(address));
 }
 
 void GoToSymbolDialog::show_mem() {
     uint32_t address = 0;
     emit obtain_value_for_name(address, ui->listSymbols->currentItem()->text());
-    emit memory_focus_addr(address);
+    emit memory_focus_addr(machine::Address(address));
 }

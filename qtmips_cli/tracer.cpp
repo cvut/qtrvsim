@@ -111,8 +111,8 @@ void Tracer::reg_hi() {
 }
 
 void Tracer::instruction_fetch(
-    const Instruction &inst,
-    uint32_t inst_addr,
+    const machine::Instruction &inst,
+    Address inst_addr,
     ExceptionCause excause,
     bool valid) {
     cout << "Fetch: " << (excause != EXCAUSE_NONE ? "!" : "")
@@ -121,7 +121,7 @@ void Tracer::instruction_fetch(
 
 void Tracer::instruction_decode(
     const machine::Instruction &inst,
-    uint32_t inst_addr,
+    Address inst_addr,
     ExceptionCause excause,
     bool valid) {
     cout << "Decode: " << (excause != EXCAUSE_NONE ? "!" : "")
@@ -130,7 +130,7 @@ void Tracer::instruction_decode(
 
 void Tracer::instruction_execute(
     const machine::Instruction &inst,
-    uint32_t inst_addr,
+    Address inst_addr,
     ExceptionCause excause,
     bool valid) {
     cout << "Execute: " << (excause != EXCAUSE_NONE ? "!" : "")
@@ -139,7 +139,7 @@ void Tracer::instruction_execute(
 
 void Tracer::instruction_memory(
     const machine::Instruction &inst,
-    uint32_t inst_addr,
+    Address inst_addr,
     ExceptionCause excause,
     bool valid) {
     cout << "Memory: " << (excause != EXCAUSE_NONE ? "!" : "")
@@ -148,15 +148,15 @@ void Tracer::instruction_memory(
 
 void Tracer::instruction_writeback(
     const machine::Instruction &inst,
-    uint32_t inst_addr,
+    Address inst_addr,
     ExceptionCause excause,
     bool valid) {
     cout << "Writeback: " << (excause != EXCAUSE_NONE ? "!" : "")
          << (valid ? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
 }
 
-void Tracer::regs_pc_update(uint32_t val) {
-    cout << "PC:" << hex << val << endl;
+void Tracer::regs_pc_update(Address val) {
+    cout << "PC:" << hex << val.get_raw() << endl;
 }
 
 void Tracer::regs_gp_update(RegisterId i, RegisterValue val) {

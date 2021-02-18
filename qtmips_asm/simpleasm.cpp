@@ -35,6 +35,8 @@
 
 #include "simpleasm.h"
 
+#include "qtmips_machine/memory/address.h"
+
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -43,6 +45,7 @@
 #include <utility>
 
 using namespace fixmatheval;
+using machine::Address;
 
 SymbolTableDb::SymbolTableDb(machine::SymbolTable *symtab) {
     this->symtab = symtab;
@@ -103,9 +106,9 @@ void SimpleAsm::clear() {
 }
 
 void SimpleAsm::setup(
-    machine::MemoryAccess *mem,
+    machine::FrontendMemory *mem,
     SymbolTableDb *symtab,
-    uint32_t address) {
+    machine::Address address) {
     this->mem = mem;
     this->symtab = symtab;
     this->address = address;
@@ -275,7 +278,7 @@ bool SimpleAsm::process_line(
     }
 
     if (!label.isEmpty()) {
-        symtab->setSymbol(label, address, 4);
+        symtab->setSymbol(label, address.get_raw(), 4);
     }
 
     if (op.isEmpty()) {
@@ -379,7 +382,7 @@ bool SimpleAsm::process_line(
             }
             return false;
         }
-        address = value;
+        address = machine::Address(value);
         return true;
     }
     if ((op == ".SPACE") || (op == ".SKIP")) {
@@ -451,7 +454,7 @@ bool SimpleAsm::process_line(
         }
         while (value-- > 0) {
             if (!fatal_occured) {
-                mem->write_byte(address, (uint8_t)fill);
+                mem->write_u8(address, (uint8_t)fill);
             }
             address += 1;
         }
@@ -550,13 +553,13 @@ bool SimpleAsm::process_line(
                     }
                 }
                 if (!fatal_occured) {
-                    mem->write_byte(address, (uint8_t)ch.toLatin1());
+                    mem->write_u8(address, (uint8_t)ch.toLatin1());
                 }
                 address += 1;
             }
             if (append_zero) {
                 if (!fatal_occured) {
-                    mem->write_byte(address, 0);
+                    mem->write_u8(address, 0);
                 }
                 address += 1;
             }
@@ -601,16 +604,16 @@ bool SimpleAsm::process_line(
                 val = (uint8_t)value;
             }
             if (!fatal_occured) {
-                mem->write_byte(address, (uint8_t)val);
+                mem->write_u8(address, (uint8_t)val);
             }
             address += 1;
         }
         return true;
     }
 
-    while (address & 3) {
+    while (address.get_raw() & 3) {
         if (!fatal_occured) {
-            mem->write_byte(address, 0);
+            mem->write_u8(address, 0);
         }
         address += 1;
     }
@@ -628,7 +631,7 @@ bool SimpleAsm::process_line(
                     line_number, 0));
             }
             if (!fatal_occured) {
-                mem->write_word(address, val);
+                mem->write_u32(address, val);
             }
             address += 4;
         }
@@ -653,7 +656,7 @@ bool SimpleAsm::process_line(
     uint32_t *p = inst;
     for (ssize_t l = 0; l < size; l += 4) {
         if (!fatal_occured) {
-            mem->write_word(address, *(p++));
+            mem->write_u32(address, *(p++));
         }
         address += 4;
     }
@@ -716,13 +719,13 @@ bool SimpleAsm::finish(QString *error_ptr) {
                 error_occured = true;
                 error_reported = true;
             } else {
-                if (false) {
+                if (false)
                     emit report_message(
                         messagetype::MSG_INFO, r->filename, r->line, 0,
                         expression.dump() + " -> " + QString::number(value),
                         "");
-                }
-                machine::Instruction inst(mem->read_word(r->location, true));
+                machine::Instruction inst(
+                    mem->read_u32(Address(r->location), true));
                 if (!inst.update(value, r)) {
                     error = tr("instruction update error %1 at line %2, "
                                "expression %3 -> value %4.")
@@ -738,7 +741,7 @@ bool SimpleAsm::finish(QString *error_ptr) {
                     error_reported = true;
                 }
                 if (!fatal_occured)
-                    mem->write_word(r->location, inst.data());
+                    mem->write_u32(Address(r->location), inst.data());
             }
         }
     }
@@ -746,7 +749,8 @@ bool SimpleAsm::finish(QString *error_ptr) {
         delete reloc.takeFirst();
     }
 
-    emit mem->external_change_notify(mem, 0, 0xffffffff, true);
+    emit mem->external_change_notify(
+        mem, machine::Address::null(), Address(0xffffffff), true);
 
     return !error_occured;
 }

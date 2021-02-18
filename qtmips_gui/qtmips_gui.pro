@@ -31,6 +31,7 @@ unix: LIBS += \
 INCLUDEPATH += $$PWD/..
 INCLUDEPATH += $$PWD/../qtmips_machine $$PWD/../qtmips_osemu $$PWD/../qtmips_asm
 DEPENDPATH += $$PWD/../qtmips_machine $$PWD/../qtmips_osemu $$PWD/../qtmips_asm
+
 QMAKE_CXXFLAGS += -std=c++14
 QMAKE_CXXFLAGS_DEBUG += -ggdb
 QMAKE_CXXFLAGS_DEBUG += -Wno-c99-designator

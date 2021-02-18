@@ -12,6 +12,8 @@
  *
  * Copyright (c) 2017-2019 Karel Koci<cynerd@email.cz>
  * Copyright (c) 2019      Pavel Pisa <pisa@cmp.felk.cvut.cz>
+ * Copyright (c) 2020      Jakub Dupak <dupak.jakub@gmail.com>
+ * Copyright (c) 2020      Max Hollmann <hollmmax@fel.cvut.cz>
  *
  * Faculty of Electrical Engineering (http://www.fel.cvut.cz)
  * Czech Technical University        (http://www.cvut.cz/)
@@ -33,99 +35,97 @@
  *
  ******************************************************************************/
 
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef QTMIPS_MACHINE_MEMORY_H
+#define QTMIPS_MACHINE_MEMORY_H
 
 #include "machinedefs.h"
+#include "memory/address.h"
+#include "memory/backend/backend_memory.h"
+#include "memory/memory_utils.h"
 #include "qtmipsexception.h"
+#include "utils.h"
 
 #include <QObject>
 #include <cstdint>
 
 namespace machine {
 
-// Virtual class for common memory access
-class MemoryAccess : public QObject {
-    Q_OBJECT
+class MemorySection final : public BackendMemory {
 public:
-    // Note: hword and word methods are throwing away lowest bits so unaligned
-    // access is ignored without error.
-    bool write_byte(uint32_t offset, uint8_t value);
-    bool write_hword(uint32_t offset, uint16_t value);
-    bool write_word(uint32_t offset, uint32_t value);
+    explicit MemorySection(size_t length_bytes);
+    MemorySection(const MemorySection &other);
+    ~MemorySection() override = default;
 
-    uint8_t read_byte(uint32_t offset, bool debug_access = false) const;
-    uint16_t read_hword(uint32_t offset, bool debug_access = false) const;
-    uint32_t read_word(uint32_t offset, bool debug_access = false) const;
+    WriteResult write(
+        Offset destination,
+        const void *source,
+        size_t total_size,
+        WriteOptions options) override;
 
-    void write_ctl(enum AccessControl ctl, uint32_t offset, uint32_t value);
-    uint32_t read_ctl(enum AccessControl ctl, uint32_t offset) const;
+    ReadResult read(
+        void *destination,
+        Offset source,
+        size_t size,
+        ReadOptions options) const override;
 
-    virtual void sync();
-    virtual enum LocationStatus location_status(uint32_t offset) const;
-    virtual uint32_t get_change_counter() const = 0;
+    LocationStatus location_status(Offset offset) const override;
 
-signals:
-    void external_change_notify(
-        const MemoryAccess *mem_access,
-        uint32_t start_addr,
-        uint32_t last_addr,
-        bool external) const;
-
-protected:
-    virtual bool wword(uint32_t offset, uint32_t value) = 0;
-    virtual uint32_t rword(uint32_t offset, bool debug_access = false) const = 0;
-
-private:
-    static int sh_nth(uint32_t offset);
-};
-
-class MemorySection : public MemoryAccess {
-public:
-    MemorySection(uint32_t length);
-    MemorySection(const MemorySection &);
-    ~MemorySection() override;
-
-    bool wword(uint32_t offset, uint32_t value) override;
-    uint32_t
-    rword(uint32_t offsetbool, bool debug_access = false) const override;
-    uint32_t get_change_counter() const override;
-    void merge(MemorySection &);
-
-    uint32_t length() const;
-    const uint32_t *data() const;
+    size_t length() const;
+    const byte *data() const;
 
     bool operator==(const MemorySection &) const;
     bool operator!=(const MemorySection &) const;
 
 private:
-    uint32_t len;
-    uint32_t *dt;
+    std::vector<byte> dt;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+/// Some optimalization options
+// How big memory sections will be in bits (2^8=256 bytes)
+constexpr size_t MEMORY_SECTION_BITS = 8;
+// How big one row of lookup tree will be in bits (2^4=16)
+constexpr size_t MEMORY_TREE_BITS = 4;
+//////////////////////////////////////////////////////////////////////////////
+// Size of one section
+constexpr size_t MEMORY_SECTION_SIZE = (1u << MEMORY_SECTION_BITS);
+// Size of one memory row
+constexpr size_t MEMORY_TREE_ROW_SIZE = (1u << MEMORY_TREE_BITS);
+// Depth of tree
+constexpr size_t MEMORY_TREE_DEPTH
+    = ((32 - MEMORY_SECTION_BITS) / MEMORY_TREE_BITS);
+
 union MemoryTree {
-    union MemoryTree *mt;
+    union MemoryTree *subtree;
     MemorySection *sec;
 };
 
-class Memory : public MemoryAccess {
+class Memory final : public BackendMemory {
     Q_OBJECT
 public:
-    Memory();
+    explicit Memory();
     Memory(const Memory &);
     ~Memory() override;
     void reset(); // Reset whole content of memory (removes old tree and creates
                   // new one)
     void reset(const Memory &);
 
-    MemorySection *get_section(uint32_t address, bool create) const; // returns
-                                                                     // section
-                                                                     // containing
-                                                                     // given
-                                                                     // address
-    bool wword(uint32_t address, uint32_t value) override;
-    uint32_t rword(uint32_t address, bool debug_access = false) const override;
-    uint32_t get_change_counter() const override;
+    // returns section containing given address
+    MemorySection *get_section(size_t offset, bool create) const;
+
+    WriteResult write(
+        Offset destination,
+        const void *source,
+        size_t size,
+        WriteOptions options) override;
+
+    ReadResult read(
+        void *destination,
+        Offset source,
+        size_t size,
+        ReadOptions options) const override;
+
+    LocationStatus location_status(Offset offset) const override;
 
     bool operator==(const Memory &) const;
     bool operator!=(const Memory &) const;
@@ -134,23 +134,20 @@ public:
 
 private:
     union MemoryTree *mt_root;
-    uint32_t change_counter {};
-    uint32_t write_counter {};
+    uint32_t change_counter = 0;
+    uint32_t write_counter = 0;
     static union MemoryTree *allocate_section_tree();
     static void free_section_tree(union MemoryTree *, size_t depth);
     static bool compare_section_tree(
         const union MemoryTree *,
         const union MemoryTree *,
         size_t depth);
-    static bool is_zero_section_tree(const union MemoryTree *, size_t depth);
     static union MemoryTree *
     copy_section_tree(const union MemoryTree *, size_t depth);
+    uint32_t get_change_counter() const;
 };
-
 } // namespace machine
 
-Q_DECLARE_METATYPE(machine::AccessControl)
-Q_DECLARE_METATYPE(machine::Memory)
-Q_DECLARE_METATYPE(machine::LocationStatus)
+Q_DECLARE_METATYPE(machine::Memory);
 
 #endif // MEMORY_H

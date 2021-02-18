@@ -64,17 +64,18 @@ void MachineTests::registers_rw_hi_lo() {
 
 void MachineTests::registers_pc() {
     Registers r;
-    QCOMPARE(r.read_pc(), (unsigned)0x80020000); // Check initial pc address
-    QCOMPARE(r.pc_inc(), (unsigned)0x80020004);
-    QCOMPARE(r.pc_inc(), (unsigned)0x80020008);
-    QCOMPARE(r.pc_jmp(-0x8), (unsigned)0x80020000);
-    QCOMPARE(r.pc_jmp(0xC), (unsigned)0x8002000C);
-    r.pc_abs_jmp(0x80020100);
-    QCOMPARE(r.read_pc(), (unsigned)0x80020100);
+    QCOMPARE(r.read_pc().get_raw(), (unsigned)0x80020000); // Check initial pc
+                                                           // address
+    QCOMPARE(r.pc_inc().get_raw(), (unsigned)0x80020004);
+    QCOMPARE(r.pc_inc().get_raw(), (unsigned)0x80020008);
+    QCOMPARE(r.pc_jmp(-0x8).get_raw(), (unsigned)0x80020000);
+    QCOMPARE(r.pc_jmp(0xC).get_raw(), (unsigned)0x8002000C);
+    r.pc_abs_jmp(Address(0x80020100));
+    QCOMPARE(r.read_pc().get_raw(), (unsigned)0x80020100);
 #ifdef QVERIFY_EXCEPTION_THROWN
     QVERIFY_EXCEPTION_THROWN(r.pc_jmp(0x1), QtMipsExceptionUnalignedJump);
     QVERIFY_EXCEPTION_THROWN(
-        r.pc_abs_jmp(0x80020101), QtMipsExceptionUnalignedJump);
+        r.pc_abs_jmp(Address(0x80020101)), QtMipsExceptionUnalignedJump);
 #endif
 }
 

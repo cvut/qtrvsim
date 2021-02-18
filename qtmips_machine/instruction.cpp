@@ -1595,7 +1595,7 @@ static const struct InstructionMap instruction_map[] = {
     { "LB",
       IT_I,
       ALU_OP_ADDU,
-      AC_BYTE,
+      AC_I8,
       nullptr,
       { "t", "o(b)" },
       0x80000000,
@@ -1604,7 +1604,7 @@ static const struct InstructionMap instruction_map[] = {
     { "LH",
       IT_I,
       ALU_OP_ADDU,
-      AC_HALFWORD,
+      AC_I16,
       nullptr,
       { "t", "o(b)" },
       0x84000000,
@@ -1622,7 +1622,7 @@ static const struct InstructionMap instruction_map[] = {
     { "LW",
       IT_I,
       ALU_OP_ADDU,
-      AC_WORD,
+      AC_U32,
       nullptr,
       { "t", "o(b)" },
       0x8c000000,
@@ -1631,7 +1631,7 @@ static const struct InstructionMap instruction_map[] = {
     { "LBU",
       IT_I,
       ALU_OP_ADDU,
-      AC_BYTE_UNSIGNED,
+      AC_U8,
       nullptr,
       { "t", "o(b)" },
       0x90000000,
@@ -1640,7 +1640,7 @@ static const struct InstructionMap instruction_map[] = {
     { "LHU",
       IT_I,
       ALU_OP_ADDU,
-      AC_HALFWORD_UNSIGNED,
+      AC_U16,
       nullptr,
       { "t", "o(b)" },
       0x94000000,
@@ -1659,7 +1659,7 @@ static const struct InstructionMap instruction_map[] = {
     { "SB",
       IT_I,
       ALU_OP_ADDU,
-      AC_BYTE,
+      AC_I8,
       nullptr,
       { "t", "o(b)" },
       0xa0000000,
@@ -1668,7 +1668,7 @@ static const struct InstructionMap instruction_map[] = {
     { "SH",
       IT_I,
       ALU_OP_ADDU,
-      AC_HALFWORD,
+      AC_I16,
       nullptr,
       { "t", "o(b)" },
       0xa4000000,
@@ -1686,7 +1686,7 @@ static const struct InstructionMap instruction_map[] = {
     { "SW",
       IT_I,
       ALU_OP_ADDU,
-      AC_WORD,
+      AC_U32,
       nullptr,
       { "t", "o(b)" },
       0xac000000,
@@ -1839,10 +1839,10 @@ Instruction::Instruction(
     this->dt |= immediate;
 }
 
-Instruction::Instruction(uint8_t opcode, uint32_t address) {
+Instruction::Instruction(uint8_t opcode, Address address) {
     this->dt = 0;
     this->dt |= opcode << 26;
-    this->dt |= address;
+    this->dt |= address.get_raw();
 }
 
 Instruction::Instruction(const Instruction &i) {
@@ -1883,8 +1883,8 @@ uint16_t Instruction::immediate() const {
     return (uint16_t)MASK(16, 0);
 }
 
-uint32_t Instruction::address() const {
-    return (uint32_t)MASK(26, 0);
+Address Instruction::address() const {
+    return Address(MASK(26, 0));
 }
 
 uint32_t Instruction::data() const {
@@ -1957,7 +1957,7 @@ Instruction &Instruction::operator=(const Instruction &c) {
     return *this;
 }
 
-QString Instruction::to_str(int32_t inst_addr) const {
+QString Instruction::to_str(Address inst_addr) const {
     const InstructionMap &im = InstructionMapFind(dt);
     // TODO there are exception where some fields are zero and such so we should
     // not print them in such case
@@ -2011,12 +2011,13 @@ QString Instruction::to_str(int32_t inst_addr) const {
                 }
                 break;
             case 'p':
-                field += inst_addr + 4;
+                field += (inst_addr + 4).get_raw();
                 res += "0x" + QString::number((uint32_t)field, 16).toUpper();
                 break;
             case 'a':
-                uint32_t target = (inst_addr & 0xF0000000) | (address() << 2);
-                res += " 0x" + QString::number(target, 16).toUpper();
+                Address target
+                    = (inst_addr & 0xF0000000) | (address() << 2).get_raw();
+                res += " 0x" + QString::number(target.get_raw(), 16).toUpper();
                 break;
             }
         }
@@ -2116,7 +2117,7 @@ static int parse_reg_from_string(QString str, uint *chars_taken = nullptr) {
 static void reloc_append(
     RelocExpressionList *reloc,
     const QString &fl,
-    uint32_t inst_addr,
+    Address inst_addr,
     int64_t offset,
     const ArgumentDesc *adesc,
     uint *chars_taken = nullptr,
@@ -2158,7 +2159,7 @@ ssize_t Instruction::code_from_string(
     const QString &inst_base,
     QStringList &inst_fields,
     QString &error,
-    uint32_t inst_addr,
+    Address inst_addr,
     RelocExpressionList *reloc,
     const QString &filename,
     int line,
@@ -2226,7 +2227,7 @@ ssize_t Instruction::code_from_string(
 
                 switch (adesc->kind) {
                 case 'g': val += parse_reg_from_string(fl, &chars_taken); break;
-                case 'p': val -= (inst_addr + 4); FALLTROUGH
+                case 'p': val -= (inst_addr + 4).get_raw(); FALLTROUGH
                 case 'o':
                 case 'n':
                     shift_right += options & 0xff;
@@ -2269,7 +2270,7 @@ ssize_t Instruction::code_from_string(
                     break;
                 case 'a':
                     shift_right += options & 0xff;
-                    val -= (inst_addr + 4) & ~(int64_t)0x0fffffff;
+                    val -= ((inst_addr + 4) & ~(int64_t)0x0fffffff).get_raw();
                     if (fl.at(0).isDigit() || (reloc == nullptr)) {
                         uint64_t num_val;
                         int i;
@@ -2397,7 +2398,7 @@ ssize_t Instruction::code_from_string(
     size_t buffsize,
     QString str,
     QString &error,
-    uint32_t inst_addr,
+    Address inst_addr,
     RelocExpressionList *reloc,
     const QString &filename,
     int line,
