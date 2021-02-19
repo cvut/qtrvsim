@@ -35,7 +35,7 @@
 
 #include "terminaldock.h"
 
-#include "qtmips_machine/serialport.h"
+#include "qtmips_machine/memory/backend/serialport.h"
 
 #include <QString>
 #include <QTextBlock>

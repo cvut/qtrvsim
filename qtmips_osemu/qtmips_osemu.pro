@@ -12,6 +12,7 @@ CONFIG += staticlib
 LIBS += -L$$OUT_PWD/../qtmips_machine/ -lqtmips_machine
 
 INCLUDEPATH += $$PWD/..
+INCLUDEPATH += $$PWD/../qtmips_machine
 DEPENDPATH += $$PWD/../qtmips_machine
 
 LIBS += -lelf

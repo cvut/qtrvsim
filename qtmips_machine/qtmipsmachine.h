@@ -36,16 +36,16 @@
 #ifndef QTMIPSMACHINE_H
 #define QTMIPSMACHINE_H
 
-#include "cache.h"
 #include "core.h"
-#include "lcddisplay.h"
 #include "machineconfig.h"
-#include "peripheral.h"
-#include "peripspiled.h"
-#include "physaddrspace.h"
+#include "memory/backend/lcddisplay.h"
+#include "memory/backend/peripheral.h"
+#include "memory/backend/peripspiled.h"
+#include "memory/backend/serialport.h"
+#include "memory/cache/cache.h"
+#include "memory/memory_bus.h"
 #include "qtmipsexception.h"
 #include "registers.h"
-#include "serialport.h"
 #include "symboltable.h"
 
 #include <QObject>

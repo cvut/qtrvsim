@@ -23,42 +23,41 @@ SOURCES += \
     qtmipsmachine.cpp \
     qtmipsexception.cpp \
     core.cpp \
-    memory.cpp \
     instruction.cpp \
     registers.cpp \
     programloader.cpp \
-    cache.cpp \
     alu.cpp \
     machineconfig.cpp \
-    physaddrspace.cpp \
-    peripheral.cpp \
-    serialport.cpp \
-    peripspiled.cpp \
-    lcddisplay.cpp \
     symboltable.cpp \
     cop0state.cpp \
-    memory/cache/cache_policy.cpp
+    memory/cache/cache.cpp \
+    memory/cache/cache_policy.cpp \
+    memory/memory_bus.cpp \
+    memory/backend/memory.cpp \
+    memory/backend/peripspiled.cpp \
+    memory/backend/lcddisplay.cpp \
+    memory/backend/peripheral.cpp \
+    memory/backend/serialport.cpp
 
 HEADERS += \
     qtmipsmachine.h \
     qtmipsexception.h \
     core.h \
-    memory.h \
     instruction.h \
     registers.h \
     programloader.h \
-    cache.h \
     alu.h \
     machineconfig.h \
     utils.h \
     machinedefs.h \
-    programloader.h \
-    physaddrspace.h \
-    peripheral.h \
-    serialport.h \
-    peripspiled.h \
-    lcddisplay.h \
     symboltable.h \
     cop0state.h \
+    memory/cache/cache.h \
     memory/cache/cache_policy.h \
-    memory/cache/cache_types.h
+    memory/cache/cache_types.h \
+    memory/memory_bus.h \
+    memory/backend/memory.h \
+    memory/backend/peripspiled.h \
+    memory/backend/lcddisplay.h \
+    memory/backend/peripheral.h \
+    memory/backend/serialport.h \

@@ -40,13 +40,13 @@
 #include "qtmips_machine/core.h"
 #include "qtmips_machine/instruction.h"
 #include "qtmips_machine/machineconfig.h"
+#include "qtmips_machine/memory/backend/memory.h"
 #include "qtmips_machine/qtmipsexception.h"
 #include "qtmips_machine/registers.h"
 
 #include <QObject>
 #include <QString>
 #include <QVector>
-#include <memory.h>
 
 namespace osemu {
 

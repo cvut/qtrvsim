@@ -33,9 +33,9 @@
  *
  ******************************************************************************/
 
-#include "qtmips_machine/cache.h"
 #include "qtmips_machine/core.h"
 #include "qtmips_machine/machineconfig.h"
+#include "qtmips_machine/memory/cache/cache.h"
 #include "tst_machine.h"
 
 #include <QVector>

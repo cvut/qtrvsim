@@ -33,7 +33,7 @@
  *
  ******************************************************************************/
 
-#include "qtmips_machine/memory.h"
+#include "qtmips_machine/memory/backend/memory.h"
 #include "tst_machine.h"
 
 using namespace machine;

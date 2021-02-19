@@ -34,7 +34,7 @@
  ******************************************************************************/
 
 #include "qtmips_machine/instruction.h"
-#include "qtmips_machine/memory.h"
+#include "qtmips_machine/memory/backend/memory.h"
 #include "qtmips_machine/programloader.h"
 #include "tst_machine.h"
 

@@ -36,7 +36,7 @@
 #ifndef PROGRAM_H
 #define PROGRAM_H
 
-#include "memory.h"
+#include "memory/backend/memory.h"
 #include "symboltable.h"
 
 #include <QFile>

@@ -10,6 +10,7 @@ TEMPLATE = lib
 CONFIG += staticlib
 
 INCLUDEPATH += $$PWD/..
+INCLUDEPATH += $$PWD/../qtmips_machine
 DEPENDPATH += $$PWD/../qtmips_machine
 
 LIBS += -lelf

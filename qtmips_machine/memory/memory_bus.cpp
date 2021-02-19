@@ -33,7 +33,7 @@
  *
  ******************************************************************************/
 
-#include "physaddrspace.h"
+#include "memory/memory_bus.h"
 
 using namespace machine;
 

@@ -40,7 +40,7 @@
 #include "cop0state.h"
 #include "instruction.h"
 #include "machineconfig.h"
-#include "memory.h"
+#include "memory/backend/memory.h"
 #include "qtmipsexception.h"
 #include "register_value.h"
 #include "registers.h"

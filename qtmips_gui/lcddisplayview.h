@@ -1,7 +1,7 @@
 #ifndef LCDDISPLAYVIEW_H
 #define LCDDISPLAYVIEW_H
 
-#include "qtmips_machine/lcddisplay.h"
+#include "qtmips_machine/memory/backend/lcddisplay.h"
 
 #include <QImage>
 #include <QWidget>

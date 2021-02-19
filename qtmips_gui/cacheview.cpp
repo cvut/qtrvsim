@@ -47,7 +47,7 @@
 #define LETTERW 7
 //////////////////////
 
-#include "qtmips_machine/cache.h"
+#include "qtmips_machine/memory/cache/cache.h"
 
 #include <iostream>
 using namespace std;

@@ -37,7 +37,7 @@
 #define PHYSADDRSPACE_H
 
 #include "machinedefs.h"
-#include "memory.h"
+#include "memory/backend/memory.h"
 #include "qtmipsexception.h"
 
 #include <QMap>

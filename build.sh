@@ -18,10 +18,10 @@ cd "$BUILDDIR"
 if $DEBUG
 then
   echo "Running debug build with options: $QMAKE_OPTIONS..."
-  qmake .. "CONFIG += debug force_debug_info" $QMAKE_OPTIONS
+  qmake .. -recursive "CONFIG += debug force_debug_info" $QMAKE_OPTIONS
 else
   echo "Running release build..."
-  qmake ..
+  qmake .. -recursive
 fi
 
 make "-j$(nproc)" -s

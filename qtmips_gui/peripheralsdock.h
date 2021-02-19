@@ -36,8 +36,8 @@
 #ifndef PERIPHERALSDOCK_H
 #define PERIPHERALSDOCK_H
 
-#include "qtmips_machine/peripheral.h"
-#include "qtmips_machine/peripspiled.h"
+#include "qtmips_machine/memory/backend/peripheral.h"
+#include "qtmips_machine/memory/backend/peripspiled.h"
 #include "qtmips_machine/qtmipsmachine.h"
 
 #include <QDockWidget>

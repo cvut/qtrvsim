@@ -37,7 +37,7 @@
 #define CACHE_H
 
 #include "machineconfig.h"
-#include "memory.h"
+#include "memory/backend/memory.h"
 #include "memory/cache/cache_policy.h"
 #include "memory/cache/cache_types.h"
 

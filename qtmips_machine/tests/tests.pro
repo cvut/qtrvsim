@@ -24,7 +24,7 @@ unix: LIBS += \
         # --enable-new-dtags \
 
 INCLUDEPATH += $$PWD/../..
-INCLUDEPATH += $$PWD/.
+INCLUDEPATH += $$PWD/..
 DEPENDPATH += $$PWD/..
 QMAKE_CXXFLAGS += -std=c++14
 QMAKE_CXXFLAGS_DEBUG += -Wno-c99-designator

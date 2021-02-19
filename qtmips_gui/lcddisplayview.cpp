@@ -1,7 +1,5 @@
 #include "lcddisplayview.h"
 
-#include "qtmips_machine/lcddisplay.h"
-
 #include <QPaintEvent>
 #include <QPainter>
 #include <QStyle>

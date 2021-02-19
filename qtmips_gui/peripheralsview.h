@@ -1,7 +1,7 @@
 #ifndef PERIPHERALSVIEW_H
 #define PERIPHERALSVIEW_H
 
-#include "qtmips_machine/peripspiled.h"
+#include "qtmips_machine/memory/backend/peripspiled.h"
 
 #include <QWidget>
 
