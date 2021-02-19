@@ -50,8 +50,6 @@ MessagesView::MessagesView(QWidget *parent, QSettings *settings)
 }
 
 void MessagesView::resizeEvent(QResizeEvent *event) {
-    MessagesModel *m = dynamic_cast<MessagesModel *>(model());
-    // TODO this looks wierd./
     Super::resizeEvent(event);
 }
 
