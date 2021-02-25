@@ -1109,16 +1109,12 @@ bool SimpleAsmWithEditorCheck::process_pragma(
         }
         if (!QString::compare(operands.at(2), "memory", Qt::CaseInsensitive)
             && (mainwindow->memory != nullptr)) {
-            QMetaObject::invokeMethod(
-                mainwindow->memory, "focus_addr", Qt::AutoConnection,
-                Q_ARG(uint32_t, value));
+            mainwindow->memory->focus_addr(machine::Address(value));
             return true;
         }
         if (!QString::compare(operands.at(2), "program", Qt::CaseInsensitive)
             && (mainwindow->program != nullptr)) {
-            QMetaObject::invokeMethod(
-                mainwindow->program, "focus_addr", Qt::AutoConnection,
-                Q_ARG(uint32_t, value));
+            mainwindow->program->focus_addr(machine::Address(value));
             return true;
         }
         emit report_message(
