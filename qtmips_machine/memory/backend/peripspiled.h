@@ -43,8 +43,6 @@
 #include "memory/memory_utils.h"
 #include "qtmipsexception.h"
 
-#include <QMap>
-#include <QObject>
 #include <cstdint>
 
 namespace machine {

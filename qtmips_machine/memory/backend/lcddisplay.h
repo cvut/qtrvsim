@@ -89,14 +89,10 @@ public:
     }
 
 private:
-    /**
-     * Read HW register - allows only 32bit alligned access.
-     */
+    /** Read HW register - allows only 32bit aligned access. */
     uint32_t read_reg(Offset source) const;
 
-    /**
-     * Write HW register - allows only 32bit alligned access.
-     */
+    /** Write HW register - allows only 32bit aligned access */
     bool write_reg(Offset destination, uint32_t value);
 
     size_t get_fb_line_size() const;

@@ -76,7 +76,7 @@ ReadResult LcdDisplay::read(
 }
 
 uint32_t LcdDisplay::read_reg(Offset source) const {
-    Q_ASSERT((source & 3U) == 0); // uint32_t alligned
+    Q_ASSERT((source & 3U) == 0); // uint32_t aligned
 
     if (source + 3 >= get_fb_size_bytes()) {
         return 0;
@@ -88,7 +88,7 @@ uint32_t LcdDisplay::read_reg(Offset source) const {
     // TODO Switch to if constexpr as soon as we have cpp17.
     if (DEBUG_LCD) {
         printf(
-            "LcdDisplay::readreg address 0x%08lx data 0x%08lx\n",
+            "LcdDisplay::read_reg address 0x%08lx data 0x%08lx\n",
             (unsigned long)source, (unsigned long)value);
     }
 

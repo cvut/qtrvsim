@@ -81,7 +81,7 @@ private:
 };
 
 //////////////////////////////////////////////////////////////////////////////
-/// Some optimalization options
+/// Some optimisation options
 // How big memory sections will be in bits (2^8=256 bytes)
 constexpr size_t MEMORY_SECTION_BITS = 8;
 // How big one row of lookup tree will be in bits (2^4=16)
@@ -130,12 +130,11 @@ public:
     bool operator==(const Memory &) const;
     bool operator!=(const Memory &) const;
 
-    const union MemoryTree *get_memorytree_root() const;
+    const union MemoryTree *get_memory_tree_root() const;
 
 private:
     union MemoryTree *mt_root;
     uint32_t change_counter = 0;
-    uint32_t write_counter = 0;
     static union MemoryTree *allocate_section_tree();
     static void free_section_tree(union MemoryTree *, size_t depth);
     static bool compare_section_tree(

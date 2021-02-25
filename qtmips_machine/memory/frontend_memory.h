@@ -73,7 +73,7 @@ public:
      * Write byte sequence to memory
      *
      * @param source        pointer to array of bytes to be copied
-     * @param destination   emulated adderess of destination to write to
+     * @param destination   emulated address of destination to write to
      * @param size         number of bytes to be written
      * @return              true when memory before and after write differs
      */
@@ -87,7 +87,7 @@ public:
     /**
      * Read sequence of bytes from memory
      *
-     * @param source        emulated adderss of data to be read
+     * @param source        emulated address of data to be read
      * @param destination   pointer to destination buffer
      * @param size          number of bytes to be read
      * @param options       additional option like debug mode, see type
@@ -111,7 +111,7 @@ private:
      * Read any type from memory
      *
      * This function was introduced to make stupid errors
-     *  like mismatched type and and its size imposible.
+     *  like mismatched type and and its size impossible.
      * It provides nicer interface than `read`.
      *  by eliminating the need for buffer.
      *
@@ -128,7 +128,7 @@ private:
      * Read any type from memory
      *
      * This function was introduced to make stupid errors
-     *  like mismatched type and and its size imposible.
+     *  like mismatched type and and its size impossible.
      * It provides nicer interface than `write`
      *  by eliminating the need for buffer.
      *

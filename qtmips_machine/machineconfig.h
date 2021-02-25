@@ -51,8 +51,8 @@ enum ConfigPresets {
 class CacheConfig {
 public:
     CacheConfig();
-    CacheConfig(const CacheConfig *cc);
-    CacheConfig(const QSettings *, const QString &prefix = "");
+    explicit CacheConfig(const CacheConfig *cc);
+    explicit CacheConfig(const QSettings *, const QString &prefix = "");
 
     void store(QSettings *, const QString &prefix = "") const;
 
@@ -99,8 +99,8 @@ private:
 class MachineConfig {
 public:
     MachineConfig();
-    MachineConfig(const MachineConfig *cc);
-    MachineConfig(const QSettings *, const QString &prefix = "");
+    explicit MachineConfig(const MachineConfig *config);
+    explicit MachineConfig(const QSettings *, const QString &prefix = "");
 
     void store(QSettings *, const QString &prefix = "");
 

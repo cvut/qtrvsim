@@ -72,5 +72,7 @@ ReadResult SimplePeripheral::read(
     return { size };
 }
 LocationStatus SimplePeripheral::location_status(Offset offset) const {
+    UNUSED(offset)
     return LOCSTAT_NONE;
 }
+

@@ -35,8 +35,8 @@
  *
  ******************************************************************************/
 
-#ifndef SIMPLEPERIPHERAL_H
-#define SIMPLEPERIPHERAL_H
+#ifndef PERIPHERAL_H
+#define PERIPHERAL_H
 
 #include "machinedefs.h"
 #include "memory/backend/backend_memory.h"
@@ -78,4 +78,4 @@ public:
 
 } // namespace machine
 
-#endif // SIMPLEPERIPHERAL_H
+#endif // PERIPHERAL_H

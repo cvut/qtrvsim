@@ -317,7 +317,7 @@ void MainWindow::create_core(
     bool keep_memory) {
     // Create machine
     machine::QtMipsMachine *new_machine
-        = new machine::QtMipsMachine(&config, true, load_executable);
+        = new machine::QtMipsMachine(config, true, load_executable);
 
     if (keep_memory && (machine != nullptr)) {
         new_machine->memory_rw()->reset(*machine->memory());

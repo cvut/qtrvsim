@@ -57,8 +57,10 @@ const machine::FrontendMemory *MemoryModel::mem_access() const {
     if (machine->memory_data_bus() != nullptr) {
         return machine->memory_data_bus();
     }
-    //    return machine->memory(); // TODO is this a problem?
-    throw std::logic_error("No memory available on machine");
+    // Direct access to memory is not allowed, data bus must be used. At least a
+    // trivial one. If this occurred, there is a misconfigured machine.
+    throw std::logic_error(
+        "No memory available on machine. This is a bug, please report it.");
 }
 
 machine::FrontendMemory *MemoryModel::mem_access_rw() const {
@@ -68,8 +70,10 @@ machine::FrontendMemory *MemoryModel::mem_access_rw() const {
     if (machine->memory_data_bus_rw() != nullptr) {
         return machine->memory_data_bus_rw();
     }
-    //    return machine->memory_rw(); // TODO can delete?
-    throw std::logic_error("No memory available on machine");
+    // Direct access to memory is not allowed, data bus must be used. At least a
+    // trivial one. If this occurred, there is a misconfigured machine.
+    throw std::logic_error(
+        "No memory available on machine. This is u bug, please report it.");
 }
 
 int MemoryModel::rowCount(const QModelIndex & /*parent*/) const {

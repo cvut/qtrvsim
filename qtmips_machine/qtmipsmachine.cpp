@@ -43,18 +43,18 @@
 using namespace machine;
 
 QtMipsMachine::QtMipsMachine(
-    const MachineConfig &cc,
+    const MachineConfig &config,
     bool load_symtab,
     bool load_executable)
     : QObject()
-    , mcnf(&cc) {
+    , mcnf(&config) {
     FrontendMemory *cpu_mem;
     stat = ST_READY;
     symtab = nullptr;
 
     regs = new Registers();
     if (load_executable) {
-        ProgramLoader program(cc.elf());
+        ProgramLoader program(config.elf());
         mem_program_only = new Memory();
         program.to_memory(mem_program_only);
         if (load_symtab) {
@@ -92,32 +92,32 @@ QtMipsMachine::QtMipsMachine(
         perip_lcd_display, 0xffe00000_addr, 0xffe4afff_addr, true);
 
     cch_program = new Cache(
-        cpu_mem, &cc.cache_program(), cc.memory_access_time_read(),
-        cc.memory_access_time_write(), cc.memory_access_time_burst());
+        cpu_mem, &config.cache_program(), config.memory_access_time_read(),
+        config.memory_access_time_write(), config.memory_access_time_burst());
     cch_data = new Cache(
-        cpu_mem, &cc.cache_data(), cc.memory_access_time_read(),
-        cc.memory_access_time_write(), cc.memory_access_time_burst());
+        cpu_mem, &config.cache_data(), config.memory_access_time_read(),
+        config.memory_access_time_write(), config.memory_access_time_burst());
 
     unsigned int min_cache_row_size = 16;
-    if (cc.cache_data().enabled()) {
-        min_cache_row_size = cc.cache_data().block_size() * 4;
+    if (config.cache_data().enabled()) {
+        min_cache_row_size = config.cache_data().block_size() * 4;
     }
 
-    if (cc.cache_program().enabled()
-        && cc.cache_program().block_size() < min_cache_row_size) {
-        min_cache_row_size = cc.cache_program().block_size() * 4;
+    if (config.cache_program().enabled()
+        && config.cache_program().block_size() < min_cache_row_size) {
+        min_cache_row_size = config.cache_program().block_size() * 4;
     }
 
     cop0st = new Cop0State();
 
-    if (cc.pipelined()) {
+    if (config.pipelined()) {
         cr = new CorePipelined(
-            regs, cch_program, cch_data, cc.hazard_unit(), min_cache_row_size,
-            cop0st);
+            regs, cch_program, cch_data, config.hazard_unit(),
+            min_cache_row_size, cop0st);
     } else {
         cr = new CoreSingle(
-            regs, cch_program, cch_data, cc.delay_slot(), min_cache_row_size,
-            cop0st);
+            regs, cch_program, cch_data, config.delay_slot(),
+            min_cache_row_size, cop0st);
     }
     connect(
         this, &QtMipsMachine::set_interrupt_signal, cop0st,
@@ -130,13 +130,13 @@ QtMipsMachine::QtMipsMachine(
     for (int i = 0; i < EXCAUSE_COUNT; i++) {
         if (i != EXCAUSE_INT && i != EXCAUSE_BREAK && i != EXCAUSE_HWBREAK) {
             set_stop_on_exception(
-                (enum ExceptionCause)i, cc.osemu_exception_stop());
+                (enum ExceptionCause)i, config.osemu_exception_stop());
             set_step_over_exception(
-                (enum ExceptionCause)i, cc.osemu_exception_stop());
+                (enum ExceptionCause)i, config.osemu_exception_stop());
         }
     }
 
-    set_stop_on_exception(EXCAUSE_INT, cc.osemu_interrupt_stop());
+    set_stop_on_exception(EXCAUSE_INT, config.osemu_interrupt_stop());
     set_step_over_exception(EXCAUSE_INT, false);
 }
 

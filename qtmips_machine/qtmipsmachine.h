@@ -58,7 +58,7 @@ class QtMipsMachine : public QObject {
     Q_OBJECT
 public:
     explicit QtMipsMachine(
-        const MachineConfig &cc,
+        const MachineConfig &config,
         bool load_symtab = false,
         bool load_executable = true);
     ~QtMipsMachine() override;

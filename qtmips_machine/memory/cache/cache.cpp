@@ -86,7 +86,7 @@ WriteResult Cache::write(
     }
 
     // FIXME: Get rid of the cast
-    // access is mosttly the same for read and write but one needs to write
+    // access is mostly the same for read and write but one needs to write
     // to the address
     const bool changed
         = access(destination, const_cast<void *>(source), size, WRITE);

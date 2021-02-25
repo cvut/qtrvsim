@@ -51,16 +51,16 @@ namespace machine {
 constexpr size_t BLOCK_ITEM_SIZE = sizeof(uint32_t);
 
 /**
- * NOTE ON TERMINILOGY:
+ * NOTE ON TERMINOLOGY:
  * N-way set associative cache consist of N ways (where N is degree
- * of associtivity). Arguments requesting N are called `associativity` of the
+ * of associativity). Arguments requesting N are called `associativity` of the
  * cache. Each way consist of blocks. (When we want to highlight, that we talk
- * about data + management tags, we speek of cache line. When we speek about
- * location of block within a way, we use the term `row`. Each block consits of
+ * about data + management tags, we speak of cache line. When we speak about
+ * location of block within a way, we use the term `row`. Each block consists of
  * some number of basic storage units (here `uint32_t`). To locate a single unit
  * withing block, we use therm `col` (as column).
  *
- * Set is consists of all block on the same row accross the ways.
+ * Set is consists of all block on the same row across the ways.
  *
  * We can imagine a cache as 3D array indexed via triple (`way`, `row`, `col`).
  * Row and col are derived from part of a address deterministically. The rest
@@ -71,6 +71,20 @@ constexpr size_t BLOCK_ITEM_SIZE = sizeof(uint32_t);
 class Cache : public FrontendMemory {
     Q_OBJECT
 public:
+    /**
+     * @param memory                    backing memory used to handle misses
+     * @param simulated_endian          endian of the simulated CPU/memory
+     * system
+     * @param config                    cache configuration struct
+     * @param memory_access_penalty_r   cycles to perform read (stats only)
+     * @param memory_access_penalty_w   cycles to perform write (stats only)
+     * @param memory_access_penalty_b   cycles to perform burst access (stats
+     *                                  only)
+     *
+     * NOTE: Memory access penalties apply only to statistics and are not taken
+     * into account during simulation itself. There is no point in doing so
+     * without superscalar execution.
+     */
     Cache(
         FrontendMemory *memory,
         const CacheConfig *config,
@@ -166,8 +180,8 @@ private:
      * Searches for given tag in a set
      *
      * @param loc       requested location in cache
-     * @return          associatity index of found block, max index + 1 if not
-     * found
+     * @return          associativity index of found block, max index + 1 if not
+     *                  found
      */
     size_t find_block_index(const CacheLocation &loc) const;
 

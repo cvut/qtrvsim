@@ -200,25 +200,25 @@ MachineConfig::MachineConfig() {
     cch_data = CacheConfig();
 }
 
-MachineConfig::MachineConfig(const MachineConfig *cc) {
-    pipeline = cc->pipelined();
-    delayslot = cc->delay_slot();
-    hunit = cc->hazard_unit();
-    exec_protect = cc->memory_execute_protection();
-    write_protect = cc->memory_write_protection();
-    mem_acc_read = cc->memory_access_time_read();
-    mem_acc_write = cc->memory_access_time_write();
-    mem_acc_burst = cc->memory_access_time_burst();
-    osem_enable = cc->osemu_enable();
-    osem_known_syscall_stop = cc->osemu_known_syscall_stop();
-    osem_unknown_syscall_stop = cc->osemu_unknown_syscall_stop();
-    osem_interrupt_stop = cc->osemu_interrupt_stop();
-    osem_exception_stop = cc->osemu_exception_stop();
-    osem_fs_root = cc->osemu_fs_root();
-    res_at_compile = cc->reset_at_compile();
-    elf_path = cc->elf();
-    cch_program = cc->cache_program();
-    cch_data = cc->cache_data();
+MachineConfig::MachineConfig(const MachineConfig *config) {
+    pipeline = config->pipelined();
+    delayslot = config->delay_slot();
+    hunit = config->hazard_unit();
+    exec_protect = config->memory_execute_protection();
+    write_protect = config->memory_write_protection();
+    mem_acc_read = config->memory_access_time_read();
+    mem_acc_write = config->memory_access_time_write();
+    mem_acc_burst = config->memory_access_time_burst();
+    osem_enable = config->osemu_enable();
+    osem_known_syscall_stop = config->osemu_known_syscall_stop();
+    osem_unknown_syscall_stop = config->osemu_unknown_syscall_stop();
+    osem_interrupt_stop = config->osemu_interrupt_stop();
+    osem_exception_stop = config->osemu_exception_stop();
+    osem_fs_root = config->osemu_fs_root();
+    res_at_compile = config->reset_at_compile();
+    elf_path = config->elf();
+    cch_program = config->cache_program();
+    cch_data = config->cache_data();
 }
 
 #define N(STR) (prefix + QString(STR))

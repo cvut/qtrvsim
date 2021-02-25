@@ -53,15 +53,10 @@ constexpr Offset SERP_TX_ST_REG_IE_m = 0x2u;
 
 constexpr Offset SERP_TX_DATA_REG_o = 0xcu;
 
-SerialPort::SerialPort() {
-    rx_st_reg = 0;
-    rx_data_reg = 0;
-    tx_st_reg = 0;
-    tx_irq_level = 2; // HW Interrupt 0
-    rx_irq_level = 3; // HW Interrupt 1
-    tx_irq_active = false;
-    rx_irq_active = false;
-}
+SerialPort::SerialPort()
+    : tx_irq_level(2) // HW interrupt 0
+    , rx_irq_level(3) // HW interrupt 1
+{}
 
 SerialPort::~SerialPort() = default;
 
@@ -89,7 +84,7 @@ WriteResult SerialPort::write(
     return write_by_u32(
         destination, source, size,
         [&](Offset src) {
-            UNUSED(src);
+            UNUSED(src)
             return 0;
         },
         [&](Offset src, uint32_t value) {
@@ -139,7 +134,7 @@ void SerialPort::update_tx_irq() const {
 }
 
 uint32_t SerialPort::read_reg(Offset source, bool debug) const {
-    Q_ASSERT((source & 3U) == 0); // uint32_t alligned
+    Q_ASSERT((source & 3U) == 0); // uint32_t aligned
 
     uint32_t value = 0;
 
@@ -175,12 +170,8 @@ uint32_t SerialPort::read_reg(Offset source, bool debug) const {
     return value;
 }
 
-uint32_t SerialPort::get_change_counter() const {
-    return change_counter;
-}
-
 bool SerialPort::write_reg(Offset destination, uint32_t value) {
-    Q_ASSERT((destination & 3U) == 0); // uint32_t alligned
+    Q_ASSERT((destination & 3U) == 0); // uint32_t aligned
 
     bool changed = [&]() {
         switch (destination & ~3U) {
@@ -222,5 +213,9 @@ LocationStatus SerialPort::location_status(Offset offset) const {
         return LOCSTAT_ILLEGAL;
     }
     }
+}
+
+uint32_t SerialPort::get_change_counter() const {
+    return change_counter;
 }
 } // namespace machine

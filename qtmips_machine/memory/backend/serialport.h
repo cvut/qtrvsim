@@ -40,8 +40,6 @@
 #include "memory/backend/peripheral.h"
 #include "qtmipsexception.h"
 
-#include <QMap>
-#include <QObject>
 #include <cstdint>
 
 namespace machine {
@@ -81,18 +79,19 @@ private:
     uint32_t read_reg(Offset source, bool debug = false) const;
     bool write_reg(Offset destination, uint32_t value);
     void rx_queue_check_internal() const;
-    mutable uint32_t change_counter {};
     void pool_rx_byte() const;
     void update_rx_irq() const;
     void update_tx_irq() const;
-    mutable uint32_t rx_st_reg;
-    mutable uint32_t rx_data_reg;
-    uint32_t tx_st_reg;
-    uint8_t tx_irq_level;
-    uint8_t rx_irq_level;
-    mutable bool tx_irq_active;
-    mutable bool rx_irq_active;
     uint32_t get_change_counter() const;
+
+    const uint8_t tx_irq_level;
+    const uint8_t rx_irq_level;
+    mutable uint32_t change_counter = { 0 };
+    mutable uint32_t tx_st_reg = { 0 };
+    mutable uint32_t rx_st_reg = { 0 };
+    mutable uint32_t rx_data_reg = { 0 };
+    mutable bool tx_irq_active = false;
+    mutable bool rx_irq_active = false;
 };
 
 } // namespace machine

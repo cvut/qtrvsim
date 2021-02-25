@@ -35,8 +35,8 @@
  *
  ******************************************************************************/
 
-#ifndef QTMIPS_MACHINE_BACKEND_MEMORY_H
-#define QTMIPS_MACHINE_BACKEND_MEMORY_H
+#ifndef BACKEND_MEMORY_H
+#define BACKEND_MEMORY_H
 
 #include "machinedefs.h"
 #include "memory/memory_utils.h"
@@ -46,7 +46,7 @@
 namespace machine {
 
 /**
- * Relative index within an instance of backend memory
+ * Relative index within an instance of backend memory.
  */
 typedef uint64_t Offset;
 
@@ -116,4 +116,4 @@ signals:
 
 } // namespace machine
 
-#endif // QTMIPS_MACHINE_BACKEND_MEMORY_H
+#endif // BACKEND_MEMORY_H

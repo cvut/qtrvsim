@@ -64,8 +64,8 @@ WriteResult MemorySection::write(
     const size_t available_size
         = std::min(destination + size, length()) - destination;
 
-    // TODO, make swap conditional for big endian machies
-    bool changed = !(memcmp(source, &dt[destination], available_size) == 0);
+    // TODO, make swap conditional for big endian machines
+    bool changed = memcmp(source, &dt[destination], available_size) != 0;
     if (changed) {
         memcpy(&dt[destination], source, available_size);
     }
@@ -134,14 +134,14 @@ static_assert(
  *
  * Example:
  *  `MemorySection` of 256x1B index is received as
- *  ```address & genmask(8, 0)```
+ *  ```address & generate_mask(8, 0)```
  */
-constexpr uint64_t genmask(size_t section_size, size_t unit_size) {
+constexpr uint64_t generate_mask(size_t section_size, size_t unit_size) {
     return ((1U << section_size) - 1) << unit_size;
 }
 
 /**
- * Get index in row for fiven offset and row number i
+ * Get index in row for given offset and row number i
  */
 constexpr size_t tree_row_bit_offset(size_t i) {
     return 32 - MEMORY_TREE_BITS - i * MEMORY_TREE_BITS;
@@ -151,7 +151,7 @@ constexpr size_t tree_row_bit_offset(size_t i) {
  * Select branch index from memory tree.
  */
 constexpr size_t get_tree_row(size_t offset, size_t i) {
-    return (offset & genmask(MEMORY_TREE_BITS, tree_row_bit_offset(i)))
+    return (offset & generate_mask(MEMORY_TREE_BITS, tree_row_bit_offset(i)))
            >> tree_row_bit_offset(i);
 }
 
@@ -159,10 +159,8 @@ Memory::Memory() {
     this->mt_root = allocate_section_tree();
 }
 
-Memory::Memory(const Memory &m) {
-    this->mt_root = copy_section_tree(m.get_memorytree_root(), 0);
-    change_counter = 0;
-    write_counter = 0;
+Memory::Memory(const Memory &other) {
+    this->mt_root = copy_section_tree(other.get_memory_tree_root(), 0);
 }
 
 Memory::~Memory() {
@@ -178,7 +176,7 @@ void Memory::reset() {
 
 void Memory::reset(const Memory &m) {
     free_section_tree(this->mt_root, 0);
-    this->mt_root = copy_section_tree(m.get_memorytree_root(), 0);
+    this->mt_root = copy_section_tree(m.get_memory_tree_root(), 0);
 }
 
 MemorySection *Memory::get_section(size_t offset, bool create) const {
@@ -209,7 +207,7 @@ MemorySection *Memory::get_section(size_t offset, bool create) const {
 }
 
 size_t get_section_offset_mask(size_t addr) {
-    return addr & genmask(MEMORY_SECTION_BITS, 0);
+    return addr & generate_mask(MEMORY_SECTION_BITS, 0);
 }
 
 WriteResult Memory::write(
@@ -256,14 +254,14 @@ uint32_t Memory::get_change_counter() const {
 }
 
 bool Memory::operator==(const Memory &m) const {
-    return compare_section_tree(this->mt_root, m.get_memorytree_root(), 0);
+    return compare_section_tree(this->mt_root, m.get_memory_tree_root(), 0);
 }
 
 bool Memory::operator!=(const Memory &m) const {
     return !this->operator==(m);
 }
 
-const union machine::MemoryTree *Memory::get_memorytree_root() const {
+const union machine::MemoryTree *Memory::get_memory_tree_root() const {
     return this->mt_root;
 }
 
@@ -334,7 +332,7 @@ Memory::copy_section_tree(const union MemoryTree *mt, size_t depth) {
     return nmt;
 }
 LocationStatus Memory::location_status(Offset offset) const {
-    UNUSED(offset);
+    UNUSED(offset)
     // Lazy allocation of memory is only internal implementation detail.
     return LOCSTAT_NONE;
 }
