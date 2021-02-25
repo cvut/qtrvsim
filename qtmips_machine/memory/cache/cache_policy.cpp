@@ -44,15 +44,20 @@ namespace machine {
 
 std::unique_ptr<CachePolicy>
 CachePolicy::get_policy_instance(const CacheConfig *config) {
-    switch (config->replacement_policy()) {
-    case CacheConfig::RP_RAND:
-        return std::make_unique<CachePolicyRAND>(config->associativity());
-    case CacheConfig::RP_LRU:
-        return std::make_unique<CachePolicyLRU>(
-            config->associativity(), config->set_count());
-    case CacheConfig::RP_LFU:
-        return std::make_unique<CachePolicyLFU>(
-            config->associativity(), config->set_count());
+    if (config->enabled()) {
+        switch (config->replacement_policy()) {
+        case CacheConfig::RP_RAND:
+            return std::make_unique<CachePolicyRAND>(config->associativity());
+        case CacheConfig::RP_LRU:
+            return std::make_unique<CachePolicyLRU>(
+                config->associativity(), config->set_count());
+        case CacheConfig::RP_LFU:
+            return std::make_unique<CachePolicyLFU>(
+                config->associativity(), config->set_count());
+        }
+    } else {
+        // Disabled cache will never use it.
+        return { nullptr };
     }
 
     Q_UNREACHABLE();
@@ -143,7 +148,6 @@ CachePolicyRAND::CachePolicyRAND(size_t associativity)
 
 void CachePolicyRAND::update_stats(size_t way, size_t row, bool is_valid) {
     UNUSED(way) UNUSED(row) UNUSED(is_valid)
-
     // NOP
 }
 
@@ -151,5 +155,4 @@ size_t CachePolicyRAND::select_way_to_evict(size_t row) const {
     UNUSED(row)
     return std::rand() % associativity; // NOLINT(cert-msc50-cpp)
 }
-
 } // namespace machine
