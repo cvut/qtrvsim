@@ -58,6 +58,7 @@ HEADERS += \
     memory/cache/cache_policy.h \
     memory/cache/cache_types.h \
     memory/memory_utils.h \
+    memory/endian.h \
     memory/memory_bus.h \
     memory/frontend_memory.h \
     memory/backend/peripspiled.h \

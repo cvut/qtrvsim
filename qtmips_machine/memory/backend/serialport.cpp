@@ -37,6 +37,8 @@
 
 #include "memory/backend/serialport.h"
 
+#include "memory/endian.h"
+
 namespace machine {
 
 constexpr Offset SERP_RX_ST_REG_o = 0x00u;

@@ -38,6 +38,7 @@
 #ifndef QTMIPS_MEMORY_UTILS_H
 #define QTMIPS_MEMORY_UTILS_H
 
+#include "memory/endian.h"
 #include "utils.h"
 
 #include <cstdint>
@@ -47,8 +48,6 @@
 
 namespace machine {
 
-enum Endianness { LITTLE, BIG };
-
 /**
  * Additional options for read operation between memory layers
  *
@@ -57,7 +56,6 @@ enum Endianness { LITTLE, BIG };
  */
 struct ReadOptions {
     bool debug;
-    //    Endianness cpu_endianness;
 };
 
 /**
@@ -66,9 +64,7 @@ struct ReadOptions {
  *  The purpose for this struct is to make the API easily
  *   extensible.
  */
-struct WriteOptions {
-    //    Endianness cpu_endianness;
-};
+struct WriteOptions {};
 
 struct ReadResult {
     /**

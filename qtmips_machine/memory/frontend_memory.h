@@ -38,6 +38,7 @@
 
 #include "machinedefs.h"
 #include "memory/address.h"
+#include "memory/endian.h"
 #include "memory/memory_utils.h"
 #include "qtmipsexception.h"
 #include "register_value.h"

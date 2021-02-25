@@ -119,45 +119,4 @@ inline constexpr T1 round_up_to_multiple(T1 n, T2 base) {
     return round_down_to_multiple(n + base, base);
 }
 
-/**
- * Full generic byteswap.
- * Optimized specializations are provided bellow.
- */
-template<typename T>
-inline T byteswap(T val) {
-    union U {
-        T val;
-        std::array<uint8_t, sizeof(T)> raw;
-    } src, dst;
-
-    src.val = val;
-    std::reverse_copy(src.raw.begin(), src.raw.end(), dst.raw.begin());
-    return dst.val;
-}
-
-template<>
-inline uint8_t byteswap(uint8_t val) {
-    // NOOP for single byte
-    return val;
-}
-
-template<>
-inline uint16_t byteswap(uint16_t val) {
-    return (val << 8) | (val >> 8);
-}
-
-template<>
-inline uint32_t byteswap(uint32_t val) {
-    val = ((val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF);
-    return (val << 16) | (val >> 16);
-}
-template<>
-inline uint64_t byteswap(uint64_t val) {
-    val = ((val << 8) & 0xFF00FF00FF00FF00ULL)
-          | ((val >> 8) & 0x00FF00FF00FF00FFULL);
-    val = ((val << 16) & 0xFFFF0000FFFF0000ULL)
-          | ((val >> 16) & 0x0000FFFF0000FFFFULL);
-    return (val << 32) | (val >> 32);
-}
-
 #endif // UTILS_H

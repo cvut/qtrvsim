@@ -37,6 +37,8 @@
 
 #include "memory/backend/peripspiled.h"
 
+#include "memory/endian.h"
+
 using namespace machine;
 
 constexpr size_t SPILED_REG_LED_LINE_o = 0x004;
