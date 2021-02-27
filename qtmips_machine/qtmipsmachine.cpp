@@ -52,6 +52,7 @@ QtMipsMachine::QtMipsMachine(
 
     if (load_executable) {
         ProgramLoader program(machine_config.elf());
+        this->machine_config.set_simulated_endian(program.get_endian());
         mem_program_only = new Memory(machine_config.get_simulated_endian());
         program.to_memory(mem_program_only);
 
