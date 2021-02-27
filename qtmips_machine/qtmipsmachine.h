@@ -58,7 +58,7 @@ class QtMipsMachine : public QObject {
     Q_OBJECT
 public:
     explicit QtMipsMachine(
-        const MachineConfig &config,
+        MachineConfig config,
         bool load_symtab = false,
         bool load_executable = true);
     ~QtMipsMachine() override;
@@ -139,25 +139,35 @@ private slots:
 
 private:
     void step_internal(bool skip_break = false);
-    MachineConfig mcnf;
+    MachineConfig machine_config;
 
-    Registers *regs;
-    Memory *mem, *mem_program_only;
-    MemoryDataBus *data_bus;
-    SerialPort *ser_port;
-    PeripSpiLed *perip_spi_led;
-    LcdDisplay *perip_lcd_display;
-    Cache *cch_program, *cch_data;
-    Cop0State *cop0st;
-    Core *cr;
+    Registers *regs = nullptr;
+    Memory *mem = nullptr;
+    /**
+     * Memory with loaded program only.
+     * It is not used for execution, only for quick
+     * simulation reset without repeated ELF file loading.
+     */
+    Memory *mem_program_only = nullptr;
+    MemoryDataBus *data_bus = nullptr;
+    SerialPort *ser_port = nullptr;
+    PeripSpiLed *perip_spi_led = nullptr;
+    LcdDisplay *perip_lcd_display = nullptr;
+    Cache *cch_program = nullptr;
+    Cache *cch_data = nullptr;
+    Cop0State *cop0st = nullptr;
+    Core *cr = nullptr;
 
-    QTimer *run_t;
-    unsigned int time_chunk {};
+    QTimer *run_t = nullptr;
+    unsigned int time_chunk = { 0 };
 
-    SymbolTable *symtab;
-    Address program_end;
-    enum Status stat;
+    SymbolTable *symtab = nullptr;
+    Address program_end = 0_addr;
+    enum Status stat = ST_READY;
     void set_status(enum Status st);
+    void setup_serial_port();
+    void setup_perip_spi_led();
+    void setup_lcd_display();
 };
 
 } // namespace machine

@@ -43,20 +43,18 @@
 using namespace machine;
 
 QtMipsMachine::QtMipsMachine(
-    const MachineConfig &config,
+    MachineConfig config,
     bool load_symtab,
     bool load_executable)
-    : QObject()
-    , mcnf(&config) {
-    FrontendMemory *cpu_mem;
-    stat = ST_READY;
-    symtab = nullptr;
-
+    : machine_config(std::move(config))
+    , stat(ST_READY) {
     regs = new Registers();
+
     if (load_executable) {
-        ProgramLoader program(config.elf());
-        mem_program_only = new Memory(config.get_simulated_endian());
+        ProgramLoader program(machine_config.elf());
+        mem_program_only = new Memory(machine_config.get_simulated_endian());
         program.to_memory(mem_program_only);
+
         if (load_symtab) {
             symtab = program.get_symbol_table();
         }
@@ -66,57 +64,47 @@ QtMipsMachine::QtMipsMachine(
         }
         mem = new Memory(*mem_program_only);
     } else {
-        program_end = 0xf0000000_addr;
-        mem_program_only = nullptr;
-        mem = new Memory(config.get_simulated_endian());
+        mem = new Memory(machine_config.get_simulated_endian());
     }
 
-    data_bus = new MemoryDataBus(config.get_simulated_endian());
+    data_bus = new MemoryDataBus(machine_config.get_simulated_endian());
     data_bus->insert_device_to_range(
         mem, 0x00000000_addr, 0xefffffff_addr, false);
-    cpu_mem = data_bus;
 
-    ser_port = new SerialPort(config.get_simulated_endian());
-    memory_bus_insert_range(ser_port, 0xffffc000_addr, 0xffffc03f_addr, true);
-    memory_bus_insert_range(ser_port, 0xffff0000_addr, 0xffff003f_addr, false);
-    connect(
-        ser_port, &SerialPort::signal_interrupt, this,
-        &QtMipsMachine::set_interrupt_signal);
-
-    perip_spi_led = new PeripSpiLed(config.get_simulated_endian());
-    memory_bus_insert_range(
-        perip_spi_led, 0xffffc100_addr, 0xffffc1ff_addr, true);
-
-    perip_lcd_display = new LcdDisplay(config.get_simulated_endian());
-    memory_bus_insert_range(
-        perip_lcd_display, 0xffe00000_addr, 0xffe4afff_addr, true);
+    setup_serial_port();
+    setup_perip_spi_led();
+    setup_lcd_display();
 
     cch_program = new Cache(
-        cpu_mem, &config.cache_program(), config.memory_access_time_read(),
-        config.memory_access_time_write(), config.memory_access_time_burst());
+        data_bus, &machine_config.cache_program(),
+        machine_config.memory_access_time_read(),
+        machine_config.memory_access_time_write(),
+        machine_config.memory_access_time_burst());
     cch_data = new Cache(
-        cpu_mem, &config.cache_data(), config.memory_access_time_read(),
-        config.memory_access_time_write(), config.memory_access_time_burst());
+        data_bus, &machine_config.cache_data(),
+        machine_config.memory_access_time_read(),
+        machine_config.memory_access_time_write(),
+        machine_config.memory_access_time_burst());
 
     unsigned int min_cache_row_size = 16;
-    if (config.cache_data().enabled()) {
-        min_cache_row_size = config.cache_data().block_size() * 4;
+    if (machine_config.cache_data().enabled()) {
+        min_cache_row_size = machine_config.cache_data().block_size() * 4;
     }
 
-    if (config.cache_program().enabled()
-        && config.cache_program().block_size() < min_cache_row_size) {
-        min_cache_row_size = config.cache_program().block_size() * 4;
+    if (machine_config.cache_program().enabled()
+        && machine_config.cache_program().block_size() < min_cache_row_size) {
+        min_cache_row_size = machine_config.cache_program().block_size() * 4;
     }
 
     cop0st = new Cop0State();
 
-    if (config.pipelined()) {
+    if (machine_config.pipelined()) {
         cr = new CorePipelined(
-            regs, cch_program, cch_data, config.hazard_unit(),
+            regs, cch_program, cch_data, machine_config.hazard_unit(),
             min_cache_row_size, cop0st);
     } else {
         cr = new CoreSingle(
-            regs, cch_program, cch_data, config.delay_slot(),
+            regs, cch_program, cch_data, machine_config.delay_slot(),
             min_cache_row_size, cop0st);
     }
     connect(
@@ -130,14 +118,32 @@ QtMipsMachine::QtMipsMachine(
     for (int i = 0; i < EXCAUSE_COUNT; i++) {
         if (i != EXCAUSE_INT && i != EXCAUSE_BREAK && i != EXCAUSE_HWBREAK) {
             set_stop_on_exception(
-                (enum ExceptionCause)i, config.osemu_exception_stop());
+                (enum ExceptionCause)i, machine_config.osemu_exception_stop());
             set_step_over_exception(
-                (enum ExceptionCause)i, config.osemu_exception_stop());
+                (enum ExceptionCause)i, machine_config.osemu_exception_stop());
         }
     }
 
-    set_stop_on_exception(EXCAUSE_INT, config.osemu_interrupt_stop());
+    set_stop_on_exception(EXCAUSE_INT, machine_config.osemu_interrupt_stop());
     set_step_over_exception(EXCAUSE_INT, false);
+}
+void QtMipsMachine::setup_lcd_display() {
+    perip_lcd_display = new LcdDisplay(machine_config.get_simulated_endian());
+    memory_bus_insert_range(
+        perip_lcd_display, 0xffe00000_addr, 0xffe4afff_addr, true);
+}
+void QtMipsMachine::setup_perip_spi_led() {
+    perip_spi_led = new PeripSpiLed(machine_config.get_simulated_endian());
+    memory_bus_insert_range(
+        perip_spi_led, 0xffffc100_addr, 0xffffc1ff_addr, true);
+}
+void QtMipsMachine::setup_serial_port() {
+    ser_port = new SerialPort(machine_config.get_simulated_endian());
+    memory_bus_insert_range(ser_port, 0xffffc000_addr, 0xffffc03f_addr, true);
+    memory_bus_insert_range(ser_port, 0xffff0000_addr, 0xffff003f_addr, false);
+    connect(
+        ser_port, &SerialPort::signal_interrupt, this,
+        &QtMipsMachine::set_interrupt_signal);
 }
 
 QtMipsMachine::~QtMipsMachine() {
@@ -164,7 +170,7 @@ QtMipsMachine::~QtMipsMachine() {
 }
 
 const MachineConfig &QtMipsMachine::config() {
-    return mcnf;
+    return machine_config;
 }
 
 void QtMipsMachine::set_speed(unsigned int ips, unsigned int time_chunk) {
@@ -249,7 +255,7 @@ void QtMipsMachine::set_symbol(
     if (symtab == nullptr) {
         symtab = new SymbolTable;
     }
-    symtab->set_symbol(std::move(name), value, size, info, other);
+    symtab->set_symbol(name, value, size, info, other);
 }
 
 const Core *QtMipsMachine::core() {
@@ -257,11 +263,11 @@ const Core *QtMipsMachine::core() {
 }
 
 const CoreSingle *QtMipsMachine::core_singe() {
-    return mcnf.pipelined() ? nullptr : (const CoreSingle *)cr;
+    return machine_config.pipelined() ? nullptr : (const CoreSingle *)cr;
 }
 
 const CorePipelined *QtMipsMachine::core_pipelined() {
-    return mcnf.pipelined() ? (const CorePipelined *)cr : nullptr;
+    return machine_config.pipelined() ? (const CorePipelined *)cr : nullptr;
 }
 
 bool QtMipsMachine::executable_loaded() const {
