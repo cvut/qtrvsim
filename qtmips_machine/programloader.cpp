@@ -126,8 +126,7 @@ ProgramLoader::ProgramLoader(const QString &file) : elf_file(file) {
 }
 
 ProgramLoader::ProgramLoader(const char *file)
-    : ProgramLoader(QString::fromLocal8Bit(file)) {
-}
+    : ProgramLoader(QString::fromLocal8Bit(file)) {}
 
 ProgramLoader::~ProgramLoader() {
     // Close elf
@@ -136,8 +135,7 @@ ProgramLoader::~ProgramLoader() {
     elf_file.close();
 }
 
-void ProgramLoader::to_memory(Memory *mem) { // TODO Why are you writing to raw
-                                             // memory
+void ProgramLoader::to_memory(Memory *mem) {
     // Load program to memory (just dump it byte by byte)
     for (size_t phdrs_i : this->map) {
         uint32_t base_address = this->phdrs[phdrs_i].p_vaddr;
@@ -145,7 +143,6 @@ void ProgramLoader::to_memory(Memory *mem) { // TODO Why are you writing to raw
         for (unsigned y = 0; y < this->phdrs[phdrs_i].p_filesz; y++) {
             const auto buffer = (uint8_t)f[this->phdrs[phdrs_i].p_offset + y];
             memory_write_u8(mem, base_address + y, buffer);
-            // TODO Why not by words
         }
     }
 }
@@ -201,4 +198,20 @@ SymbolTable *ProgramLoader::get_symbol_table() {
     }
 
     return p_st;
+}
+Endian ProgramLoader::get_endian() const {
+    // Reading elf endian_id_byte according to the ELF specs.
+    unsigned char endian_id_byte = this->hdr.e_ident[EI_DATA];
+    if (endian_id_byte == ELFDATA2LSB) {
+        return LITTLE;
+    } else if (endian_id_byte == ELFDATA2MSB) {
+        return BIG;
+    } else {
+        throw QTMIPS_EXCEPTION(
+            Input,
+            "ELF header e_ident malformed."
+            "Unknown value of the byte EI_DATA."
+            "Expected value little (=1) or big (=2).",
+            "");
+    }
 }

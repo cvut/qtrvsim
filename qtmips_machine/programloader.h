@@ -62,6 +62,8 @@ public:
     Address get_executable_entry() const;
     SymbolTable *get_symbol_table();
 
+    Endian get_endian() const;
+
 private:
     QFile elf_file;
     Elf *elf;
