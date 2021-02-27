@@ -41,6 +41,7 @@ SOURCES += tst_machine.cpp \
     testcore.cpp \
     testcache.cpp
 
-HEADERS += tst_machine.h
+HEADERS += tst_machine.h \
+           utils/integer_decomposition.h
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
