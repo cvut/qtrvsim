@@ -38,6 +38,8 @@
 #ifndef QTMIPS_REGISTER_VALUE_H
 #define QTMIPS_REGISTER_VALUE_H
 
+#include <QMetaType>
+
 namespace machine {
 
 /*
@@ -45,7 +47,7 @@ namespace machine {
  *
  * TODO: make compile time option
  */
-using register_storage_t = uint32_t;
+using register_storage_t = uint64_t;
 
 /**
  * Represents a value stored in register
@@ -70,6 +72,7 @@ public:
      */
     constexpr inline RegisterValue(uint64_t value) : data(value) {};
 
+    // Must be present to avoid ambiguity.
     constexpr inline RegisterValue(uint32_t value) : data(value) {};
 
     constexpr inline RegisterValue() : data(0) {};
@@ -78,54 +81,45 @@ public:
 
     /* Sign-extending constructors */
 
-    constexpr inline RegisterValue(int64_t value)
-        : data(value) {
-    };
+    constexpr inline RegisterValue(int64_t value) : data(value) {};
 
-    constexpr inline RegisterValue(int32_t value)
-        : data(value) {
-    };
+    constexpr inline RegisterValue(int32_t value) : data(value) {};
 
-    constexpr inline RegisterValue(int16_t value)
-        : data(value) {
-    };
+    constexpr inline RegisterValue(int16_t value) : data(value) {};
 
-    constexpr inline RegisterValue(int8_t value)
-        : data(value) {
-    };
+    constexpr inline RegisterValue(int8_t value) : data(value) {};
 
     constexpr inline int8_t as_i8() const {
-        return (int8_t) data;
+        return (int8_t)data;
     };
 
     constexpr inline uint8_t as_u8() const {
-        return (uint8_t) data;
+        return (uint8_t)data;
     };
 
     constexpr inline int16_t as_i16() const {
-        return (int16_t) data;
+        return (int16_t)data;
     };
 
     constexpr inline uint16_t as_u16() const {
-        return (uint16_t) data;
+        return (uint16_t)data;
     };
 
     constexpr inline int32_t as_i32() const {
-        return (int32_t) data;
+        return (int32_t)data;
     };
 
     constexpr inline uint32_t as_u32() const {
-        return (uint32_t) data;
+        return (uint32_t)data;
     };
 
     constexpr inline int64_t as_i64() const {
-        return (int64_t) data;
+        return (int64_t)data;
     };
 
     constexpr inline uint64_t as_u64() const {
-        return (uint64_t) data;
+        return (uint64_t)data;
     };
-
 
     constexpr explicit operator int8_t() const {
         return as_i8();
@@ -177,4 +171,7 @@ private:
 };
 
 } // namespace machine
+
+Q_DECLARE_METATYPE(machine::RegisterValue)
+
 #endif // QTMIPS_REGISTER_VALUE_H

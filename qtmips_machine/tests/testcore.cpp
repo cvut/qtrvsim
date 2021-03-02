@@ -110,7 +110,8 @@ static void core_regs_data() {
         regs_init.write_gp(24, 0x800000f0);
         regs_init.write_gp(25, 3);
         Registers regs_res(regs_init);
-        regs_res.write_gp(26, 0xF000001e);
+        // Cast is needed to correctly work with any internal size of register.
+        regs_res.write_gp(26, (int32_t)0xF000001e);
         QTest::newRow("SRA")
             << Instruction(0, 0, 24, 26, 3, 3) << regs_init << regs_res;
         QTest::newRow("SRAV")
@@ -360,10 +361,12 @@ static void core_mem_data() {
         Registers regs;
         regs.write_gp(1, 0x22);
         Registers regs_res(regs);
-        regs_res.write_gp(21, 0xFFFFFFA3);
+        // Cast to get proper sign extension.
+        regs_res.write_gp(21, (int32_t)0xFFFFFFA3);
         QTest::newRow("LB")
             << Instruction(32, 1, 21, 0x2) << regs << regs_res << mem << mem;
-        regs_res.write_gp(21, 0xFFFFA324);
+        // Cast to get proper sign extension.
+        regs_res.write_gp(21, (int32_t)0xFFFFA324);
         QTest::newRow("LH")
             << Instruction(33, 1, 21, 0x2) << regs << regs_res << mem << mem;
         regs_res.write_gp(21, 0xA3242526);

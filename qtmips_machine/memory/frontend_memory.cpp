@@ -91,16 +91,22 @@ void FrontendMemory::write_ctl(
     }
     case AC_I8:
     case AC_U8: {
-        write_u8(offset, (uint8_t)value.as_u32());
+        write_u8(offset, value.as_u8());
         break;
     }
     case AC_I16:
     case AC_U16: {
-        write_u16(offset, (uint16_t)value.as_u32());
+        write_u16(offset, value.as_u16());
         break;
     }
+    case AC_I32:
     case AC_U32: {
-        write_u32(offset, (uint32_t)value.as_u32());
+        write_u32(offset, value.as_u32());
+        break;
+    }
+    case AC_I64:
+    case AC_U64: {
+        write_u64(offset, value.as_u64());
         break;
     }
     default: {
@@ -113,14 +119,16 @@ void FrontendMemory::write_ctl(
 
 RegisterValue
 FrontendMemory::read_ctl(enum AccessControl ctl, Address address) const {
-    // TODO u32 is no longer guaranteed maximum
     switch (ctl) {
     case AC_NONE: return 0;
     case AC_I8: return (int8_t)read_u8(address);
-    case AC_I16: return (int16_t)read_u16(address);
-    case AC_U32: return read_u32(address);
     case AC_U8: return read_u8(address);
+    case AC_I16: return (int16_t)read_u16(address);
     case AC_U16: return read_u16(address);
+    case AC_I32: return (int32_t)read_u32(address);
+    case AC_U32: return read_u32(address);
+    case AC_I64: return (int64_t)read_u64(address);
+    case AC_U64: return read_u64(address);
     default: {
         throw QTMIPS_EXCEPTION(
             UnknownMemoryControl, "Trying to read from memory with unknown ctl",

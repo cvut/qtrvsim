@@ -299,17 +299,20 @@ void MachineTests::memory_write_ctl_data() {
     for (auto endian : default_endians) {
         Memory mem(endian);
 
-        QTest::addRow("AC_NONE") << AC_NONE << mem;
-        memory_write_u8(&mem, 0x20, 0x26);
-        QTest::addRow("AC_I8") << AC_I8 << mem;
-        QTest::addRow("AC_U8") << AC_U8 << mem;
-        memory_write_u16(&mem, 0x20, 0x2526);
-        QTest::addRow("AC_I16") << AC_I16 << mem;
-        QTest::addRow("AC_U16") << AC_U16 << mem;
-        memory_write_u32(&mem, 0x20, 0x23242526);
-        QTest::addRow("AC_U32") << AC_U32 << mem;
-
-        // TODO I32, U64
+        QTest::addRow("AC_NONE, endian=%s", to_string(endian))
+            << AC_NONE << mem;
+        memory_write_u8(&mem, 0x20, 0x30);
+        QTest::addRow("AC_I8, endian=%s", to_string(endian)) << AC_I8 << mem;
+        QTest::addRow("AC_U8, endian=%s", to_string(endian)) << AC_U8 << mem;
+        memory_write_u16(&mem, 0x20, 0x2930);
+        QTest::addRow("AC_I16, endian=%s", to_string(endian)) << AC_I16 << mem;
+        QTest::addRow("AC_U16, endian=%s", to_string(endian)) << AC_U16 << mem;
+        memory_write_u32(&mem, 0x20, 0x27282930);
+        QTest::addRow("AC_I32, endian=%s", to_string(endian)) << AC_I32 << mem;
+        QTest::addRow("AC_U32, endian=%s", to_string(endian)) << AC_U32 << mem;
+        memory_write_u64(&mem, 0x20, 0x2324252627282930ULL);
+        QTest::addRow("AC_I64, endian=%s", to_string(endian)) << AC_I64 << mem;
+        QTest::addRow("AC_U64, endian=%s", to_string(endian)) << AC_U64 << mem;
     }
 }
 
@@ -322,7 +325,9 @@ void MachineTests::memory_write_ctl() {
     // simple FrontendMemory with no additional functionality.
     Memory mem(result.simulated_machine_endian);
     TrivialBus bus(&mem);
-    bus.write_ctl(ctl, 0x20_addr, 0x23242526);
+    bus.write_ctl(ctl, 0x20_addr, (uint64_t)0x2324252627282930ULL);
+    printf("DIRECT %lx\n", memory_read_u64(&mem, 0x20));
+    printf("%lx\n", bus.read_ctl(ctl, 0x20_addr).as_u64());
     QCOMPARE(mem, result);
 }
 
@@ -344,7 +349,7 @@ void MachineTests::memory_read_ctl() {
 
     bus.write_u64(frontend_address, value.u64);
 
-    // TODO U64, I32
+    QCOMPARE(bus.read_ctl(AC_U64, frontend_address + stride), result.u64);
 
     for (size_t i = 0; i < 2; ++i) {
         QCOMPARE(

@@ -248,8 +248,8 @@ RegisterValue machine::alu_operate(
     case ALU_OP_WSBH:
         return ((t.as_u32() << 8U) & 0xff00ff00)
                | ((t.as_u32() >> 8U) & 0x00ff00ffU);
-    case ALU_OP_SEB: return (uint32_t)(int32_t)(int8_t)t.as_u32();
-    case ALU_OP_SEH: return (uint32_t)(int32_t)(int16_t)t.as_u32();
+    case ALU_OP_SEB: return t.as_i8();
+    case ALU_OP_SEH: return t.as_i16();
     case ALU_OP_EXT: return (s.as_u32() >> sa) & ((1 << (sz + 1)) - 1);
     case ALU_OP_INS:
         u32_val = (1 << (sz + 1)) - 1;

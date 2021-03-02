@@ -150,7 +150,7 @@ enum AluOp : uint8_t {
     ALU_OP_ERET,
     ALU_OP_UNKNOWN,
     ALU_OP_LAST // First impossible operation (just to be sure that we don't
-                // overflow)
+    // overflow)
 };
 
 enum LocationStatus {
@@ -162,7 +162,6 @@ enum LocationStatus {
 };
 
 const Address STAGEADDR_NONE = 0xffffffff_addr;
-
 } // namespace machine
 
 Q_DECLARE_METATYPE(machine::AccessControl)
