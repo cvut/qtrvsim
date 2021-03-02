@@ -78,28 +78,85 @@ public:
 
     /* Sign-extending constructors */
 
-    constexpr inline RegisterValue(int64_t value) : data(value) {};
+    constexpr inline RegisterValue(int64_t value)
+        : data(value) {
+    };
 
-    constexpr inline RegisterValue(int32_t value) : data(value) {};
+    constexpr inline RegisterValue(int32_t value)
+        : data(value) {
+    };
 
-    constexpr inline RegisterValue(int16_t value) : data(value) {};
+    constexpr inline RegisterValue(int16_t value)
+        : data(value) {
+    };
 
-    constexpr inline RegisterValue(int8_t value) : data(value) {};
+    constexpr inline RegisterValue(int8_t value)
+        : data(value) {
+    };
+
+    constexpr inline int8_t as_i8() const {
+        return (int8_t) data;
+    };
+
+    constexpr inline uint8_t as_u8() const {
+        return (uint8_t) data;
+    };
+
+    constexpr inline int16_t as_i16() const {
+        return (int16_t) data;
+    };
+
+    constexpr inline uint16_t as_u16() const {
+        return (uint16_t) data;
+    };
 
     constexpr inline int32_t as_i32() const {
-        return (int32_t)data;
+        return (int32_t) data;
     };
 
     constexpr inline uint32_t as_u32() const {
-        return (uint32_t)data;
-    };
-
-    constexpr inline uint64_t as_u64() const {
-        return (uint64_t)data;
+        return (uint32_t) data;
     };
 
     constexpr inline int64_t as_i64() const {
-        return (int64_t)data;
+        return (int64_t) data;
+    };
+
+    constexpr inline uint64_t as_u64() const {
+        return (uint64_t) data;
+    };
+
+
+    constexpr explicit operator int8_t() const {
+        return as_i8();
+    };
+
+    constexpr explicit operator uint8_t() const {
+        return as_u8();
+    };
+
+    constexpr explicit operator int16_t() const {
+        return as_i16();
+    };
+
+    constexpr explicit operator uint16_t() const {
+        return as_u16();
+    };
+
+    constexpr explicit operator int32_t() const {
+        return as_i32();
+    };
+
+    constexpr explicit operator uint32_t() const {
+        return as_u32();
+    };
+
+    constexpr explicit operator int64_t() const {
+        return as_i64();
+    };
+
+    constexpr explicit operator uint64_t() const {
+        return as_u64();
     };
 
     /**
