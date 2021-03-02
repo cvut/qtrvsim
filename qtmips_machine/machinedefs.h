@@ -46,19 +46,34 @@ namespace machine {
 enum AccessControl {
     AC_NONE,
     AC_I8,
-    AC_I16,
-    AC_U32,
     AC_U8,
+    AC_I16,
     AC_U16,
+    AC_I32,
+    AC_U32,
+    AC_I64,
+    AC_U64,
     AC_LOAD_LINKED,
     AC_STORE_CONDITIONAL,
     AC_WORD_RIGHT,
     AC_WORD_LEFT,
     AC_CACHE_OP,
-
-    AC_FIRST_REGULAR = AC_I8,
-    AC_LAST_REGULAR = AC_U16,
 };
+
+constexpr AccessControl AC_FIRST_REGULAR = AC_I8;
+constexpr AccessControl AC_LAST_REGULAR = AC_U64;
+constexpr AccessControl AC_FIRST_SPECIAL = AC_LOAD_LINKED;
+constexpr AccessControl AC_LAST_SPECIAL = AC_CACHE_OP;
+
+constexpr bool is_regular_access(AccessControl type) {
+    return AC_FIRST_REGULAR <= type and type <= AC_LAST_REGULAR;
+}
+
+constexpr bool is_special_access(AccessControl type) {
+    return AC_FIRST_SPECIAL <= type and type <= AC_LAST_SPECIAL;
+}
+static_assert(is_special_access(AC_CACHE_OP), "");
+static_assert(is_special_access((AccessControl)13), "");
 
 enum ExceptionCause {
     EXCAUSE_NONE = 0, // Use zero as default value when no exception is

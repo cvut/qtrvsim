@@ -551,17 +551,20 @@ struct Core::dtMemory Core::memory(const struct dtExecute &dt) {
 
     enum ExceptionCause excause = dt.excause;
     if (excause == EXCAUSE_NONE) {
-        if (dt.memctl > AC_LAST_REGULAR) {
+        if (is_special_access(dt.memctl)) {
             excause = memory_special(
                 dt.memctl, dt.inst.rt(), memread, memwrite, towrite_val,
                 dt.val_rt, mem_addr);
-        } else {
+        } else if (is_regular_access(dt.memctl)) {
             if (memwrite) {
                 mem_data->write_ctl(dt.memctl, mem_addr, dt.val_rt);
             }
             if (memread) {
                 towrite_val = mem_data->read_ctl(dt.memctl, mem_addr);
             }
+        } else {
+            Q_ASSERT(dt.memctl == AC_NONE);
+            // AC_NONE is memory NOP
         }
     }
 
