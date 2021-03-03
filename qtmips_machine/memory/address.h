@@ -40,6 +40,7 @@
 
 #include "utils.h"
 
+#include <QMetaType>
 #include <cstdint>
 
 using std::uint64_t;
@@ -257,5 +258,7 @@ constexpr int64_t Address::operator-(const Address &other) const {
 }
 
 } // namespace machine
+
+Q_DECLARE_METATYPE(machine::Address)
 
 #endif // QTMIPS_ADDRESS_H

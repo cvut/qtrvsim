@@ -75,8 +75,10 @@ private Q_SLOTS:
     void alu_except_data();
     // Cache
     // Core depends on cache, therefore it is tested first.
-    void cache_data();
-    void cache();
+    static void cache_data();
+    static void cache();
+    static void cache_correctness_data();
+    static void cache_correctness();
     // Core
     void singlecore_regs();
     void singlecore_regs_data();
