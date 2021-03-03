@@ -162,7 +162,7 @@ private:
     unsigned int time_chunk = { 0 };
 
     SymbolTable *symtab = nullptr;
-    Address program_end = 0_addr;
+    Address program_end = 0xffff0000_addr;
     enum Status stat = ST_READY;
     void set_status(enum Status st);
     void setup_serial_port();
