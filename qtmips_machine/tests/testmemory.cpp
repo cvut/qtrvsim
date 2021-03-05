@@ -326,8 +326,6 @@ void MachineTests::memory_write_ctl() {
     Memory mem(result.simulated_machine_endian);
     TrivialBus bus(&mem);
     bus.write_ctl(ctl, 0x20_addr, (uint64_t)0x2324252627282930ULL);
-    printf("DIRECT %lx\n", memory_read_u64(&mem, 0x20));
-    printf("%lx\n", bus.read_ctl(ctl, 0x20_addr).as_u64());
     QCOMPARE(mem, result);
 }
 
