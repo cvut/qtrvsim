@@ -5,11 +5,11 @@ TEST_NAME="registers"
 . "$(dirname "$0")/../test_lib.sh"
 
 # Build cli binary
-qtmips_make sub-qtmips_cli
+qtmips_make sub-src-cli
 
 # Compile mips binary
 mips_make_test
 
 # Run test
-qtmips_run qtmips_cli/qtmips_cli --trace-gp '*' "$TEST_DIR/registers" \
+qtmips_run src/cli/cli --trace-gp '*' "$TEST_DIR/registers" \
 	|| echo_fail "Test $TEST_NAME failed!"

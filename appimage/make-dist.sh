@@ -145,7 +145,7 @@ rm -r $DIST_DIR
 mkdir -p $DIST_DIR
 
 # rsync -av --exclude '*.debug' $BUILD_DIR/lib/ $DIST_LIB_DIR
-# echo rsync -av $BUILD_DIR/qtmips_gui/qtmips_gui $DIST_BIN_DIR
+# echo rsync -av $BUILD_DIR/gui/gui $DIST_BIN_DIR
 rsync -av $BUILD_DIR/qtmips_gui/qtmips_gui $DIST_BIN_DIR/
 
 #rsync -a --exclude '*.debug'v $QT_DIR/lib/libicu* $DIST_LIB_DIR

@@ -5,11 +5,11 @@ TEST_NAME="machine-unit-test"
 . "$(dirname "$0")/../test_lib.sh"
 
 # Build tests binary
-qtmips_make sub-qtmips_machine-tests
+qtmips_make sub-src-machine-tests
 # Build test data
 mips_make_test
 
 cd "$TEST_DIR"
 
 # Run unit tests
-qtmips_run qtmips_machine/tests/tst_machine
+qtmips_run src/machine/tests/tst_machine

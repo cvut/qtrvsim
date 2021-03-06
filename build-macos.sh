@@ -28,24 +28,24 @@ qmake \
 	-config release \
 	-recursive \
 	"$ROOT" \
-	"QMAKE_RPATHDIR += ../qtmips_machine ../qtmips_osemu ../qtmips_asm" \
+	"QMAKE_RPATHDIR += ../src/machine ../src/os_emulation ../src/assembler" \
 	"INCLUDEPATH += /usr/local/Cellar/libelf/0.8.13_1/include/libelf /usr/local/Cellar/libelf/0.8.13_1/include" \
 	"LIBS += -L/usr/local/Cellar/libelf/0.8.13_1/lib -lelf" \
 	"QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.14"
 echo ""
 
-echo "running sub-qtmips_cli sub-qtmips_gui ..."
-make sub-qtmips_cli sub-qtmips_gui # Note: we are building these to to not build tests
+echo "running sub-src-cli sub-src-gui ..."
+make sub-src-cli sub-src-gui # Note: we are building these to to not build tests
 echo ""
 
 # add Qt framework (adds Qt static libs as framework and do some other tweaks)
 echo "running macdeployqt ..."
-macdeployqt qtmips_gui/qtmips_gui.app -verbose=2
+macdeployqt gui/gui.app -verbose=2
 echo ""
 
 echo "creating qtmips.zip ..."
-cd qtmips_gui
-zip -yr ../qtmips-macos.zip qtmips_gui.app
+cd gui
+zip -yr ../qtmips-macos.zip gui.app
 cd ..
-zip -j qtmips-macos.zip qtmips_cli/qtmips_cli
+zip -j qtmips-macos.zip cli/cli
 echo ""

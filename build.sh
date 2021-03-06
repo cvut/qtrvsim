@@ -28,5 +28,5 @@ make "-j$(nproc)" -s
 
 cd "$ROOT"
 # Link executables to more suitable place
-ln -fs "$BUILDDIR/qtmips_cli/qtmips_cli" cli
-ln -fs "$BUILDDIR/qtmips_gui/qtmips_gui" gui
+ln -fs "$BUILDDIR/src/cli/cli" cli
+ln -fs "$BUILDDIR/src/gui/gui" gui

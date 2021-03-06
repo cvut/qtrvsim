@@ -1,17 +1,24 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    qtmips_machine \
-    qtmips_osemu \
-    qtmips_asm
+    machine \
+    os_emulation \
+    assembler
 
 !wasm: SUBDIRS += \
-    qtmips_machine/tests \
-    qtmips_cli \
+    machine-tests \
+    cli \
 
 SUBDIRS += \
-    qtmips_gui
+    gui
 
-qtmips_cli.depends = qtmips_machine qtmips_asm
-qtmips_gui.depends = qtmips_machine qtmips_osemu qtmips_asm
-qtmips_machine-tests.depends = qtmips_machine
+machine.subdir = src/machine
+assembler.subdir = src/assembler
+os_emulation.subdir = src/os_emulation
+cli.subdir = src/cli
+gui.subdir = src/gui
+machine-tests.subdir = src/machine/tests
+
+cli.depends = machine assembler
+gui.depends = machine os_emulation assembler
+machine-tests.depends = machine

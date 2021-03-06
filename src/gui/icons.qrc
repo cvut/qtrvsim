@@ -1,0 +1,23 @@
+<RCC>
+    <qresource prefix="/">
+        <file>
+            icons/gui.png
+        </file>
+        <file>icons/application-exit.png</file>
+        <file>icons/reload.png</file>
+        <file>icons/document-import.png</file>
+        <file>icons/finish.png</file>
+        <file>icons/forward.png</file>
+        <file>icons/next.png</file>
+        <file>icons/pause.png</file>
+        <file>icons/refresh.png</file>
+        <file>icons/play.png</file>
+        <file>icons/stop.png</file>
+        <file>icons/new.png</file>
+        <file>icons/open.png</file>
+        <file>icons/save.png</file>
+        <file>icons/closetab.png</file>
+        <file>icons/compfile-256.png</file>
+        <file>icons/build-256.png</file>
+    </qresource>
+</RCC>

@@ -72,9 +72,9 @@ PROJECT_ROOT="$TEST_SRC"
 while [ -n "$PROJECT_ROOT" ] && ! [ \
 		-f "$PROJECT_ROOT/LICENSE" -a \
 		-f "$PROJECT_ROOT/README.md" -a \
-		-d "$PROJECT_ROOT/qtmips_gui" -a \
-		-d "$PROJECT_ROOT/qtmips_cli" -a \
-		-d "$PROJECT_ROOT/qtmips_machine" \
+		-d "$PROJECT_ROOT/src/gui" -a \
+		-d "$PROJECT_ROOT/src/cli" -a \
+		-d "$PROJECT_ROOT/src/machine" \
 		]; do
 	PROJECT_ROOT="${PROJECT_ROOT%/*}"
 done
@@ -112,7 +112,7 @@ qtmips_make() {
 qtmips_run() {
 	local BIN="$BUILD_DIR/$1"
 	shift
-	LD_LIBRARY_PATH="$BUILD_DIR/qtmips_machine" "$BIN" "$@" || \
+	LD_LIBRARY_PATH="$BUILD_DIR/src/machine" "$BIN" "$@" || \
 		echo_fail "QtMips execution exited with non-zero code ($?): $@"
 }
 
