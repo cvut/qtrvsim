@@ -73,9 +73,9 @@ void MachineTests::registers_pc() {
     r.pc_abs_jmp(Address(0x80020100));
     QCOMPARE(r.read_pc().get_raw(), uint64_t(0x80020100));
 #ifdef QVERIFY_EXCEPTION_THROWN
-    QVERIFY_EXCEPTION_THROWN(r.pc_jmp(0x1), QtMipsExceptionUnalignedJump);
+    QVERIFY_EXCEPTION_THROWN(r.pc_jmp(0x1), SimulatorExceptionUnalignedJump);
     QVERIFY_EXCEPTION_THROWN(
-        r.pc_abs_jmp(Address(0x80020101)), QtMipsExceptionUnalignedJump);
+        r.pc_abs_jmp(Address(0x80020101)), SimulatorExceptionUnalignedJump);
 #endif
 }
 

@@ -35,8 +35,8 @@
  *
  ******************************************************************************/
 
-#ifndef QTMIPS_MACHINE_MEMORY_H
-#define QTMIPS_MACHINE_MEMORY_H
+#ifndef MACHINE_MEMORY_H
+#define MACHINE_MEMORY_H
 
 #include "machinedefs.h"
 #include "memory/address.h"

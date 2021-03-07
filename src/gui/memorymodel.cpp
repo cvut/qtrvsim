@@ -182,11 +182,11 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
     return QVariant();
 }
 
-void MemoryModel::setup(machine::QtMipsMachine *machine) {
+void MemoryModel::setup(machine::Machine *machine) {
     this->machine = machine;
     if (machine != nullptr) {
         connect(
-            machine, &machine::QtMipsMachine::post_tick, this,
+            machine, &machine::Machine::post_tick, this,
             &MemoryModel::check_for_updates);
     }
     if (mem_access() != nullptr) {

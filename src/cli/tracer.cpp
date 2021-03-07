@@ -41,7 +41,7 @@
 using namespace std;
 using namespace machine;
 
-Tracer::Tracer(QtMipsMachine *machine) {
+Tracer::Tracer(Machine *machine) {
     this->machine = machine;
     for (bool &gp_reg : gp_regs) {
         gp_reg = false;

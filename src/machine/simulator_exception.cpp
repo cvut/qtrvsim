@@ -41,7 +41,7 @@
 
 using namespace machine;
 
-QtMipsException::QtMipsException(
+SimulatorException::SimulatorException(
     QString reason,
     QString ext,
     QString file,
@@ -53,14 +53,14 @@ QtMipsException::QtMipsException(
     this->line = line;
 }
 
-const char *QtMipsException::what() const noexcept {
+const char *SimulatorException::what() const noexcept {
     QString message = this->msg(true);
     char *cstr = new char[message.length() + 1];
     std::strcpy(cstr, message.toStdString().c_str());
     return cstr;
 }
 
-QString QtMipsException::msg(bool pos) const {
+QString SimulatorException::msg(bool pos) const {
     QString message;
     message += name;
     if (pos) {
@@ -76,10 +76,10 @@ QString QtMipsException::msg(bool pos) const {
 }
 
 #define EXCEPTION(NAME, PARENT)                                                \
-    QtMipsException##NAME::QtMipsException##NAME(                              \
+    SimulatorException##NAME::SimulatorException##NAME(                        \
         QString reason, QString ext, QString file, int line)                   \
-        : QtMipsException##PARENT(reason, ext, file, line) {                   \
+        : SimulatorException##PARENT(reason, ext, file, line) {                \
         name = #NAME;                                                          \
     }
-QTMIPS_EXCEPTIONS
+SIMULATOR_EXCEPTIONS
 #undef EXCEPTION

@@ -51,10 +51,10 @@ class MemoryDock : public QDockWidget {
 public:
     MemoryDock(QWidget *parent, QSettings *settings);
 
-    void setup(machine::QtMipsMachine *machine);
+    void setup(machine::Machine *machine);
 
 signals:
-    void machine_setup(machine::QtMipsMachine *machine);
+    void machine_setup(machine::Machine *machine);
     void focus_addr(machine::Address);
 
 private:

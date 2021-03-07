@@ -133,7 +133,7 @@ void Memory::set_type(const QString &text) {
         HEIGHT - (HEIGHT - CACHE_HEIGHT) / 2 - box.height());
 }
 
-ProgramMemory::ProgramMemory(machine::QtMipsMachine *machine)
+ProgramMemory::ProgramMemory(machine::Machine *machine)
     : Memory(
         machine->config().cache_program().enabled(),
         machine->cache_program()) {
@@ -163,7 +163,7 @@ const Connector *ProgramMemory::connector_instruction() const {
     return con_inst;
 }
 
-DataMemory::DataMemory(machine::QtMipsMachine *machine)
+DataMemory::DataMemory(machine::Machine *machine)
     : Memory(machine->config().cache_data().enabled(), machine->cache_data()) {
     set_type("Data");
 

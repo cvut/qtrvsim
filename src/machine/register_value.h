@@ -35,8 +35,8 @@
  *
  ******************************************************************************/
 
-#ifndef QTMIPS_REGISTER_VALUE_H
-#define QTMIPS_REGISTER_VALUE_H
+#ifndef REGISTER_VALUE_H
+#define REGISTER_VALUE_H
 
 #include <QMetaType>
 
@@ -174,4 +174,4 @@ private:
 
 Q_DECLARE_METATYPE(machine::RegisterValue)
 
-#endif // QTMIPS_REGISTER_VALUE_H
+#endif // REGISTER_VALUE_H

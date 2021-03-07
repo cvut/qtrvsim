@@ -34,7 +34,7 @@
  ******************************************************************************/
 
 #include <QtWidgets>
-#ifdef QTMIPS_WITH_PRINTING
+#ifdef WITH_PRINTING
     #include <QPrintDialog>
     #include <QPrinter>
 #endif
@@ -181,7 +181,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         ui->actionMessages, &QAction::triggered, this,
         &MainWindow::show_messages);
     connect(
-        ui->actionAbout, &QAction::triggered, this, &MainWindow::about_qtmips);
+        ui->actionAbout, &QAction::triggered, this, &MainWindow::about_program);
     connect(
         ui->actionAboutQt, &QAction::triggered, this, &MainWindow::about_qt);
     connect(ui->ips1, &QAction::toggled, this, &MainWindow::set_speed);
@@ -316,8 +316,8 @@ void MainWindow::create_core(
     bool load_executable,
     bool keep_memory) {
     // Create machine
-    machine::QtMipsMachine *new_machine
-        = new machine::QtMipsMachine(config, true, load_executable);
+    machine::Machine *new_machine
+        = new machine::Machine(config, true, load_executable);
 
     if (keep_memory && (machine != nullptr)) {
         new_machine->memory_rw()->reset(*machine->memory());
@@ -357,30 +357,28 @@ void MainWindow::create_core(
 
     // Connect machine signals and slots
     connect(
-        ui->actionRun, &QAction::triggered, machine,
-        &machine::QtMipsMachine::play);
+        ui->actionRun, &QAction::triggered, machine, &machine::Machine::play);
     connect(
         ui->actionPause, &QAction::triggered, machine,
-        &machine::QtMipsMachine::pause);
+        &machine::Machine::pause);
     connect(
-        ui->actionStep, &QAction::triggered, machine,
-        &machine::QtMipsMachine::step);
+        ui->actionStep, &QAction::triggered, machine, &machine::Machine::step);
     connect(
         ui->actionRestart, &QAction::triggered, machine,
-        &machine::QtMipsMachine::restart);
+        &machine::Machine::restart);
     connect(
-        machine, &machine::QtMipsMachine::status_change, this,
+        machine, &machine::Machine::status_change, this,
         &MainWindow::machine_status);
     connect(
-        machine, &machine::QtMipsMachine::program_exit, this,
+        machine, &machine::Machine::program_exit, this,
         &MainWindow::machine_exit);
     connect(
-        machine, &machine::QtMipsMachine::program_trap, this,
+        machine, &machine::Machine::program_trap, this,
         &MainWindow::machine_trap);
     // Connect signal from break to machine pause
     connect(
         machine->core(), &machine::Core::stop_on_exception_reached, machine,
-        &machine::QtMipsMachine::pause);
+        &machine::Machine::pause);
 
     // Setup docks
     registers->setup(machine);
@@ -411,7 +409,7 @@ void MainWindow::create_core(
         &ProgramDock::writeback_inst_addr);
 
     // Set status to ready
-    machine_status(machine::QtMipsMachine::ST_READY);
+    machine_status(machine::Machine::ST_READY);
 }
 
 bool MainWindow::configured() {
@@ -433,7 +431,7 @@ void MainWindow::machine_reload(bool force_memory_reset, bool force_elf_load) {
     try {
         create_core(
             cnf, load_executable, !load_executable && !force_memory_reset);
-    } catch (const machine::QtMipsExceptionInput &e) {
+    } catch (const machine::SimulatorExceptionInput &e) {
         QMessageBox msg(this);
         msg.setText(e.msg(false));
         msg.setIcon(QMessageBox::Critical);
@@ -444,7 +442,7 @@ void MainWindow::machine_reload(bool force_memory_reset, bool force_elf_load) {
 }
 
 void MainWindow::print_action() {
-#ifdef QTMIPS_WITH_PRINTING
+#ifdef WITH_PRINTING
     QPrinter printer(QPrinter::HighResolution);
     printer.setColorMode(QPrinter::Color);
     QPrintDialog print_dialog(&printer, this);
@@ -476,7 +474,7 @@ void MainWindow::print_action() {
         corescene->render(
             &painter, target_rect, scene_rect, Qt::KeepAspectRatio);
     }
-#endif // QTMIPS_WITH_PRINTING
+#endif // WITH_PRINTING
 }
 
 #define SHOW_HANDLER(NAME, DEFAULT_AREA)                                       \
@@ -521,7 +519,7 @@ void MainWindow::show_symbol_dialog() {
     gotosyboldialog->open();
 }
 
-void MainWindow::about_qtmips() {
+void MainWindow::about_program() {
     AboutDialog *aboutdialog = new AboutDialog(this);
     aboutdialog->show();
 }
@@ -628,29 +626,29 @@ void MainWindow::show_dockwidget(QDockWidget *dw, Qt::DockWidgetArea area) {
     }
 }
 
-void MainWindow::machine_status(enum machine::QtMipsMachine::Status st) {
+void MainWindow::machine_status(enum machine::Machine::Status st) {
     QString status;
     switch (st) {
-    case machine::QtMipsMachine::ST_READY:
+    case machine::Machine::ST_READY:
         ui->actionPause->setEnabled(false);
         ui->actionRun->setEnabled(true);
         ui->actionStep->setEnabled(true);
         status = "Ready";
         break;
-    case machine::QtMipsMachine::ST_RUNNING:
+    case machine::Machine::ST_RUNNING:
         ui->actionPause->setEnabled(true);
         ui->actionRun->setEnabled(false);
         ui->actionStep->setEnabled(false);
         status = "Running";
         break;
-    case machine::QtMipsMachine::ST_BUSY:
+    case machine::Machine::ST_BUSY:
         // Busy is not interesting (in such case we should just be running
         return;
-    case machine::QtMipsMachine::ST_EXIT:
+    case machine::Machine::ST_EXIT:
         // machine_exit is called so we disable controls in that
         status = "Exited";
         break;
-    case machine::QtMipsMachine::ST_TRAPPED:
+    case machine::Machine::ST_TRAPPED:
         // machine_trap is called so we disable controls in that
         status = "Trapped";
         break;
@@ -665,7 +663,7 @@ void MainWindow::machine_exit() {
     ui->actionStep->setEnabled(false);
 }
 
-void MainWindow::machine_trap(machine::QtMipsException &e) {
+void MainWindow::machine_trap(machine::SimulatorException &e) {
     machine_exit();
 
     QMessageBox msg(this);
@@ -836,7 +834,7 @@ void MainWindow::open_source() {
             add_src_editor_to_tabs(editor);
         } else {
             QMessageBox::critical(
-                this, "QtMips Error",
+                this, "Simulator Error",
                 tr("Cannot open file '%1' for reading.").arg(file_name));
             delete (editor);
         }
@@ -866,7 +864,7 @@ void MainWindow::save_source_as() {
     const QString fn = fileDialog.selectedFiles().first();
     if (!current_srceditor->saveFile(fn)) {
         QMessageBox::critical(
-            this, "QtMips Error", tr("Cannot save file '%1'.").arg(fn));
+            this, "Simulator Error", tr("Cannot save file '%1'.").arg(fn));
         return;
     }
     int idx = central_window->indexOf(current_srceditor);
@@ -916,7 +914,7 @@ void MainWindow::save_source() {
 #ifndef __EMSCRIPTEN__
     if (!current_srceditor->saveFile()) {
         QMessageBox::critical(
-            this, "QtMips Error",
+            this, "Simulator Error",
             tr("Cannot save file '%1'.").arg(current_srceditor->filename()));
     }
 #else
@@ -991,7 +989,7 @@ void MainWindow::example_source(const QString &source_file) {
         update_open_file_list();
     } else {
         QMessageBox::critical(
-            this, "QtMips Error",
+            this, "Simulator Error",
             tr("Cannot open example file '%1' for reading.").arg(source_file));
         delete (editor);
     }
@@ -1140,14 +1138,14 @@ void MainWindow::compile_source() {
     }
     if (machine == nullptr) {
         QMessageBox::critical(
-            this, "QtMips Error", tr("No machine to store program."));
+            this, "Simulator Error", tr("No machine to store program."));
         return;
     }
     SymbolTableDb symtab(machine->symbol_table_rw(true));
     machine::FrontendMemory *mem = machine->memory_data_bus_rw();
     if (mem == nullptr) {
         QMessageBox::critical(
-            this, "QtMips Error",
+            this, "Simulator Error",
             tr("No physical addresspace to store program."));
         return;
     }

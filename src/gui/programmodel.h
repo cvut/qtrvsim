@@ -99,7 +99,7 @@ public:
 signals:
     void report_error(QString error);
 public slots:
-    void setup(machine::QtMipsMachine *machine);
+    void setup(machine::Machine *machine);
     void check_for_updates();
     void toggle_hw_break(const QModelIndex &index);
     void update_stage_addr(uint stage, machine::Address addr);
@@ -110,7 +110,7 @@ private:
     machine::FrontendMemory *mem_access_rw() const;
     machine::Address index0_offset;
     QFont data_font;
-    machine::QtMipsMachine *machine;
+    machine::Machine *machine;
     uint32_t memory_change_counter;
     uint32_t cache_program_change_counter;
     machine::Address stage_addr[STAGEADDR_COUNT] {};

@@ -80,7 +80,7 @@ Cop0Dock::~Cop0Dock() {
     delete scrollarea;
 }
 
-void Cop0Dock::setup(machine::QtMipsMachine *machine) {
+void Cop0Dock::setup(machine::Machine *machine) {
     if (machine == nullptr) {
         // Reset data
         for (int i = 1; i < machine::Cop0State::COP0REGS_CNT; i++) {
@@ -104,8 +104,7 @@ void Cop0Dock::setup(machine::QtMipsMachine *machine) {
         cop0state, &machine::Cop0State::cop0reg_read, this,
         &Cop0Dock::cop0reg_read);
     connect(
-        machine, &machine::QtMipsMachine::tick, this,
-        &Cop0Dock::clear_highlights);
+        machine, &machine::Machine::tick, this, &Cop0Dock::clear_highlights);
 }
 
 void Cop0Dock::cop0reg_changed(

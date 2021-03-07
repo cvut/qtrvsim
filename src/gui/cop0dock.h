@@ -52,7 +52,7 @@ public:
     Cop0Dock(QWidget *parent);
     ~Cop0Dock() override;
 
-    void setup(machine::QtMipsMachine *machine);
+    void setup(machine::Machine *machine);
 
 private slots:
     void

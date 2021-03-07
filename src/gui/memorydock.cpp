@@ -110,6 +110,6 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
         &MemoryTableView::recompute_columns);
 }
 
-void MemoryDock::setup(machine::QtMipsMachine *machine) {
+void MemoryDock::setup(machine::Machine *machine) {
     emit machine_setup(machine);
 }

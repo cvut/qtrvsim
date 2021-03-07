@@ -1114,7 +1114,7 @@ bool OsSyscallExceptionHandler::handle_exception(
         syscall_num -= 4000;
         sdesc = &mips_syscall_args[syscall_num];
     } else {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             SyscallUnknown, "System call number unknown ",
             QString::number(syscall_num));
     }

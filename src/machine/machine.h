@@ -54,14 +54,14 @@
 
 namespace machine {
 
-class QtMipsMachine : public QObject {
+class Machine : public QObject {
     Q_OBJECT
 public:
-    explicit QtMipsMachine(
+    explicit Machine(
         MachineConfig config,
         bool load_symtab = false,
         bool load_executable = true);
-    ~QtMipsMachine() override;
+    ~Machine() override;
 
     const MachineConfig &config();
     void set_speed(unsigned int ips, unsigned int time_chunk = 0);
@@ -128,8 +128,8 @@ public slots:
 
 signals:
     void program_exit();
-    void program_trap(machine::QtMipsException &e);
-    void status_change(enum machine::QtMipsMachine::Status st);
+    void program_trap(machine::SimulatorException &e);
+    void status_change(enum machine::Machine::Status st);
     void tick();      // Time tick
     void post_tick(); // Emitted after tick to allow updates
     void set_interrupt_signal(uint irq_num, bool active);

@@ -53,13 +53,13 @@ ProgramLoader::ProgramLoader(const QString &file) : elf_file(file) {
     const GElf_Ehdr *elf_ehdr;
     // Initialize elf library
     if (elf_version(EV_CURRENT) == EV_NONE) {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             Input, "Elf library initialization failed", elf_errmsg(-1));
     }
     // Open source file - option QIODevice::ExistingOnly cannot be used on Qt
     // <5.11
     if (!elf_file.open(QIODevice::ReadOnly | QIODevice::Unbuffered)) {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             Input,
             QString("Can't open input elf file for reading (") + QString(file)
                 + QString(")"),
@@ -67,51 +67,52 @@ ProgramLoader::ProgramLoader(const QString &file) : elf_file(file) {
     }
     // Initialize elf
     if (!(this->elf = elf_begin(elf_file.handle(), ELF_C_READ, nullptr))) {
-        throw QTMIPS_EXCEPTION(Input, "Elf read begin failed", elf_errmsg(-1));
+        throw SIMULATOR_EXCEPTION(
+            Input, "Elf read begin failed", elf_errmsg(-1));
     }
     // Check elf kind
     if (elf_kind(this->elf) != ELF_K_ELF) {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             Input, "Invalid input file elf format, plain elf file expected",
             "");
     }
 
     elf_ehdr = gelf_getehdr(this->elf, &this->hdr);
     if (!elf_ehdr) {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             Input, "Getting elf file header failed", elf_errmsg(-1));
     }
 
     executable_entry = Address(elf_ehdr->e_entry);
     // Check elf file format, executable expected, nothing else.
     if (this->hdr.e_type != ET_EXEC) {
-        throw QTMIPS_EXCEPTION(Input, "Invalid input file type", "");
+        throw SIMULATOR_EXCEPTION(Input, "Invalid input file type", "");
     }
     // Check elf file architecture, of course only mips is supported.
     // Note: This also checks that this is big endian as EM_MIPS is suppose to
     // be: MIPS R3000 big-endian
     if (this->hdr.e_machine != EM_MIPS) {
-        throw QTMIPS_EXCEPTION(Input, "Invalid input file architecture", "");
+        throw SIMULATOR_EXCEPTION(Input, "Invalid input file architecture", "");
     }
     // Check elf file class, only 32bit architecture is supported.
     int elf_class;
     if ((elf_class = gelf_getclass(this->elf)) == ELFCLASSNONE) {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             Input, "Getting elf class failed", elf_errmsg(-1));
     }
     if (elf_class != ELFCLASS32) {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             Input, "Only supported architecture is 32bit", "");
     }
 
     // Get number of program sections in elf file
     if (elf_getphdrnum(this->elf, &this->n_secs)) {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             Input, "Elf program sections count query failed", elf_errmsg(-1));
     }
     // Get program sections headers
     if (!(this->phdrs = elf32_getphdr(this->elf))) {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             Input, "Elf program sections get failed", elf_errmsg(-1));
     }
     // We want only LOAD sections so we create map of those sections
@@ -207,7 +208,7 @@ Endian ProgramLoader::get_endian() const {
     } else if (endian_id_byte == ELFDATA2MSB) {
         return BIG;
     } else {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             Input,
             "ELF header e_ident malformed."
             "Unknown value of the byte EI_DATA."

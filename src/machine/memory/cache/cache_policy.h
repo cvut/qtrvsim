@@ -35,8 +35,8 @@
  *
  ******************************************************************************/
 
-#ifndef QTMIPS_CACHE_POLICY_H
-#define QTMIPS_CACHE_POLICY_H
+#ifndef CACHE_POLICY_H
+#define CACHE_POLICY_H
 
 #include "machineconfig.h"
 #include "memory/cache/cache_types.h"
@@ -141,4 +141,4 @@ private:
 
 } // namespace machine
 
-#endif // QTMIPS_CACHE_POLICY_H
+#endif // CACHE_POLICY_H

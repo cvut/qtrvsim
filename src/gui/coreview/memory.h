@@ -80,7 +80,7 @@ private:
 class ProgramMemory : public Memory {
     Q_OBJECT
 public:
-    ProgramMemory(machine::QtMipsMachine *machine);
+    ProgramMemory(machine::Machine *machine);
     ~ProgramMemory() override;
 
     void setPos(qreal x, qreal y);
@@ -95,7 +95,7 @@ private:
 class DataMemory : public Memory {
     Q_OBJECT
 public:
-    DataMemory(machine::QtMipsMachine *machine);
+    DataMemory(machine::Machine *machine);
     ~DataMemory() override;
 
     void setPos(qreal x, qreal y);

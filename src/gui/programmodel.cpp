@@ -181,14 +181,14 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
     return QVariant();
 }
 
-void ProgramModel::setup(machine::QtMipsMachine *machine) {
+void ProgramModel::setup(machine::Machine *machine) {
     this->machine = machine;
     for (auto &i : stage_addr) {
         i = machine::STAGEADDR_NONE;
     }
     if (machine != nullptr) {
         connect(
-            machine, &machine::QtMipsMachine::post_tick, this,
+            machine, &machine::Machine::post_tick, this,
             &ProgramModel::check_for_updates);
     }
     if (mem_access() != nullptr) {

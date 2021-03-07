@@ -42,9 +42,9 @@
 namespace machine {
 
 // Base exception for all machine ones
-class QtMipsException : public std::exception {
+class SimulatorException : public std::exception {
 public:
-    QtMipsException(QString reason, QString ext, QString file, int line);
+    SimulatorException(QString reason, QString ext, QString file, int line);
     const char *what() const noexcept override;
     QString msg(bool pos) const;
 
@@ -64,7 +64,7 @@ protected:
  *  This can be cause by really using some unimplemented instruction or because
  * of problems in instruction decode. UnsupportedAluOperation: Decoded ALU
  * operation is not supported This is basically same exception as
- * QtMipsExceptionUnsupportedInstruction but it is emmited from ALU when
+ * SimulatorExceptionUnsupportedInstruction but it is emmited from ALU when
  * executed and not before that. Overflow: Integer operation resulted to
  * overflow (or underflow as we are working with unsigned values) This is for
  * sure caused by program it self. UnalignedJump: Instruction is jumping to
@@ -81,7 +81,7 @@ protected:
  * probably QtMips bug if raised not program. Sanity: This is sanity check
  * exception
  */
-#define QTMIPS_EXCEPTIONS                                                      \
+#define SIMULATOR_EXCEPTIONS                                                   \
     EXCEPTION(Input, )                                                         \
     EXCEPTION(Runtime, )                                                       \
     EXCEPTION(UnsupportedInstruction, Runtime)                                 \
@@ -94,27 +94,27 @@ protected:
     EXCEPTION(SyscallUnknown, Runtime)
 
 #define EXCEPTION(NAME, PARENT)                                                \
-    class QtMipsException##NAME : public QtMipsException##PARENT {             \
+    class SimulatorException##NAME : public SimulatorException##PARENT {       \
     public:                                                                    \
-        QtMipsException##NAME(                                                 \
+        SimulatorException##NAME(                                              \
             QString reason,                                                    \
             QString ext,                                                       \
             QString file,                                                      \
             int line);                                                         \
     };
-QTMIPS_EXCEPTIONS
+SIMULATOR_EXCEPTIONS
 #undef EXCEPTION
 
 // This is helper macro for throwing QtMips exceptions
-#define QTMIPS_EXCEPTION(TYPE, REASON, EXT)                                    \
-    (machine::QtMipsException##TYPE(                                           \
+#define SIMULATOR_EXCEPTION(TYPE, REASON, EXT)                                 \
+    (machine::SimulatorException##TYPE(                                        \
         QString(REASON), QString(EXT), QString(__FILE__), __LINE__))
 
-// Sanity comparison potentially throwing QtMipsExceptionSanity
+// Sanity comparison potentially throwing SimulatorExceptionSanity
 #define SANITY_ASSERT(COND, MSG)                                               \
     do {                                                                       \
         if (!(COND))                                                           \
-            throw QTMIPS_EXCEPTION(                                            \
+            throw SIMULATOR_EXCEPTION(                                         \
                 Sanity, "Sanity check failed (" #COND ")", MSG);               \
     } while (false)
 

@@ -118,14 +118,14 @@ public slots:
     void show_symbol_dialog();
     void show_messages();
     // Actions - help menu
-    void about_qtmips();
+    void about_program();
     void about_qt();
     // Actions - execution speed
     void set_speed();
     // Machine signals
-    void machine_status(enum machine::QtMipsMachine::Status st);
+    void machine_status(enum machine::Machine::Status st);
     void machine_exit();
-    void machine_trap(machine::QtMipsException &e);
+    void machine_trap(machine::SimulatorException &e);
     void central_tab_changed(int index);
     void tab_widget_destroyed(QObject *obj);
     void view_mnemonics_registers(bool enable);
@@ -171,7 +171,7 @@ private:
 
     QSettings *settings;
 
-    machine::QtMipsMachine *machine; // Current simulated machine
+    machine::Machine *machine; // Current simulated machine
 
     void show_dockwidget(
         QDockWidget *w,

@@ -426,7 +426,7 @@ void configure_serial_port(QCommandLineParser &p, SerialPort *ser_port) {
     }
 }
 
-void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
+void load_ranges(Machine &machine, const QStringList &ranges) {
     foreach (QString range_arg, ranges) {
         bool ok = true;
         QString str;
@@ -475,7 +475,7 @@ void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
     }
 }
 
-bool assemble(QtMipsMachine &machine, MsgReport &msgrep, QString filename) {
+bool assemble(Machine &machine, MsgReport &msgrep, QString filename) {
     SymbolTableDb symtab(machine.symbol_table_rw(true));
     machine::FrontendMemory *mem = machine.memory_data_bus_rw();
     if (mem == nullptr) {
@@ -509,7 +509,7 @@ int main(int argc, char *argv[]) {
 
     MachineConfig cc;
     configure_machine(p, cc);
-    QtMipsMachine machine(cc, !asm_source, !asm_source);
+    Machine machine(cc, !asm_source, !asm_source);
 
     Tracer tr(&machine);
     configure_tracer(p, tr);

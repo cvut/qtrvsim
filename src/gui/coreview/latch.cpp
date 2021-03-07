@@ -44,7 +44,7 @@ using namespace coreview;
 #define PENW 1
 //////////////////////
 
-Latch::Latch(machine::QtMipsMachine *machine, qreal height)
+Latch::Latch(machine::Machine *machine, qreal height)
     : QGraphicsObject(nullptr) {
     this->height = height;
 
@@ -59,7 +59,7 @@ Latch::Latch(machine::QtMipsMachine *machine, qreal height)
     wedge_animation->setEndValue(QColor(255, 255, 255));
     wedge_clr = QColor(255, 255, 255);
 
-    connect(machine, &machine::QtMipsMachine::tick, this, &Latch::tick);
+    connect(machine, &machine::Machine::tick, this, &Latch::tick);
 }
 
 Latch::~Latch() {

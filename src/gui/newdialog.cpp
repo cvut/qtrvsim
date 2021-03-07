@@ -186,7 +186,7 @@ void NewDialog::create() {
 
     try {
         prnt->create_core(*config, true, false);
-    } catch (const machine::QtMipsExceptionInput &e) {
+    } catch (const machine::SimulatorExceptionInput &e) {
         QMessageBox msg(this);
         msg.setText(e.msg(false));
         msg.setIcon(QMessageBox::Critical);

@@ -48,7 +48,7 @@ using namespace coreview;
 #define PENW 1
 //////////////////////
 
-ProgramCounter::ProgramCounter(machine::QtMipsMachine *machine)
+ProgramCounter::ProgramCounter(machine::Machine *machine)
     : QGraphicsObject(nullptr)
     , name("PC", this)
     , value(this) {

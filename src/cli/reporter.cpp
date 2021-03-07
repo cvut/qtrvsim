@@ -44,14 +44,12 @@
 using namespace machine;
 using namespace std;
 
-Reporter::Reporter(QCoreApplication *app, QtMipsMachine *machine) : QObject() {
+Reporter::Reporter(QCoreApplication *app, Machine *machine) : QObject() {
     this->app = app;
     this->machine = machine;
 
-    connect(
-        machine, &QtMipsMachine::program_exit, this, &Reporter::machine_exit);
-    connect(
-        machine, &QtMipsMachine::program_trap, this, &Reporter::machine_trap);
+    connect(machine, &Machine::program_exit, this, &Reporter::machine_exit);
+    connect(machine, &Machine::program_trap, this, &Reporter::machine_trap);
     connect(
         machine->core(), &Core::stop_on_exception_reached, this,
         &Reporter::machine_exception_reached);
@@ -135,18 +133,18 @@ void Reporter::machine_exception_reached() {
     QCoreApplication::exit();
 }
 
-void Reporter::machine_trap(QtMipsException &e) {
+void Reporter::machine_trap(SimulatorException &e) {
     report();
 
     bool expected = false;
     auto &etype = typeid(e);
-    if (etype == typeid(QtMipsExceptionUnsupportedInstruction)) {
+    if (etype == typeid(SimulatorExceptionUnsupportedInstruction)) {
         expected = e_fail & FR_I;
-    } else if (etype == typeid(QtMipsExceptionUnsupportedAluOperation)) {
+    } else if (etype == typeid(SimulatorExceptionUnsupportedAluOperation)) {
         expected = e_fail & FR_A;
-    } else if (etype == typeid(QtMipsExceptionOverflow)) {
+    } else if (etype == typeid(SimulatorExceptionOverflow)) {
         expected = e_fail & FR_O;
-    } else if (etype == typeid(QtMipsExceptionUnalignedJump)) {
+    } else if (etype == typeid(SimulatorExceptionUnalignedJump)) {
         expected = e_fail & FR_J;
     }
 

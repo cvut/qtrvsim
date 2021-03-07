@@ -45,7 +45,7 @@
 class Tracer : public QObject {
     Q_OBJECT
 public:
-    Tracer(machine::QtMipsMachine *machine);
+    Tracer(machine::Machine *machine);
 
     // Trace instructions in different stages/sections
     void fetch();
@@ -91,7 +91,7 @@ private slots:
     void regs_hi_lo_update(bool hi, machine::RegisterValue val) const;
 
 private:
-    machine::QtMipsMachine *machine;
+    machine::Machine *machine;
 
     bool gp_regs[32] {};
     bool r_hi, r_lo;

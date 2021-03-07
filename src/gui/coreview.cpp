@@ -91,8 +91,7 @@
             &coreview::MiniMux::set);                                          \
     } while (false)
 
-CoreViewScene::CoreViewScene(machine::QtMipsMachine *machine)
-    : QGraphicsScene() {
+CoreViewScene::CoreViewScene(machine::Machine *machine) : QGraphicsScene() {
     setSceneRect(0, 0, SC_WIDTH, SC_HEIGHT);
 
     // Elements //
@@ -363,7 +362,7 @@ CoreViewScene::new_label(const QString &str, qreal x, qreal y) {
     return i;
 }
 
-CoreViewSceneSimple::CoreViewSceneSimple(machine::QtMipsMachine *machine)
+CoreViewSceneSimple::CoreViewSceneSimple(machine::Machine *machine)
     : CoreViewScene(machine) {
     NEW_I(inst_prim, 230, 60, instruction_executed, QColor(255, 173, 230));
     if (machine->config().delay_slot()) {
@@ -473,7 +472,7 @@ CoreViewSceneSimple::CoreViewSceneSimple(machine::QtMipsMachine *machine)
     NEW_V(280, 200, writeback_regw_value, false, 1);
 }
 
-CoreViewScenePipelined::CoreViewScenePipelined(machine::QtMipsMachine *machine)
+CoreViewScenePipelined::CoreViewScenePipelined(machine::Machine *machine)
     : CoreViewScene(machine) {
     NEW(Latch, latch_if_id, 158, 70, machine, 400);
     latch_if_id->setTitle("IF/ID");

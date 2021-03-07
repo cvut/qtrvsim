@@ -52,7 +52,7 @@ public:
     RegistersDock(QWidget *parent);
     ~RegistersDock() override;
 
-    void setup(machine::QtMipsMachine *machine);
+    void setup(machine::Machine *machine);
 
 private slots:
     void pc_changed(machine::Address val);

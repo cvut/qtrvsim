@@ -35,8 +35,8 @@
  *
  ******************************************************************************/
 
-#ifndef QTMIPS_ADDRESS_H
-#define QTMIPS_ADDRESS_H
+#ifndef ADDRESS_H
+#define ADDRESS_H
 
 #include "utils.h"
 
@@ -261,4 +261,4 @@ constexpr int64_t Address::operator-(const Address &other) const {
 
 Q_DECLARE_METATYPE(machine::Address)
 
-#endif // QTMIPS_ADDRESS_H
+#endif // ADDRESS_H

@@ -97,7 +97,7 @@ RegistersDock::~RegistersDock() {
     delete scrollarea;
 }
 
-void RegistersDock::setup(machine::QtMipsMachine *machine) {
+void RegistersDock::setup(machine::Machine *machine) {
     if (machine == nullptr) {
         // Reset data
         pc->setText("");
@@ -131,7 +131,7 @@ void RegistersDock::setup(machine::QtMipsMachine *machine) {
         regs, &machine::Registers::hi_lo_read, this,
         &RegistersDock::hi_lo_read);
     connect(
-        machine, &machine::QtMipsMachine::tick, this,
+        machine, &machine::Machine::tick, this,
         &RegistersDock::clear_highlights);
 }
 

@@ -266,7 +266,7 @@ RegisterValue machine::alu_operate(
     case ALU_OP_MFMC0:
     case ALU_OP_ERET: return 0;
     default:
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             UnsupportedAluOperation, "Unknown ALU operation",
             QString::number(operation, 16));
     }

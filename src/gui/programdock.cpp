@@ -125,7 +125,7 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
         &ProgramModel::update_all);
 }
 
-void ProgramDock::setup(machine::QtMipsMachine *machine) {
+void ProgramDock::setup(machine::Machine *machine) {
     machine::Address pc;
     emit machine_setup(machine);
     if (machine == nullptr) {
@@ -201,5 +201,5 @@ void ProgramDock::update_follow_position() {
 }
 
 void ProgramDock::report_error(const QString &error) {
-    QMessageBox::critical(this, "QtMips Error", error);
+    QMessageBox::critical(this, "Simulator Error", error);
 }

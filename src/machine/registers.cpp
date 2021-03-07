@@ -70,7 +70,7 @@ Address Registers::pc_inc() {
 
 Address Registers::pc_jmp(int32_t offset) {
     if (offset % 4) {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             UnalignedJump, "Trying to jump by unaligned offset",
             QString::number(offset, 16));
     }
@@ -81,7 +81,7 @@ Address Registers::pc_jmp(int32_t offset) {
 
 void Registers::pc_abs_jmp(machine::Address address) {
     if (address.get_raw() % 4) {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             UnalignedJump, "Trying to jump to unaligned address",
             QString::number(address.get_raw(), 16));
     }

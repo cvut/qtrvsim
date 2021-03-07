@@ -82,7 +82,7 @@ QLineF Connector::vector() const {
     case AX_XY: return QLineF(p, p + QPointF(1, 1));
     case AX_MXY: return QLineF(p, p + QPoint(1, -1));
     }
-    throw QTMIPS_EXCEPTION(
+    throw SIMULATOR_EXCEPTION(
         Sanity, "Connection::vector() unknown axes set", QString::number(ax));
 }
 

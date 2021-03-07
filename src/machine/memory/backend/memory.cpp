@@ -61,7 +61,7 @@ WriteResult MemorySection::write(
     UNUSED(options)
 
     if (destination >= length()) {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             OutOfMemoryAccess, "Trying to write outside of the memory section",
             QString("Accessing using offset: ") + QString::number(destination));
     }
@@ -89,7 +89,7 @@ ReadResult MemorySection::read(
     size = std::min(source + size, length()) - source;
 
     if (source >= length()) {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             OutOfMemoryAccess, "Trying to read outside of the memory section",
             QString("Accessing using offset: ") + QString::number(source));
     }

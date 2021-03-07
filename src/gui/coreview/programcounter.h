@@ -48,7 +48,7 @@ namespace coreview {
 class ProgramCounter : public QGraphicsObject {
     Q_OBJECT
 public:
-    ProgramCounter(machine::QtMipsMachine *machine);
+    ProgramCounter(machine::Machine *machine);
     ~ProgramCounter() override;
 
     QRectF boundingRect() const override;

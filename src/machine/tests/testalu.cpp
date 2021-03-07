@@ -216,6 +216,6 @@ void MachineTests::alu_except() {
     // Only runtime exception is expected as any other exception is a bug
     QVERIFY_EXCEPTION_THROWN(
         alu_operate((enum AluOp)op, s, t, 0, 0, &regs, discard, excause),
-        QtMipsExceptionRuntime);
+        SimulatorExceptionRuntime);
 #endif
 }

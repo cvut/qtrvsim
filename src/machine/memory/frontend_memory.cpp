@@ -110,7 +110,7 @@ void FrontendMemory::write_ctl(
         break;
     }
     default: {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             UnknownMemoryControl, "Trying to write to memory with unknown ctl",
             QString::number(ctl));
     }
@@ -130,7 +130,7 @@ FrontendMemory::read_ctl(enum AccessControl ctl, Address address) const {
     case AC_I64: return (int64_t)read_u64(address);
     case AC_U64: return read_u64(address);
     default: {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             UnknownMemoryControl, "Trying to read from memory with unknown ctl",
             QString::number(ctl));
     }

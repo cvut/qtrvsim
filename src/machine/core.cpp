@@ -319,7 +319,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     dt.inst.flags_alu_op_mem_ctl(flags, alu_op, mem_ctl);
 
     if (!(flags & IMF_SUPPORTED)) {
-        throw QTMIPS_EXCEPTION(
+        throw SIMULATOR_EXCEPTION(
             UnsupportedInstruction,
             "Instruction with following encoding is not supported",
             QString::number(dt.inst.data(), 16));
@@ -460,7 +460,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
             break;
         case ALU_OP_MTC0:
             if (cop0state == nullptr) {
-                throw QTMIPS_EXCEPTION(
+                throw SIMULATOR_EXCEPTION(
                     UnsupportedInstruction, "Cop0 not supported",
                     "setup Cop0State");
             }
@@ -468,7 +468,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
             break;
         case ALU_OP_MFC0:
             if (cop0state == nullptr) {
-                throw QTMIPS_EXCEPTION(
+                throw SIMULATOR_EXCEPTION(
                     UnsupportedInstruction, "Cop0 not supported",
                     "setup Cop0State");
             }
@@ -476,7 +476,7 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
             break;
         case ALU_OP_MFMC0:
             if (cop0state == nullptr) {
-                throw QTMIPS_EXCEPTION(
+                throw SIMULATOR_EXCEPTION(
                     UnsupportedInstruction, "Cop0 not supported",
                     "setup Cop0State");
             }

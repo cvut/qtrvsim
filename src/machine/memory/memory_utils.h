@@ -35,8 +35,8 @@
  *
  ******************************************************************************/
 
-#ifndef QTMIPS_MEMORY_UTILS_H
-#define QTMIPS_MEMORY_UTILS_H
+#ifndef MEMORY_UTILS_H
+#define MEMORY_UTILS_H
 
 #include "memory/endian.h"
 #include "utils.h"
@@ -337,4 +337,4 @@ void memory_write_u64(MEM_T *mem, ADDR_T address, uint64_t value) {
 
 } // namespace machine
 
-#endif // QTMIPS_MEMORY_UTILS_H
+#endif // MEMORY_UTILS_H

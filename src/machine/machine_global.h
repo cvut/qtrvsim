@@ -33,15 +33,15 @@
  *
  ******************************************************************************/
 
-#ifndef QTMIPS_MACHINE_GLOBAL_H
-#define QTMIPS_MACHINE_GLOBAL_H
+#ifndef MACHINE_GLOBAL_H
+#define MACHINE_GLOBAL_H
 
 #include <QtCore/qglobal.h>
 
-#if defined(QTMIPS_MACHINE_LIBRARY)
-    #define QTMIPS_MACHINESHARED_EXPORT Q_DECL_EXPORT
+#if defined(MACHINE_LIBRARY)
+    #define MACHINE_SHARED_EXPORT Q_DECL_EXPORT
 #else
-    #define QTMIPS_MACHINESHARED_EXPORT Q_DECL_IMPORT
+    #define MACHINE_SHARED_EXPORT Q_DECL_IMPORT
 #endif
 
-#endif // QTMIPS_MACHINE_GLOBAL_H
+#endif // MACHINE_GLOBAL_H

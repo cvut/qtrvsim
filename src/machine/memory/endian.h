@@ -1,5 +1,5 @@
-#ifndef QTMIPS_ENDIAN_H
-#define QTMIPS_ENDIAN_H
+#ifndef ENDIAN_H
+#define ENDIAN_H
 
 #include "utils.h"
 
@@ -170,5 +170,4 @@ T byteswap_if(T value, bool condition) {
 
 Q_DECLARE_METATYPE(machine::Endian)
 
-
-#endif // QTMIPS_ENDIAN_H
+#endif // ENDIAN_H

@@ -50,7 +50,7 @@ class Latch : public QGraphicsObject {
     Q_OBJECT
     Q_PROPERTY(QColor wedge_clr READ wedge_color WRITE set_wedge_color)
 public:
-    Latch(machine::QtMipsMachine *machine, qreal height);
+    Latch(machine::Machine *machine, qreal height);
     ~Latch() override;
 
     QRectF boundingRect() const override;

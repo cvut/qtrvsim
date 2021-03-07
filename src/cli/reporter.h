@@ -49,7 +49,7 @@ class Reporter : public QObject {
     Q_OBJECT
 
 public:
-    Reporter(QCoreApplication *app, machine::QtMipsMachine *machine);
+    Reporter(QCoreApplication *app, machine::Machine *machine);
 
     void regs(); // Report status of registers
     void cache_stats();
@@ -75,12 +75,12 @@ public:
 
 private slots:
     void machine_exit();
-    void machine_trap(machine::QtMipsException &e);
+    void machine_trap(machine::SimulatorException &e);
     void machine_exception_reached();
 
 private:
     QCoreApplication *app;
-    machine::QtMipsMachine *machine;
+    machine::Machine *machine;
     QVector<DumpRange> dump_ranges;
 
     bool e_regs;

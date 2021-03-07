@@ -51,10 +51,10 @@ class ProgramDock : public QDockWidget {
 public:
     ProgramDock(QWidget *parent, QSettings *settings);
 
-    void setup(machine::QtMipsMachine *machine);
+    void setup(machine::Machine *machine);
 
 signals:
-    void machine_setup(machine::QtMipsMachine *machine);
+    void machine_setup(machine::Machine *machine);
     void jump_to_pc(machine::Address);
     void focus_addr(machine::Address);
     void focus_addr_with_save(machine::Address);

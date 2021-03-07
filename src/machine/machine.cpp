@@ -42,10 +42,7 @@
 
 using namespace machine;
 
-QtMipsMachine::QtMipsMachine(
-    MachineConfig config,
-    bool load_symtab,
-    bool load_executable)
+Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
     : machine_config(std::move(config))
     , stat(ST_READY) {
     regs = new Registers();
@@ -109,12 +106,12 @@ QtMipsMachine::QtMipsMachine(
             min_cache_row_size, cop0st);
     }
     connect(
-        this, &QtMipsMachine::set_interrupt_signal, cop0st,
+        this, &Machine::set_interrupt_signal, cop0st,
         &Cop0State::set_interrupt_signal);
 
     run_t = new QTimer(this);
     set_speed(0); // In default run as fast as possible
-    connect(run_t, &QTimer::timeout, this, &QtMipsMachine::step_timer);
+    connect(run_t, &QTimer::timeout, this, &Machine::step_timer);
 
     for (int i = 0; i < EXCAUSE_COUNT; i++) {
         if (i != EXCAUSE_INT && i != EXCAUSE_BREAK && i != EXCAUSE_HWBREAK) {
@@ -128,26 +125,26 @@ QtMipsMachine::QtMipsMachine(
     set_stop_on_exception(EXCAUSE_INT, machine_config.osemu_interrupt_stop());
     set_step_over_exception(EXCAUSE_INT, false);
 }
-void QtMipsMachine::setup_lcd_display() {
+void Machine::setup_lcd_display() {
     perip_lcd_display = new LcdDisplay(machine_config.get_simulated_endian());
     memory_bus_insert_range(
         perip_lcd_display, 0xffe00000_addr, 0xffe4afff_addr, true);
 }
-void QtMipsMachine::setup_perip_spi_led() {
+void Machine::setup_perip_spi_led() {
     perip_spi_led = new PeripSpiLed(machine_config.get_simulated_endian());
     memory_bus_insert_range(
         perip_spi_led, 0xffffc100_addr, 0xffffc1ff_addr, true);
 }
-void QtMipsMachine::setup_serial_port() {
+void Machine::setup_serial_port() {
     ser_port = new SerialPort(machine_config.get_simulated_endian());
     memory_bus_insert_range(ser_port, 0xffffc000_addr, 0xffffc03f_addr, true);
     memory_bus_insert_range(ser_port, 0xffff0000_addr, 0xffff003f_addr, false);
     connect(
         ser_port, &SerialPort::signal_interrupt, this,
-        &QtMipsMachine::set_interrupt_signal);
+        &Machine::set_interrupt_signal);
 }
 
-QtMipsMachine::~QtMipsMachine() {
+Machine::~Machine() {
     delete run_t;
     run_t = nullptr;
     delete cr;
@@ -170,44 +167,44 @@ QtMipsMachine::~QtMipsMachine() {
     symtab = nullptr;
 }
 
-const MachineConfig &QtMipsMachine::config() {
+const MachineConfig &Machine::config() {
     return machine_config;
 }
 
-void QtMipsMachine::set_speed(unsigned int ips, unsigned int time_chunk) {
+void Machine::set_speed(unsigned int ips, unsigned int time_chunk) {
     this->time_chunk = time_chunk;
     run_t->setInterval(ips);
 }
 
-const Registers *QtMipsMachine::registers() {
+const Registers *Machine::registers() {
     return regs;
 }
 
-const Cop0State *QtMipsMachine::cop0state() {
+const Cop0State *Machine::cop0state() {
     return cop0st;
 }
 
-const Memory *QtMipsMachine::memory() {
+const Memory *Machine::memory() {
     return mem;
 }
 
-Memory *QtMipsMachine::memory_rw() {
+Memory *Machine::memory_rw() {
     return mem;
 }
 
-const Cache *QtMipsMachine::cache_program() {
+const Cache *Machine::cache_program() {
     return cch_program;
 }
 
-const Cache *QtMipsMachine::cache_data() {
+const Cache *Machine::cache_data() {
     return cch_data;
 }
 
-Cache *QtMipsMachine::cache_data_rw() {
+Cache *Machine::cache_data_rw() {
     return cch_data;
 }
 
-void QtMipsMachine::cache_sync() {
+void Machine::cache_sync() {
     if (cch_program != nullptr) {
         cch_program->sync();
     }
@@ -216,38 +213,38 @@ void QtMipsMachine::cache_sync() {
     }
 }
 
-const MemoryDataBus *QtMipsMachine::memory_data_bus() {
+const MemoryDataBus *Machine::memory_data_bus() {
     return data_bus;
 }
 
-MemoryDataBus *QtMipsMachine::memory_data_bus_rw() {
+MemoryDataBus *Machine::memory_data_bus_rw() {
     return data_bus;
 }
 
-SerialPort *QtMipsMachine::serial_port() {
+SerialPort *Machine::serial_port() {
     return ser_port;
 }
 
-PeripSpiLed *QtMipsMachine::peripheral_spi_led() {
+PeripSpiLed *Machine::peripheral_spi_led() {
     return perip_spi_led;
 }
 
-LcdDisplay *QtMipsMachine::peripheral_lcd_display() {
+LcdDisplay *Machine::peripheral_lcd_display() {
     return perip_lcd_display;
 }
 
-SymbolTable *QtMipsMachine::symbol_table_rw(bool create) {
+SymbolTable *Machine::symbol_table_rw(bool create) {
     if (create && (symtab == nullptr)) {
         symtab = new SymbolTable;
     }
     return symtab;
 }
 
-const SymbolTable *QtMipsMachine::symbol_table(bool create) {
+const SymbolTable *Machine::symbol_table(bool create) {
     return symbol_table_rw(create);
 }
 
-void QtMipsMachine::set_symbol(
+void Machine::set_symbol(
     const QString &name,
     uint32_t value,
     uint32_t size,
@@ -259,27 +256,27 @@ void QtMipsMachine::set_symbol(
     symtab->set_symbol(name, value, size, info, other);
 }
 
-const Core *QtMipsMachine::core() {
+const Core *Machine::core() {
     return cr;
 }
 
-const CoreSingle *QtMipsMachine::core_singe() {
+const CoreSingle *Machine::core_singe() {
     return machine_config.pipelined() ? nullptr : (const CoreSingle *)cr;
 }
 
-const CorePipelined *QtMipsMachine::core_pipelined() {
+const CorePipelined *Machine::core_pipelined() {
     return machine_config.pipelined() ? (const CorePipelined *)cr : nullptr;
 }
 
-bool QtMipsMachine::executable_loaded() const {
+bool Machine::executable_loaded() const {
     return (mem_program_only != nullptr);
 }
 
-enum QtMipsMachine::Status QtMipsMachine::status() {
+enum Machine::Status Machine::status() {
     return stat;
 }
 
-bool QtMipsMachine::exited() {
+bool Machine::exited() {
     return stat == ST_EXIT || stat == ST_TRAPPED;
 }
 
@@ -291,14 +288,14 @@ bool QtMipsMachine::exited() {
             return;                                                            \
     } while (false)
 
-void QtMipsMachine::play() {
+void Machine::play() {
     CTL_GUARD;
     set_status(ST_RUNNING);
     run_t->start();
     step_internal(true);
 }
 
-void QtMipsMachine::pause() {
+void Machine::pause() {
     if (stat != ST_BUSY) {
         CTL_GUARD;
     }
@@ -306,7 +303,7 @@ void QtMipsMachine::pause() {
     run_t->stop();
 }
 
-void QtMipsMachine::step_internal(bool skip_break) {
+void Machine::step_internal(bool skip_break) {
     CTL_GUARD;
     enum Status stat_prev = stat;
     set_status(ST_BUSY);
@@ -317,7 +314,7 @@ void QtMipsMachine::step_internal(bool skip_break) {
             cr->step(skip_break);
         } while (time_chunk != 0 && stat == ST_BUSY && !skip_break
                  && start_time.msecsTo(QTime::currentTime()) < (int)time_chunk);
-    } catch (QtMipsException &e) {
+    } catch (SimulatorException &e) {
         run_t->stop();
         set_status(ST_TRAPPED);
         emit program_trap(e);
@@ -335,15 +332,15 @@ void QtMipsMachine::step_internal(bool skip_break) {
     emit post_tick();
 }
 
-void QtMipsMachine::step() {
+void Machine::step() {
     step_internal(true);
 }
 
-void QtMipsMachine::step_timer() {
+void Machine::step_timer() {
     step_internal();
 }
 
-void QtMipsMachine::restart() {
+void Machine::restart() {
     pause();
     regs->reset();
     if (mem_program_only != nullptr) {
@@ -355,7 +352,7 @@ void QtMipsMachine::restart() {
     set_status(ST_READY);
 }
 
-void QtMipsMachine::set_status(enum Status st) {
+void Machine::set_status(enum Status st) {
     bool change = st != stat;
     stat = st;
     if (change) {
@@ -363,7 +360,7 @@ void QtMipsMachine::set_status(enum Status st) {
     }
 }
 
-void QtMipsMachine::register_exception_handler(
+void Machine::register_exception_handler(
     ExceptionCause excause,
     ExceptionHandler *exhandler) {
     if (cr != nullptr) {
@@ -371,7 +368,7 @@ void QtMipsMachine::register_exception_handler(
     }
 }
 
-bool QtMipsMachine::memory_bus_insert_range(
+bool Machine::memory_bus_insert_range(
     BackendMemory *mem_acces,
     Address start_addr,
     Address last_addr,
@@ -383,56 +380,52 @@ bool QtMipsMachine::memory_bus_insert_range(
         mem_acces, start_addr, last_addr, move_ownership);
 }
 
-void QtMipsMachine::insert_hwbreak(Address address) {
+void Machine::insert_hwbreak(Address address) {
     if (cr != nullptr) {
         cr->insert_hwbreak(address);
     }
 }
 
-void QtMipsMachine::remove_hwbreak(Address address) {
+void Machine::remove_hwbreak(Address address) {
     if (cr != nullptr) {
         cr->remove_hwbreak(address);
     }
 }
 
-bool QtMipsMachine::is_hwbreak(Address address) {
+bool Machine::is_hwbreak(Address address) {
     if (cr != nullptr) {
         return cr->is_hwbreak(address);
     }
     return false;
 }
 
-void QtMipsMachine::set_stop_on_exception(
-    enum ExceptionCause excause,
-    bool value) {
+void Machine::set_stop_on_exception(enum ExceptionCause excause, bool value) {
     if (cr != nullptr) {
         cr->set_stop_on_exception(excause, value);
     }
 }
 
-bool QtMipsMachine::get_stop_on_exception(enum ExceptionCause excause) const {
+bool Machine::get_stop_on_exception(enum ExceptionCause excause) const {
     if (cr != nullptr) {
         return cr->get_stop_on_exception(excause);
     }
     return false;
 }
 
-void QtMipsMachine::set_step_over_exception(
-    enum ExceptionCause excause,
-    bool value) {
+void Machine::set_step_over_exception(enum ExceptionCause excause, bool value) {
     if (cr != nullptr) {
         cr->set_step_over_exception(excause, value);
     }
 }
 
-bool QtMipsMachine::get_step_over_exception(enum ExceptionCause excause) const {
+bool Machine::get_step_over_exception(enum ExceptionCause excause) const {
     if (cr != nullptr) {
         return cr->get_step_over_exception(excause);
     }
     return false;
 }
 
-enum ExceptionCause QtMipsMachine::get_exception_cause() const {
+enum ExceptionCause Machine::get_exception_cause() const {
     uint32_t val;
     if (cop0st == nullptr) {
         return EXCAUSE_NONE;
