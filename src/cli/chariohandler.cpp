@@ -1,18 +1,27 @@
-#include <chariohandler.h>
+#include "chariohandler.h"
 
-CharIOHandler::CharIOHandler(QIODevice *iodev, QObject *parent) :
-               QIODevice(parent), fd_list() {
+CharIOHandler::CharIOHandler(QIODevice *iodev, QObject *parent)
+    : QIODevice(parent)
+    , fd_list() {
     this->iodev = iodev;
-    if (!iodev->parent())
+    if (!iodev->parent()) {
         iodev->setParent(this);
+    }
     fd_specific = false;
-    if (iodev->isOpen())
+    if (iodev->isOpen()) {
         Super::open(iodev->openMode());
+    }
     connect(iodev, &Super::aboutToClose, this, &CharIOHandler::aboutToClose);
     connect(iodev, &Super::bytesWritten, this, &CharIOHandler::bytesWritten);
-    connect(iodev, &Super::channelBytesWritten, this, &CharIOHandler::channelBytesWritten);
-    connect(iodev, &Super::channelReadyRead, this, &CharIOHandler::channelReadyRead);
-    connect(iodev, &Super::readChannelFinished, this, &CharIOHandler::readChannelFinished);
+    connect(
+        iodev, &Super::channelBytesWritten, this,
+        &CharIOHandler::channelBytesWritten);
+    connect(
+        iodev, &Super::channelReadyRead, this,
+        &CharIOHandler::channelReadyRead);
+    connect(
+        iodev, &Super::readChannelFinished, this,
+        &CharIOHandler::readChannelFinished);
     connect(iodev, &Super::readyRead, this, &CharIOHandler::readyRead);
 }
 
@@ -27,14 +36,14 @@ void CharIOHandler::writeByte(unsigned int data) {
 }
 
 void CharIOHandler::writeByte(int fd, unsigned int data) {
-   if(!fd_specific || fd_list.contains(fd))
-       writeByte(data);
+    if (!fd_specific || fd_list.contains(fd))
+        writeByte(data);
 }
 
 void CharIOHandler::readBytePoll(int fd, unsigned int &data, bool &available) {
     char ch;
     qint64 res;
-    if(!fd_specific || fd_list.contains(fd)) {
+    if (!fd_specific || fd_list.contains(fd)) {
         if (bytesAvailable() > 0) {
             res = read(&ch, 1);
             if (res > 0) {
@@ -59,7 +68,6 @@ bool CharIOHandler::isSequential() const {
 
 bool CharIOHandler::open(OpenMode mode) {
     if (!iodev->open(mode)) {
-
         return false;
     }
     Super::open(mode);

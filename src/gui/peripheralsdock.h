@@ -4,11 +4,11 @@
 #include "machine/machine.h"
 #include "machine/memory/backend/peripheral.h"
 #include "machine/memory/backend/peripspiled.h"
+#include "peripheralsview.h"
 
 #include <QDockWidget>
 #include <QFormLayout>
 #include <QLabel>
-#include <peripheralsview.h>
 
 class PeripheralsDock : public QDockWidget {
     Q_OBJECT

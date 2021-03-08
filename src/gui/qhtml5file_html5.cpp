@@ -55,8 +55,9 @@
 std::function<void(char *, size_t, const char *)> g_qtFileDataReadyCallback;
 extern "C" EMSCRIPTEN_KEEPALIVE void
 qt_callFileDataReady(char *content, size_t contentSize, const char *fileName) {
-    if (g_qtFileDataReadyCallback == nullptr)
+    if (g_qtFileDataReadyCallback == nullptr) {
         return;
+    }
 
     g_qtFileDataReadyCallback(content, contentSize, fileName);
     g_qtFileDataReadyCallback = nullptr;
@@ -66,9 +67,10 @@ namespace {
 void loadFile(
     const char *accept,
     std::function<void(char *, size_t, const char *)> fileDataReady) {
-    if (::g_qtFileDataReadyCallback)
+    if (::g_qtFileDataReadyCallback) {
         puts("Warning: Concurrent loadFile() calls are not supported. "
              "Cancelling earlier call");
+    }
 
     // Call qt_callFileDataReady to make sure the emscripten linker does not
     // optimize it away, which may happen if the function is called from

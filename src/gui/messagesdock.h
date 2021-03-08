@@ -1,11 +1,12 @@
 #ifndef MESSAGESDOCK_H
 #define MESSAGESDOCK_H
 
+#include "messagesmodel.h"
+
 #include <QComboBox>
 #include <QDockWidget>
 #include <QLabel>
 #include <QSettings>
-#include <messagesmodel.h>
 
 class MessagesDock : public QDockWidget {
     Q_OBJECT

@@ -1,8 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>
-            icons/gui.png
-        </file>
+        <file>icons/gui.png</file>
         <file>icons/application-exit.png</file>
         <file>icons/reload.png</file>
         <file>icons/document-import.png</file>
