@@ -10,10 +10,10 @@ namespace machine {
  * given addresses should be stored, if present.
  */
 struct CacheLocation {
-    size_t row;
-    size_t col;
-    size_t tag;
-    size_t byte;
+    uint64_t row;
+    uint64_t col;
+    uint64_t tag;
+    uint64_t byte;
 };
 
 /**
@@ -21,7 +21,7 @@ struct CacheLocation {
  */
 struct CacheLine {
     bool valid, dirty;
-    size_t tag;
+    uint64_t tag;
     std::vector<uint32_t> data;
 };
 

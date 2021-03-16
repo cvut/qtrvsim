@@ -1,6 +1,6 @@
-project(elf)
+project(libelf)
 
-set(elf_SOURCES
+set(libelf_SOURCES
         32.fsize.c
         32.getehdr.c
         32.getphdr.c
@@ -57,7 +57,7 @@ set(elf_SOURCES
         x.remscn.c
         )
 
-set(elf_HEADERS
+set(libelf_HEADERS
         config.h
         byteswap.h
         elf_repl.h
@@ -72,8 +72,12 @@ set(elf_HEADERS
         sys_elf.h
         )
 
-add_library(elf STATIC ${elf_HEADERS} ${elf_SOURCES})
-target_compile_definitions(elf PUBLIC __LIBELF_INTERNAL__)
-target_compile_definitions(elf PUBLIC HAVE_CONFIG_H=1)
-target_include_directories(elf PUBLIC .)
-set_target_properties(elf PROPERTIES LINKER_LANGUAGE C)
+add_library(libelf STATIC ${libelf_HEADERS} ${libelf_SOURCES})
+# This is 3rd party code, I do not intend to fix it.
+target_compile_options(libelf PRIVATE -w)
+target_include_directories(libelf PUBLIC .)
+target_compile_definitions(libelf PUBLIC __LIBELF_INTERNAL__)
+target_compile_definitions(libelf PUBLIC HAVE_CONFIG_H=1)
+set_target_properties(libelf PROPERTIES LINKER_LANGUAGE C)
+
+

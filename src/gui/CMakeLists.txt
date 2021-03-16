@@ -123,13 +123,9 @@ set(qtmips_gui_RESOURCES
         )
 
 if ("${CMAKE_SYSTEM_NAME}" MATCHES "Emscripten")
-    message("Including WASM only files.")
-    set(qtmips_gui_WASM
-            qhtml5file_html5.cpp
-            qhtml5file.h
-            )
-else ()
-    set(qtmisp_gui_WASM "")
+    message("qtmips_gui :: Including WASM only files.")
+    list(APPEND qtmips_gui_SOURCES qhtml5file_html5.cpp)
+    list(APPEND qtmips_gui_HEADERS qhtml5file.h)
 endif ()
 
 

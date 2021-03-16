@@ -14,7 +14,7 @@ namespace machine {
 /**
  * Relative index within an instance of backend memory.
  */
-typedef uint64_t Offset;
+typedef size_t Offset;
 
 /**
  * Interface for physical memory or periphery.

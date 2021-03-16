@@ -1,5 +1,5 @@
 project(qtmips_machine
-        DESCRIPTION "The actual simulator as library. Link with an UI.")
+        DESCRIPTION "The actual simulator as a library. Link with an UI of your choice.")
 
 set(CMAKE_AUTOMOC ON)
 
@@ -70,28 +70,25 @@ set(qtmips_machine_TESTS
         )
 
 
-#find_package(ElfUtils REQUIRED)
-
 # Object library is preferred, because the library archive is never really
 # needed. This option skips the archive creation and links directly .o files.
 add_library(qtmips_machine OBJECT
         ${qtmips_machine_SOURCES} ${qtmips_machine_HEADERS})
-
-#target_precompile_headers(qtmips_machine
-#        PUBLIC ${qtmips_machine_HEADERS})
-
-target_link_libraries(qtmips_machine
-        PRIVATE Qt5::Core elf)
-
 target_include_directories(qtmips_machine
-        PRIVATE "${CMAKE_SOURCE_DIR}/external/libelf")
+        SYSTEM PUBLIC libelf)
+target_link_libraries(qtmips_machine
+        PRIVATE Qt5::Core
+        PUBLIC libelf)
 
-find_package(Qt5 COMPONENTS Test REQUIRED)
+if (NOT ${WASM})
+    target_precompile_headers(qtmips_machine
+            PUBLIC ${qtmips_machine_HEADERS})
 
-add_executable(qtmips_machine_unit_tests ${qtmips_machine_TESTS})
-target_link_libraries(qtmips_machine_unit_tests
-        PRIVATE qtmips_machine Qt5::Core Qt5::Test)
+    # Machine tests (not available on WASM)
+    add_executable(qtmips_machine_unit_tests ${qtmips_machine_TESTS})
+    target_link_libraries(qtmips_machine_unit_tests
+            PRIVATE qtmips_machine Qt5::Core Qt5::Test)
 
-add_test(NAME qtmips_machine_unit_tests
-        COMMAND qtmips_machine_unit_tests
-        )
+    add_test(NAME qtmips_machine_unit_tests
+            COMMAND qtmips_machine_unit_tests)
+endif ()

@@ -7,6 +7,7 @@
 #include "target_errno.h"
 
 #include <cerrno>
+#include <cinttypes>
 #include <cstdio>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -1099,9 +1100,10 @@ bool OsSyscallExceptionHandler::handle_exception(
 
 #if 1
     printf(
-        "Syscall %s number %d/0x%x a1 %ld a2 %ld a3 %ld a4 %ld\n", sdesc->name,
-        syscall_num, syscall_num, a1.as_u64(), a2.as_u64(), a3.as_u64(),
-        a4.as_u64());
+        "Syscall %s number %d/0x%x a1=%" PRIu64 " a2=%" PRIu64 " a3=%" PRIu64
+        " a4=%" PRIu64 "\n",
+        sdesc->name, syscall_num, syscall_num, a1.as_u64(), a2.as_u64(),
+        a3.as_u64(), a4.as_u64());
 
 #endif
     status = (this->*sdesc->handler)(
