@@ -67,6 +67,16 @@ FmeNode *FmeNode::child() {
     return nullptr;
 }
 
+FmeNode *FmeNode::find_last_child() {
+    FmeNode *current = this;
+    FmeNode *child = this->child();
+    while (child != nullptr) {
+        current = child;
+        child = child->child();
+    }
+    return current;
+}
+
 FmeNodeConstant::FmeNodeConstant(FmeValue value) : FmeNode(INT_MAX) {
     this->value = value;
 }
@@ -228,10 +238,7 @@ bool FmeExpression::parse(const QString &expression, QString &error) {
                 } else {
                     new_node = new FmeNodeSymbol(word);
                 }
-                FmeNode *node;
-                FmeNode *child;
-                for (node = this; (child = node->child()) != nullptr;
-                     node = child) {}
+                FmeNode *node = this->find_last_child();
                 ok = node->insert(new_node);
                 if (!ok) {
                     error = QString("parse stuck at \"%1\"").arg(word);

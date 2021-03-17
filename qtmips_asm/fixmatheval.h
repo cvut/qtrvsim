@@ -56,6 +56,7 @@ public:
     virtual bool insert(FmeNode *node);
     virtual FmeNode *child();
     virtual QString dump() = 0;
+    FmeNode *find_last_child();
     int priority() const;
 
 private:
