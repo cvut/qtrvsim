@@ -129,8 +129,7 @@ public:
     /**
      * @param associativity     degree of associativity
      */
-    explicit CachePolicyRAND(size_t associativity)
-        : associativity(associativity) {}
+    explicit CachePolicyRAND(size_t associativity);
 
     size_t select_way_to_evict(size_t row) const final;
 

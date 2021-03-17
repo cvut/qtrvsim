@@ -132,6 +132,15 @@ size_t CachePolicyLFU::select_way_to_evict(size_t row) const {
     return index;
 }
 
+CachePolicyRAND::CachePolicyRAND(size_t associativity)
+    : associativity(associativity) {
+    // Reset random generator to make result reproducible.
+    // Random is by default seeded by 1 (by cpp standard), so this makes it
+    // consistent across multiple runs.
+    // NOTE: Reproducibility applies only on the same execution environment.
+    std::srand(1); // NOLINT(cert-msc51-cpp)
+}
+
 void CachePolicyRAND::update_stats(size_t way, size_t row, bool is_valid) {
     UNUSED(way) UNUSED(row) UNUSED(is_valid)
 
