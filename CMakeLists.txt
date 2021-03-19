@@ -9,7 +9,14 @@ project(QtMips
 # =============================================================================
 
 set(FORCE_ELFLIB_STATIC false CACHE BOOL
-        "Use included statically linked libelf even if system one is available")
+        "Use included statically linked libelf even if system one is available.")
+set(SANITIZERS "address,undefined" CACHE STRING
+        "Runtime sanitizers to use in debug builds.
+        Column separated subset of {address, memory, undefined, thread} or none.
+        Memory and address cannot be used at the same time.")
+
+# Auto detected
+set(WASM ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
 
 # =============================================================================
 # CMake config and tools
@@ -28,6 +35,15 @@ endif ()
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if (NOT "${SANITIZERS}" MATCHES "none")
+    set(CMAKE_C_FLAGS_DEBUG
+            "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS} -g -g3 -ggdb")
+    set(CMAKE_CXX_FLAGS_DEBUG
+            "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS} -g -g3 -ggdb")
+    SET(CMAKE_LINKER_FLAGS_DEBUG
+            "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS}")
+endif ()
 
 include_directories("src" "src/machine")
 
@@ -49,12 +65,7 @@ endif ()
 # Dependencies
 # =============================================================================
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
-    ## ========================================================================
-    ## WASM
-    ## ========================================================================
-
-    set(WASM true) # Simplifies other WASM conditions.
+if ("${WASM}")
     message("WASM build...")
 
     # Path to WASM compiled Qt. Pass your value via CLI argument if it differs.
@@ -70,8 +81,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     add_link_options("SHELL:-s EXTRA_EXPORTED_RUNTIME_METHODS=[\"UTF16ToString\",\"stringToUTF16\"]")
     add_link_options("--bind")
 else ()
-    set(WASM false)
-
     # Not available for WASM
     enable_testing()
 
