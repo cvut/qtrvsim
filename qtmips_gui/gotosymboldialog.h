@@ -15,12 +15,12 @@ class GoToSymbolDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit GoToSymbolDialog(QWidget *parent, QStringList &symlist);
+    GoToSymbolDialog(QWidget *parent, const QStringList &symbol_names);
     ~GoToSymbolDialog() override;
 signals:
     void program_focus_addr(machine::Address);
     void memory_focus_addr(machine::Address);
-    bool obtain_value_for_name(uint32_t &value, QString name) const;
+    bool obtain_value_for_name(uint64_t &value, const QString &name) const;
 public slots:
     void show_prog();
     void show_mem();

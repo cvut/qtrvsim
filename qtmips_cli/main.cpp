@@ -52,6 +52,9 @@
 using namespace machine;
 using namespace std;
 
+using ae = machine::AccessEffects; // For enum values, type is obvious from
+                                   // context.
+
 void create_parser(QCommandLineParser &p) {
     p.setApplicationDescription("QtMips CLI machine simulator");
     p.addHelpOption();
@@ -324,8 +327,7 @@ void configure_reporter(
     }
 
     foreach (QString range_arg, p.values("dump-range")) {
-        uint32_t start;
-        uint32_t len;
+        uint64_t len;
         bool ok1 = true;
         bool ok2 = true;
         QString str;
@@ -340,10 +342,13 @@ void configure_reporter(
             exit(1);
         }
         str = range_arg.mid(0, comma1);
+        Address start;
         if (str.size() >= 1 && !str.at(0).isDigit() && symtab != nullptr) {
-            ok1 = symtab->name_to_value(start, str);
+            SymbolValue _start;
+            ok1 = symtab->name_to_value(_start, str);
+            start = Address(_start);
         } else {
-            start = str.toULong(&ok1, 0);
+            start = Address(str.toULong(&ok1, 0));
         }
         str = range_arg.mid(comma1 + 1, comma2 - comma1 - 1);
         if (str.size() >= 1 && !str.at(0).isDigit() && symtab != nullptr) {
@@ -373,7 +378,7 @@ void configure_serial_port(QCommandLineParser &p, SerialPort *ser_port) {
     siz = p.values("serial-in").size();
     if (siz >= 1) {
         QIODevice::OpenMode mode = QFile::ReadOnly;
-        QFile *qf = new QFile(p.values("serial-in").at(siz - 1));
+        auto *qf = new QFile(p.values("serial-in").at(siz - 1));
         ser_in = new CharIOHandler(qf, ser_port);
         siz = p.values("serial-out").size();
         if (siz) {
@@ -392,7 +397,7 @@ void configure_serial_port(QCommandLineParser &p, SerialPort *ser_port) {
     if (!ser_out) {
         siz = p.values("serial-out").size();
         if (siz >= 1) {
-            QFile *qf = new QFile(p.values("serial-out").at(siz - 1));
+            auto *qf = new QFile(p.values("serial-out").at(siz - 1));
             ser_out = new CharIOHandler(qf, ser_port);
             if (!ser_out->open(QFile::WriteOnly)) {
                 cout << "Serial port output file cannot be open for write."
@@ -423,7 +428,6 @@ void configure_serial_port(QCommandLineParser &p, SerialPort *ser_port) {
 
 void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
     foreach (QString range_arg, ranges) {
-        uint32_t start;
         bool ok = true;
         QString str;
         int comma1 = range_arg.indexOf(",");
@@ -432,11 +436,14 @@ void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
             exit(1);
         }
         str = range_arg.mid(0, comma1);
+        Address start;
         if (str.size() >= 1 && !str.at(0).isDigit()
             && machine.symbol_table() != nullptr) {
-            ok = machine.symbol_table()->name_to_value(start, str);
+            SymbolValue _start;
+            ok = machine.symbol_table()->name_to_value(_start, str);
+            start = Address(_start);
         } else {
-            start = str.toULong(&ok, 0);
+            start = Address(str.toULong(&ok, 0));
         }
         if (!ok) {
             cout << "Range start/length specification error." << endl;
@@ -444,7 +451,7 @@ void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
         }
         ifstream in;
         uint32_t val;
-        uint32_t addr = start;
+        Address addr = start;
         in.open(range_arg.mid(comma1 + 1).toLocal8Bit().data(), ios::in);
         start = start & ~3;
         for (std::string line; getline(in, line);) {
@@ -461,8 +468,7 @@ void load_ranges(QtMipsMachine &machine, const QStringList &ranges) {
                 cout << "cannot parse load range data." << endl;
                 exit(1);
             }
-            machine.memory_data_bus_rw()->write_u32(
-                Address(addr), val, machine::AccessEffects::INTERNAL);
+            machine.memory_data_bus_rw()->write_u32(addr, val, ae::INTERNAL);
             addr += 4;
         }
         in.close();
@@ -483,7 +489,7 @@ bool assemble(QtMipsMachine &machine, MsgReport &msgrep, QString filename) {
 
     sasm.setup(mem, &symtab, 0x80020000_addr);
 
-    if (!sasm.process_file(std::move(filename))) {
+    if (!sasm.process_file(filename)) {
         return false;
     }
 

@@ -41,57 +41,54 @@ using namespace machine;
 
 SymbolTableEntry::SymbolTableEntry(
     QString name,
-    uint32_t value,
-    uint32_t size,
-    unsigned char info,
-    unsigned char other) {
-    this->name = std::move(name);
-    this->value = value;
-    this->size = size;
-    this->info = info;
-    this->other = other;
-}
+    SymbolValue value,
+    SymbolSize size,
+    SymbolInfo info,
+    SymbolOther other)
+    : name(std::move(name))
+    , value(value)
+    , size(size)
+    , info(info)
+    , other(other) {}
 
 SymbolTable::SymbolTable(QObject *parent)
     : QObject(parent)
-    , map_value_to_symbol()
-    , map_name_to_symbol() {
-}
+    , map_name_to_symbol()
+    , map_value_to_symbol() {}
 
 SymbolTable::~SymbolTable() {
-    while (!map_value_to_symbol.isEmpty()) {
-        SymbolTableEntry *p_ste = map_value_to_symbol.first();
-        p_ste = map_value_to_symbol.take(p_ste->value);
-        map_name_to_symbol.remove(p_ste->name);
-        delete p_ste;
+    map_name_to_symbol.clear(); // Does not own data.
+    auto iter = map_value_to_symbol.begin();
+    while (iter != map_value_to_symbol.end()) {
+        const SymbolTableEntry *p_entry = iter.value();
+        iter = map_value_to_symbol .erase(iter); // Advances iterator.
+        delete p_entry;
     }
 }
 
 void SymbolTable::add_symbol(
     const QString &name,
-    uint32_t value,
+    SymbolValue value,
     uint32_t size,
     unsigned char info,
     unsigned char other) {
-    SymbolTableEntry *p_ste
-        = new SymbolTableEntry(name, value, size, info, other);
-    map_value_to_symbol.insert(value, p_ste);
-    map_name_to_symbol.insert(name, p_ste);
+    auto *p_entry = new SymbolTableEntry(name, value, size, info, other);
+    map_value_to_symbol.insert(value, p_entry);
+    map_name_to_symbol.insert(name, p_entry);
 }
 
 void SymbolTable::remove_symbol(const QString &name) {
-    SymbolTableEntry *p_ste = map_name_to_symbol.value(name);
-    if (p_ste == nullptr) {
+    auto *p_entry = map_name_to_symbol.take(name);
+    if (p_entry == nullptr) {
         return;
     }
-    map_name_to_symbol.remove(name);
-    map_value_to_symbol.remove(p_ste->value, p_ste);
-    delete p_ste;
+    map_value_to_symbol.remove(p_entry->value, p_entry);
+    delete p_entry;
 }
 
 void SymbolTable::set_symbol(
     const QString &name,
-    uint32_t value,
+    SymbolValue value,
     uint32_t size,
     unsigned char info,
     unsigned char other) {
@@ -99,33 +96,28 @@ void SymbolTable::set_symbol(
     add_symbol(name, value, size, info, other);
 }
 
-bool SymbolTable::name_to_value(uint32_t &value, const QString &name) const {
-    SymbolTableEntry *p_ste = map_name_to_symbol.value(name);
-    if (p_ste == nullptr) {
+// TODO cpp17 - return optional
+bool SymbolTable::name_to_value(SymbolValue &value, const QString &name) const {
+    auto *p_entry = map_name_to_symbol.value(name);
+    if (p_entry == nullptr) {
         value = 0;
         return false;
     }
-    value = p_ste->value;
+    value = p_entry->value;
     return true;
 }
 
-bool SymbolTable::value_to_name(QString &name, uint32_t value) const {
-    SymbolTableEntry *p_ste = map_value_to_symbol.value(value);
-    if (p_ste == nullptr) {
+// TODO cpp17 - return optional
+bool SymbolTable::location_to_name(QString &name, SymbolValue value) const {
+    auto *p_entry = map_value_to_symbol.value(value);
+    if (p_entry == nullptr) {
         name = "";
         return false;
     }
-    name = p_ste->name;
+    name = p_entry->name;
     return true;
 }
 
-QStringList *SymbolTable::names() const {
-    auto *l = new QStringList();
-
-    auto i = map_name_to_symbol.begin();
-    while (i != map_name_to_symbol.end()) {
-        l->append(i.value()->name);
-        i++;
-    }
-    return l;
+QStringList SymbolTable::names() const {
+    return map_name_to_symbol.keys();
 }

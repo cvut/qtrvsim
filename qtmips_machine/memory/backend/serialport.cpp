@@ -39,6 +39,9 @@
 
 #include "memory/endian.h"
 
+using ae = machine::AccessEffects; // For enum values, type is obvious from
+                                   // context.
+
 namespace machine {
 
 constexpr Offset SERP_RX_ST_REG_o = 0x00u;

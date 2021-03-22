@@ -500,9 +500,8 @@ void MainWindow::show_symbol_dialog() {
     if (machine == nullptr || machine->symbol_table() == nullptr) {
         return;
     }
-    QStringList *symnames = machine->symbol_table()->names();
-    GoToSymbolDialog *gotosyboldialog = new GoToSymbolDialog(this, *symnames);
-    delete symnames;
+    QStringList symbol_names = machine->symbol_table()->names();
+    auto *gotosyboldialog = new GoToSymbolDialog(this, symbol_names);
     connect(
         gotosyboldialog, &GoToSymbolDialog::program_focus_addr, program,
         &ProgramDock::focus_addr_with_save);
@@ -1025,7 +1024,7 @@ void MainWindow::message_selected(
 }
 
 bool SimpleAsmWithEditorCheck::process_file(
-    QString filename,
+    const QString &filename,
     QString *error_ptr) {
     SrcEditor *editor = mainwindow->source_editor_for_file(filename, false);
     if (editor == nullptr) {
@@ -1043,7 +1042,7 @@ bool SimpleAsmWithEditorCheck::process_file(
 
 bool SimpleAsmWithEditorCheck::process_pragma(
     QStringList &operands,
-    QString filename,
+    const QString &filename,
     int line_number,
     QString *error_ptr) {
     (void)error_ptr;

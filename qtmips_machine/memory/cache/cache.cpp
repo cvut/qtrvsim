@@ -39,6 +39,9 @@
 
 #include "memory/cache/cache_types.h"
 
+using ae = machine::AccessEffects; // For enum values, type is obvious from
+                                   // context.
+
 namespace machine {
 
 Cache::Cache(
@@ -271,7 +274,8 @@ bool Cache::access(
 
         mem->read(
             cd.data.data(), calc_base_address(loc.tag, loc.row),
-            cache_config.block_size() * BLOCK_ITEM_SIZE, { .type = ae::REGULAR });
+            cache_config.block_size() * BLOCK_ITEM_SIZE,
+            { .type = ae::REGULAR });
 
         cd.valid = true;
         cd.dirty = false;

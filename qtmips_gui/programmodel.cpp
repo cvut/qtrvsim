@@ -38,6 +38,9 @@
 #include <QBrush>
 #include <QtGui/qbrush.h>
 
+using ae = machine::AccessEffects; // For enum values, type is obvious from
+                                   // context.
+
 ProgramModel::ProgramModel(QObject *parent)
     : Super(parent)
     , data_font("Monospace") {

@@ -44,19 +44,24 @@
 #include <QString>
 #include <QStringList>
 
+using machine::SymbolInfo;
+using machine::SymbolOther;
+using machine::SymbolSize;
+using machine::SymbolValue;
+
 class SymbolTableDb : public fixmatheval::FmeSymbolDb {
 public:
-    explicit SymbolTableDb(machine::SymbolTable *symtab);
+    explicit SymbolTableDb(machine::SymbolTable *symbol_table);
     bool getValue(fixmatheval::FmeValue &value, QString name) override;
     void setSymbol(
         const QString &name,
-        uint32_t value,
-        uint32_t size,
-        unsigned char info = 0,
-        unsigned char other = 0);
+        SymbolValue value,
+        SymbolSize size,
+        SymbolInfo info = 0,
+        SymbolOther other = 0);
 
 private:
-    machine::SymbolTable *symtab;
+    machine::SymbolTable *symbol_table;
 };
 
 class SimpleAsm : public QObject {
@@ -90,13 +95,14 @@ public:
         const QString &filename = "",
         int line_number = 0,
         QString *error_ptr = nullptr);
-    virtual bool process_file(QString filename, QString *error_ptr = nullptr);
+    virtual bool
+    process_file(const QString &filename, QString *error_ptr = nullptr);
     bool finish(QString *error_ptr = nullptr);
 
 protected:
     virtual bool process_pragma(
         QStringList &operands,
-        QString filename = "",
+        const QString &filename = "",
         int line_number = 0,
         QString *error_ptr = nullptr);
     bool error_occured {};

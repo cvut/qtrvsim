@@ -37,6 +37,9 @@
 
 #include <QBrush>
 
+using ae = machine::AccessEffects; // For enum values, type is obvious from
+                                   // context.
+
 MemoryModel::MemoryModel(QObject *parent)
     : Super(parent)
     , data_font("Monospace") {

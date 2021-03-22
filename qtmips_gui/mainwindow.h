@@ -191,14 +191,14 @@ class SimpleAsmWithEditorCheck : public SimpleAsm {
 public:
     SimpleAsmWithEditorCheck(MainWindow *a_mainwindow, QObject *parent = nullptr)
         : Super(parent)
-        , mainwindow(a_mainwindow) {
-    }
-    bool process_file(QString filename, QString *error_ptr = nullptr) override;
+        , mainwindow(a_mainwindow) {}
+    bool process_file(const QString &filename, QString *error_ptr = nullptr)
+        override;
 
 protected:
     bool process_pragma(
         QStringList &operands,
-        QString filename = "",
+        const QString &filename = "",
         int line_number = 0,
         QString *error_ptr = nullptr) override;
 

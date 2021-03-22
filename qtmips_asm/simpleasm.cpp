@@ -47,14 +47,16 @@
 
 using namespace fixmatheval;
 using machine::Address;
+using ae = machine::AccessEffects; // For enum values, type is obvious from
+                                   // context.
 
-SymbolTableDb::SymbolTableDb(machine::SymbolTable *symtab) {
-    this->symtab = symtab;
+SymbolTableDb::SymbolTableDb(machine::SymbolTable *symbol_table) {
+    this->symbol_table = symbol_table;
 }
 
 bool SymbolTableDb::getValue(fixmatheval::FmeValue &value, QString name) {
-    uint32_t val;
-    if (!symtab->name_to_value(val, name)) {
+    SymbolValue val;
+    if (!symbol_table->name_to_value(val, name)) {
         return false;
     }
     value = val;
@@ -63,11 +65,11 @@ bool SymbolTableDb::getValue(fixmatheval::FmeValue &value, QString name) {
 
 void SymbolTableDb::setSymbol(
     const QString &name,
-    uint32_t value,
-    uint32_t size,
-    unsigned char info,
-    unsigned char other) {
-    symtab->set_symbol(name, value, size, info, other);
+    SymbolValue value,
+    SymbolSize size,
+    SymbolInfo info,
+    SymbolOther other) {
+    symbol_table->set_symbol(name, value, size, info, other);
 }
 
 uint64_t
@@ -665,7 +667,7 @@ bool SimpleAsm::process_line(
     return true;
 }
 
-bool SimpleAsm::process_file(QString filename, QString *error_ptr) {
+bool SimpleAsm::process_file(const QString &filename, QString *error_ptr) {
     QString error;
     bool res = true;
     QFile srcfile(filename);
@@ -702,8 +704,9 @@ bool SimpleAsm::finish(QString *error_ptr) {
                       .arg(error, QString::number(r->line), expression.dump());
             emit report_message(
                 messagetype::MSG_ERROR, r->filename, r->line, 0, error, "");
-            if (error_ptr != nullptr && !error_reported)
+            if (error_ptr != nullptr && !error_reported) {
                 *error_ptr = error;
+            }
             error_occured = true;
             error_reported = true;
         } else {
@@ -716,8 +719,9 @@ bool SimpleAsm::finish(QString *error_ptr) {
                                 expression.dump());
                 emit report_message(
                     messagetype::MSG_ERROR, r->filename, r->line, 0, error, "");
-                if (error_ptr != nullptr && !error_reported)
+                if (error_ptr != nullptr && !error_reported) {
                     *error_ptr = error;
+                }
                 error_occured = true;
                 error_reported = true;
             } else {
@@ -738,10 +742,12 @@ bool SimpleAsm::finish(QString *error_ptr) {
                     emit report_message(
                         messagetype::MSG_ERROR, r->filename, r->line, 0, error,
                         "");
-                    if (error_ptr != nullptr && !error_reported)
+                    if (error_ptr != nullptr && !error_reported) {
                         *error_ptr = error;
+                    }
                     error_occured = true;
                     error_reported = true;
+                    // Remove address
                 }
                 if (!fatal_occured) {
                     mem->write_u32(
@@ -762,7 +768,7 @@ bool SimpleAsm::finish(QString *error_ptr) {
 
 bool SimpleAsm::process_pragma(
     QStringList &operands,
-    QString filename,
+    const QString &filename,
     int line_number,
     QString *error_ptr) {
     (void)operands;

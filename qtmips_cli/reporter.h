@@ -43,8 +43,11 @@
 #include <QString>
 #include <QVector>
 
+using machine::Address;
+
 class Reporter : public QObject {
     Q_OBJECT
+
 public:
     Reporter(QCoreApplication *app, machine::QtMipsMachine *machine);
 
@@ -63,11 +66,12 @@ public:
     void expect_fail(enum FailReason reason);
 
     struct DumpRange {
-        uint32_t start;
-        uint32_t len;
-        QString fname;
+        Address start;
+        size_t len;
+        /** Path to file, where this range will be dumped. */
+        QString path_to_write;
     };
-    void add_dump_range(uint32_t start, uint32_t len, const QString &fname);
+    void add_dump_range(Address start, size_t len, const QString &path_to_write);
 
 private slots:
     void machine_exit();
@@ -88,3 +92,4 @@ private:
 };
 
 #endif // REPORTER_H
+
