@@ -106,6 +106,7 @@ find_package(Qt5 COMPONENTS Core Widgets Gui Test REQUIRED)
 # Sources
 # =============================================================================
 
+add_subdirectory("src/common")
 add_subdirectory("src/machine")
 add_subdirectory("src/assembler")
 add_subdirectory("src/os_emulation")
