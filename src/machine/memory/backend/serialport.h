@@ -1,6 +1,7 @@
 #ifndef SERIALPORT_H
 #define SERIALPORT_H
 
+#include "common/endian.h"
 #include "memory/backend/backend_memory.h"
 #include "memory/backend/peripheral.h"
 #include "simulator_exception.h"

@@ -1,5 +1,7 @@
 #include "memory/backend/peripheral.h"
 
+#include "common/endian.h"
+
 using namespace machine;
 
 SimplePeripheral::SimplePeripheral(Endian simulated_machine_endian)

@@ -43,7 +43,6 @@ set(qtmips_machine_HEADERS
         memory/cache/cache.h
         memory/cache/cache_policy.h
         memory/cache/cache_types.h
-        memory/endian.h
         memory/frontend_memory.h
         memory/memory_bus.h
         memory/memory_utils.h
@@ -73,9 +72,8 @@ set(qtmips_machine_TESTS
 # Object library is preferred, because the library archive is never really
 # needed. This option skips the archive creation and links directly .o files.
 add_library(qtmips_machine OBJECT
-        ${qtmips_machine_SOURCES} ${qtmips_machine_HEADERS})
-target_include_directories(qtmips_machine
-        SYSTEM PUBLIC libelf)
+        ${qtmips_machine_SOURCES}
+        ${qtmips_machine_HEADERS})
 target_link_libraries(qtmips_machine
         PRIVATE Qt5::Core
         PUBLIC libelf)

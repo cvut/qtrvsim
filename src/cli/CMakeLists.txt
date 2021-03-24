@@ -16,5 +16,8 @@ set(qtmips_cli_HEADERS
         tracer.h
         )
 
-add_executable(qtmips_cli ${qtmips_cli_SOURCES} ${qtmips_cli_HEADERS})
-target_link_libraries(qtmips_cli Qt5::Core qtmips_machine qtmips_asm)
+add_executable(qtmips_cli
+        ${qtmips_cli_SOURCES}
+        ${qtmips_cli_HEADERS})
+target_link_libraries(qtmips_cli
+        PRIVATE Qt5::Core qtmips_machine qtmips_asm)

@@ -72,7 +72,9 @@ set(libelf_HEADERS
         sys_elf.h
         )
 
-add_library(libelf STATIC ${libelf_HEADERS} ${libelf_SOURCES})
+add_library(libelf STATIC
+        ${libelf_HEADERS}
+        ${libelf_SOURCES})
 # This is 3rd party code, I do not intend to fix it.
 target_compile_options(libelf PRIVATE -w)
 target_include_directories(libelf PUBLIC .)

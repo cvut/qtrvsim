@@ -1,6 +1,7 @@
 #ifndef PROGRAM_H
 #define PROGRAM_H
 
+#include "common/endian.h"
 #include "memory/backend/memory.h"
 #include "symboltable.h"
 

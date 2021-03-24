@@ -1,6 +1,7 @@
 #ifndef PERIPSPILED_H
 #define PERIPSPILED_H
 
+#include "common/endian.h"
 #include "machinedefs.h"
 #include "memory/backend/backend_memory.h"
 #include "memory/memory_utils.h"

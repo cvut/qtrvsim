@@ -1,5 +1,7 @@
 #include "lcddisplay.h"
 
+#include "common/endian.h"
+
 #ifdef DEBUG_LCD
     #undef DEBUG_LCD
     #define DEBUG_LCD true

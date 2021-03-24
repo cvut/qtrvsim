@@ -1,6 +1,7 @@
 #ifndef MACHINE_MEMORY_H
 #define MACHINE_MEMORY_H
 
+#include "common/endian.h"
 #include "machinedefs.h"
 #include "memory/address.h"
 #include "memory/backend/backend_memory.h"

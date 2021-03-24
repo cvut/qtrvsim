@@ -1,5 +1,7 @@
 #include "machineconfig.h"
 
+#include "common/endian.h"
+
 #include <QMap>
 #include <utility>
 

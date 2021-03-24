@@ -1,11 +1,11 @@
 #ifndef MEMORY_BUS_H
 #define MEMORY_BUS_H
 
+#include "common/endian.h"
 #include "machinedefs.h"
 #include "memory/backend/backend_memory.h"
 #include "memory/frontend_memory.h"
 #include "simulator_exception.h"
-#include "memory/endian.h"
 #include "utils.h"
 
 #include <QMultiMap>

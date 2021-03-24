@@ -1,6 +1,7 @@
 #ifndef LCDDISPLAY_H
 #define LCDDISPLAY_H
 
+#include "common/endian.h"
 #include "machinedefs.h"
 #include "memory/backend/backend_memory.h"
 #include "simulator_exception.h"

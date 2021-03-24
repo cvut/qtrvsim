@@ -1,6 +1,7 @@
 #ifndef CACHEVIEW_H
 #define CACHEVIEW_H
 
+#include "common/endian.h"
 #include "graphicsview.h"
 #include "machine/machine.h"
 
@@ -63,7 +64,7 @@ private slots:
         bool write);
 
 private:
-    const machine::Endian simulated_machine_endian;
+    const Endian simulated_machine_endian;
     bool islast;
     unsigned block;
     unsigned rows, columns;

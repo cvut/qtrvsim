@@ -1,6 +1,6 @@
 #include "memory/backend/serialport.h"
 
-#include "memory/endian.h"
+#include "common/endian.h"
 
 using ae = machine::AccessEffects; // For enum values, type is obvious from
                                    // context.

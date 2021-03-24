@@ -1,5 +1,7 @@
 #include "memory/frontend_memory.h"
 
+#include "common/endian.h"
+
 namespace machine {
 
 bool FrontendMemory::write_u8(

@@ -1,7 +1,7 @@
 #ifndef INTEGER_DECOMPOSITION_H
 #define INTEGER_DECOMPOSITION_H
 
-#include "machine/memory/endian.h"
+#include "common/endian.h"
 
 #include <array>
 #include <cstdint>

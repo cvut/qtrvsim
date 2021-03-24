@@ -2,12 +2,16 @@ project(polyfills
         DESCRIPTION "Helper code to unify access to compiler intrinsics and
                      provide fallback implementations.")
 
+set(polyfills_HEADERS
+        endian_detection.h
+        byteswap.h
+        )
+
 # =============================================================================
 # Target for usage of this header library
+# - this is header only library and it is implicitly available in the whole
+#   project
 # =============================================================================
-
-add_library(polyfills INTERFACE)
-target_include_directories(polyfills INTERFACE .)
 
 # =============================================================================
 # Tests

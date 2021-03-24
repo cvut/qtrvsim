@@ -12,5 +12,8 @@ set(qtmips_osemu_HEADERS
         target_errno.h
         )
 
-add_library(qtmips_osemu OBJECT ${qtmips_osemu_SOURCES} ${qtmips_osemu_HEADERS})
-target_link_libraries(qtmips_osemu PRIVATE Qt5::Core)
+add_library(qtmips_osemu OBJECT
+        ${qtmips_osemu_SOURCES}
+        ${qtmips_osemu_HEADERS})
+target_link_libraries(qtmips_osemu
+        PRIVATE Qt5::Core)

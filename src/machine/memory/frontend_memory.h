@@ -1,9 +1,9 @@
 #ifndef FRONTEND_MEMORY_H
 #define FRONTEND_MEMORY_H
 
+#include "common/endian.h"
 #include "machinedefs.h"
 #include "memory/address.h"
-#include "memory/endian.h"
 #include "memory/memory_utils.h"
 #include "register_value.h"
 #include "simulator_exception.h"

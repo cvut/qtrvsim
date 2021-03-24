@@ -1,5 +1,6 @@
 #include "programloader.h"
 
+#include "common/endian.h"
 #include "simulator_exception.h"
 
 #include <cerrno>

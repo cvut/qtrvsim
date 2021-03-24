@@ -138,4 +138,4 @@ add_executable(qtmips_gui
 target_include_directories(qtmips_gui PUBLIC . coreview)
 target_link_libraries(qtmips_gui
         PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui
-        qtmips_machine qtmips_osemu qtmips_asm)
+        PRIVATE qtmips_machine qtmips_osemu qtmips_asm)

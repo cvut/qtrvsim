@@ -12,5 +12,8 @@ set(qtmips_asm_HEADERS
         simpleasm.h
         )
 
-add_library(qtmips_asm ${qtmips_asm_SOURCES} ${qtmips_asm_HEADERS})
-target_link_libraries(qtmips_asm Qt5::Core)
+add_library(qtmips_asm
+        ${qtmips_asm_SOURCES}
+        ${qtmips_asm_HEADERS})
+target_link_libraries(qtmips_asm
+        PRIVATE Qt5::Core)

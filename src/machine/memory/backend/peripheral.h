@@ -1,6 +1,7 @@
 #ifndef PERIPHERAL_H
 #define PERIPHERAL_H
 
+#include "common/endian.h"
 #include "machinedefs.h"
 #include "memory/backend/backend_memory.h"
 #include "memory/backend/memory.h"

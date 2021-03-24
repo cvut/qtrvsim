@@ -1,3 +1,4 @@
+#include "common/endian.h"
 #include "machine/machinedefs.h"
 #include "machine/memory/backend/memory.h"
 #include "machine/memory/memory_bus.h"
