@@ -4,7 +4,7 @@ project(machine
 set(CMAKE_AUTOMOC ON)
 
 set(machine_SOURCES
-        alu.cpp
+        execute/alu.cpp
         cop0state.cpp
         core.cpp
         instruction.cpp
@@ -26,7 +26,7 @@ set(machine_SOURCES
         )
 
 set(machine_HEADERS
-        alu.h
+        execute/alu.h
         cop0state.h
         core.h
         instruction.h

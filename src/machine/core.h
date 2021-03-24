@@ -1,8 +1,8 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include "alu.h"
 #include "cop0state.h"
+#include "execute/alu.h"
 #include "instruction.h"
 #include "machineconfig.h"
 #include "memory/address.h"

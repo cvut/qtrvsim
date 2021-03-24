@@ -1,4 +1,4 @@
-#include "machine/alu.h"
+#include "machine/execute/alu.h"
 #include "machine/simulator_exception.h"
 #include "tst_machine.h"
 

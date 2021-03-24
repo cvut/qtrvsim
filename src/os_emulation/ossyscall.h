@@ -1,8 +1,8 @@
 #ifndef OSSYCALL_H
 #define OSSYCALL_H
 
-#include "machine/alu.h"
 #include "machine/core.h"
+#include "machine/execute/alu.h"
 #include "machine/instruction.h"
 #include "machine/machineconfig.h"
 #include "machine/memory/backend/memory.h"
