@@ -64,7 +64,7 @@ if(MSVC)
 else()
 	add_compile_options(-Wall -Wextra)
 	if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-		# This is currently a wontfix and it will be OK in cpp20.
+		# This is currently a wont-fix and it will be OK in cpp20.
 		add_compile_options(-Wno-c99-designator)
 	endif()
 endif()
@@ -74,7 +74,7 @@ endif()
 # =============================================================================
 
 if("${WASM}")
-	message(STATUS "WASM build...")
+	message(STATUS "WASM build detected")
 
 	# Path to WASM compiled Qt. Pass your value via CLI argument if it differs.
 	set(CMAKE_FIND_ROOT_PATH "/opt/qt5-wasm" CACHE STRING "WASM QT DIR")
@@ -99,6 +99,7 @@ else()
 			add_library(libelf INTERFACE)
 			target_link_libraries(libelf INTERFACE ${LIBELF_LIBRARY})
 			target_include_directories(libelf INTERFACE ${LIBELF_INCLUDE})
+			message(STATUS "Using system libelf")
 		endif()
 	endif()
 endif()
@@ -108,10 +109,12 @@ if("${WASM}" OR "${FORCE_ELFLIB_STATIC}" OR NOT "${LibElf_FOUND}")
 	add_subdirectory("external/libelf")
 endif()
 
-find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
-if(NOT "${WASM}")
-	find_package(Qt5 COMPONENTS Test REQUIRED)
-endif()
+find_package(Qt5
+             REQUIRED COMPONENTS Core Widgets Gui Test
+             OPTIONAL_COMPONENTS PrintSupport)
+
+message(STATUS "Qt5 version: ${Qt5Core_VERSION}")
+message(STATUS "Qt5 print support: ${Qt5PrintSupport_FOUND}")
 
 add_subdirectory("external/svgscene")
 

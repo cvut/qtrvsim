@@ -124,8 +124,9 @@ set(gui_RESOURCES
         samples.qrc
         )
 
-if ("${CMAKE_SYSTEM_NAME}" MATCHES "Emscripten")
-    message("gui :: Including WASM only files.")
+
+if ("${WASM}")
+    message(STATUS "gui :: Including WASM only files.")
     list(APPEND gui_SOURCES qhtml5file_html5.cpp)
     list(APPEND gui_HEADERS qhtml5file.h)
 endif ()
@@ -147,3 +148,8 @@ target_include_directories(gui PUBLIC . coreview)
 target_link_libraries(gui
         PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui
         PRIVATE machine os_emulation assembler)
+
+if(${Qt5PrintSupport_FOUND})
+    target_link_libraries(gui PRIVATE Qt5::PrintSupport)
+    target_compile_definitions(gui PRIVATE WITH_PRINTING=1)
+endif()
