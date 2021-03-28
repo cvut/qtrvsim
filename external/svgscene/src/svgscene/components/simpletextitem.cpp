@@ -4,8 +4,7 @@
 
 namespace svgscene {
 
-SimpleTextItem::SimpleTextItem(const CssAttributes &css, QGraphicsItem *parent)
-    : Super(parent) {
+SimpleTextItem::SimpleTextItem(const CssAttributes &css, QGraphicsItem *parent) : Super(parent) {
     const QString anchor = css.value(QStringLiteral("text-anchor"));
     if (anchor == QLatin1String("middle"))
         m_alignment = Qt::AlignHCenter;
@@ -15,7 +14,7 @@ SimpleTextItem::SimpleTextItem(const CssAttributes &css, QGraphicsItem *parent)
         m_alignment = Qt::AlignLeft;
 }
 
-void SimpleTextItem::setText(const QString& text) {
+void SimpleTextItem::setText(const QString &text) {
     if (!m_origTransformLoaded) {
         m_origTransformLoaded = true;
         m_origTransform = transform();

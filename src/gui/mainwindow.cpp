@@ -8,7 +8,6 @@
 #include "assembler/fixmatheval.h"
 #include "assembler/simpleasm.h"
 #include "extprocess.h"
-#include "fontsize.h"
 #include "gotosymboldialog.h"
 #include "mainwindow.h"
 #include "os_emulation/ossyscall.h"
@@ -20,7 +19,6 @@
 #include <QMessageBox>
 #include <QMetaObject>
 #include <QTextDocument>
-#include <iostream>
 
 #ifdef __EMSCRIPTEN__
     #include "qhtml5file.h"
@@ -87,9 +85,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(
         ui->actionNewMachine, &QAction::triggered, this,
         &MainWindow::new_machine);
-    connect(
-        ui->actionReload, &QAction::triggered, this,
-        std::bind(&MainWindow::machine_reload, this, false, false));
+    connect(ui->actionReload, &QAction::triggered, this, [this] { machine_reload(false, false); });
     connect(
         ui->actionPrint, &QAction::triggered, this, &MainWindow::print_action);
     connect(ui->actionNew, &QAction::triggered, this, &MainWindow::new_source);
@@ -281,8 +277,7 @@ void MainWindow::create_core(
     bool load_executable,
     bool keep_memory) {
     // Create machine
-    machine::Machine *new_machine
-        = new machine::Machine(config, true, load_executable);
+    auto *new_machine = new machine::Machine(config, true, load_executable);
 
     if (keep_memory && (machine != nullptr)) {
         new_machine->memory_rw()->reset(*machine->memory());
@@ -300,10 +295,9 @@ void MainWindow::create_core(
     set_speed(); // Update machine speed to current settings
 
     if (config.osemu_enable()) {
-        osemu::OsSyscallExceptionHandler *osemu_handler
-            = new osemu::OsSyscallExceptionHandler(
-                config.osemu_known_syscall_stop(),
-                config.osemu_unknown_syscall_stop(), config.osemu_fs_root());
+        auto *osemu_handler = new osemu::OsSyscallExceptionHandler(
+            config.osemu_known_syscall_stop(), config.osemu_unknown_syscall_stop(),
+            config.osemu_fs_root());
         machine->register_exception_handler(
             machine::EXCAUSE_SYSCALL, osemu_handler);
         connect(
@@ -412,6 +406,17 @@ void MainWindow::print_action() {
     printer.setColorMode(QPrinter::Color);
     QPrintDialog print_dialog(&printer, this);
     if (print_dialog.exec() == QDialog::Accepted) {
+        // This vector pre-drawing step is required because Qt fallbacks to
+        // bitmap and produces extremely large and slow to render files.
+        // (https://forum.qt.io/topic/21330/printing-widgets-not-as-bitmap-but-in-a-vector-based-format/3)
+        QPicture scene_as_vector;
+        {
+            QPainter painter(&scene_as_vector);
+            corescene->render(&painter);
+            painter.end();
+        }
+
+        // Prepare printer for PDF printing with appropriate resize.
         QRectF scene_rect = corescene->sceneRect();
         if (printer.outputFormat() == QPrinter::PdfFormat
             && (scene_rect.height() != 0)) {
@@ -434,11 +439,22 @@ void MainWindow::print_action() {
             layout.setPageSize(pagesize, layout.margins());
             printer.setPageLayout(layout);
         }
+
         QPainter painter(&printer);
-        QRectF target_rect = painter.viewport();
-        corescene->render(
-            &painter, target_rect, scene_rect, Qt::KeepAspectRatio);
+        painter.drawPicture(0, 0, scene_as_vector);
+        painter.end();
     }
+#else
+    QMessageBox msgBox;
+    msgBox.setText("Printing is not supported.");
+    msgBox.setInformativeText("The simulator was compiled without printing support.\n"
+                              "If you compiled the simulator yourself, make sure that the Qt "
+                              "print support library is present.\n"
+                              "Otherwise report this to the executable provider (probably your "
+                              "teacher).");
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    msgBox.exec();
 #endif // WITH_PRINTING
 }
 
@@ -485,7 +501,7 @@ void MainWindow::show_symbol_dialog() {
 }
 
 void MainWindow::about_program() {
-    AboutDialog *aboutdialog = new AboutDialog(this);
+    auto *aboutdialog = new AboutDialog(this);
     aboutdialog->show();
 }
 
@@ -498,18 +514,19 @@ void MainWindow::set_speed() {
         return; // just ignore
     }
 
-    if (ui->ips1->isChecked())
+    if (ui->ips1->isChecked()) {
         machine->set_speed(1000);
-    else if (ui->ips2->isChecked())
+    } else if (ui->ips2->isChecked()) {
         machine->set_speed(500);
-    else if (ui->ips5->isChecked())
+    } else if (ui->ips5->isChecked()) {
         machine->set_speed(200);
-    else if (ui->ips10->isChecked())
+    } else if (ui->ips10->isChecked()) {
         machine->set_speed(100);
-    else if (ui->ipsMax->isChecked())
+    } else if (ui->ipsMax->isChecked()) {
         machine->set_speed(0, 100);
-    else
+    } else {
         machine->set_speed(0);
+    }
 }
 
 void MainWindow::view_mnemonics_registers(bool enable) {
@@ -528,7 +545,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     QStringList list;
     if (modified_file_list(list, true) && !ignore_unsaved) {
         event->ignore();
-        SaveChnagedDialog *dialog = new SaveChnagedDialog(list, this);
+        auto *dialog = new SaveChnagedDialog(list, this);
         int id = qMetaTypeId<QStringList>();
         if (!QMetaType::isRegistered(id)) {
             qRegisterMetaType<QStringList>();
@@ -562,7 +579,7 @@ void MainWindow::save_exit_or_ignore(bool cancel, const QStringList &tosavelist)
     if (save_unnamed && (central_window != nullptr)) {
         for (int i = 0; i < central_window->count(); i++) {
             QWidget *w = central_window->widget(i);
-            SrcEditor *editor = dynamic_cast<SrcEditor *>(w);
+            auto *editor = dynamic_cast<SrcEditor *>(w);
             if (editor == nullptr) {
                 continue;
             }
@@ -662,7 +679,7 @@ void MainWindow::tab_widget_destroyed(QObject *obj) {
 
 void MainWindow::central_tab_changed(int index) {
     QWidget *widget = central_window->widget(index);
-    SrcEditor *srceditor = dynamic_cast<SrcEditor *>(widget);
+    auto *srceditor = dynamic_cast<SrcEditor *>(widget);
     if (srceditor != nullptr) {
         setCurrentSrcEditor(srceditor);
     }
@@ -682,7 +699,7 @@ void MainWindow::update_open_file_list() {
     }
     for (int i = 0; i < central_window->count(); i++) {
         QWidget *w = central_window->widget(i);
-        SrcEditor *editor = dynamic_cast<SrcEditor *>(w);
+        auto *editor = dynamic_cast<SrcEditor *>(w);
         if (editor == nullptr) {
             continue;
         }
@@ -703,7 +720,7 @@ bool MainWindow::modified_file_list(QStringList &list, bool report_unnamed) {
     }
     for (int i = 0; i < central_window->count(); i++) {
         QWidget *w = central_window->widget(i);
-        SrcEditor *editor = dynamic_cast<SrcEditor *>(w);
+        auto *editor = dynamic_cast<SrcEditor *>(w);
         if (editor == nullptr) {
             continue;
         }
@@ -743,7 +760,7 @@ MainWindow::source_editor_for_file(const QString &filename, bool open) {
     SrcEditor *found_editor = nullptr;
     for (int i = 0; i < central_window->count(); i++) {
         QWidget *w = central_window->widget(i);
-        SrcEditor *editor = dynamic_cast<SrcEditor *>(w);
+        auto *editor = dynamic_cast<SrcEditor *>(w);
         if (editor == nullptr) {
             continue;
         }
@@ -762,7 +779,7 @@ MainWindow::source_editor_for_file(const QString &filename, bool open) {
         return nullptr;
     }
 
-    SrcEditor *editor = new SrcEditor();
+    auto *editor = new SrcEditor();
     if (!editor->loadFile(filename)) {
         delete editor;
         return nullptr;
@@ -773,7 +790,7 @@ MainWindow::source_editor_for_file(const QString &filename, bool open) {
 }
 
 void MainWindow::new_source() {
-    SrcEditor *editor = new SrcEditor();
+    auto *editor = new SrcEditor();
     add_src_editor_to_tabs(editor);
     update_open_file_list();
 }
@@ -899,7 +916,7 @@ void MainWindow::close_source_check() {
         close_source();
         return;
     }
-    QMessageBox *msgbox = new QMessageBox(this);
+    auto *msgbox = new QMessageBox(this);
     msgbox->setWindowTitle("Close unsaved source");
     msgbox->setText("Close unsaved source.");
     msgbox->setInformativeText("Do you want to save your changes?");
@@ -946,7 +963,7 @@ void MainWindow::close_source() {
 }
 
 void MainWindow::example_source(const QString &source_file) {
-    SrcEditor *editor = new SrcEditor();
+    auto *editor = new SrcEditor();
 
     if (editor->loadFile(source_file)) {
         editor->setSaveAsRequired(true);
@@ -1144,7 +1161,7 @@ void MainWindow::compile_source() {
 void MainWindow::build_execute() {
     QStringList list;
     if (modified_file_list(list)) {
-        SaveChnagedDialog *dialog = new SaveChnagedDialog(list, this);
+        auto *dialog = new SaveChnagedDialog(list, this);
         connect(
             dialog, &SaveChnagedDialog::user_decision, this,
             &MainWindow::build_execute_with_save);

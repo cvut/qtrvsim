@@ -2,24 +2,26 @@
 
 #include <QGraphicsView>
 
-class SvgGraphicsView : public QGraphicsView
-{
-	Q_OBJECT
+class SvgGraphicsView : public QGraphicsView {
+    Q_OBJECT
 
-	using Super = QGraphicsView;
+    using Super = QGraphicsView;
+
 public:
-	explicit SvgGraphicsView(QWidget *parent = nullptr);
+    explicit SvgGraphicsView(QWidget *parent = nullptr);
 
-	void zoomToFit();
+    void zoomToFit();
+
 protected:
-	void zoom(double delta, const QPoint &mouse_pos);
+    void zoom(double delta, const QPoint &mouse_pos);
 
-	void paintEvent(QPaintEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
 
-	void wheelEvent(QWheelEvent *ev) Q_DECL_OVERRIDE;
-	void mousePressEvent(QMouseEvent *ev) Q_DECL_OVERRIDE;
-	void mouseReleaseEvent(QMouseEvent *ev) Q_DECL_OVERRIDE;
-	void mouseMoveEvent(QMouseEvent *ev) Q_DECL_OVERRIDE;
+    void wheelEvent(QWheelEvent *ev) Q_DECL_OVERRIDE;
+    void mousePressEvent(QMouseEvent *ev) Q_DECL_OVERRIDE;
+    void mouseReleaseEvent(QMouseEvent *ev) Q_DECL_OVERRIDE;
+    void mouseMoveEvent(QMouseEvent *ev) Q_DECL_OVERRIDE;
+
 private:
-	QPoint m_dragMouseStartPos;
+    QPoint m_dragMouseStartPos;
 };

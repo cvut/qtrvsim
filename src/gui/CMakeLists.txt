@@ -146,7 +146,7 @@ target_compile_definitions(gui
         ENV_CONFIG_FILE_NAME=\"QTRVSIM_CONFIG_FILE\")
 target_include_directories(gui PUBLIC . coreview)
 target_link_libraries(gui
-        PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui
+        PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Svg
         PRIVATE machine os_emulation assembler)
 
 if(${Qt5PrintSupport_FOUND})

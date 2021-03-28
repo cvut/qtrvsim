@@ -4,7 +4,6 @@
 
 namespace svgscene {
 
-GroupItem::GroupItem(QGraphicsItem *parent)
-	: Super(parent) {}
+GroupItem::GroupItem(QGraphicsItem *parent) : Super(parent) {}
 
 } // namespace svgscene

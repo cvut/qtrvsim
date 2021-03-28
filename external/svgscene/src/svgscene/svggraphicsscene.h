@@ -18,4 +18,4 @@ protected:
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 };
 
-}
+} // namespace svgscene

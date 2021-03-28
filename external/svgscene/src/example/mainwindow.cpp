@@ -13,9 +13,7 @@
 
 using namespace svgscene;
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
 
     m_scene = new QGraphicsScene(this);
@@ -31,8 +29,7 @@ void MainWindow::openFile(const QString &fn) {
     if (file_name.isEmpty())
         file_name = QFileDialog::getOpenFileName(
             this, tr("Open Image"), "", tr("SVG Image Files (*.svg)"));
-    if (file_name.isEmpty())
-        return;
+    if (file_name.isEmpty()) return;
     QFile f(file_name);
     if (f.open(QFile::ReadOnly)) {
         m_scene->clear();

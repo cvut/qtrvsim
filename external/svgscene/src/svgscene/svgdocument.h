@@ -13,12 +13,8 @@ public:
 
     TT *getElement() const;
 
-    QString getAttrValueOr(
-        const QString &attr_name,
-        const QString &default_value = QString());
-    QString getCssValueOr(
-        const QString &attr_name,
-        const QString &default_value = QString());
+    QString getAttrValueOr(const QString &attr_name, const QString &default_value = QString());
+    QString getCssValueOr(const QString &attr_name, const QString &default_value = QString());
 
     template<typename T>
     static SvgDomTree<T> findFromParent(
@@ -33,14 +29,11 @@ public:
         const QString &attr_value = QString());
 
     template<typename T = QGraphicsItem>
-    SvgDomTree<T> find(
-        const QString &attr_name = QString(),
-        const QString &attr_value = QString());
+    SvgDomTree<T> find(const QString &attr_name = QString(), const QString &attr_value = QString());
 
     template<typename T = QGraphicsItem>
-    QList<SvgDomTree<T>> findAll(
-        const QString &attr_name = QString(),
-        const QString &attr_value = QString());
+    QList<SvgDomTree<T>>
+    findAll(const QString &attr_name = QString(), const QString &attr_value = QString());
 
 protected:
     /**
@@ -48,11 +41,10 @@ protected:
      * recoverable errors in a different way - using nullptr.
      */
     template<typename T>
-    static T* findFromParentRaw(
+    static T *findFromParentRaw(
         const QGraphicsItem *parent,
         const QString &attr_name = QString(),
         const QString &attr_value = QString());
-
 
 protected:
     TT *root;
@@ -72,17 +64,11 @@ bool itemMatchesSelector(
     const QGraphicsItem *item,
     const QString &attr_name,
     const QString &attr_value) {
-    if (item == nullptr) {
-        throw std::out_of_range("Supplied item is nullptr.");
-    }
-    if (attr_name.isEmpty()) {
-        return true;
-    }
+    if (item == nullptr) { throw std::out_of_range("Supplied item is nullptr."); }
+    if (attr_name.isEmpty()) { return true; }
 
     auto attrs = getXmlAttributes(item);
-    if (!attrs.contains(attr_name)) {
-        return false;
-    }
+    if (!attrs.contains(attr_name)) { return false; }
     return attr_value.isEmpty() || attrs.value(attr_name) == attr_value;
 }
 
@@ -99,17 +85,13 @@ TT *SvgDomTree<TT>::getElement() const {
 }
 
 template<typename T>
-QString SvgDomTree<T>::getAttrValueOr(
-    const QString &attr_name,
-    const QString &default_value) {
+QString SvgDomTree<T>::getAttrValueOr(const QString &attr_name, const QString &default_value) {
     svgscene::XmlAttributes attrs = getXmlAttributes(root);
     return attrs.value(attr_name, default_value);
 }
 
 template<typename T>
-QString SvgDomTree<T>::getCssValueOr(
-    const QString &attr_name,
-    const QString &default_value) {
+QString SvgDomTree<T>::getCssValueOr(const QString &attr_name, const QString &default_value) {
     return getCssAttributeOr(root, attr_name, default_value);
 }
 
@@ -119,9 +101,7 @@ SvgDomTree<T> SvgDomTree<TT>::findFromParent(
     const QGraphicsItem *parent,
     const QString &attr_name,
     const QString &attr_value) {
-    if (!parent) {
-        throw std::out_of_range("Current element is nullptr.");
-    }
+    if (!parent) { throw std::out_of_range("Current element is nullptr."); }
 
     for (QGraphicsItem *_child : parent->childItems()) {
         if (T *child = dynamic_cast<T *>(_child)) {
@@ -130,35 +110,26 @@ SvgDomTree<T> SvgDomTree<TT>::findFromParent(
             }
         }
 
-        T* found = findFromParentRaw<T>(_child, attr_name, attr_value);
-        if (found != nullptr) {
-            return SvgDomTree<T>(found);
-        }
+        T *found = findFromParentRaw<T>(_child, attr_name, attr_value);
+        if (found != nullptr) { return SvgDomTree<T>(found); }
     }
     throw std::out_of_range("Not found.");
 }
 
-
 template<typename TT>
 template<typename T>
-T* SvgDomTree<TT>::findFromParentRaw(
+T *SvgDomTree<TT>::findFromParentRaw(
     const QGraphicsItem *parent,
     const QString &attr_name,
     const QString &attr_value) {
-    if (!parent) {
-        return nullptr;
-    }
+    if (!parent) { return nullptr; }
 
     for (QGraphicsItem *_child : parent->childItems()) {
         if (T *child = dynamic_cast<T *>(_child)) {
-            if (itemMatchesSelector<T>(child, attr_name, attr_value)) {
-                return child;
-            }
+            if (itemMatchesSelector<T>(child, attr_name, attr_value)) { return child; }
         }
-        T* found = findFromParentRaw<T>(_child, attr_name, attr_value);
-        if (found != nullptr) {
-            return found;
-        }
+        T *found = findFromParentRaw<T>(_child, attr_name, attr_value);
+        if (found != nullptr) { return found; }
     }
     return nullptr;
 }
@@ -170,9 +141,7 @@ QList<SvgDomTree<T>> SvgDomTree<TT>::findAllFromParent(
     const QString &attr_value) {
     QList<SvgDomTree<T>> ret;
 
-    if (!parent) {
-        return ret;
-    }
+    if (!parent) { return ret; }
 
     for (QGraphicsItem *_child : parent->childItems()) {
         if (T *child = dynamic_cast<T *>(_child)) {
@@ -187,15 +156,13 @@ QList<SvgDomTree<T>> SvgDomTree<TT>::findAllFromParent(
 
 template<typename TT>
 template<typename T>
-SvgDomTree<T>
-SvgDomTree<TT>::find(const QString &attr_name, const QString &attr_value) {
+SvgDomTree<T> SvgDomTree<TT>::find(const QString &attr_name, const QString &attr_value) {
     return findFromParent<T>(root, attr_name, attr_value);
 }
 
 template<typename TT>
 template<typename T>
-QList<SvgDomTree<T>>
-SvgDomTree<TT>::findAll(const QString &attr_name, const QString &attr_value) {
+QList<SvgDomTree<T>> SvgDomTree<TT>::findAll(const QString &attr_name, const QString &attr_value) {
     return findAllFromParent<T>(root, attr_name, attr_value);
 }
 

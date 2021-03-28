@@ -12,11 +12,8 @@ class SimpleTextItem : public QGraphicsSimpleTextItem {
 public:
     explicit SimpleTextItem(const CssAttributes &css, QGraphicsItem *parent = nullptr);
 
-    void setText(const QString& text);
-    void paint(
-        QPainter *painter,
-        const QStyleOptionGraphicsItem *option,
-        QWidget *widget) override;
+    void setText(const QString &text);
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 private:
     int m_alignment = Qt::AlignLeft;

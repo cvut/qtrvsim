@@ -3,11 +3,11 @@
 #include "svgdocument.h"
 #include "svgmetadata.h"
 
+#include <QFile>
 #include <QMap>
 #include <QPen>
 #include <QStack>
 #include <utility>
-#include <QFile>
 
 class QXmlStreamReader;
 class QXmlStreamAttributes;
@@ -20,7 +20,7 @@ class QAbstractGraphicsShapeItem;
 namespace svgscene {
 
 SvgDocument parseFromFileName(QGraphicsScene *scene, const QString &filename);
-SvgDocument parseFromFile(QGraphicsScene *scene, QFile* file);
+SvgDocument parseFromFile(QGraphicsScene *scene, QFile *file);
 
 class SvgHandler {
 public:
@@ -59,23 +59,18 @@ protected:
 
 private:
     void parse();
-    static CssAttributes parseXmlAttributes(
-        const QXmlStreamAttributes &attributes,
-        CssAttributes &css);
+    static CssAttributes
+    parseXmlAttributes(const QXmlStreamAttributes &attributes, CssAttributes &css);
     static void mergeCSSAttributes(
         CssAttributes &css_attributes,
         const QString &attr_name,
         const XmlAttributes &xml_attributes);
 
     static void setTransform(QGraphicsItem *it, const QString &str_val);
-    static void
-    setStyle(QAbstractGraphicsShapeItem *it, const CssAttributes &attributes);
+    static void setStyle(QAbstractGraphicsShapeItem *it, const CssAttributes &attributes);
     static void setTextStyle(QFont &font, const CssAttributes &attributes);
-    static void setTextStyle(
-        QGraphicsSimpleTextItem *text,
-        const CssAttributes &attributes);
-    static void
-    setTextStyle(QGraphicsTextItem *text, const CssAttributes &attributes);
+    static void setTextStyle(QGraphicsSimpleTextItem *text, const CssAttributes &attributes);
+    static void setTextStyle(QGraphicsTextItem *text, const CssAttributes &attributes);
 
     bool startElement();
     void addItem(QGraphicsItem *it);
