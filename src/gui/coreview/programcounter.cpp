@@ -15,7 +15,7 @@ using namespace coreview;
 
 ProgramCounter::ProgramCounter(machine::Machine *machine)
     : QGraphicsObject(nullptr)
-    , name("PC", this)
+    , name("", this)
     , value(this) {
     registers = machine->registers();
 
@@ -25,9 +25,7 @@ ProgramCounter::ProgramCounter(machine::Machine *machine)
     name.setPos(WIDTH / 2 - name.boundingRect().width() / 2, 0);
     name.setFont(font);
     font.setPointSize(FontSize::SIZE8);
-    value.setText(
-        QString("0x")
-        + QString::number(machine->registers()->read_pc().get_raw(), 16));
+    value.setText(QString(" 0x") + QString::number(machine->registers()->read_pc().get_raw(), 16));
     value.setPos(1, HEIGHT - value.boundingRect().height());
     value.setFont(font);
 

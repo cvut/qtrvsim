@@ -54,10 +54,10 @@ void LogicBlock::paint(
     const QStyleOptionGraphicsItem *option __attribute__((unused)),
     QWidget *widget __attribute__((unused))) {
     QPen pen = painter->pen();
-    pen.setColor(BLOCK_OUTLINE_COLOR);
-    painter->setPen(pen);
-
-    painter->drawRoundedRect(box, RADIUS, RADIUS);
+    //    pen.setColor(BLOCK_OUTLINE_COLOR);
+    //    painter->setPen(pen);
+    //
+    //    painter->drawRoundedRect(box, RADIUS, RADIUS);
 }
 
 void LogicBlock::setPos(qreal x, qreal y) {
@@ -70,8 +70,8 @@ void LogicBlock::setPos(qreal x, qreal y) {
 
 void LogicBlock::setSize(qreal width, qreal height) {
     box.setX(-width / 2 - GAP);
-    box.setWidth(width + (2 * GAP));
-    box.setHeight(height + (2 * GAP));
+    box.setWidth(width);
+    box.setHeight(height);
     for (int i = 0; i < connectors.size(); i++) { // Update point for all
                                                   // connectors
         struct Con &c = connectors[i];

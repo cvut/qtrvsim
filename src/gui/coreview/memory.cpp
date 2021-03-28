@@ -14,7 +14,7 @@ using namespace coreview;
 
 Memory::Memory(bool cache_used, const machine::Cache *cch)
     : QGraphicsObject(nullptr)
-    , name("Memory", this)
+    , name("", this)
     , type(this)
     , cache_t("Cache", this)
     , cache_hit_t("Hit: 0", this)
@@ -64,7 +64,7 @@ void Memory::paint(
     pen.setColor(BLOCK_OUTLINE_COLOR);
     painter->setPen(pen);
 
-    painter->drawRect(0, 0, WIDTH, HEIGHT);
+    //    painter->drawRect(0, 0, WIDTH, HEIGHT);
     if (cache) {
         painter->drawLine(0, CACHE_HEIGHT, WIDTH, CACHE_HEIGHT);
     }
@@ -100,8 +100,6 @@ ProgramMemory::ProgramMemory(machine::Machine *machine)
     : Memory(
         machine->config().cache_program().enabled(),
         machine->cache_program()) {
-    set_type("Program");
-
     con_address = new Connector(Connector::AX_X);
     con_inst = new Connector(Connector::AX_X);
 }
@@ -128,7 +126,6 @@ const Connector *ProgramMemory::connector_instruction() const {
 
 DataMemory::DataMemory(machine::Machine *machine)
     : Memory(machine->config().cache_data().enabled(), machine->cache_data()) {
-    set_type("Data");
 
     con_address = new Connector(Connector::AX_X);
     con_data_out = new Connector(Connector::AX_X);
@@ -157,24 +154,4 @@ void DataMemory::setPos(qreal x, qreal y) {
     }
     con_req_write->setPos(x + 40, y);
     con_req_read->setPos(x + 50, y);
-}
-
-const Connector *DataMemory::connector_address() const {
-    return con_address;
-}
-
-const Connector *DataMemory::connector_data_out() const {
-    return con_data_out;
-}
-
-const Connector *DataMemory::connector_data_in() const {
-    return con_data_in;
-}
-
-const Connector *DataMemory::connector_req_write() const {
-    return con_req_write;
-}
-
-const Connector *DataMemory::connector_req_read() const {
-    return con_req_read;
 }

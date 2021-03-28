@@ -1,18 +1,9 @@
 #ifndef COREVIEW_H
     #define COREVIEW_H
 
-    #include "coreview/adder.h"
-    #include "coreview/alu.h"
-    #include "coreview/and.h"
-    #include "coreview/connection.h"
-    #include "coreview/constant.h"
     #include "coreview/instructionview.h"
-    #include "coreview/junction.h"
-    #include "coreview/latch.h"
     #include "coreview/logicblock.h"
     #include "coreview/memory.h"
-    #include "coreview/minimux.h"
-    #include "coreview/multiplexer.h"
     #include "coreview/multitext.h"
     #include "coreview/programcounter.h"
     #include "coreview/registers.h"
@@ -22,11 +13,13 @@
 
     #include <QGraphicsScene>
     #include <QGraphicsView>
+    #include <QSvgWidget>
 
 class CoreViewScene : public QGraphicsScene {
     Q_OBJECT
+
 public:
-    CoreViewScene(machine::Machine *machine);
+    CoreViewScene(machine::Machine *machine, const QString &background_name);
     ~CoreViewScene() override;
 
 signals:
@@ -40,81 +33,38 @@ signals:
     void request_terminal();
 
 protected:
+    QSvgWidget *background;
     coreview::ProgramMemory *mem_program;
     coreview::DataMemory *mem_data;
     coreview::Registers *regs;
-    coreview::Alu *alu;
     coreview::LogicBlock *peripherals;
     coreview::LogicBlock *terminal;
     struct {
         coreview::ProgramCounter *pc;
-        coreview::Latch *latch;
-        coreview::Adder *adder;
-        coreview::Constant *adder_4;
-        coreview::Junction *junc_pc, *junc_pc_4;
-        coreview::Multiplexer *multiplex;
     } ft {};
     struct {
-        coreview::LogicBlock *ctl_block, *sign_ext, *shift2, *cmp;
-        coreview::Adder *add;
-        coreview::Junction *j_sign_ext;
-        coreview::And *and_branch;
-        coreview::Junction *j_inst_up, *j_inst_down;
-        coreview::Junction *j_jalpctor31, *j_jump_reg;
-        coreview::Bus *instr_bus;
-    } dc {};
-    struct {
-        coreview::Junction *j_mux;
-        coreview::Junction *j_rs_num;
-        coreview::Multiplexer *mux_imm, *mux_regdest;
-    } ex {};
-    struct {
-        coreview::Junction *j_addr;
         coreview::MultiText *multi_excause;
     } mm {};
     struct {
-        coreview::Multiplexer *mem_or_reg;
-        coreview::Junction *j_reg_write_val;
-    } wb {};
-    struct {
-        coreview::Multiplexer *mux_alu_reg_a;
-        coreview::Multiplexer *mux_alu_reg_b;
-        coreview::Junction *j_alu_out;
         coreview::MultiText *multi_stall;
-        coreview::MiniMux *mux_branch_reg_a;
-        coreview::MiniMux *mux_branch_reg_b;
     } hu {};
 
-    coreview::Connection *
-    new_connection(const coreview::Connector *, const coreview::Connector *);
-    coreview::Bus *new_bus(
-        const coreview::Connector *,
-        const coreview::Connector *,
-        unsigned width = 4);
-    coreview::Signal *
-    new_signal(const coreview::Connector *, const coreview::Connector *);
     QGraphicsSimpleTextItem *new_label(const QString &str, qreal x, qreal y);
-    coreview::Connection *pc2pc_latch {};
-    coreview::Connection *pc_latch2pc_joint {}, *pc_joint2pc_adder {},
-        *pc_joint2mem {};
-    coreview::Connection *pc_multiplexer2pc {};
 };
 
 class CoreViewSceneSimple : public CoreViewScene {
 public:
-    CoreViewSceneSimple(machine::Machine *machine);
+    explicit CoreViewSceneSimple(machine::Machine *machine);
 
 private:
-    coreview::InstructionView *inst_prim, *inst_fetch;
-    coreview::Latch *latch_if_id;
+    coreview::InstructionView *inst_prim;
 };
 
 class CoreViewScenePipelined : public CoreViewScene {
 public:
-    CoreViewScenePipelined(machine::Machine *machine);
+    explicit CoreViewScenePipelined(machine::Machine *machine);
 
 private:
-    coreview::Latch *latch_if_id, *latch_id_ex, *latch_ex_mem, *latch_mem_wb;
     coreview::InstructionView *inst_fetch, *inst_dec, *inst_exec, *inst_mem,
         *inst_wrb;
     coreview::LogicBlock *hazard_unit;

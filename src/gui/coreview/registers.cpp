@@ -13,7 +13,7 @@ using namespace coreview;
 #define PENW 1
 //////////////////////
 
-Registers::Registers() : QGraphicsObject(nullptr), name("Registers", this) {
+Registers::Registers() : QGraphicsObject(nullptr), name("", this) {
     con_read1 = new Connector(Connector::AX_X);
     con_read1_reg = new Connector(Connector::AX_X);
     con_read2 = new Connector(Connector::AX_X);
@@ -54,10 +54,10 @@ void Registers::paint(
     const QStyleOptionGraphicsItem *option __attribute((unused)),
     QWidget *widget __attribute((unused))) {
     QPen pen = painter->pen();
-    pen.setColor(BLOCK_OUTLINE_COLOR);
-    painter->setPen(pen);
-
-    painter->drawRect(0, 0, WIDTH, HEIGHT);
+    //    pen.setColor(BLOCK_OUTLINE_COLOR);
+    //    painter->setPen(pen);
+    //
+    //    painter->drawRect(0, 0, WIDTH, HEIGHT);
 }
 
 void Registers::setPos(qreal x, qreal y) {

@@ -11,14 +11,8 @@ set(gui_SOURCES
         cachedock.cpp
         cacheview.cpp
         cop0dock.cpp
-        coreview/adder.cpp
-        coreview/alu.cpp
-        coreview/and.cpp
         coreview/connection.cpp
-        coreview/constant.cpp
         coreview/instructionview.cpp
-        coreview/junction.cpp
-        coreview/latch.cpp
         coreview/logicblock.cpp
         coreview/memory.cpp
         coreview/minimux.cpp
@@ -64,15 +58,9 @@ set(gui_HEADERS
         cachedock.h
         cacheview.h
         cop0dock.h
-        coreview/adder.h
-        coreview/alu.h
-        coreview/and.h
         coreview/connection.h
-        coreview/constant.h
         coreview/coreview_colors.h
         coreview/instructionview.h
-        coreview/junction.h
-        coreview/latch.h
         coreview/logicblock.h
         coreview/memory.h
         coreview/minimux.h
