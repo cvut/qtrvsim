@@ -9,8 +9,14 @@ using namespace machine;
 // This is common program start (initial value of program counter)
 #define PC_INIT 0x80020000
 
+const char *EXECUTABLE_NAME = "data";
+
 void MachineTests::program_loader() {
-    ProgramLoader pl("data");
+    if (not QFile::exists(EXECUTABLE_NAME)) {
+        QSKIP("Executable is not present, cannot test program loader.");
+    }
+
+    ProgramLoader pl(EXECUTABLE_NAME);
     Memory m(BIG);
     pl.to_memory(&m);
 

@@ -94,5 +94,4 @@ target_link_libraries(qtmips_machine_unit_tests
 
 add_test(NAME qtmips_machine_unit_tests
         COMMAND qtmips_machine_unit_tests
-        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/../../test_dir/machine-unit-test")
-
+        )
