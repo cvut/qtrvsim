@@ -6,12 +6,26 @@ on:
       - cmake
   workflow_dispatch:
 
-env:
-  BUILD_TYPE: Release
-
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Ubuntu Latest GCC",
+            os: ubuntu-latest,
+            build_type: "Release",
+            cc: "gcc", cxx: "g++", qt_version: "5.11.2"
+          }
+          - {
+            name: "macOS Latest Clang",
+            os: macos-latest,
+            build_type: "Release",
+            cc: "clang", cxx: "clang++", qt_version: "5.11.2"
+          }
 
     steps:
       - uses: actions/checkout@v2
@@ -21,13 +35,69 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ../Qt
-          key: ${{ runner.os }}-QtCache
+          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-QtCache
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          version: 5.11.3
+          version: ${{ matrix.config.qt_version }}
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          arch: ${{ matrix.config.qt_arch }}
+
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{ github.workspace }}/build
+
+      - name: Configure CMake
+        shell: bash
+        working-directory: ${{ github.workspace }}/build
+        env:
+          CC: ${{ matrix.config.cc }}
+          CXX: ${{ matrix.config.cxx }}
+        run: "cmake $GITHUB_WORKSPACE
+                    -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}"
+
+      - name: Build
+        working-directory: ${{ github.workspace }}/build
+        shell: bash
+        run: cmake --build . --config ${{ matrix.config.build_type }}
+
+      - name: Test
+        working-directory: ${{ github.workspace }}/build
+        shell: bash
+        run: ctest
+
+  build-mingw:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Windows Latest MinGW",
+            os: windows-latest,
+            build_type: "Release",
+            cc: "gcc", cxx: "g++", build_system: "MinGW Makefiles",
+            # Older Qt releases do not have 64bit mingw release
+            qt_version: "5.12.9", qt_arch: "win64_mingw73"
+          }
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-QtCache
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: ${{ matrix.config.qt_version }}
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          arch: ${{ matrix.config.qt_arch }}
 
       - name: Create Build Environment
         run: cmake -E make_directory ${{github.workspace}}/build
@@ -35,14 +105,18 @@ jobs:
       - name: Configure CMake
         shell: bash
         working-directory: ${{github.workspace}}/build
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        run: "cmake $GITHUB_WORKSPACE
+                    -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
+                    -DCMAKE_C_COMPILER=${{ matrix.config.cc }}
+                    -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }}
+                    -G \"${{ matrix.config.build_system }}\""
 
       - name: Build
-        working-directory: ${{github.workspace}}/build
+        working-directory: ${{ github.workspace }}/build
         shell: bash
-        run: cmake --build . --config $BUILD_TYPE
+        run: cmake --build . --config ${{ matrix.config.build_type }}
 
       - name: Test
-        working-directory: ${{github.workspace}}/build
+        working-directory: ${{ github.workspace }}/build
         shell: bash
-        run: ctest -C $BUILD_TYPE
+        run: ctest
