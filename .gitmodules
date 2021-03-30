@@ -1,3 +1,0 @@
-[submodule "compiler/crosstool-ng"]
-	path = compiler/crosstool-ng
-	url = https://github.com/crosstool-ng/crosstool-ng
