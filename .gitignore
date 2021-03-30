@@ -1,6 +1,7 @@
 .*
 !.gitignore
 !.gitmodules
+!.github
 
 # Qt stuff
 *.pro.user*
