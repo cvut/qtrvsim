@@ -1,4 +1,5 @@
-project(qtmips_gui)
+project(qtmips_gui
+        VERSION 0.7.5)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -134,7 +135,13 @@ add_executable(qtmips_gui
         ${qtmips_gui_HEADERS}
         ${qtmips_gui_UI}
         ${qtmips_gui_RESOURCES})
-
+target_compile_definitions(qtmips_gui
+        PRIVATE
+        APP_ORGANIZATION=\"CTU\"
+        APP_ORGANIZATION_DOMAIN=\"https://fel.cvut.cz/\"
+        APP_NAME=\"QtMips\"
+        APP_VERSION=\"${PROJECT_VERSION}\"
+        ENV_CONFIG_FILE_NAME=\"QTMIPS_CONFIG_FILE\")
 target_include_directories(qtmips_gui PUBLIC . coreview)
 target_link_libraries(qtmips_gui
         PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui
