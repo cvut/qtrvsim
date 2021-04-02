@@ -3,15 +3,15 @@
 
 #include <QGraphicsObject>
 #include <QGraphicsSimpleTextItem>
-#include <QMap>
 #include <QString>
+#include <vector>
 
 namespace coreview {
 
 class MultiText : public QGraphicsObject {
     Q_OBJECT
 public:
-    MultiText(QMap<uint32_t, QString> value_map, bool nonzero_red = false);
+    explicit MultiText(const std::vector<QString> &texts_table, bool show_nonzero_red = false);
 
     QRectF boundingRect() const override;
     void paint(
@@ -20,13 +20,13 @@ public:
         QWidget *widget) override;
 
 public slots:
-    void multitext_update(uint32_t value);
+    void multitext_update(size_t new_value);
 
 private:
     QGraphicsSimpleTextItem text;
-    uint32_t value {};
-    QMap<uint32_t, QString> value_map;
-    uint32_t nonzero_red;
+    size_t value { 0 };
+    const std::vector<QString> &texts_table;
+    bool show_nonzero_red;
 };
 
 } // namespace coreview

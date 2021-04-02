@@ -8,13 +8,20 @@ constexpr size_t SC_WIDTH = 720;
 constexpr size_t SC_HEIGHT = 540;
 //////////////////////////////////////////////////////////////////////////////
 
-static QMap<uint32_t, QString> excause_map
-    = { { machine::EXCAUSE_NONE, "NONE" },         { machine::EXCAUSE_INT, "INT" },
-        { machine::EXCAUSE_ADDRL, "ADDRL" },       { machine::EXCAUSE_ADDRS, "ADDRS" },
-        { machine::EXCAUSE_IBUS, "IBUS" },         { machine::EXCAUSE_DBUS, "DBUS" },
-        { machine::EXCAUSE_SYSCALL, "SYSCALL" },   { machine::EXCAUSE_BREAK, "BREAK" },
-        { machine::EXCAUSE_OVERFLOW, "OVERFLOW" }, { machine::EXCAUSE_TRAP, "TRAP" },
-        { machine::EXCAUSE_HWBREAK, "HWBREAK" } };
+static const std::vector<QString> EXCEPTION_NAME_TABLE
+    = { { "NONE" },      // machine::EXCAUSE_NONE
+        { "INT" },       // machine::EXCAUSE_INT
+        { "ADDRL" },     // machine::EXCAUSE_ADDRL
+        { "ADDRS" },     // machine::EXCAUSE_ADDRS
+        { "IBUS" },      // machine::EXCAUSE_IBUS
+        { "DBUS" },      // machine::EXCAUSE_DBUS
+        { "SYSCALL" },   // machine::EXCAUSE_SYSCALL
+        { "BREAK" },     // machine::EXCAUSE_BREAK
+        { "OVERFLOW" },  // machine::EXCAUSE_OVERFLOW
+        { "TRAP" },      // machine::EXCAUSE_TRAP
+        { "HWBREAK" } }; // machine::EXCAUSE_HWBREAK
+
+static const std::vector<QString> STALL_TEXT_TABLE = { { "NORMAL" }, { "STALL" }, { "FORWARD" } };
 
 #define NEW_B(TYPE, VAR, ...)                                                  \
     do {                                                                       \
@@ -65,8 +72,7 @@ CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &backgroun
     NEW(LogicBlock, terminal, 610, 400, "");
     terminal->setSize(35, 16);
     NEW(ProgramCounter, ft.pc, 2, 280, machine);
-    NEW_MULTI(
-        mm.multi_excause, 602, 447, memory_excause_value, excause_map, true);
+    NEW_MULTI(mm.multi_excause, 602, 447, memory_excause_value, EXCEPTION_NAME_TABLE, true);
     new_label("Exception", 595, 437);
 
     coreview::Value *val;
@@ -185,12 +191,9 @@ CoreViewScenePipelined::CoreViewScenePipelined(machine::Machine *machine)
         NEW(LogicBlock, hazard_unit, SC_WIDTH / 2, SC_HEIGHT - 15,
             "Hazard Unit");
         hazard_unit->setSize(SC_WIDTH - 100, 12);
-        static QMap<uint32_t, QString> stall_map
-            = { { 0, "NORMAL" }, { 1, "STALL" }, { 2, "FORWARD" } };
-        NEW_MULTI(
-            hu.multi_stall, 480, 447, execute_stall_forward_value, stall_map);
-        NEW_MULTI(hu.multi_stall, 310, 340, branch_forward_value, stall_map);
-        NEW_MULTI(hu.multi_stall, 250, SC_HEIGHT - 18, hu_stall_value, stall_map);
+        NEW_MULTI(hu.multi_stall, 480, 447, execute_stall_forward_value, STALL_TEXT_TABLE);
+        NEW_MULTI(hu.multi_stall, 310, 340, branch_forward_value, STALL_TEXT_TABLE);
+        NEW_MULTI(hu.multi_stall, 250, SC_HEIGHT - 18, hu_stall_value, STALL_TEXT_TABLE);
     }
 
     coreview::Value *val;
