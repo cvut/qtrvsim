@@ -1,10 +1,18 @@
 #ifndef ENDIAN_DETECTION_H
 #define ENDIAN_DETECTION_H
+/**
+ * Including this file ensures that GCC macros `__LITTLE_ENDIAN__` or
+ * `__BIG_ENDIAN__` are defined regardless of OS and compiler. If used
+ * system/compiler is not supported, it will stop the compilation using a
+ * static assert. Precisely one of the given macros is always guaranteed to be
+ * defined.
+ *
+ * @file
+ */
 
-// Cross-platform endian detection
+// Cross-platform endian detection source
 // https://gist.github.com/jtbr/7a43e6281e6cca353b33ee501421860c (MIT license)
 
-// When available, these headers can improve platform endianness detection
 #ifdef __has_include // C++17, supported as extension to C++11 in clang, GCC 5+,
                      // vs2015
     #if __has_include(<endian.h>)
@@ -46,6 +54,21 @@
         defined(_M_ARM) /* msvc code on arm executes in little endian mode */
         #define __LITTLE_ENDIAN__
     #endif
+#endif
+
+#if !defined(__LITTLE_ENDIAN__) && !defined(__BIG_ENDIAN__)
+static_assert(
+    false,
+    "Current compiler/system is not supported by the endian "
+    "detection polyfill code or it uses unsupported endian.\n"
+    "Supported endians are: BIG | LITTLE.");
+#endif
+
+#if defined(__LITTLE_ENDIAN__) && defined(__BIG_ENDIAN__)
+static_assert(
+    false,
+    "Both endianness macros are defined. This is a bug of endian "
+    "detection. Please report it via a github issue.");
 #endif
 
 #endif // ENDIAN_DETECTION_H
