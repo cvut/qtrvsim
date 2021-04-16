@@ -79,9 +79,6 @@ target_link_libraries(qtmips_machine
         PUBLIC libelf)
 
 if (NOT ${WASM})
-    target_precompile_headers(qtmips_machine
-            PUBLIC ${qtmips_machine_HEADERS})
-
     # Machine tests (not available on WASM)
     add_executable(qtmips_machine_unit_tests ${qtmips_machine_TESTS})
     target_link_libraries(qtmips_machine_unit_tests
