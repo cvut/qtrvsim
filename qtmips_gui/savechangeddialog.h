@@ -50,7 +50,7 @@ public:
         QWidget *parent = nullptr);
     ~SaveChnagedDialog() override;
 signals:
-    void user_decision(bool cancel, QStringList &tosavelist);
+    void user_decision(bool cancel, QStringList tosavelist);
 private slots:
     void cancel_clicked();
     void ignore_clicked();

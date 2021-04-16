@@ -1202,7 +1202,7 @@ void MainWindow::build_execute() {
 
 void MainWindow::build_execute_with_save(
     bool cancel,
-    const QStringList &tosavelist) {
+    QStringList tosavelist) { // NOLINT(performance-unnecessary-value-param)
     if (cancel) {
         return;
     }
