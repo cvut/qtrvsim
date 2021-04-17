@@ -49,13 +49,24 @@
 namespace machine {
 
 /**
+ * Determines what effects should memory access cause.
+ */
+enum class AccessEffects {
+    REGULAR, //> All (memory, simulation counters, simulation flags, allocation
+             // on read miss (write allocation is necessary)). For accessed
+             // requested by simulated program.
+    INTERNAL //> Only memory. Internal access performed for visualization,
+             // control and debugging.
+};
+
+/**
  * Additional options for read operation between memory layers
  *
  *  The purpose for this struct is to make the API easily
  *   extensible.
  */
 struct ReadOptions {
-    bool debug;
+    AccessEffects type;
 };
 
 /**
@@ -64,7 +75,9 @@ struct ReadOptions {
  *  The purpose for this struct is to make the API easily
  *   extensible.
  */
-struct WriteOptions {};
+struct WriteOptions {
+    AccessEffects type;
+};
 
 struct ReadResult {
     /**

@@ -76,7 +76,7 @@ public:
     LocationStatus location_status(Offset offset) const override;
 
 private:
-    uint32_t read_reg(Offset source, bool debug = false) const;
+    uint32_t read_reg(Offset source, AccessEffects type) const;
     bool write_reg(Offset destination, uint32_t value);
     void rx_queue_check_internal() const;
     void pool_rx_byte() const;

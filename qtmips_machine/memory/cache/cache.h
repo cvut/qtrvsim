@@ -160,7 +160,7 @@ private:
                      mem_reads = 0, mem_writes = 0, burst_reads = 0,
                      burst_writes = 0, change_counter = 0;
 
-    void debug_read(Address source, void *destination, size_t size) const;
+    void internal_read(Address source, void *destination, size_t size) const;
 
     bool access(
         Address address,

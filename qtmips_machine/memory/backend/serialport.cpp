@@ -102,7 +102,7 @@ ReadResult SerialPort::read(
     ReadOptions options) const {
     return read_by_u32(destination, source, size, [&](Offset src) {
         return byteswap_if(
-            read_reg(src, options.debug),
+            read_reg(src, options.type),
             internal_endian != simulated_machine_endian);
     });
 }
@@ -126,7 +126,7 @@ void SerialPort::rx_queue_check_internal() const {
 void SerialPort::rx_queue_check() const {
     rx_queue_check_internal();
     emit external_backend_change_notify(
-        this, SERP_RX_ST_REG_o, SERP_RX_DATA_REG_o + 3, true);
+        this, SERP_RX_ST_REG_o, SERP_RX_DATA_REG_o + 3, ae::INTERNAL);
 }
 
 void SerialPort::update_tx_irq() const {
@@ -138,7 +138,7 @@ void SerialPort::update_tx_irq() const {
     }
 }
 
-uint32_t SerialPort::read_reg(Offset source, bool debug) const {
+uint32_t SerialPort::read_reg(Offset source, AccessEffects type) const {
     Q_ASSERT((source & 3U) == 0); // uint32_t aligned
 
     uint32_t value = 0;
@@ -152,11 +152,12 @@ uint32_t SerialPort::read_reg(Offset source, bool debug) const {
         pool_rx_byte();
         if (rx_st_reg & SERP_RX_ST_REG_READY_m) {
             value = rx_data_reg;
-            if (!debug) {
+            if (type == ae::REGULAR) {
                 rx_st_reg &= ~SERP_RX_ST_REG_READY_m;
                 update_rx_irq();
                 emit external_backend_change_notify(
-                    this, SERP_RX_ST_REG_o, SERP_RX_DATA_REG_o + 3, true);
+                    this, SERP_RX_ST_REG_o, SERP_RX_DATA_REG_o + 3,
+                    ae::INTERNAL);
             }
         } else {
             value = 0;

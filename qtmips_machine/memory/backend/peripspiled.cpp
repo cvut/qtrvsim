@@ -50,7 +50,7 @@ constexpr size_t SPILED_REG_KBDRD_KNOBS_DIRECT_o = 0x020;
 constexpr size_t SPILED_REG_KNOBS_8BIT_o = 0x024;
 
 PeripSpiLed::PeripSpiLed(Endian simulated_machine_endian)
-    : BackendMemory(simulated_machine_endian) {};
+    : BackendMemory(simulated_machine_endian) {}
 
 PeripSpiLed::~PeripSpiLed() = default;
 
@@ -86,7 +86,7 @@ ReadResult PeripSpiLed::read(
 }
 
 uint32_t PeripSpiLed::read_reg(Offset source) const {
-    Q_ASSERT((source & 3U) == 0); // uint32_t alligned
+    Q_ASSERT((source & 3U) == 0); // uint32_t aligned
     uint32_t value = [&]() {
         switch (source) {
         case SPILED_REG_LED_LINE_o: return spiled_reg_led_line;
@@ -109,7 +109,7 @@ uint32_t PeripSpiLed::read_reg(Offset source) const {
 }
 
 bool PeripSpiLed::write_reg(Offset destination, uint32_t value) {
-    Q_ASSERT((destination & 3U) == 0); // uint32_t alligned
+    Q_ASSERT((destination & 3U) == 0); // uint32_t aligned
 
     bool changed = [&]() {
         switch (destination) {
@@ -159,7 +159,8 @@ void PeripSpiLed::knob_update_notify(uint32_t val, uint32_t mask, size_t shift) 
     spiled_reg_knobs_8bit |= val;
 
     emit external_backend_change_notify(
-        this, SPILED_REG_KNOBS_8BIT_o, SPILED_REG_KNOBS_8BIT_o + 3, true);
+        this, SPILED_REG_KNOBS_8BIT_o, SPILED_REG_KNOBS_8BIT_o + 3,
+        ae::INTERNAL);
 }
 
 void PeripSpiLed::red_knob_update(int val) {

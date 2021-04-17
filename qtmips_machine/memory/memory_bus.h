@@ -154,7 +154,7 @@ private slots:
         const BackendMemory *device,
         Offset start_offset,
         Offset last_offset,
-        bool external);
+        AccessEffects type);
 
 private:
     class RangeDesc; // See declaration bellow;

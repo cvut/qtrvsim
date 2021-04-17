@@ -303,7 +303,7 @@ bool ProgramModel::setData(
             if (!ok) {
                 return false;
             }
-            mem->write_u32(address, data);
+            mem->write_u32(address, data,ae::INTERNAL);
             break;
         case 3:
             if (machine::Instruction::code_from_string(
@@ -314,7 +314,7 @@ bool ProgramModel::setData(
 
                 return false;
             }
-            mem->write_u32(address, data);
+            mem->write_u32(address, data,ae::INTERNAL);
             break;
         default: return false;
         }

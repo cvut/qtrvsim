@@ -132,10 +132,10 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
             return QString("");
         }
         switch (cell_size) {
-        case CELLSIZE_BYTE: data = mem->read_u8(address, true); break;
-        case CELLSIZE_HWORD: data = mem->read_u16(address, true); break;
+        case CELLSIZE_BYTE: data = mem->read_u8(address,ae::INTERNAL); break;
+        case CELLSIZE_HWORD: data = mem->read_u16(address,ae::INTERNAL); break;
         default:
-        case CELLSIZE_WORD: data = mem->read_u32(address, true); break;
+        case CELLSIZE_WORD: data = mem->read_u32(address,ae::INTERNAL); break;
         }
 
         t = QString::number(data, 16);
@@ -304,10 +304,10 @@ bool MemoryModel::setData(
         }
         address += cellSizeBytes() * (index.column() - 1);
         switch (cell_size) {
-        case CELLSIZE_BYTE: mem->write_u8(address, data); break;
-        case CELLSIZE_HWORD: mem->write_u16(address, data); break;
+        case CELLSIZE_BYTE: mem->write_u8(address, data,ae::INTERNAL); break;
+        case CELLSIZE_HWORD: mem->write_u16(address, data,ae::INTERNAL); break;
         default:
-        case CELLSIZE_WORD: mem->write_u32(address, data); break;
+        case CELLSIZE_WORD: mem->write_u32(address, data,ae::INTERNAL); break;
         }
     }
     return true;

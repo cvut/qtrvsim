@@ -115,11 +115,11 @@ ReadResult Cache::read(
         return mem->read(destination, source, size, options);
     }
 
-    if (options.debug) {
+    if (options.type == ae::INTERNAL) {
         if (!(location_status(source) & LOCSTAT_CACHED)) {
             mem->read(destination, source, size, options);
         } else {
-            debug_read(source, destination, size);
+            internal_read(source, destination, size);
         }
         return {};
     }
@@ -195,7 +195,7 @@ void Cache::reset() {
     }
 }
 
-void Cache::debug_read(Address source, void *destination, size_t size) const {
+void Cache::internal_read(Address source, void *destination, size_t size) const {
     CacheLocation loc = compute_location(source);
     for (size_t assoc_index = 0; assoc_index < cache_config.associativity();
          assoc_index++) {
@@ -271,7 +271,7 @@ bool Cache::access(
 
         mem->read(
             cd.data.data(), calc_base_address(loc.tag, loc.row),
-            cache_config.block_size() * BLOCK_ITEM_SIZE, { .debug = false });
+            cache_config.block_size() * BLOCK_ITEM_SIZE, { .type = ae::REGULAR });
 
         cd.valid = true;
         cd.dirty = false;

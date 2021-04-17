@@ -37,36 +37,48 @@
 
 namespace machine {
 
-bool FrontendMemory::write_u8(Address address, uint8_t value) {
-    return write_generic<typeof(value)>(address, value);
+bool FrontendMemory::write_u8(
+    Address address,
+    uint8_t value,
+    AccessEffects type) {
+    return write_generic<typeof(value)>(address, value, type);
 }
 
-bool FrontendMemory::write_u16(Address address, uint16_t value) {
-    return write_generic<typeof(value)>(address, value);
+bool FrontendMemory::write_u16(
+    Address address,
+    uint16_t value,
+    AccessEffects type) {
+    return write_generic<typeof(value)>(address, value, type);
 }
 
-bool FrontendMemory::write_u32(Address address, uint32_t value) {
-    return write_generic<typeof(value)>(address, value);
+bool FrontendMemory::write_u32(
+    Address address,
+    uint32_t value,
+    AccessEffects type) {
+    return write_generic<typeof(value)>(address, value, type);
 }
 
-bool FrontendMemory::write_u64(Address address, uint64_t value) {
-    return write_generic<typeof(value)>(address, value);
+bool FrontendMemory::write_u64(
+    Address address,
+    uint64_t value,
+    AccessEffects type) {
+    return write_generic<typeof(value)>(address, value, type);
 }
 
-uint8_t FrontendMemory::read_u8(Address address, bool debug_access) const {
-    return read_generic<uint8_t>(address, debug_access);
+uint8_t FrontendMemory::read_u8(Address address, AccessEffects type) const {
+    return read_generic<uint8_t>(address, type);
 }
 
-uint16_t FrontendMemory::read_u16(Address address, bool debug_access) const {
-    return read_generic<uint16_t>(address, debug_access);
+uint16_t FrontendMemory::read_u16(Address address, AccessEffects type) const {
+    return read_generic<uint16_t>(address, type);
 }
 
-uint32_t FrontendMemory::read_u32(Address address, bool debug_access) const {
-    return read_generic<uint32_t>(address, debug_access);
+uint32_t FrontendMemory::read_u32(Address address, AccessEffects type) const {
+    return read_generic<uint32_t>(address, type);
 }
 
-uint64_t FrontendMemory::read_u64(Address address, bool debug_access) const {
-    return read_generic<uint64_t>(address, debug_access);
+uint64_t FrontendMemory::read_u64(Address address, AccessEffects type) const {
+    return read_generic<uint64_t>(address, type);
 }
 
 void FrontendMemory::write_ctl(
@@ -125,9 +137,9 @@ LocationStatus FrontendMemory::location_status(Address address) const {
 }
 
 template<typename T>
-T FrontendMemory::read_generic(Address address, bool debug_read) const {
+T FrontendMemory::read_generic(Address address, AccessEffects type) const {
     T value;
-    read(&value, address, sizeof(T), { .debug = debug_read });
+    read(&value, address, sizeof(T), { .type = type });
     // When cross-simulating (BIG simulator on LITTLE host machine and vice
     // versa) data needs to be swapped before writing to memory and after
     // reading from memory to achieve correct results of misaligned reads. See
@@ -155,11 +167,14 @@ T FrontendMemory::read_generic(Address address, bool debug_read) const {
 }
 
 template<typename T>
-bool FrontendMemory::write_generic(Address address, const T value) {
+bool FrontendMemory::write_generic(
+    Address address,
+    const T value,
+    AccessEffects type) {
     // See example in read_generic for byteswap explanation.
     const T swapped_value
         = byteswap_if(value, this->simulated_machine_endian != NATIVE_ENDIAN);
-    return write(address, &swapped_value, sizeof(T), {}).changed;
+    return write(address, &swapped_value, sizeof(T), { .type = type }).changed;
 }
 FrontendMemory::FrontendMemory(Endian simulated_endian)
     : simulated_machine_endian(simulated_endian) {}

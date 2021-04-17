@@ -208,8 +208,8 @@ void MemoryDataBus::range_backend_external_change(
     const BackendMemory *device,
     Offset start_offset,
     Offset last_offset,
-    bool external) {
-    if (external) {
+    AccessEffects type) {
+    if (type == ae::REGULAR) {
         change_counter++;
     }
     // We only use device here for lookup, so const_cast is safe as find takes
@@ -219,8 +219,7 @@ void MemoryDataBus::range_backend_external_change(
         const RangeDesc *range = i.value();
         emit external_change_notify(
             this, range->start_addr + start_offset,
-            std::max(range->start_addr + last_offset, range->last_addr),
-            external);
+            std::max(range->start_addr + last_offset, range->last_addr), type);
     }
 }
 

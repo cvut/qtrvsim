@@ -51,7 +51,7 @@ namespace machine {
  *
  * It is guaranteed that all instances of this type belong to single address
  * space and therefore all can be compared fearlessly.
- *
+ * <p>
  * OPTIMIZATION NOTE: All methods are implemented in header file to support
  * inlining (as we want to use it as a primitive type) but too keep declaration
  * tidy out-of-line definitions are preferred.

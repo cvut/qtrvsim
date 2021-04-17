@@ -251,7 +251,8 @@ void Reporter::report() {
             out << "0x";
             // TODO not nice
             uint32_t buffer;
-            machine->memory()->read(&buffer, addr, sizeof(buffer), { false });
+            machine->memory()->read(
+                &buffer, addr, sizeof(buffer), { .type = ae::INTERNAL });
             out_hex(out, buffer, 8);
             out << endl;
         }
