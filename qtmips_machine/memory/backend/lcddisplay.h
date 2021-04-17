@@ -51,7 +51,7 @@ namespace machine {
 class LcdDisplay final : public BackendMemory {
     Q_OBJECT
 public:
-    explicit LcdDisplay();
+    explicit LcdDisplay(Endian simulated_machine_endian);
     ~LcdDisplay() override;
 
 signals:
@@ -89,6 +89,9 @@ public:
     }
 
 private:
+    /** Endian internal registers of the periphery (framebuffer) use. */
+    static constexpr Endian internal_endian = BIG;
+
     /** Read HW register - allows only 32bit aligned access. */
     uint32_t read_reg(Offset source) const;
 

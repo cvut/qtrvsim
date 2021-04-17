@@ -39,7 +39,8 @@
 
 using namespace machine;
 
-SimplePeripheral::SimplePeripheral() = default;
+SimplePeripheral::SimplePeripheral(Endian simulated_machine_endian)
+    : BackendMemory(simulated_machine_endian) {};
 
 SimplePeripheral::~SimplePeripheral() = default;
 

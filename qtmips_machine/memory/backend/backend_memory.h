@@ -51,14 +51,43 @@ namespace machine {
 typedef uint64_t Offset;
 
 /**
- * Interface for physical memory or periphery
+ * Interface for physical memory or periphery.
+ * .
+ * Device implementing this interface is connected to the memory system via
+ * memory data bus (`memory/memory_bus.h`).
+ *
+ * ## ENDIAN
+ * Each device is responsible to return reads and write with the correct endian.
+ * This is because there are different optimal ways to perform the swapping in
+ * different kind of peripheries. For example, peripheries that have only word
+ * (u23) accessible registers are simple to swap.
+ *
+ * All backend memory devices must set the `simulated_machine_endian` in
+ * `BackendMemory` parent. They should also, by convention, have a private
+ * (`const` or `static constexpr`) variable `internal_endian`. It can have
+ * values `LITTLE | BIG | NATIVE_ENDIAN` (note: `NATIVE_ENDIAN` is a compile
+ * time constant with endian of the host machine i.e. `LITTLE | BIG`). Byteswap
+ * is needed, when internal and simulated endian are mismatched.
+ *
+ * ### Examples of internal endian values
+ * - LED diode will have `NATIVE_ENDIAN` as the rgb value needs to be valid for
+ *   GUI.
+ * - Memory mapped source will have runtime set endian, based on the file
+ *   endian.
+ * - LCD has fixed `BIG` endian, as required by the hardware.
  */
 class BackendMemory : public QObject {
     Q_OBJECT
 
 public:
     /**
-     * Write byte sequence to memory
+     * @param simulated_machine_endian      endian of the simulated CPU/memory
+     *                                      system
+     */
+    explicit BackendMemory(Endian simulated_machine_endian);
+
+    /**
+     * Write byte sequence to memory.
      *
      * @param source        pointer to array of bytes to be copied
      * @param destination   relative index of destination to write to
@@ -98,6 +127,12 @@ public:
      */
     virtual enum LocationStatus location_status(Offset offset) const = 0;
 
+    /**
+     * Endian of the simulated CPU/memory system.
+     * @see BackendMemory docs
+     */
+    const Endian simulated_machine_endian;
+
 signals:
     /**
      * Notify upper layer about a change in managed physical memory of periphery
@@ -113,6 +148,9 @@ signals:
         uint32_t last_addr,
         bool external) const;
 };
+
+inline BackendMemory::BackendMemory(Endian simulated_machine_endian)
+    : simulated_machine_endian(simulated_machine_endian) {}
 
 } // namespace machine
 

@@ -43,9 +43,15 @@
 
 namespace machine {
 
-MemorySection::MemorySection(size_t length_bytes) : dt(length_bytes, 0) {}
+MemorySection::MemorySection(
+    size_t length_bytes,
+    Endian simulated_machine_endian)
+    : BackendMemory(simulated_machine_endian)
+    , dt(length_bytes, 0) {}
 
-MemorySection::MemorySection(const MemorySection &other) : dt(other.dt) {}
+MemorySection::MemorySection(const MemorySection &other)
+    : BackendMemory(other.simulated_machine_endian)
+    , dt(other.dt) {}
 
 WriteResult MemorySection::write(
     Offset destination,
@@ -155,11 +161,18 @@ constexpr size_t get_tree_row(size_t offset, size_t i) {
            >> tree_row_bit_offset(i);
 }
 
-Memory::Memory() {
+Memory::Memory() : BackendMemory(BIG) {
+    // This is dummy constructor for qt internal uses only.
+    this->mt_root = nullptr;
+}
+
+Memory::Memory(Endian simulated_machine_endian)
+    : BackendMemory(simulated_machine_endian) {
     this->mt_root = allocate_section_tree();
 }
 
-Memory::Memory(const Memory &other) {
+Memory::Memory(const Memory &other)
+    : BackendMemory(other.simulated_machine_endian) {
     this->mt_root = copy_section_tree(other.get_memory_tree_root(), 0);
 }
 
@@ -201,7 +214,8 @@ MemorySection *Memory::get_section(size_t offset, bool create) const {
         if (!create) {
             return nullptr;
         }
-        w[row_num].sec = new MemorySection(MEMORY_SECTION_SIZE);
+        w[row_num].sec
+            = new MemorySection(MEMORY_SECTION_SIZE, simulated_machine_endian);
     }
     return w[row_num].sec;
 }

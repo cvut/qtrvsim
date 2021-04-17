@@ -47,7 +47,7 @@ namespace machine {
 class SerialPort : public BackendMemory {
     Q_OBJECT
 public:
-    SerialPort();
+    explicit SerialPort(Endian simulated_machine_endian);
     ~SerialPort() override;
 
 signals:
@@ -84,6 +84,8 @@ private:
     void update_tx_irq() const;
     uint32_t get_change_counter() const;
 
+    /** endian of internal registers of the periphery use. */
+    static constexpr Endian internal_endian = NATIVE_ENDIAN;
     const uint8_t tx_irq_level;
     const uint8_t rx_irq_level;
     mutable uint32_t change_counter = { 0 };

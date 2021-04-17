@@ -53,8 +53,9 @@ constexpr Offset SERP_TX_ST_REG_IE_m = 0x2u;
 
 constexpr Offset SERP_TX_DATA_REG_o = 0xcu;
 
-SerialPort::SerialPort()
-    : tx_irq_level(2) // HW interrupt 0
+SerialPort::SerialPort(Endian simulated_machine_endian)
+    : BackendMemory(simulated_machine_endian)
+    , tx_irq_level(2)
     , rx_irq_level(3) // HW interrupt 1
 {}
 
@@ -88,7 +89,9 @@ WriteResult SerialPort::write(
             return 0;
         },
         [&](Offset src, uint32_t value) {
-            return write_reg(src, byteswap(value));
+            return write_reg(
+                src, byteswap_if(
+                         value, internal_endian != simulated_machine_endian));
         });
 }
 
@@ -98,7 +101,9 @@ ReadResult SerialPort::read(
     size_t size,
     ReadOptions options) const {
     return read_by_u32(destination, source, size, [&](Offset src) {
-        return byteswap(read_reg(src, options.debug));
+        return byteswap_if(
+            read_reg(src, options.debug),
+            internal_endian != simulated_machine_endian);
     });
 }
 
@@ -205,9 +210,14 @@ bool SerialPort::write_reg(Offset destination, uint32_t value) {
 LocationStatus SerialPort::location_status(Offset offset) const {
     switch (offset & ~3U) {
     case SERP_RX_ST_REG_o: FALLTROUGH
-    case SERP_RX_DATA_REG_o: FALLTROUGH
-    case SERP_TX_DATA_REG_o: {
+    case SERP_TX_ST_REG_o: FALLTROUGH
+    case SERP_TX_DATA_REG_o: // This is actually write only, but there is no
+                             // enum for that.
+    {
         return LOCSTAT_NONE;
+    }
+    case SERP_RX_DATA_REG_o: {
+        return LOCSTAT_READ_ONLY;
     }
     default: {
         return LOCSTAT_ILLEGAL;

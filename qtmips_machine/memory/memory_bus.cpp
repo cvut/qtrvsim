@@ -39,7 +39,8 @@
 
 using namespace machine;
 
-MemoryDataBus::MemoryDataBus() = default;
+MemoryDataBus::MemoryDataBus(Endian simulated_endian)
+    : FrontendMemory(simulated_endian) {};
 
 MemoryDataBus::~MemoryDataBus() {
     ranges_by_addr.clear(); // No stored values are owned.
@@ -242,7 +243,8 @@ bool MemoryDataBus::RangeDesc::overlaps(Address start, Address last) const {
 }
 
 TrivialBus::TrivialBus(BackendMemory *backend_memory)
-    : device(backend_memory) {}
+    : FrontendMemory(backend_memory->simulated_machine_endian)
+    , device(backend_memory) {}
 
 WriteResult TrivialBus::write(
     Address destination,

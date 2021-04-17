@@ -55,7 +55,7 @@ QtMipsMachine::QtMipsMachine(
     regs = new Registers();
     if (load_executable) {
         ProgramLoader program(config.elf());
-        mem_program_only = new Memory();
+        mem_program_only = new Memory(config.get_simulated_endian());
         program.to_memory(mem_program_only);
         if (load_symtab) {
             symtab = program.get_symbol_table();
@@ -68,26 +68,26 @@ QtMipsMachine::QtMipsMachine(
     } else {
         program_end = 0xf0000000_addr;
         mem_program_only = nullptr;
-        mem = new Memory();
+        mem = new Memory(config.get_simulated_endian());
     }
 
-    data_bus = new MemoryDataBus();
+    data_bus = new MemoryDataBus(config.get_simulated_endian());
     data_bus->insert_device_to_range(
         mem, 0x00000000_addr, 0xefffffff_addr, false);
     cpu_mem = data_bus;
 
-    ser_port = new SerialPort();
+    ser_port = new SerialPort(config.get_simulated_endian());
     memory_bus_insert_range(ser_port, 0xffffc000_addr, 0xffffc03f_addr, true);
     memory_bus_insert_range(ser_port, 0xffff0000_addr, 0xffff003f_addr, false);
     connect(
         ser_port, &SerialPort::signal_interrupt, this,
         &QtMipsMachine::set_interrupt_signal);
 
-    perip_spi_led = new PeripSpiLed();
+    perip_spi_led = new PeripSpiLed(config.get_simulated_endian());
     memory_bus_insert_range(
         perip_spi_led, 0xffffc100_addr, 0xffffc1ff_addr, true);
 
-    perip_lcd_display = new LcdDisplay();
+    perip_lcd_display = new LcdDisplay(config.get_simulated_endian());
     memory_bus_insert_range(
         perip_lcd_display, 0xffe00000_addr, 0xffe4afff_addr, true);
 

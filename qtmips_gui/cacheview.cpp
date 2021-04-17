@@ -182,7 +182,8 @@ CacheViewBlock::CacheViewBlock(
     const machine::Cache *cache,
     unsigned block,
     bool last)
-    : QGraphicsObject(nullptr) {
+    : QGraphicsObject(nullptr)
+    , simulated_machine_endian(cache->simulated_machine_endian) {
     islast = last;
     this->block = block;
     rows = cache->get_config().set_count();
@@ -422,10 +423,16 @@ void CacheViewBlock::cache_update(
               : "");
     for (unsigned i = 0; i < columns; i++) {
         this->data[set][i]->setText(
-            valid
-                ? QString("0x")
-                      + QString("%1").arg(data[i], 8, 16, QChar('0')).toUpper()
-                : "");
+            valid ? QString("0x")
+                        + QString("%1")
+                              .arg(
+                                  machine::byteswap_if(
+                                      data[i], simulated_machine_endian
+                                                   != machine::NATIVE_ENDIAN),
+                                  8, 16, QChar('0'))
+                              .toUpper()
+                  : "");
+        //  TODO Use cache API
     }
 
     if (last_highlighted) {

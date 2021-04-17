@@ -47,7 +47,8 @@ Cache::Cache(
     uint32_t memory_access_penalty_r,
     uint32_t memory_access_penalty_w,
     uint32_t memory_access_penalty_b)
-    : cache_config(config)
+    : FrontendMemory(memory->simulated_machine_endian)
+    , cache_config(config)
     , mem(memory)
     , uncached_start(0xf0000000_addr)
     , uncached_last(0xfffffffe_addr)

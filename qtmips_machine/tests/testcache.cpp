@@ -66,7 +66,7 @@ void MachineTests::cache() {
     QFETCH(unsigned, hit);
     QFETCH(unsigned, miss);
 
-    Memory m;
+    Memory m(BIG);
     TrivialBus m_frontend(&m);
     Cache cch(&m_frontend, &cache_c);
 

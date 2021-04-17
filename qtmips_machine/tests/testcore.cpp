@@ -196,7 +196,8 @@ void MachineTests::singlecore_regs() {
     QFETCH(Registers, init);
     QFETCH(Registers, res);
 
-    Memory mem; // Just memory (it shouldn't be used here except instruction)
+    Memory mem(BIG); // Just memory (it shouldn't be used here except
+                     // instruction)
     TrivialBus mem_frontend(&mem);
     memory_write_u32(&mem, res.read_pc().get_raw(), i.data()); // Store single
                                                                // instruction
@@ -223,7 +224,8 @@ void MachineTests::pipecore_regs() {
     QFETCH(Registers, init);
     QFETCH(Registers, res);
 
-    Memory mem; // Just memory (it shouldn't be used here except instruction)
+    Memory mem(BIG); // Just memory (it shouldn't be used here except
+                     // instruction)
     TrivialBus mem_frontend(&mem);
     memory_write_u32(&mem, res.read_pc().get_raw(), i.data()); // Store single
                                                                // instruction
@@ -294,7 +296,7 @@ void MachineTests::singlecore_jmp() {
     QFETCH(Registers, regs);
     QFETCH(uint64_t, pc);
 
-    Memory mem;
+    Memory mem(BIG);
     TrivialBus mem_frontend(&mem);
     memory_write_u32(&mem, regs.read_pc().get_raw(), i.data());
     Memory mem_used(mem);
@@ -319,7 +321,7 @@ void MachineTests::pipecore_jmp() {
     QFETCH(Registers, regs);
     QFETCH(uint64_t, pc);
 
-    Memory mem;
+    Memory mem(BIG);
     TrivialBus mem_frontend(&mem);
     memory_write_u32(&mem, regs.read_pc().get_raw(), i.data());
     Memory mem_used(mem);
@@ -353,7 +355,7 @@ static void core_mem_data() {
 
     // Load
     {
-        Memory mem;
+        Memory mem(BIG);
         memory_write_u32(&mem, 0x24, 0xA3242526);
         Registers regs;
         regs.write_gp(1, 0x22);
@@ -379,16 +381,16 @@ static void core_mem_data() {
         Registers regs;
         regs.write_gp(1, 0x22);
         regs.write_gp(21, 0x23242526);
-        Memory mem;
+        Memory mem(BIG);
         memory_write_u8(&mem, 0x24, 0x26); // Note: store least significant byte
-        QTest::newRow("SB")
-            << Instruction(40, 1, 21, 0x2) << regs << regs << Memory() << mem;
+        QTest::newRow("SB") << Instruction(40, 1, 21, 0x2) << regs << regs
+                            << Memory(BIG) << mem;
         memory_write_u16(&mem, 0x24, 0x2526);
-        QTest::newRow("SH")
-            << Instruction(41, 1, 21, 0x2) << regs << regs << Memory() << mem;
+        QTest::newRow("SH") << Instruction(41, 1, 21, 0x2) << regs << regs
+                            << Memory(BIG) << mem;
         memory_write_u32(&mem, 0x24, 0x23242526);
-        QTest::newRow("SW")
-            << Instruction(43, 1, 21, 0x2) << regs << regs << Memory() << mem;
+        QTest::newRow("SW") << Instruction(43, 1, 21, 0x2) << regs << regs
+                            << Memory(BIG) << mem;
     }
 }
 
@@ -698,9 +700,9 @@ void MachineTests::singlecore_alu_forward() {
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
-    Memory mem_init;
+    Memory mem_init(BIG);
     TrivialBus mem_init_frontend(&mem_init);
-    Memory mem_res;
+    Memory mem_res(BIG);
     TrivialBus mem_res_frontend(&mem_res);
     CoreSingle core(&reg_init, &mem_init_frontend, &mem_init_frontend, true);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
@@ -710,9 +712,9 @@ void MachineTests::pipecore_alu_forward() {
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
-    Memory mem_init;
+    Memory mem_init(BIG);
     TrivialBus mem_init_frontend(&mem_init);
-    Memory mem_res;
+    Memory mem_res(BIG);
     TrivialBus mem_res_frontend(&mem_res);
     CorePipelined core(
         &reg_init, &mem_init_frontend, &mem_init_frontend,
@@ -724,9 +726,9 @@ void MachineTests::pipecorestall_alu_forward() {
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
-    Memory mem_init;
+    Memory mem_init(BIG);
     TrivialBus mem_init_frontend(&mem_init);
-    Memory mem_res;
+    Memory mem_res(BIG);
     TrivialBus mem_res_frontend(&mem_res);
     CorePipelined core(
         &reg_init, &mem_init_frontend, &mem_init_frontend,
@@ -809,13 +811,13 @@ static void core_memory_tests_data() {
         regs_res.write_gp(21, 0xf);
         regs_res.pc_abs_jmp(regs_init.read_pc() + 4 * code.length() - 4);
         uint32_t addr;
-        Memory mem_init;
+        Memory mem_init(BIG);
         addr = 0x1000;
         foreach (uint32_t i, data_init) {
             memory_write_u32(&mem_init, addr, i);
             addr += 4;
         }
-        Memory mem_res;
+        Memory mem_res(BIG);
         addr = 0x1000;
         foreach (uint32_t i, data_res) {
             memory_write_u32(&mem_res, addr, i);
@@ -905,7 +907,7 @@ static void core_memory_tests_data() {
         regs_res.write_gp(28, 0x800290d0);
 
         uint32_t addr;
-        Memory mem_init;
+        Memory mem_init(BIG);
         addr = 0x80020100;
         QVector<uint32_t> data_init { 0x01020304, 0x05060708, 0x090a0b0c,
                                       0x0d0e0f00, 0x11121314, 0x15161718,
@@ -915,7 +917,7 @@ static void core_memory_tests_data() {
             memory_write_u32(&mem_init, addr, i);
             addr += 4;
         }
-        Memory mem_res;
+        Memory mem_res(BIG);
         addr = 0x80020100;
         QVector<uint32_t> data_res { 0xdd020304, 0xccdd0708, 0xbbccdd0c,
                                      0xaabbccdd, 0x11121314, 0xaabbccdd,

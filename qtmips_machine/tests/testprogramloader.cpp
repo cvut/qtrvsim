@@ -46,7 +46,7 @@ using namespace machine;
 
 void MachineTests::program_loader() {
     ProgramLoader pl("data");
-    Memory m;
+    Memory m(BIG);
     pl.to_memory(&m);
 
     // 	addi $1, $0, 6

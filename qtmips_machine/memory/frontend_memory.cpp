@@ -119,7 +119,7 @@ FrontendMemory::read_ctl(enum AccessControl ctl, Address address) const {
 
 void FrontendMemory::sync() {}
 
-enum LocationStatus FrontendMemory::location_status(Address address) const {
+LocationStatus FrontendMemory::location_status(Address address) const {
     (void)address;
     return LOCSTAT_NONE;
 }
@@ -128,12 +128,39 @@ template<typename T>
 T FrontendMemory::read_generic(Address address, bool debug_read) const {
     T value;
     read(&value, address, sizeof(T), { .debug = debug_read });
-    return byteswap(value);
+    // When cross-simulating (BIG simulator on LITTLE host machine and vice
+    // versa) data needs to be swapped before writing to memory and after
+    // reading from memory to achieve correct results of misaligned reads. See
+    // bellow.
+    //
+    // Example (4 byte write and 4 byte read offseted by 2 bytes):
+    //
+    //  BIG on LITTLE
+    //      REGISTER:           12 34 56 78
+    //      PRE-SWAP:           78 56 34 12 (still in register)
+    //      NATIVE ENDIAN MEM:  12 34 56 78 00 00 (native is LITTLE)
+    //      READ IN MEM:              56 78 00 00
+    //      REGISTER:                 00 00 78 56
+    //      POST-SWAP:                56 78 00 00 (correct)
+    //
+    //  LITTLE on BIG
+    //      REGISTER:          12 34 56 78
+    //      PRE-SWAP:          78 56 34 12  (still in register)
+    //      NATIVE ENDIAN MEM: 78 56 34 12 00 00 (native is BIG)
+    //      READ IN MEM:             34 12 00 00
+    //      REGISTER:                34 12 00 00
+    //      POST-SWAP:               00 00 12 34 (correct)
+    //
+    return byteswap_if(value, this->simulated_machine_endian != NATIVE_ENDIAN);
 }
 
 template<typename T>
 bool FrontendMemory::write_generic(Address address, const T value) {
-    const T swapped_value = byteswap(value);
+    // See example in read_generic for byteswap explanation.
+    const T swapped_value
+        = byteswap_if(value, this->simulated_machine_endian != NATIVE_ENDIAN);
     return write(address, &swapped_value, sizeof(T), {}).changed;
 }
+FrontendMemory::FrontendMemory(Endian simulated_endian)
+    : simulated_machine_endian(simulated_endian) {}
 } // namespace machine

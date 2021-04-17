@@ -51,7 +51,7 @@ void MachineTests::memory_data() {
 }
 
 void MachineTests::memory() {
-    Memory m;
+    Memory m(BIG);
 
     QFETCH(uint32_t, address);
 
@@ -80,7 +80,7 @@ void MachineTests::memory_section_data() {
 }
 
 void MachineTests::memory_section() {
-    Memory m;
+    Memory m(BIG);
 
     QFETCH(uint32_t, address);
 
@@ -100,7 +100,7 @@ void MachineTests::memory_section() {
 }
 
 void MachineTests::memory_endian() {
-    Memory m;
+    Memory m(BIG);
 
     // Memory should be big endian so write bytes from most significant byte
     memory_write_u8(&m, 0x00, 0x12);
@@ -122,7 +122,7 @@ void MachineTests::memory_endian() {
 }
 
 void MachineTests::memory_compare() {
-    Memory m1, m2;
+    Memory m1(BIG), m2(BIG);
     QCOMPARE(m1, m2);
     memory_write_u8(&m1, 0x20, 0x0);
     QVERIFY(m1 != m2); // This should not be equal as this identifies also
@@ -150,7 +150,7 @@ void MachineTests::memory_write_ctl_data() {
     QTest::addColumn<AccessControl>("ctl");
     QTest::addColumn<Memory>("result");
 
-    Memory mem;
+    Memory mem(BIG);
     QTest::newRow("none") << AC_NONE << mem;
     memory_write_u8(&mem, 0x20, 0x26);
     QTest::newRow("byte") << AC_I8 << mem;
@@ -169,7 +169,7 @@ void MachineTests::memory_write_ctl() {
     // Memory is not supposed to be read directly as it does not implement
     // frontend memory. TrivialBus was introduced to wrap Memory into the most
     // simple FrontendMemory with no additional functionality.
-    Memory _mem;
+    Memory _mem(BIG);
     TrivialBus mem(&_mem);
     mem.write_ctl(ctl, 0x20_addr, 0x23242526);
     QCOMPARE(_mem, result);
@@ -191,7 +191,7 @@ void MachineTests::memory_read_ctl() {
     QFETCH(AccessControl, ctl);
     QFETCH(uint32_t, result);
 
-    Memory _mem;
+    Memory _mem(BIG);
     TrivialBus mem(&_mem);
     mem.write_u32(0x20_addr, 0xA3242526);
     QCOMPARE(mem.read_ctl(ctl, 0x20_addr), result);

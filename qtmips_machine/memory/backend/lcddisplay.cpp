@@ -46,8 +46,9 @@
 
 namespace machine {
 
-LcdDisplay::LcdDisplay()
-    : fb_width(480)
+LcdDisplay::LcdDisplay(Endian simulated_machine_endian)
+    : BackendMemory(simulated_machine_endian)
+    , fb_width(480)
     , fb_height(320)
     , fb_bits_per_pixel(16)
     , fb_data(get_fb_size_bytes(), 0) {}
@@ -61,8 +62,16 @@ WriteResult LcdDisplay::write(
     WriteOptions options) {
     UNUSED(options)
     return write_by_u32(
-        destination, source, size, [&](Offset src) { return read_reg(src); },
-        [&](Offset src, uint32_t value) { return write_reg(src, value); });
+        destination, source, size,
+        [&](Offset src) {
+            return byteswap_if(
+                read_reg(src), internal_endian != simulated_machine_endian);
+        },
+        [&](Offset src, uint32_t value) {
+            return write_reg(
+                src, byteswap_if(
+                         value, internal_endian != simulated_machine_endian));
+        });
 }
 
 ReadResult LcdDisplay::read(
@@ -71,8 +80,10 @@ ReadResult LcdDisplay::read(
     size_t size,
     ReadOptions options) const {
     UNUSED(options)
-    return read_by_u32(
-        destination, source, size, [&](Offset src) { return read_reg(src); });
+    return read_by_u32(destination, source, size, [&](Offset src) {
+        return byteswap_if(
+            read_reg(src), internal_endian != simulated_machine_endian);
+    });
 }
 
 uint32_t LcdDisplay::read_reg(Offset source) const {

@@ -50,7 +50,7 @@ namespace machine {
 class PeripSpiLed final : public BackendMemory {
     Q_OBJECT
 public:
-    explicit PeripSpiLed();
+    explicit PeripSpiLed(Endian simulated_machine_endian);
     ~PeripSpiLed() override;
 
 signals:
@@ -89,6 +89,8 @@ private:
     bool write_reg(Offset destination, uint32_t value);
     void knob_update_notify(uint32_t val, uint32_t mask, size_t shift);
 
+    /** endian of internal registers of the periphery use. */
+    static constexpr Endian internal_endian = NATIVE_ENDIAN;
     uint32_t spiled_reg_led_line = 0;
     uint32_t spiled_reg_led_rgb1 = 0;
     uint32_t spiled_reg_led_rgb2 = 0;

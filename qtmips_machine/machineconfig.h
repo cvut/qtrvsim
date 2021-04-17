@@ -36,6 +36,8 @@
 #ifndef MACHINECONFIG_H
 #define MACHINECONFIG_H
 
+#include "memory/endian.h"
+
 #include <QSettings>
 #include <QString>
 
@@ -142,6 +144,7 @@ public:
     // Configure cache
     void set_cache_program(const CacheConfig &);
     void set_cache_data(const CacheConfig &);
+    void set_simulated_endian(Endian endian);
 
     bool pipelined() const;
     bool delay_slot() const;
@@ -161,6 +164,7 @@ public:
     QString elf() const;
     const CacheConfig &cache_program() const;
     const CacheConfig &cache_data() const;
+    Endian get_simulated_endian() const;
 
     CacheConfig *access_cache_program();
     CacheConfig *access_cache_data();
@@ -179,6 +183,7 @@ private:
     QString osem_fs_root;
     QString elf_path;
     CacheConfig cch_program, cch_data;
+    Endian simulated_endian = BIG;
 };
 
 } // namespace machine

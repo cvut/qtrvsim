@@ -267,7 +267,7 @@ template<typename T, typename MEM_T, typename ADDR_T>
 T memory_read(MEM_T *mem, ADDR_T address) {
     T buffer;
     mem->read(&buffer, address, sizeof(T), {});
-    return byteswap(buffer);
+    return byteswap_if(buffer, mem->simulated_machine_endian != NATIVE_ENDIAN);
 }
 
 template<typename MEM_T, typename ADDR_T>
@@ -297,7 +297,8 @@ uint64_t memory_read_u64(MEM_T *mem, ADDR_T address) {
  */
 template<typename T, typename MEM_T, typename ADDR_T>
 void memory_write(MEM_T *mem, ADDR_T address, T value) {
-    const T swapped_value = byteswap(value);
+    const T swapped_value
+        = byteswap_if(value, mem->simulated_machine_endian != NATIVE_ENDIAN);
     mem->write(address, &swapped_value, sizeof(T), {});
 }
 

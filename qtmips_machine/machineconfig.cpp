@@ -384,6 +384,10 @@ void MachineConfig::set_cache_data(const CacheConfig &c) {
     cch_data = c;
 }
 
+void MachineConfig::set_simulated_endian(Endian endian) {
+    MachineConfig::simulated_endian = endian;
+}
+
 bool MachineConfig::pipelined() const {
     return pipeline;
 }
@@ -460,6 +464,10 @@ CacheConfig *MachineConfig::access_cache_program() {
 
 CacheConfig *MachineConfig::access_cache_data() {
     return &cch_data;
+}
+
+Endian MachineConfig::get_simulated_endian() const {
+    return simulated_endian;
 }
 
 bool MachineConfig::operator==(const MachineConfig &c) const {

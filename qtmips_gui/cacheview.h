@@ -98,6 +98,7 @@ private slots:
         bool write);
 
 private:
+    const machine::Endian simulated_machine_endian;
     bool islast;
     unsigned block;
     unsigned rows, columns;

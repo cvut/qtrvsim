@@ -50,9 +50,13 @@
 
 namespace machine {
 
+/**
+ * NOTE: Internal endian of memory must be the same as endian of the whole
+ * simulated machine. Therefore it does not have internal_endian field.
+ */
 class MemorySection final : public BackendMemory {
 public:
-    explicit MemorySection(size_t length_bytes);
+    explicit MemorySection(size_t length_bytes, Endian simulated_machine_endian);
     MemorySection(const MemorySection &other);
     ~MemorySection() override = default;
 
@@ -100,10 +104,16 @@ union MemoryTree {
     MemorySection *sec;
 };
 
+/**
+ * NOTE: Internal endian of memory must be the same as endian of the whole
+ * simulated machine. Therefore it does not have internal_endian field.
+ */
 class Memory final : public BackendMemory {
     Q_OBJECT
 public:
-    explicit Memory();
+    // This is dummy constructor for qt internal uses only.
+    Memory();
+    explicit Memory(Endian simulated_machine_endian);
     Memory(const Memory &);
     ~Memory() override;
     void reset(); // Reset whole content of memory (removes old tree and creates

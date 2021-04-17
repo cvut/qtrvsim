@@ -50,10 +50,14 @@
 
 namespace machine {
 
+/**
+ * NOTE: This peripheral is constant, it does not case about endian. Therefore
+ * it does not have internal_endian field.
+ */
 class SimplePeripheral final : public BackendMemory {
     Q_OBJECT
 public:
-    explicit SimplePeripheral();
+    explicit SimplePeripheral(Endian simulated_machine_endian);
     ~SimplePeripheral() override;
 
 signals:

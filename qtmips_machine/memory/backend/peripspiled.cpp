@@ -49,7 +49,8 @@ constexpr size_t SPILED_REG_LED_KBDWR_DIRECT_o = 0x018;
 constexpr size_t SPILED_REG_KBDRD_KNOBS_DIRECT_o = 0x020;
 constexpr size_t SPILED_REG_KNOBS_8BIT_o = 0x024;
 
-PeripSpiLed::PeripSpiLed() = default;
+PeripSpiLed::PeripSpiLed(Endian simulated_machine_endian)
+    : BackendMemory(simulated_machine_endian) {};
 
 PeripSpiLed::~PeripSpiLed() = default;
 
@@ -61,9 +62,14 @@ WriteResult PeripSpiLed::write(
     UNUSED(options)
     return write_by_u32(
         destination, source, size,
-        [&](Offset src) { return byteswap(read_reg(src)); },
+        [&](Offset src) {
+            return byteswap_if(
+                read_reg(src), internal_endian != simulated_machine_endian);
+        },
         [&](Offset src, uint32_t value) {
-            return write_reg(src, byteswap(value));
+            return write_reg(
+                src, byteswap_if(
+                         value, internal_endian != simulated_machine_endian));
         });
 }
 
@@ -74,7 +80,8 @@ ReadResult PeripSpiLed::read(
     ReadOptions options) const {
     UNUSED(options)
     return read_by_u32(destination, source, size, [&](Offset src) {
-        return byteswap(read_reg(src));
+        return byteswap_if(
+            read_reg(src), internal_endian != simulated_machine_endian);
     });
 }
 
