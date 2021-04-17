@@ -14,7 +14,7 @@ set(SANITIZERS "address,undefined" CACHE STRING
         "Runtime sanitizers to use in debug builds.
         Column separated subset of {address, memory, undefined, thread} or none.
         Memory and address cannot be used at the same time.")
-set(EXECUTABLE_OUTPUT_PATH "${PROJECT_SOURCE_DIR}/target/${CMAKE_BUILD_TYPE}"
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/target/"
         CACHE STRING "Absolute path to place executables to.")
 
 # Auto detected
