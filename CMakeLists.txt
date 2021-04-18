@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(QtMips
-        VERSION 0.7.5
-        DESCRIPTION "MIPS CPU simulator for education purposes.")
+project(QtRVSim
+        VERSION 0.0.1
+        DESCRIPTION "RISC-V CPU simulator for education purposes.")
 
 # =============================================================================
 # Configurable options

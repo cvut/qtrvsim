@@ -1,19 +1,20 @@
-project(qtmips_asm)
+project(assembler
+        DESCRIPTION "Simple assembler library to use in the UI.")
 
 set(CMAKE_AUTOMOC ON)
 
-set(qtmips_asm_SOURCES
+set(assembler_SOURCES
         fixmatheval.cpp
         simpleasm.cpp
         )
-set(qtmips_asm_HEADERS
+set(assembler_HEADERS
         fixmatheval.h
         messagetype.h
         simpleasm.h
         )
 
-add_library(qtmips_asm
-        ${qtmips_asm_SOURCES}
-        ${qtmips_asm_HEADERS})
-target_link_libraries(qtmips_asm
+add_library(assembler
+        ${assembler_SOURCES}
+        ${assembler_HEADERS})
+target_link_libraries(assembler
         PRIVATE Qt5::Core)

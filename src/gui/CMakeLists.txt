@@ -1,11 +1,12 @@
-project(qtmips_gui
-        VERSION 0.7.5)
+project(gui
+        VERSION 0.7.5
+        DESCRIPTION "Graphical UI for the simulator")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(qtmips_gui_SOURCES
+set(gui_SOURCES
         aboutdialog.cpp
         cachedock.cpp
         cacheview.cpp
@@ -58,7 +59,7 @@ set(qtmips_gui_SOURCES
         terminaldock.cpp
         textsignalaction.cpp
         )
-set(qtmips_gui_HEADERS
+set(gui_HEADERS
         aboutdialog.h
         cachedock.h
         cacheview.h
@@ -111,38 +112,38 @@ set(qtmips_gui_HEADERS
         terminaldock.h
         textsignalaction.h
         )
-set(qtmips_gui_UI
+set(gui_UI
         gotosymboldialog.ui
         NewDialog.ui
         peripheralsview.ui
         MainWindow.ui
         NewDialogCache.ui
         )
-set(qtmips_gui_RESOURCES
+set(gui_RESOURCES
         icons.qrc
         samples.qrc
         )
 
 if ("${CMAKE_SYSTEM_NAME}" MATCHES "Emscripten")
-    message("qtmips_gui :: Including WASM only files.")
-    list(APPEND qtmips_gui_SOURCES qhtml5file_html5.cpp)
-    list(APPEND qtmips_gui_HEADERS qhtml5file.h)
+    message("gui :: Including WASM only files.")
+    list(APPEND gui_SOURCES qhtml5file_html5.cpp)
+    list(APPEND gui_HEADERS qhtml5file.h)
 endif ()
 
 
-add_executable(qtmips_gui
-        ${qtmips_gui_SOURCES}
-        ${qtmips_gui_HEADERS}
-        ${qtmips_gui_UI}
-        ${qtmips_gui_RESOURCES})
-target_compile_definitions(qtmips_gui
+add_executable(gui
+        ${gui_SOURCES}
+        ${gui_HEADERS}
+        ${gui_UI}
+        ${gui_RESOURCES})
+target_compile_definitions(gui
         PRIVATE
         APP_ORGANIZATION=\"CTU\"
         APP_ORGANIZATION_DOMAIN=\"https://fel.cvut.cz/\"
-        APP_NAME=\"QtMips\"
+        APP_NAME=\"QtRVSim\"
         APP_VERSION=\"${PROJECT_VERSION}\"
-        ENV_CONFIG_FILE_NAME=\"QTMIPS_CONFIG_FILE\")
-target_include_directories(qtmips_gui PUBLIC . coreview)
-target_link_libraries(qtmips_gui
+        ENV_CONFIG_FILE_NAME=\"QTRVSIM_CONFIG_FILE\")
+target_include_directories(gui PUBLIC . coreview)
+target_link_libraries(gui
         PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui
-        PRIVATE qtmips_machine qtmips_osemu qtmips_asm)
+        PRIVATE machine os_emulation assembler)

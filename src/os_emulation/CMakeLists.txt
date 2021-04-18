@@ -1,19 +1,19 @@
-project(qtmips_osemu
+project(os_emulation
         DESCRIPTION "Simple emulation of a Linux like kernel")
 
 set(CMAKE_AUTOMOC ON)
 
-set(qtmips_osemu_SOURCES
+set(os_emulation_SOURCES
         ossyscall.cpp
         )
-set(qtmips_osemu_HEADERS
+set(os_emulation_HEADERS
         ossyscall.h
         syscall_nr.h
         target_errno.h
         )
 
-add_library(qtmips_osemu OBJECT
-        ${qtmips_osemu_SOURCES}
-        ${qtmips_osemu_HEADERS})
-target_link_libraries(qtmips_osemu
+add_library(os_emulation OBJECT
+        ${os_emulation_SOURCES}
+        ${os_emulation_HEADERS})
+target_link_libraries(os_emulation
         PRIVATE Qt5::Core)

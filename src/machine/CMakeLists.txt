@@ -1,9 +1,9 @@
-project(qtmips_machine
+project(machine
         DESCRIPTION "The actual simulator as a library. Link with an UI of your choice.")
 
 set(CMAKE_AUTOMOC ON)
 
-set(qtmips_machine_SOURCES
+set(machine_SOURCES
         alu.cpp
         cop0state.cpp
         core.cpp
@@ -25,7 +25,7 @@ set(qtmips_machine_SOURCES
         symboltable.cpp
         )
 
-set(qtmips_machine_HEADERS
+set(machine_HEADERS
         alu.h
         cop0state.h
         core.h
@@ -54,7 +54,7 @@ set(qtmips_machine_HEADERS
         utils.h
         machine_global.h
         )
-set(qtmips_machine_TESTS
+set(machine_TESTS
         tests/data/cache_test_performance_data.h
         tests/tst_machine.h
         tests/utils/integer_decomposition.h
@@ -71,19 +71,19 @@ set(qtmips_machine_TESTS
 
 # Object library is preferred, because the library archive is never really
 # needed. This option skips the archive creation and links directly .o files.
-add_library(qtmips_machine OBJECT
-        ${qtmips_machine_SOURCES}
-        ${qtmips_machine_HEADERS})
-target_link_libraries(qtmips_machine
+add_library(machine OBJECT
+        ${machine_SOURCES}
+        ${machine_HEADERS})
+target_link_libraries(machine
         PRIVATE Qt5::Core
         PUBLIC libelf)
 
 if (NOT ${WASM})
     # Machine tests (not available on WASM)
-    add_executable(qtmips_machine_unit_tests ${qtmips_machine_TESTS})
-    target_link_libraries(qtmips_machine_unit_tests
-            PRIVATE qtmips_machine Qt5::Core Qt5::Test)
+    add_executable(machine_unit_tests ${machine_TESTS})
+    target_link_libraries(machine_unit_tests
+            PRIVATE machine Qt5::Core Qt5::Test)
 
-    add_test(NAME qtmips_machine_unit_tests
-            COMMAND qtmips_machine_unit_tests)
+    add_test(NAME machine_unit_tests
+            COMMAND machine_unit_tests)
 endif ()
