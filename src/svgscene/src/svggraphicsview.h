@@ -9,7 +9,7 @@ class SvgGraphicsView : public QGraphicsView
 
 	using Super = QGraphicsView;
 public:
-	SvgGraphicsView(QWidget *parent = nullptr);
+	explicit SvgGraphicsView(QWidget *parent = nullptr);
 
 	void zoomToFit();
 protected:

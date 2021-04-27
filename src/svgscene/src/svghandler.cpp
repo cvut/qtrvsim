@@ -6,7 +6,6 @@
 #include "groupitem.h"
 
 #include <QGraphicsItem>
-#include <QGraphicsTextItem>
 #include <QGraphicsScene>
 #include <QXmlStreamReader>
 #include <QStack>
@@ -14,8 +13,8 @@
 #include <QFontMetrics>
 #include <QSet>
 
-#define logSvgW() nCInfo("svg")
-#define logSvgD() nCDebug("svg")
+#define LOG nCInfo("svg")
+#define DEBUG nCDebug("svg")
 
 namespace svgscene {
 
@@ -283,8 +282,8 @@ static QColor parseColor(const QString &color, const QString &opacity)
 				if (compo.size() == 1) {
 					s = color_str.constData() + 4;
 					compo = parsePercentageList(s);
-					for (int i = 0; i < compo.size(); ++i)
-						compo[i] *= (qreal)2.55;
+					for (double & i : compo)
+						i *= (qreal)2.55;
 				}
 				if (compo.size() == 3) {
 					ret = QColor(int(compo[0]),
@@ -322,7 +321,7 @@ static QColor parseColor(const QString &color, const QString &opacity)
 static QMatrix parseTransformationMatrix(const QStringRef &value)
 {
 	if (value.isEmpty())
-		return QMatrix();
+		return {};
 	QMatrix matrix;
 	const QChar *str = value.constData();
 	const QChar *end = str + value.length();
@@ -433,12 +432,12 @@ static QMatrix parseTransformationMatrix(const QStringRef &value)
 		} else if (state == SkewX) {
 			if (points.count() != 1)
 				goto error;
-			const qreal deg2rad = qreal(0.017453292519943295769);
+			const auto deg2rad = qreal(0.017453292519943295769);
 			matrix.shear(qTan(points[0]*deg2rad), 0);
 		} else if (state == SkewY) {
 			if (points.count() != 1)
 				goto error;
-			const qreal deg2rad = qreal(0.017453292519943295769);
+			const auto deg2rad = qreal(0.017453292519943295769);
 			matrix.shear(0, qTan(points[0]*deg2rad));
 		}
 	}
@@ -907,8 +906,7 @@ SvgHandler::SvgHandler(QGraphicsScene *scene)
 }
 
 SvgHandler::~SvgHandler()
-{
-}
+= default;
 
 void SvgHandler::load(QXmlStreamReader *data, bool skip_definitions)
 {
@@ -942,7 +940,7 @@ void SvgHandler::parse()
 				}
 			}
 			el.xmlAttributes = parseXmlAttributes(m_xml->attributes());
-			logSvgD() << QString(m_elementStack.count(), '-') << ">" << "+ start element:" << el.name << "id:" << el.xmlAttributes.value("id");
+            DEBUG << QString(m_elementStack.count(), '-') << ">" << "+ start element:" << el.name << "id:" << el.xmlAttributes.value("id");
 			if(!m_elementStack.isEmpty())
 				el.styleAttributes = m_elementStack.last().styleAttributes;
 			mergeCSSAttributes(el.styleAttributes, QStringLiteral("style"), el.xmlAttributes);
@@ -954,7 +952,7 @@ void SvgHandler::parse()
 		case QXmlStreamReader::EndElement:
 		{
 			SvgElement svg_element = m_elementStack.pop();
-			logSvgD() << QString(m_elementStack.count(), '-') << ">" << "- end element:" << m_xml->name() << "item created:" << svg_element.itemCreated;
+            DEBUG << QString(m_elementStack.count(), '-') << ">" << "- end element:" << m_xml->name() << "item created:" << svg_element.itemCreated;
 			if(svg_element.itemCreated && m_topLevelItem) {
 				//logSvgI() << "m_topLevelItem:" << m_topLevelItem << typeid (*m_topLevelItem).name() << svg_element.name;
 				installVisuController(m_topLevelItem, svg_element);
@@ -964,15 +962,15 @@ void SvgHandler::parse()
 		}
 		case QXmlStreamReader::Characters:
 		{
-			logSvgD() << "characters element:" << m_xml->text();// << typeid (*m_topLevelItem).name();
-			if(SimpleTextItem *text_item = dynamic_cast<SimpleTextItem*>(m_topLevelItem)) {
+            DEBUG << "characters element:" << m_xml->text();// << typeid (*m_topLevelItem).name();
+			if(auto *text_item = dynamic_cast<SimpleTextItem*>(m_topLevelItem)) {
 				QString text = text_item->text();
 				if(!text.isEmpty())
 					text += '\n';
-				logSvgD() << text_item->text() << "+" << m_xml->text().toString();
+                DEBUG << text_item->text() << "+" << m_xml->text().toString();
 				text_item->setText(text + m_xml->text().toString());
 			}
-			else if(QGraphicsTextItem *text_item = dynamic_cast<QGraphicsTextItem*>(m_topLevelItem)) {
+			else if(auto *text_item = dynamic_cast<QGraphicsTextItem*>(m_topLevelItem)) {
 				QString text = text_item->toPlainText();
 				if(!text.isEmpty())
 					text += '\n';
@@ -980,13 +978,13 @@ void SvgHandler::parse()
 				//nInfo() << text_item->toPlainText();
 			}
 			else {
-				logSvgD() << "characters are not part of text item, will be ignored";
+                DEBUG << "characters are not part of text item, will be ignored";
 				//nWarning() << "top:" << m_topLevelItem << (m_topLevelItem? typeid (*m_topLevelItem).name(): "NULL");
 			}
 			break;
 		}
 		case QXmlStreamReader::ProcessingInstruction:
-			logSvgD() << "ProcessingInstruction:" << m_xml->processingInstructionTarget() << m_xml->processingInstructionData();
+            DEBUG << "ProcessingInstruction:" << m_xml->processingInstructionTarget() << m_xml->processingInstructionData();
 			//processingInstruction(xml->processingInstructionTarget().toString(), xml->processingInstructionData().toString());
 			break;
 		default:
@@ -1028,7 +1026,7 @@ bool SvgHandler::startElement()
 			qreal y = el.xmlAttributes.value(QStringLiteral("y")).toDouble();
 			qreal w = el.xmlAttributes.value(QStringLiteral("width")).toDouble();
 			qreal h = el.xmlAttributes.value(QStringLiteral("height")).toDouble();
-			if(QGraphicsTextItem *text_item = dynamic_cast<QGraphicsTextItem*>(m_topLevelItem)) {
+			if(auto *text_item = dynamic_cast<QGraphicsTextItem*>(m_topLevelItem)) {
 				QTransform t;
 				t.translate(x, y);
 				text_item->setTransform(t, true);
@@ -1036,7 +1034,7 @@ bool SvgHandler::startElement()
 				return false;
 			}
 			else {
-				QGraphicsRectItem *item = new QGraphicsRectItem();
+				auto *item = new QGraphicsRectItem();
 				setXmlAttributes(item, el);
 				item->setRect(QRectF(x, y, w, h));
 				setStyle(item, el.styleAttributes);
@@ -1046,7 +1044,7 @@ bool SvgHandler::startElement()
 			}
 		}
 		else if (el.name == QLatin1String("circle")) {
-			QGraphicsEllipseItem *item = new QGraphicsEllipseItem();
+			auto *item = new QGraphicsEllipseItem();
 			setXmlAttributes(item, el);
 			qreal cx = toDouble(el.xmlAttributes.value(QStringLiteral("cx")));
 			qreal cy = toDouble(el.xmlAttributes.value(QStringLiteral("cy")));
@@ -1060,7 +1058,7 @@ bool SvgHandler::startElement()
 			return true;
 		}
 		else if (el.name == QLatin1String("ellipse")) {
-			QGraphicsEllipseItem *item = new QGraphicsEllipseItem();
+			auto *item = new QGraphicsEllipseItem();
 			setXmlAttributes(item, el);
 			qreal cx = toDouble(el.xmlAttributes.value(QStringLiteral("cx")));
 			qreal cy = toDouble(el.xmlAttributes.value(QStringLiteral("cy")));
@@ -1075,7 +1073,7 @@ bool SvgHandler::startElement()
 			return true;
 		}
 		else if (el.name == QLatin1String("path")) {
-			QGraphicsPathItem *item = new QGraphicsPathItem();
+			auto *item = new QGraphicsPathItem();
 			setXmlAttributes(item, el);
 			QString data = el.xmlAttributes.value(QStringLiteral("d"));
 			QPainterPath p;
@@ -1092,7 +1090,7 @@ bool SvgHandler::startElement()
 			return true;
 		}
 		else if (el.name == QLatin1String("text")) {
-			QGraphicsRectItem *item = new QGraphicsRectItem();
+			auto *item = new QGraphicsRectItem();
 			setXmlAttributes(item, el);
 			//qreal x = attributes.value(QLatin1String("x")).toDouble();
 			//qreal y = attributes.value(QLatin1String("y")).toDouble();
@@ -1103,7 +1101,7 @@ bool SvgHandler::startElement()
 			return true;
 		}
 		else if (el.name == QLatin1String("tspan")) {
-			SimpleTextItem *item = new SimpleTextItem(el.styleAttributes);
+			auto *item = new SimpleTextItem(el.styleAttributes);
 			setXmlAttributes(item, el);
 			qreal x = toDouble(el.xmlAttributes.value(QStringLiteral("x")));
 			qreal y = toDouble(el.xmlAttributes.value(QStringLiteral("y")));
@@ -1119,7 +1117,7 @@ bool SvgHandler::startElement()
 			return true;
 		}
 		else if (el.name == QLatin1String("flowRoot")) {
-			QGraphicsTextItem *item = new QGraphicsTextItem();
+			auto *item = new QGraphicsTextItem();
 			setXmlAttributes(item, el);
 			//nWarning() << "FlowRoot:" << (QGraphicsItem*)item;
 			setTextStyle(item, el.styleAttributes);
@@ -1128,7 +1126,7 @@ bool SvgHandler::startElement()
 			return true;
 		}
 		else {
-			logSvgW() << "unsupported element:" << el.name;
+            LOG << "unsupported element:" << el.name;
 		}
 		return false;
 	}
@@ -1210,7 +1208,7 @@ void SvgHandler::mergeCSSAttributes(CssAttributes &css_attributes, const QString
 #else
 	QStringList css = xml_attributes.value(attr_name).split(';', Qt::SkipEmptyParts);
 #endif
-	for(QString ss : css) {
+	for(const QString& ss : css) {
 		int ix = ss.indexOf(':');
 		if(ix > 0) {
 			css_attributes[ss.mid(0, ix).trimmed()] = ss.mid(ix + 1).trimmed();
@@ -1261,7 +1259,7 @@ void SvgHandler::setStyle(QAbstractGraphicsShapeItem *it, const CssAttributes &a
 				bool ok;
 				double d = s.toDouble(&ok);
 				if(!ok) {
-					logSvgW() << "Invalid stroke dash definition:" << dash_pattern.toStdString();
+                    LOG << "Invalid stroke dash definition:" << dash_pattern.toStdString();
 					arr.clear();
 					break;
 				}
@@ -1279,7 +1277,7 @@ void SvgHandler::setStyle(QAbstractGraphicsShapeItem *it, const CssAttributes &a
 				pen.setDashOffset(d);
 			}
 			else {
-				logSvgW() << "Invalid stroke dash offset:" << dash_offset.toStdString();
+                LOG << "Invalid stroke dash offset:" << dash_offset.toStdString();
 			}
 		}
 		it->setPen(pen);
@@ -1288,12 +1286,12 @@ void SvgHandler::setStyle(QAbstractGraphicsShapeItem *it, const CssAttributes &a
 
 void SvgHandler::setTextStyle(QFont &font, const CssAttributes &attributes)
 {
-	logSvgD() << "orig font" << font.toString();
+    DEBUG << "orig font" << font.toString();
 	//font.setStyleName(QString());
 	font.setStyleName(QStringLiteral("Normal"));
 	QString font_size = attributes.value(QStringLiteral("font-size"));
 	if(!font_size.isEmpty()) {
-		logSvgD() << "font_size:" << font_size;
+        DEBUG << "font_size:" << font_size;
 		if(font_size.endsWith(QLatin1String("px")))
 			font.setPixelSize((int)toDouble(font_size.mid(0, font_size.size() - 2)));
 		else if(font_size.endsWith(QLatin1String("pt")))
@@ -1301,13 +1299,13 @@ void SvgHandler::setTextStyle(QFont &font, const CssAttributes &attributes)
 	}
 	QString font_family = attributes.value(QStringLiteral("font-family"));
 	if(!font_family.isEmpty()) {
-		logSvgD() << "font_family:" << font_family;
+        DEBUG << "font_family:" << font_family;
 		font.setFamily(font_family);
 	}
 	font.setWeight(QFont::Normal);
 	QString font_weight = attributes.value(QStringLiteral("font-weight"));
 	if(!font_weight.isEmpty()) {
-		logSvgD() << "font_weight:" << font_weight;
+        DEBUG << "font_weight:" << font_weight;
 		if(font_weight == QLatin1String("thin"))
 			font.setWeight(QFont::Thin);
 		else if(font_weight == QLatin1String("light"))
@@ -1324,7 +1322,7 @@ void SvgHandler::setTextStyle(QFont &font, const CssAttributes &attributes)
 	font.setStretch(QFont::Unstretched);
 	QString font_stretch = attributes.value(QStringLiteral("font-stretch"));
 	if(!font_stretch.isEmpty()) {
-		logSvgD() << "font_stretch:" << font_stretch;
+        DEBUG << "font_stretch:" << font_stretch;
 		if(font_stretch == QLatin1String("ultra-condensed"))
 			font.setStretch(QFont::UltraCondensed);
 		else if(font_stretch == QLatin1String("extra-condensed"))
@@ -1354,12 +1352,12 @@ void SvgHandler::setTextStyle(QFont &font, const CssAttributes &attributes)
 		else if(font_style == QLatin1String("oblique"))
 			font.setStyle(QFont::StyleOblique);
 	}
-	logSvgD() << "font"
+    DEBUG << "font"
 			  << "px size:" << font.pixelSize()
 			  << "pt size:" << font.pointSize()
 			  << "stretch:" << font.stretch()
 			  << "weight:" << font.weight();
-	logSvgD() << "new font" << font.toString();
+    DEBUG << "new font" << font.toString();
 }
 
 void SvgHandler::setTextStyle(QGraphicsSimpleTextItem *text, const CssAttributes &attributes)
@@ -1402,10 +1400,10 @@ void SvgHandler::addItem(QGraphicsItem *it)
 {
 	if(!m_topLevelItem)
 		return;
-	logSvgD() << "adding item:" << typeid (*it).name()
+    DEBUG << "adding item:" << typeid (*it).name()
 			  << "pos:" << point2str(it->pos())
 			  << "bounding rect:" << rect2str(it->boundingRect());
-	if(QGraphicsItemGroup *grp = dynamic_cast<QGraphicsItemGroup*>(m_topLevelItem)) {
+	if(auto *grp = dynamic_cast<QGraphicsItemGroup*>(m_topLevelItem)) {
 		grp->addToGroup(it);
 	}
 	else {

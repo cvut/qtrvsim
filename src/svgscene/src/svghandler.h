@@ -5,6 +5,7 @@
 #include <QPen>
 #include <QMap>
 #include <QStack>
+#include <utility>
 
 class QXmlStreamReader;
 class QXmlStreamAttributes;
@@ -28,11 +29,11 @@ public:
 		CssAttributes styleAttributes;
 		bool itemCreated = false;
 
-		SvgElement() {}
-		SvgElement(const QString &n, bool created = false) : name(n), itemCreated(created) {}
+		SvgElement() = default;
+		explicit SvgElement(QString n, bool created = false) : name(std::move(n)), itemCreated(created) {}
 	};
 public:
-    SvgHandler(QGraphicsScene *scene);
+    explicit SvgHandler(QGraphicsScene *scene);
 	virtual ~SvgHandler();
 
 	void load(QXmlStreamReader *data, bool is_skip_definitions = false);
@@ -47,14 +48,14 @@ protected:
 	QGraphicsScene *m_scene;
 private:
 	void parse();
-	XmlAttributes parseXmlAttributes(const QXmlStreamAttributes &attributes);
-	void mergeCSSAttributes(CssAttributes &css_attributes, const QString &attr_name, const XmlAttributes &xml_attributes);
+	static XmlAttributes parseXmlAttributes(const QXmlStreamAttributes &attributes);
+	static void mergeCSSAttributes(CssAttributes &css_attributes, const QString &attr_name, const XmlAttributes &xml_attributes);
 
-	void setTransform(QGraphicsItem *it, const QString &str_val);
-	void setStyle(QAbstractGraphicsShapeItem *it, const CssAttributes &attributes);
-	void setTextStyle(QFont &font, const CssAttributes &attributes);
-	void setTextStyle(QGraphicsSimpleTextItem *text, const CssAttributes &attributes);
-	void setTextStyle(QGraphicsTextItem *text, const CssAttributes &attributes);
+	static void setTransform(QGraphicsItem *it, const QString &str_val);
+	static void setStyle(QAbstractGraphicsShapeItem *it, const CssAttributes &attributes);
+	static void setTextStyle(QFont &font, const CssAttributes &attributes);
+	static void setTextStyle(QGraphicsSimpleTextItem *text, const CssAttributes &attributes);
+	static  void setTextStyle(QGraphicsTextItem *text, const CssAttributes &attributes);
 
 	bool startElement();
 	void addItem(QGraphicsItem *it);

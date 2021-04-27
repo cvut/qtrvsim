@@ -15,7 +15,7 @@ SimpleTextItem::SimpleTextItem(const CssAttributes &css, QGraphicsItem *parent)
         m_alignment = Qt::AlignLeft;
 }
 
-void SimpleTextItem::setText(const QString text) {
+void SimpleTextItem::setText(const QString& text) {
     if (!m_origTransformLoaded) {
         m_origTransformLoaded = true;
         m_origTransform = transform();

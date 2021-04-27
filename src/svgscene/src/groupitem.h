@@ -9,7 +9,7 @@ class GroupItem : public QGraphicsRectItem {
     using Super = QGraphicsRectItem;
 
 public:
-    GroupItem(QGraphicsItem *parent = nullptr);
+    explicit GroupItem(QGraphicsItem *parent = nullptr);
 
     void paint(
         QPainter *painter,

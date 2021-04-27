@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 	MainWindow w;
 	w.show();
 
-	w.openFile(a.arguments().value(1));
+	w.openFile(QApplication::arguments().value(1));
 
-	return a.exec();
+	return QApplication::exec();
 }

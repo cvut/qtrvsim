@@ -10,9 +10,9 @@ class SimpleTextItem : public QGraphicsSimpleTextItem {
     using Super = QGraphicsSimpleTextItem;
 
 public:
-    SimpleTextItem(const CssAttributes &css, QGraphicsItem *parent = nullptr);
+    explicit SimpleTextItem(const CssAttributes &css, QGraphicsItem *parent = nullptr);
 
-    void setText(const QString text);
+    void setText(const QString& text);
     void paint(
         QPainter *painter,
         const QStyleOptionGraphicsItem *option,
