@@ -1,4 +1,6 @@
 #include "mainwindow.h"
+
+#include "svghandler.h"
 #include "ui_mainwindow.h"
 #include "svghandler.h"
 

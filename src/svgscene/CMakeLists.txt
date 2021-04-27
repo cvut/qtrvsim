@@ -30,6 +30,7 @@ target_sources(svgscene
         src/simpletextitem.cpp
         src/groupitem.h
         src/groupitem.cpp
+        src/svg-spec.h
         )
 target_include_directories(svgscene
         PRIVATE . src necrolog)
