@@ -6,15 +6,6 @@
 
 namespace svgscene {
 
-template<typename T>
-class SvgDomTree;
-
-template<typename T>
-static bool itemMatchesSelector(
-    const QGraphicsItem *item,
-    const QString &attr_name = QString(),
-    const QString &attr_value = QString());
-
 template<typename TT>
 class SvgDomTree {
 public:
@@ -83,6 +74,36 @@ bool itemMatchesSelector(
     return attr_value.isEmpty() || attrs.value(attr_name) == attr_value;
 }
 
+template<typename T>
+SvgDomTree<T>::SvgDomTree(QGraphicsItem *root) : root(dynamic_cast<T *>(root)) {
+    if (this->root == nullptr) {
+        throw std::out_of_range("Cannot build dom tree with nullptr item.");
+    }
+}
+
+template<typename TT>
+TT *SvgDomTree<TT>::getElement() const {
+    return root;
+}
+
+template<typename T>
+QString SvgDomTree<T>::getAttrValueOr(
+    const QString &attr_name,
+    const QString &default_value) {
+    svgscene::XmlAttributes attrs = qvariant_cast<svgscene::XmlAttributes>(
+        root->data(Types::DataKey::XmlAttributes));
+    return attrs.value(attr_name, default_value);
+}
+
+template<typename T>
+QString SvgDomTree<T>::getCssValueOr(
+    const QString &attr_name,
+    const QString &default_value) {
+    svgscene::CssAttributes attrs = qvariant_cast<svgscene::CssAttributes>(
+        root->data(Types::DataKey::CssAttributes));
+    return attrs.value(attr_name, default_value);
+}
+
 template<typename TT>
 template<typename T>
 SvgDomTree<T> SvgDomTree<TT>::findFromParent(
@@ -134,39 +155,12 @@ SvgDomTree<T>
 SvgDomTree<TT>::find(const QString &attr_name, const QString &attr_value) {
     return findFromParent<T>(root, attr_name, attr_value);
 }
+
 template<typename TT>
 template<typename T>
 QList<SvgDomTree<T>>
 SvgDomTree<TT>::findAll(const QString &attr_name, const QString &attr_value) {
     return findAllFromParent<T>(root, attr_name, attr_value);
-}
-template<typename TT>
-TT *SvgDomTree<TT>::getElement() const {
-    return root;
-}
-
-template<typename T>
-SvgDomTree<T>::SvgDomTree(QGraphicsItem *root)
-    : root(dynamic_cast<T *>(root)) {
-    throw std::out_of_range("Cannot build dom tree with nullptr item.")
-}
-
-template<typename T>
-QString SvgDomTree<T>::getAttrValueOr(
-    const QString &attr_name,
-    const QString &default_value) {
-    svgscene::XmlAttributes attrs = qvariant_cast<svgscene::XmlAttributes>(
-        root->data(Types::DataKey::XmlAttributes));
-    return attrs.value(attr_name, default_value);
-}
-
-template<typename T>
-QString SvgDomTree<T>::getCssValueOr(
-    const QString &attr_name,
-    const QString &default_value) {
-    svgscene::CssAttributes attrs = qvariant_cast<svgscene::CssAttributes>(
-        root->data(Types::DataKey::CssAttributes));
-    return attrs.value(attr_name, default_value);
 }
 
 } // namespace svgscene
