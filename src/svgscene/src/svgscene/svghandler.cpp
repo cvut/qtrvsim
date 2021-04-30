@@ -1,10 +1,10 @@
 ﻿#include "svghandler.h"
 
-#include "groupitem.h"
-#include "log.h"
-#include "simpletextitem.h"
-#include "svg-spec.h"
+#include "components/groupitem.h"
+#include "components/simpletextitem.h"
+#include "svgspec.h"
 #include "types.h"
+#include "utils/logging.h"
 
 #include <QFontMetrics>
 #include <QGraphicsItem>
@@ -14,8 +14,7 @@
 #include <QXmlStreamReader>
 #include <QtMath>
 
-#define LOG nCInfo("svg")
-#define DEBUG nCDebug("svg")
+LOG_CATEGORY("svgscene.parsing");
 
 namespace svgscene {
 
@@ -159,30 +158,29 @@ static QVector<qreal> parseNumbersList(const QChar *&str) {
     return points;
 }
 
-static QVector<qreal> parsePercentageList(const QChar *&str)
-{
-	QVector<qreal> points;
-	if (!str)
-		return points;
-	while (str->isSpace())
-		++str;
-	while ((*str >= QLatin1Char('0') && *str <= QLatin1Char('9')) ||
-		   *str == QLatin1Char('-') || *str == QLatin1Char('+') ||
-		   *str == QLatin1Char('.')) {
-		points.append(toDouble(str));
-		while (str->isSpace())
-			++str;
-		if (*str == QLatin1Char('%'))
-			++str;
-		while (str->isSpace())
-			++str;
-		if (*str == QLatin1Char(','))
-			++str;
-		//eat the rest of space
-		while (str->isSpace())
-			++str;
-	}
-	return points;
+static QVector<qreal> parsePercentageList(const QChar *&str) {
+    QVector<qreal> points;
+    if (!str)
+        return points;
+    while (str->isSpace())
+        ++str;
+    while ((*str >= QLatin1Char('0') && *str <= QLatin1Char('9'))
+           || *str == QLatin1Char('-') || *str == QLatin1Char('+')
+           || *str == QLatin1Char('.')) {
+        points.append(toDouble(str));
+        while (str->isSpace())
+            ++str;
+        if (*str == QLatin1Char('%'))
+            ++str;
+        while (str->isSpace())
+            ++str;
+        if (*str == QLatin1Char(','))
+            ++str;
+        // eat the rest of space
+        while (str->isSpace())
+            ++str;
+    }
+    return points;
 }
 
 static inline int qsvg_h2i(char hex) {
@@ -245,70 +243,67 @@ bool qsvg_get_hex_rgb(const QChar *str, int len, QRgb *rgb) {
     return qsvg_get_hex_rgb(tmp, rgb);
 }
 
-static QColor parseColor(const QString &color, const QString &opacity)
-{
-	QColor ret;
-	{
-		QStringRef color_str = QStringRef(&color).trimmed();
-		if (color_str.isEmpty())
-			return ret;
-		switch(color_str.at(0).unicode()) {
-		case '#':
-		{
-			// #rrggbb is very very common, so let's tackle it here
-			// rather than falling back to QColor
-			QRgb rgb;
-			bool ok = qsvg_get_hex_rgb(color_str.unicode(), color_str.length(), &rgb);
-			if (ok)
-				ret.setRgb(rgb);
-			break;
-		}
-		case 'r':
-		{
-			// starts with "rgb(", ends with ")" and consists of at least 7 characters "rgb(,,)"
-			if (color_str.length() >= 7 && color_str.at(color_str.length() - 1) == QLatin1Char(')')
-					&& QStringRef(color_str.string(), color_str.position(), 4) == QLatin1String("rgb(")) {
-				const QChar *s = color_str.constData() + 4;
-				QVector<qreal> compo = parseNumbersList(s);
-				//1 means that it failed after reaching non-parsable
-				//character which is going to be "%"
-				if (compo.size() == 1) {
-					s = color_str.constData() + 4;
-					compo = parsePercentageList(s);
-					for (double & i : compo)
-						i *= (qreal)2.55;
-				}
-				if (compo.size() == 3) {
-					ret = QColor(int(compo[0]),
-							int(compo[1]),
-							int(compo[2]));
-				}
-			}
-			break;
-		}
-		case 'c':
-			if (color_str == QLatin1String("currentColor")) {
-				//color = handler->currentColor();
-				return ret;
-			}
-			break;
-		case 'i':
-			if (color_str == QLatin1String("inherit"))
-				return ret;
-			break;
-		default:
-			ret = QColor(color_str.toString());
-			break;
-		}
-	}
-	if (!opacity.isEmpty() && ret.isValid()) {
-		bool ok = true;
-		qreal op = qMin(qreal(1.0), qMax(qreal(0.0), toDouble(opacity, &ok)));
-		if (!ok)
-			op = 1.0;
-		ret.setAlphaF(op);
-	}
-	return ret;
+static QColor parseColor(const QString &color, const QString &opacity) {
+    QColor ret;
+    {
+        QStringRef color_str = QStringRef(&color).trimmed();
+        if (color_str.isEmpty())
+            return ret;
+        switch (color_str.at(0).unicode()) {
+        case '#': {
+            // #rrggbb is very very common, so let's tackle it here
+            // rather than falling back to QColor
+            QRgb rgb;
+            bool ok = qsvg_get_hex_rgb(
+                color_str.unicode(), color_str.length(), &rgb);
+            if (ok)
+                ret.setRgb(rgb);
+            break;
+        }
+        case 'r': {
+            // starts with "rgb(", ends with ")" and consists of at least 7
+            // characters "rgb(,,)"
+            if (color_str.length() >= 7
+                && color_str.at(color_str.length() - 1) == QLatin1Char(')')
+                && QStringRef(color_str.string(), color_str.position(), 4)
+                       == QLatin1String("rgb(")) {
+                const QChar *s = color_str.constData() + 4;
+                QVector<qreal> compo = parseNumbersList(s);
+                // 1 means that it failed after reaching non-parsable
+                // character which is going to be "%"
+                if (compo.size() == 1) {
+                    s = color_str.constData() + 4;
+                    compo = parsePercentageList(s);
+                    for (double &i : compo)
+                        i *= (qreal)2.55;
+                }
+                if (compo.size() == 3) {
+                    ret = QColor(int(compo[0]), int(compo[1]), int(compo[2]));
+                }
+            }
+            break;
+        }
+        case 'c':
+            if (color_str == QLatin1String("currentColor")) {
+                // color = handler->currentColor();
+                return ret;
+            }
+            break;
+        case 'i':
+            if (color_str == QLatin1String("inherit"))
+                return ret;
+            break;
+        default: ret = QColor(color_str.toString()); break;
+        }
+    }
+    if (!opacity.isEmpty() && ret.isValid()) {
+        bool ok = true;
+        qreal op = qMin(qreal(1.0), qMax(qreal(0.0), toDouble(opacity, &ok)));
+        if (!ok)
+            op = 1.0;
+        ret.setAlphaF(op);
+    }
+    return ret;
 }
 
 static QMatrix parseTransformationMatrix(const QStringRef &value) {
@@ -563,332 +558,325 @@ static void pathArc(
     }
 }
 
-static bool parsePathDataFast(const QStringRef &dataStr, QPainterPath &path)
-{
-	qreal x0 = 0, y0 = 0;              // starting point
-	qreal x = 0, y = 0;                // current point
-	char lastMode = 0;
-	QPointF ctrlPt;
-	const QChar *str = dataStr.constData();
-	const QChar *end = str + dataStr.size();
-	while (str != end) {
-		while (str->isSpace())
-			++str;
-		QChar pathElem = *str;
-		++str;
-		QChar endc = *end;
-		*const_cast<QChar *>(end) = 0; // parseNumbersArray requires 0-termination that QStringRef cannot guarantee
-		QVarLengthArray<qreal, 8> arg;
-		parseNumbersArray(str, arg);
-		*const_cast<QChar *>(end) = endc;
-		if (pathElem == QLatin1Char('z') || pathElem == QLatin1Char('Z'))
-			arg.append(0);//dummy
-		const qreal *num = arg.constData();
-		int count = arg.count();
-		while (count > 0) {
-			qreal offsetX = x;        // correction offsets
-			qreal offsetY = y;        // for relative commands
-			switch (pathElem.unicode()) {
-			case 'm': {
-				if (count < 2) {
-					num++;
-					count--;
-					break;
-				}
-				x = x0 = num[0] + offsetX;
-				y = y0 = num[1] + offsetY;
-				num += 2;
-				count -= 2;
-				path.moveTo(x0, y0);
-				// As per 1.2  spec 8.3.2 The "moveto" commands
-				// If a 'moveto' is followed by multiple pairs of coordinates without explicit commands,
-				// the subsequent pairs shall be treated as implicit 'lineto' commands.
-				pathElem = QLatin1Char('l');
-			}
-				break;
-			case 'M': {
-				if (count < 2) {
-					num++;
-					count--;
-					break;
-				}
-				x = x0 = num[0];
-				y = y0 = num[1];
-				num += 2;
-				count -= 2;
-				path.moveTo(x0, y0);
-				// As per 1.2  spec 8.3.2 The "moveto" commands
-				// If a 'moveto' is followed by multiple pairs of coordinates without explicit commands,
-				// the subsequent pairs shall be treated as implicit 'lineto' commands.
-				pathElem = QLatin1Char('L');
-			}
-				break;
-			case 'z':
-			case 'Z': {
-				x = x0;
-				y = y0;
-				count--; // skip dummy
-				num++;
-				path.closeSubpath();
-			}
-				break;
-			case 'l': {
-				if (count < 2) {
-					num++;
-					count--;
-					break;
-				}
-				x = num[0] + offsetX;
-				y = num[1] + offsetY;
-				num += 2;
-				count -= 2;
-				path.lineTo(x, y);
-			}
-				break;
-			case 'L': {
-				if (count < 2) {
-					num++;
-					count--;
-					break;
-				}
-				x = num[0];
-				y = num[1];
-				num += 2;
-				count -= 2;
-				path.lineTo(x, y);
-			}
-				break;
-			case 'h': {
-				x = num[0] + offsetX;
-				num++;
-				count--;
-				path.lineTo(x, y);
-			}
-				break;
-			case 'H': {
-				x = num[0];
-				num++;
-				count--;
-				path.lineTo(x, y);
-			}
-				break;
-			case 'v': {
-				y = num[0] + offsetY;
-				num++;
-				count--;
-				path.lineTo(x, y);
-			}
-				break;
-			case 'V': {
-				y = num[0];
-				num++;
-				count--;
-				path.lineTo(x, y);
-			}
-				break;
-			case 'c': {
-				if (count < 6) {
-					num += count;
-					count = 0;
-					break;
-				}
-				QPointF c1(num[0] + offsetX, num[1] + offsetY);
-				QPointF c2(num[2] + offsetX, num[3] + offsetY);
-				QPointF e(num[4] + offsetX, num[5] + offsetY);
-				num += 6;
-				count -= 6;
-				path.cubicTo(c1, c2, e);
-				ctrlPt = c2;
-				x = e.x();
-				y = e.y();
-				break;
-			}
-			case 'C': {
-				if (count < 6) {
-					num += count;
-					count = 0;
-					break;
-				}
-				QPointF c1(num[0], num[1]);
-				QPointF c2(num[2], num[3]);
-				QPointF e(num[4], num[5]);
-				num += 6;
-				count -= 6;
-				path.cubicTo(c1, c2, e);
-				ctrlPt = c2;
-				x = e.x();
-				y = e.y();
-				break;
-			}
-			case 's': {
-				if (count < 4) {
-					num += count;
-					count = 0;
-					break;
-				}
-				QPointF c1;
-				if (lastMode == 'c' || lastMode == 'C' ||
-						lastMode == 's' || lastMode == 'S')
-					c1 = QPointF(2*x-ctrlPt.x(), 2*y-ctrlPt.y());
-				else
-					c1 = QPointF(x, y);
-				QPointF c2(num[0] + offsetX, num[1] + offsetY);
-				QPointF e(num[2] + offsetX, num[3] + offsetY);
-				num += 4;
-				count -= 4;
-				path.cubicTo(c1, c2, e);
-				ctrlPt = c2;
-				x = e.x();
-				y = e.y();
-				break;
-			}
-			case 'S': {
-				if (count < 4) {
-					num += count;
-					count = 0;
-					break;
-				}
-				QPointF c1;
-				if (lastMode == 'c' || lastMode == 'C' ||
-						lastMode == 's' || lastMode == 'S')
-					c1 = QPointF(2*x-ctrlPt.x(), 2*y-ctrlPt.y());
-				else
-					c1 = QPointF(x, y);
-				QPointF c2(num[0], num[1]);
-				QPointF e(num[2], num[3]);
-				num += 4;
-				count -= 4;
-				path.cubicTo(c1, c2, e);
-				ctrlPt = c2;
-				x = e.x();
-				y = e.y();
-				break;
-			}
-			case 'q': {
-				if (count < 4) {
-					num += count;
-					count = 0;
-					break;
-				}
-				QPointF c(num[0] + offsetX, num[1] + offsetY);
-				QPointF e(num[2] + offsetX, num[3] + offsetY);
-				num += 4;
-				count -= 4;
-				path.quadTo(c, e);
-				ctrlPt = c;
-				x = e.x();
-				y = e.y();
-				break;
-			}
-			case 'Q': {
-				if (count < 4) {
-					num += count;
-					count = 0;
-					break;
-				}
-				QPointF c(num[0], num[1]);
-				QPointF e(num[2], num[3]);
-				num += 4;
-				count -= 4;
-				path.quadTo(c, e);
-				ctrlPt = c;
-				x = e.x();
-				y = e.y();
-				break;
-			}
-			case 't': {
-				if (count < 2) {
-					num += count;
-					count = 0;
-					break;
-				}
-				QPointF e(num[0] + offsetX, num[1] + offsetY);
-				num += 2;
-				count -= 2;
-				QPointF c;
-				if (lastMode == 'q' || lastMode == 'Q' ||
-						lastMode == 't' || lastMode == 'T')
-					c = QPointF(2*x-ctrlPt.x(), 2*y-ctrlPt.y());
-				else
-					c = QPointF(x, y);
-				path.quadTo(c, e);
-				ctrlPt = c;
-				x = e.x();
-				y = e.y();
-				break;
-			}
-			case 'T': {
-				if (count < 2) {
-					num += count;
-					count = 0;
-					break;
-				}
-				QPointF e(num[0], num[1]);
-				num += 2;
-				count -= 2;
-				QPointF c;
-				if (lastMode == 'q' || lastMode == 'Q' ||
-						lastMode == 't' || lastMode == 'T')
-					c = QPointF(2*x-ctrlPt.x(), 2*y-ctrlPt.y());
-				else
-					c = QPointF(x, y);
-				path.quadTo(c, e);
-				ctrlPt = c;
-				x = e.x();
-				y = e.y();
-				break;
-			}
-			case 'a': {
-				if (count < 7) {
-					num += count;
-					count = 0;
-					break;
-				}
-				qreal rx = (*num++);
-				qreal ry = (*num++);
-				qreal xAxisRotation = (*num++);
-				qreal largeArcFlag  = (*num++);
-				qreal sweepFlag = (*num++);
-				qreal ex = (*num++) + offsetX;
-				qreal ey = (*num++) + offsetY;
-				count -= 7;
-				qreal curx = x;
-				qreal cury = y;
-				pathArc(path, rx, ry, xAxisRotation, int(largeArcFlag),
-						int(sweepFlag), ex, ey, curx, cury);
-				x = ex;
-				y = ey;
-			}
-				break;
-			case 'A': {
-				if (count < 7) {
-					num += count;
-					count = 0;
-					break;
-				}
-				qreal rx = (*num++);
-				qreal ry = (*num++);
-				qreal xAxisRotation = (*num++);
-				qreal largeArcFlag  = (*num++);
-				qreal sweepFlag = (*num++);
-				qreal ex = (*num++);
-				qreal ey = (*num++);
-				count -= 7;
-				qreal curx = x;
-				qreal cury = y;
-				pathArc(path, rx, ry, xAxisRotation, int(largeArcFlag),
-						int(sweepFlag), ex, ey, curx, cury);
-				x = ex;
-				y = ey;
-			}
-				break;
-			default:
-				return false;
-			}
-			lastMode = pathElem.toLatin1();
-		}
-	}
-	return true;
+static bool parsePathDataFast(const QStringRef &dataStr, QPainterPath &path) {
+    qreal x0 = 0, y0 = 0; // starting point
+    qreal x = 0, y = 0;   // current point
+    char lastMode = 0;
+    QPointF ctrlPt;
+    const QChar *str = dataStr.constData();
+    const QChar *end = str + dataStr.size();
+    while (str != end) {
+        while (str->isSpace())
+            ++str;
+        QChar pathElem = *str;
+        ++str;
+        QChar endc = *end;
+        *const_cast<QChar *>(end) = 0; // parseNumbersArray requires
+                                       // 0-termination that QStringRef cannot
+                                       // guarantee
+        QVarLengthArray<qreal, 8> arg;
+        parseNumbersArray(str, arg);
+        *const_cast<QChar *>(end) = endc;
+        if (pathElem == QLatin1Char('z') || pathElem == QLatin1Char('Z'))
+            arg.append(0); // dummy
+        const qreal *num = arg.constData();
+        int count = arg.count();
+        while (count > 0) {
+            qreal offsetX = x; // correction offsets
+            qreal offsetY = y; // for relative commands
+            switch (pathElem.unicode()) {
+            case 'm': {
+                if (count < 2) {
+                    num++;
+                    count--;
+                    break;
+                }
+                x = x0 = num[0] + offsetX;
+                y = y0 = num[1] + offsetY;
+                num += 2;
+                count -= 2;
+                path.moveTo(x0, y0);
+                // As per 1.2  spec 8.3.2 The "moveto" commands
+                // If a 'moveto' is followed by multiple pairs of coordinates
+                // without explicit commands, the subsequent pairs shall be
+                // treated as implicit 'lineto' commands.
+                pathElem = QLatin1Char('l');
+            } break;
+            case 'M': {
+                if (count < 2) {
+                    num++;
+                    count--;
+                    break;
+                }
+                x = x0 = num[0];
+                y = y0 = num[1];
+                num += 2;
+                count -= 2;
+                path.moveTo(x0, y0);
+                // As per 1.2  spec 8.3.2 The "moveto" commands
+                // If a 'moveto' is followed by multiple pairs of coordinates
+                // without explicit commands, the subsequent pairs shall be
+                // treated as implicit 'lineto' commands.
+                pathElem = QLatin1Char('L');
+            } break;
+            case 'z':
+            case 'Z': {
+                x = x0;
+                y = y0;
+                count--; // skip dummy
+                num++;
+                path.closeSubpath();
+            } break;
+            case 'l': {
+                if (count < 2) {
+                    num++;
+                    count--;
+                    break;
+                }
+                x = num[0] + offsetX;
+                y = num[1] + offsetY;
+                num += 2;
+                count -= 2;
+                path.lineTo(x, y);
+            } break;
+            case 'L': {
+                if (count < 2) {
+                    num++;
+                    count--;
+                    break;
+                }
+                x = num[0];
+                y = num[1];
+                num += 2;
+                count -= 2;
+                path.lineTo(x, y);
+            } break;
+            case 'h': {
+                x = num[0] + offsetX;
+                num++;
+                count--;
+                path.lineTo(x, y);
+            } break;
+            case 'H': {
+                x = num[0];
+                num++;
+                count--;
+                path.lineTo(x, y);
+            } break;
+            case 'v': {
+                y = num[0] + offsetY;
+                num++;
+                count--;
+                path.lineTo(x, y);
+            } break;
+            case 'V': {
+                y = num[0];
+                num++;
+                count--;
+                path.lineTo(x, y);
+            } break;
+            case 'c': {
+                if (count < 6) {
+                    num += count;
+                    count = 0;
+                    break;
+                }
+                QPointF c1(num[0] + offsetX, num[1] + offsetY);
+                QPointF c2(num[2] + offsetX, num[3] + offsetY);
+                QPointF e(num[4] + offsetX, num[5] + offsetY);
+                num += 6;
+                count -= 6;
+                path.cubicTo(c1, c2, e);
+                ctrlPt = c2;
+                x = e.x();
+                y = e.y();
+                break;
+            }
+            case 'C': {
+                if (count < 6) {
+                    num += count;
+                    count = 0;
+                    break;
+                }
+                QPointF c1(num[0], num[1]);
+                QPointF c2(num[2], num[3]);
+                QPointF e(num[4], num[5]);
+                num += 6;
+                count -= 6;
+                path.cubicTo(c1, c2, e);
+                ctrlPt = c2;
+                x = e.x();
+                y = e.y();
+                break;
+            }
+            case 's': {
+                if (count < 4) {
+                    num += count;
+                    count = 0;
+                    break;
+                }
+                QPointF c1;
+                if (lastMode == 'c' || lastMode == 'C' || lastMode == 's'
+                    || lastMode == 'S')
+                    c1 = QPointF(2 * x - ctrlPt.x(), 2 * y - ctrlPt.y());
+                else
+                    c1 = QPointF(x, y);
+                QPointF c2(num[0] + offsetX, num[1] + offsetY);
+                QPointF e(num[2] + offsetX, num[3] + offsetY);
+                num += 4;
+                count -= 4;
+                path.cubicTo(c1, c2, e);
+                ctrlPt = c2;
+                x = e.x();
+                y = e.y();
+                break;
+            }
+            case 'S': {
+                if (count < 4) {
+                    num += count;
+                    count = 0;
+                    break;
+                }
+                QPointF c1;
+                if (lastMode == 'c' || lastMode == 'C' || lastMode == 's'
+                    || lastMode == 'S')
+                    c1 = QPointF(2 * x - ctrlPt.x(), 2 * y - ctrlPt.y());
+                else
+                    c1 = QPointF(x, y);
+                QPointF c2(num[0], num[1]);
+                QPointF e(num[2], num[3]);
+                num += 4;
+                count -= 4;
+                path.cubicTo(c1, c2, e);
+                ctrlPt = c2;
+                x = e.x();
+                y = e.y();
+                break;
+            }
+            case 'q': {
+                if (count < 4) {
+                    num += count;
+                    count = 0;
+                    break;
+                }
+                QPointF c(num[0] + offsetX, num[1] + offsetY);
+                QPointF e(num[2] + offsetX, num[3] + offsetY);
+                num += 4;
+                count -= 4;
+                path.quadTo(c, e);
+                ctrlPt = c;
+                x = e.x();
+                y = e.y();
+                break;
+            }
+            case 'Q': {
+                if (count < 4) {
+                    num += count;
+                    count = 0;
+                    break;
+                }
+                QPointF c(num[0], num[1]);
+                QPointF e(num[2], num[3]);
+                num += 4;
+                count -= 4;
+                path.quadTo(c, e);
+                ctrlPt = c;
+                x = e.x();
+                y = e.y();
+                break;
+            }
+            case 't': {
+                if (count < 2) {
+                    num += count;
+                    count = 0;
+                    break;
+                }
+                QPointF e(num[0] + offsetX, num[1] + offsetY);
+                num += 2;
+                count -= 2;
+                QPointF c;
+                if (lastMode == 'q' || lastMode == 'Q' || lastMode == 't'
+                    || lastMode == 'T')
+                    c = QPointF(2 * x - ctrlPt.x(), 2 * y - ctrlPt.y());
+                else
+                    c = QPointF(x, y);
+                path.quadTo(c, e);
+                ctrlPt = c;
+                x = e.x();
+                y = e.y();
+                break;
+            }
+            case 'T': {
+                if (count < 2) {
+                    num += count;
+                    count = 0;
+                    break;
+                }
+                QPointF e(num[0], num[1]);
+                num += 2;
+                count -= 2;
+                QPointF c;
+                if (lastMode == 'q' || lastMode == 'Q' || lastMode == 't'
+                    || lastMode == 'T')
+                    c = QPointF(2 * x - ctrlPt.x(), 2 * y - ctrlPt.y());
+                else
+                    c = QPointF(x, y);
+                path.quadTo(c, e);
+                ctrlPt = c;
+                x = e.x();
+                y = e.y();
+                break;
+            }
+            case 'a': {
+                if (count < 7) {
+                    num += count;
+                    count = 0;
+                    break;
+                }
+                qreal rx = (*num++);
+                qreal ry = (*num++);
+                qreal xAxisRotation = (*num++);
+                qreal largeArcFlag = (*num++);
+                qreal sweepFlag = (*num++);
+                qreal ex = (*num++) + offsetX;
+                qreal ey = (*num++) + offsetY;
+                count -= 7;
+                qreal curx = x;
+                qreal cury = y;
+                pathArc(
+                    path, rx, ry, xAxisRotation, int(largeArcFlag),
+                    int(sweepFlag), ex, ey, curx, cury);
+                x = ex;
+                y = ey;
+            } break;
+            case 'A': {
+                if (count < 7) {
+                    num += count;
+                    count = 0;
+                    break;
+                }
+                qreal rx = (*num++);
+                qreal ry = (*num++);
+                qreal xAxisRotation = (*num++);
+                qreal largeArcFlag = (*num++);
+                qreal sweepFlag = (*num++);
+                qreal ex = (*num++);
+                qreal ey = (*num++);
+                count -= 7;
+                qreal curx = x;
+                qreal cury = y;
+                pathArc(
+                    path, rx, ry, xAxisRotation, int(largeArcFlag),
+                    int(sweepFlag), ex, ey, curx, cury);
+                x = ex;
+                y = ey;
+            } break;
+            default: return false;
+            }
+            lastMode = pathElem.toLatin1();
+        }
+    }
+    return true;
 }
 
 SvgHandler::SvgHandler(QGraphicsScene *scene) : m_scene(scene) {}
@@ -928,9 +916,9 @@ void SvgHandler::parse() {
             el.styleAttributes = m_elementStack.last().styleAttributes;
             el.xmlAttributes
                 = parseXmlAttributes(m_xml->attributes(), el.styleAttributes);
-            DEBUG << QString(m_elementStack.count(), '-') << ">"
-                  << "+ start element:" << el.name
-                  << "id:" << el.xmlAttributes.value("id");
+            DEBUG() << QString(m_elementStack.count(), '-') << ">"
+                    << "+ start element:" << el.name
+                    << "id:" << el.xmlAttributes.value("id");
             mergeCSSAttributes(
                 el.styleAttributes, QStringLiteral("style"), el.xmlAttributes);
             m_elementStack.push(el);
@@ -940,9 +928,9 @@ void SvgHandler::parse() {
         }
         case QXmlStreamReader::EndElement: {
             SvgElement svg_element = m_elementStack.pop();
-            DEBUG << QString(m_elementStack.count(), '-') << ">"
-                  << "- end element:" << m_xml->name()
-                  << "item created:" << svg_element.itemCreated;
+            DEBUG() << QString(m_elementStack.count(), '-') << ">"
+                    << "- end element:" << m_xml->name()
+                    << "item created:" << svg_element.itemCreated;
             if (svg_element.itemCreated && m_topLevelItem) {
                 // logSvgI() << "m_topLevelItem:" << m_topLevelItem << typeid
                 // (*m_topLevelItem).name() << svg_element.name;
@@ -952,14 +940,14 @@ void SvgHandler::parse() {
             break;
         }
         case QXmlStreamReader::Characters: {
-            DEBUG << "characters element:"
-                  << m_xml->text(); // << typeid (*m_topLevelItem).name();
+            DEBUG() << "characters element:"
+                    << m_xml->text(); // << typeid (*m_topLevelItem).name();
             if (auto *text_item
                 = dynamic_cast<SimpleTextItem *>(m_topLevelItem)) {
                 QString text = text_item->text();
                 if (!text.isEmpty())
                     text += '\n';
-                DEBUG << text_item->text() << "+" << m_xml->text().toString();
+                DEBUG() << text_item->text() << "+" << m_xml->text().toString();
                 text_item->setText(text + m_xml->text().toString());
             } else if (
                 auto *text_item
@@ -970,7 +958,7 @@ void SvgHandler::parse() {
                 text_item->setPlainText(text + m_xml->text());
                 // nInfo() << text_item->toPlainText();
             } else {
-                DEBUG
+                DEBUG()
                     << "characters are not part of text item, will be ignored";
                 // nWarning() << "top:" << m_topLevelItem << (m_topLevelItem?
                 // typeid (*m_topLevelItem).name(): "NULL");
@@ -978,9 +966,9 @@ void SvgHandler::parse() {
             break;
         }
         case QXmlStreamReader::ProcessingInstruction:
-            DEBUG << "ProcessingInstruction:"
-                  << m_xml->processingInstructionTarget()
-                  << m_xml->processingInstructionData();
+            DEBUG() << "ProcessingInstruction:"
+                    << m_xml->processingInstructionTarget()
+                    << m_xml->processingInstructionData();
             // processingInstruction(xml->processingInstructionTarget().toString(),
             // xml->processingInstructionData().toString());
             break;
@@ -989,140 +977,145 @@ void SvgHandler::parse() {
     }
 }
 
-bool SvgHandler::startElement()
-{
-	const SvgElement &el = m_elementStack.last();
-	if (!m_topLevelItem) {
-		if (el.name == QLatin1String("svg")) {
-			m_topLevelItem = new QGraphicsRectItem();
-			m_scene->addItem(m_topLevelItem);
-			return true;
-		}
-		else {
-			nWarning() << "unsupported root element:" << el.name;
-		}
-		return false;
-	}
-	else {
-		if (el.name == QLatin1String("g")) {
-			QGraphicsItem *item = createGroupItem(el);
-			if(item) {
-				setXmlAttributes(item, el);
-				if(auto *rect_item = dynamic_cast<QGraphicsRectItem*>(item)) {
-					setStyle(rect_item, el.xmlAttributes);
-				}
-				setTransform(item, el.xmlAttributes.value(QStringLiteral("transform")));
-				addItem(item);
-				return true;
-			}
-			return false;
-		}
-		else if (el.name == QLatin1String("rect")) {
-			qreal x = el.xmlAttributes.value(QStringLiteral("x")).toDouble();
-			qreal y = el.xmlAttributes.value(QStringLiteral("y")).toDouble();
-			qreal w = el.xmlAttributes.value(QStringLiteral("width")).toDouble();
-			qreal h = el.xmlAttributes.value(QStringLiteral("height")).toDouble();
-			if(auto *text_item = dynamic_cast<QGraphicsTextItem*>(m_topLevelItem)) {
-				QTransform t;
-				t.translate(x, y);
-				text_item->setTransform(t, true);
-				text_item->setTextWidth(w);
-				return false;
-			}
-			else {
-				auto *item = new QGraphicsRectItem();
-				setXmlAttributes(item, el);
-				item->setRect(QRectF(x, y, w, h));
-				setStyle(item, el.styleAttributes);
-				setTransform(item, el.xmlAttributes.value(QStringLiteral("transform")));
-				addItem(item);
-				return true;
-			}
-		}
-		else if (el.name == QLatin1String("circle")) {
-			auto *item = new QGraphicsEllipseItem();
-			setXmlAttributes(item, el);
-			qreal cx = toDouble(el.xmlAttributes.value(QStringLiteral("cx")));
-			qreal cy = toDouble(el.xmlAttributes.value(QStringLiteral("cy")));
-			qreal rx = toDouble(el.xmlAttributes.value(QStringLiteral("r")));
-			QRectF r(0, 0, 2*rx, 2*rx);
-			r.translate(cx - rx, cy - rx);
-			item->setRect(r);
-			setStyle(item, el.styleAttributes);
-			setTransform(item, el.xmlAttributes.value(QStringLiteral("transform")));
-			addItem(item);
-			return true;
-		}
-		else if (el.name == QLatin1String("ellipse")) {
-			auto *item = new QGraphicsEllipseItem();
-			setXmlAttributes(item, el);
-			qreal cx = toDouble(el.xmlAttributes.value(QStringLiteral("cx")));
-			qreal cy = toDouble(el.xmlAttributes.value(QStringLiteral("cy")));
-			qreal rx = toDouble(el.xmlAttributes.value(QStringLiteral("rx")));
-			qreal ry = toDouble(el.xmlAttributes.value(QStringLiteral("ry")));
-			QRectF r(0, 0, 2*rx, 2*ry);
-			r.translate(cx - rx, cy - ry);
-			item->setRect(r);
-			setStyle(item, el.styleAttributes);
-			setTransform(item, el.xmlAttributes.value(QStringLiteral("transform")));
-			addItem(item);
-			return true;
-		}
-		else if (el.name == QLatin1String("path")) {
-			auto *item = new QGraphicsPathItem();
-			setXmlAttributes(item, el);
-			QString data = el.xmlAttributes.value(QStringLiteral("d"));
-			QPainterPath p;
-			parsePathDataFast(QStringRef(&data), p);
-			setStyle(item, el.styleAttributes);
-			static auto FILL_RULE = QStringLiteral("fill-rule");
-			if(el.styleAttributes.value(FILL_RULE) == QLatin1String("evenodd"))
-				p.setFillRule(Qt::OddEvenFill);
-			else
-				p.setFillRule(Qt::WindingFill);
-			item->setPath(p);
-			setTransform(item, el.xmlAttributes.value(QStringLiteral("transform")));
-			addItem(item);
-			return true;
-		}
-		else if (el.name == QLatin1String("text")) {
-			auto *item = new QGraphicsRectItem();
-			setXmlAttributes(item, el);
-			//qreal x = attributes.value(QLatin1String("x")).toDouble();
-			//qreal y = attributes.value(QLatin1String("y")).toDouble();
-			//text->setPos(x, y);
-			setStyle(item, el.styleAttributes);
-			setTransform(item, el.xmlAttributes.value(QStringLiteral("transform")));
-			addItem(item);
-			return true;
-		}
-		else if (el.name == QLatin1String("tspan")) {
-			auto *item = new SimpleTextItem(el.styleAttributes);
-			setXmlAttributes(item, el);
-			qreal x = toDouble(el.xmlAttributes.value(QStringLiteral("x")));
-			qreal y = toDouble(el.xmlAttributes.value(QStringLiteral("y")));
-			//text->setPos(x, y);
-			setStyle(item, el.styleAttributes);
-			setTextStyle(item, el.styleAttributes);
-			setTransform(item, el.xmlAttributes.value(QStringLiteral("transform")));
-			QFontMetricsF fm(item->font());
-			QTransform t;
-			t.translate(x, y - fm.ascent());
-			item->setTransform(t, true);
-			addItem(item);
-			return true;
-		}
-		else if (el.name == QLatin1String("flowRoot")) {
-			auto *item = new QGraphicsTextItem();
-			setXmlAttributes(item, el);
-			//nWarning() << "FlowRoot:" << (QGraphicsItem*)item;
-			setTextStyle(item, el.styleAttributes);
-			setTransform(item, el.xmlAttributes.value(QStringLiteral("transform")));
-			addItem(item);
-			return true;
-		}
-		else {
-            LOG << "unsupported element:" << el.name;
+bool SvgHandler::startElement() {
+    const SvgElement &el = m_elementStack.last();
+    if (!m_topLevelItem) {
+        if (el.name == QLatin1String("svg")) {
+            m_topLevelItem = new QGraphicsRectItem();
+            m_scene->addItem(m_topLevelItem);
+            root = m_topLevelItem;
+            return true;
+        } else {
+            WARN() << "unsupported root element:" << el.name;
+        }
+        return false;
+    } else {
+        if (el.name == QLatin1String("g") || el.name == QLatin1String("a")) {
+            QGraphicsItem *item = createGroupItem(el);
+            if (item) {
+                setXmlAttributes(item, el);
+                if (auto *rect_item = dynamic_cast<QGraphicsRectItem *>(item)) {
+                    setStyle(rect_item, el.xmlAttributes);
+                }
+                setTransform(
+                    item, el.xmlAttributes.value(QStringLiteral("transform")));
+                addItem(item);
+                return true;
+            }
+            return false;
+        } else if (el.name == QLatin1String("rect")) {
+            qreal x = el.xmlAttributes.value(QStringLiteral("x")).toDouble();
+            qreal y = el.xmlAttributes.value(QStringLiteral("y")).toDouble();
+            qreal w
+                = el.xmlAttributes.value(QStringLiteral("width")).toDouble();
+            qreal h
+                = el.xmlAttributes.value(QStringLiteral("height")).toDouble();
+            if (auto *text_item
+                = dynamic_cast<QGraphicsTextItem *>(m_topLevelItem)) {
+                QTransform t;
+                t.translate(x, y);
+                text_item->setTransform(t, true);
+                text_item->setTextWidth(w);
+                return false;
+            } else {
+                auto *item = new QGraphicsRectItem();
+                setXmlAttributes(item, el);
+                item->setRect(QRectF(x, y, w, h));
+                setStyle(item, el.styleAttributes);
+                setTransform(
+                    item, el.xmlAttributes.value(QStringLiteral("transform")));
+                addItem(item);
+                return true;
+            }
+        } else if (el.name == QLatin1String("circle")) {
+            auto *item = new QGraphicsEllipseItem();
+            setXmlAttributes(item, el);
+            qreal cx = toDouble(el.xmlAttributes.value(QStringLiteral("cx")));
+            qreal cy = toDouble(el.xmlAttributes.value(QStringLiteral("cy")));
+            qreal rx = toDouble(el.xmlAttributes.value(QStringLiteral("r")));
+            QRectF r(0, 0, 2 * rx, 2 * rx);
+            r.translate(cx - rx, cy - rx);
+            item->setRect(r);
+            setStyle(item, el.styleAttributes);
+            setTransform(
+                item, el.xmlAttributes.value(QStringLiteral("transform")));
+            addItem(item);
+            return true;
+        } else if (el.name == QLatin1String("ellipse")) {
+            auto *item = new QGraphicsEllipseItem();
+            setXmlAttributes(item, el);
+            qreal cx = toDouble(el.xmlAttributes.value(QStringLiteral("cx")));
+            qreal cy = toDouble(el.xmlAttributes.value(QStringLiteral("cy")));
+            qreal rx = toDouble(el.xmlAttributes.value(QStringLiteral("rx")));
+            qreal ry = toDouble(el.xmlAttributes.value(QStringLiteral("ry")));
+            QRectF r(0, 0, 2 * rx, 2 * ry);
+            r.translate(cx - rx, cy - ry);
+            item->setRect(r);
+            setStyle(item, el.styleAttributes);
+            setTransform(
+                item, el.xmlAttributes.value(QStringLiteral("transform")));
+            addItem(item);
+            return true;
+        } else if (el.name == QLatin1String("path")) {
+            auto *item = new QGraphicsPathItem();
+            setXmlAttributes(item, el);
+            QString data = el.xmlAttributes.value(QStringLiteral("d"));
+            QPainterPath p;
+            parsePathDataFast(QStringRef(&data), p);
+            setStyle(item, el.styleAttributes);
+            static auto FILL_RULE = QStringLiteral("fill-rule");
+            if (el.styleAttributes.value(FILL_RULE) == QLatin1String("evenodd"))
+                p.setFillRule(Qt::OddEvenFill);
+            else
+                p.setFillRule(Qt::WindingFill);
+            item->setPath(p);
+            setTransform(
+                item, el.xmlAttributes.value(QStringLiteral("transform")));
+            addItem(item);
+            return true;
+        } else if (el.name == QLatin1String("text")) {
+            auto *item = new SimpleTextItem(el.styleAttributes);
+            setXmlAttributes(item, el);
+            qreal x = toDouble(el.xmlAttributes.value(QStringLiteral("x")));
+            qreal y = toDouble(el.xmlAttributes.value(QStringLiteral("y")));
+            //            item->setPos(x, y);
+            setStyle(item, el.styleAttributes);
+            setTextStyle(item, el.styleAttributes);
+            setTransform(
+                item, el.xmlAttributes.value(QStringLiteral("transform")));
+            QFontMetricsF fm(item->font());
+            QTransform t;
+            t.translate(x, y - fm.ascent());
+            item->setTransform(t, true);
+            addItem(item);
+            return true;
+        } else if (el.name == QLatin1String("tspan")) {
+            auto *item = new SimpleTextItem(el.styleAttributes);
+            setXmlAttributes(item, el);
+            qreal x = toDouble(el.xmlAttributes.value(QStringLiteral("x")));
+            qreal y = toDouble(el.xmlAttributes.value(QStringLiteral("y")));
+            // text->setPos(x, y);
+            setStyle(item, el.styleAttributes);
+            setTextStyle(item, el.styleAttributes);
+            setTransform(
+                item, el.xmlAttributes.value(QStringLiteral("transform")));
+            QFontMetricsF fm(item->font());
+            QTransform t;
+            t.translate(x, y - fm.ascent());
+            item->setTransform(t, true);
+            addItem(item);
+            return true;
+        } else if (el.name == QLatin1String("flowRoot")) {
+            auto *item = new QGraphicsTextItem();
+            setXmlAttributes(item, el);
+            // nWarning() << "FlowRoot:" << (QGraphicsItem*)item;
+            setTextStyle(item, el.styleAttributes);
+            setTransform(
+                item, el.xmlAttributes.value(QStringLiteral("transform")));
+            addItem(item);
+            return true;
+        } else {
+            LOG() << "unsupported element:" << el.name;
         }
         return false;
     }
@@ -1144,44 +1137,21 @@ void SvgHandler::installVisuController(
 void SvgHandler::setXmlAttributes(
     QGraphicsItem *git,
     const SvgHandler::SvgElement &el) {
-    XmlAttributes attrs;
-    QMapIterator<QString, QString> it(el.xmlAttributes);
-    while (it.hasNext()) {
-        it.next();
-        const QString k = it.key();
-        if (k == Types::ATTR_SHV_PATH) {
-            git->setData(Types::DataKey::ShvPath, it.value());
-            attrs[k] = it.value();
-        } else if (k == Types::ATTR_SHV_TYPE) {
-            git->setData(Types::DataKey::ShvType, it.value());
-            attrs[k] = it.value();
-        } else if (k == Types::ATTR_SHV_VISU_TYPE) {
-            git->setData(Types::DataKey::ShvVisuType, it.value());
-            attrs[k] = it.value();
-        } else if (k == Types::ATTR_ID) {
-            git->setData(Types::DataKey::Id, it.value());
-            attrs[k] = it.value();
-        } else if (k == Types::ATTR_CHILD_ID) {
-            git->setData(Types::DataKey::ChildId, it.value());
-            attrs[k] = it.value();
-        }
-        if (it.key().startsWith(QStringLiteral("shv")))
-            attrs[it.key()] = it.value();
-    }
-    git->setData(Types::DataKey::XmlAttributes, QVariant::fromValue(attrs));
+    git->setData(
+        Types::DataKey::XmlAttributes, QVariant::fromValue(el.xmlAttributes));
     git->setData(
         Types::DataKey::CssAttributes, QVariant::fromValue(el.styleAttributes));
 }
 
-void SvgHandler::setTransform(QGraphicsItem *it, const QString &str_val)
-{
-	QStringRef transform(&str_val);
-	QMatrix mx = parseTransformationMatrix(transform.trimmed());
-	if(!mx.isIdentity()) {
-		QTransform t(mx);
-		//logSvgI() << typeid (*it).name() << "setting matrix:" << t.dx() << t.dy();
-		it->setTransform(t);
-	}
+void SvgHandler::setTransform(QGraphicsItem *it, const QString &str_val) {
+    QStringRef transform(&str_val);
+    QMatrix mx = parseTransformationMatrix(transform.trimmed());
+    if (!mx.isIdentity()) {
+        QTransform t(mx);
+        // logSvgI() << typeid (*it).name() << "setting matrix:" << t.dx() <<
+        // t.dy();
+        it->setTransform(t);
+    }
 }
 
 CssAttributes SvgHandler::parseXmlAttributes(
@@ -1274,8 +1244,7 @@ void SvgHandler::setStyle(
                 bool ok;
                 double d = s.toDouble(&ok);
                 if (!ok) {
-                    LOG << "Invalid stroke dash definition:"
-                        << dash_pattern.toStdString();
+                    LOG() << "Invalid stroke dash definition:" << dash_pattern;
                     arr.clear();
                     break;
                 }
@@ -1293,8 +1262,7 @@ void SvgHandler::setStyle(
             if (ok) {
                 pen.setDashOffset(d);
             } else {
-                LOG << "Invalid stroke dash offset:"
-                    << dash_offset.toStdString();
+                LOG() << "Invalid stroke dash offset:" << dash_offset;
             }
         }
         it->setPen(pen);
@@ -1302,12 +1270,12 @@ void SvgHandler::setStyle(
 }
 
 void SvgHandler::setTextStyle(QFont &font, const CssAttributes &attributes) {
-    DEBUG << "orig font" << font.toString();
+    DEBUG() << "orig font" << font.toString();
     // font.setStyleName(QString());
     font.setStyleName(QStringLiteral("Normal"));
     QString font_size = attributes.value(QStringLiteral("font-size"));
     if (!font_size.isEmpty()) {
-        DEBUG << "font_size:" << font_size;
+        DEBUG() << "font_size:" << font_size;
         if (font_size.endsWith(QLatin1String("px")))
             font.setPixelSize(
                 (int)toDouble(font_size.mid(0, font_size.size() - 2)));
@@ -1317,13 +1285,13 @@ void SvgHandler::setTextStyle(QFont &font, const CssAttributes &attributes) {
     }
     QString font_family = attributes.value(QStringLiteral("font-family"));
     if (!font_family.isEmpty()) {
-        DEBUG << "font_family:" << font_family;
+        DEBUG() << "font_family:" << font_family;
         font.setFamily(font_family);
     }
     font.setWeight(QFont::Normal);
     QString font_weight = attributes.value(QStringLiteral("font-weight"));
     if (!font_weight.isEmpty()) {
-        DEBUG << "font_weight:" << font_weight;
+        DEBUG() << "font_weight:" << font_weight;
         if (font_weight == QLatin1String("thin"))
             font.setWeight(QFont::Thin);
         else if (font_weight == QLatin1String("light"))
@@ -1340,7 +1308,7 @@ void SvgHandler::setTextStyle(QFont &font, const CssAttributes &attributes) {
     font.setStretch(QFont::Unstretched);
     QString font_stretch = attributes.value(QStringLiteral("font-stretch"));
     if (!font_stretch.isEmpty()) {
-        DEBUG << "font_stretch:" << font_stretch;
+        DEBUG() << "font_stretch:" << font_stretch;
         if (font_stretch == QLatin1String("ultra-condensed"))
             font.setStretch(QFont::UltraCondensed);
         else if (font_stretch == QLatin1String("extra-condensed"))
@@ -1370,10 +1338,10 @@ void SvgHandler::setTextStyle(QFont &font, const CssAttributes &attributes) {
         else if (font_style == QLatin1String("oblique"))
             font.setStyle(QFont::StyleOblique);
     }
-    DEBUG << "font"
-          << "px size:" << font.pixelSize() << "pt size:" << font.pointSize()
-          << "stretch:" << font.stretch() << "weight:" << font.weight();
-    DEBUG << "new font" << font.toString();
+    DEBUG() << "font"
+            << "px size:" << font.pixelSize() << "pt size:" << font.pointSize()
+            << "stretch:" << font.stretch() << "weight:" << font.weight();
+    DEBUG() << "new font" << font.toString();
 }
 
 void SvgHandler::setTextStyle(
@@ -1414,15 +1382,19 @@ QString SvgHandler::rect2str(QRectF r) {
 void SvgHandler::addItem(QGraphicsItem *it) {
     if (!m_topLevelItem)
         return;
-    DEBUG << "adding item:" << typeid(*it).name()
-          << "pos:" << point2str(it->pos())
-          << "bounding rect:" << rect2str(it->boundingRect());
+    DEBUG() << "adding item:" << typeid(*it).name()
+            << "pos:" << point2str(it->pos())
+            << "bounding rect:" << rect2str(it->boundingRect());
     if (auto *grp = dynamic_cast<QGraphicsItemGroup *>(m_topLevelItem)) {
         grp->addToGroup(it);
     } else {
         it->setParentItem(m_topLevelItem);
     }
     m_topLevelItem = it;
+}
+
+SvgDocument SvgHandler::getDocument() const {
+    return SvgDocument(root);
 }
 
 SvgHandler::SvgElement SvgHandler::SvgElement::initial_element() {

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "svgdocument.h"
 #include "types.h"
 
 #include <QMap>
@@ -16,9 +17,6 @@ class QGraphicsTextItem;
 class QAbstractGraphicsShapeItem;
 
 namespace svgscene {
-
-using XmlAttributes = Types::XmlAttributes;
-using CssAttributes = Types::CssAttributes;
 
 class SvgHandler {
 public:
@@ -44,6 +42,9 @@ public:
 
     static QString point2str(QPointF r);
     static QString rect2str(QRectF r);
+
+    SvgDocument getDocument() const;
+
 
 protected:
     virtual QGraphicsItem *createGroupItem(const SvgElement &el);
@@ -76,9 +77,8 @@ private:
     void addItem(QGraphicsItem *it);
 
 private:
+    QGraphicsItem *root = nullptr;
     QStack<SvgElement> m_elementStack;
-
-    // QGraphicsItemGroup *m_topLevelGroup = nullptr;
     QGraphicsItem *m_topLevelItem = nullptr;
     QXmlStreamReader *m_xml = nullptr;
     QPen m_defaultPen;

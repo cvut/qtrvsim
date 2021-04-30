@@ -1,8 +1,10 @@
 #include "svggraphicsview.h"
 
-#include "log.h"
+#include "utils/logging.h"
 
 #include <QMouseEvent>
+
+LOG_CATEGORY("svgscene.view");
 
 SvgGraphicsView::SvgGraphicsView(QWidget *parent) : Super(parent) {}
 
@@ -14,8 +16,8 @@ void SvgGraphicsView::zoomToFit() {
 }
 
 void SvgGraphicsView::zoom(double delta, const QPoint &mouse_pos) {
-    nLogFuncFrame() << "delta:" << delta << "center_pos:" << mouse_pos.x()
-                    << mouse_pos.y();
+    LOG() << "delta:" << delta << "center_pos:" << mouse_pos.x()
+          << mouse_pos.y();
     double factor = delta / 100;
     factor = 1 + factor;
     if (factor < 0)
@@ -34,12 +36,6 @@ void SvgGraphicsView::zoom(double delta, const QPoint &mouse_pos) {
 }
 
 void SvgGraphicsView::paintEvent(QPaintEvent *event) {
-    // QPainter p(viewport());
-    // p.fillRect(sceneRect(), QBrush(QColor(0, 0 , 255, 120)));
-    // p.setPen(Qt::blue);
-    // QRectF r = scene()->sceneRect();
-
-    // p.drawRect(r);
     Super::paintEvent(event);
 }
 

@@ -1,5 +1,4 @@
-#ifndef SVGGRAPHICSVIEW_H
-#define SVGGRAPHICSVIEW_H
+#pragma once
 
 #include <QGraphicsView>
 
@@ -24,5 +23,3 @@ protected:
 private:
 	QPoint m_dragMouseStartPos;
 };
-
-#endif // SVGGRAPHICSVIEW_H

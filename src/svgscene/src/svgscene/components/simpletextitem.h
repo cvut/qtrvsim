@@ -1,6 +1,6 @@
 #pragma once
 
-#include "svghandler.h"
+#include "svgscene/svghandler.h"
 
 #include <QGraphicsItem>
 
