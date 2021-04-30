@@ -70,7 +70,7 @@ bool itemMatchesSelector(
     const QString &attr_name,
     const QString &attr_value) {
     if (item == nullptr) {
-        return false;
+        throw std::out_of_range("Supplied item is nullptr.");
     }
     if (attr_name.isEmpty()) {
         return true;
@@ -90,7 +90,7 @@ SvgDomTree<T> SvgDomTree<TT>::findFromParent(
     const QString &attr_name,
     const QString &attr_value) {
     if (!parent) {
-        return SvgDomTree<T>(nullptr);
+        throw std::out_of_range("Current element is nullptr.");
     }
 
     for (QGraphicsItem *_child : parent->childItems()) {
@@ -99,12 +99,11 @@ SvgDomTree<T> SvgDomTree<TT>::findFromParent(
                 return SvgDomTree<T>(child);
             }
         }
-        SvgDomTree<T> tit = findFromParent<T>(_child, attr_name, attr_value);
-        if (tit.getElement() != nullptr) {
-            return tit;
-        }
+        try {
+            return findFromParent<T>(_child, attr_name, attr_value);
+        } catch (std::out_of_range &) { continue; }
     }
-    return SvgDomTree<T>(nullptr);
+    throw std::out_of_range("Not found.");
 }
 template<typename TT>
 template<typename T>
@@ -148,7 +147,9 @@ TT *SvgDomTree<TT>::getElement() const {
 
 template<typename T>
 SvgDomTree<T>::SvgDomTree(QGraphicsItem *root)
-    : root(dynamic_cast<T *>(root)) {}
+    : root(dynamic_cast<T *>(root)) {
+    throw std::out_of_range("Cannot build dom tree with nullptr item.")
+}
 
 template<typename T>
 QString SvgDomTree<T>::getAttrValueOr(
