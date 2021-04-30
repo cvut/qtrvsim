@@ -52,6 +52,7 @@ set(gui_SOURCES
         statictable.cpp
         terminaldock.cpp
         textsignalaction.cpp
+        coreview/components/numeric_value.cpp
         )
 set(gui_HEADERS
         aboutdialog.h
@@ -99,6 +100,7 @@ set(gui_HEADERS
         statictable.h
         terminaldock.h
         textsignalaction.h
+        coreview/components/numeric_value.h
         )
 set(gui_UI
         gotosymboldialog.ui
@@ -134,8 +136,8 @@ target_compile_definitions(gui
         ENV_CONFIG_FILE_NAME=\"QTRVSIM_CONFIG_FILE\")
 target_include_directories(gui PUBLIC . coreview)
 target_link_libraries(gui
-        PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Svg
-        PRIVATE machine os_emulation assembler)
+        PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui
+        PRIVATE machine os_emulation assembler svgscene)
 
 if(${Qt5PrintSupport_FOUND})
     target_link_libraries(gui PRIVATE Qt5::PrintSupport)

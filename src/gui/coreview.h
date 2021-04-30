@@ -13,7 +13,7 @@
 
     #include <QGraphicsScene>
     #include <QGraphicsView>
-    #include <QSvgWidget>
+    #include <QSignalMapper>
 
 class CoreViewScene : public QGraphicsScene {
     Q_OBJECT
@@ -33,7 +33,6 @@ signals:
     void request_terminal();
 
 protected:
-    QSvgWidget *background;
     coreview::ProgramMemory *mem_program;
     coreview::DataMemory *mem_data;
     coreview::Registers *regs;
