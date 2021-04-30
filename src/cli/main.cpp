@@ -1,5 +1,7 @@
 #include "assembler/simpleasm.h"
 #include "chariohandler.h"
+#include "common/logging.h"
+#include "common/logging_format_colors.h"
 #include "machine/machineconfig.h"
 #include "msgreport.h"
 #include "reporter.h"
@@ -465,6 +467,7 @@ int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("cli");
     QCoreApplication::setApplicationVersion("0.7.5");
+    set_default_log_pattern();
 
     QCommandLineParser p;
     create_parser(p);

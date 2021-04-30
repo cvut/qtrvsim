@@ -4,7 +4,9 @@ project(common
 add_subdirectory(polyfills)
 
 set(common_HEADERS
-        common/endian.h
+        endian.h
+        logging.h
+        logging_format_colors.h
         )
 
 # =============================================================================
