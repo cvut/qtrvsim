@@ -31,13 +31,6 @@ private Q_SLOTS:
     // Instruction
     void instruction();
     void instruction_access();
-    // Alu
-    void alu();
-    void alu_data();
-    void alu_trap_overflow();
-    void alu_trap_overflow_data();
-    void alu_except();
-    void alu_except_data();
     // Cache
     // Core depends on cache, therefore it is tested first.
     static void cache_data();

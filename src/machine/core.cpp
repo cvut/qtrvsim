@@ -2,6 +2,7 @@
 
 #include "programloader.h"
 #include "utils.h"
+//#include "execute/alu.h"
 
 using namespace machine;
 
@@ -388,9 +389,12 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
     }
 
     if (excause == EXCAUSE_NONE) {
-        alu_val = alu_operate(
-            dt.aluop, dt.val_rs, alu_sec, dt.inst.shamt(), dt.num_rd, regs, discard, excause);
-        if (discard) { regwrite = false; }
+        //        alu_val = alu_operate(
+        //            dt.aluop, dt.val_rs, alu_sec, dt.inst.shamt(), dt.num_rd, regs,
+        //            discard, excause);
+        //        if (discard) {
+        //            regwrite = false;
+        //        }
 
         switch (dt.aluop) {
         case ALU_OP_RDHWR:

@@ -1,212 +1,136 @@
 #include "alu.h"
 
-#include "simulator_exception.h"
-#include "utils.h"
+#include "common/polyfills/mulh64.h"
 
-using namespace machine;
+namespace machine {
 
-#if defined(__GNUC__) && __GNUC__ >= 4
-
-static inline uint32_t alu_op_clz(uint32_t n) {
-    int intbits = sizeof(int) * CHAR_BIT;
-    if (n == 0) { return 32; }
-    return __builtin_clz(n) - (intbits - 32);
-}
-
-#else /* Fallback for generic compiler */
-
-// see https://en.wikipedia.org/wiki/Find_first_set#CLZ
-static const uint8_t sig_table_4bit[16] = { 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4 };
-
-static inline uint32_t alu_op_clz(uint32_t n) {
-    int len = 32;
-
-    if (n & 0xFFFF0000) {
-        len -= 16;
-        n >>= 16;
-    }
-    if (n & 0xFF00) {
-        len -= 8;
-        n >>= 8;
-    }
-    if (n & 0xF0) {
-        len -= 4;
-        n >>= 4;
-    }
-    len -= sig_table_4bit[n];
-    return len;
-}
-
-#endif /* end of mips_clz */
-
-static inline uint64_t alu_read_hi_lo_64bit(Registers *regs) {
-    uint64_t val;
-    val = regs->read_hi_lo(false).as_u64();
-    val |= regs->read_hi_lo(true).as_u64() << 32U;
-    return val;
-}
-
-static inline void alu_write_hi_lo_64bit(Registers *regs, uint64_t val) {
-    regs->write_hi_lo(false, (uint32_t)(val & 0xffffffff));
-    regs->write_hi_lo(true, (uint32_t)(val >> 32U));
-}
-
-RegisterValue machine::alu_operate(
-    enum AluOp operation,
-    RegisterValue s,
-    RegisterValue t,
-    uint8_t sa,
-    uint8_t sz,
-    Registers *regs,
-    bool &discard,
-    ExceptionCause &excause) {
-    int64_t s64_val;
-    uint64_t u64_val;
-    uint32_t u32_val;
-    discard = false;
-
-    switch (operation) {
-    case ALU_OP_NOP: return 0;
-    case ALU_OP_SLL: return t.as_u32() << sa;
-    case ALU_OP_SRL: return t.as_u32() >> sa;
-    case ALU_OP_ROTR:
-        if (!sa) { return t.as_u32(); }
-        return (t.as_u32() >> sa) | (t.as_u32() << (32U - sa));
-    case ALU_OP_SRA:
-        // Note: This might be broken with some compilers but works with gcc
-        return t.as_i32() >> sa;
-    case ALU_OP_SLLV: return t.as_u32() << (s.as_u32() & 0x1fU);
-    case ALU_OP_SRLV: return t.as_u32() >> (s.as_u32() & 0x1fU);
-    case ALU_OP_ROTRV:
-        u32_val = s.as_u32() & 0x1fU;
-        if (!u32_val) { return t.as_u32(); }
-        return (t.as_u32() >> u32_val) | (t.as_u32() << (32 - u32_val));
-    case ALU_OP_SRAV:
-        // Note: same note as in case of SRA
-        return t.as_i32() >> (s.as_u32() & 0x1fU);
-    case ALU_OP_MOVZ:
-        // Signal discard of result when condition is not true
-        discard = (t.as_u32() != 0);
-        return discard ? 0 : s;
-    case ALU_OP_MOVN:
-        // Same note as MOVZ
-        discard = (t.as_u32() == 0);
-        return discard ? 0 : s;
-    case ALU_OP_MFHI: return regs->read_hi_lo(true);
-    case ALU_OP_MTHI: regs->write_hi_lo(true, s); return 0x0;
-    case ALU_OP_MFLO: return regs->read_hi_lo(false);
-    case ALU_OP_MTLO: regs->write_hi_lo(false, s); return 0x0;
-    case ALU_OP_MULT:
-        s64_val = (int64_t)s.as_i32() * t.as_i32();
-        alu_write_hi_lo_64bit(regs, (uint64_t)s64_val);
-        return 0x0;
-    case ALU_OP_MULTU:
-        u64_val = (uint64_t)s.as_u32() * t.as_u32();
-        alu_write_hi_lo_64bit(regs, u64_val);
-        return 0x0;
-    case ALU_OP_DIV:
-        if (t.as_u32() == 0) {
-            regs->write_hi_lo(false, 0);
-            regs->write_hi_lo(true, 0);
-            return 0;
-        }
-        regs->write_hi_lo(false, (uint32_t)(s.as_i32() / t.as_i32()));
-        regs->write_hi_lo(true, (uint32_t)(s.as_i32() % t.as_i32()));
-        return 0x0;
-    case ALU_OP_DIVU:
-        if (t.as_u32() == 0) {
-            regs->write_hi_lo(false, 0);
-            regs->write_hi_lo(true, 0);
-            return 0;
-        }
-        regs->write_hi_lo(false, s.as_u32() / t.as_u32());
-        regs->write_hi_lo(true, s.as_u32() % t.as_u32());
-        return 0x0;
-    case ALU_OP_ADD:
-        /* s(31) ^ ~t(31) ... same signs on input  */
-        /* (s + t)(31) ^ s(31)  ... different sign on output */
-        if (((s.as_u32() ^ ~t.as_u32()) & ((s.as_u32() + t.as_u32()) ^ s.as_u32())) & 0x80000000) {
-            excause = EXCAUSE_OVERFLOW;
-        }
-        FALLTROUGH
-    case ALU_OP_ADDU: return s.as_u32() + t.as_u32();
-    case ALU_OP_SUB:
-        /* s(31) ^ t(31) ... differnt signd on input */
-        /* (s - t)(31) ^ ~s(31)  <> 0 ... otput sign differs from s  */
-        if (((s.as_u32() ^ t.as_u32()) & ((s.as_u32() - t.as_u32()) ^ s.as_u32())) & 0x80000000) {
-            excause = EXCAUSE_OVERFLOW;
-        }
-        FALLTROUGH
-    case ALU_OP_SUBU: return s.as_u32() - t.as_u32();
-    case ALU_OP_AND: return s.as_u32() & t.as_u32();
-    case ALU_OP_OR: return s.as_u32() | t.as_u32();
-    case ALU_OP_XOR: return s.as_u32() ^ t.as_u32();
-    case ALU_OP_NOR: return ~(s.as_u32() | t.as_u32());
-    case ALU_OP_SLT:
-        // Note: this is in two's complement so there is difference in unsigned
-        // and signed compare
-        return (s.as_i32() < t.as_i32()) ? 1 : 0;
-    case ALU_OP_SLTU: return (s.as_u32() < t.as_u32()) ? 1 : 0;
-    case ALU_OP_MUL: return (uint32_t)(s.as_i32() * t.as_i32());
-    case ALU_OP_MADD:
-        s64_val = (int64_t)alu_read_hi_lo_64bit(regs);
-        s64_val += (int64_t)s.as_i32() * t.as_i32();
-        alu_write_hi_lo_64bit(regs, (uint64_t)s64_val);
-        return 0x0;
-    case ALU_OP_MADDU:
-        u64_val = alu_read_hi_lo_64bit(regs);
-        u64_val += (uint64_t)s.as_u32() * t.as_u32();
-        alu_write_hi_lo_64bit(regs, u64_val);
-        return 0x0;
-    case ALU_OP_MSUB:
-        s64_val = (int64_t)alu_read_hi_lo_64bit(regs);
-        s64_val -= (int64_t)s.as_i32() * t.as_i32();
-        alu_write_hi_lo_64bit(regs, (uint64_t)s64_val);
-        return 0x0;
-    case ALU_OP_MSUBU:
-        u64_val = alu_read_hi_lo_64bit(regs);
-        u64_val -= (uint64_t)s.as_u32() * t.as_u32();
-        alu_write_hi_lo_64bit(regs, u64_val);
-        return 0x0;
-    case ALU_OP_TGE:
-        if (s.as_i32() >= t.as_i32()) { excause = EXCAUSE_TRAP; }
-        return 0;
-    case ALU_OP_TGEU:
-        if (s.as_u32() >= t.as_u32()) { excause = EXCAUSE_TRAP; }
-        return 0;
-    case ALU_OP_TLT:
-        if (s.as_i32() < t.as_i32()) { excause = EXCAUSE_TRAP; }
-        return 0;
-    case ALU_OP_TLTU:
-        if (s.as_u32() < t.as_u32()) { excause = EXCAUSE_TRAP; }
-        return 0;
-    case ALU_OP_TEQ:
-        if (s.as_u32() == t.as_u32()) { excause = EXCAUSE_TRAP; }
-        return 0;
-    case ALU_OP_TNE:
-        if (s.as_u32() != t.as_u32()) { excause = EXCAUSE_TRAP; }
-        return 0;
-    case ALU_OP_LUI: return t.as_u32() << 16U;
-    case ALU_OP_WSBH: return ((t.as_u32() << 8U) & 0xff00ff00) | ((t.as_u32() >> 8U) & 0x00ff00ffU);
-    case ALU_OP_SEB: return t.as_i8();
-    case ALU_OP_SEH: return t.as_i16();
-    case ALU_OP_EXT: return (s.as_u32() >> sa) & ((1 << (sz + 1)) - 1);
-    case ALU_OP_INS:
-        u32_val = (1 << (sz + 1)) - 1;
-        return ((s.as_u32() & u32_val) << sa) | (t.as_u32() & ~(u32_val << sa));
-    case ALU_OP_CLZ: return alu_op_clz(s.as_u32());
-    case ALU_OP_CLO: return alu_op_clz(~s.as_u32());
-    case ALU_OP_PASS_T: // Pass s argument without change for JAL
-        return t;
-    case ALU_OP_BREAK:
-    case ALU_OP_SYSCALL:
-    case ALU_OP_RDHWR:
-    case ALU_OP_MTC0:
-    case ALU_OP_MFC0:
-    case ALU_OP_MFMC0:
-    case ALU_OP_ERET: return 0;
-    default:
-        throw SIMULATOR_EXCEPTION(
-            UnsupportedAluOperation, "Unknown ALU operation", QString::number(operation, 16));
+RegisterValue alu_combined_operate(
+    AluCombinedOp op,
+    AluComponent component,
+    bool w_operation,
+    bool modified,
+    RegisterValue a,
+    RegisterValue b) {
+    switch (component) {
+    case AluComponent::ALU:
+        return (w_operation) ? alu32_operate(op.alu_op, modified, a, b)
+                             : alu64_operate(op.alu_op, modified, a, b);
+    case AluComponent::MUL:
+        return (w_operation) ? mul32_operate(op.mul_op, a, b) : mul64_operate(op.mul_op, a, b);
+    default: qDebug("ERROR, unknown alu component: %hhx", uint8_t(component)); return 0;
     }
 }
+
+/**
+ * Shift operations are limited to shift by 31 bits.
+ * Other bits of the operand may be used as flags and need to be masked out
+ * before any ALU operation is performed.
+ */
+constexpr uint64_t SHIFT_MASK = 0b11111; // == 31
+
+int64_t alu64_operate(AluOp op, bool modified, RegisterValue a, RegisterValue b) {
+    uint64_t _a = a.as_u64();
+    uint64_t _b = b.as_u64();
+
+    switch (op) {
+    case AluOp::ADD: return _a + ((modified) ? -_b : _b);
+    case AluOp::SLL: return _a << (_b & SHIFT_MASK);
+    case AluOp::SLT: return a.as_i64() < b.as_i64();
+    case AluOp::SLTU: return _a < _b;
+    case AluOp::XOR:
+        return _a ^ _b;
+        // Most compilers should calculate SRA correctly, but it is UB.
+    case AluOp::SR: return (modified) ? (a.as_i64() >> _b) : (_a >> (_b & SHIFT_MASK));
+    case AluOp::OR: return _a | _b;
+    case AluOp::AND: return _a & _b;
+    default: qDebug("ERROR, unknown alu operation: %hhx", uint8_t(op)); return 0;
+    }
+}
+
+int32_t alu32_operate(AluOp op, bool modified, RegisterValue a, RegisterValue b) {
+    uint32_t _a = a.as_u32();
+    uint32_t _b = b.as_u32();
+
+    switch (op) {
+    case AluOp::ADD: return _a + ((modified) ? -_b : _b);
+    case AluOp::SLL: return _a << (_b & SHIFT_MASK);
+    case AluOp::SLT: return a.as_i64() < b.as_i64();
+    case AluOp::SLTU: return _a < _b;
+    case AluOp::XOR:
+        return _a ^ _b;
+        // Most compilers should calculate SRA correctly, but it is UB.
+    case AluOp::SR:
+        return (modified) ? (a.as_i64() >> (_b & SHIFT_MASK)) : (_a >> (_b & SHIFT_MASK));
+    case AluOp::OR: return _a | _b;
+    case AluOp::AND: return _a & _b;
+    default: qDebug("ERROR, unknown alu operation: %hhx", uint8_t(op)); return 0;
+    }
+}
+
+int64_t mul64_operate(MulOp op, RegisterValue a, RegisterValue b) {
+    switch (op) {
+    case MulOp::MUL: return a.as_u64() * b.as_u64();
+    case MulOp::MULH: return mulh64(a.as_i64(), b.as_i64());
+    case MulOp::MULHSU: return mulhsu64(a.as_i64(), b.as_u64());
+    case MulOp::MULHU: return mulhu64(a.as_u64(), b.as_u64());
+    case MulOp::DIV:
+        if (b.as_i64() == 0) {
+            return -1; // Division by zero is defined.
+        } else if (a.as_i64() == INT64_MIN && b.as_i64() == -1) {
+            return INT64_MIN; // Overflow.
+        } else {
+            return a.as_i64() / b.as_i64();
+        }
+    case MulOp::DIVU:
+        return (b.as_u64() == 0) ? UINT64_MAX // Division by zero is defined.
+                                 : a.as_u64() / b.as_u64();
+    case MulOp::REM:
+        if (b.as_i64() == 0) {
+            return a.as_i64(); // Division by zero is defined.
+        } else if (a.as_i64() == INT64_MIN && b.as_i64() == -1) {
+            return 0; // Overflow.
+        } else {
+            return a.as_i64() % b.as_i64();
+        }
+    case MulOp::REMU:
+        return (b.as_u64() == 0) ? a.as_u64() // Division by zero reminder
+                                              // is defined.
+                                 : a.as_u64() % b.as_u64();
+    default: qDebug("ERROR, unknown multiplication operation: %hhx", uint8_t(op)); return 0;
+    }
+}
+
+int32_t mul32_operate(MulOp op, RegisterValue a, RegisterValue b) {
+    switch (op) {
+    case MulOp::MUL: return a.as_u32() * b.as_u32();
+    case MulOp::MULH: return ((uint64_t)a.as_i32() * (uint64_t)b.as_i32()) >> 32;
+    case MulOp::MULHSU: return ((uint64_t)a.as_i32() * (uint64_t)b.as_u32()) >> 32;
+    case MulOp::MULHU: return ((uint64_t)a.as_u32() * (uint64_t)b.as_u32()) >> 32;
+    case MulOp::DIV:
+        if (b.as_i32() == 0) {
+            return -1; // Division by zero is defined.
+        } else if (a.as_i32() == INT32_MIN && b.as_i32() == -1) {
+            return INT32_MIN; // Overflow.
+        } else {
+            return a.as_i32() / b.as_i32();
+        }
+    case MulOp::DIVU:
+        return (b.as_u32() == 0) ? UINT32_MAX // Division by zero is defined.
+                                 : a.as_u32() / b.as_u32();
+    case MulOp::REM:
+        if (b.as_i32() == 0) {
+            return a.as_i32(); // Division by zero is defined.
+        } else if (a.as_i32() == INT32_MIN && b.as_i32() == -1) {
+            return 0; // Overflow.
+        } else {
+            return a.as_i32() % b.as_i32();
+        }
+    case MulOp::REMU:
+        return (b.as_u32() == 0) ? a.as_u32() // Division by zero reminder
+                                              // is defined.
+                                 : a.as_u32() % b.as_u32();
+    default: qDebug("ERROR, unknown multiplication operation: %hhx", uint8_t(op)); return 0;
+    }
+}
+
+} // namespace machine

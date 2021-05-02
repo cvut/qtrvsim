@@ -2,7 +2,6 @@
 #define OSSYCALL_H
 
 #include "machine/core.h"
-#include "machine/execute/alu.h"
 #include "machine/instruction.h"
 #include "machine/machineconfig.h"
 #include "machine/memory/backend/memory.h"

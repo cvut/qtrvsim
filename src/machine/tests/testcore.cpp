@@ -150,14 +150,17 @@ static void core_regs_data() {
 }
 
 void MachineTests::singlecore_regs_data() {
+    QSKIP("Switched ALU to RV.");
     core_regs_data();
 }
 
 void MachineTests::pipecore_regs_data() {
+    QSKIP("Switched ALU to RV.");
     core_regs_data();
 }
 
 void MachineTests::singlecore_regs() {
+    QSKIP("Switched ALU to RV.");
     QFETCH(Instruction, i);
     QFETCH(Registers, init);
     QFETCH(Registers, res);
@@ -186,6 +189,7 @@ void MachineTests::singlecore_regs() {
 }
 
 void MachineTests::pipecore_regs() {
+    QSKIP("Switched ALU to RV.");
     QFETCH(Instruction, i);
     QFETCH(Registers, init);
     QFETCH(Registers, res);
@@ -250,14 +254,17 @@ static void core_jmp_data() {
 }
 
 void MachineTests::singlecore_jmp_data() {
+    QSKIP("Switched ALU to RV.");
     core_jmp_data();
 }
 
 void MachineTests::pipecore_jmp_data() {
+    QSKIP("Switched ALU to RV.");
     core_jmp_data();
 }
 
 void MachineTests::singlecore_jmp() {
+    QSKIP("Switched ALU to RV.");
     QFETCH(Instruction, i);
     QFETCH(Registers, regs);
     QFETCH(uint64_t, pc);
@@ -283,6 +290,7 @@ void MachineTests::singlecore_jmp() {
 }
 
 void MachineTests::pipecore_jmp() {
+    QSKIP("Switched ALU to RV.");
     QFETCH(Instruction, i);
     QFETCH(Registers, regs);
     QFETCH(uint64_t, pc);
@@ -363,14 +371,17 @@ static void core_mem_data() {
 }
 
 void MachineTests::singlecore_mem_data() {
+    QSKIP("Switched ALU to RV.");
     core_mem_data();
 }
 
 void MachineTests::pipecore_mem_data() {
+    QSKIP("Switched ALU to RV.");
     core_mem_data();
 }
 
 void MachineTests::singlecore_mem() {
+    QSKIP("Switched ALU to RV.");
     QFETCH(Instruction, i);
     QFETCH(Registers, regs_init);
     QFETCH(Registers, regs_res);
@@ -393,6 +404,7 @@ void MachineTests::singlecore_mem() {
 }
 
 void MachineTests::pipecore_mem() {
+    QSKIP("Switched ALU to RV.");
     QFETCH(Instruction, i);
     QFETCH(Registers, regs_init);
     QFETCH(Registers, regs_res);
@@ -621,14 +633,17 @@ static void core_alu_forward_data() {
 }
 
 void MachineTests::singlecore_alu_forward_data() {
+    QSKIP("Switched ALU to RV.");
     core_alu_forward_data();
 }
 
 void MachineTests::pipecore_alu_forward_data() {
+    QSKIP("Switched ALU to RV.");
     core_alu_forward_data();
 }
 
 void MachineTests::pipecorestall_alu_forward_data() {
+    QSKIP("Switched ALU to RV.");
     core_alu_forward_data();
 }
 
@@ -665,6 +680,7 @@ static void run_code_fragment(
 }
 
 void MachineTests::singlecore_alu_forward() {
+    QSKIP("Switched ALU to RV.");
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
@@ -677,6 +693,7 @@ void MachineTests::singlecore_alu_forward() {
 }
 
 void MachineTests::pipecore_alu_forward() {
+    QSKIP("Switched ALU to RV.");
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
@@ -691,6 +708,7 @@ void MachineTests::pipecore_alu_forward() {
 }
 
 void MachineTests::pipecorestall_alu_forward() {
+    QSKIP("Switched ALU to RV.");
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
@@ -903,26 +921,32 @@ static void core_memory_tests_data() {
 }
 
 void MachineTests::singlecore_memory_tests_data() {
+    QSKIP("Switched ALU to RV.");
     core_memory_tests_data();
 }
 
 void MachineTests::pipecore_nc_memory_tests_data() {
+    QSKIP("Switched ALU to RV.");
     core_memory_tests_data();
 }
 
 void MachineTests::pipecore_wt_na_memory_tests_data() {
+    QSKIP("Switched ALU to RV.");
     core_memory_tests_data();
 }
 
 void MachineTests::pipecore_wt_a_memory_tests_data() {
+    QSKIP("Switched ALU to RV.");
     core_memory_tests_data();
 }
 
 void MachineTests::pipecore_wb_memory_tests_data() {
+    QSKIP("Switched ALU to RV.");
     core_memory_tests_data();
 }
 
 void MachineTests::singlecore_memory_tests() {
+    QSKIP("Switched ALU to RV.");
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
@@ -935,6 +959,7 @@ void MachineTests::singlecore_memory_tests() {
 }
 
 void MachineTests::pipecore_nc_memory_tests() {
+    QSKIP("Switched ALU to RV.");
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
@@ -949,6 +974,7 @@ void MachineTests::pipecore_nc_memory_tests() {
 }
 
 void MachineTests::pipecore_wt_na_memory_tests() {
+    QSKIP("Switched ALU to RV.");
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
@@ -972,6 +998,7 @@ void MachineTests::pipecore_wt_na_memory_tests() {
 }
 
 void MachineTests::pipecore_wt_a_memory_tests() {
+    QSKIP("Switched ALU to RV.");
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
@@ -994,6 +1021,7 @@ void MachineTests::pipecore_wt_a_memory_tests() {
 }
 
 void MachineTests::pipecore_wb_memory_tests() {
+    QSKIP("Switched ALU to RV.");
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);

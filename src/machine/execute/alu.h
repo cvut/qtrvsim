@@ -1,40 +1,117 @@
 #ifndef ALU_H
 #define ALU_H
 
-#include "machinedefs.h"
+#include "execute/alu_op.h"
+#include "execute/mul_op.h"
 #include "register_value.h"
-#include "registers.h"
 
-#include <QObject>
-#include <QString>
 #include <cstdint>
 
 namespace machine {
 
-// Do ALU operation.
-// excause: Reported exception by given operation
-// operation: This is function field from instruction or shifted opcode for
-// immediate instructions s: Loaded from rs. Also calles as source. t: Loaded
-// from rt or immediate field from instruction it self. Also called as target.
-// sa: This is value directly from instruction it self (sa section) used for
-// shift operations sz: This is value directly from instruction it self used in
-// filed extract instructions regs: Registers used. We need direct access to lo
-// and hi registers (those are not accessed from core it self but from alu
-// directly Returned value is commonly saved to rt/rd or any other way passed
-// trough core
-RegisterValue alu_operate(
-    enum AluOp operation,
-    RegisterValue s,
-    RegisterValue t,
-    uint8_t sa,
-    uint8_t sz,
-    Registers *regs,
-    bool &discard,
-    ExceptionCause &excause);
+/**
+ * Components available in combined ALU.
+ */
+enum class AluComponent {
+    ALU, //> RV32/64I
+    MUL, //> RV32/64M
+};
+
+union AluCombinedOp {
+    AluOp alu_op;
+    MulOp mul_op;
+};
+
+/**
+ * Dispatcher for specialised ALUs
+ *
+ * @param op          alu and mul operands are isomorphic
+ * @param component   specifies which specialization to use
+ * @param w_operation word operation false=64b, true=32b
+ * @param modified    see alu64/32
+ * @param a           operand 1
+ * @param b           operand 2
+ * @return            result of specified ALU operation (always, no traps)
+ */
+[[gnu::const]] RegisterValue alu_combined_operate(
+    AluCombinedOp op,
+    AluComponent component,
+    bool w_operation,
+    bool modified,
+    RegisterValue a,
+    RegisterValue b);
+
+/**
+ * RV64I for OP and OP-IMM instructions
+ *
+ * ALU conforming to Base Integer Instruction Set, Version 2.0.
+ *
+ * @param op        operation specifier (funct3 in instruction)
+ * @param modified  modifies behavior of ADD (to SUB) and SRL (to SRA)
+ *                  encoded by bit 30 if applicable
+ * @param a         operand 1
+ * @param b         operand 2
+ * @return          result of specified ALU operation (always, no traps)
+ *                  integer type is returned to ensure correct signe extension
+ *                  to arbitrary implementation of RegisterValue
+ */
+[[gnu::const]] int64_t alu64_operate(AluOp op, bool modified, RegisterValue a, RegisterValue b);
+
+/**
+ * RV32I for OP and OP-IMM instructions and RV64I OP-32 and OP-IMM-32
+ *
+ * ALU conforming to Base Integer Instruction Set, Version 2.0.
+ *
+ * @param op        operation specifier (funct3 in instruction)
+ * @param modified  modifies behavior of ADD (to SUB) and SRL (to SRA)
+ *                  encoded by bit 30 if applicable
+ * @param a         operand 1
+ * @param b         operand 2
+ * @return          result of specified ALU operation (always, no traps)
+ *                  integer type is returned to ensure correct signe extension
+ *                  to arbitrary implementation of RegisterValue
+ */
+[[gnu::const]] int32_t alu32_operate(AluOp op, bool modified, RegisterValue a, RegisterValue b);
+
+/**
+ * RV64 "M" for OP instructions
+ *
+ * Multiplier conforming to Standard Extension for Integer Multiplication and
+ * Division, Version 2.0.
+ *
+ * Implements operation for instructions: MUL, MUL[[S]H], DIV[U], REM[U].
+ * Division by zero is defined §7.2 table 7.1 (or see implementation).
+ *
+ * @param op  operation specifier (funct3 in the instruction)
+ * @param a   operand 1
+ * @param b   operand 2
+ * @return    result of specified operation (always, no traps)
+ *            integer type is returned to ensure correct signe extension
+ *            to arbitrary implementation of RegisterValue
+ */
+[[gnu::const]] int64_t mul64_operate(MulOp op, RegisterValue a, RegisterValue b);
+
+/**
+ * RV32 "M" for OP instructions and RV64 "M" for OP-32 instructions
+ *
+ * Multiplier conforming to Standard Extension for Integer Multiplication and
+ * Division, Version 2.0.
+ *
+ * Implements operation for instructions:
+ *    RV32: MUL, MUL[[S]H]W, DIV[U]W, REM[U]W.
+ *    RV64: MULW, MUL[[S]H]W, DIV[U], REM[U].
+ *
+ * Division by zero is defined §7.2 table 7.1 (or see implementation).
+ *
+ * @param op  operation specifier (funct3 in the instruction)
+ * @param a   operand 1
+ * @param b   operand 2
+ * @return    result of specified operation (always, no traps)
+ *            integer type is returned to ensure correct signe extension
+ *            to arbitrary implementation of RegisterValue
+ */
+[[gnu::const]] int32_t mul32_operate(MulOp op, RegisterValue a, RegisterValue b);
 
 } // namespace machine
-
-Q_DECLARE_METATYPE(machine::AluOp)
-Q_DECLARE_METATYPE(machine::ExceptionCause)
 
 #endif // ALU_H
