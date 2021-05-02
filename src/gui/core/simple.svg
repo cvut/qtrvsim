@@ -568,7 +568,7 @@
         <g id="cell-Haz_8EwUBin59iLyk_8Q-183"
            content="&lt;UserObject label=&quot;Peripherals&quot; link=&quot;#immediate-decode&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
            data-label="Peripherals" data-link="#immediate-decode" data-tags="simple pipeline forwarding">
-            <a xlink:href="#immediate-decode">
+            <a xlink:href="#peripherals">
                 <rect x="590" y="347" width="45" height="16" rx="2.72" ry="2.72" fill="#ffffff" stroke="#000000"
                       pointer-events="all"/>
                 <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
@@ -579,7 +579,7 @@
         <g id="cell-Haz_8EwUBin59iLyk_8Q-184"
            content="&lt;UserObject label=&quot;Terminal&quot; link=&quot;#immediate-decode&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
            data-label="Terminal" data-link="#immediate-decode" data-tags="simple pipeline forwarding">
-            <a xlink:href="#immediate-decode">
+            <a xlink:href="#terminal">
                 <rect x="593" y="397" width="35" height="16" rx="2.72" ry="2.72" fill="#ffffff" stroke="#000000"
                       pointer-events="all"/>
                 <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">

@@ -9,13 +9,15 @@
     #include "coreview/registers.h"
     #include "coreview/value.h"
     #include "graphicsview.h"
-    #include "machine/machine.h"
 
     #include <QGraphicsScene>
     #include <QGraphicsView>
     #include <QSignalMapper>
+    #include <machine/machine.h>
+    #include <svgscene/components/hyperlinkitem.h>
+    #include <svgscene/svggraphicsscene.h>
 
-class CoreViewScene : public QGraphicsScene {
+class CoreViewScene : public svgscene::SvgGraphicsScene {
     Q_OBJECT
 
 public:
@@ -31,6 +33,9 @@ signals:
     void request_cache_data();
     void request_peripherals();
     void request_terminal();
+
+protected:
+    void register_hyperlink(svgscene::HyperlinkItem *element) const;
 
 protected:
     coreview::ProgramMemory *mem_program;

@@ -1,23 +1,47 @@
 #include "coreview.h"
 
+#include "common/logging.h"
 #include "fontsize.h"
 
 #include <QMetaMethod>
 #include <QSignalMapper>
 #include <QXmlStreamReader>
-#include <components/numeric_value.h>
 #include <svgscene/components/groupitem.h>
+#include <svgscene/components/hyperlinkitem.h>
 #include <svgscene/components/simpletextitem.h>
 #include <svgscene/svghandler.h>
 #include <unordered_map>
 
-#define LOG nCInfo("coreview")
+using svgscene::HyperlinkItem;
+using svgscene::SimpleTextItem;
+
+LOG_CATEGORY("gui.coreview");
 
 //////////////////////////////////////////////////////////////////////////////
 /// Size of visible view area
 constexpr size_t SC_WIDTH = 720;
 constexpr size_t SC_HEIGHT = 540;
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Link targets available for use in the SVG.
+ *
+ * EXAMPLE:
+ * ```svg
+ *  <a xlink:href="#registers">
+ *    <text>Registers</text>
+ *  </a>
+ * ```
+ */
+const std::unordered_map<QString, void (::CoreViewScene::*)()> HYPERLINK_TARGETS {
+    { "#registers", &CoreViewScene::request_registers },
+    { "#cache_data", &CoreViewScene::request_cache_data },
+    { "#cache_program", &CoreViewScene::request_cache_program },
+    { "#data_memory", &CoreViewScene::request_data_memory },
+    { "#peripherals", &CoreViewScene::request_peripherals },
+    { "#program_memory", &CoreViewScene::request_program_memory },
+    { "#terminal", &CoreViewScene::request_terminal },
+};
 
 static const std::vector<QString> EXCEPTION_NAME_TABLE
     = { { "NONE" },      // machine::EXCAUSE_NONE
@@ -66,137 +90,18 @@ static const std::vector<QString> STALL_TEXT_TABLE = { { "NORMAL" }, { "STALL" }
             &coreview::MultiText::multitext_update);                           \
     } while (false)
 
-uint64_t const1() {
-    return 11;
-}
-
 CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &background_name)
-    : QGraphicsScene() {
+    : SvgGraphicsScene() {
     svgscene::SvgHandler h(this);
-    //    QFile f(QString(":/core/%1.svg").arg(background_name));
-    QFile f(QString(":/core/%1.svg").arg("simple"));
+    QFile f(QString(":/core/%1.svg").arg(background_name));
     f.open(QIODevice::ReadOnly);
     QXmlStreamReader xml(&f);
     h.load(&xml);
     svgscene::SvgDocument document = h.getDocument();
-    std::vector<NumericValue *> nvc;
-    for (auto &component :
-         document.getRoot().findAll<QGraphicsItem>("data-component", "value-signal")) {
-        auto node = component.find<svgscene::SimpleTextItem>();
-        const auto src = node.getAttrValueOr("data-source");
-        auto controller = new NumericValue(node.getElement(), const1, 1, 16);
-        nvc.push_back(controller);
-    }
-    for (auto &nv : nvc) {
-        nv->update();
-    }
 
-    /*
-     * The Plan
-     *
-     * For each type of dynamic component, there will be a vector of pairs:
-     * pointer to item to be updated and a function to retrieve its data.
-     *
-     * Text
-     * ??? Format: dec vs hex
-     *
-     * Mux
-     *
-     * Links
-     * - have a list of possible targets by name
-     *
-     * Instructions?
-     *
-     * Multi?
-     */
-
-    //    NEW(ProgramMemory, mem_program, 90, 240, machine);
-    //    NEW(DataMemory, mem_data, 580, 258, machine);
-    //    NEW(Registers, regs, 230, 240);
-    //    NEW(LogicBlock, peripherals, 610, 350, "");
-    //    peripherals->setSize(45, 16);
-    //    NEW(LogicBlock, terminal, 610, 400, "");
-    //    terminal->setSize(35, 16);
-    //    NEW(ProgramCounter, ft.pc, 2, 280, machine);
-    //    NEW_MULTI(
-    //        mm.multi_excause, 602, 447, memory_excause_value,
-    //        EXCEPTION_NAME_TABLE, true);
-    //    new_label("Exception", 595, 437);
-    //
-    //    coreview::Value *val;
-    //    // Fetch stage values
-    //    NEW_V(25, 440, fetch_branch_value, false, 1);
-    //    NEW_V(360, 93, fetch_jump_reg_value, false, 1);
-    //    // Decode stage values
-    //    NEW_V(200, 200, decode_instruction_value); // Instruction
-    //    NEW_V(360, 250, decode_reg1_value);        // Register output 1
-    //    NEW_V(360, 270, decode_reg2_value);        // Register output 2
-    //    NEW_V(335, 413, decode_immediate_value);   // Sign extended immediate
-    //    value NEW_V(370, 99, decode_regd31_value, false, 1); NEW_V(370, 113,
-    //    decode_memtoreg_value, false, 1); NEW_V(360, 120,
-    //    decode_memwrite_value, false, 1); NEW_V(370, 127,
-    //    decode_memread_value, false, 1); NEW_V(360, 140, decode_regdest_value,
-    //    false, 1); NEW_V(370, 148, decode_alusrc_value, false, 1);
-    //    // Execute stage
-    //    NEW_V(450, 230, execute_reg1_value, true); // Register 1
-    //    NEW_V(450, 310, execute_reg2_value, true); // Register 2
-    //    NEW_V(527, 280, execute_alu_value, true);  // Alu output
-    //    NEW_V(480, 413, execute_immediate_value);  // Immediate value
-    //    NEW_V(470, 113, execute_memtoreg_value, false, 1);
-    //    NEW_V(460, 120, execute_memwrite_value, false, 1);
-    //    NEW_V(470, 127, execute_memread_value, false, 1);
-    //    NEW_V(470, 127, execute_memread_value, false, 1);
-    //    NEW_V(485, 345, execute_regdest_value, false, 1);
-    //    NEW_V(475, 280, execute_alusrc_value, false, 1);
-    //    // Memory stage
-    //    NEW_V(560, 260, memory_alu_value, true); // Alu output
-    //    NEW_V(560, 345, memory_rt_value, true);  // rt
-    //    NEW_V(650, 290, memory_mem_value, true); // Memory output
-    //    NEW_V(570, 113, memory_memtoreg_value, false, 1);
-    //    NEW_V(630, 220, memory_memwrite_value, false, 1);
-    //    NEW_V(620, 220, memory_memread_value, false, 1);
-    //    // Write back stage
-    //    NEW_V(710, 330, writeback_value, true); // Write back value
-    //
-    //    NEW_V(205, 250, decode_rs_num_value, false, 2, 0, 10, ' ');
-    //    NEW_V(205, 270, decode_rt_num_value, false, 2, 0, 10, ' ');
-    //
-    //    NEW_V(320, 390, decode_rd_num_value, false, 2, 0, 10, ' ');
-    //    NEW_V(320, 500, writeback_regw_num_value, false, 2, 0, 10, ' ');
-    //
-    //    NEW_V(500, SC_HEIGHT - 12, cycle_c_value, false, 10, 0, 10, ' ',
-    //    false); NEW_V(630, SC_HEIGHT - 12, stall_c_value, false, 10, 0, 10, '
-    //    ', false);
-    //
-    //    setBackgroundBrush(QBrush(Qt::white));
-    //
-    //    connect(
-    //        regs, &coreview::Registers::open_registers, this,
-    //        &CoreViewScene::request_registers);
-    //    connect(
-    //        mem_program, &coreview::Memory::open_mem, this,
-    //        &CoreViewScene::request_program_memory);
-    //    connect(
-    //        mem_data, &coreview::Memory::open_mem, this,
-    //        &CoreViewScene::request_data_memory);
-    //    connect(
-    //        ft.pc, &coreview::ProgramCounter::open_program, this,
-    //        &CoreViewScene::request_program_memory);
-    //    connect(
-    //        ft.pc, &coreview::ProgramCounter::jump_to_pc, this,
-    //        &CoreViewScene::request_jump_to_program_counter);
-    //    connect(
-    //        mem_program, &coreview::Memory::open_cache, this,
-    //        &CoreViewScene::request_cache_program);
-    //    connect(
-    //        mem_data, &coreview::Memory::open_cache, this,
-    //        &CoreViewScene::request_cache_data);
-    //    connect(
-    //        peripherals, &coreview::LogicBlock::open_block, this,
-    //        &CoreViewScene::request_peripherals);
-    //    connect(
-    //        terminal, &coreview::LogicBlock::open_block, this,
-    //        &CoreViewScene::request_terminal);
+    for (auto hyperlink_tree : document.getRoot().findAll<HyperlinkItem>()) {
+        this->register_hyperlink(hyperlink_tree.getElement());
+    }
 }
 
 // We add all items to scene and they are removed in QGraphicsScene
@@ -212,6 +117,21 @@ CoreViewScene::new_label(const QString &str, qreal x, qreal y) {
     addItem(i);
     i->setPos(x, y);
     return i;
+}
+
+auto w = &CoreViewScene::request_cache_data;
+
+void CoreViewScene::register_hyperlink(svgscene::HyperlinkItem *element) const {
+    try {
+        connect(
+            element, &svgscene::HyperlinkItem::triggered, this,
+            HYPERLINK_TARGETS.at(element->getTargetName()));
+        LOG("Registered hyperlink to target %s", qPrintable(element->getTargetName()));
+    } catch (std::out_of_range &) {
+        WARN(
+            "Registering hyperlink without valid target (href: \"%s\").",
+            qPrintable(element->getTargetName()));
+    }
 }
 
 CoreViewSceneSimple::CoreViewSceneSimple(machine::Machine *machine)
