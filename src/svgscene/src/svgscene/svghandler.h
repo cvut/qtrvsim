@@ -7,6 +7,7 @@
 #include <QPen>
 #include <QStack>
 #include <utility>
+#include <QFile>
 
 class QXmlStreamReader;
 class QXmlStreamAttributes;
@@ -17,6 +18,9 @@ class QGraphicsTextItem;
 class QAbstractGraphicsShapeItem;
 
 namespace svgscene {
+
+SvgDocument parseFromFileName(QGraphicsScene *scene, const QString &filename);
+SvgDocument parseFromFile(QGraphicsScene *scene, QFile* file);
 
 class SvgHandler {
 public:
@@ -44,7 +48,6 @@ public:
     static QString rect2str(QRectF r);
 
     SvgDocument getDocument() const;
-
 
 protected:
     virtual QGraphicsItem *createGroupItem(const SvgElement &el);

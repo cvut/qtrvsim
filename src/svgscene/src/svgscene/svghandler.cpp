@@ -19,6 +19,19 @@ LOG_CATEGORY("svgscene.parsing");
 
 namespace svgscene {
 
+SvgDocument parseFromFileName(QGraphicsScene *scene, const QString &filename) {
+    QFile file(filename);
+    file.open(QIODevice::ReadOnly);
+    return parseFromFile(scene, &file);
+}
+
+SvgDocument parseFromFile(QGraphicsScene *scene, QFile *file) {
+    QXmlStreamReader xml(file);
+    SvgHandler handler(scene);
+    handler.load(&xml);
+    return handler.getDocument();
+}
+
 // see: https://www.w3.org/TR/SVG11/
 
 // '0' is 0x30 and '9' is 0x39
