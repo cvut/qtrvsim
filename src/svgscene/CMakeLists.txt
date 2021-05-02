@@ -21,8 +21,9 @@ target_sources(svgscene
         src/svgscene/svgdocument.h
         src/svgscene/svghandler.cpp
         src/svgscene/svghandler.h
+        src/svgscene/svgmetadata.cpp
+        src/svgscene/svgmetadata.h
         src/svgscene/svgspec.h
-        src/svgscene/types.h
         src/svgscene/utils/logging.h
         src/svgscene/utils/memory_ownership.h
         )

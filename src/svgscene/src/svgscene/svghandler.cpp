@@ -2,8 +2,8 @@
 
 #include "components/groupitem.h"
 #include "components/simpletextitem.h"
+#include "svgmetadata.h"
 #include "svgspec.h"
-#include "types.h"
 #include "utils/logging.h"
 
 #include <QFontMetrics>
@@ -1138,9 +1138,11 @@ void SvgHandler::setXmlAttributes(
     QGraphicsItem *git,
     const SvgHandler::SvgElement &el) {
     git->setData(
-        Types::DataKey::XmlAttributes, QVariant::fromValue(el.xmlAttributes));
+        static_cast<int>(MetadataType::XmlAttributes),
+        QVariant::fromValue(el.xmlAttributes));
     git->setData(
-        Types::DataKey::CssAttributes, QVariant::fromValue(el.styleAttributes));
+        static_cast<int>(MetadataType::CssAttributes),
+        QVariant::fromValue(el.styleAttributes));
 }
 
 void SvgHandler::setTransform(QGraphicsItem *it, const QString &str_val) {

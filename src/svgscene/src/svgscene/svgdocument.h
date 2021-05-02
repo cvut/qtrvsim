@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.h"
+#include "svgmetadata.h"
 
 #include <QGraphicsItem>
 
@@ -66,8 +66,8 @@ bool itemMatchesSelector(
     if (attr_name.isEmpty()) {
         return true;
     }
-    auto attrs = qvariant_cast<svgscene::XmlAttributes>(
-        item->data(Types::DataKey::XmlAttributes));
+
+    auto attrs = getXmlAttributes(item);
     if (!attrs.contains(attr_name)) {
         return false;
     }
@@ -90,8 +90,7 @@ template<typename T>
 QString SvgDomTree<T>::getAttrValueOr(
     const QString &attr_name,
     const QString &default_value) {
-    svgscene::XmlAttributes attrs = qvariant_cast<svgscene::XmlAttributes>(
-        root->data(Types::DataKey::XmlAttributes));
+    svgscene::XmlAttributes attrs = getXmlAttributes(root);
     return attrs.value(attr_name, default_value);
 }
 
@@ -99,9 +98,7 @@ template<typename T>
 QString SvgDomTree<T>::getCssValueOr(
     const QString &attr_name,
     const QString &default_value) {
-    svgscene::CssAttributes attrs = qvariant_cast<svgscene::CssAttributes>(
-        root->data(Types::DataKey::CssAttributes));
-    return attrs.value(attr_name, default_value);
+    return getCssAttributeOr(root, attr_name, default_value);
 }
 
 template<typename TT>

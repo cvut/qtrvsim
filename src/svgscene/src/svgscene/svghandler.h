@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "svgdocument.h"
-#include "types.h"
+#include "svgmetadata.h"
 
 #include <QMap>
 #include <QPen>
