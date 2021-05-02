@@ -14,10 +14,7 @@ public:
     explicit MultiText(const std::vector<QString> &texts_table, bool show_nonzero_red = false);
 
     QRectF boundingRect() const override;
-    void paint(
-        QPainter *painter,
-        const QStyleOptionGraphicsItem *option,
-        QWidget *widget) override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 public slots:
     void multitext_update(size_t new_value);

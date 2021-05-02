@@ -29,8 +29,7 @@ Registers::Registers() : QGraphicsObject(nullptr), name("", this) {
     name.setFont(font);
 
     QRectF name_box = name.boundingRect();
-    name.setPos(
-        WIDTH / 2 - name_box.width() / 2, HEIGHT / 2 - name_box.height() / 2);
+    name.setPos(WIDTH / 2 - name_box.width() / 2, HEIGHT / 2 - name_box.height() / 2);
 
     setPos(x(), y()); // set connector's position
 }

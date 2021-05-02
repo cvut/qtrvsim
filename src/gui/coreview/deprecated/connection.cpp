@@ -47,23 +47,17 @@ QLineF Connector::vector() const {
     case AX_XY: return QLineF(p, p + QPointF(1, 1));
     case AX_MXY: return QLineF(p, p + QPoint(1, -1));
     }
-    throw SIMULATOR_EXCEPTION(
-        Sanity, "Connection::vector() unknown axes set", QString::number(ax));
+    throw SIMULATOR_EXCEPTION(Sanity, "Connection::vector() unknown axes set", QString::number(ax));
 }
 
-Connection::Connection(const Connector *a, const Connector *b)
-    : QGraphicsObject(nullptr) {
+Connection::Connection(const Connector *a, const Connector *b) : QGraphicsObject(nullptr) {
     pen_width = 1;
 
     ax_start = a->vector();
     ax_end = a->vector();
 
-    connect(
-        a, QOverload<QLineF>::of(&Connector::updated), this,
-        &Connection::moved_start);
-    connect(
-        b, QOverload<QLineF>::of(&Connector::updated), this,
-        &Connection::moved_end);
+    connect(a, QOverload<QLineF>::of(&Connector::updated), this, &Connection::moved_start);
+    connect(b, QOverload<QLineF>::of(&Connector::updated), this, &Connection::moved_end);
     moved_start(a->vector());
     moved_end(b->vector());
 }
@@ -79,9 +73,7 @@ void Connection::setHasText(bool has) {
 
 void Connection::setText(const QString &val) {
     text = val;
-    if (value != nullptr) {
-        value->setText(val);
-    }
+    if (value != nullptr) { value->setText(val); }
 }
 
 void Connection::setAxes(QVector<QLineF> axes) {
@@ -102,10 +94,8 @@ void Connection::moved_end(QLineF p) {
 QRectF Connection::boundingRect() const {
     QRectF rect;
     for (int i = 0; i < (points.size() - 1); i++) {
-        qreal x = points[i].x() > points[i + 1].x() ? points[i + 1].x()
-                                                    : points[i].x();
-        qreal y = points[i].y() > points[i + 1].y() ? points[i + 1].y()
-                                                    : points[i].y();
+        qreal x = points[i].x() > points[i + 1].x() ? points[i + 1].x() : points[i].x();
+        qreal y = points[i].y() > points[i + 1].y() ? points[i + 1].y() : points[i].y();
         rect |= QRectF(
             x - pen_width / 2.0, y - pen_width / 2.0,
             fabs(points[i].x() - points[i + 1].x()) + pen_width,
@@ -135,8 +125,7 @@ void Connection::recalc_line() {
 
     QLineF cur_l = ax_start;
     for (int i = 0; i < break_axes.size(); i++) {
-        if (recalc_line_add_point(cur_l, break_axes[i]))
-            cur_l = break_axes[i];
+        if (recalc_line_add_point(cur_l, break_axes[i])) cur_l = break_axes[i];
     }
     recalc_line_add_point(cur_l, ax_end);
 
@@ -145,15 +134,12 @@ void Connection::recalc_line() {
 
 bool Connection::recalc_line_add_point(const QLineF &l1, const QLineF &l2) {
     QPointF intersec;
-    if (l1.intersect(l2, &intersec) == QLineF::NoIntersection) {
-        return false;
-    }
+    if (l1.intersect(l2, &intersec) == QLineF::NoIntersection) { return false; }
     points.append(intersec);
     return true;
 }
 
-Bus::Bus(const Connector *start, const Connector *end, unsigned width)
-    : Connection(start, end) {
+Bus::Bus(const Connector *start, const Connector *end, unsigned width) : Connection(start, end) {
     pen_width = width;
 }
 
@@ -167,16 +153,14 @@ void Bus::setAxes(QVector<QLineF> axes) {
     conns_update();
 }
 
-const Connector *
-Bus::new_connector(qreal x, qreal y, enum Connector::Axis axis) {
+const Connector *Bus::new_connector(qreal x, qreal y, enum Connector::Axis axis) {
     Connector *c = new Connector(axis);
     conns.append({ .c = c, .p = QPoint(x, y) });
     conns_update();
     return c;
 }
 
-const Connector *
-Bus::new_connector(const QPointF &p, enum Connector::Axis axis) {
+const Connector *Bus::new_connector(const QPointF &p, enum Connector::Axis axis) {
     return new_connector(p.x(), p.y(), axis);
 }
 
@@ -223,8 +207,7 @@ void Bus::conns_update() {
                 // zero length)
                 continue;
             }
-            range = cu_closest(
-                QLineF(points[y], points[y + 1]), QPointF(conn.p), &inter);
+            range = cu_closest(QLineF(points[y], points[y + 1]), QPointF(conn.p), &inter);
             if (closest.isNull() || closest_range > range) {
                 closest = inter;
                 closest_range = range;
@@ -235,7 +218,6 @@ void Bus::conns_update() {
     }
 }
 
-Signal::Signal(const Connector *start, const Connector *end)
-    : Connection(start, end) {
+Signal::Signal(const Connector *start, const Connector *end) : Connection(start, end) {
     color = QColor(0, 0, 255);
 }

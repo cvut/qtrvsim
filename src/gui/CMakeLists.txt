@@ -11,16 +11,16 @@ set(gui_SOURCES
         cachedock.cpp
         cacheview.cpp
         cop0dock.cpp
-        coreview/connection.cpp
-        coreview/instructionview.cpp
-        coreview/logicblock.cpp
-        coreview/memory.cpp
-        coreview/minimux.cpp
-        coreview/multiplexer.cpp
-        coreview/multitext.cpp
-        coreview/programcounter.cpp
-        coreview/registers.cpp
-        coreview/value.cpp
+        coreview/deprecated/connection.cpp
+        coreview/deprecated/instructionview.cpp
+        coreview/deprecated/logicblock.cpp
+        coreview/deprecated/memory.cpp
+        coreview/deprecated/minimux.cpp
+        coreview/deprecated/multiplexer.cpp
+        coreview/deprecated/multitext.cpp
+        coreview/deprecated/programcounter.cpp
+        coreview/deprecated/registers.cpp
+        coreview/deprecated/value.cpp
         coreview.cpp
         extprocess.cpp
         fontsize.cpp
@@ -59,17 +59,17 @@ set(gui_HEADERS
         cachedock.h
         cacheview.h
         cop0dock.h
-        coreview/connection.h
-        coreview/coreview_colors.h
-        coreview/instructionview.h
-        coreview/logicblock.h
-        coreview/memory.h
-        coreview/minimux.h
-        coreview/multiplexer.h
-        coreview/multitext.h
-        coreview/programcounter.h
-        coreview/registers.h
-        coreview/value.h
+#        coreview/deprecated/connection.h
+#        coreview/deprecated/coreview_colors.h
+#        coreview/deprecated/instructionview.h
+#        coreview/deprecated/logicblock.h
+#        coreview/deprecated/memory.h
+#        coreview/deprecated/minimux.h
+#        coreview/deprecated/multiplexer.h
+#        coreview/deprecated/multitext.h
+#        coreview/deprecated/programcounter.h
+#        coreview/deprecated/registers.h
+#        coreview/deprecated/value.h
         coreview.h
         extprocess.h
         fontsize.h
@@ -101,6 +101,7 @@ set(gui_HEADERS
         terminaldock.h
         textsignalaction.h
         coreview/components/numeric_value.h
+        coreview/data.h
         )
 set(gui_UI
         gotosymboldialog.ui
@@ -112,6 +113,7 @@ set(gui_UI
 set(gui_RESOURCES
         icons.qrc
         samples.qrc
+        coreview/schemas/schemas.qrc
         )
 
 

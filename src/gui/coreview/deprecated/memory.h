@@ -17,10 +17,7 @@ public:
     Memory(bool cache_used, const machine::Cache *cache);
 
     QRectF boundingRect() const override;
-    void paint(
-        QPainter *painter,
-        const QStyleOptionGraphicsItem *option,
-        QWidget *widget) override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 signals:
     void open_mem();
@@ -72,8 +69,7 @@ public:
     const Connector *connector_req_read() const;
 
 private:
-    Connector *con_address, *con_data_out, *con_data_in, *con_req_write,
-        *con_req_read;
+    Connector *con_address, *con_data_out, *con_data_in, *con_req_write, *con_req_read;
 };
 
 } // namespace coreview

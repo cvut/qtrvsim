@@ -14,10 +14,7 @@ public:
     InstructionView(QColor bgnd = QColor(240, 240, 240));
 
     QRectF boundingRect() const override;
-    void paint(
-        QPainter *painter,
-        const QStyleOptionGraphicsItem *option,
-        QWidget *widget) override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 public slots:
     void instruction_update(

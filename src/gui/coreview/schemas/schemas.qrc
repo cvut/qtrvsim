@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/core">
+        <file>simple.svg</file>
+        <file>pipeline.svg</file>
+        <file>forwarding.svg</file>
+    </qresource>
+</RCC>

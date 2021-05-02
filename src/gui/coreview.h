@@ -1,30 +1,27 @@
-#ifndef COREVIEW_H
-    #define COREVIEW_H
+#ifndef QTRVSIM_COREVIEW_H
+#define QTRVSIM_COREVIEW_H
 
-    #include "coreview/instructionview.h"
-    #include "coreview/logicblock.h"
-    #include "coreview/memory.h"
-    #include "coreview/multitext.h"
-    #include "coreview/programcounter.h"
-    #include "coreview/registers.h"
-    #include "coreview/value.h"
-    #include "graphicsview.h"
+#include "components/numeric_value.h"
+#include "graphicsview.h"
 
-    #include <QGraphicsScene>
-    #include <QGraphicsView>
-    #include <QSignalMapper>
-    #include <machine/machine.h>
-    #include <svgscene/components/hyperlinkitem.h>
-    #include <svgscene/svggraphicsscene.h>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QSignalMapper>
+#include <machine/machine.h>
+#include <svgscene/components/hyperlinkitem.h>
+#include <svgscene/components/simpletextitem.h>
+#include <svgscene/svggraphicsscene.h>
+#include <unordered_map>
 
 class CoreViewScene : public svgscene::SvgGraphicsScene {
     Q_OBJECT
 
 public:
-    CoreViewScene(machine::Machine *machine, const QString &background_name);
+    CoreViewScene(machine::Machine *machine, const QString &core_svg_scheme_name);
     ~CoreViewScene() override;
 
 signals:
+    /* Hyperlink handlers propagated to main window. */
     void request_registers();
     void request_data_memory();
     void request_program_memory();
@@ -34,50 +31,88 @@ signals:
     void request_peripherals();
     void request_terminal();
 
-protected:
-    void register_hyperlink(svgscene::HyperlinkItem *element) const;
+public slots:
+    /**
+     * Update all installed dynamic values.
+     *
+     * @see install_value
+     */
+    void update_values();
 
 protected:
-    coreview::ProgramMemory *mem_program;
-    coreview::DataMemory *mem_data;
-    coreview::Registers *regs;
-    coreview::LogicBlock *peripherals;
-    coreview::LogicBlock *terminal;
-    struct {
-        coreview::ProgramCounter *pc;
-    } ft {};
-    struct {
-        coreview::MultiText *multi_excause;
-    } mm {};
-    struct {
-        coreview::MultiText *multi_stall;
-    } hu {};
+    /**
+     * Lookup link target and connect element one of `request_` slots.
+     * @param element   the clickable element
+     */
+    void install_hyperlink(svgscene::HyperlinkItem *element) const;
 
-    QGraphicsSimpleTextItem *new_label(const QString &str, qreal x, qreal y);
+    /**
+     * Create update handler for dynamic value in core view.
+     *
+     * @tparam T_handler              one of classes in
+     *                                `coreview/components/numeric_value.h`
+     * @tparam T                      type of value to update from
+     * @param handler_list            list, where the created handler will be
+     *                                stored
+     * @param value_source_name_map   maps of map names used in svg to
+     *                                references in the state struct
+     * @param element                 text element that will be updated
+     * @param source_name             name of data source, see
+     *                                value_source_name_map
+     */
+    template<typename T_handler, typename T>
+    void install_value(
+        std::vector<T_handler> &handler_list,
+        const std::unordered_map<QString, const T &> &value_source_name_map,
+        svgscene::SimpleTextItem *element,
+        const QString &source_name);
+
+    /**
+     * Wrapper for `install_value` which searched all value components of
+     * the given type in the SVG document.
+     *
+     * @tparam T_handler            see install_value
+     * @tparam T                    see install_value
+     * @param document              SVG document
+     * @param handler_list          see install_value
+     * @param value_source_name_map see install_value
+     */
+    template<typename T_handler, typename T>
+    void install_values_from_document(
+        const svgscene::SvgDocument &document,
+        std::vector<T_handler> &handler_list,
+        const std::unordered_map<QString, T &> &value_source_name_map);
+
+    /**
+     * Update all value components of given type.
+     *
+     * @tparam T          type of component
+     * @param value_list  list of components
+     * @see               install_value
+     */
+    template<typename T>
+    void update_value_list(std::vector<T> &value_list);
+
+protected:
+    /**
+     * Lists of dynamic values from svg that should updated each cycle.
+     */
+    struct {
+        std::vector<BoolValue> bool_values;
+        std::vector<RegValue> reg_values;
+        std::vector<DebugValue> debug_values;
+        std::vector<PCValue> pc_values;
+    } values;
 };
 
 class CoreViewSceneSimple : public CoreViewScene {
 public:
     explicit CoreViewSceneSimple(machine::Machine *machine);
-
-private:
-    coreview::InstructionView *inst_prim;
 };
 
 class CoreViewScenePipelined : public CoreViewScene {
 public:
     explicit CoreViewScenePipelined(machine::Machine *machine);
-
-private:
-    coreview::InstructionView *inst_fetch, *inst_dec, *inst_exec, *inst_mem,
-        *inst_wrb;
-    coreview::LogicBlock *hazard_unit;
 };
 
-#else
-
-class CoreViewScene;
-class CoreViewSceneSimple;
-class CoreViewScenePipelined;
-
-#endif // COREVIEW_H
+#endif

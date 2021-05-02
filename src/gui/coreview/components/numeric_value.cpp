@@ -1,17 +1,28 @@
 #include "numeric_value.h"
 
-NumericValue::NumericValue(
-    BORROWED svgscene::SimpleTextItem *element,
-    u64_getter getter,
-    unsigned int text_width_chars,
-    unsigned int base,
-    QChar fill_char)
+BoolValue::BoolValue(svgscene::SimpleTextItem *const element, const bool &data)
     : element(element)
-    , getter(getter)
-    , text_width_chars(text_width_chars)
-    , base(base)
-    , fill_char(fill_char) {}
+    , data(data) {}
 
-void NumericValue::update() {
-    element->setText(QString("%1").arg(getter(), text_width_chars, base, fill_char));
+void BoolValue::update() {
+    element->setText(data ? "1" : "0");
+}
+PCValue::PCValue(svgscene::SimpleTextItem *element, const machine::Address &data)
+    : element(element)
+    , data(data) {}
+
+void PCValue::update() {
+    element->setText(QString("0x%1").arg(data.get_raw(), 8, 16, QChar('0')));
+}
+RegValue::RegValue(svgscene::SimpleTextItem *element, const machine::RegisterValue &data)
+    : element(element)
+    , data(data) {}
+void RegValue::update() {
+    element->setText(QString("0x%1").arg(data.as_u32(), 8, 16, QChar('0')));
+}
+DebugValue::DebugValue(svgscene::SimpleTextItem *element, const unsigned int &data)
+    : element(element)
+    , data(data) {}
+void DebugValue::update() {
+    element->setText(QString("0x%1").arg(data, 0, 10, QChar(' ')));
 }

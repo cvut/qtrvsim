@@ -436,8 +436,8 @@
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-119"
            content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;value-signal&quot; source=&quot;fetch_jump_reg_value&quot;/&gt;"
-           data-label="0" data-tags="simple pipeline forwarding" data-component="value-signal"
-           data-source="fetch_jump_reg_value">
+           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
+           data-source="sample-bool">
             <rect x="357" y="89" width="7" height="8" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"
                   pointer-events="all"/>
             <g fill="#000000" font-family="sans-serif" text-anchor="end" font-size="6px">

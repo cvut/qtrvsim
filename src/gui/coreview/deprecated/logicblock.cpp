@@ -14,8 +14,7 @@ using namespace coreview;
 #define PENW 1
 //////////////////////
 
-LogicBlock::LogicBlock(QString name) : LogicBlock(QVector<QString>({ name })) {
-}
+LogicBlock::LogicBlock(QString name) : LogicBlock(QVector<QString>({ name })) {}
 
 LogicBlock::LogicBlock(QVector<QString> name) : QGraphicsObject(nullptr) {
     QFont font;
@@ -29,8 +28,7 @@ LogicBlock::LogicBlock(QVector<QString> name) : QGraphicsObject(nullptr) {
         QRectF t_box = t->boundingRect();
         t->setPos(-t_box.width() / 2, h + LINE_OFFSET);
         h += t_box.height() + LINE_OFFSET;
-        if (w < t_box.width())
-            w = t_box.width();
+        if (w < t_box.width()) w = t_box.width();
     }
 
     box = QRectF(-w / 2 - GAP, -GAP, w + (2 * GAP), h + (2 * GAP));
@@ -44,9 +42,7 @@ LogicBlock::~LogicBlock() {
 }
 
 QRectF LogicBlock::boundingRect() const {
-    return QRectF(
-        box.x() - PENW / 2, box.y() - PENW / 2, box.width() + PENW,
-        box.height() + PENW);
+    return QRectF(box.x() - PENW / 2, box.y() - PENW / 2, box.width() + PENW, box.height() + PENW);
 }
 
 void LogicBlock::paint(
@@ -94,8 +90,7 @@ const Connector *LogicBlock::new_connector(qreal x, qreal y) {
 
     // Note: we are using here that 0 and M_PI is same angle but different
     // orientation (but we ignore orientation for now)
-    Connector *c
-        = new Connector(fabs(x) > fabs(y) ? Connector::AX_X : Connector::AX_Y);
+    Connector *c = new Connector(fabs(x) > fabs(y) ? Connector::AX_X : Connector::AX_Y);
     connectors.append({ .con = c, .x = x, .y = y, .p = con_pos(x, y) });
     setPos(this->x(), this->y()); // Update connector position
     return c;
@@ -105,10 +100,8 @@ QPointF LogicBlock::con_pos(qreal x, qreal y) {
     qreal px, py;
     px = (box.right() - GAP) * x;
     py = (box.bottom() / 2 - GAP) * (y + 1) + GAP;
-    if (fabs(x) == 1)
-        px += GAP * sign(x);
-    if (fabs(y) == 1)
-        py += GAP * sign(y);
+    if (fabs(x) == 1) px += GAP * sign(x);
+    if (fabs(y) == 1) py += GAP * sign(y);
     return QPointF(px, py);
 }
 

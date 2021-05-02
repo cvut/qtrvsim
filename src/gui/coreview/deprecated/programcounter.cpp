@@ -29,9 +29,7 @@ ProgramCounter::ProgramCounter(machine::Machine *machine)
     value.setPos(1, HEIGHT - value.boundingRect().height());
     value.setFont(font);
 
-    connect(
-        machine->registers(), &machine::Registers::pc_update, this,
-        &ProgramCounter::pc_update);
+    connect(machine->registers(), &machine::Registers::pc_update, this, &ProgramCounter::pc_update);
 
     con_in = new Connector(Connector::AX_Y);
     con_out = new Connector(Connector::AX_Y);

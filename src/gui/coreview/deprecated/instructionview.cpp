@@ -19,9 +19,7 @@ using namespace coreview;
 #define PENW 1
 //////////////////////
 
-InstructionView::InstructionView(QColor bgnd)
-    : QGraphicsObject(nullptr)
-    , text(this) {
+InstructionView::InstructionView(QColor bgnd) : QGraphicsObject(nullptr), text(this) {
     QFont f;
     f.setPointSize(FontSize::SIZE6);
     text.setFont(f);
@@ -29,8 +27,7 @@ InstructionView::InstructionView(QColor bgnd)
     valid = false;
     // Initialize to NOP
     instruction_update(
-        machine::Instruction(), machine::Address::null(), machine::EXCAUSE_NONE,
-        false);
+        machine::Instruction(), machine::Address::null(), machine::EXCAUSE_NONE, false);
 }
 
 QRectF InstructionView::boundingRect() const {

@@ -1,28 +1,53 @@
-#ifndef QTMIPS_NUMERIC_VALUE_H
-#define QTMIPS_NUMERIC_VALUE_H
+#ifndef QTRVSIM_NUMERIC_VALUE_H
+#define QTRVSIM_NUMERIC_VALUE_H
 
+#include <machine/memory/address.h>
+#include <machine/register_value.h>
 #include <svgscene/components/simpletextitem.h>
 #include <svgscene/utils/memory_ownership.h>
 
-typedef uint64_t (*u64_getter)();
-
-class NumericValue : public QObject {
+class BoolValue {
 public:
-    explicit NumericValue(
-        BORROWED svgscene::SimpleTextItem *element,
-        u64_getter getter,
-        unsigned int text_width_chars = 8,
-        unsigned int base = 16,
-        QChar fill_char = '0');
-
+    BoolValue(svgscene::SimpleTextItem *element, const bool &data);
     void update();
+    static constexpr const char *COMPONENT_NAME = "bool-value";
 
 private:
-    BORROWED svgscene::SimpleTextItem *element;
-    u64_getter getter;
-    const uint8_t text_width_chars;
-    const uint8_t base;
-    const QChar fill_char;
+    BORROWED svgscene::SimpleTextItem *const element;
+    const bool &data;
 };
 
-#endif // QTMIPS_NUMERIC_VALUE_H
+class PCValue {
+public:
+    PCValue(svgscene::SimpleTextItem *element, const machine::Address &data);
+    void update();
+    static constexpr const char *COMPONENT_NAME = "pc-value";
+
+private:
+    BORROWED svgscene::SimpleTextItem *const element;
+    const machine::Address &data;
+};
+
+class RegValue {
+public:
+    RegValue(svgscene::SimpleTextItem *element, const machine::RegisterValue &data);
+    void update();
+    static constexpr const char *COMPONENT_NAME = "reg-value";
+
+private:
+    BORROWED svgscene::SimpleTextItem *const element;
+    const machine::RegisterValue &data;
+};
+
+class DebugValue {
+public:
+    DebugValue(svgscene::SimpleTextItem *element, const unsigned int &data);
+    void update();
+    static constexpr const char *COMPONENT_NAME = "reg-value";
+
+private:
+    BORROWED svgscene::SimpleTextItem *const element;
+    const unsigned &data;
+};
+
+#endif // QTRVSIM_NUMERIC_VALUE_H

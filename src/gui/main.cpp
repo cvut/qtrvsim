@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     QApplication::setApplicationVersion(APP_VERSION);
 
     LOG("Started %s version %s.", APP_NAME, APP_VERSION);
-    LOG("Developed at %s (%s).\n\n", APP_ORGANIZATION, APP_ORGANIZATION_DOMAIN);
+    LOG("Developed at %s (%s).", APP_ORGANIZATION, APP_ORGANIZATION_DOMAIN);
 
     /*
      * If environment variable specified in define ENV_CONFIG_FILE_NAME is

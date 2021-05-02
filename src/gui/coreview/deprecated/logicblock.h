@@ -19,10 +19,7 @@ public:
     ~LogicBlock() override;
 
     QRectF boundingRect() const override;
-    void paint(
-        QPainter *painter,
-        const QStyleOptionGraphicsItem *option,
-        QWidget *widget) override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
     void setPos(qreal x, qreal y);
     void setSize(qreal width, qreal height);

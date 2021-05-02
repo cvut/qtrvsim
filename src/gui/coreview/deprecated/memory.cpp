@@ -29,16 +29,13 @@ Memory::Memory(bool cache_used, const machine::Cache *cch)
     cache_hit_t.setFont(font);
     cache_miss_t.setFont(font);
 
-    name.setPos(
-        WIDTH / 2 - name.boundingRect().width() / 2,
-        HEIGHT - (HEIGHT - CACHE_HEIGHT) / 2);
+    name.setPos(WIDTH / 2 - name.boundingRect().width() / 2, HEIGHT - (HEIGHT - CACHE_HEIGHT) / 2);
     if (cache) {
         const QRectF &cache_t_b = cache_t.boundingRect();
         cache_t.setPos(WIDTH / 2 - cache_t_b.width() / 2, 1);
         const QRectF &cache_hit_b = cache_hit_t.boundingRect();
         cache_hit_t.setPos(WIDTH / 20, cache_t_b.height() + 2);
-        cache_miss_t.setPos(
-            WIDTH / 20, cache_t_b.height() + cache_hit_b.height() + 3);
+        cache_miss_t.setPos(WIDTH / 20, cache_t_b.height() + cache_hit_b.height() + 3);
     }
 
     cache_t.setVisible(cache);
@@ -46,8 +43,7 @@ Memory::Memory(bool cache_used, const machine::Cache *cch)
     cache_miss_t.setVisible(cache);
 
     connect(cch, &machine::Cache::hit_update, this, &Memory::cache_hit_update);
-    connect(
-        cch, &machine::Cache::miss_update, this, &Memory::cache_miss_update);
+    connect(cch, &machine::Cache::miss_update, this, &Memory::cache_miss_update);
 
     setPos(x(), y()); // set connector's position
 }
@@ -65,9 +61,7 @@ void Memory::paint(
     painter->setPen(pen);
 
     //    painter->drawRect(0, 0, WIDTH, HEIGHT);
-    if (cache) {
-        painter->drawLine(0, CACHE_HEIGHT, WIDTH, CACHE_HEIGHT);
-    }
+    if (cache) { painter->drawLine(0, CACHE_HEIGHT, WIDTH, CACHE_HEIGHT); }
 }
 
 void Memory::cache_hit_update(unsigned val) {
@@ -91,15 +85,11 @@ void Memory::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) {
 void Memory::set_type(const QString &text) {
     type.setText(text);
     const QRectF &box = type.boundingRect();
-    type.setPos(
-        WIDTH / 2 - box.width() / 2,
-        HEIGHT - (HEIGHT - CACHE_HEIGHT) / 2 - box.height());
+    type.setPos(WIDTH / 2 - box.width() / 2, HEIGHT - (HEIGHT - CACHE_HEIGHT) / 2 - box.height());
 }
 
 ProgramMemory::ProgramMemory(machine::Machine *machine)
-    : Memory(
-        machine->config().cache_program().enabled(),
-        machine->cache_program()) {
+    : Memory(machine->config().cache_program().enabled(), machine->cache_program()) {
     con_address = new Connector(Connector::AX_X);
     con_inst = new Connector(Connector::AX_X);
 }
@@ -126,7 +116,6 @@ const Connector *ProgramMemory::connector_instruction() const {
 
 DataMemory::DataMemory(machine::Machine *machine)
     : Memory(machine->config().cache_data().enabled(), machine->cache_data()) {
-
     con_address = new Connector(Connector::AX_X);
     con_data_out = new Connector(Connector::AX_X);
     con_data_in = new Connector(Connector::AX_X);

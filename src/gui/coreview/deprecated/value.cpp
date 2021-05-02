@@ -27,11 +27,11 @@ Value::Value(
 
 QRectF Value::boundingRect() const {
     if (vertical) {
-        return { -LETWIDTH / 2.0 - 1.0, -HEIGHT * (int)wid / 2.0 - 1.0,
-                 LETWIDTH + 2, HEIGHT * wid + 2.0 };
+        return { -LETWIDTH / 2.0 - 1.0, -HEIGHT * (int)wid / 2.0 - 1.0, LETWIDTH + 2,
+                 HEIGHT * wid + 2.0 };
     } else {
-        return { -(LETWIDTH * (int)wid) / 2.0 - 1.0, -HEIGHT / 2.0 - 1.0,
-                 LETWIDTH * wid + 2.0, HEIGHT + 2.0 };
+        return { -(LETWIDTH * (int)wid) / 2.0 - 1.0, -HEIGHT / 2.0 - 1.0, LETWIDTH * wid + 2.0,
+                 HEIGHT + 2.0 };
     }
 }
 
@@ -46,12 +46,10 @@ void Value::paint(
     QRectF rect;
     if (vertical) {
         rect = QRectF(
-            -LETWIDTH / 2 - 0.5, -(HEIGHT * (int)wid) / 2 - 0.5, LETWIDTH + 1,
-            HEIGHT * wid + 1);
+            -LETWIDTH / 2 - 0.5, -(HEIGHT * (int)wid) / 2 - 0.5, LETWIDTH + 1, HEIGHT * wid + 1);
     } else {
         rect = QRectF(
-            -(LETWIDTH * (int)wid) / 2 - 0.5, -HEIGHT / 2 - 0.5,
-            LETWIDTH * wid + 1, HEIGHT + 1);
+            -(LETWIDTH * (int)wid) / 2 - 0.5, -HEIGHT / 2 - 0.5, LETWIDTH * wid + 1, HEIGHT + 1);
     }
     painter->setBrush(QBrush(QColor(Qt::white)));
     painter->setBackgroundMode(Qt::OpaqueMode);

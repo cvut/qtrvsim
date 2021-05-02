@@ -36,8 +36,7 @@ MiniMux::~MiniMux() {
 #define C_WIDTH (WIDTH + (GAP * (size - 1)))
 
 QRectF MiniMux::boundingRect() const {
-    return { -PENW / 2.0, -PENW / 2.0, static_cast<qreal>(C_WIDTH + PENW),
-             WIDTH + PENW };
+    return { -PENW / 2.0, -PENW / 2.0, static_cast<qreal>(C_WIDTH + PENW), WIDTH + PENW };
 }
 
 void MiniMux::paint(
@@ -50,9 +49,8 @@ void MiniMux::paint(
     }
 
     painter->setPen(QColor(0, 0, 0));
-    const QPointF poly[]
-        = { QPointF(0, HEIGHT), QPointF(HEIGHT / 2, 0),
-            QPointF(C_WIDTH - (HEIGHT / 2), 0), QPointF(C_WIDTH, HEIGHT) };
+    const QPointF poly[] = { QPointF(0, HEIGHT), QPointF(HEIGHT / 2, 0),
+                             QPointF(C_WIDTH - (HEIGHT / 2), 0), QPointF(C_WIDTH, HEIGHT) };
     painter->drawPolygon(poly, sizeof(poly) / sizeof(QPointF));
 }
 

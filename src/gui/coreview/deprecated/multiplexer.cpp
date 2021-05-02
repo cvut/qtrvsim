@@ -11,8 +11,7 @@ using namespace coreview;
 #define PENW 1
 //////////////////////
 
-Multiplexer::Multiplexer(unsigned size, bool ctl_up)
-    : QGraphicsObject(nullptr) {
+Multiplexer::Multiplexer(unsigned size, bool ctl_up) : QGraphicsObject(nullptr) {
     this->size = size;
     seton = -1;
     ctlfrom = ctl_up;
@@ -37,8 +36,7 @@ Multiplexer::~Multiplexer() {
 #define C_HEIGHT (HEIGHT + (GAP * (size - 1)))
 
 QRectF Multiplexer::boundingRect() const {
-    return { -PENW / 2.0, -PENW / 2.0, WIDTH + PENW,
-             static_cast<qreal>(C_HEIGHT + PENW) };
+    return { -PENW / 2.0, -PENW / 2.0, WIDTH + PENW, static_cast<qreal>(C_HEIGHT + PENW) };
 }
 
 void Multiplexer::paint(
@@ -51,9 +49,8 @@ void Multiplexer::paint(
     }
 
     painter->setPen(QColor(0, 0, 0));
-    const QPointF poly[]
-        = { QPointF(0, 0), QPointF(WIDTH, WIDTH / 2),
-            QPointF(WIDTH, C_HEIGHT - (WIDTH / 2)), QPointF(0, C_HEIGHT) };
+    const QPointF poly[] = { QPointF(0, 0), QPointF(WIDTH, WIDTH / 2),
+                             QPointF(WIDTH, C_HEIGHT - (WIDTH / 2)), QPointF(0, C_HEIGHT) };
     painter->drawPolygon(poly, sizeof(poly) / sizeof(QPointF));
 }
 
@@ -79,8 +76,7 @@ const Connector *Multiplexer::connector_out() const {
 }
 
 const Connector *Multiplexer::connector_in(unsigned i) const {
-    SANITY_ASSERT(
-        i < size, "Multiplexer: requested out of range input connector");
+    SANITY_ASSERT(i < size, "Multiplexer: requested out of range input connector");
     return con_in[i];
 }
 

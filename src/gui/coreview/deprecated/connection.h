@@ -44,10 +44,7 @@ public:
     Connection(const Connector *start, const Connector *end);
 
     QRectF boundingRect() const override;
-    void paint(
-        QPainter *painter,
-        const QStyleOptionGraphicsItem *option,
-        QWidget *widget) override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
     void setHasText(bool has);
     void setText(const QString &val);
@@ -80,10 +77,8 @@ public:
     void setAxes(QVector<QLineF>) override;
 
     // This creates connector snapped to closes point to x,y that is on bus
-    const Connector *
-    new_connector(qreal x, qreal y, enum Connector::Axis = Connector::AX_X);
-    const Connector *
-    new_connector(const QPointF &, enum Connector::Axis = Connector::AX_X);
+    const Connector *new_connector(qreal x, qreal y, enum Connector::Axis = Connector::AX_X);
+    const Connector *new_connector(const QPointF &, enum Connector::Axis = Connector::AX_X);
 
 protected:
     struct con_pos {
