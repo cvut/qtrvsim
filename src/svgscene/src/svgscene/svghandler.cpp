@@ -13,6 +13,7 @@
 #include <QStack>
 #include <QXmlStreamReader>
 #include <QtMath>
+#include <components/hyperlinkitem.h>
 
 LOG_CATEGORY("svgscene.parsing");
 
@@ -990,8 +991,21 @@ bool SvgHandler::startElement() {
         }
         return false;
     } else {
-        if (el.name == QLatin1String("g") || el.name == QLatin1String("a")) {
+        if (el.name == QLatin1String("g")) {
             QGraphicsItem *item = createGroupItem(el);
+            if (item) {
+                setXmlAttributes(item, el);
+                if (auto *rect_item = dynamic_cast<QGraphicsRectItem *>(item)) {
+                    setStyle(rect_item, el.xmlAttributes);
+                }
+                setTransform(
+                    item, el.xmlAttributes.value(QStringLiteral("transform")));
+                addItem(item);
+                return true;
+            }
+            return false;
+        } else if (el.name == QLatin1String("a")) {
+            QGraphicsItem *item = createHyperlinkItem(el);
             if (item) {
                 setXmlAttributes(item, el);
                 if (auto *rect_item = dynamic_cast<QGraphicsRectItem *>(item)) {
@@ -1124,6 +1138,13 @@ bool SvgHandler::startElement() {
 QGraphicsItem *SvgHandler::createGroupItem(const SvgHandler::SvgElement &el) {
     Q_UNUSED(el)
     QGraphicsItem *item = new GroupItem();
+    return item;
+}
+
+QGraphicsItem *
+SvgHandler::createHyperlinkItem(const SvgHandler::SvgElement &el) {
+    Q_UNUSED(el)
+    QGraphicsItem *item = new HyperlinkItem();
     return item;
 }
 

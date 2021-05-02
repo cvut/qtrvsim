@@ -48,6 +48,7 @@ public:
 
 protected:
     virtual QGraphicsItem *createGroupItem(const SvgElement &el);
+    QGraphicsItem *createHyperlinkItem(const SvgElement &el);
     virtual void installVisuController(QGraphicsItem *it, const SvgElement &el);
     virtual void setXmlAttributes(QGraphicsItem *git, const SvgElement &el);
 

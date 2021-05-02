@@ -13,12 +13,16 @@ target_sources(svgscene
         PRIVATE
         src/svgscene/components/groupitem.cpp
         src/svgscene/components/groupitem.h
+        src/svgscene/components/hyperlinkitem.cpp
+        src/svgscene/components/hyperlinkitem.h
         src/svgscene/components/simpletextitem.cpp
         src/svgscene/components/simpletextitem.h
         src/svgscene/graphicsview/svggraphicsview.cpp
         src/svgscene/graphicsview/svggraphicsview.h
         src/svgscene/svgdocument.cpp
         src/svgscene/svgdocument.h
+        src/svgscene/svggraphicsscene.cpp
+        src/svgscene/svggraphicsscene.h
         src/svgscene/svghandler.cpp
         src/svgscene/svghandler.h
         src/svgscene/svgmetadata.cpp
