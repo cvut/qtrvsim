@@ -26,3 +26,24 @@ DebugValue::DebugValue(svgscene::SimpleTextItem *element, const unsigned int &da
 void DebugValue::update() {
     element->setText(QString("0x%1").arg(data, 0, 10, QChar(' ')));
 }
+MultiTextValue::MultiTextValue(
+    svgscene::SimpleTextItem *const element,
+    std::pair<const unsigned int &, const std::vector<QString> &> data)
+    : element(element)
+    , current_text_index(data.first)
+    , text_table(data.second) {}
+
+void MultiTextValue::update() {
+    element->setText(text_table.at(current_text_index));
+}
+
+InstructionValue::InstructionValue(
+    svgscene::SimpleTextItem *const element,
+    std::pair<const machine::Instruction &, const machine::Address &> data)
+    : element(element)
+    , instruction_data(data.first)
+    , address_data(data.second) {}
+
+void InstructionValue::update() {
+    element->setText(instruction_data.to_str(address_data));
+}

@@ -1,6 +1,7 @@
 #ifndef QTRVSIM_NUMERIC_VALUE_H
 #define QTRVSIM_NUMERIC_VALUE_H
 
+#include <instruction.h>
 #include <machine/memory/address.h>
 #include <machine/register_value.h>
 #include <svgscene/components/simpletextitem.h>
@@ -48,6 +49,34 @@ public:
 private:
     BORROWED svgscene::SimpleTextItem *const element;
     const unsigned &data;
+};
+
+class MultiTextValue {
+public:
+    MultiTextValue(
+        svgscene::SimpleTextItem *element,
+        std::pair<const unsigned int &, const std::vector<QString> &> data);
+    void update();
+    static constexpr const char *COMPONENT_NAME = "multi-text-value";
+
+private:
+    BORROWED svgscene::SimpleTextItem *const element;
+    const unsigned &current_text_index;
+    const std::vector<QString> &text_table;
+};
+
+class InstructionValue {
+public:
+    InstructionValue(
+        svgscene::SimpleTextItem *element,
+        std::pair<const machine::Instruction &, const machine::Address &> data);
+    void update();
+    static constexpr const char *COMPONENT_NAME = "instruction-value";
+
+private:
+    BORROWED svgscene::SimpleTextItem *const element;
+    const machine::Instruction &instruction_data;
+    const machine::Address &address_data;
 };
 
 #endif // QTRVSIM_NUMERIC_VALUE_H

@@ -63,7 +63,7 @@ protected:
     template<typename T_handler, typename T>
     void install_value(
         std::vector<T_handler> &handler_list,
-        const std::unordered_map<QString, const T &> &value_source_name_map,
+        const std::unordered_map<QStringView, T> &value_source_name_map,
         svgscene::SimpleTextItem *element,
         const QString &source_name);
 
@@ -81,7 +81,7 @@ protected:
     void install_values_from_document(
         const svgscene::SvgDocument &document,
         std::vector<T_handler> &handler_list,
-        const std::unordered_map<QString, T &> &value_source_name_map);
+        const std::unordered_map<QStringView, T> &value_source_name_map);
 
     /**
      * Update all value components of given type.
@@ -102,6 +102,8 @@ protected:
         std::vector<RegValue> reg_values;
         std::vector<DebugValue> debug_values;
         std::vector<PCValue> pc_values;
+        std::vector<MultiTextValue> multi_text_values;
+        std::vector<InstructionValue> instruction_values;
     } values;
 };
 

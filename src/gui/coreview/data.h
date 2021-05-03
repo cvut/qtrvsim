@@ -1,6 +1,7 @@
 #ifndef QTRVSIM_DATA_H
 #define QTRVSIM_DATA_H
 
+using std::pair;
 using std::unordered_map;
 using std::vector;
 class CoreViewScene;
@@ -30,10 +31,15 @@ static const unordered_map<QString, void (::CoreViewScene::*)()> HYPERLINK_TARGE
  * retrieved.
  */
 static struct {
-    const unordered_map<QString, const bool &> BOOL {};
-    const unordered_map<QString, const machine::RegisterValue &> REG {};
-    const unordered_map<QString, const unsigned &> DEBUG {};
-    const unordered_map<QString, const machine::Address &> PC {};
+    const unordered_map<QStringView, const bool &> BOOL {};
+    const unordered_map<QStringView, const machine::RegisterValue &> REG {};
+    const unordered_map<QStringView, const unsigned &> DEBUG {};
+    const unordered_map<QStringView, const machine::Address &> PC {};
+    const unordered_map<QStringView, pair<const unsigned &, const std::vector<QString> &>>
+        MULTI_TEXT {};
+    const unordered_map<QStringView, pair<const machine::Instruction &, const machine::Address &>>
+        INSTRUCTION {};
+
 } VALUE_SOURCE_NAME_MAPS;
 
 static const std::vector<QString> EXCEPTION_NAME_TABLE
