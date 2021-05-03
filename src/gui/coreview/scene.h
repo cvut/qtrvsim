@@ -1,8 +1,9 @@
 #ifndef QTRVSIM_SCENE_H
 #define QTRVSIM_SCENE_H
 
+#include "./components/cache.h"
+#include "./components/value_handlers.h"
 #include "graphicsview.h"
-#include "gui/coreview/value_handlers.h"
 
 #include <QGraphicsScene>
 #include <QGraphicsView>
@@ -105,6 +106,9 @@ protected:
         std::vector<MultiTextValue> multi_text_values;
         std::vector<InstructionValue> instruction_values;
     } values;
+
+    Box<Cache> program_cache;
+    Box<Cache> data_cache;
 };
 
 class CoreViewSceneSimple : public CoreViewScene {

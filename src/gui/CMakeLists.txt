@@ -11,16 +11,16 @@ set(gui_SOURCES
         cachedock.cpp
         cacheview.cpp
         cop0dock.cpp
-        coreview/deprecated/connection.cpp
-        coreview/deprecated/instructionview.cpp
-        coreview/deprecated/logicblock.cpp
-        coreview/deprecated/memory.cpp
-        coreview/deprecated/minimux.cpp
-        coreview/deprecated/multiplexer.cpp
-        coreview/deprecated/multitext.cpp
-        coreview/deprecated/programcounter.cpp
-        coreview/deprecated/registers.cpp
-        coreview/deprecated/value.cpp
+#        coreview/deprecated/connection.cpp
+#        coreview/deprecated/instructionview.cpp
+#        coreview/deprecated/logicblock.cpp
+#        coreview/deprecated/memory.cpp
+#        coreview/deprecated/minimux.cpp
+#        coreview/deprecated/multiplexer.cpp
+#        coreview/deprecated/multitext.cpp
+#        coreview/deprecated/programcounter.cpp
+#        coreview/deprecated/registers.cpp
+#        coreview/deprecated/value.cpp
         coreview/scene.cpp
         extprocess.cpp
         fontsize.cpp
@@ -52,7 +52,8 @@ set(gui_SOURCES
         statictable.cpp
         terminaldock.cpp
         textsignalaction.cpp
-        coreview/value_handlers.cpp
+        coreview/components/value_handlers.cpp
+        coreview/components/cache.cpp
         )
 set(gui_HEADERS
         aboutdialog.h
@@ -100,8 +101,9 @@ set(gui_HEADERS
         statictable.h
         terminaldock.h
         textsignalaction.h
-        coreview/value_handlers.h
+        coreview/components/value_handlers.h
         coreview/data.h
+        coreview/components/cache.h
         )
 set(gui_UI
         gotosymboldialog.ui

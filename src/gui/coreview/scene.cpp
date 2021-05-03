@@ -23,11 +23,39 @@ LOG_CATEGORY("gui.coreview");
 CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &core_svg_scheme_name)
     : SvgGraphicsScene() {
     Q_UNUSED(machine)
+
     SvgDocument document
         = svgscene::parseFromFileName(this, QString(":/core/%1.svg").arg(core_svg_scheme_name));
 
     for (auto hyperlink_tree : document.getRoot().findAll<HyperlinkItem>()) {
         this->install_hyperlink(hyperlink_tree.getElement());
+    }
+    // TODO: this is not nice
+    {
+        auto program_cache_tree
+            = document.getRoot().find<QGraphicsItem>("data-component", "program-cache");
+        if (machine->config().cache_program().enabled()) {
+            auto texts = program_cache_tree.findAll<SimpleTextItem>();
+            // Diagrams.net dow not allow me, to put there some marks. :(
+            auto miss = texts.takeLast().getElement();
+            auto hit = texts.takeLast().getElement();
+            program_cache.reset(new Cache(machine->cache_program(), hit, miss));
+        } else {
+            program_cache_tree.getElement()->hide();
+        }
+    }
+    {
+        auto data_cache_tree
+            = document.getRoot().find<QGraphicsItem>("data-component", "data-cache");
+        if (machine->config().cache_data().enabled()) {
+            auto texts = data_cache_tree.findAll<SimpleTextItem>();
+            // Diagrams.net dow not allow me, to put there some marks. :(
+            auto miss = texts.takeLast().getElement();
+            auto hit = texts.takeLast().getElement();
+            data_cache.reset(new Cache(machine->cache_data(), hit, miss));
+        } else {
+            data_cache_tree.getElement()->hide();
+        }
     }
 
     /*
