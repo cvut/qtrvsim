@@ -1,4 +1,4 @@
-#include "numeric_value.h"
+#include "value_handlers.h"
 
 BoolValue::BoolValue(svgscene::SimpleTextItem *const element, const bool &data)
     : element(element)

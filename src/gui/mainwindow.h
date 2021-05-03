@@ -4,7 +4,6 @@
 #include "assembler/simpleasm.h"
 #include "cachedock.h"
 #include "cop0dock.h"
-#include "coreview.h"
 #include "extprocess.h"
 #include "gui/srceditor.h"
 #include "lcddisplaydock.h"
@@ -16,6 +15,7 @@
 #include "peripheralsdock.h"
 #include "programdock.h"
 #include "registersdock.h"
+#include "scene.h"
 #include "terminaldock.h"
 #include "ui_MainWindow.h"
 

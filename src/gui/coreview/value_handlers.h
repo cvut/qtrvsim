@@ -1,5 +1,5 @@
-#ifndef QTRVSIM_NUMERIC_VALUE_H
-#define QTRVSIM_NUMERIC_VALUE_H
+#ifndef QTRVSIM_VALUE_HANDLERS_H
+#define QTRVSIM_VALUE_HANDLERS_H
 
 #include <instruction.h>
 #include <machine/memory/address.h>
@@ -79,4 +79,4 @@ private:
     const machine::Address &address_data;
 };
 
-#endif // QTRVSIM_NUMERIC_VALUE_H
+#endif // QTRVSIM_VALUE_HANDLERS_H

@@ -21,7 +21,7 @@ set(gui_SOURCES
         coreview/deprecated/programcounter.cpp
         coreview/deprecated/registers.cpp
         coreview/deprecated/value.cpp
-        coreview.cpp
+        coreview/scene.cpp
         extprocess.cpp
         fontsize.cpp
         gotosymboldialog.cpp
@@ -52,7 +52,7 @@ set(gui_SOURCES
         statictable.cpp
         terminaldock.cpp
         textsignalaction.cpp
-        coreview/components/numeric_value.cpp
+        coreview/value_handlers.cpp
         )
 set(gui_HEADERS
         aboutdialog.h
@@ -70,7 +70,7 @@ set(gui_HEADERS
 #        coreview/deprecated/programcounter.h
 #        coreview/deprecated/registers.h
 #        coreview/deprecated/value.h
-        coreview.h
+        coreview/scene.h
         extprocess.h
         fontsize.h
         gotosymboldialog.h
@@ -100,7 +100,7 @@ set(gui_HEADERS
         statictable.h
         terminaldock.h
         textsignalaction.h
-        coreview/components/numeric_value.h
+        coreview/value_handlers.h
         coreview/data.h
         )
 set(gui_UI

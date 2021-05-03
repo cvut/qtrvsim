@@ -1,8 +1,8 @@
-#ifndef QTRVSIM_COREVIEW_H
-#define QTRVSIM_COREVIEW_H
+#ifndef QTRVSIM_SCENE_H
+#define QTRVSIM_SCENE_H
 
-#include "components/numeric_value.h"
 #include "graphicsview.h"
+#include "gui/coreview/value_handlers.h"
 
 #include <QGraphicsScene>
 #include <QGraphicsView>
