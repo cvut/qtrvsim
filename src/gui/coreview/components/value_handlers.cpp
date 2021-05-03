@@ -9,24 +9,37 @@ BoolValue::BoolValue(SimpleTextItem *const element, const bool &data)
 void BoolValue::update() {
     element->setText(data ? "1" : "0");
 }
+
 PCValue::PCValue(SimpleTextItem *element, const machine::Address &data)
     : element(element)
     , data(data) {}
 
 void PCValue::update() {
-    element->setText(QString("0x%1").arg(data.get_raw(), 8, 16, QChar('0')));
+    element->setText(QString("0x%1").arg(data.get_raw(), 8, 16, QChar('0')).toUpper());
 }
+
 RegValue::RegValue(SimpleTextItem *element, const machine::RegisterValue &data)
     : element(element)
     , data(data) {}
+
 void RegValue::update() {
-    element->setText(QString("0x%1").arg(data.as_u32(), 8, 16, QChar('0')));
+    element->setText(QString("%1").arg(data.as_u32(), 8, 16, QChar('0')).toUpper());
 }
+
+RegIdValue::RegIdValue(svgscene::SimpleTextItem *element, const machine::RegisterId &data)
+    : element(element)
+    , data(data) {}
+
+void RegIdValue::update() {
+    element->setText(QString("%1").arg(data.data, 2, 10, QChar('0')));
+}
+
 DebugValue::DebugValue(SimpleTextItem *element, const unsigned int &data)
     : element(element)
     , data(data) {}
+
 void DebugValue::update() {
-    element->setText(QString("0x%1").arg(data, 0, 10, QChar(' ')));
+    element->setText(QString("%1").arg(data, 0, 10, QChar(' ')));
 }
 MultiTextValue::MultiTextValue(SimpleTextItem *const element, Data data)
     : element(element)

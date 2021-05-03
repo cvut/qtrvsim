@@ -101,6 +101,7 @@ protected:
     struct {
         std::vector<BoolValue> bool_values;
         std::vector<RegValue> reg_values;
+        std::vector<RegIdValue> reg_id_values;
         std::vector<DebugValue> debug_values;
         std::vector<PCValue> pc_values;
         std::vector<MultiTextValue> multi_text_values;

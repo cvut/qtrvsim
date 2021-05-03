@@ -4,6 +4,7 @@
 #include <instruction.h>
 #include <machine/memory/address.h>
 #include <machine/register_value.h>
+#include <machine/registers.h>
 #include <svgscene/components/simpletextitem.h>
 #include <svgscene/utils/memory_ownership.h>
 
@@ -40,11 +41,22 @@ private:
     const machine::RegisterValue &data;
 };
 
+class RegIdValue {
+public:
+    RegIdValue(svgscene::SimpleTextItem *element, const machine::RegisterId &data);
+    void update();
+    static constexpr const char *COMPONENT_NAME = "reg-id-value";
+
+private:
+    BORROWED svgscene::SimpleTextItem *const element;
+    const machine::RegisterId &data;
+};
+
 class DebugValue {
 public:
     DebugValue(svgscene::SimpleTextItem *element, const unsigned int &data);
     void update();
-    static constexpr const char *COMPONENT_NAME = "reg-value";
+    static constexpr const char *COMPONENT_NAME = "debug-value";
 
 private:
     BORROWED svgscene::SimpleTextItem *const element;
