@@ -54,7 +54,8 @@
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-40"
            content="&lt;UserObject label=&quot;Registers&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
-           data-label="Registers" data-tags="simple pipeline forwarding">
+           data-label="Registers" data-tags="simple pipeline forwarding"
+           data-component="multi-text-value" data-source="test">
             <rect x="230" y="240" width="60" height="80" rx="1.2" ry="1.2" fill="#ffffff" stroke="#000000"
                   pointer-events="all"/>
             <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">

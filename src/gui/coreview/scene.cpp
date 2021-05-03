@@ -103,7 +103,7 @@ void CoreViewScene::install_values_from_document(
 template<typename T>
 void CoreViewScene::update_value_list(std::vector<T> &value_list) {
     for (auto &value_handler : value_list) {
-        DEBUG("Calling full update...");
+        DEBUG("Calling full update of %s...", typeid(T).name());
         value_handler.update();
     }
 }
@@ -113,6 +113,8 @@ void CoreViewScene::update_values() {
     update_value_list(values.debug_values);
     update_value_list(values.reg_values);
     update_value_list(values.pc_values);
+    update_value_list(values.multi_text_values);
+    update_value_list(values.instruction_values);
 }
 
 CoreViewSceneSimple::CoreViewSceneSimple(machine::Machine *machine)

@@ -52,10 +52,10 @@ private:
 };
 
 class MultiTextValue {
+    using Data = std::pair<const unsigned int &, const std::vector<QString> &>;
+
 public:
-    MultiTextValue(
-        svgscene::SimpleTextItem *element,
-        std::pair<const unsigned int &, const std::vector<QString> &> data);
+    MultiTextValue(svgscene::SimpleTextItem *element, Data data);
     void update();
     static constexpr const char *COMPONENT_NAME = "multi-text-value";
 
@@ -66,10 +66,10 @@ private:
 };
 
 class InstructionValue {
+    using Data = std::pair<const machine::Instruction &, const machine::Address &>;
+
 public:
-    InstructionValue(
-        svgscene::SimpleTextItem *element,
-        std::pair<const machine::Instruction &, const machine::Address &> data);
+    InstructionValue(svgscene::SimpleTextItem *element, Data data);
     void update();
     static constexpr const char *COMPONENT_NAME = "instruction-value";
 
