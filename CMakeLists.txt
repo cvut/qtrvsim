@@ -98,7 +98,7 @@ else ()
 endif ()
 
 if ("${WASM}" OR "${FORCE_ELFLIB_STATIC}" OR NOT "${LibElf_FOUND}")
-    message("Using local libelf fallback.")
+    message(STATUS "Using local libelf fallback.")
     add_subdirectory("external/libelf")
 endif ()
 
@@ -116,3 +116,15 @@ add_subdirectory("src/gui")
 if (NOT "${WASM}")
     add_subdirectory("src/cli")
 endif ()
+
+# =============================================================================
+# Installation
+# =============================================================================
+
+install(TARGETS gui cli
+        RUNTIME DESTINATION bin)
+install(DIRECTORY data/icons DESTINATION share/icons/hicolor/scalable/apps
+        PATTERN "data/icons/*.svg")
+install(DIRECTORY data/icons DESTINATION share/icons/hicolor/48x48/apps
+        PATTERN "data/icons/*.png")
+install(FILES data/qtmips.desktop DESTINATION share/applications)
