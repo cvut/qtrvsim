@@ -18,27 +18,19 @@ V_USER_EMAIL="$(git config user.email)"
 
 DEBIAN_NATIVE=1
 
-sed --in-place \
-  -e 's#^\([\t ]*\)versionText = "Version [^"]*\\n";.*$#\1versionText = "Version '"$V_TXT"'\\n";#' \
-  qtmips_gui/aboutdialog.cpp
-
-sed --in-place \
-  -e 's#^\([\t ]*\)app.setApplicationVersion("[^"]*");.*$#\1app.setApplicationVersion("'"$V_TXT"'");#' \
-  qtmips_gui/main.cpp
-
-sed --in-place \
-  -e 's#^\([\t ]*\)app.setApplicationVersion("[^"]*");.*$#\1app.setApplicationVersion("'"$V_TXT"'");#' \
-  qtmips_cli/main.cpp
+#sed --in-place \
+#  -e 's#^\([\t ]*\)versionText = "Version [^"]*\\n";.*$#\1versionText = "Version '"$V_TXT"'\\n";#' \
+#  qtrvsim_gui/aboutdialog.cpp
 
 if [ $DEBIAN_NATIVE -eq 1 ] ; then
 
-if grep -q "qtmips ($V_TXT)" debian/changelog ; then
+if grep -q "qtrvsim ($V_TXT)" debian/changelog ; then
 sed --in-place \
   -e '1,/^ -- .*$/s/^ -- .*$/'" -- $V_USER_NAME <$V_USER_EMAIL>  $V_DATE_RFC/" \
   debian/changelog
 else
 cat >debian/changelog.tmp <<EOF
-qtmips ($V_TXT) unstable; urgency=medium
+qtrvsim ($V_TXT) unstable; urgency=medium
 
   * Debian package updated to version $V_TXT.
 
@@ -55,15 +47,14 @@ fi # DEBIAN_NATIVE
 
 sed --in-place \
   -e 's#^\(Version:[\t ]*\)[^ ]\+ *$#\1'"$V_TXT"'#' \
-  qtmips.spec
+  qtrvsim.spec
 
 if [ $DEBIAN_NATIVE -eq 1 ] ; then
 
 echo Press enter to continue
 read x
 
-git add debian/changelog qtmips_gui/aboutdialog.cpp \
-        qtmips_gui/main.cpp qtmips.spec
+git add debian/changelog
 
 fi # DEBIAN_NATIVE
 
@@ -87,16 +78,16 @@ fi # !DEBIAN_NATIVE
 
 rm -rf ../debian-test-build
 
-mkdir -p ../debian-test-build/qtmips-$V_TXT
+mkdir -p ../debian-test-build/qtrvsim-$V_TXT
 
-cp -xa . ../debian-test-build/qtmips-$V_TXT
+cp -xa . ../debian-test-build/qtrvsim-$V_TXT
 
-cd ../debian-test-build/qtmips-$V_TXT || exit 1
+cd ../debian-test-build/qtrvsim-$V_TXT || exit 1
 
 if [ -x  /usr/lib/obs-build/changelog2spec ] ; then
-  /usr/lib/obs-build/changelog2spec debian/changelog >../qtmips.changes
+  /usr/lib/obs-build/changelog2spec debian/changelog >../qtrvsim.changes
 fi
 
-rm -f qtmips.pro.user*
+rm -f qtrvsim.pro.user*
 
 dpkg-buildpackage
