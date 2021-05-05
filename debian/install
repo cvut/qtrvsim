@@ -1,5 +1,1 @@
-qtrvsim_gui/qtrvsim_gui /usr/bin
-qtrvsim_cli/qtrvsim_cli /usr/bin
-data/qtrvsim.desktop usr/share/applications
-data/icons/qtrvsim_gui.svg /usr/share/icons/hicolor/scalable/apps
-data/icons/qtrvsim_gui.png /usr/share/icons/hicolor/48x48/apps
+

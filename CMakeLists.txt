@@ -1,23 +1,49 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(QtRVSim
-        VERSION 0.0.1
-        DESCRIPTION "RISC-V CPU simulator for education purposes.")
+        LANGUAGES C CXX
+        VERSION 0.8.0
+        DESCRIPTION "RISC-V CPU simulator for education purposes")
+
+set(KAREL_KOCI "Karel Koci <cynerd@email.cz>")
+set(PAVEL_PISA "Pavel Pisa <pisa@cmp.felk.cvut.cz>")
+set(JAKUB_DUPAK "Jakub Dupak <dev@jakubdupak.com>")
+set(MAX_HOLLMANN "Max Hollmann <hollmmax@fel.cvut.cz>")
+
+set(PROJECT_HOMEPAGE_URL "https://github.com/cvut/qtrvsim")
+set(GENERIC_NAME "RISC-V CPU simulator")
+set(LICENCE "GPL-3.0-or-later")
+set(LONG_DESCRIPTION
+    "RISC-V CPU simulator for education purposes with pipeline and cache visualization.")
+string(TIMESTAMP YEAR "%Y")
+
+set(COPYRIGHT "Copyright (c) 2017-2019 ${KAREL_KOCI}, \
+Copyright (c) 2019-${YEAR} ${PAVEL_PISA}, \
+Copyright (c) 2020-${YEAR} ${JAKUB_DUPAK}, \
+Copyright (c) 2020-${YEAR} ${MAX_HOLLMANN}")
 
 # =============================================================================
 # Configurable options
 # =============================================================================
 
+set(DEVEL_MODE false CACHE BOOL "Enable developer options in this CMake, like packaging.\
+	They should be ignored, when user just wants to build this project.")
 set(FORCE_ELFLIB_STATIC false CACHE BOOL
     "Use included statically linked libelf even if system one is available.")
 set(SANITIZERS "address,undefined" CACHE STRING
     "Runtime sanitizers to use in debug builds.
         Column separated subset of {address, memory, undefined, thread} or none.
         Memory and address cannot be used at the same time.")
-set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/target/"
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/target"
     CACHE STRING "Absolute path to place executables to.")
+set(PACKAGE_OUTPUT_PATH "${EXECUTABLE_OUTPUT_PATH}/pkg"
+    CACHE STRING "Absolute path to place generated package files.")
 
-# Auto detected
+
+# =============================================================================
+# Generated variables
+# =============================================================================
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
 	set(WASM true)
 else()
@@ -25,6 +51,17 @@ else()
 endif()
 set(CXX_TEST_PATH ${EXECUTABLE_OUTPUT_PATH})
 set(C_TEST_PATH ${EXECUTABLE_OUTPUT_PATH})
+
+# I don't want to relly on the assumption, that this file is invoked as root
+# project. Therefore I propagate the information to all subprojects
+# MAIN_PROJECT_*. Lowercase and uppercase are used for executable names and
+# C defines, respectively.
+set(MAIN_PROJECT_NAME "${PROJECT_NAME}")
+set(MAIN_PROJECT_VERSION "${PROJECT_VERSION}")
+set(MAIN_PROJECT_ORGANIZATION "FEE CTU")
+set(MAIN_PROJECT_HOMEPAGE_URL "${PROJECT_HOMEPAGE_URL}")
+string(TOLOWER "${PROJECT_NAME}" MAIN_PROJECT_NAME_LOWER)
+string(TOUPPER "${PROJECT_NAME}" MAIN_PROJECT_NAME_UPPER)
 
 # =============================================================================
 # CMake config and tools
@@ -135,10 +172,47 @@ endif()
 # Installation
 # =============================================================================
 
-install(TARGETS gui
+configure_file(data/gui.desktop.in
+               "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop")
+
+install(TARGETS gui cli
         RUNTIME DESTINATION bin)
-install(DIRECTORY data/icons DESTINATION share/icons/hicolor/scalable/apps
-        PATTERN "data/icons/*.svg")
-install(DIRECTORY data/icons DESTINATION share/icons/hicolor/48x48/apps
-        PATTERN "data/icons/*.png")
-install(FILES data/qtmips.desktop DESTINATION share/applications)
+install(FILES "data/icons/gui.svg"
+        DESTINATION "share/icons/hicolor/scalable/apps"
+        RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.svg")
+install(FILES "data/icons/48x48/gui.png"
+        DESTINATION "share/icons/hicolor/48x48/apps"
+        RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.png")
+install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop"
+        DESTINATION share/applications)
+
+# =============================================================================
+# Packages
+# =============================================================================
+
+if("${DEVEL_MODE}")
+	message(STATUS "Packaging tools enabled.")
+
+	set(PACKAGE_NAME "${MAIN_PROJECT_NAME_LOWER}")
+	set(PACKAGE_VERSION "${PROJECT_VERSION}")
+	set(PACKAGE_RELEASE "1")
+	set(PACKAGE_SOURCE_ARCHIVE_NAME "${PACKAGE_NAME}_${PACKAGE_VERSION}.tar.xz")
+	set(PACKAGE_SOURCE_ARCHIVE_FILE "${PACKAGE_OUTPUT_PATH}/${PACKAGE_SOURCE_ARCHIVE_NAME}")
+	set(PACKAGE_TOPLEVEL_DIR "${PACKAGE_NAME}-${PACKAGE_VERSION}")
+	set(PACKAGE_DESCRIPTION "${PROJECT_DESCRIPTION}")
+	set(PACKAGE_LONG_DESCRIPTION "${LONG_DESCRIPTION}")
+	set(PACKAGE_MAINTAINER "${JAKUB_DUPAK}")
+	set(PACKAGE_URL "${PROJECT_HOMEPAGE_URL}")
+	set(PACKAGE_GIT "${PACKAGE_URL}")
+	set(PACKAGE_LICENCE "${LICENCE}")
+
+	include(cmake/PackageTools.cmake)
+
+	package_config_file(appimage appimage.yml extras/packages/appimage/appimage.yml.in)
+	package_config_file(archlinux PKGBUILD extras/packages/arch/PKGBUILD.in)
+	package_config_file(deb ${PACKAGE_NAME}_${PACKAGE_VERSION}.dsc extras/packages/deb/dsc.in)
+	package_config_file(rpm ${PACKAGE_NAME}.spec extras/packages/rpm/spec.in)
+	add_custom_target(open_build_service_bundle
+	                  DEPENDS ${PACKAGE_SOURCE_ARCHIVE_NAME} appimage archlinux deb rpm
+	                  WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/pkg)
+endif()

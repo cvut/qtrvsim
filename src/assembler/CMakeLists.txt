@@ -13,7 +13,7 @@ set(assembler_HEADERS
         simpleasm.h
         )
 
-add_library(assembler
+add_library(assembler STATIC
         ${assembler_SOURCES}
         ${assembler_HEADERS})
 target_link_libraries(assembler

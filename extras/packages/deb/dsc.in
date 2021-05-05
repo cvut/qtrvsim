@@ -1,0 +1,19 @@
+Format: 3.0 (native)
+Source: @PACKAGE_NAME@
+Binary: @PACKAGE_NAME@
+Architecture: any
+Version: @PACKAGE_VERSION@
+Maintainer: @PACKAGE_MAINTAINER@
+Homepage: @PACKAGE_URL@
+Standards-Version: 3.9.8
+Vcs-Browser: @PACKAGE_URL@
+Vcs-Git: @PACKAGE_GIT@.git
+Build-Depends: debhelper (>= 9), qtbase5-dev, libelf-dev, cmake
+Package-List:
+ @PACKAGE_NAME@ deb devel optional arch=any
+Checksums-Sha1:
+ @FILE_SHA1@ @FILE_SIZE@ @PACKAGE_SOURCE_ARCHIVE_NAME@
+Checksums-Sha256:
+ @FILE_SHA256@ @FILE_SIZE@ @PACKAGE_SOURCE_ARCHIVE_NAME@
+Files:
+ @FILE_MD5@ @FILE_SIZE@ @PACKAGE_SOURCE_ARCHIVE_NAME@

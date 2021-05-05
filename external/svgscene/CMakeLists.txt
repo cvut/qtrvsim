@@ -1,5 +1,5 @@
-project(svgscene)
 cmake_minimum_required(VERSION 3.10)
+project(svgscene)
 
 find_package(Qt5
         REQUIRED COMPONENTS Core Widgets Gui)
@@ -8,9 +8,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-add_library(svgscene STATIC)
-target_sources(svgscene
-        PRIVATE
+add_library(svgscene STATIC
         src/svgscene/components/groupitem.cpp
         src/svgscene/components/groupitem.h
         src/svgscene/components/hyperlinkitem.cpp

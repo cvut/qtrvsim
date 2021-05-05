@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=@PROJECT_NAME@
+GenericName=@GENERIC_NAME@
+Exec=@MAIN_PROJECT_NAME_LOWER@_gui
+Icon=@MAIN_PROJECT_NAME_LOWER@_gui
+Type=Application
+Comment=@GENERIC_NAME@
+Terminal=false
+Categories=System;Emulator;

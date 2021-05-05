@@ -2,7 +2,7 @@ qtrvsim (0.8.0) unstable; urgency=medium
 
   * Debian package updated to version 0.8.0.
   * Switch to RISC-V simulator
- -- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Tue, 04 May 2021 15:47:28 +0200
+ -- Jakub Dupak <dev@jakubdupak.com>  Tue, 04 May 2021 23:01:01 +0200
 
 qtmips (0.7.5) unstable; urgency=medium
 

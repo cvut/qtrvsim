@@ -1,5 +1,6 @@
 project(gui
-        VERSION 0.7.5
+        LANGUAGES C CXX
+        VERSION ${MAIN_PROJECT_VERSION}
         DESCRIPTION "Graphical UI for the simulator")
 
 set(CMAKE_AUTOMOC ON)
@@ -131,17 +132,19 @@ add_executable(gui
         ${gui_HEADERS}
         ${gui_UI}
         ${gui_RESOURCES})
-target_compile_definitions(gui
-        PRIVATE
-        APP_ORGANIZATION=\"CTU\"
-        APP_ORGANIZATION_DOMAIN=\"https://fel.cvut.cz/\"
-        APP_NAME=\"QtRVSim\"
-        APP_VERSION=\"${PROJECT_VERSION}\"
-        ENV_CONFIG_FILE_NAME=\"QTRVSIM_CONFIG_FILE\")
 target_include_directories(gui PUBLIC . coreview)
 target_link_libraries(gui
         PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui
         PRIVATE machine os_emulation assembler svgscene)
+target_compile_definitions(gui
+        PRIVATE
+        APP_ORGANIZATION=\"${MAIN_PROJECT_ORGANIZATION}\"
+        APP_ORGANIZATION_DOMAIN=\"${MAIN_PROJECT_HOMEPAGE_URL}\"
+        APP_NAME=\"${MAIN_PROJECT_NAME}\"
+        APP_VERSION=\"${MAIN_PROJECT_VERSION}\"
+        ENV_CONFIG_FILE_NAME=\"${MAIN_PROJECT_NAME_UPPER}_CONFIG_FILE\")
+set_target_properties(gui PROPERTIES
+        OUTPUT_NAME "${MAIN_PROJECT_NAME_LOWER}_${PROJECT_NAME}")
 
 if(${Qt5PrintSupport_FOUND})
     target_link_libraries(gui PRIVATE Qt5::PrintSupport)

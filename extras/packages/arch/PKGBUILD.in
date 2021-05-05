@@ -1,0 +1,30 @@
+# Maintainer: @PACKAGE_MAINTAINER@
+pkgname=@PACKAGE_NAME@
+pkgver=@PROJECT_VERSION@
+pkgrel=1
+pkgdesc="@PACKAGE_DESCRIPTION@"
+arch=("any")
+url="@PACKAGE_URL@"
+license=('@PACKAGE_LICENCE@')
+depends=("qt5-base")
+makedepends=("cmake" "elfutils")
+source=("@PACKAGE_SOURCE_ARCHIVE_NAME@")
+md5sums=("@FILE_MD5@")
+
+prepare() {
+    export CMAKE_BUILD_PARALLEL_LEVEL=$(nproc)
+	cd "$srcdir/@PACKAGE_TOPLEVEL_DIR@"
+	mkdir build
+	cd build
+	cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+}
+
+build() {
+	cd "$srcdir/@PACKAGE_TOPLEVEL_DIR@/build"
+    cmake --build .
+}
+
+package() {
+	cd "$srcdir/@PACKAGE_TOPLEVEL_DIR@/build"
+	DESTDIR="$pkgdir" cmake --install .
+}

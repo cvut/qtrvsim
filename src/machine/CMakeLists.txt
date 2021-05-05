@@ -75,7 +75,7 @@ set(machine_TESTS
 
 # Object library is preferred, because the library archive is never really
 # needed. This option skips the archive creation and links directly .o files.
-add_library(machine OBJECT
+add_library(machine STATIC
         ${machine_SOURCES}
         ${machine_HEADERS})
 target_link_libraries(machine

@@ -1,0 +1,23 @@
+app: @PACKAGE_NAME@
+
+build:
+  packages:
+    - linuxdeployqt
+    - pkgconfig(Qt5Core)
+    - pkgconfig(Qt5Widgets)
+    - pkgconfig(Qt5Test)
+    - pkgconfig(Qt5PrintSupport)
+    - libelf-devel
+
+script:
+  - cd $BUILD_SOURCE_DIR
+  - tar xf @PACKAGE_SOURCE_ARCHIVE_NAME@
+  - cd @PACKAGE_TOPLEVEL_DIR@
+  - mkdir build
+  - cd build
+  - export CMAKE_BUILD_PARALLEL_LEVEL=$(nproc)
+  - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+  - cmake --build .
+  - DESTDIR="$BUILD_APPDIR" cmake --install .
+  - unset QTDIR; unset QT_PLUGIN_PATH; unset LD_LIBRARY_PATH
+  - linuxdeployqt $BUILD_APPDIR/usr/share/applications/*.desktop -bundle-non-qt-libs -verbose=2 -no-strip
