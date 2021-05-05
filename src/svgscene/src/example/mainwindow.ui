@@ -75,7 +75,7 @@
   <customwidget>
    <class>SvgGraphicsView</class>
    <extends>QGraphicsView</extends>
-   <header>src/svggraphicsview.h</header>
+   <header>svgscene/graphicsview/svggraphicsview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
