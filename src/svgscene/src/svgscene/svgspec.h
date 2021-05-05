@@ -2,14 +2,14 @@
 #ifndef SVGSCENE_SVG_SPEC_H
 #define SVGSCENE_SVG_SPEC_H
 
-#include "unordered_set"
+#include <QSet>
 
 namespace svgspec {
 
 /**
  * https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
  */
-static const std::unordered_set<QString> presentation_attributes {
+static const QSet<QString> presentation_attributes {
     "alignment-baseline",
     "baseline-shift",
     "clip",

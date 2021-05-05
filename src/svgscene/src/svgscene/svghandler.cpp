@@ -1210,7 +1210,7 @@ CssAttributes SvgHandler::parseXmlAttributes(
          * """
          * https://www.w3.org/TR/SVG/styling.html#UsingPresentationAttributes
          */
-        if (svgspec::presentation_attributes.count(name) == 1) {
+        if (svgspec::presentation_attributes.contains(name)) {
             css[name] = value;
         }
     }

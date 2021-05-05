@@ -2,7 +2,7 @@
 
 namespace svgscene {
 
-XmlAttributes svgscene::getXmlAttributes(const QGraphicsItem *element) {
+XmlAttributes getXmlAttributes(const QGraphicsItem *element) {
     QVariant raw = element->data(static_cast<int>(MetadataType::XmlAttributes));
     if (!raw.isValid() || !raw.canConvert<XmlAttributes>()) {
         throw std::out_of_range(
@@ -27,7 +27,7 @@ QString getXmlAttributeOr(
     return attrs.value(name, defaultValue);
 }
 
-CssAttributes svgscene::getCssAttributes(const QGraphicsItem *element) {
+CssAttributes getCssAttributes(const QGraphicsItem *element) {
     QVariant raw = element->data(static_cast<int>(MetadataType::CssAttributes));
     if (!raw.isValid() || !raw.canConvert<CssAttributes>()) {
         throw std::out_of_range(
