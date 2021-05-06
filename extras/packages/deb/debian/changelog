@@ -1,4 +1,4 @@
-qtrvsim (0.8.0) unstable; urgency=medium
+qtrvsim (0.8.0-1) unstable; urgency=medium
 
   * Debian package updated to version 0.8.0.
   * Switch to RISC-V simulator

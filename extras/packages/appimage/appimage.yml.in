@@ -11,7 +11,7 @@ build:
 
 script:
   - cd $BUILD_SOURCE_DIR
-  - tar xf @PACKAGE_SOURCE_ARCHIVE_NAME@
+  - tar xf @PACKAGE_SOURCE_ARCHIVE_FILE@
   - cd @PACKAGE_TOPLEVEL_DIR@
   - mkdir build
   - cd build

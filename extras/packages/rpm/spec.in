@@ -1,5 +1,5 @@
 #
-# spec file for package @MAIN_PROJECT_NAME_LOWER@
+# spec file for package @PACKAGE_NAME@
 #
 # @COPYRIGHT@
 #
@@ -22,14 +22,14 @@
 #
 
 
-Name:           @MAIN_PROJECT_NAME_LOWER@
-Version:        @PROJECT_VERSION@
+Name:           @PACKAGE_NAME@
+Version:        @PACKAGE_VERSION@
 Release:        0
-Summary:        @PROJECT_DESCRIPTION@
-License:        @LICENCE@
+Summary:        @PACKAGE_DESCRIPTION@
+License:        @PACKAGE_LICENCE@
 Group:          System/Emulators/Other
-URL:            @PROJECT_HOMEPAGE_URL@
-Source:         @MAIN_PROJECT_NAME_LOWER@_%{version}.tar.xz
+URL:            @PACKAGE_URL@
+Source:         @PACKAGE_SOURCE_ARCHIVE_FILE@
 BuildRequires:  cmake
 BuildRequires:  gcc-c++
 BuildRequires:  pkgconfig
@@ -50,7 +50,7 @@ BuildRequires:  update-desktop-files
 %endif
 
 %description
-@LONG_DESCPPRIPTION@
+@PACKAGE_LONG_DESCRIPTION@
 
 %prep
 %setup -q
@@ -64,13 +64,14 @@ BuildRequires:  update-desktop-files
 
 #desktop icon
 %if 0%{?suse_version}
-%suse_update_desktop_file -r -i @MAIN_PROJECT_NAME_LOWER@ 'System Emulator'
+%suse_update_desktop_file -r -i @PACKAGE_NAME@ 'System Emulator'
 %endif
 
 %if 0%{?fedora} || 0%{?rhel} || 0%{?centos}
-desktop-file-validate %{buildroot}share/applications/@MAIN_PROJECT_NAME_LOWER@.desktop
+desktop-file-validate %{buildroot}share/applications/@PACKAGE_NAME@.desktop
 %endif
 
+# TODO: this should be generated from CMake
 %files
 /usr/bin/qtrvsim_gui
 /usr/bin/qtrvsim_cli

@@ -1,0 +1,15 @@
+Source: @PACKAGE_NAME@
+Section: devel
+Priority: optional
+Maintainer: @PACKAGE_MAINTAINER@
+Build-Depends: debhelper (>= 9), qtbase5-dev, libelf-dev, cmake
+Standards-Version: 3.9.8
+Homepage: @PACKAGE_URL@
+Vcs-Git: @PACKAGE_GIT@
+Vcs-Browser: @PACKAGE_URL@
+
+Package: @PACKAGE_NAME@
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: @PACKAGE_DESCRIPTION@
+ @PACKAGE_LONG_DESCRIPTION@

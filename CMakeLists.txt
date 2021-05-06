@@ -26,7 +26,7 @@ Copyright (c) 2020-${YEAR} ${MAX_HOLLMANN}")
 # Configurable options
 # =============================================================================
 
-set(DEVEL_MODE false CACHE BOOL "Enable developer options in this CMake, like packaging.\
+set(DEV_MODE false CACHE BOOL "Enable developer options in this CMake, like packaging.\
 	They should be ignored, when user just wants to build this project.")
 set(FORCE_ELFLIB_STATIC false CACHE BOOL
     "Use included statically linked libelf even if system one is available.")
@@ -190,29 +190,33 @@ install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop"
 # Packages
 # =============================================================================
 
-if("${DEVEL_MODE}")
+if("${DEV_MODE}")
 	message(STATUS "Packaging tools enabled.")
 
 	set(PACKAGE_NAME "${MAIN_PROJECT_NAME_LOWER}")
 	set(PACKAGE_VERSION "${PROJECT_VERSION}")
 	set(PACKAGE_RELEASE "1")
-	set(PACKAGE_SOURCE_ARCHIVE_NAME "${PACKAGE_NAME}_${PACKAGE_VERSION}.tar.xz")
-	set(PACKAGE_SOURCE_ARCHIVE_FILE "${PACKAGE_OUTPUT_PATH}/${PACKAGE_SOURCE_ARCHIVE_NAME}")
+	set(PACKAGE_SOURCE_ARCHIVE_FILE "${PACKAGE_NAME}_${PACKAGE_VERSION}.orig.tar.xz")
+	set(PACKAGE_SOURCE_ARCHIVE_PATH "${PACKAGE_OUTPUT_PATH}/${PACKAGE_SOURCE_ARCHIVE_FILE}")
 	set(PACKAGE_TOPLEVEL_DIR "${PACKAGE_NAME}-${PACKAGE_VERSION}")
 	set(PACKAGE_DESCRIPTION "${PROJECT_DESCRIPTION}")
 	set(PACKAGE_LONG_DESCRIPTION "${LONG_DESCRIPTION}")
 	set(PACKAGE_MAINTAINER "${JAKUB_DUPAK}")
 	set(PACKAGE_URL "${PROJECT_HOMEPAGE_URL}")
-	set(PACKAGE_GIT "${PACKAGE_URL}")
+	set(PACKAGE_GIT "github.com:cvut/qtrvsim.git")
 	set(PACKAGE_LICENCE "${LICENCE}")
 
 	include(cmake/PackageTools.cmake)
 
 	package_config_file(appimage appimage.yml extras/packages/appimage/appimage.yml.in)
 	package_config_file(archlinux PKGBUILD extras/packages/arch/PKGBUILD.in)
-	package_config_file(deb ${PACKAGE_NAME}_${PACKAGE_VERSION}.dsc extras/packages/deb/dsc.in)
 	package_config_file(rpm ${PACKAGE_NAME}.spec extras/packages/rpm/spec.in)
+	package_debian_quilt(deb
+	                     ${PACKAGE_NAME}_${PACKAGE_VERSION}-${PACKAGE_RELEASE}.dsc
+	                     extras/packages/deb/dsc.in
+	                     extras/packages/deb/debian
+	                     ${PACKAGE_NAME}_${PACKAGE_VERSION}-${PACKAGE_RELEASE}.debian.tar.xz)
 	add_custom_target(open_build_service_bundle
-	                  DEPENDS ${PACKAGE_SOURCE_ARCHIVE_NAME} appimage archlinux deb rpm
+	                  DEPENDS ${PACKAGE_SOURCE_ARCHIVE_FILE} appimage archlinux deb rpm
 	                  WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/pkg)
 endif()
