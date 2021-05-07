@@ -35,9 +35,7 @@ target_link_libraries(svgscene
         PRIVATE Qt5::Core Qt5::Gui Qt5::Widgets)
 target_include_directories(svgscene PUBLIC src PRIVATE src/svgscene)
 
-add_executable(svgscene-example)
-target_sources(svgscene-example
-        PRIVATE
+add_executable(svgscene-example EXCLUDE_FROM_ALL
         src/example/main.cpp
         src/example/mainwindow.cpp
         src/example/mainwindow.h
