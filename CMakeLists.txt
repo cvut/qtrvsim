@@ -22,6 +22,8 @@ Copyright (c) 2019-${YEAR} ${PAVEL_PISA}, \
 Copyright (c) 2020-${YEAR} ${JAKUB_DUPAK}, \
 Copyright (c) 2020-${YEAR} ${MAX_HOLLMANN}")
 
+include(cmake/GPL-3.0-or-later.cmake)
+
 # =============================================================================
 # Configurable options
 # =============================================================================
@@ -172,11 +174,13 @@ endif()
 # Installation
 # =============================================================================
 
+# Prior to CMake version 3.13, installation must be performed in the subdirectory,
+# there the target was created. Therefore executable installation is to be found
+# in corresponding CMakeLists.txt.
+
 configure_file(data/gui.desktop.in
                "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop")
 
-install(TARGETS gui cli
-        RUNTIME DESTINATION bin)
 install(FILES "data/icons/gui.svg"
         DESTINATION "share/icons/hicolor/scalable/apps"
         RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.svg")
@@ -191,6 +195,8 @@ install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop"
 # =============================================================================
 
 if("${DEV_MODE}")
+	# The condition prevents execution of this section during regular user installation.
+	# It created files useless to normal users and requires additional tools (git, xz).
 	message(STATUS "Packaging tools enabled.")
 
 	set(PACKAGE_NAME "${MAIN_PROJECT_NAME_LOWER}")
@@ -208,14 +214,19 @@ if("${DEV_MODE}")
 
 	include(cmake/PackageTools.cmake)
 
+	# Inject up-to-date information into package config files.
 	package_config_file(appimage appimage.yml extras/packages/appimage/appimage.yml.in)
 	package_config_file(archlinux PKGBUILD extras/packages/arch/PKGBUILD.in)
 	package_config_file(rpm ${PACKAGE_NAME}.spec extras/packages/rpm/spec.in)
+	# Debian uses whole directory which has to be saved to archive and shipped.
 	package_debian_quilt(deb
 	                     ${PACKAGE_NAME}_${PACKAGE_VERSION}-${PACKAGE_RELEASE}.dsc
 	                     extras/packages/deb/dsc.in
 	                     extras/packages/deb/debian
 	                     ${PACKAGE_NAME}_${PACKAGE_VERSION}-${PACKAGE_RELEASE}.debian.tar.xz)
+	# Creates bunch of files in ${CMAKE_BINARY_DIR}/target/pkg that you can just pass to
+	# Open Build Service and it will build all packages.
+	# TODO: Currently changelog is not handled automatically.
 	add_custom_target(open_build_service_bundle
 	                  DEPENDS ${PACKAGE_SOURCE_ARCHIVE_FILE} appimage archlinux deb rpm
 	                  WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/pkg)

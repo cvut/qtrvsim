@@ -150,3 +150,15 @@ if(${Qt5PrintSupport_FOUND})
     target_link_libraries(gui PRIVATE Qt5::PrintSupport)
     target_compile_definitions(gui PRIVATE WITH_PRINTING=1)
 endif()
+
+# =============================================================================
+# Installation
+# =============================================================================
+
+# Prior to CMake version 3.13, installation must be performed in the subdirectory,
+# there the target was created. Therefore executable installation is to be found
+# in corresponding CMakeLists.txt.
+
+install(TARGETS gui
+        RUNTIME DESTINATION bin)
+

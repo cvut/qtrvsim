@@ -34,3 +34,14 @@ target_compile_definitions(cli
 set_target_properties(cli PROPERTIES
                       OUTPUT_NAME "${MAIN_PROJECT_NAME_LOWER}_${PROJECT_NAME}")
 
+# =============================================================================
+# Installation
+# =============================================================================
+
+# Prior to CMake version 3.13, installation must be performed in the subdirectory,
+# there the target was created. Therefore executable installation is to be found
+# in corresponding CMakeLists.txt.
+
+install(TARGETS cli
+        RUNTIME DESTINATION bin)
+
