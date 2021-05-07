@@ -911,7 +911,8 @@ void SvgHandler::parse() {
             } else if (auto *text_item = dynamic_cast<QGraphicsTextItem *>(m_topLevelItem)) {
                 QString text = text_item->toPlainText();
                 if (!text.isEmpty()) text += '\n';
-                text_item->setPlainText(text + m_xml->text());
+                text += m_xml->text();
+                text_item->setPlainText(text);
                 // nInfo() << text_item->toPlainText();
             } else {
                 DEBUG() << "characters are not part of text item, will be ignored";

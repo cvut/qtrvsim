@@ -1,6 +1,8 @@
 #ifndef QTRVSIM_DATA_H
 #define QTRVSIM_DATA_H
 
+#include "common/polyfills/qstring_hash.h"
+
 using std::pair;
 using std::unordered_map;
 using std::vector;
@@ -52,50 +54,70 @@ struct {
     unsigned d { 2 };
     machine::Instruction i { 0X8C022000 };
 } dummy;
+
 /**
  * Maps SVG usable value names to references to fields, where thy can be
  * retrieved.
  */
 static const struct {
     const unordered_map<QStringView, const bool &> BOOL {
-        { u"alu-zero", dummy.b },         { u"decode-alu-src", dummy.b },
-        { u"decode-branch", dummy.b },    { u"decode-mem-read", dummy.b },
-        { u"decode-mem-read", dummy.b },  { u"decode-mem-to-reg", dummy.b },
-        { u"decode-mem-write", dummy.b }, { u"decode-reg-write", dummy.b },
-        { u"exec-alu-src", dummy.b },     { u"exec-branch", dummy.b },
-        { u"exec-mem-read", dummy.b },    { u"exec-mem-to-reg", dummy.b },
-        { u"exec-mem-write", dummy.b },   { u"exec-reg-write", dummy.b },
-        { u"fetch-branch", dummy.b },     { u"mem-mem-read", dummy.b },
-        { u"mem-mem-to-reg", dummy.b },   { u"mem-mem-write", dummy.b },
-        { u"mem-reg-write", dummy.b },    { u"mem-to-reg", dummy.b },
-        { u"wb-reg-write", dummy.b },
+        { QStringLiteral("alu-zero"), dummy.b },
+        { QStringLiteral("decode-alu-src"), dummy.b },
+        { QStringLiteral("decode-branch"), dummy.b },
+        { QStringLiteral("decode-mem-read"), dummy.b },
+        { QStringLiteral("decode-mem-read"), dummy.b },
+        { QStringLiteral("decode-mem-to-reg"), dummy.b },
+        { QStringLiteral("decode-mem-write"), dummy.b },
+        { QStringLiteral("decode-reg-write"), dummy.b },
+        { QStringLiteral("exec-alu-src"), dummy.b },
+        { QStringLiteral("exec-branch"), dummy.b },
+        { QStringLiteral("exec-mem-read"), dummy.b },
+        { QStringLiteral("exec-mem-to-reg"), dummy.b },
+        { QStringLiteral("exec-mem-write"), dummy.b },
+        { QStringLiteral("exec-reg-write"), dummy.b },
+        { QStringLiteral("fetch-branch"), dummy.b },
+        { QStringLiteral("mem-mem-read"), dummy.b },
+        { QStringLiteral("mem-mem-to-reg"), dummy.b },
+        { QStringLiteral("mem-mem-write"), dummy.b },
+        { QStringLiteral("mem-reg-write"), dummy.b },
+        { QStringLiteral("mem-to-reg"), dummy.b },
+        { QStringLiteral("wb-reg-write"), dummy.b },
     };
     const unordered_map<QStringView, const machine::RegisterValue &> REG {
-        { u"alu-res", dummy.reg },    { u"alu-src1", dummy.reg }, { u"alu-src2", dummy.reg },
-        { u"decode-imm", dummy.reg }, { u"exec-imm", dummy.reg }, { u"fetched-value", dummy.reg },
-        { u"mem-in", dummy.reg },     { u"mem-out", dummy.reg },  { u"rs1", dummy.reg },
-        { u"rs2", dummy.reg },        { u"wb", dummy.reg },
+        { QStringLiteral("alu-res"), dummy.reg },  { QStringLiteral("alu-src1"), dummy.reg },
+        { QStringLiteral("alu-src2"), dummy.reg }, { QStringLiteral("decode-imm"), dummy.reg },
+        { QStringLiteral("exec-imm"), dummy.reg }, { QStringLiteral("fetched-value"), dummy.reg },
+        { QStringLiteral("mem-in"), dummy.reg },   { QStringLiteral("mem-out"), dummy.reg },
+        { QStringLiteral("rs1"), dummy.reg },      { QStringLiteral("rs2"), dummy.reg },
+        { QStringLiteral("wb"), dummy.reg },
     };
     const unordered_map<QStringView, const machine::RegisterId &> REG_ID {
-        { u"decode-rd", dummy.regid }, { u"exec-rd", dummy.regid }, { u"mem-rd", dummy.regid },
-        { u"rs1", dummy.regid },       { u"rs2", dummy.regid },     { u"wb-rd", dummy.regid },
+        { QStringLiteral("decode-rd"), dummy.regid }, { QStringLiteral("exec-rd"), dummy.regid },
+        { QStringLiteral("mem-rd"), dummy.regid },    { QStringLiteral("rs1"), dummy.regid },
+        { QStringLiteral("rs2"), dummy.regid },       { QStringLiteral("wb-rd"), dummy.regid },
 
     };
     const unordered_map<QStringView, const unsigned &> DEBUG {
-        { u"cycle-count", dummy.d },    { u"decode-alu-op", dummy.d },  { u"exec-alu-op", dummy.d },
-        { u"exec-forward-a", dummy.d }, { u"exec-forward-b", dummy.d }, { u"stall-count", dummy.d },
+        { QStringLiteral("cycle-count"), dummy.d },
+        { QStringLiteral("decode-alu-op"), dummy.d },
+        { QStringLiteral("exec-alu-op"), dummy.d },
+        { QStringLiteral("exec-forward-a"), dummy.d },
+        { QStringLiteral("exec-forward-b"), dummy.d },
+        { QStringLiteral("stall-count"), dummy.d },
     };
     const unordered_map<QStringView, const machine::Address &> PC {
-        { u"fetch-pc", dummy.pc },
+        { QStringLiteral("fetch-pc"), dummy.pc },
     };
     const unordered_map<QStringView, MultiTextData> MULTI_TEXT {
-        { u"hazard", { dummy.d, STALL_TEXT_TABLE } },
-        { u"exception", { dummy.d, EXCEPTION_NAME_TABLE } },
+        { QStringLiteral("hazard"), { dummy.d, STALL_TEXT_TABLE } },
+        { QStringLiteral("exception"), { dummy.d, EXCEPTION_NAME_TABLE } },
     };
     const unordered_map<QStringView, InstructionData> INSTRUCTION {
-        { u"fetch", { dummy.i, dummy.pc } }, { u"decode", { dummy.i, dummy.pc } },
-        { u"exec", { dummy.i, dummy.pc } },  { u"mem", { dummy.i, dummy.pc } },
-        { u"wb", { dummy.i, dummy.pc } },
+        { QStringLiteral("fetch"), { dummy.i, dummy.pc } },
+        { QStringLiteral("decode"), { dummy.i, dummy.pc } },
+        { QStringLiteral("exec"), { dummy.i, dummy.pc } },
+        { QStringLiteral("mem"), { dummy.i, dummy.pc } },
+        { QStringLiteral("wb"), { dummy.i, dummy.pc } },
     };
 } VALUE_SOURCE_NAME_MAPS;
 

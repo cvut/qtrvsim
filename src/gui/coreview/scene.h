@@ -3,6 +3,7 @@
 
 #include "./components/cache.h"
 #include "./components/value_handlers.h"
+#include "common/polyfills/qstring_hash.h"
 #include "graphicsview.h"
 
 #include <QGraphicsScene>

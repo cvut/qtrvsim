@@ -3,11 +3,12 @@ project(polyfills
                      provide fallback implementations.")
 
 set(polyfills_HEADERS
-    endian_detection.h
-    mulh64.h
-    clz32.h
-    byteswap.h
-    )
+        endian_detection.h
+        mulh64.h
+        clz32.h
+        byteswap.h
+        qstring_hash.h
+        )
 
 # =============================================================================
 # Target for usage of this header library
