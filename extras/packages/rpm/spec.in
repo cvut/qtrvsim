@@ -24,7 +24,7 @@
 
 Name:           @PACKAGE_NAME@
 Version:        @PACKAGE_VERSION@
-Release:        0
+Release:        @PACKAGE_RELEASE@
 Summary:        @PACKAGE_DESCRIPTION@
 License:        @PACKAGE_LICENCE@
 Group:          System/Emulators/Other
