@@ -41,7 +41,7 @@ target_sources(svgscene-example
         src/example/main.cpp
         src/example/mainwindow.cpp
         src/example/mainwindow.h
-        src/example/mainwindow.ui
+               src/example/mainwindow.ui
         )
 target_link_libraries(svgscene-example
         PRIVATE Qt5::Core Qt5::Gui Qt5::Widgets svgscene)

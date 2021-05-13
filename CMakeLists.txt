@@ -113,6 +113,8 @@ if(NOT "${WASM}")
 	find_package(Qt5 COMPONENTS Test REQUIRED)
 endif()
 
+add_subdirectory("external/svgscene")
+
 # =============================================================================
 # Sources
 # =============================================================================
