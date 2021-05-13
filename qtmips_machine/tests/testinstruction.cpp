@@ -58,7 +58,7 @@ void MachineTests::instruction_access() {
     QCOMPARE(i.shamt(), (uint8_t)0x1f);
     QCOMPARE(i.funct(), (uint8_t)0x3f);
     QCOMPARE(i.immediate(), (uint16_t)0xffff);
-    QCOMPARE(i.address().get_raw(), (uint32_t)0x3ffffff);
+    QCOMPARE(i.address().get_raw(), (uint64_t)0x3ffffff);
 }
 
 // TODO test to_str

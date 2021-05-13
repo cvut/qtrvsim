@@ -334,6 +334,7 @@ void MachineTests::memory_read_ctl_data() {
         default_endians, default_addresses, default_strides, default_values);
 }
 
+
 void MachineTests::memory_read_ctl() {
     QFETCH(Endian, endian);
     QFETCH(Offset, address);
@@ -347,31 +348,32 @@ void MachineTests::memory_read_ctl() {
 
     bus.write_u64(frontend_address, value.u64);
 
-    QCOMPARE(bus.read_ctl(AC_U64, frontend_address + stride), result.u64);
+    QCOMPARE(
+        bus.read_ctl(AC_U64, frontend_address + stride).as_u64(), result.u64);
 
     for (size_t i = 0; i < 2; ++i) {
         QCOMPARE(
-            bus.read_ctl(AC_U32, frontend_address + stride + 4 * i),
+            bus.read_ctl(AC_U32, frontend_address + stride + 4 * i).as_u32(),
             result.u32.at(i));
     }
     for (size_t i = 0; i < 4; ++i) {
         QCOMPARE(
-            bus.read_ctl(AC_U16, frontend_address + stride + 2 * i),
+            bus.read_ctl(AC_U16, frontend_address + stride + 2 * i).as_u16(),
             result.u16.at(i));
     }
     for (size_t i = 0; i < 4; ++i) {
         QCOMPARE(
-            bus.read_ctl(AC_I16, frontend_address + stride + 2 * i),
+            bus.read_ctl(AC_I16, frontend_address + stride + 2 * i).as_i16(),
             (int16_t)result.u16.at(i));
     }
     for (size_t i = 0; i < 8; ++i) {
         QCOMPARE(
-            bus.read_ctl(AC_U8, frontend_address + stride + i),
+            bus.read_ctl(AC_U8, frontend_address + stride + i).as_u8(),
             result.u8.at(i));
     }
     for (size_t i = 0; i < 8; ++i) {
         QCOMPARE(
-            bus.read_ctl(AC_I8, frontend_address + stride + i),
+            bus.read_ctl(AC_I8, frontend_address + stride + i).as_i8(),
             (int8_t)result.u8.at(i));
     }
 }

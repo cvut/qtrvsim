@@ -94,8 +94,8 @@ void MemoryTableView::adjustColumnCount() {
         t.fill(QChar('0'), m->cellSizeBytes() * 2);
         int width1_dh
             = delegate->sizeHintForText(viewOptions(), idx, t).width() + 2;
-        if (width1_dh < fm.horizontalAdvance("+99")) {
-            width1_dh = fm.horizontalAdvance("+99");
+        if (width1_dh < fm.width("+99")) {
+            width1_dh = fm.width("+99");
         }
         horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
         horizontalHeader()->resizeSection(1, width1_dh);
