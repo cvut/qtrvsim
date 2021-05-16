@@ -100,6 +100,12 @@ jobs:
         shell: bash
         run: ctest
 
+      - name: Store created artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: target-${{ runner.os }}-qt${{ matrix.config.qt_version }}
+          path: ${{ github.workspace }}/build/target
+
   build-mingw:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -154,3 +160,75 @@ jobs:
         working-directory: ${{ github.workspace }}/build
         shell: bash
         run: ctest
+
+      - name: Store created artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: target-${{ runner.os }}-qt${{ matrix.config.qt_version }}
+          path: ${{ github.workspace }}/build/target
+
+  build-emscripten:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "WASM Linux",
+            os: ubuntu-latest,
+            build_type: "Release",
+            qt_arch: "wasm_32",
+            emsdk_version: 1.39.8,
+            qt_version: "5.15.2",
+          }
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v2.1.5
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-wasm-QtCache
+
+      - name: Setup EMSDK cache
+        id: cache-system-libraries
+        uses: actions/cache@v2
+        with:
+          path: 'emsdk-cache'
+          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-emsdk-QtCache
+
+      - name: Setup emsdk
+        uses: mymindstorm/setup-emsdk@v9
+        with:
+          version: ${{ matrix.config.emsdk_version }}
+          actions-cache-folder: 'emsdk-cache'
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: ${{ matrix.config.qt_version }}
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          arch: ${{ matrix.config.qt_arch }}
+
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{github.workspace}}/build
+
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}/build
+        run: "emcmake cmake $GITHUB_WORKSPACE
+                    -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
+                    -DCMAKE_PREFIX_PATH=$Qt5_DIR
+                    -DCMAKE_FIND_ROOT_PATH=$Qt5_DIR
+                    -Wno-dev"
+
+      - name: Build
+        working-directory: ${{ github.workspace }}/build
+        run: cmake --build .
+
+      - name: Store created artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: target-wasm-${{ runner.os }}-qt${{ matrix.config.qt_version }}
+          path: ${{ github.workspace }}/build/target
