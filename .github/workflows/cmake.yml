@@ -42,7 +42,7 @@ jobs:
 
       - name: Cache Qt
         id: cache-qt
-        uses: actions/cache@v1
+        uses: actions/cache@v2.1.5
         with:
           path: ${{ github.workspace }}/Qt
           key: ${{ runner.os }}-${{ matrix.config.qt_version }}-Qt
@@ -104,7 +104,7 @@ jobs:
 
       - name: Cache Qt
         id: cache-qt
-        uses: actions/cache@v1
+        uses: actions/cache@v2.1.5
         with:
           path: ${{ github.workspace }}/Qt
           key: ${{ runner.os }}-${{ matrix.config.qt_version }}-Qt
