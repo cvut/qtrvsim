@@ -84,7 +84,7 @@ endif()
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(NOT "${SANITIZERS}" MATCHES "none")
+if(NOT "${SANITIZERS}" MATCHES "none" AND NOT "${WASM}")
 	set(CMAKE_C_FLAGS_DEBUG
 	    "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS} -g -g3 -ggdb")
 	set(CMAKE_CXX_FLAGS_DEBUG
@@ -116,9 +116,8 @@ endif()
 if("${WASM}")
 	message(STATUS "WASM build detected")
 
-	# Path to WASM compiled Qt. Pass your value via CLI argument if it differs.
-	set(CMAKE_FIND_ROOT_PATH "/opt/qt5-wasm" CACHE STRING "WASM QT DIR")
-
+	message(STATUS "Enabled WASM exception handling")
+	add_link_options("SHELL:-s DISABLE_EXCEPTION_CATCHING=0")
 	# Extra options for WASM linking
 	add_link_options("SHELL:-s FETCH=1")
 	add_link_options("SHELL:-s WASM=1")
