@@ -11,30 +11,6 @@ on:
   workflow_dispatch:
 
 jobs:
-# TODO store built examples as artifacts and use them for tests
-
-#  compile-examples:
-#    runs-on: ubuntu-latest
-#    env:
-#      NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM: 1
-#
-#    steps:
-#      - uses: actions/checkout@v2
-#      - uses: cachix/install-nix-action@v12
-#        with:
-#          nix_path: nixpkgs=channel:nixpkgs-unstable
-#      - name: "Enable nix cache"
-#        uses: cachix/cachix-action@v8
-#        with:
-#          name: ctu-apo-simulator-project
-#          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-#      - name: CMake
-#        working-directory: ${{ github.workspace }}/build
-#        run: nix-shell ${{ github.workspace }}/extras/crosscompiling/shell-mips-elf.nix --run "cmake ${{ github.workspace }}/examples"
-#      - name: Build
-#        working-directory: ${{ github.workspace }}/build
-#        run: nix-shell ${{ github.workspace }}/extras/crosscompiling/shell-mips-elf.nix --run "cmake --build ."
-
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -68,8 +44,8 @@ jobs:
         id: cache-qt
         uses: actions/cache@v1
         with:
-          path: ../Qt
-          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-QtCache
+          path: ${{ github.workspace }}/Qt
+          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-Qt
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
@@ -77,6 +53,8 @@ jobs:
           version: ${{ matrix.config.qt_version }}
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           arch: ${{ matrix.config.qt_arch }}
+          dir: ${{ github.workspace }}/Qt
+
 
       - name: Create Build Environment
         run: cmake -E make_directory ${{ github.workspace }}/build
@@ -129,8 +107,8 @@ jobs:
         id: cache-qt
         uses: actions/cache@v1
         with:
-          path: ../Qt
-          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-QtCache
+          path: ${{ github.workspace }}/Qt
+          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-Qt
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
@@ -138,6 +116,7 @@ jobs:
           version: ${{ matrix.config.qt_version }}
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           arch: ${{ matrix.config.qt_arch }}
+          dir: ${{ github.workspace }}/Qt
 
       - name: Create Build Environment
         run: cmake -E make_directory ${{github.workspace}}/build
@@ -177,10 +156,10 @@ jobs:
           - {
             name: "WASM Linux",
             os: ubuntu-latest,
-            build_type: "Release",
-            qt_arch: "wasm_32",
-            emsdk_version: 1.39.8,
-            qt_version: "5.15.2",
+            build_type: Release,
+            qt_arch: wasm_32,
+            emsdk_version: 1.39.20,
+            qt_version: 5.15.2,
           }
     steps:
       - uses: actions/checkout@v2
@@ -189,18 +168,18 @@ jobs:
         id: cache-qt
         uses: actions/cache@v2.1.5
         with:
-          path: ../Qt
-          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-wasm-QtCache
+          path: ${{ github.workspace }}/Qt
+          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-wasm-Qt
 
       - name: Setup EMSDK cache
         id: cache-system-libraries
         uses: actions/cache@v2
         with:
           path: 'emsdk-cache'
-          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-emsdk-QtCache
+          key: ${{ runner.os }}-${{ matrix.config.emsdk_version }}-${{ matrix.config.qt_version }}-emsdk
 
       - name: Setup emsdk
-        uses: mymindstorm/setup-emsdk@v9
+        uses: mymindstorm/setup-emsdk@v10
         with:
           version: ${{ matrix.config.emsdk_version }}
           actions-cache-folder: 'emsdk-cache'
@@ -211,6 +190,7 @@ jobs:
           version: ${{ matrix.config.qt_version }}
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           arch: ${{ matrix.config.qt_arch }}
+          dir: ${{ github.workspace }}/Qt
 
       - name: Create Build Environment
         run: cmake -E make_directory ${{github.workspace}}/build
