@@ -1,12 +1,8 @@
-QtMips
-======
+# QtRVSim
 
-[![OpenHub](https://www.openhub.net/p/QtMips/widgets/project_thin_badge?format=gif)](https://www.openhub.net/p/QtMips) [![build status](https://dev.azure.com/qtmips/qtmips/_apis/build/status/cvut.QtMips?branchName=master)](https://dev.azure.com/qtmips/QtMips/_build/latest?definitionId=1&branchName=master)
+RISC-V CPU simulator for education purposes.
 
-MIPS CPU simulator for education purposes.
-
-Ongoing Development
--------------------
+## Ongoing Development
 
 * QtRVSim - [RISC-V](https://riscv.org/) architecture based edition ([https://github.com/cvut/qtrvsim](https://github.com/cvut/qtrvsim)), suggested for future contributions
 * QtMips development branch with little/endian support - [devel](https://github.com/cvut/QtMips/tree/devel)
@@ -14,172 +10,121 @@ Ongoing Development
 
 Implemented to support following courses:
 
-* [B35APO - Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b35apo)
-* [B4M35PAP - Advanced Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b4m35pap/start)
+- [B35APO - Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b35apo)
+- [B4M35PAP - Advanced Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b4m35pap/start)
 
-[Faculty of Electrical Engineering](http://www.fel.cvut.cz)
+[Faculty of Electrical Engineering](http://www.fel.cvut.cz) [Czech Technical University](http://www.cvut.cz/)
 
-[Czech Technical University](http://www.cvut.cz/)
+## Documentation
 
-Documentation
--------------
+Main documentation is provided in this README and in subdirectories [`docs/user`](docs/user)
+and [`docs/developer`](docs/developer).
+
 The project has started as diploma theses work of Karel Kočí. The complete text of the
 thesis [Graphical CPU Simulator with Cache Visualization](https://dspace.cvut.cz/bitstream/handle/10467/76764/F3-DP-2018-Koci-Karel-diploma.pdf)
-is available from the online archive of the [Czech Technical University in Prague](https://www.cvut.cz/)
-. The document provides analysis of available alternative simulators, overview of the project architecture and basic
-usage information.
+is available from the online archive of the [Czech Technical University in Prague](https://www.cvut.cz/). The document
+provides analysis of available alternative simulators, overview of the project architecture and basic usage information.
 
-The used [MIPS CPU](https://en.wikipedia.org/wiki/MIPS_architecture)
-building block diagram, and a pipeline model matches lecture slides prepared by Michal Štepanovský for the subject
-[Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b35apo/start)
-. The course is based on the
-book  [Computer Organization and Design, The HW/SW Interface](https://www.elsevier.com/books/computer-organization-and-design-mips-edition/patterson/978-0-12-407726-3)
-written by professors Patterson and Hennessy.
+The project was extended as bachelor's theses of Jakub Dupak and Max Hollmann. Links will be provided as soon as the
+theses are released (**TODO**)
 
-Additional documentation can be found in subdirectory [`docs`](docs)
-of the project.
+## Build and packages
 
-Build Dependencies
-------------------
+### Build Dependencies
 
-* Qt 5
-* elfutils (libelf works too but there can be some problems)
+- Qt 5
+- elfutils (optional; libelf works too but there can be some problems)
 
-General Compilation
--------------------
-To compile whole project just run these commands:
+### General Compilation
 
-```
-qmake /path/to/qtmips
+```shell
+cmake -DCMAKE_BUILD_TYPE=Release /path/to/qtrvsim
 make
 ```
 
-Where `/path/to/qtmips` is path to this project root.
+Where `/path/to/qtrvsim` is path to this project root. The built binaries are to be found in the directory `target`
+in the build directory (the one, where cmake was called).
 
-(Be sure to use qt5 qmake.)
-
-Compilation for Local Execution
--------------------------------
-Because simulator it self and operating system stub are implemented as libraries you need to have that libraries in path
-where loader can found them. Binary looks for library at system library paths (on Windows in actual directory as well)
-and on compiled in RPATH which is `../lib` (i.e., install into `bin`
-and `lib` directory is assumed):
-
-```
-qmake /path/to/qtmips "QMAKE_RPATHDIR += ../qtmips_machine ../qtmips_osemu"
-make
-```
-
-Or compile the application with static libraries
-
-```
-mkdir QtMips-build
-cd QtMips-build
-qmake "CONFIG+=static" "CONFIG+=staticlib" -recursive ../QtMips/qtmips.pro
-```
-
-Alternatively, you can setup
-
-```
-LD_LIBRARY_PATH=/path_to_QtMips/qtmips_machine /path_to_QtMips/qtmips_osemu
-```
-
-Building from source on macOS
--------------------------------
+### Building from source on macOS
 
 Install the latest version of **Xcode** from the App Store. Then open a terminal and execute xcode-select --install to
 install Command Line Tools. Then open Xcode, accept the license agreement and wait for it to install any additional
 components. After you finally see the "Welcome to Xcode" screen, from the top bar choose Xcode -> Preferences ->
 Locations -> Command Line Tools and select an SDK version.
 
-Install [Homebrew](https://brew.sh/) and the following dependencies:
+Install [Homebrew](https://brew.sh/) and use it to install Qt and libelf. (__Installing libelf is optional. If libelf is
+not found in the system, local fallback is used.__)
 
-```bash
+```shell
 brew install qt libelf
+cmake -DCMAKE_BUILD_TYPE=Release /path/to/qtRVSim
+make
 ```
 
-Add Qt to the PATH. If you use Bash, you can do it like this:
+This procedure produces raw executables, macOS app bundle has not been tested yet. (**TODO TEST MACOS BUNDLE**)
 
-```bash
-echo 'export PATH="/usr/local/opt/qt/bin:$PATH"' >> ~/.bash_profile
-```
+### Download Binary Packages
 
-Verify Qt is available in the PATH by running:
-
-```bash
-qmake --version
-```
-
-Finally, you can build the QtMips:
-
-```bash
-./build-macos.sh
-```
-
-After successful completion, you should see **build/qtmips-macos.zip**
-which contains two files: qtmips_qui.app and qtmips_cli.
-
-You can unzip it and then copy qtmips_qui.app wherever you want. Double-click to start it.
-
-
-Download Binary Packages
-------------------------
-
-* [https://github.com/cvut/QtMips/releases](https://github.com/cvut/QtMips/releases)
+- [https://github.com/cvut/qtrvsim/releases](https://github.com/cvut/qtrvsim/releases)
     - archives with Windows and generic GNU/Linux binaries
-* [https://launchpad.net/~ppisa/+archive/ubuntu/qtmips](https://launchpad.net/~ppisa/+archive/ubuntu/qtmips)
-    - Ubuntu packages for Disco, Cosmic, Bionic and Xenial releases.
-* [https://build.opensuse.org/repositories/home:ppisa/qtmips](https://build.opensuse.org/repositories/home:ppisa/qtmips)
-    - Open Build Service build for Fedora_29, Fedora_Rawhide, Raspbian_9.0, SLE_15, openSUSE_Leap_15.0_Ports,
-      openSUSE_Leap_15.0, openSUSE_Leap_15.1, openSUSE_Leap_42.3, openSUSE_Leap_42.3_Ports, openSUSE_Tumbleweed and
-      Debian
-* [https://software.opensuse.org//download.html?project=home%3Appisa&package=qtmips](https://software.opensuse.org//download.html?project=home%3Appisa&package=qtmips)
+- [https://build.opensuse.org/repositories/home:jdupak/qtrvsim](https://build.opensuse.org/repositories/home:jdupak/qtrvsim)
+- [https://software.opensuse.org/download.html?project=home%3Ajdupak&package=qtrvsim](https://software.opensuse.
+  org/download.html?project=home%3Ajdupak&package=qtrvsim)
     - Open Build Service binary packages
+
+### Nix package
+
+QtRVSim provides a Nix package as a part of the repository. You can build and install it by a command bellow. Updates
+have to be done manually by checking out the git. NIXPKGS package is planned.
+
+```shell
+nix-env -if .
+```
 
 Accepted Binary Formats
 ------------------------
-The simulator accepts ELF statically linked executables compiled for 32-bit big-endian MISP target.
+The simulator accepts ELF statically linked executables compiled for RISC-V target. (TODO Max: depends on instruction
+support).
 
-Optimal is use of plain mips-elf GCC toolchain.
+Optimal is use of plain riscv-elf GCC toolchain.
 
-For more refer to the [supported executable formats](docs/exec-formats-and-tools.md)
+For more refer to the [supported executable formats](docs/user/exec-formats-and-tools.md)
 documentation in the [`docs`](docs) projects subdirectory.
 
-Integrated Assembler
--------------------
-Basic integrated assembler is included in the simulator. It recognizes basic MIPS instructions and `la` and `li` pseudo
-instructions. Small subset of
+## Integrated Assembler
+
+Basic integrated assembler is included in the simulator. Small subset of
 [GNU assembler](https://sourceware.org/binutils/docs/as/) directives is recognized as well. Next directives are
 recognized: `.word`, `.orig`, `.set`
 /`.equ`, `.ascii` and `.asciz`. Some other directives are simply ignored: `.data`, `.text`, `.globl`, `.end` and `.ent`.
 This allows to write code which can be compiled by both - integrated and full-featured assembler. Addresses are assigned
-to labels/symbols which are stored in symbol table. Addition, substraction, multiplication, divide and bitwise and and
-or are recognized.
+to labels/symbols which are stored in symbol table. Addition, subtraction, multiplication, divide and bitwise and and or
+are recognized.
 
-Support to call external make utility
--------------------------------------
+## Support to call external make utility
+
 The action "Build executable by external make" call "make" program. If the action is invoked and some of source editors
 selected in main windows tabs then the "make" is started in the corresponding directory. Else directory of last selected
 editor is chosen. If no editor is open then directory of last loaded ELF executable are used as "make" start path. If
 even that is not an option then default directory when the emulator has been started is used.
 
-Tests
------
-There are two types of tests in QtMips. One type are unit tests for simulator it self and second one are integration
-tests with command line client and real compiled elf binaries. All these tests can be executed using script
-`tests/run-all.sh` or one by one by running respective `test.sh` scripts.
+## Tests
 
-Source files for unit tests can be found in path `qtmips_machine/tests` and integration tests are located in `tests`
-directory.
+Tests are managed by CTest (part of CMake). To build and run all tests, use this commands:
 
-Peripherals
------------
+```bash
+cmake -DCMAKE_BUILD_TYPE=Release /path/to/qtRVSim
+make
+ctest
+```
+
+## Peripherals
 
 The simulator implements emulation of two peripherals for now. Base addresses are selected such way that they are
 accessible by 16 immediate offset which uses register 0 (`zero`) as base.
 
 The first is simple serial port (UART). It support transmission
-(Tx) and receiption (Rx). Receiver status register (`SERP_RX_ST_REG`)
+(Tx) and reception (Rx). Receiver status register (`SERP_RX_ST_REG`)
 implements two bits. Read-only bit 0 (`SERP_RX_ST_REG_READY`)
 is set to one if there is unread character available in the receiver data register (`SERP_RX_DATA_REG`). The bit 1
 (`SERP_RX_ST_REG_IE`) can be written to 1 to enable interrupt request when unread character is available. The
@@ -205,7 +150,7 @@ offsets (`_o`) and individual fields masks (`_m`) follows
 #define SERP_TX_DATA_REG_o         0x0c
 ```
 
-The UART registers region is mirrored on the address 0xffff0000 to enable use of programs initially writtent
+The UART registers region is mirrored on the address 0xffff0000 to enable use of programs initially written
 for [SPIM](http://spimsimulator.sourceforge.net/)
 or [MARS](http://courses.missouristate.edu/KenVollmar/MARS/) emulators.
 
@@ -236,12 +181,13 @@ in bits 5 .. 10 and blue component in bits 0 .. 4.
 #define LCD_FB_END         0xffe4afff
 ```
 
-Limitation: actual concept of memory view updates and access doesnot allows to reliably read peripheral registers and
+Limitation: actual concept of memory view updates and access does not allows to reliably read peripheral registers and
 I/O memory content. It is possible to write into framebuffer memory when cached (from CPU perspective) access to memory
 is selected.
 
-Interrupts and Coprocessor 0 Support
-------------------------------------
+## Interrupts and Coprocessor 0 Support
+
+(NOTICE: Coprocessor0 will have to be replaced with RISC-V status registers)
 
 List of interrupt sources:
 
@@ -305,8 +251,9 @@ Use next linker option to place section start at right address
  -Wl,--section-start=.irq_handler=0x80000180
 ```
 
-System Calls Support
---------------------
+## System Calls Support
+
+(Not tested for RISC-V; coprocessor0 will have to be replaced.)
 
 The emulator includes support for a few Linux kernel systemcalls. The MIPS O32 ABI is used.
 
@@ -384,28 +331,17 @@ pairs of base address, length pairs stored in memory at address pass in `iov`.
 
 Set TLS base into `C0` `user_local` register accessible by `rdhwr` instruction..
 
-Special instructions support
----------------------------------
+## Special instructions support
 
-#### RDHWR - read hardware registers
+(TODO Max)
 
-Supported registers described in Interrupts and Coprocessor 0 Support section
+## Limitations of the Implementation
 
-#### SYNC - memory barrier between preceding and following reads/writes
+This is initial implementation of the RISC-V edition. Everything is limited.
 
-It is implemented as NOP because memory access is processed in order and only in the memory stage.
+- Coprocessor0 has to be ported to RISC-V status registes.
 
-#### SYNCI - synchronize/propagate modification to the instruction cache memory and pipeline
-
-The function codes for different modes nor address/cache line which should be synchronized is recognized. Instruction is
-implemented as full instruction and data cache flush.
-
-#### CACHE - cache maintenance operations
-
-Function is not decoded, full flush of data and instruction caches is performed.
-
-Limitations of the Implementation
----------------------------------
+### QtRVSim original limitations
 
 * Only very minimal support for privileged instruction is implemented for now. Only RDHWR, SYNCI, CACHE and some
   coprocessor 0 registers implemented. TLB and virtual memory and complete exception model are not implemented.
@@ -415,25 +351,19 @@ Limitations of the Implementation
 * Only limited support for interrupts and exceptions. When `syscall` or `break`
   instruction is recognized, emulation stops. Single step proceed after instruction.
 
-List of Actually Supported Instructions
----------------------------------------
-ADD ADDI ADDIU ADDU AND ANDI BEQ BEQL BGEZ BGEZAL BGEZALL BGEZL BGTZ BGTZL BLEZ BLEZL BLTZ BLTZAL BLTZALL BLTZL BNE BNEL
-BREAK CACHE CLO CLZ DIV DIVU ERET EXT INS J JAL JALR JR LB LBU LH LHU LL LUI LW LWC1 LWD1 LWL LWR MADD MADDU MFC0 MFHI
-MFLO MFMC0 MOVN MOVZ MSUB MSUBU MTC0 MTHI MTLO MUL MULT MULTU NOR OR ORI PREF RDHWR ROTR ROTRV SB SC SDC1 SEB SEH SH SLL
-SLLV SLT SLTI SLTIU SLTU SRA SRAV SRL SRLV SUB SUBU SW SWC1 SWL SWR SYNC SYNCI SYSCALL TEQ TEQI TGE TGEI TGEIU TGEU TLT
-TLTI TLTIU TLTU TNE TNEI WSBH XOR XORI
+## List of Actually Supported Instructions
 
-Links to Resources and Similar Projects
----------------------------------------
-* SPIM/QtSPIM: A MIPS32 Simulator [http://spimsimulator.sourceforge.net/](http://spimsimulator.sourceforge.net/)
-* MARS: IDE with detailed help and hints [http://courses.missouristate.edu/KenVollmar/MARS/index.htm](http://courses.missouristate.edu/KenVollmar/MARS/index.htm)
-* EduMIPS64: 1x fixed and 3x FP pipelines [https://www.edumips.org/](https://www.edumips.org/)
-* Jakub Dupak: [Graphical RISC-V Architecture Simulator - Memory Model and Project Management](https://dspace.cvut.cz/bitstream/handle/10467/94446/F3-BP-2021-Dupak-Jakub-thesis.pdf) documents QtMips and QtRvSim development
+(TODO Max)
 
-Copyright
-----------
+## Links to Resources and Similar Projects
 
-* Copyright (c) 2017-2019 Karel Koci <cynerd@email.cz>
-* Copyright (c) 2019-2021 Pavel Pisa <pisa@cmp.felk.cvut.cz>
-* Copyright (c) 2020-2021 Jakub Dupak <dev@jakubdupak.com>
-* Copyright (c) 2020-2021 Max Hollmann <hollmmax@fel.cvut.cz>
+- QtRVSim - MIPS predecessor of this simulator [https://github.com/cvut/QtRVSim](https://github.com/cvut/QtRVSim)
+- Jakub Dupak: [Graphical RISC-V Architecture Simulator - Memory Model and Project Management](https://dspace.cvut.
+  cz/bitstream/handle/10467/94446/F3-BP-2021-Dupak-Jakub-thesis.pdf) documents QtMips and QtRvSim development
+
+## Copyright
+
+- Copyright (c) 2017-2019 Karel Koci <cynerd@email.cz>
+- Copyright (c) 2019-2021 Pavel Pisa <pisa@cmp.felk.cvut.cz>
+- Copyright (c) 2020-2021 Jakub Dupak <dev@jakubdupak.com>
+- Copyright (c) 2020-2021 Max Hollmann <hollmmax@fel.cvut.cz>
