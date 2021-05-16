@@ -43,6 +43,18 @@ public:
         const QString &attr_value = QString());
 
 protected:
+    /**
+     * WASM does not allows exception catching so we have to handle
+     * recoverable errors in a different way - using nullptr.
+     */
+    template<typename T>
+    static T* findFromParentRaw(
+        const QGraphicsItem *parent,
+        const QString &attr_name = QString(),
+        const QString &attr_value = QString());
+
+
+protected:
     TT *root;
 };
 
@@ -117,11 +129,38 @@ SvgDomTree<T> SvgDomTree<TT>::findFromParent(
                 return SvgDomTree<T>(child);
             }
         }
-        try {
-            return findFromParent<T>(_child, attr_name, attr_value);
-        } catch (std::out_of_range &) { continue; }
+
+        T* found = findFromParentRaw<T>(_child, attr_name, attr_value);
+        if (found != nullptr) {
+            return SvgDomTree<T>(found);
+        }
     }
     throw std::out_of_range("Not found.");
+}
+
+
+template<typename TT>
+template<typename T>
+T* SvgDomTree<TT>::findFromParentRaw(
+    const QGraphicsItem *parent,
+    const QString &attr_name,
+    const QString &attr_value) {
+    if (!parent) {
+        return nullptr;
+    }
+
+    for (QGraphicsItem *_child : parent->childItems()) {
+        if (T *child = dynamic_cast<T *>(_child)) {
+            if (itemMatchesSelector<T>(child, attr_name, attr_value)) {
+                return child;
+            }
+        }
+        T* found = findFromParentRaw<T>(_child, attr_name, attr_value);
+        if (found != nullptr) {
+            return found;
+        }
+    }
+    return nullptr;
 }
 template<typename TT>
 template<typename T>
