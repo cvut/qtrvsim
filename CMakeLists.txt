@@ -128,6 +128,10 @@ if("${WASM}")
 	add_link_options("SHELL:-s ALLOW_MEMORY_GROWTH=1")
 	add_link_options("SHELL:-s EXTRA_EXPORTED_RUNTIME_METHODS=[\"UTF16ToString\",\"stringToUTF16\"]")
 	add_link_options("--bind")
+
+	add_compile_definitions(QT_NO_DEBUG_OUTPUT=1)
+	message(STATUS "Debug output disabled")
+
 else()
 	# Not available for WASM
 	enable_testing()
