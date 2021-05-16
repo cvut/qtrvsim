@@ -32,12 +32,12 @@ public:
         const QString &attr_name = QString(),
         const QString &attr_value = QString());
 
-    template<typename T>
+    template<typename T = QGraphicsItem>
     SvgDomTree<T> find(
         const QString &attr_name = QString(),
         const QString &attr_value = QString());
 
-    template<typename T>
+    template<typename T = QGraphicsItem>
     QList<SvgDomTree<T>> findAll(
         const QString &attr_name = QString(),
         const QString &attr_value = QString());
