@@ -57,11 +57,9 @@ not found in the system, local fallback is used.__)
 
 ```shell
 brew install qt libelf
-cmake -DCMAKE_BUILD_TYPE=Release /path/to/qtRVSim
-make
 ```
 
-This procedure produces raw executables, macOS app bundle has not been tested yet. (**TODO TEST MACOS BUNDLE**)
+Then build as in general compilation (above).
 
 ### Download Binary Packages
 

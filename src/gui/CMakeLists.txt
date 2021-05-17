@@ -126,12 +126,17 @@ if ("${WASM}")
     list(APPEND gui_HEADERS qhtml5file.h)
 endif ()
 
+# MACOS
+set(ICON_NAME gui)
+set(ICON_PATH ${CMAKE_SOURCE_DIR}/data/icons/macos/${ICON_NAME}.icns)
+# END MACOS
 
 add_executable(gui
-        ${gui_SOURCES}
-        ${gui_HEADERS}
-        ${gui_UI}
-        ${gui_RESOURCES})
+               ${ICON_PATH}
+               ${gui_SOURCES}
+               ${gui_HEADERS}
+               ${gui_UI}
+               ${gui_RESOURCES})
 target_include_directories(gui PUBLIC . coreview)
 target_link_libraries(gui
         PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui
@@ -151,6 +156,19 @@ if(${Qt5PrintSupport_FOUND})
     target_compile_definitions(gui PRIVATE WITH_PRINTING=1)
 endif()
 
+# MACOS
+set_property(SOURCE ${ICON_PATH}
+             PROPERTY MACOSX_PACKAGE_LOCATION Resources)
+set_target_properties(gui PROPERTIES
+                      MACOSX_BUNDLE true
+                      MACOSX_BUNDLE_GUI_IDENTIFIER cz.cvut.fel.${MAIN_PROJECT_ORGANIZATION}.gui
+                      MACOSX_BUNDLE_BUNDLE_NAME ${MAIN_PROJECT_NAME}
+                      MACOSX_BUNDLE_BUNDLE_VERSION "${MAIN_PROJECT_VERSION}"
+                      MACOSX_BUNDLE_SHORT_VERSION_STRING "${MAIN_PROJECT_VERSION}"
+                      MACOSX_BUNDLE_ICONFILE ${ICON_NAME}
+                      )
+# END MACOS
+
 # =============================================================================
 # Installation
 # =============================================================================
@@ -160,5 +178,7 @@ endif()
 # in corresponding CMakeLists.txt.
 
 install(TARGETS gui
-        RUNTIME DESTINATION bin)
+        RUNTIME DESTINATION bin
+        BUNDLE DESTINATION ${EXECUTABLE_OUTPUT_PATH}
+        )
 
