@@ -19,6 +19,8 @@ set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/target/"
 
 # Auto detected
 set(WASM ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+set(CXX_TEST_PATH ${EXECUTABLE_OUTPUT_PATH})
+set(C_TEST_PATH ${EXECUTABLE_OUTPUT_PATH})
 
 # =============================================================================
 # CMake config and tools
