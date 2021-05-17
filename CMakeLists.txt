@@ -216,17 +216,17 @@ if("${DEV_MODE}")
 	include(cmake/PackageTools.cmake)
 
 	# Inject up-to-date information into package config files.
-	package_config_file(appimage appimage.yml extras/packages/appimage/appimage.yml.in)
-	package_config_file(archlinux PKGBUILD extras/packages/arch/PKGBUILD.in)
-	package_config_file(rpm ${PACKAGE_NAME}.spec extras/packages/rpm/spec.in)
+	package_config_file(appimage appimage.yml extras/packaging/appimage/appimage.yml.in)
+	package_config_file(archlinux PKGBUILD extras/packaging/arch/PKGBUILD.in)
+	package_config_file(rpm ${PACKAGE_NAME}.spec extras/packaging/rpm/spec.in)
 	# Debian uses whole directory which has to be saved to archive and shipped.
 	package_debian_quilt(deb
 	                     ${PACKAGE_NAME}_${PACKAGE_VERSION}-${PACKAGE_RELEASE}.dsc
-	                     extras/packages/deb/dsc.in
-	                     extras/packages/deb/debian
+	                     extras/packaging/deb/dsc.in
+	                     extras/packaging/deb/debian
 	                     ${PACKAGE_NAME}_${PACKAGE_VERSION}-${PACKAGE_RELEASE}.debian.tar.xz)
 	# Creates bunch of files in ${CMAKE_BINARY_DIR}/target/pkg that you can just pass to
-	# Open Build Service and it will build all packages.
+	# Open Build Service and it will build all packaging.
 	# TODO: Currently changelog is not handled automatically.
 	add_custom_target(open_build_service_bundle
 	                  DEPENDS ${PACKAGE_SOURCE_ARCHIVE_FILE} appimage archlinux deb rpm
