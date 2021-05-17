@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48mm" height="48mm" inkscape:export-filename="/home/pi/repo/emu/qtmips/QtMips/data/icons/qtmips_gui.png" inkscape:export-xdpi="25.4" inkscape:export-ydpi="25.4" inkscape:version="1.0.2 (e86c870879, 2021-01-15)" sodipodi:docname="gui.svg" version="1.1" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd">
+ <defs>
+  <inkscape:path-effect attempt_force_join="true" effect="join_type" is_visible="true" line_width="1" linecap_type="round" linejoin_type="extrp_arc" lpeversion="1" miter_limit="96.9"/>
+  <rect x="-27.5" y="264.5" width="10" height="13"/>
+ </defs>
+ <sodipodi:namedview id="base" bordercolor="#666666" borderopacity="1.0" inkscape:current-layer="layer1" inkscape:cx="-12.837825" inkscape:cy="47.533282" inkscape:document-rotation="0" inkscape:document-units="mm" inkscape:pageopacity="0.0" inkscape:pageshadow="2" inkscape:window-height="1051" inkscape:window-maximized="0" inkscape:window-width="956" inkscape:window-x="960" inkscape:window-y="25" inkscape:zoom="0.98994949" pagecolor="#ffffff" showgrid="true">
+  <inkscape:grid dotted="false" originx="0.5" originy="0.5" snapvisiblegridlinesonly="true" spacingx="1" spacingy="0.99999999" type="xygrid" units="mm" visible="true"/>
+ </sodipodi:namedview>
+ <metadata>
+  <rdf:RDF>
+   <cc:Work rdf:about="">
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:title/>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <g fill="none" stroke="#a39329" stroke-linecap="round" stroke-width="2" inkscape:groupmode="layer" inkscape:label="Pad_Layer">
+  <path d="m9.5 4.5h-2v1h-1v2h1v1h2v-4" inkscape:connector-curvature="0"/>
+  <path d="m9.4417 13.438h-2v1h-1v2h1v1h2v-4" inkscape:connector-curvature="0"/>
+  <path d="m9.4417 40.425h-2v1h-1v2h1v1h2v-4" inkscape:connector-curvature="0"/>
+  <path d="m9.4417 31.429h-2v1h-1v2h1v1h2v-4" inkscape:connector-curvature="0"/>
+  <path d="m9.5 22.5h-2v1h-1v2h1v1h2v-4" inkscape:connector-curvature="0"/>
+  <path d="m32.443 4.3875h2v1h1v2h-1v1h-2v-4" inkscape:connector-curvature="0"/>
+  <path d="m32.502 13.325h2v1h1v2h-1v1h-2v-4" inkscape:connector-curvature="0"/>
+  <path d="m32.502 40.313h2v1h1v2h-1v1h-2v-4" inkscape:connector-curvature="0"/>
+  <path d="m32.502 31.317h2v1h1v2h-1v1h-2v-4" inkscape:connector-curvature="0"/>
+  <path d="m32.443 22.387h2v1h1v2h-1v1h-2v-4" inkscape:connector-curvature="0"/>
+ </g>
+ <g inkscape:groupmode="layer" inkscape:label="IC_Layer">
+  <rect x="10.5" y="2.5" width="21" height="44" fill="none" stroke="#613a22" stroke-linejoin="round" stroke-width="2"/>
+  <path d="m10.5 14.5 7-4h7l7 4v-12h-21z" fill="#613a22" fill-rule="evenodd" inkscape:connector-curvature="0"/>
+  <path d="m10.5 32.5 5 4h10l6-3v13h-21z" fill="#613a22" fill-rule="evenodd" inkscape:connector-curvature="0"/>
+ </g>
+ <g inkscape:groupmode="layer" inkscape:label="Chip_Layer">
+  <ellipse cx="20.878" cy="23.831" rx="13.378" ry="13.669" fill="#ffb68a"/>
+  <g fill="none" stroke="#ff9400">
+   <path d="m13.5 15.5h8v4h9" inkscape:connector-curvature="0"/>
+   <path d="m10.5 17.5h9v5h-4v5h5v4" inkscape:connector-curvature="0"/>
+   <path d="m21.5 10.5v3h-8" inkscape:connector-curvature="0"/>
+   <path d="m23.5 11.5v6h9v13" inkscape:connector-curvature="0"/>
+   <path d="m25.5 11.5v4h6" inkscape:connector-curvature="0"/>
+   <path d="m30.5 33.5v-11h-7v3h-5" inkscape:connector-curvature="0"/>
+   <path d="m27.5 24.5v11h-3v-8h-2v10" inkscape:connector-curvature="0"/>
+   <path d="m18.5 19.5h-5v8h-5" inkscape:connector-curvature="0"/>
+   <path d="m9.5 29.5h7v4h4v4" inkscape:connector-curvature="0"/>
+   <path d="m10.5 20.5v5" inkscape:connector-curvature="0"/>
+   <path d="m13.5 31.5v4h5" inkscape:connector-curvature="0"/>
+  </g>
+ </g>
+ <g transform="translate(0,-249)" inkscape:groupmode="layer" inkscape:label="Mag_Layer">
+  <g fill="none">
+   <g stroke="#131cb5" stroke-linecap="round">
+    <circle cx="21.33" cy="273" r="13.5" stroke-width="2.5"/>
+    <g stroke-width="2">
+     <path d="m31.5 282.5 8 8" inkscape:connector-curvature="0" sodipodi:nodetypes="cc"/>
+     <path d="m40.5 259.5v17l4 4" inkscape:connector-curvature="0" sodipodi:nodetypes="ccc"/>
+     <path d="m37.5 264.03h6" inkscape:connector-curvature="0"/>
+    </g>
+    <path d="m36.5 287.5 6 6" stroke-width="4" inkscape:connector-curvature="0" sodipodi:nodetypes="cc"/>
+   </g>
+   <g stroke="#000">
+    <g>
+     <path d="m16.5 289.5-1-1h-2l-1 1v4l1 1h2l1-1" inkscape:connector-curvature="0"/>
+     <path d="m18.5 288.5h4" inkscape:connector-curvature="0" sodipodi:nodetypes="cc"/>
+     <path d="m20.5 288.5v6" inkscape:connector-curvature="0"/>
+    </g>
+    <path d="m24.5 288.5v5l1 1h2l1-1v-5" stroke-linecap="square" inkscape:connector-curvature="0"/>
+   </g>
+  </g>
+  <g transform="translate(42.351 .12064)" style="font-variant-caps:normal;font-variant-east-asian:normal;font-variant-ligatures:normal;font-variant-numeric:normal;shape-inside:url(#rect2151);white-space:pre" aria-label="R">
+   <path transform="matrix(.26458 0 0 .26458 -42.351 248.88)" d="m65.031 67.797c-2.392 0.003175-4.7841 0.019151-7.1758 0.007813v40.57h8.0605v-15.777h4.0059c2.2003 5.2594 4.3993 10.518 6.5996 15.777h8.6562l-7.4648-17.127c2.0305-0.90183 3.8483-2.3681 5.084-4.2852 2.3069-3.6307 2.417-8.582 0.61133-12.455-2.0369-4.3321-6.7752-6.4366-11.201-6.6602-2.391-0.047622-4.7837-0.053363-7.1758-0.048828v-0.001953zm0.88477 7.0469c1.8519 0.015118 3.7057-0.027396 5.5566 0.029297 2.7161 0.055559 5.1057 2.5436 5.043 5.3965 0.25232 2.5412-1.3633 5.1814-3.8477 5.6426-2.2279 0.37606-4.5017 0.14051-6.752 0.20703v-0.001953-11.273z" stroke-width="5.2174" style="font-variant-caps:normal;font-variant-east-asian:normal;font-variant-ligatures:normal;font-variant-numeric:normal"/>
+   <g aria-label="v">
+    <g aria-label="v">
+     <path d="m-20.437 273.54h1.6404l1.1007 3.5137q0.0635 0.1905 0.09525 0.39158 0.04233 0.20108 0.0635 0.37042 0.02117 0.20108 0.03175 0.381h0.0635q0.01058-0.17992 0.03175-0.381 0.02117-0.16934 0.0635-0.37042t0.09525-0.39158l1.0583-3.5137h1.6192l-1.9685 5.8208h-1.905z" stroke-width=".070115" style="font-variant-caps:normal;font-variant-east-asian:normal;font-variant-ligatures:normal;font-variant-numeric:normal"/>
+    </g>
+   </g>
+  </g>
+ </g>
+</svg>

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <title>QtRVSim: RISV-V simulator for education</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="mask-icon" href="./safari-pinned-tab.svg" color="#d5875b">
+    <meta name="apple-mobile-web-app-title" content="QtRVSim">
+    <meta name="application-name" content="QtRVSim">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            height: 100%
+        }
+
+        /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+        canvas {
+            border: 0px none;
+            background-color: white;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* The contenteditable property is set to true for the canvas in order to support
+           clipboard events. Hide the resulting focus frame and set the cursor back to
+           the default cursor. */
+        canvas {
+            outline: 0px solid transparent;
+            caret-color: transparent;
+            cursor: default
+        }
+    </style>
+</head>
+<body onload="init()">
+<figure id="qtspinner" style="overflow:visible;">
+    <div style="margin-top:1.5em; line-height:150%; text-align: center;">
+        <img height=200; src="logo.svg" style="display:block; margin: auto;" width="320" alt="Qt">
+        <strong>Qt for WebAssembly: qtrvsim_gui</strong>
+        <div id="qtstatus"></div>
+        <noscript>JavaScript is disabled. Please enable JavaScript to use this application.</noscript>
+    </div>
+</figure>
+<canvas contenteditable="true" id="qtcanvas" oncontextmenu="event.preventDefault()"></canvas>
+
+<script type='text/javascript'>
+    function init() {
+        var spinner = document.querySelector('#qtspinner');
+        var canvas = document.querySelector('#qtcanvas');
+        var status = document.querySelector('#qtstatus')
+
+        var qtLoader = QtLoader({
+            canvasElements: [canvas],
+            showLoader: function (loaderStatus) {
+                spinner.style.display = 'block';
+                canvas.style.display = 'none';
+                status.innerHTML = loaderStatus + "...";
+            },
+            showError: function (errorText) {
+                status.innerHTML = errorText;
+                spinner.style.display = 'block';
+                canvas.style.display = 'none';
+            },
+            showExit: function () {
+                status.innerHTML = "Application exit";
+                if (qtLoader.exitCode !== undefined)
+                    status.innerHTML += " with code " + qtLoader.exitCode;
+                if (qtLoader.exitText !== undefined)
+                    status.innerHTML += " (" + qtLoader.exitText + ")";
+                spinner.style.display = 'block';
+                canvas.style.display = 'none';
+            },
+            showCanvas: function () {
+                spinner.style.display = 'none';
+                canvas.style.display = 'block';
+            },
+        });
+        qtLoader.loadEmscriptenModule("qtrvsim_gui");
+    }
+</script>
+<script src="qtloader.js" type="text/javascript"></script>
+</body>
+</html>
