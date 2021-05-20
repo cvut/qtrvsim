@@ -1,14 +1,16 @@
 #include "programloader.h"
 
 #include "common/endian.h"
+#include "common/logging.h"
 #include "simulator_exception.h"
 
 #include <cerrno>
 #include <cstring>
 #include <exception>
-#include <fcntl.h>
-#include <unistd.h>
 
+LOG_CATEGORY("machine.ProgramLoader");
+
+// TODO - document
 #ifndef O_BINARY
     #define O_BINARY 0
 #endif
@@ -57,7 +59,7 @@ ProgramLoader::ProgramLoader(const QString &file) : elf_file(file) {
     // Check elf file architecture, of course only mips is supported.
     // Note: This also checks that this is big endian as EM_MIPS is suppose to
     // be: MIPS R3000 big-endian
-    if (this->hdr.e_machine != EM_MIPS) {
+    if (this->hdr.e_machine != EM_RISCV) {
         throw SIMULATOR_EXCEPTION(Input, "Invalid input file architecture", "");
     }
     // Check elf file class, only 32bit architecture is supported.
@@ -66,26 +68,46 @@ ProgramLoader::ProgramLoader(const QString &file) : elf_file(file) {
         throw SIMULATOR_EXCEPTION(
             Input, "Getting elf class failed", elf_errmsg(-1));
     }
-    if (elf_class != ELFCLASS32) {
-        throw SIMULATOR_EXCEPTION(Input, "Only supported architecture is 32bit", "");
-    }
-
     // Get number of program sections in elf file
     if (elf_getphdrnum(this->elf, &this->n_secs)) {
         throw SIMULATOR_EXCEPTION(
             Input, "Elf program sections count query failed", elf_errmsg(-1));
     }
-    // Get program sections headers
-    if (!(this->phdrs = elf32_getphdr(this->elf))) {
-        throw SIMULATOR_EXCEPTION(Input, "Elf program sections get failed", elf_errmsg(-1));
+
+    if (elf_class == ELFCLASS32) {
+        LOG("Loaded executable: 32bit");
+        architecture_type = ARCH32;
+        // Get program sections headers
+        if (!(sections_headers.arch32 = elf32_getphdr(elf))) {
+            throw SIMULATOR_EXCEPTION(Input, "Elf program sections get failed", elf_errmsg(-1));
+        }
+        // We want only LOAD sections so we create load_sections_indexes of those sections
+        for (unsigned i = 0; i < n_secs; i++) {
+            if (sections_headers.arch32[i].p_type != PT_LOAD) { continue; }
+            indexes_of_load_sections.push_back(i);
+        }
+    } else if (elf_class == ELFCLASS64) {
+        LOG("Loaded executable: 64bit");
+        architecture_type = ARCH64;
+        WARN("64bit simulation is not fully supported.");
+        // Get program sections headers
+        if (!(sections_headers.arch64 = elf64_getphdr(elf))) {
+            throw SIMULATOR_EXCEPTION(Input, "Elf program sections get failed", elf_errmsg(-1));
+        }
+        // We want only LOAD sections so we create load_sections_indexes of those sections
+        for (unsigned i = 0; i < this->n_secs; i++) {
+            if (sections_headers.arch64[i].p_type != PT_LOAD) { continue; }
+            this->indexes_of_load_sections.push_back(i);
+        }
+
+    } else {
+        WARN("Unsupported elf class: %d", elf_class);
+        throw SIMULATOR_EXCEPTION(
+            Input,
+            "Unsupported architecture type."
+            "This simulator only supports 32bit and 64bit CPUs.",
+            "");
     }
-    // We want only LOAD sections so we create map of those sections
-    for (unsigned i = 0; i < this->n_secs; i++) {
-        if (phdrs[i].p_type != PT_LOAD) { continue; }
-        this->map.push_back(i);
-    }
-    // TODO instead of direct access should we be using sections and elf_data?
-    // And if so how to link program header and section?
 }
 
 ProgramLoader::ProgramLoader(const char *file)
@@ -100,12 +122,23 @@ ProgramLoader::~ProgramLoader() {
 
 void ProgramLoader::to_memory(Memory *mem) {
     // Load program to memory (just dump it byte by byte)
-    for (size_t phdrs_i : this->map) {
-        uint32_t base_address = this->phdrs[phdrs_i].p_vaddr;
-        char *f = elf_rawfile(this->elf, nullptr);
-        for (unsigned y = 0; y < this->phdrs[phdrs_i].p_filesz; y++) {
-            const auto buffer = (uint8_t)f[this->phdrs[phdrs_i].p_offset + y];
-            memory_write_u8(mem, base_address + y, buffer);
+    if (architecture_type == ARCH32) {
+        for (size_t phdrs_i : this->indexes_of_load_sections) {
+            uint32_t base_address = this->sections_headers.arch32[phdrs_i].p_vaddr;
+            char *f = elf_rawfile(this->elf, nullptr);
+            for (unsigned y = 0; y < this->sections_headers.arch32[phdrs_i].p_filesz; y++) {
+                const auto buffer = (uint8_t)f[this->sections_headers.arch32[phdrs_i].p_offset + y];
+                memory_write_u8(mem, base_address + y, buffer);
+            }
+        }
+    } else if (architecture_type == ARCH64) {
+        for (size_t phdrs_i : this->indexes_of_load_sections) {
+            uint32_t base_address = this->sections_headers.arch64[phdrs_i].p_vaddr;
+            char *f = elf_rawfile(this->elf, nullptr);
+            for (unsigned y = 0; y < this->sections_headers.arch64[phdrs_i].p_filesz; y++) {
+                const auto buffer = (uint8_t)f[this->sections_headers.arch64[phdrs_i].p_offset + y];
+                memory_write_u8(mem, base_address + y, buffer);
+            }
         }
     }
 }
@@ -113,9 +146,16 @@ void ProgramLoader::to_memory(Memory *mem) {
 Address ProgramLoader::end() {
     uint32_t last = 0;
     // Go trough all sections and found out last one
-    for (size_t i : this->map) {
-        Elf32_Phdr *phdr = &(this->phdrs[i]);
-        if ((phdr->p_vaddr + phdr->p_filesz) > last) { last = phdr->p_vaddr + phdr->p_filesz; }
+    if (architecture_type == ARCH32) {
+        for (size_t i : this->indexes_of_load_sections) {
+            Elf32_Phdr *phdr = &(this->sections_headers.arch32[i]);
+            if ((phdr->p_vaddr + phdr->p_filesz) > last) { last = phdr->p_vaddr + phdr->p_filesz; }
+        }
+    } else if (architecture_type == ARCH64) {
+        for (size_t i : this->indexes_of_load_sections) {
+            Elf64_Phdr *phdr = &(this->sections_headers.arch64[i]);
+            if ((phdr->p_vaddr + phdr->p_filesz) > last) { last = phdr->p_vaddr + phdr->p_filesz; }
+        }
     }
     return Address(last + 0x10); // We add offset so we are sure that also
                                  // pipeline is empty TODO propagate address
@@ -149,7 +189,7 @@ SymbolTable *ProgramLoader::get_symbol_table() {
     data = elf_getdata(scn, nullptr);
     count = shdr.sh_size / shdr.sh_entsize;
 
-    /* rettrieve the symbol names */
+    /* retrieve the symbol names */
     for (ii = 0; ii < count; ++ii) {
         GElf_Sym sym;
         gelf_getsym(data, ii, &sym);
@@ -175,4 +215,7 @@ Endian ProgramLoader::get_endian() const {
             "Expected value little (=1) or big (=2).",
             "");
     }
+}
+ArchitectureType ProgramLoader::get_architecture_type() const {
+    return architecture_type;
 }

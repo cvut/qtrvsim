@@ -14,6 +14,11 @@
 
 namespace machine {
 
+enum ArchitectureType {
+    ARCH32,
+    ARCH64,
+};
+
 class ProgramLoader {
 public:
     explicit ProgramLoader(const char *file);
@@ -29,13 +34,22 @@ public:
 
     Endian get_endian() const;
 
+    /** Tells whether the executable is 32bit or 64bit. */
+    ArchitectureType get_architecture_type() const;
+
 private:
     QFile elf_file;
     Elf *elf;
-    GElf_Ehdr hdr {};    // elf file header
-    size_t n_secs {};    // number of sections in elf program header
-    Elf32_Phdr *phdrs;   // program section headers
-    QVector<size_t> map; // external index to phdrs index
+    GElf_Ehdr hdr {}; // elf file header
+    size_t n_secs {}; // number of sections in elf program header
+    ArchitectureType architecture_type;
+
+private:
+    union {
+        Elf32_Phdr *arch32;
+        Elf64_Phdr *arch64;
+    } sections_headers;
+    QVector<size_t> indexes_of_load_sections; // external index to sections_headers index
     Address executable_entry;
 };
 

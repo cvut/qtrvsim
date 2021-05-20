@@ -288,6 +288,7 @@ typedef struct {
     110 /* Microprocessor series from PKU-Unity Ltd. and MPRC of Peking        \
            University */
 #define EM_NUM 111
+#define EM_RISCV 243 /* RISC-V */
 
 /*
  * e_ident[EI_VERSION], e_version
