@@ -1,14 +1,15 @@
 project(common
-        DESCRIPTION "Utils shared between multiple subprojects.")
+		DESCRIPTION "Utils shared between multiple subprojects.")
 
 add_subdirectory(polyfills)
 
 set(common_HEADERS
-        endian.h
-        logging.h
-        logging_format_colors.h
+		endian.h
+		logging.h
+		logging_format_colors.h
 		memory_ownership.h
-        )
+		type_utils/lens.h
+		)
 
 # =============================================================================
 # Target for usage of this header library
