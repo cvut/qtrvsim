@@ -2,6 +2,7 @@
 
 #include "common/logging.h"
 #include "coreview/data.h"
+#include "machine/core.h"
 
 #include <svgscene/components/groupitem.h>
 #include <svgscene/components/hyperlinkitem.h>
@@ -22,14 +23,16 @@ CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &core_svg_
     : SvgGraphicsScene() {
     Q_UNUSED(machine)
 
+    // Update coreview each core step.
+    connect(machine->core(), &machine::Core::step_done, this, &CoreViewScene::update_values);
+
     SvgDocument document
         = svgscene::parseFromFileName(this, QString(":/core/%1.svg").arg(core_svg_scheme_name));
 
     for (auto hyperlink_tree : document.getRoot().findAll<HyperlinkItem>()) {
         this->install_hyperlink(hyperlink_tree.getElement());
     }
-    // TODO: this is not nice
-    {
+    { // Program cache install
         auto program_cache_tree = document.getRoot().find("data-component", "program-cache");
         if (machine->config().cache_program().enabled()) {
             auto texts = program_cache_tree.findAll<SimpleTextItem>();
@@ -41,7 +44,7 @@ CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &core_svg_
             program_cache_tree.getElement()->hide();
         }
     }
-    {
+    { // Data cache install
         auto data_cache_tree = document.getRoot().find("data-component", "data-cache");
         if (machine->config().cache_data().enabled()) {
             auto texts = data_cache_tree.findAll<SimpleTextItem>();
@@ -51,6 +54,12 @@ CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &core_svg_
             data_cache.reset(new Cache(machine->cache_data(), hit, miss));
         } else {
             data_cache_tree.getElement()->hide();
+        }
+    }
+    if (machine->config().hazard_unit() == machine::MachineConfig::HU_NONE) {
+        // Hazard unit conditional hide
+        for (auto elem_tree : document.getRoot().findAll("data-tags", "hazardunit")) {
+            elem_tree.getElement()->hide();
         }
     }
 
@@ -64,24 +73,25 @@ CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &core_svg_
      * only once.
      */
 
-    install_values_from_document(document, values.bool_values, VALUE_SOURCE_NAME_MAPS.BOOL);
-    install_values_from_document(document, values.reg_values, VALUE_SOURCE_NAME_MAPS.REG);
-    install_values_from_document(document, values.reg_id_values, VALUE_SOURCE_NAME_MAPS.REG_ID);
-    install_values_from_document(document, values.debug_values, VALUE_SOURCE_NAME_MAPS.DEBUG);
-    install_values_from_document(document, values.pc_values, VALUE_SOURCE_NAME_MAPS.PC);
+    const machine::CoreState &core_state = machine->core()->state;
     install_values_from_document(
-        document, values.multi_text_values, VALUE_SOURCE_NAME_MAPS.MULTI_TEXT);
+        document, values.bool_values, VALUE_SOURCE_NAME_MAPS.BOOL, core_state);
     install_values_from_document(
-        document, values.instruction_values, VALUE_SOURCE_NAME_MAPS.INSTRUCTION);
+        document, values.reg_values, VALUE_SOURCE_NAME_MAPS.REG, core_state);
+    install_values_from_document(
+        document, values.reg_id_values, VALUE_SOURCE_NAME_MAPS.REG_ID, core_state);
+    install_values_from_document(
+        document, values.debug_values, VALUE_SOURCE_NAME_MAPS.DEBUG, core_state);
+    install_values_from_document(document, values.pc_values, VALUE_SOURCE_NAME_MAPS.PC, core_state);
+    install_values_from_document(
+        document, values.multi_text_values, VALUE_SOURCE_NAME_MAPS.MULTI_TEXT, core_state);
+    install_values_from_document(
+        document, values.instruction_values, VALUE_SOURCE_NAME_MAPS.INSTRUCTION, core_state);
 
     update_values();
 }
 
-// We add all items to scene and they are removed in QGraphicsScene
-// destructor so we don't have to care about them here
 CoreViewScene::~CoreViewScene() = default;
-
-auto w = &CoreViewScene::request_cache_data;
 
 void CoreViewScene::install_hyperlink(svgscene::HyperlinkItem *element) const {
     try {
@@ -100,9 +110,10 @@ void CoreViewScene::install_value(
     vector<T_handler> &handler_list,
     const unordered_map<QStringView, T> &value_source_name_map,
     SimpleTextItem *element,
-    const QString &source_name) {
+    const QString &source_name,
+    const CoreState &core_state) {
     try {
-        handler_list.emplace_back(element, value_source_name_map.at(source_name));
+        handler_list.emplace_back(element, value_source_name_map.at(source_name)(core_state));
 
         DEBUG(
             "Installing value %s with source %s.", T_handler::COMPONENT_NAME,
@@ -116,12 +127,14 @@ template<typename T_handler, typename T>
 void CoreViewScene::install_values_from_document(
     const SvgDocument &document,
     vector<T_handler> &handler_list,
-    const unordered_map<QStringView, T> &value_source_name_map) {
+    const unordered_map<QStringView, T> &value_source_name_map,
+    const CoreState &core_state) {
     for (SvgDomTree<QGraphicsItem> component_tree :
          document.getRoot().findAll("data-component", T_handler::COMPONENT_NAME)) {
         SimpleTextItem *text_element = component_tree.find<SimpleTextItem>().getElement();
         QString source_name = component_tree.getAttrValueOr("data-source", "");
-        install_value<T_handler, T>(handler_list, value_source_name_map, text_element, source_name);
+        install_value<T_handler, T>(
+            handler_list, value_source_name_map, text_element, source_name, core_state);
     }
 }
 

@@ -56,7 +56,7 @@ protected:
      * @tparam T                      type of value to update from
      * @param handler_list            list, where the created handler will be
      *                                stored
-     * @param value_source_name_map   maps of map names used in svg to
+     * @param value_source_name_map   maps of load_sections_indexes names used in svg to
      *                                references in the state struct
      * @param element                 text element that will be updated
      * @param source_name             name of data source, see
@@ -67,7 +67,8 @@ protected:
         std::vector<T_handler> &handler_list,
         const std::unordered_map<QStringView, T> &value_source_name_map,
         svgscene::SimpleTextItem *element,
-        const QString &source_name);
+        const QString &source_name,
+        const machine::CoreState &core_state);
 
     /**
      * Wrapper for `install_value` which searched all value components of
@@ -83,7 +84,8 @@ protected:
     void install_values_from_document(
         const svgscene::SvgDocument &document,
         std::vector<T_handler> &handler_list,
-        const std::unordered_map<QStringView, T> &value_source_name_map);
+        const std::unordered_map<QStringView, T> &value_source_name_map,
+        const machine::CoreState &core_state);
 
     /**
      * Update all value components of given type.

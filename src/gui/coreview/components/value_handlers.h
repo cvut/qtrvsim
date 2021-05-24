@@ -1,3 +1,11 @@
+/**
+ * Components defined in here update the GUI placeholders with up to date
+ * values that is read from provided source.
+ *
+ * Components accept different types and produce different formatting.
+ *
+ * @file
+ */
 #ifndef QTRVSIM_VALUE_HANDLERS_H
 #define QTRVSIM_VALUE_HANDLERS_H
 
@@ -43,13 +51,13 @@ private:
 
 class RegIdValue {
 public:
-    RegIdValue(svgscene::SimpleTextItem *element, const machine::RegisterId &data);
+    RegIdValue(svgscene::SimpleTextItem *element, const uint8_t &data);
     void update();
     static constexpr const char *COMPONENT_NAME = "reg-id-value";
 
 private:
     BORROWED svgscene::SimpleTextItem *const element;
-    const machine::RegisterId &data;
+    const uint8_t &data;
 };
 
 class DebugValue {
