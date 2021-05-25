@@ -3,11 +3,11 @@ project(polyfills
                      provide fallback implementations.")
 
 set(polyfills_HEADERS
-        endian_detection.h
-        mulh64.h
-        clz32.h
-        byteswap.h
-        )
+    endian_detection.h
+    mulh64.h
+    clz32.h
+    byteswap.h
+    )
 
 # =============================================================================
 # Target for usage of this header library
@@ -21,14 +21,16 @@ set(polyfills_HEADERS
 #   compiler or platform as this code is platform/compiler specific.
 # =============================================================================
 
-set(CMAKE_AUTOMOC ON)
+if(NOT "${WASM}")
+	set(CMAKE_AUTOMOC ON)
 
-add_executable(mulh64_test
-        mulh64.h
-        mulh64.test.h
-        mulh64.test.cpp
-        )
-target_link_libraries(mulh64_test PRIVATE Qt5::Test)
-add_test(NAME mulh64
-         COMMAND mulh64_test)
+	add_executable(mulh64_test
+	               mulh64.h
+	               mulh64.test.h
+	               mulh64.test.cpp
+	               )
+	target_link_libraries(mulh64_test PRIVATE Qt5::Test)
+	add_test(NAME mulh64
+	         COMMAND mulh64_test)
+endif()
 

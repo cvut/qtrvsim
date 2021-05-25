@@ -18,7 +18,11 @@ set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/target/"
     CACHE STRING "Absolute path to place executables to.")
 
 # Auto detected
-set(WASM ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+	set(WASM true)
+else()
+	set(WASM false)
+endif()
 set(CXX_TEST_PATH ${EXECUTABLE_OUTPUT_PATH})
 set(C_TEST_PATH ${EXECUTABLE_OUTPUT_PATH})
 
@@ -70,7 +74,7 @@ endif()
 # =============================================================================
 
 if("${WASM}")
-	message("WASM build...")
+	message(STATUS "WASM build...")
 
 	# Path to WASM compiled Qt. Pass your value via CLI argument if it differs.
 	set(CMAKE_FIND_ROOT_PATH "/opt/qt5-wasm" CACHE STRING "WASM QT DIR")
@@ -104,7 +108,10 @@ if("${WASM}" OR "${FORCE_ELFLIB_STATIC}" OR NOT "${LibElf_FOUND}")
 	add_subdirectory("external/libelf")
 endif()
 
-find_package(Qt5 COMPONENTS Core Widgets Gui Test REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
+if(NOT "${WASM}")
+	find_package(Qt5 COMPONENTS Test REQUIRED)
+endif()
 
 # =============================================================================
 # Sources
@@ -123,7 +130,7 @@ endif()
 # Installation
 # =============================================================================
 
-install(TARGETS gui cli
+install(TARGETS gui
         RUNTIME DESTINATION bin)
 install(DIRECTORY data/icons DESTINATION share/icons/hicolor/scalable/apps
         PATTERN "data/icons/*.svg")
