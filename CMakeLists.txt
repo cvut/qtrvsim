@@ -95,6 +95,12 @@ if(NOT "${SANITIZERS}" MATCHES "none" AND NOT "${WASM}")
 	    "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS}")
 endif()
 
+
+if("${BUILD_RELEASE}")
+	message(STATUS "Debug prints globally suppressed.")
+	add_compile_definitions(QT_NO_DEBUG_OUTPUT=1)
+endif()
+
 include_directories("src" "src/machine")
 
 ## ============================================================================

@@ -18,8 +18,18 @@
 
 #define LOG_CATEGORY(NAME) static QLoggingCategory _loging_category_(NAME)
 
+#if !defined(QT_NO_QDEBUG_MACRO)
+    #define QT_NO_QDEBUG_MACRO                                                                     \
+        while (false)                                                                              \
+        QMessageLogger().noDebug
+#endif
+
+#if defined(QT_NO_DEBUG_OUTPUT)
+    #define DEBUG QT_NO_QDEBUG_MACRO
+#else
+    #define DEBUG(...) qCDebug(_loging_category_, __VA_ARGS__)
+#endif
 #define LOG(...) qCInfo(_loging_category_, __VA_ARGS__)
-#define DEBUG(...) qCDebug(_loging_category_, __VA_ARGS__)
 #define WARN(...) qCWarning(_loging_category_, __VA_ARGS__)
 #define ERROR(...) qCCritical(_loging_category_, __VA_ARGS__)
 
