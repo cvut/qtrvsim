@@ -27,9 +27,17 @@ private:
     const bool &data;
 };
 
-class PCValue {
+class PCValue : public QObject {
+    Q_OBJECT
+
+public slots:
+    void clicked();
+signals:
+    void jump_to_pc(machine::Address pc_value);
+
 public:
     PCValue(svgscene::SimpleTextItem *element, const machine::Address &data);
+    PCValue(const PCValue &);
     void update();
     static constexpr const char *COMPONENT_NAME = "pc-value";
 

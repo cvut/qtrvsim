@@ -14,6 +14,15 @@ PCValue::PCValue(SimpleTextItem *element, const machine::Address &data)
     : element(element)
     , data(data) {}
 
+PCValue::PCValue(const PCValue &other)
+    : QObject(other.parent())
+    , element(other.element)
+    , data(other.data) {}
+
+void PCValue::clicked() {
+    emit jump_to_pc(data);
+}
+
 void PCValue::update() {
     element->setText(QString("0x%1").arg(data.get_raw(), 8, 16, QChar('0')).toUpper());
 }

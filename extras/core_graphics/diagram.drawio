@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2021-05-24T22:19:01.622Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4464.0 Safari/537.36 Edg/91.0.852.0" etag="bGp05cGzCd4D8L3neCVW" compressed="false" version="14.7.0" type="device">
+<mxfile host="app.diagrams.net" modified="2021-05-26T21:51:47.739Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4464.0 Safari/537.36 Edg/91.0.852.0" etag="fE7q_P1UkEBpPsmL3vKO" compressed="false" version="14.7.0" type="device">
   <diagram id="6v_UKsHeDzqBDUNiW_st" name="RISC-V">
-    <mxGraphModel dx="1356" dy="822" grid="0" gridSize="1" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="700" pageHeight="540" background="#FFFFFF" math="0" shadow="0">
+    <mxGraphModel dx="319" dy="193" grid="0" gridSize="1" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="700" pageHeight="540" background="#FFFFFF" math="0" shadow="0">
       <root>
         <mxCell id="0jYIva3T7vnUbckOAgtF-0" />
         <mxCell id="0jYIva3T7vnUbckOAgtF-1" style="locked=1;" parent="0jYIva3T7vnUbckOAgtF-0" />
@@ -10,25 +10,33 @@
           </mxCell>
         </UserObject>
         <mxCell id="Haz_8EwUBin59iLyk_8Q-26" value="CPU" parent="0jYIva3T7vnUbckOAgtF-0" />
+        <UserObject label="" tags="simple pipeline" id="uWEq7-W_z53UrtFael4O-41">
+          <mxCell style="rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.2;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" edge="1">
+            <mxGeometry relative="1" as="geometry">
+              <mxPoint x="487.66666666666663" y="252.20000000000005" as="sourcePoint" />
+              <mxPoint x="353" y="250.5" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-185">
           <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;fillColor=none;arcSize=30;spacing=2;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
             <mxGeometry x="48" y="521" width="620" height="17" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline" id="Haz_8EwUBin59iLyk_8Q-28">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.984;entryY=0.37;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;fontFamily=sans-serif;fontSize=6;strokeWidth=3;labelBackgroundColor=none;endFill=0;endArrow=none;sketch=0;jumpStyle=arc;startArrow=none;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-153" target="Haz_8EwUBin59iLyk_8Q-40" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.984;entryY=0.37;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;fontFamily=sans-serif;fontSize=6;strokeWidth=3;labelBackgroundColor=none;endFill=0;endArrow=none;sketch=0;jumpStyle=arc;jumpSize=4;startArrow=none;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-153" target="Haz_8EwUBin59iLyk_8Q-40" edge="1">
             <mxGeometry relative="1" as="geometry">
               <Array as="points" />
             </mxGeometry>
           </mxCell>
         </UserObject>
-        <UserObject label="" tags="simple pipeline" id="Haz_8EwUBin59iLyk_8Q-29">
-          <mxCell style="rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1.001;entryY=0.12;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;startArrow=none;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-118" target="Haz_8EwUBin59iLyk_8Q-40" edge="1">
+        <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-29">
+          <mxCell style="rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1.001;entryY=0.12;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;startArrow=none;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-118" target="Haz_8EwUBin59iLyk_8Q-40" edge="1">
             <mxGeometry relative="1" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-30">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;shadow=0;endArrow=none;endFill=0;strokeColor=#3333FF;strokeWidth=1;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitX=0.5;exitY=0.17;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.993;entryY=0.695;entryDx=0;entryDy=0;entryPerimeter=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-180" target="Haz_8EwUBin59iLyk_8Q-85" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;shadow=0;endArrow=none;endFill=0;strokeColor=#3333FF;strokeWidth=1;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitX=0.5;exitY=0.17;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.993;entryY=0.695;entryDx=0;entryDy=0;entryPerimeter=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-180" target="Haz_8EwUBin59iLyk_8Q-85" edge="1">
             <mxGeometry x="485" y="234" as="geometry">
               <mxPoint x="250" y="134" as="targetPoint" />
               <Array as="points">
@@ -40,19 +48,19 @@
           </mxCell>
         </UserObject>
         <object label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-31">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;entryX=0.508;entryY=-0.192;entryDx=0;entryDy=0;entryPerimeter=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-148" target="Haz_8EwUBin59iLyk_8Q-150" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;entryX=0.508;entryY=-0.192;entryDx=0;entryDy=0;entryPerimeter=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-148" target="Haz_8EwUBin59iLyk_8Q-150" edge="1" visible="0">
             <mxGeometry relative="1" as="geometry">
               <mxPoint x="420.0153550863723" y="506" as="targetPoint" />
             </mxGeometry>
           </mxCell>
         </object>
         <object label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-32">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-143" target="Haz_8EwUBin59iLyk_8Q-145" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-143" target="Haz_8EwUBin59iLyk_8Q-145" edge="1" visible="0">
             <mxGeometry relative="1" as="geometry" />
           </mxCell>
         </object>
         <UserObject label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-33">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=sharp;orthogonalLoop=1;jettySize=auto;html=1;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-150" target="Haz_8EwUBin59iLyk_8Q-56" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=sharp;orthogonalLoop=1;jettySize=auto;html=1;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-150" target="Haz_8EwUBin59iLyk_8Q-56" edge="1" visible="0">
             <mxGeometry relative="1" as="geometry">
               <mxPoint x="571" y="286" as="targetPoint" />
               <Array as="points">
@@ -78,7 +86,7 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-35">
-          <mxCell style="rounded=0;sketch=0;jumpStyle=sharp;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.2;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-116" target="Haz_8EwUBin59iLyk_8Q-180" edge="1">
+          <mxCell style="rounded=0;sketch=0;jumpStyle=sharp;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.2;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-116" target="Haz_8EwUBin59iLyk_8Q-180" edge="1" visible="0">
             <mxGeometry relative="1" as="geometry" />
           </mxCell>
         </UserObject>
@@ -88,7 +96,7 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-37">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;entryX=0;entryY=0.25;entryDx=0;entryDy=0;endArrow=none;endFill=0;fontSize=6;strokeWidth=3;sketch=0;shadow=0;rounded=0;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-39" target="Haz_8EwUBin59iLyk_8Q-208" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;entryX=0;entryY=0.25;entryDx=0;entryDy=0;endArrow=none;endFill=0;fontSize=6;strokeWidth=3;sketch=0;shadow=0;rounded=0;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-39" target="Haz_8EwUBin59iLyk_8Q-208" edge="1">
             <mxGeometry relative="1" as="geometry">
               <Array as="points">
                 <mxPoint x="38" y="260" />
@@ -97,7 +105,7 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-38">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;entryX=0;entryY=0.2;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=3;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-39" target="Haz_8EwUBin59iLyk_8Q-219" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;entryX=0;entryY=0.2;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=3;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-39" target="Haz_8EwUBin59iLyk_8Q-219" edge="1">
             <mxGeometry relative="1" as="geometry">
               <Array as="points">
                 <mxPoint x="38" y="260" />
@@ -108,11 +116,6 @@
             </mxGeometry>
           </mxCell>
         </UserObject>
-        <UserObject label="Registers" tags="simple pipeline forwarding" link="#registers" id="Haz_8EwUBin59iLyk_8Q-40">
-          <mxCell style="rounded=1;gradientColor=none;arcSize=2;fontSize=6;fontStyle=1;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="230" y="240" width="60" height="80" as="geometry" />
-          </mxCell>
-        </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-41">
           <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=sharp;orthogonalLoop=1;jettySize=auto;exitX=0;exitY=0.493;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=3;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitPerimeter=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-85" target="Haz_8EwUBin59iLyk_8Q-75" edge="1">
             <mxGeometry relative="1" as="geometry">
@@ -121,21 +124,25 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-42">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.25;exitDx=0;exitDy=0;shadow=0;endArrow=none;endFill=0;strokeWidth=1;fontSize=6;strokeColor=#3333FF;entryX=0.837;entryY=0.004;entryDx=0;entryDy=0;entryPerimeter=0;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-85" target="Haz_8EwUBin59iLyk_8Q-40" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;shadow=0;endArrow=none;endFill=0;strokeWidth=1;fontSize=6;strokeColor=#3333FF;entryX=0.837;entryY=0.004;entryDx=0;entryDy=0;entryPerimeter=0;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="HRoSpS79B9qHWH9jaoA8-5" target="Haz_8EwUBin59iLyk_8Q-40" edge="1" visible="0">
             <mxGeometry relative="1" as="geometry">
               <mxPoint x="280" y="232" as="targetPoint" />
               <Array as="points">
+                <mxPoint x="289" y="106" />
+                <mxPoint x="289" y="107" />
                 <mxPoint x="695" y="107" />
                 <mxPoint x="695" y="45" />
                 <mxPoint x="280" y="45" />
               </Array>
+              <mxPoint x="290" y="107" as="sourcePoint" />
             </mxGeometry>
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-44">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=sharp;orthogonalLoop=1;jettySize=auto;entryX=0;entryY=0.5;entryDx=0;entryDy=0;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=3;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-45" target="Haz_8EwUBin59iLyk_8Q-59" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=sharp;orthogonalLoop=1;jettySize=auto;entryX=0;entryY=0.5;entryDx=0;entryDy=0;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=3;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="Haz_8EwUBin59iLyk_8Q-26" target="Haz_8EwUBin59iLyk_8Q-59" edge="1">
             <mxGeometry relative="1" as="geometry">
               <Array as="points" />
+              <mxPoint x="272" y="416" as="sourcePoint" />
             </mxGeometry>
           </mxCell>
         </UserObject>
@@ -156,17 +163,17 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-47">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;exitX=0.668;exitY=0.003;exitDx=0;exitDy=0;entryX=1.001;entryY=0.518;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;endArrow=none;endFill=0;strokeColor=#3333FF;strokeWidth=1;fontSize=6;exitPerimeter=0;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-211" target="Haz_8EwUBin59iLyk_8Q-85" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;exitX=0.668;exitY=0.003;exitDx=0;exitDy=0;entryX=1.001;entryY=0.518;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;endArrow=none;endFill=0;strokeColor=#3333FF;strokeWidth=1;fontSize=6;exitPerimeter=0;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-211" target="Haz_8EwUBin59iLyk_8Q-85" edge="1">
             <mxGeometry relative="1" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-48">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;exitX=0.834;exitY=0.001;exitDx=0;exitDy=0;entryX=1.001;entryY=0.427;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;endArrow=none;endFill=0;strokeColor=#3333FF;strokeWidth=1;fontSize=6;exitPerimeter=0;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-211" target="Haz_8EwUBin59iLyk_8Q-85" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;exitX=0.834;exitY=0.001;exitDx=0;exitDy=0;entryX=1.001;entryY=0.427;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;endArrow=none;endFill=0;strokeColor=#3333FF;strokeWidth=1;fontSize=6;exitPerimeter=0;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-211" target="Haz_8EwUBin59iLyk_8Q-85" edge="1">
             <mxGeometry relative="1" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-49">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0.065;exitDx=0;exitDy=0;entryX=1.002;entryY=0.344;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;endArrow=none;endFill=0;strokeColor=#3333FF;strokeWidth=1;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitPerimeter=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-112" target="Haz_8EwUBin59iLyk_8Q-85" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0.065;exitDx=0;exitDy=0;entryX=1.002;entryY=0.344;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;endArrow=none;endFill=0;strokeColor=#3333FF;strokeWidth=1;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitPerimeter=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-112" target="Haz_8EwUBin59iLyk_8Q-85" edge="1">
             <mxGeometry relative="1" as="geometry">
               <Array as="points">
                 <mxPoint x="696" y="113" />
@@ -224,43 +231,29 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-58">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;entryX=0;entryY=0.65;entryDx=0;entryDy=0;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=3;fontSize=6;entryPerimeter=0;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;startArrow=none;" parent="Haz_8EwUBin59iLyk_8Q-26" source="uWEq7-W_z53UrtFael4O-38" target="Haz_8EwUBin59iLyk_8Q-113" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;entryX=0;entryY=0.65;entryDx=0;entryDy=0;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=3;fontSize=6;entryPerimeter=0;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;startArrow=none;startSize=6;jumpSize=4;" parent="Haz_8EwUBin59iLyk_8Q-26" source="uWEq7-W_z53UrtFael4O-38" edge="1">
             <mxGeometry relative="1" as="geometry">
               <Array as="points">
-                <mxPoint x="466" y="412" />
-                <mxPoint x="466" y="309" />
+                <mxPoint x="466" y="416" />
+                <mxPoint x="466" y="311" />
               </Array>
-              <mxPoint x="482.5000000000002" y="408.04999999999995" as="sourcePoint" />
-              <mxPoint x="470.6388888888889" y="309.25" as="targetPoint" />
+              <mxPoint x="355.5" y="414" as="sourcePoint" />
+              <mxPoint x="470.6388888888889" y="311.2500000000001" as="targetPoint" />
             </mxGeometry>
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-59">
           <mxCell style="rounded=0;whiteSpace=wrap;fillColor=#000000;fontSize=6;align=center;fontFamily=sans-serif;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="289" y="411" width="2" height="2" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-60">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;entryX=0.007;entryY=0.878;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=1;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="Haz_8EwUBin59iLyk_8Q-26" target="Haz_8EwUBin59iLyk_8Q-40" edge="1">
-            <mxGeometry relative="1" as="geometry">
-              <Array as="points">
-                <mxPoint x="680" y="391" />
-                <mxPoint x="680" y="499" />
-                <mxPoint x="210" y="499" />
-                <mxPoint x="210" y="310" />
-              </Array>
-              <mxPoint x="190" y="391" as="sourcePoint" />
-              <mxPoint x="228.45999999999998" y="309.92" as="targetPoint" />
-            </mxGeometry>
+            <mxGeometry x="289" y="415" width="2" height="2" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-61">
           <mxCell style="rounded=0;whiteSpace=wrap;fillColor=#000000;fontSize=6;align=center;fontFamily=sans-serif;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="189" y="390" width="2" height="2" as="geometry" />
+            <mxGeometry x="189" y="389" width="2" height="2" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-62">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;entryX=0;entryY=0.5;entryDx=0;entryDy=0;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=3;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-64" target="Haz_8EwUBin59iLyk_8Q-45" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;entryX=0;entryY=0.5;entryDx=0;entryDy=0;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=3;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-64" target="Haz_8EwUBin59iLyk_8Q-45" edge="1">
             <mxGeometry relative="1" as="geometry">
               <mxPoint x="196" y="412" as="sourcePoint" />
               <Array as="points">
@@ -349,7 +342,7 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-77">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;entryX=0.661;entryY=0.993;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=3;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-79" target="Haz_8EwUBin59iLyk_8Q-156" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;entryX=0.661;entryY=0.993;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=3;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-79" target="Haz_8EwUBin59iLyk_8Q-156" edge="1">
             <mxGeometry relative="1" as="geometry">
               <Array as="points">
                 <mxPoint x="79" y="380" />
@@ -360,7 +353,7 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-78">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;entryX=0;entryY=0.8;entryDx=0;entryDy=0;entryPerimeter=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-79" target="Haz_8EwUBin59iLyk_8Q-222" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;entryX=0;entryY=0.8;entryDx=0;entryDy=0;entryPerimeter=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-79" target="Haz_8EwUBin59iLyk_8Q-222" edge="1">
             <mxGeometry relative="1" as="geometry">
               <mxPoint x="337" y="456" as="targetPoint" />
             </mxGeometry>
@@ -374,11 +367,6 @@
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-84">
           <mxCell style="shape=or;whiteSpace=wrap;rounded=1;fontFamily=sans-serif;fontSize=6;align=center;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
             <mxGeometry x="558" y="183" width="10" height="10" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="Control&#xa;Unit" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-85">
-          <mxCell style="rounded=1;gradientColor=none;arcSize=8;fontSize=6;fontStyle=1;spacing=0;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="210" y="87" width="40" height="75" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-86">
@@ -418,29 +406,9 @@
             </mxGeometry>
           </mxCell>
         </UserObject>
-        <UserObject label="00" tags="simple pipeline forwarding" component="reg-id-value" source="decode-rd" id="Haz_8EwUBin59iLyk_8Q-93">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;spacing=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="313" y="386" width="14" height="8" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="00" tags="pipeline forwarding" component="reg-id-value" source="exec-rd" id="Haz_8EwUBin59iLyk_8Q-94">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;spacing=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="495" y="386" width="14" height="8" as="geometry" />
-          </mxCell>
-        </UserObject>
         <UserObject label="Rd" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-95">
           <mxCell style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="316" y="378" width="8" height="8" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="Rd" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-96">
-          <mxCell style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="498" y="378" width="8" height="8" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="00" tags="pipeline forwarding" component="reg-id-value" source="mem-rd" id="Haz_8EwUBin59iLyk_8Q-98">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;spacing=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="603" y="386" width="14" height="8" as="geometry" />
+            <mxGeometry x="316" y="382" width="8" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="00" tags="simple pipeline forwarding" component="reg-id-value" source="rs1" id="Haz_8EwUBin59iLyk_8Q-101">
@@ -464,7 +432,7 @@
           </mxCell>
         </UserObject>
         <UserObject label="00000000" tags="pipeline forwarding" component="reg-value" source="alu-res" id="Haz_8EwUBin59iLyk_8Q-105">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;direction=south;horizontal=0;spacing=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;direction=south;horizontal=0;spacing=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="525" y="248" width="7" height="64" as="geometry" />
           </mxCell>
         </UserObject>
@@ -474,23 +442,9 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-107">
-          <mxCell style="edgeStyle=none;rounded=0;sketch=0;jumpStyle=sharp;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-199" target="Haz_8EwUBin59iLyk_8Q-113" edge="1">
+          <mxCell style="edgeStyle=none;rounded=0;sketch=0;jumpStyle=sharp;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-199" target="Haz_8EwUBin59iLyk_8Q-113" edge="1" visible="0">
             <mxGeometry relative="1" as="geometry">
               <mxPoint x="470.6388888888889" y="301.75" as="targetPoint" />
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="simple" id="Haz_8EwUBin59iLyk_8Q-108">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-199" target="Haz_8EwUBin59iLyk_8Q-211" edge="1">
-            <mxGeometry relative="1" as="geometry">
-              <Array as="points">
-                <mxPoint x="450" y="303" />
-                <mxPoint x="450" y="359" />
-                <mxPoint x="560" y="359" />
-                <mxPoint x="560" y="342" />
-                <mxPoint x="651" y="342" />
-                <mxPoint x="651" y="278" />
-              </Array>
             </mxGeometry>
           </mxCell>
         </UserObject>
@@ -517,48 +471,30 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-115">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=sharp;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.25;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.991;entryY=0.12;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-116" target="Haz_8EwUBin59iLyk_8Q-40" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=sharp;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.25;exitDx=0;exitDy=0;exitPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="Haz_8EwUBin59iLyk_8Q-26" edge="1" visible="0">
             <mxGeometry relative="1" as="geometry">
               <Array as="points">
-                <mxPoint x="430" y="242" />
-                <mxPoint x="403" y="241" />
-                <mxPoint x="403" y="250" />
+                <mxPoint x="388" y="241" />
+                <mxPoint x="388" y="251" />
+                <mxPoint x="353" y="251" />
               </Array>
+              <mxPoint x="430.2777777777778" y="241.49999999999994" as="sourcePoint" />
+              <mxPoint x="353" y="250.00000000000006" as="targetPoint" />
             </mxGeometry>
           </mxCell>
         </UserObject>
         <UserObject label="EX/MEM" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-131">
-          <mxCell style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="518" y="59" width="42" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="MEM/WB" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-132">
-          <mxCell style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="640" y="59" width="42" height="8" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="ID/EX" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-133">
-          <mxCell style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="373" y="59" width="42" height="8" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-139">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;shadow=0;endArrow=none;endFill=0;strokeColor=#3333FF;strokeWidth=1;fontFamily=sans-serif;fontSize=6;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-84" target="Haz_8EwUBin59iLyk_8Q-156" edge="1">
-            <mxGeometry relative="1" as="geometry">
-              <Array as="points">
-                <mxPoint x="574" y="188" />
-                <mxPoint x="574" y="200" />
-                <mxPoint x="547" y="200" />
-                <mxPoint x="547" y="487" />
-                <mxPoint x="25" y="487" />
-                <mxPoint x="25" y="420" />
-              </Array>
-              <mxPoint x="26" y="416" as="targetPoint" />
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-142">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;html=1;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-143" target="Haz_8EwUBin59iLyk_8Q-40" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;html=1;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;entryX=0;entryY=0.75;entryDx=0;entryDy=0;jumpSize=4;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-143" target="Haz_8EwUBin59iLyk_8Q-40" edge="1">
             <mxGeometry relative="1" as="geometry">
               <Array as="points">
                 <mxPoint x="172" y="509" />
@@ -573,22 +509,22 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-144">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-145" target="Haz_8EwUBin59iLyk_8Q-116" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-145" target="Haz_8EwUBin59iLyk_8Q-116" edge="1" visible="0">
             <mxGeometry relative="1" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-145">
-          <mxCell style="rounded=0;whiteSpace=wrap;fillColor=#000000;fontSize=6;align=center;fontFamily=sans-serif;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=0;whiteSpace=wrap;fillColor=#000000;fontSize=6;align=center;fontFamily=sans-serif;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="409" y="302" width="2" height="2" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-146">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=sharp;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-148" target="Haz_8EwUBin59iLyk_8Q-199" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=sharp;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-148" target="Haz_8EwUBin59iLyk_8Q-199" edge="1" visible="0">
             <mxGeometry relative="1" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-147">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-148" target="Haz_8EwUBin59iLyk_8Q-116" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-148" target="Haz_8EwUBin59iLyk_8Q-116" edge="1" visible="0">
             <mxGeometry relative="1" as="geometry">
               <Array as="points">
                 <mxPoint x="420" y="258" />
@@ -597,7 +533,7 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-148">
-          <mxCell style="rounded=0;whiteSpace=wrap;fillColor=#000000;fontSize=6;align=center;fontFamily=sans-serif;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=0;whiteSpace=wrap;fillColor=#000000;fontSize=6;align=center;fontFamily=sans-serif;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="419" y="310" width="2" height="2" as="geometry" />
           </mxCell>
         </UserObject>
@@ -614,30 +550,26 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-150">
-          <mxCell style="rounded=0;whiteSpace=wrap;fillColor=#000000;fontSize=6;align=center;fontFamily=sans-serif;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=0;whiteSpace=wrap;fillColor=#000000;fontSize=6;align=center;fontFamily=sans-serif;verticalAlign=middle;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="419" y="489" width="2" height="2" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-151">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1.007;entryY=0.373;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-199" target="Haz_8EwUBin59iLyk_8Q-40" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1.007;entryY=0.373;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;jumpSize=4;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-199" target="Haz_8EwUBin59iLyk_8Q-40" edge="1" visible="0">
             <mxGeometry relative="1" as="geometry">
               <Array as="points">
                 <mxPoint x="435" y="303" />
                 <mxPoint x="435" y="295" />
                 <mxPoint x="403" y="295" />
                 <mxPoint x="403" y="270" />
+                <mxPoint x="290" y="270" />
               </Array>
             </mxGeometry>
           </mxCell>
         </UserObject>
         <UserObject label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-152">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-145" target="Haz_8EwUBin59iLyk_8Q-199" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;jumpSize=4;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-145" target="Haz_8EwUBin59iLyk_8Q-199" edge="1" visible="0">
             <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="00" tags="simple pipeline forwarding" component="reg-id-value" source="wb-rd" id="Haz_8EwUBin59iLyk_8Q-154">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="313" y="496" width="14" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-156">
@@ -651,7 +583,7 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-170">
-          <mxCell style="group" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" connectable="0">
+          <mxCell style="group" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" connectable="0" visible="0">
             <mxGeometry x="661" y="70" width="6" height="398.5" as="geometry" />
           </mxCell>
         </UserObject>
@@ -671,12 +603,12 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-174">
-          <mxCell style="rounded=0;whiteSpace=wrap;html=1;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;" parent="Haz_8EwUBin59iLyk_8Q-173" vertex="1">
+          <mxCell style="rounded=0;whiteSpace=wrap;html=1;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;" parent="Haz_8EwUBin59iLyk_8Q-173" vertex="1" visible="0">
             <mxGeometry width="6" height="398.5" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-175">
-          <mxCell style="triangle;whiteSpace=wrap;html=1;rounded=0;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;direction=south;" parent="Haz_8EwUBin59iLyk_8Q-173" vertex="1">
+          <mxCell style="triangle;whiteSpace=wrap;html=1;rounded=0;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;direction=south;" parent="Haz_8EwUBin59iLyk_8Q-173" vertex="1" visible="0">
             <mxGeometry x="0.5" width="5" height="4.5" as="geometry" />
           </mxCell>
         </UserObject>
@@ -715,14 +647,9 @@
             <mxGeometry x="13" y="31" width="16" height="5.56" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="Peripherals" link="#peripherals" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-183">
+        <UserObject label="Peripherals" tags="simple pipeline forwarding" link="#peripherals" id="Haz_8EwUBin59iLyk_8Q-183">
           <mxCell style="rounded=1;gradientColor=none;arcSize=17;fontSize=6;fontFamily=sans-serif;fontStyle=1;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="590" y="347" width="45" height="16" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="Terminal" link="#terminal" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-184">
-          <mxCell style="rounded=1;gradientColor=none;arcSize=17;fontSize=6;fontFamily=sans-serif;fontStyle=1;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="593" y="397" width="35" height="16" as="geometry" />
+            <mxGeometry x="590" y="341" width="45" height="16" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="Cycles:" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-187">
@@ -737,31 +664,31 @@
         </UserObject>
         <UserObject label="MemToReg" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-191">
           <mxCell style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=sans-serif;fontSize=6;fontStyle=1;spacing=0;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="301" y="106.5" width="40" height="8" as="geometry" />
+            <mxGeometry x="285.5" y="106.5" width="40" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="MemWrite" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-192">
           <mxCell style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=sans-serif;fontSize=6;fontStyle=1;spacing=0;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="301" y="112.5" width="40" height="8" as="geometry" />
+            <mxGeometry x="285.5" y="112.5" width="40" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="MemRead" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-193">
           <mxCell style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=sans-serif;fontSize=6;fontStyle=1;spacing=0;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="301" y="119.5" width="40" height="8" as="geometry" />
+            <mxGeometry x="285.5" y="119.5" width="40" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="AluCtl" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-194">
           <mxCell style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=sans-serif;fontSize=6;fontStyle=1;spacing=0;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="302" y="132.5" width="40" height="8" as="geometry" />
+            <mxGeometry x="286.5" y="132.5" width="40" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="AluSrc" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-195">
           <mxCell style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=sans-serif;fontSize=6;fontStyle=1;spacing=0;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="301" y="140.5" width="40" height="8" as="geometry" />
+            <mxGeometry x="285.5" y="140.5" width="40" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-201">
-          <mxCell style="group" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" connectable="0">
+          <mxCell style="group" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" connectable="0" visible="0">
             <mxGeometry x="142" y="60" width="42" height="409" as="geometry" />
           </mxCell>
         </UserObject>
@@ -771,7 +698,7 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-203">
-          <mxCell style="group" parent="Haz_8EwUBin59iLyk_8Q-201" vertex="1" connectable="0">
+          <mxCell style="group" parent="Haz_8EwUBin59iLyk_8Q-201" vertex="1" connectable="0" visible="0">
             <mxGeometry x="18" y="10.5" width="6" height="398.5" as="geometry" />
           </mxCell>
         </UserObject>
@@ -785,7 +712,7 @@
             <mxGeometry x="0.5" width="5" height="4.5" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="" tags="simple forwarding pipeline" id="Haz_8EwUBin59iLyk_8Q-210">
+        <UserObject label="" tags="simple forwarding pipeline" link="#data_memory" id="Haz_8EwUBin59iLyk_8Q-210">
           <mxCell style="group;fontSize=12;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" connectable="0">
             <mxGeometry x="580" y="258" width="60" height="80" as="geometry" />
           </mxCell>
@@ -795,7 +722,7 @@
             <mxGeometry width="60" height="80" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="Data&#xa;Memory" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-212">
+        <UserObject label="Data&#xa;Memory" tags="simple pipeline forwarding" link="#data_memory" id="Haz_8EwUBin59iLyk_8Q-212">
           <mxCell style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=1;" parent="Haz_8EwUBin59iLyk_8Q-210" vertex="1">
             <mxGeometry x="6" y="53" width="48" height="17" as="geometry" />
           </mxCell>
@@ -817,7 +744,7 @@
           <mxGeometry x="9" width="20" height="39" as="geometry" />
         </mxCell>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-216">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;exitX=0;exitY=0.8;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-215" target="Haz_8EwUBin59iLyk_8Q-214" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;exitX=0;exitY=0.8;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-215" target="Haz_8EwUBin59iLyk_8Q-214" edge="1">
             <mxGeometry x="87" y="330" as="geometry">
               <mxPoint x="-1" y="32" as="targetPoint" />
               <mxPoint x="3.944444444444457" y="32" as="sourcePoint" />
@@ -856,12 +783,12 @@
           </mxCell>
         </UserObject>
         <UserObject label="RegWrite" tags="pipeline forwarding" id="4UeL6ZtvB5kMY3OpyeXH-3">
-          <mxCell style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=sans-serif;fontSize=6;fontStyle=1;spacing=0;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="301" y="101.5" width="40" height="8" as="geometry" />
+          <mxCell style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=sans-serif;fontSize=6;fontStyle=1;spacing=0;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
+            <mxGeometry x="285.5" y="99.5" width="40" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple" id="4UeL6ZtvB5kMY3OpyeXH-2">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;shadow=0;fontFamily=sans-serif;fontSize=6;strokeColor=#3333FF;strokeWidth=1;labelBackgroundColor=none;endFill=0;endArrow=none;sketch=0;jumpStyle=arc;" parent="Haz_8EwUBin59iLyk_8Q-26" target="Haz_8EwUBin59iLyk_8Q-40" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;shadow=0;fontFamily=sans-serif;fontSize=6;strokeColor=#3333FF;strokeWidth=1;labelBackgroundColor=none;endFill=0;endArrow=none;sketch=0;jumpStyle=arc;jumpSize=4;" parent="Haz_8EwUBin59iLyk_8Q-26" target="Haz_8EwUBin59iLyk_8Q-40" edge="1">
             <mxGeometry relative="1" as="geometry">
               <mxPoint x="250" y="134" as="sourcePoint" />
               <Array as="points">
@@ -871,7 +798,7 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="pipeline forwarding simple" id="Haz_8EwUBin59iLyk_8Q-50">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0.065;exitDx=0;exitDy=0;shadow=0;endArrow=none;endFill=0;strokeColor=#3333FF;strokeWidth=1;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitPerimeter=0;entryX=1.005;entryY=0.802;entryDx=0;entryDy=0;entryPerimeter=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-113" target="Haz_8EwUBin59iLyk_8Q-85" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0.065;exitDx=0;exitDy=0;shadow=0;endArrow=none;endFill=0;strokeColor=#3333FF;strokeWidth=1;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitPerimeter=0;entryX=1.005;entryY=0.802;entryDx=0;entryDy=0;entryPerimeter=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-113" target="Haz_8EwUBin59iLyk_8Q-85" edge="1">
             <mxGeometry relative="1" as="geometry">
               <mxPoint x="250" y="147" as="targetPoint" />
               <Array as="points">
@@ -882,7 +809,7 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-83">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;exitX=0;exitY=0.25;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.997;entryY=0.879;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;endArrow=none;endFill=0;strokeColor=#3333FF;strokeWidth=1;fontFamily=sans-serif;fontSize=6;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-84" target="Haz_8EwUBin59iLyk_8Q-85" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;exitX=0;exitY=0.25;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.997;entryY=0.879;entryDx=0;entryDy=0;entryPerimeter=0;shadow=0;endArrow=none;endFill=0;strokeColor=#3333FF;strokeWidth=1;fontFamily=sans-serif;fontSize=6;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-84" target="Haz_8EwUBin59iLyk_8Q-85" edge="1">
             <mxGeometry relative="1" as="geometry">
               <Array as="points">
                 <mxPoint x="521" y="186" />
@@ -891,69 +818,9 @@
             </mxGeometry>
           </mxCell>
         </UserObject>
-        <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-158">
-          <mxCell style="group" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" connectable="0">
-            <mxGeometry x="393" y="70" width="6" height="399.5" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="simple" id="Haz_8EwUBin59iLyk_8Q-159">
-          <mxCell style="rounded=0;whiteSpace=wrap;html=1;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;" parent="Haz_8EwUBin59iLyk_8Q-158" vertex="1">
-            <mxGeometry width="6" height="398.5" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="simple" id="Haz_8EwUBin59iLyk_8Q-160">
-          <mxCell style="triangle;whiteSpace=wrap;html=1;rounded=0;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;direction=south;" parent="Haz_8EwUBin59iLyk_8Q-158" vertex="1">
-            <mxGeometry x="0.5" width="5" height="4.5" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-161">
-          <mxCell style="group" parent="Haz_8EwUBin59iLyk_8Q-158" vertex="1" connectable="0">
-            <mxGeometry width="6" height="398.5" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-162">
-          <mxCell style="rounded=0;whiteSpace=wrap;html=1;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;" parent="Haz_8EwUBin59iLyk_8Q-161" vertex="1">
-            <mxGeometry width="6" height="398.5" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-163">
-          <mxCell style="triangle;whiteSpace=wrap;html=1;rounded=0;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;direction=south;" parent="Haz_8EwUBin59iLyk_8Q-161" vertex="1">
-            <mxGeometry x="0.5" width="5" height="4.5" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-164">
-          <mxCell style="group" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" connectable="0">
-            <mxGeometry x="537" y="70" width="6" height="398.5" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="simple" id="Haz_8EwUBin59iLyk_8Q-165">
-          <mxCell style="rounded=0;whiteSpace=wrap;html=1;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;" parent="Haz_8EwUBin59iLyk_8Q-164" vertex="1">
-            <mxGeometry width="6" height="398.5" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="simple" id="Haz_8EwUBin59iLyk_8Q-166">
-          <mxCell style="triangle;whiteSpace=wrap;html=1;rounded=0;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;direction=south;" parent="Haz_8EwUBin59iLyk_8Q-164" vertex="1">
-            <mxGeometry x="0.5" width="5" height="4.5" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="pipeline simple forwarding" id="Haz_8EwUBin59iLyk_8Q-167">
-          <mxCell style="group" parent="Haz_8EwUBin59iLyk_8Q-164" vertex="1" connectable="0">
-            <mxGeometry width="6" height="398.5" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-168">
-          <mxCell style="rounded=0;whiteSpace=wrap;html=1;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;" parent="Haz_8EwUBin59iLyk_8Q-167" vertex="1">
-            <mxGeometry width="6" height="398.5" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-169">
-          <mxCell style="triangle;whiteSpace=wrap;html=1;rounded=0;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;direction=south;" parent="Haz_8EwUBin59iLyk_8Q-167" vertex="1">
-            <mxGeometry x="0.5" width="5" height="4.5" as="geometry" />
-          </mxCell>
-        </UserObject>
         <UserObject label="Branch" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-196">
           <mxCell style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=sans-serif;fontSize=6;fontStyle=1;spacing=0;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="301" y="146.5" width="40" height="8" as="geometry" />
+            <mxGeometry x="285.5" y="146.5" width="40" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" link="#program_memory" id="Haz_8EwUBin59iLyk_8Q-208">
@@ -961,7 +828,7 @@
             <mxGeometry x="93" y="238" width="60" height="80" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="Program&#xa;Memory" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-209">
+        <UserObject label="Program&#xa;Memory" tags="simple pipeline forwarding" link="#program_memory" id="Haz_8EwUBin59iLyk_8Q-209">
           <mxCell style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
             <mxGeometry x="99" y="294" width="48" height="18" as="geometry" />
           </mxCell>
@@ -971,7 +838,7 @@
             <mxGeometry x="283" y="190" width="40" height="8" as="geometry" />
           </mxCell>
         </UserObject>
-        <mxCell id="Zvq364hImIOJoiC3617Z-14" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=3;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-222" target="Haz_8EwUBin59iLyk_8Q-156" edge="1">
+        <mxCell id="Zvq364hImIOJoiC3617Z-14" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=3;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;jumpSize=4;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-222" target="Haz_8EwUBin59iLyk_8Q-156" edge="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="531" y="444" />
@@ -983,46 +850,35 @@
             <mxPoint x="83" y="482" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <UserObject label="" link="#cache_program" component="program-cache" tags="simple forwarding pipeline" id="uWEq7-W_z53UrtFael4O-36">
+        <UserObject label="" component="program-cache" tags="simple forwarding pipeline" link="#cache_program" id="uWEq7-W_z53UrtFael4O-36">
           <mxCell style="shape=stencil(rVTRbsMgDPwaHidRWPteZZv20o9gxDSolFTA1GRfP4LJOliXqVqlSInPOd8ZWxDe+E6cgDBqxREIfyKMSSG7iLAIdoisKYZnDDc5FP4EMiCm9AAtwj64/gBn3YZM17YDp8OU5c+EbuM/08ObNyEPe9e/27ZIzOmUcZMEowOWyspjEVW2KtPCSa8/cm8MMcJeKisR+cUNb1TvYMGm0sZgz1cqX2rYkGzE8/lys7nupuCE0SRSeifW6m+WEkdtxhjnj8TzwvoHHyehlgsEGAKOEXnNZR/yFHg5htV80kbvbd4hsAHcbTqvcUX4thBaFzpz+E3HgAq3qey098sy/PEOMrQQqPb2Lo1UCv/oIW3/jyVPKN4OCfgE);collapsible=0;dropTarget=0;autosize=0;container=0;metaEdit=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
             <mxGeometry x="93" y="237" width="60" height="50" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="00000000" tags="simple pipeline forwarding" component="reg-value" source="decode-imm" id="uWEq7-W_z53UrtFael4O-38">
           <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="319.5" y="408" width="56" height="8" as="geometry" />
+            <mxGeometry x="299.5" y="412" width="56" height="8" as="geometry" />
           </mxCell>
         </UserObject>
-        <mxCell id="uWEq7-W_z53UrtFael4O-39" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=3;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-59" target="uWEq7-W_z53UrtFael4O-38" edge="1">
+        <mxCell id="uWEq7-W_z53UrtFael4O-39" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=3;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-59" edge="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="320" y="412" />
+              <mxPoint x="295" y="416" />
+              <mxPoint x="295" y="416" />
             </Array>
-            <mxPoint x="291" y="412" as="sourcePoint" />
-            <mxPoint x="299" y="412" as="targetPoint" />
+            <mxPoint x="291" y="416" as="sourcePoint" />
+            <mxPoint x="299.5" y="416" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="uWEq7-W_z53UrtFael4O-40" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;exitX=0;exitY=0.35;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;shadow=0;fontFamily=sans-serif;fontSize=6;strokeWidth=3;labelBackgroundColor=none;endFill=0;endArrow=none;sketch=0;jumpStyle=arc;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-113" target="Haz_8EwUBin59iLyk_8Q-153" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="403" y="302" />
-              <mxPoint x="403" y="270" />
-            </Array>
-            <mxPoint x="470.6388888888888" y="301.75" as="sourcePoint" />
-            <mxPoint x="289.03999999999996" y="269.6" as="targetPoint" />
-          </mxGeometry>
+        <mxCell id="HRoSpS79B9qHWH9jaoA8-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.995;entryY=0.129;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;startSize=6;" edge="1" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-118" target="Haz_8EwUBin59iLyk_8Q-40">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <UserObject label="00000000" tags="simple pipeline forwarding" component="reg-value" source="rs1" id="Haz_8EwUBin59iLyk_8Q-118">
+        <mxCell id="HRoSpS79B9qHWH9jaoA8-30" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;shadow=0;fontFamily=sans-serif;fontSize=6;strokeWidth=3;labelBackgroundColor=none;sketch=0;entryX=0.995;entryY=0.126;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-118" target="Haz_8EwUBin59iLyk_8Q-40">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <UserObject label="00000000" tags="simple pipeline forwarding" component="reg-value" source="decode-rs1" id="Haz_8EwUBin59iLyk_8Q-118">
           <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="332" y="246" width="56" height="8" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="simple pipeline" id="uWEq7-W_z53UrtFael4O-41">
-          <mxCell style="rounded=0;sketch=0;jumpStyle=arc;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.2;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;shadow=0;labelBackgroundColor=none;endArrow=none;endFill=0;strokeWidth=3;fontFamily=sans-serif;fontSize=6;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-180" target="Haz_8EwUBin59iLyk_8Q-118" edge="1">
-            <mxGeometry relative="1" as="geometry">
-              <mxPoint x="487.66666666666674" y="251.2" as="sourcePoint" />
-              <mxPoint x="290.06000000000006" y="249.59999999999997" as="targetPoint" />
-            </mxGeometry>
+            <mxGeometry x="297" y="246" width="56" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <object label="" component="pc-value" source="fetch-pc" id="uWEq7-W_z53UrtFael4O-43">
@@ -1030,8 +886,8 @@
             <mxGeometry x="2" y="280" width="72" height="25" as="geometry" />
           </mxCell>
         </object>
-        <UserObject label="0x00000000" tags="simple pipeline forwarding" component="pc-value" source="fetch-pc" id="Haz_8EwUBin59iLyk_8Q-39">
-          <mxCell style="rounded=1;gradientColor=none;perimeterSpacing=0;arcSize=1;fontSize=8;fontStyle=0;verticalAlign=middle;spacing=0;fontFamily=sans-serif;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingTop=6;" parent="uWEq7-W_z53UrtFael4O-43" vertex="1">
+        <UserObject label="0x00000000" tags="simple pipeline forwarding" component="pc-value" source="fetch-pc" link="#" id="Haz_8EwUBin59iLyk_8Q-39">
+          <mxCell style="rounded=1;gradientColor=none;perimeterSpacing=0;arcSize=1;fontSize=8;fontStyle=0;verticalAlign=middle;spacing=0;fontFamily=sans-serif;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingTop=6;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;connectable=0;" parent="uWEq7-W_z53UrtFael4O-43" vertex="1">
             <mxGeometry width="72" height="25" as="geometry" />
           </mxCell>
         </UserObject>
@@ -1056,84 +912,59 @@
             <mxGeometry x="316" y="488" width="8" height="8" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="Rd" tags="pipeline forwarding" id="uWEq7-W_z53UrtFael4O-49">
-          <mxCell style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="606" y="378" width="8" height="8" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="00000000" tags="simple pipeline forwarding" component="reg-value" source="rs2" id="Haz_8EwUBin59iLyk_8Q-153">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="332.5" y="266" width="56" height="8" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="00000000" tags="forwarding" component="reg-value" source="alu-src2" id="Haz_8EwUBin59iLyk_8Q-200">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;direction=south;spacing=0;horizontal=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="447" y="278.00000000000006" width="7" height="64" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="00000000" tags="forwarding" component="reg-value" source="alu-src1" id="Haz_8EwUBin59iLyk_8Q-117">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;direction=south;spacing=0;horizontal=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="447" y="198.00000000000006" width="7" height="64" as="geometry" />
+        <UserObject label="00000000" tags="forwarding pipeline" component="reg-value" source="exec-rs1" id="Haz_8EwUBin59iLyk_8Q-117">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;direction=south;spacing=0;horizontal=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
+            <mxGeometry x="373.5" y="195.00000000000006" width="7" height="64" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-116">
-          <mxCell style="shape=stencil(rZRNT8MwDIZ/Ta4oS9igR1TGjeMkrlnrUbMsqZqyjX+Pm7RA1Q+qrlKl1O8bP3ESK0zGLlM5MMGNOgGTz0yI190bxZL+aMiCFvEQXkIo1iFULoekDNoBr5AG2ZWFPcIF07JOR5NBgWXlyi3jTzSn+mScWGOIgNa4lvPHJ5hCQ7n8GmB1KV91dNcUw8TLbMYCiIcZjNUCZTRJPxC+WYIS3fdTZEzK0LXJeK+S43thP03au3auqpboGI2t0cCHRUORH3wteziDHttSk32yZxi8nymAavlfgGgfyep2xOMMRHsb0c2E9WiPTSHISYREWwf/zjqg1uG1GGlY0jt949WBZiOsLaDXoKSO59XwDHrhGw==);rounded=1;fontSize=7;align=right;spacingRight=0;spacingBottom=0;fontStyle=1;spacing=0;arcSize=19;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="shape=stencil(rZRNT8MwDIZ/Ta4oS9igR1TGjeMkrlnrUbMsqZqyjX+Pm7RA1Q+qrlKl1O8bP3ESK0zGLlM5MMGNOgGTz0yI190bxZL+aMiCFvEQXkIo1iFULoekDNoBr5AG2ZWFPcIF07JOR5NBgWXlyi3jTzSn+mScWGOIgNa4lvPHJ5hCQ7n8GmB1KV91dNcUw8TLbMYCiIcZjNUCZTRJPxC+WYIS3fdTZEzK0LXJeK+S43thP03au3auqpboGI2t0cCHRUORH3wteziDHttSk32yZxi8nymAavlfgGgfyep2xOMMRHsb0c2E9WiPTSHISYREWwf/zjqg1uG1GGlY0jt949WBZiOsLaDXoKSO59XwDHrhGw==);rounded=1;fontSize=7;align=right;spacingRight=0;spacingBottom=0;fontStyle=1;spacing=0;arcSize=19;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="425" y="233" width="20" height="34" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-199">
-          <mxCell style="shape=stencil(rZRNT8MwDIZ/Ta4oS9igR1TGjeMkrlnrUbMsqZqyjX+Pm7RA1Q+qrlKl1O8bP3ESK0zGLlM5MMGNOgGTz0yI190bxZL+aMiCFvEQXkIo1iFULoekDNoBr5AG2ZWFPcIF07JOR5NBgWXlyi3jTzSn+mScWGOIgNa4lvPHJ5hCQ7n8GmB1KV91dNcUw8TLbMYCiIcZjNUCZTRJPxC+WYIS3fdTZEzK0LXJeK+S43thP03au3auqpboGI2t0cCHRUORH3wteziDHttSk32yZxi8nymAavlfgGgfyep2xOMMRHsb0c2E9WiPTSHISYREWwf/zjqg1uG1GGlY0jt949WBZiOsLaDXoKSO59XwDHrhGw==);rounded=1;fontSize=7;align=right;spacingRight=0;spacingBottom=0;fontStyle=1;spacing=0;arcSize=19;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="425" y="286" width="20" height="34" as="geometry" />
-          </mxCell>
-        </UserObject>
         <UserObject label="0" tags="pipeline forwarding" component="bool-value" source="alu-zero" id="uWEq7-W_z53UrtFael4O-55">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="518" y="223" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="pipeline forwarding" component="bool-value" source="exec-alu-src" id="uWEq7-W_z53UrtFael4O-56">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="472" y="271" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="pipeline forwarding" component="bool-value" source="exec-mem-to-reg" id="uWEq7-W_z53UrtFael4O-57">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="485" y="109" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="pipeline forwarding" component="bool-value" source="mem-to-reg" id="uWEq7-W_z53UrtFael4O-58">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="692" y="237" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="simple pipeline forwarding" component="bool-value" source="decode-alu-src" id="uWEq7-W_z53UrtFael4O-60">
           <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="357.5" y="143" width="7" height="8" as="geometry" />
+            <mxGeometry x="342" y="143" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="pipeline forwarding" component="bool-value" source="exec-mem-read" id="uWEq7-W_z53UrtFael4O-61">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="461" y="124" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="pipeline forwarding" component="bool-value" source="exec-mem-write" id="uWEq7-W_z53UrtFael4O-62">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="473" y="116" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="pipeline forwarding" component="bool-value" source="exec-reg-write" id="uWEq7-W_z53UrtFael4O-63">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="463" y="104" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="pipeline forwarding" component="bool-value" source="exec-branch" id="uWEq7-W_z53UrtFael4O-64">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="519" y="166" width="7" height="8" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="0" tags="simple pipeline forwarding" component="bool-value" source="exec-branch" id="uWEq7-W_z53UrtFael4O-66">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="21.910000000000025" y="426" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="simple" component="bool-value" source="decode-reg-write" id="uWEq7-W_z53UrtFael4O-67">
@@ -1143,52 +974,52 @@
         </UserObject>
         <UserObject label="0" tags="simple pipeline forwarding" component="bool-value" source="decode-mem-to-reg" id="uWEq7-W_z53UrtFael4O-68">
           <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="369.5" y="109" width="7" height="8" as="geometry" />
+            <mxGeometry x="329" y="109" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="simple pipeline forwarding" component="bool-value" source="decode-mem-write" id="uWEq7-W_z53UrtFael4O-69">
           <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="358.5" y="116" width="7" height="8" as="geometry" />
+            <mxGeometry x="342" y="115" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="simple pipeline forwarding" component="bool-value" source="decode-mem-read" id="uWEq7-W_z53UrtFael4O-70">
           <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="370.5" y="121.5" width="7" height="8" as="geometry" />
+            <mxGeometry x="329" y="121.5" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="pipeline forwarding" component="bool-value" source="wb-reg-write" id="uWEq7-W_z53UrtFael4O-71">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="479" y="41" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="simple pipeline forwarding" component="bool-value" source="decode-reg-write" id="uWEq7-W_z53UrtFael4O-72">
           <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="359.5" y="104.5" width="7" height="8" as="geometry" />
+            <mxGeometry x="342" y="102.5" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="pipeline forwarding" component="bool-value" source="mem-mem-to-reg" id="uWEq7-W_z53UrtFael4O-73">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="583" y="107.5" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="pipeline forwarding" component="bool-value" source="mem-mem-read" id="uWEq7-W_z53UrtFael4O-74">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="617" y="198" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="pipeline forwarding" component="bool-value" source="mem-mem-write" id="uWEq7-W_z53UrtFael4O-75">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="628" y="198" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="pipeline forwarding" component="bool-value" source="mem-reg-write" id="uWEq7-W_z53UrtFael4O-76">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="561" y="102.5" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="simple pipeline forwarding" component="bool-value" source="decode-branch" id="uWEq7-W_z53UrtFael4O-77">
           <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="370.5" y="149.5" width="7" height="8" as="geometry" />
+            <mxGeometry x="329" y="149.5" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <object label="0" component="debug-value" source="cycle-count" tags="simple forwarding hazardunit pipeline" id="uWEq7-W_z53UrtFael4O-78">
@@ -1202,7 +1033,7 @@
           </mxCell>
         </object>
         <UserObject label="0" tags="forwarding" component="debug-value" source="exec-forward-a" id="uWEq7-W_z53UrtFael4O-80">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=1;rotatable=0;resizeWidth=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=1;rotatable=0;resizeWidth=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="427.25" y="220" width="15.5" height="8" as="geometry" />
           </mxCell>
         </UserObject>
@@ -1212,13 +1043,13 @@
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="forwarding" component="debug-value" source="exec-forward-b" id="uWEq7-W_z53UrtFael4O-82">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=1;rotatable=0;resizeWidth=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=1;rotatable=0;resizeWidth=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="427.25" y="274" width="15.5" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="simple pipeline forwarding" component="debug-value" source="decode-alu-op" id="uWEq7-W_z53UrtFael4O-83">
           <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=1;rotatable=0;resizeWidth=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="371.5" y="136.5" width="15.5" height="8" as="geometry" />
+            <mxGeometry x="320" y="135" width="15.5" height="8" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="Hazard Unit:" tags="hazardunit" id="uWEq7-W_z53UrtFael4O-84">
@@ -1237,67 +1068,291 @@
           </mxCell>
         </UserObject>
         <UserObject label="ADD $0, $1, $3" tags="forwarding pipeline" component="instruction-value" source="decode" id="uWEq7-W_z53UrtFael4O-91">
-          <mxCell style="rounded=1;comic=0;fontFamily=sans-serif;fontSize=11;fontColor=#000000;strokeColor=#000000;fillColor=#CCCCCC;align=center;spacing=4;horizontal=1;fontStyle=0" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;comic=0;fontFamily=sans-serif;fontSize=11;fontColor=#000000;strokeColor=#000000;fillColor=#CCCCCC;align=center;spacing=4;horizontal=1;fontStyle=0" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="225" y="9" width="120" height="26.5" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="ADD $0, $1, $3" tags="forwarding pipeline" component="instruction-value" source="exec" id="uWEq7-W_z53UrtFael4O-92">
-          <mxCell style="rounded=1;comic=0;fontFamily=sans-serif;fontSize=11;fontColor=#000000;strokeColor=#000000;fillColor=#CCCCCC;align=center;spacing=4;horizontal=1;fontStyle=0" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;comic=0;fontFamily=sans-serif;fontSize=11;fontColor=#000000;strokeColor=#000000;fillColor=#CCCCCC;align=center;spacing=4;horizontal=1;fontStyle=0" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="410" y="9" width="120" height="26.5" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="ADD $0, $1, $3" tags="forwarding pipeline" component="instruction-value" source="mem" id="uWEq7-W_z53UrtFael4O-93">
-          <mxCell style="rounded=1;comic=0;fontFamily=sans-serif;fontSize=11;fontColor=#000000;strokeColor=#000000;fillColor=#CCCCCC;align=center;spacing=4;horizontal=1;fontStyle=0" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;comic=0;fontFamily=sans-serif;fontSize=11;fontColor=#000000;strokeColor=#000000;fillColor=#CCCCCC;align=center;spacing=4;horizontal=1;fontStyle=0" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="541" y="9" width="120" height="26.5" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="ADD $0, $1, $3" tags="forwarding pipeline" component="instruction-value" source="wb" id="uWEq7-W_z53UrtFael4O-94">
-          <mxCell style="rounded=1;comic=0;fontFamily=sans-serif;fontSize=11;fontColor=#000000;strokeColor=#000000;fillColor=#CCCCCC;align=center;spacing=4;horizontal=1;fontStyle=0" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;comic=0;fontFamily=sans-serif;fontSize=11;fontColor=#000000;strokeColor=#000000;fillColor=#CCCCCC;align=center;spacing=4;horizontal=1;fontStyle=0" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="579" y="434" width="120" height="26.5" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="00000000" tags="pipeline forwarding" component="reg-value" source="exec-imm" id="qpQ6hB7pEMShyfFWmkmH-1">
-          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;spacing=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;spacing=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
             <mxGeometry x="436" y="408" width="56" height="8" as="geometry" />
           </mxCell>
         </UserObject>
-        <mxCell id="kbNWJ5ZPAqXhiAnqFs6d-0" value="" style="group" vertex="1" connectable="0" parent="Haz_8EwUBin59iLyk_8Q-26">
+        <mxCell id="kbNWJ5ZPAqXhiAnqFs6d-0" value="" style="group" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" connectable="0">
           <mxGeometry x="32.5" y="419" width="89" height="34" as="geometry" />
         </mxCell>
         <UserObject label="Exception:" tags="forwarding pipeline" id="Haz_8EwUBin59iLyk_8Q-186">
-          <mxCell style="text;strokeColor=none;fillColor=none;align=right;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=0;" parent="kbNWJ5ZPAqXhiAnqFs6d-0" vertex="1">
+          <mxCell style="text;strokeColor=none;fillColor=none;align=right;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=0;" parent="kbNWJ5ZPAqXhiAnqFs6d-0" vertex="1" visible="0">
             <mxGeometry y="2" width="41" height="17" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="NONE" tags="pipeline forwarding" component="multi-text-value" source="fetch-exception" id="uWEq7-W_z53UrtFael4O-88">
-          <mxCell style="text;strokeColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=3;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=0;fillColor=#CCCCCC;spacingTop=0;" parent="kbNWJ5ZPAqXhiAnqFs6d-0" vertex="1">
+          <mxCell style="text;strokeColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=3;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=0;fillColor=#CCCCCC;spacingTop=0;" parent="kbNWJ5ZPAqXhiAnqFs6d-0" vertex="1" visible="0">
             <mxGeometry y="19" width="89" height="15" as="geometry" />
           </mxCell>
         </UserObject>
-        <mxCell id="kbNWJ5ZPAqXhiAnqFs6d-1" value="" style="group" vertex="1" connectable="0" parent="Haz_8EwUBin59iLyk_8Q-26">
+        <mxCell id="kbNWJ5ZPAqXhiAnqFs6d-1" value="" style="group" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" connectable="0">
           <mxGeometry x="231" y="336" width="89" height="34" as="geometry" />
         </mxCell>
         <UserObject label="Exception:" tags="forwarding pipeline" id="kbNWJ5ZPAqXhiAnqFs6d-2">
-          <mxCell style="text;strokeColor=none;fillColor=none;align=right;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=0;" vertex="1" parent="kbNWJ5ZPAqXhiAnqFs6d-1">
+          <mxCell style="text;strokeColor=none;fillColor=none;align=right;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=0;" parent="kbNWJ5ZPAqXhiAnqFs6d-1" vertex="1" visible="0">
             <mxGeometry y="2" width="41" height="17" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="NONE" tags="pipeline forwarding" component="multi-text-value" source="decode-exception" id="kbNWJ5ZPAqXhiAnqFs6d-3">
-          <mxCell style="text;strokeColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=3;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=0;fillColor=#CCCCCC;spacingTop=0;" vertex="1" parent="kbNWJ5ZPAqXhiAnqFs6d-1">
+          <mxCell style="text;strokeColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=3;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=0;fillColor=#CCCCCC;spacingTop=0;" parent="kbNWJ5ZPAqXhiAnqFs6d-1" vertex="1" visible="0">
             <mxGeometry y="19" width="89" height="15" as="geometry" />
           </mxCell>
         </UserObject>
-        <mxCell id="kbNWJ5ZPAqXhiAnqFs6d-4" value="" style="group" vertex="1" connectable="0" parent="Haz_8EwUBin59iLyk_8Q-26">
+        <mxCell id="kbNWJ5ZPAqXhiAnqFs6d-4" value="" style="group" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" connectable="0">
           <mxGeometry x="435" y="443" width="89" height="34" as="geometry" />
         </mxCell>
         <UserObject label="Exception:" tags="pipeline forwarding" id="kbNWJ5ZPAqXhiAnqFs6d-5">
-          <mxCell style="text;strokeColor=none;fillColor=none;align=right;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=0;" vertex="1" parent="kbNWJ5ZPAqXhiAnqFs6d-4">
+          <mxCell style="text;strokeColor=none;fillColor=none;align=right;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=0;" parent="kbNWJ5ZPAqXhiAnqFs6d-4" vertex="1" visible="0">
             <mxGeometry y="2" width="41" height="17" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="NONE" tags="pipeline forwarding" component="multi-text-value" source="memory-exception" id="kbNWJ5ZPAqXhiAnqFs6d-6">
-          <mxCell style="text;strokeColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=3;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=0;fillColor=#CCCCCC;spacingTop=0;" vertex="1" parent="kbNWJ5ZPAqXhiAnqFs6d-4">
+          <mxCell style="text;strokeColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=3;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=0;fillColor=#CCCCCC;spacingTop=0;" parent="kbNWJ5ZPAqXhiAnqFs6d-4" vertex="1" visible="0">
             <mxGeometry y="19" width="89" height="15" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="simple pipeline" id="uWEq7-W_z53UrtFael4O-40">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=0;exitX=0;exitY=0.35;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;shadow=0;fontFamily=sans-serif;fontSize=6;strokeWidth=3;labelBackgroundColor=none;endFill=0;endArrow=none;sketch=0;jumpStyle=arc;jumpSize=4;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-113" target="Haz_8EwUBin59iLyk_8Q-153" edge="1">
+            <mxGeometry relative="1" as="geometry">
+              <Array as="points">
+                <mxPoint x="403" y="302" />
+                <mxPoint x="403" y="270" />
+              </Array>
+              <mxPoint x="470.6388888888888" y="301.75" as="sourcePoint" />
+              <mxPoint x="289.03999999999996" y="269.6" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="forwarding simple pipeline" id="HRoSpS79B9qHWH9jaoA8-1">
+          <mxCell style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=none;" vertex="1" parent="Haz_8EwUBin59iLyk_8Q-26">
+            <mxGeometry x="231" y="499.5" width="1" height="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-60">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;shadow=0;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=1;fontSize=6;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="Haz_8EwUBin59iLyk_8Q-26" target="HRoSpS79B9qHWH9jaoA8-1" edge="1">
+            <mxGeometry relative="1" as="geometry">
+              <Array as="points">
+                <mxPoint x="191" y="395" />
+                <mxPoint x="701" y="395" />
+                <mxPoint x="701" y="500" />
+              </Array>
+              <mxPoint x="191" y="391.5" as="sourcePoint" />
+              <mxPoint x="233" y="500" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="simple forwarding pipeline" id="HRoSpS79B9qHWH9jaoA8-2">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;jumpStyle=arc;jumpSize=4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="Haz_8EwUBin59iLyk_8Q-26" source="HRoSpS79B9qHWH9jaoA8-1">
+            <mxGeometry relative="1" as="geometry">
+              <mxPoint x="232" y="494" as="sourcePoint" />
+              <mxPoint x="230" y="309" as="targetPoint" />
+              <Array as="points">
+                <mxPoint x="210" y="500" />
+                <mxPoint x="210" y="309" />
+              </Array>
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="00" tags="simple pipeline forwarding" component="reg-id-value" source="decode-rd" id="Haz_8EwUBin59iLyk_8Q-93">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;spacing=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+            <mxGeometry x="313" y="390" width="14" height="8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="00" tags="pipeline forwarding" component="reg-id-value" source="exec-rd" id="Haz_8EwUBin59iLyk_8Q-94">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;spacing=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
+            <mxGeometry x="495" y="390" width="14" height="8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Write data" tags="pipeline forwarding simple" id="Haz_8EwUBin59iLyk_8Q-96">
+          <mxCell style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+            <mxGeometry x="490" y="339" width="47" height="8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="00" tags="pipeline forwarding" component="reg-id-value" source="mem-rd" id="Haz_8EwUBin59iLyk_8Q-98">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;spacing=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
+            <mxGeometry x="603" y="390" width="14" height="8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Rd" tags="pipeline forwarding" id="uWEq7-W_z53UrtFael4O-49">
+          <mxCell style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
+            <mxGeometry x="606" y="382" width="8" height="8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Registers" tags="simple pipeline forwarding" link="#registers" id="Haz_8EwUBin59iLyk_8Q-40">
+          <mxCell style="rounded=1;gradientColor=none;arcSize=2;fontSize=6;fontStyle=1;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+            <mxGeometry x="230" y="240" width="60" height="80" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="HRoSpS79B9qHWH9jaoA8-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;html=1;entryX=1.002;entryY=0.26;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;shadow=0;fontFamily=sans-serif;fontSize=6;strokeColor=#3333FF;strokeWidth=1;labelBackgroundColor=none;sketch=0;" edge="1" parent="Haz_8EwUBin59iLyk_8Q-26" source="HRoSpS79B9qHWH9jaoA8-5" target="Haz_8EwUBin59iLyk_8Q-85">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <UserObject label="" tags="forwarding pipeline" id="HRoSpS79B9qHWH9jaoA8-5">
+          <mxCell style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=#3333FF;" vertex="1" visible="0" parent="Haz_8EwUBin59iLyk_8Q-26">
+            <mxGeometry x="284.5" y="106" width="1" height="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Control&#xa;Unit" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-85">
+          <mxCell style="rounded=1;gradientColor=none;arcSize=8;fontSize=6;fontStyle=1;spacing=0;fontFamily=sans-serif;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+            <mxGeometry x="210" y="87" width="40" height="75" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="forwarding simple pipeline" id="HRoSpS79B9qHWH9jaoA8-7">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;endArrow=none;endFill=0;shadow=0;fontFamily=sans-serif;fontSize=6;strokeWidth=3;labelBackgroundColor=none;sketch=0;" edge="1" parent="Haz_8EwUBin59iLyk_8Q-26" target="Haz_8EwUBin59iLyk_8Q-211">
+            <mxGeometry relative="1" as="geometry">
+              <mxPoint x="353" y="270" as="sourcePoint" />
+              <Array as="points">
+                <mxPoint x="403" y="270" />
+                <mxPoint x="403" y="349" />
+                <mxPoint x="562" y="349" />
+                <mxPoint x="562" y="318" />
+              </Array>
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="00000000" tags="simple pipeline forwarding" component="reg-value" source="decode-rs2" id="Haz_8EwUBin59iLyk_8Q-153">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+            <mxGeometry x="297.5" y="265.5" width="56" height="8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-164">
+          <mxCell style="group" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" connectable="0" visible="0">
+            <mxGeometry x="537" y="70" width="6" height="398.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="simple" id="Haz_8EwUBin59iLyk_8Q-165">
+          <mxCell style="rounded=0;whiteSpace=wrap;html=1;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;" parent="Haz_8EwUBin59iLyk_8Q-164" vertex="1">
+            <mxGeometry width="6" height="398.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="simple" id="Haz_8EwUBin59iLyk_8Q-166">
+          <mxCell style="triangle;whiteSpace=wrap;html=1;rounded=0;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;direction=south;" parent="Haz_8EwUBin59iLyk_8Q-164" vertex="1">
+            <mxGeometry x="0.5" width="5" height="4.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="pipeline simple forwarding" id="Haz_8EwUBin59iLyk_8Q-167">
+          <mxCell style="group" parent="Haz_8EwUBin59iLyk_8Q-164" vertex="1" connectable="0">
+            <mxGeometry width="6" height="398.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-168">
+          <mxCell style="rounded=0;whiteSpace=wrap;html=1;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;" parent="Haz_8EwUBin59iLyk_8Q-167" vertex="1" visible="0">
+            <mxGeometry width="6" height="398.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-169">
+          <mxCell style="triangle;whiteSpace=wrap;html=1;rounded=0;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;direction=south;" parent="Haz_8EwUBin59iLyk_8Q-167" vertex="1" visible="0">
+            <mxGeometry x="0.5" width="5" height="4.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="simple pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-139">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=arc;jumpSize=4;orthogonalLoop=1;jettySize=auto;shadow=0;endArrow=none;endFill=0;strokeColor=#3333FF;strokeWidth=1;fontFamily=sans-serif;fontSize=6;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="Haz_8EwUBin59iLyk_8Q-84" target="Haz_8EwUBin59iLyk_8Q-156" edge="1">
+            <mxGeometry relative="1" as="geometry">
+              <Array as="points">
+                <mxPoint x="574" y="188" />
+                <mxPoint x="574" y="200" />
+                <mxPoint x="551" y="200" />
+                <mxPoint x="551" y="487" />
+                <mxPoint x="25" y="487" />
+                <mxPoint x="25" y="420" />
+                <mxPoint x="25" y="420" />
+              </Array>
+              <mxPoint x="26" y="416" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="00" tags="simple pipeline forwarding" component="reg-id-value" source="wb-rd" id="Haz_8EwUBin59iLyk_8Q-154">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+            <mxGeometry x="313" y="496" width="14" height="8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="00000000" tags="forwarding" component="reg-value" source="alu-src2" id="Haz_8EwUBin59iLyk_8Q-200">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;direction=south;spacing=0;horizontal=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
+            <mxGeometry x="447" y="278.00000000000006" width="7" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Rd" tags="pipeline forwarding" id="HRoSpS79B9qHWH9jaoA8-8">
+          <mxCell style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=1;" vertex="1" visible="0" parent="Haz_8EwUBin59iLyk_8Q-26">
+            <mxGeometry x="499" y="383" width="8" height="8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="pipeline forwarding" id="HRoSpS79B9qHWH9jaoA8-17">
+          <mxCell style="group" vertex="1" connectable="0" parent="Haz_8EwUBin59iLyk_8Q-26" visible="0">
+            <mxGeometry x="342" y="59" width="42" height="410.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-158">
+          <mxCell style="group;fillColor=#ffffff;strokeColor=#000000;" parent="HRoSpS79B9qHWH9jaoA8-17" vertex="1" connectable="0" visible="0">
+            <mxGeometry x="18" y="11" width="6" height="399.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="simple" id="Haz_8EwUBin59iLyk_8Q-159">
+          <mxCell style="rounded=0;whiteSpace=wrap;html=1;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;" parent="Haz_8EwUBin59iLyk_8Q-158" vertex="1">
+            <mxGeometry width="6" height="398.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="simple" id="Haz_8EwUBin59iLyk_8Q-160">
+          <mxCell style="triangle;whiteSpace=wrap;html=1;rounded=0;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;direction=south;" parent="Haz_8EwUBin59iLyk_8Q-158" vertex="1">
+            <mxGeometry x="0.5" width="5" height="4.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-161">
+          <mxCell style="group" parent="Haz_8EwUBin59iLyk_8Q-158" vertex="1" connectable="0" visible="0">
+            <mxGeometry width="6" height="398.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-163">
+          <mxCell style="triangle;whiteSpace=wrap;html=1;rounded=0;fontFamily=sans-serif;fontSize=6;fontColor=#0000CC;align=left;direction=south;" parent="Haz_8EwUBin59iLyk_8Q-161" vertex="1" visible="0">
+            <mxGeometry x="0.5" width="5" height="4.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="ID/EX" tags="pipeline forwarding" id="Haz_8EwUBin59iLyk_8Q-133">
+          <mxCell style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;spacing=0;fontStyle=1;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=1;" parent="HRoSpS79B9qHWH9jaoA8-17" vertex="1" visible="0">
+            <mxGeometry width="42" height="8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="00000000" tags="forwarding" component="reg-value" source="alu-src1" id="HRoSpS79B9qHWH9jaoA8-23">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;direction=south;spacing=0;horizontal=0;" vertex="1" visible="0" parent="Haz_8EwUBin59iLyk_8Q-26">
+            <mxGeometry x="448" y="199.00000000000006" width="7" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="00000000" tags="forwarding pipeline" component="reg-value" source="exec-rs2" id="HRoSpS79B9qHWH9jaoA8-24">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;direction=south;spacing=0;horizontal=0;" vertex="1" visible="0" parent="Haz_8EwUBin59iLyk_8Q-26">
+            <mxGeometry x="373.5" y="263.00000000000006" width="7" height="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" tags="forwarding" id="Haz_8EwUBin59iLyk_8Q-199">
+          <mxCell style="shape=stencil(rZRNT8MwDIZ/Ta4oS9igR1TGjeMkrlnrUbMsqZqyjX+Pm7RA1Q+qrlKl1O8bP3ESK0zGLlM5MMGNOgGTz0yI190bxZL+aMiCFvEQXkIo1iFULoekDNoBr5AG2ZWFPcIF07JOR5NBgWXlyi3jTzSn+mScWGOIgNa4lvPHJ5hCQ7n8GmB1KV91dNcUw8TLbMYCiIcZjNUCZTRJPxC+WYIS3fdTZEzK0LXJeK+S43thP03au3auqpboGI2t0cCHRUORH3wteziDHttSk32yZxi8nymAavlfgGgfyep2xOMMRHsb0c2E9WiPTSHISYREWwf/zjqg1uG1GGlY0jt949WBZiOsLaDXoKSO59XwDHrhGw==);rounded=1;fontSize=7;align=right;spacingRight=0;spacingBottom=0;fontStyle=1;spacing=0;arcSize=19;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" visible="0">
+            <mxGeometry x="425" y="286" width="20" height="34" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="0" tags="simple pipeline forwarding" component="bool-value" source="exec-branch" id="uWEq7-W_z53UrtFael4O-66">
+          <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
+            <mxGeometry x="21.910000000000025" y="426" width="7" height="8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Terminal" link="#terminal" tags="simple pipeline forwarding" id="HRoSpS79B9qHWH9jaoA8-25">
+          <mxCell style="rounded=1;gradientColor=none;arcSize=17;fontSize=6;fontFamily=sans-serif;fontStyle=1;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;" vertex="1" parent="Haz_8EwUBin59iLyk_8Q-26">
+            <mxGeometry x="590" y="360" width="45" height="16" as="geometry" />
           </mxCell>
         </UserObject>
       </root>

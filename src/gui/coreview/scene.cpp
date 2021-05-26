@@ -9,6 +9,7 @@
 #include <svgscene/components/simpletextitem.h>
 #include <svgscene/svghandler.h>
 #include <unordered_map>
+#include <vector>
 
 using std::unordered_map;
 using std::vector;
@@ -18,6 +19,14 @@ using svgscene::SvgDocument;
 using svgscene::SvgDomTree;
 
 LOG_CATEGORY("gui.coreview");
+
+// Template specialization must be declared before usage.
+template<>
+void CoreViewScene::install_values_from_document<PCValue>(
+    const SvgDocument &document,
+    vector<PCValue> &handler_list,
+    const unordered_map<QStringView, Lens<CoreState, Address>> &value_source_name_map,
+    const CoreState &core_state);
 
 CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &core_svg_scheme_name)
     : SvgGraphicsScene() {
@@ -94,11 +103,15 @@ CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &core_svg_
 CoreViewScene::~CoreViewScene() = default;
 
 void CoreViewScene::install_hyperlink(svgscene::HyperlinkItem *element) const {
+    if (element->getTargetName() == "#") {
+        DEBUG("Skipping NOP hyperlink.");
+        return;
+    }
     try {
         connect(
             element, &svgscene::HyperlinkItem::triggered, this,
             HYPERLINK_TARGETS.at(element->getTargetName()));
-        LOG("Registered hyperlink to target %s", qPrintable(element->getTargetName()));
+        DEBUG("Registered hyperlink to target %s", qPrintable(element->getTargetName()));
     } catch (std::out_of_range &) {
         WARN(
             "Registering hyperlink without valid target (href: \"%s\").",
@@ -135,6 +148,31 @@ void CoreViewScene::install_values_from_document(
         QString source_name = component_tree.getAttrValueOr("data-source", "");
         install_value<T_handler, T>(
             handler_list, value_source_name_map, text_element, source_name, core_state);
+    }
+}
+
+template<>
+void CoreViewScene::install_values_from_document<PCValue>(
+    const SvgDocument &document,
+    vector<PCValue> &handler_list,
+    const unordered_map<QStringView, Lens<CoreState, Address>> &value_source_name_map,
+    const CoreState &core_state) {
+    for (SvgDomTree<QGraphicsItem> component_tree :
+         document.getRoot().findAll("data-component", PCValue::COMPONENT_NAME)) {
+        SimpleTextItem *text_element = component_tree.find<SimpleTextItem>().getElement();
+        QString source_name = component_tree.getAttrValueOr("data-source", "");
+        install_value<PCValue, Lens<CoreState, Address>>(
+            handler_list, value_source_name_map, text_element, source_name, core_state);
+        try {
+            PCValue *handler = &handler_list.back();
+            HyperlinkItem *hyperlink = component_tree.find<HyperlinkItem>().getElement();
+            connect(hyperlink, &HyperlinkItem::triggered, handler, &PCValue::clicked);
+            connect(
+                handler, &PCValue::jump_to_pc, this,
+                &CoreViewScene::request_jump_to_program_counter);
+            connect(
+                hyperlink, &HyperlinkItem::triggered, this, &CoreViewScene::request_program_memory);
+        } catch (std::out_of_range &e) { DEBUG("PC component without a hyperlink."); }
     }
 }
 
