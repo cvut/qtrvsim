@@ -81,12 +81,12 @@ target_link_libraries(machine
 
 if (NOT ${WASM})
     # Machine tests (not available on WASM)
-    add_executable(machine_unit_tests ${machine_TESTS})
-    target_link_libraries(machine_unit_tests
-            PRIVATE machine Qt5::Core Qt5::Test)
-
-    add_test(NAME machine_unit_tests
-            COMMAND machine_unit_tests)
+#    add_executable(machine_unit_tests ${machine_TESTS})
+#    target_link_libraries(machine_unit_tests
+#            PRIVATE machine Qt5::Core Qt5::Test)
+#
+#    add_test(NAME machine_unit_tests
+#            COMMAND machine_unit_tests)
 
     add_executable(alu_test
             execute/alu.test.cpp
