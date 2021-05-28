@@ -18,10 +18,14 @@ set(LONG_DESCRIPTION
     "RISC-V CPU simulator for education purposes with pipeline and cache visualization.")
 string(TIMESTAMP YEAR "%Y")
 
-set(COPYRIGHT "Copyright (c) 2017-2019 ${KAREL_KOCI}, \
-Copyright (c) 2019-${YEAR} ${PAVEL_PISA}, \
-Copyright (c) 2020-${YEAR} ${JAKUB_DUPAK}, \
-Copyright (c) 2020-${YEAR} ${MAX_HOLLMANN}")
+include(cmake/CopyrightTools.cmake)
+
+
+copyright(
+    "Copyright (c) 2017-2019 ${KAREL_KOCI}"
+    "Copyright (c) 2019-${YEAR} ${PAVEL_PISA}"
+	"Copyright (c) 2020-${YEAR} ${JAKUB_DUPAK}"
+    "Copyright (c) 2020-${YEAR} ${MAX_HOLLMANN}")
 
 include(cmake/GPL-3.0-or-later.cmake)
 
@@ -30,13 +34,13 @@ include(cmake/GPL-3.0-or-later.cmake)
 # =============================================================================
 
 set(DEV_MODE false CACHE BOOL "Enable developer options in this CMake, like packaging.\
-	They should be ignored, when user just wants to build this project.")
+    They should be ignored, when user just wants to build this project.")
 set(FORCE_ELFLIB_STATIC false CACHE BOOL
     "Use included statically linked libelf even if system one is available.")
 set(SANITIZERS "address,undefined" CACHE STRING
     "Runtime sanitizers to use in debug builds.
-        Column separated subset of {address, memory, undefined, thread} or none.
-        Memory and address cannot be used at the same time.")
+    Column separated subset of {address, memory, undefined, thread} or none.
+    Memory and address cannot be used at the same time.")
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/target"
     CACHE STRING "Absolute path to place executables to.")
 set(PACKAGE_OUTPUT_PATH "${EXECUTABLE_OUTPUT_PATH}/pkg"
@@ -77,6 +81,7 @@ if(CMAKE_VERSION VERSION_LESS "3.7.0")
 endif()
 
 include(cmake/BuildType.cmake)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # =============================================================================
 # Build options
@@ -222,7 +227,7 @@ if("${DEV_MODE}")
 	set(PACKAGE_MAINTAINER "${JAKUB_DUPAK}")
 	set(PACKAGE_URL "${PROJECT_HOMEPAGE_URL}")
 	set(PACKAGE_GIT "github.com:cvut/qtrvsim.git")
-	set(PACKAGE_LICENCE "${LICENCE}")
+	set(PACKAGE_LICENCE "${LICENCE} ")
 
 	include(cmake/PackageTools.cmake)
 
@@ -243,3 +248,5 @@ if("${DEV_MODE}")
 	                  DEPENDS ${PACKAGE_SOURCE_ARCHIVE_FILE} appimage archlinux deb rpm
 	                  WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/pkg)
 endif()
+
+configure_file(src/project_info.h.in ${CMAKE_CURRENT_LIST_DIR}/src/project_info.h @ONLY)

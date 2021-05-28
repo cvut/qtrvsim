@@ -13,3 +13,4 @@ test_dir
 build
 /CMakeFiles/
 compile_commands.json
+/src/project_info.h

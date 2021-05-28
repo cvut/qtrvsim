@@ -1,0 +1,12 @@
+/**
+ * Transfers project information form CMake to C++.
+ * @file
+ */
+#ifndef QTRVSIM_PROJECT_INFO_H_IN
+#define QTRVSIM_PROJECT_INFO_H_IN
+
+constexpr const char *COPYRIGHT_HTML = "@COPYRIGHT_HTML@";
+constexpr const char *LICENCE_HTML = "@LICENCE_SHORT_HTML@";
+
+
+#endif // QTRVSIM_PROJECT_INFO_H_IN

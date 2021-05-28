@@ -504,7 +504,7 @@
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>About Qt Mips</string>
+    <string>About QtRVSim</string>
    </property>
   </action>
   <action name="ipsMax">

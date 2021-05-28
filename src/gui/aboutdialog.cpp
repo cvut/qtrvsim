@@ -1,5 +1,7 @@
 #include "aboutdialog.h"
 
+#include "project_info.h"
+
 #include <QApplication>
 #include <QDebug>
 #include <QLabel>
@@ -16,7 +18,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
     setAttribute(Qt::WA_ShowModal);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    setWindowTitle(tr("About Qt Mips"));
+    setWindowTitle(tr("About " APP_NAME));
 
     all = new QVBoxLayout(this);
 
@@ -41,28 +43,19 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
     lbl->setAlignment(Qt::AlignHCenter);
     lbl->setOpenExternalLinks(true);
     vl->addWidget(lbl);
-    vl->addWidget(new QLabel(
-        "Copyright (C) 2017-2019 Karel Kočí "
-        "<a href=\"mailto://cynerd@email.cz\">cynerd@email.cz</a><br/>"
-        "Copyright (C) 2019 Pavel Píša "
-        "<a "
-        "href=\"mailto://pisa@cmp.felk.cvut.cz\">pisa@cmp.felk.cvut.cz</a>"));
+    vl->addWidget(new QLabel(COPYRIGHT_HTML));
 
     QString supportText;
     supportText = "Home Page : <a "
                   "href=\"" APP_GIT "\">" APP_GIT "</a><br/>"
-                  "Implemented for<br/>"
-                  "<a "
+                  "Implemented for <a "
                   "href=\"https://cw.fel.cvut.cz/wiki/courses/b35apo/"
-                  "start\">Computer Architectures</a><br/>"
-                  "and<br/>"
-                  "<a "
+                  "start\">Computer Architectures</a> and <a "
                   "href=\"https://cw.fel.cvut.cz/wiki/courses/b4m35pap/"
-                  "start\">Advanced Computer Achitectures</a><br/>"
-                  "courses at<br/>"
-                  "<a href=\"https://www.cvut.cz/\">Czech Technical University "
-                  "in Prague</a><br/>"
-                  "<a href=\"https://www.fel.cvut.cz/\">Faculty of Electrical "
+                  "start\">Advanced Computer Achitectures</a> courses "
+                  "at <a href=\"https://www.cvut.cz/\">Czech Technical "
+                  "University in Prague</a>"
+                  " <a href=\"https://www.fel.cvut.cz/\">Faculty of Electrical "
                   "Engineering</a><br/>";
 
     QTextBrowser *supportBrowser = new QTextBrowser;
@@ -70,28 +63,9 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
     supportBrowser->setHtml(supportText);
     vl->addWidget(supportBrowser);
 
-    QString licenseText;
-    licenseText
-        = "This program is free software; you can redistribute it and/or\n"
-          "modify it under the terms of the GNU General Public License\n"
-          "as published by the Free Software Foundation; either version 2\n"
-          "of the License, or (at your option) any later version.\n"
-          "<br/>\n"
-          "<br/>\n"
-          "This program is distributed in the hope that it will be useful,\n"
-          "but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-          "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
-          "GNU General Public License for more details.\n"
-          "<br/>\n"
-          "<br/>\n"
-          "You should have received a copy of the GNU General Public License\n"
-          "along with this program; if not, write to the Free Software\n"
-          "Foundation, Inc., 51 Franklin Street, Fifth Floor,\n"
-          "Boston, MA  02110-1301, USA.\n";
-
     QTextBrowser *licenseBrowser = new QTextBrowser;
     licenseBrowser->setOpenExternalLinks(true);
-    licenseBrowser->setHtml(licenseText);
+    licenseBrowser->setHtml(LICENCE_HTML);
     vl->addWidget(licenseBrowser);
 
     QWidget *hbBtn = new QWidget();

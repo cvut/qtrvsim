@@ -1,0 +1,17 @@
+function(copyright_to_html OUTPUT INPUT)
+	string(REPLACE ";" "<br>" TMP1 "${INPUT}")
+	string(REGEX REPLACE "<([^<>]+@[^<>]+)>" "<a href='mailto:\\1'>\\1</a>" TMP2 ${TMP1})
+	set(${OUTPUT} ${TMP2} PARENT_SCOPE)
+endfunction()
+
+function(copyright_to_comment OUTPUT INPUT)
+	string(REGEX REPLACE "([^;]+)" "# \\1" ${OUTPUT} "${INPUT}")
+	string(REPLACE ";" "\n" ${OUTPUT} "${${OUTPUT}}")
+	set(${OUTPUT} ${${OUTPUT}} PARENT_SCOPE)
+endfunction()
+
+macro(copyright)
+	set(COPYRIGHT_LIST "${ARGN}")
+	copyright_to_html(COPYRIGHT_HTML "${COPYRIGHT_LIST}")
+	copyright_to_comment(COPYRIGHT_HASH_COMMENT "${COPYRIGHT_LIST}")
+endmacro()
