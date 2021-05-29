@@ -1,5 +1,7 @@
 # QtRVSim
 
+![logo](data/icons/gui.svg)
+
 RISC-V CPU simulator for education purposes.
 
 ## Ongoing Development
@@ -15,24 +17,47 @@ Implemented to support following courses:
 
 [Faculty of Electrical Engineering](http://www.fel.cvut.cz) [Czech Technical University](http://www.cvut.cz/)
 
-## Documentation
+## Table of contents
 
-Main documentation is provided in this README and in subdirectories [`docs/user`](docs/user)
-and [`docs/developer`](docs/developer).
+- [QtRVSim](#qtrvsim)
+  - [Try it out! (WebAssembly)](#try-it-out-webassembly)
+  - [Build and packages](#build-and-packages)
+     - [Build Dependencies](#build-dependencies)
+     - [General Compilation](#general-compilation)
+     - [Building from source on macOS](#building-from-source-on-macos)
+     - [Download Binary Packages](#download-binary-packages)
+     - [Nix package](#nix-package)
+     - [Tests](#tests)
+  - [Documentation](#documentation)
+  - [Accepted Binary Formats](#accepted-binary-formats)
+     - [LLVM toolchain usage](#llvm-toolchain-usage)
+     - [GNU toolchain usage](#gnu-toolchain-usage)
+  - [Integrated Assembler](#integrated-assembler)
+  - [Support to call external make utility](#support-to-call-external-make-utility)
+  - [Advanced functionalities](#advanced-functionalities)
+     - [Peripherals](#peripherals)
+     - [Interrupts and Coprocessor 0 Support](#interrupts-and-coprocessor-0-support)
+     - [System Calls Support](#system-calls-support)
+  - [Special instructions support](#special-instructions-support)
+  - [Limitations of the Implementation](#limitations-of-the-implementation)
+     - [QtMips original limitations](#qtmips-original-limitations)
+  - [List of Actually Supported Instructions](#list-of-actually-supported-instructions)
+  - [Links to Resources and Similar Projects](#links-to-resources-and-similar-projects)
+  - [Copyright](#copyright)
 
-The project has started as diploma theses work of Karel Kočí. The complete text of the
-thesis [Graphical CPU Simulator with Cache Visualization](https://dspace.cvut.cz/bitstream/handle/10467/76764/F3-DP-2018-Koci-Karel-diploma.pdf)
-is available from the online archive of the [Czech Technical University in Prague](https://www.cvut.cz/). The document
-provides analysis of available alternative simulators, overview of the project architecture and basic usage information.
+## Try it out! (WebAssembly)
 
-The project was extended as bachelor's theses of Jakub Dupak and Max Hollmann. Links will be provided as soon as the
-theses are released (**TODO**)
+QtRVSim is experimentally available for [WebAssembly](https://webassembly.org/) and it can be run in most browsers
+without installation. **[QtRVSim online](http://dev.jakubdupak.com/qtrvsim)**
+
+**Note, that WebAssembly version is experimental.**
+Please, report any difficulties via [GitHub issues](https://github.com/cvut/qtrvsim/issues/new).
 
 ## Build and packages
 
 ### Build Dependencies
 
-- Qt 5
+- Qt 5 (minimal tested version is 5.9.5)
 - elfutils (optional; libelf works too but there can be some problems)
 
 ### General Compilation
@@ -59,7 +84,7 @@ not found in the system, local fallback is used.__)
 brew install qt libelf
 ```
 
-Then build as in general compilation (above).
+Now build the project the same way as in general compilation (above).
 
 ### Download Binary Packages
 
@@ -79,34 +104,7 @@ have to be done manually by checking out the git. NIXPKGS package is planned.
 nix-env -if .
 ```
 
-Accepted Binary Formats
-------------------------
-The simulator accepts ELF statically linked executables compiled for RISC-V target. (TODO Max: depends on instruction
-support).
-
-Optimal is use of plain riscv-elf GCC toolchain.
-
-For more refer to the [supported executable formats](docs/user/exec-formats-and-tools.md)
-documentation in the [`docs`](docs) projects subdirectory.
-
-## Integrated Assembler
-
-Basic integrated assembler is included in the simulator. Small subset of
-[GNU assembler](https://sourceware.org/binutils/docs/as/) directives is recognized as well. Next directives are
-recognized: `.word`, `.orig`, `.set`
-/`.equ`, `.ascii` and `.asciz`. Some other directives are simply ignored: `.data`, `.text`, `.globl`, `.end` and `.ent`.
-This allows to write code which can be compiled by both - integrated and full-featured assembler. Addresses are assigned
-to labels/symbols which are stored in symbol table. Addition, subtraction, multiplication, divide and bitwise and and or
-are recognized.
-
-## Support to call external make utility
-
-The action "Build executable by external make" call "make" program. If the action is invoked and some of source editors
-selected in main windows tabs then the "make" is started in the corresponding directory. Else directory of last selected
-editor is chosen. If no editor is open then directory of last loaded ELF executable are used as "make" start path. If
-even that is not an option then default directory when the emulator has been started is used.
-
-## Tests
+### Tests
 
 Tests are managed by CTest (part of CMake). To build and run all tests, use this commands:
 
@@ -116,7 +114,76 @@ make
 ctest
 ```
 
-## Peripherals
+## Documentation
+
+Main documentation is provided in this README and in subdirectories [`docs/user`](docs/user)
+and [`docs/developer`](docs/developer).
+
+The project has started as diploma thesis work of Karel Kočí. The complete text of the
+thesis [Graphical CPU Simulator with Cache Visualization](https://dspace.cvut.cz/bitstream/handle/10467/76764/F3-DP-2018-Koci-Karel-diploma.pdf)
+is available from the online archive of the [Czech Technical University in Prague](https://www.cvut.cz/). The document
+provides analysis of available alternative simulators, overview of the project architecture and basic usage information.
+
+The project was extended as bachelor's theses of Jakub Dupak and Max Hollmann. Links will be provided as soon as the
+theses are released (**TODO**)
+
+## Accepted Binary Formats
+
+The simulator accepts ELF statically linked executables compiled for RISC-V target (`--march=rv64g`). The simulator will
+automatically select endianness based on the ELF header. Simulation will execute as XLEN=32.
+
+- 64bit simulation is not yet supported.
+- Compressed instructions are not yet supported.
+
+You can use compile the code for simulation using specialized RISC-V GCC/Binutils toolchain (`riscv32-elf`) or using
+unified Clang/LLVM toolchain with [LLD](https://lld.llvm.org/). If you have Clang installed, you don't need any
+additional tools. Clang can be used on Linux, Windows, macOS and others...
+
+### LLVM toolchain usage
+
+```shell
+clang --target=riscv32 -march=rv64g -nostdlib -static -fuse-ld=lld test.S -o test
+llvm-objdump -S test
+```
+
+### GNU toolchain usage
+
+```shell
+riscv32-elf-as test.S -o test.o
+riscv32-elf-ld test.o -o test
+riscv32-elf-objdump -S test
+```
+
+or
+
+```shell
+riscv32-elf-gcc test.S -o test
+riscv32-elf-objdump -S test
+```
+
+## Integrated Assembler
+
+Basic integrated assembler is included in the simulator. Small subset of
+[GNU assembler](https://sourceware.org/binutils/docs/as/) directives is recognized as well. Next directives are
+recognized: `.word`, `.orig`, `.set`
+/`.equ`, `.ascii` and `.asciz`. Some other directives are simply ignored: `.data`, `.text`, `.globl`, `.end` and `.ent`.
+This allows to write code which can be compiled by both - integrated and full-featured assembler. Addresses are assigned
+to labels/symbols which are stored in symbol table. Addition, subtraction, multiplication, divide and bitwise and or are
+recognized.
+
+## Support to call external make utility
+
+The action "Build executable by external make" call "make" program. If the action is invoked, and some source editors
+selected in main windows tabs then the "make" is started in the corresponding directory. Else directory of last selected
+editor is chosen. If no editor is open then directory of last loaded ELF executable are used as "make" start path. If
+even that is not an option then default directory when the emulator has been started is used.
+
+## Advanced functionalities
+
+**THIS PART IS FROM MIPS EDITION AND HAS NOT BEEN TESTED ON RISC-V**
+
+### Peripherals
+
 
 The simulator implements emulation of two peripherals for now. Base addresses are selected such way that they are
 accessible by 16 immediate offset which uses register 0 (`zero`) as base.
@@ -169,21 +236,21 @@ are two other words writable which control color of RGB LED 1 and 2
 #define SPILED_REG_KNOBS_8BIT_o         0x024
 ```
 
-The simple 16-bit per pixel (RGB565) framebuffer and LCD display are implemented. The framebuffer is mapped into range
-starting at `LCD_FB_START`
-address. The display size is 480 x 320 pixel. Pixel format RGB565 expect red component in bits 11 .. 15, green component
-in bits 5 .. 10 and blue component in bits 0 .. 4.
+The simple 16-bit per pixel (RGB565) framebuffer and LCD are implemented. The framebuffer is mapped into range starting
+at `LCD_FB_START`
+address. The display size is 480 x 320 pixel. Pixel format RGB565 expect red component in bits 11..15, green component
+in bits 5..10 and blue component in bits 0..4.
 
 ```
 #define LCD_FB_START       0xffe00000
 #define LCD_FB_END         0xffe4afff
 ```
 
-Limitation: actual concept of memory view updates and access does not allows to reliably read peripheral registers and
+Limitation: actual concept of memory view updates and access does not allow to reliably read peripheral registers, and
 I/O memory content. It is possible to write into framebuffer memory when cached (from CPU perspective) access to memory
 is selected.
 
-## Interrupts and Coprocessor 0 Support
+### Interrupts and Coprocessor 0 Support
 
 (NOTICE: Coprocessor0 will have to be replaced with RISC-V status registers)
 
@@ -249,7 +316,7 @@ Use next linker option to place section start at right address
  -Wl,--section-start=.irq_handler=0x80000180
 ```
 
-## System Calls Support
+### System Calls Support
 
 (Not tested for RISC-V; coprocessor0 will have to be replaced.)
 
@@ -337,9 +404,9 @@ Set TLS base into `C0` `user_local` register accessible by `rdhwr` instruction..
 
 This is initial implementation of the RISC-V edition. Everything is limited.
 
-- Coprocessor0 has to be ported to RISC-V status registes.
+- Coprocessor0 has to be ported to RISC-V status registers.
 
-### QtRVSim original limitations
+### QtMips original limitations
 
 * Only very minimal support for privileged instruction is implemented for now. Only RDHWR, SYNCI, CACHE and some
   coprocessor 0 registers implemented. TLB and virtual memory and complete exception model are not implemented.
@@ -351,7 +418,14 @@ This is initial implementation of the RISC-V edition. Everything is limited.
 
 ## List of Actually Supported Instructions
 
-(TODO Max)
+- **RV32G**:
+    - **LOAD**: `lw, lh, lb`
+    - **STORE**: `sw, sh, sb`
+    - **OP**: `add, sub, sll, slt, sltu, xor, srl, sra, or, and`
+    - **OP-IMM**: `addi, sll, slti, sltiu, xori, srli, srai, ori, andi`
+
+For details about RISC-V, refer to the ISA specification:
+[https://riscv.org/technical/specifications/](https://riscv.org/technical/specifications/).
 
 ## Links to Resources and Similar Projects
 
