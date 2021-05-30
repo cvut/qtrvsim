@@ -44,6 +44,7 @@ Implemented to support following courses:
   - [List of Actually Supported Instructions](#list-of-actually-supported-instructions)
   - [Links to Resources and Similar Projects](#links-to-resources-and-similar-projects)
   - [Copyright](#copyright)
+  - [License](#license)
 
 ## Try it out! (WebAssembly)
 
@@ -439,3 +440,19 @@ For details about RISC-V, refer to the ISA specification:
 - Copyright (c) 2019-2021 Pavel Pisa <pisa@cmp.felk.cvut.cz>
 - Copyright (c) 2020-2021 Jakub Dupak <dev@jakubdupak.com>
 - Copyright (c) 2020-2021 Max Hollmann <hollmmax@fel.cvut.cz>
+
+## License
+
+This project is licensed under `GPL-3.0-or-later`. The full text of the license is in the [LICENSE](LICENSE) file. 
+The license applies to all files except for directories named `external` and files in them. Files in external 
+directories have a separate license compatible with the projects license.
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public 
+License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later 
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied 
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. 
+If not, see [https://www.gnu.org/licenses/](https://www.gnu.org/licenses/).
