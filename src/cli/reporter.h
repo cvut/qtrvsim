@@ -1,6 +1,7 @@
 #ifndef REPORTER_H
 #define REPORTER_H
 
+#include "common/memory_ownership.h"
 #include "machine/machine.h"
 
 #include <QCoreApplication>
@@ -16,18 +17,16 @@ class Reporter : public QObject {
 public:
     Reporter(QCoreApplication *app, machine::Machine *machine);
 
-    void regs(); // Report status of registers
-    void cache_stats();
-    void cycles();
+    void regs() { e_regs = true; }; // Report status of registers
+    void cache_stats() { e_cache_stats = true; };
+    void cycles() { e_cycles = true; };
 
     enum FailReason {
-        FR_I = (1 << 0), // Unsupported Instruction
-        FR_A = (1 << 1), // Unsupported ALU operation
-        FR_O = (1 << 2), // Overflow/underflow of numerical operation
-        FR_J = (1 << 3), // Unaligned jump
+        FR_NONE = 0,
+        FR_UNSUPPORTED_INSTR = (1 << 0),
     };
-    static const enum FailReason FailAny = (enum FailReason)(FR_I | FR_A | FR_O | FR_J);
-    void expect_fail(enum FailReason reason);
+    static const enum FailReason FailAny = FR_UNSUPPORTED_INSTR;
+    void expect_fail(enum FailReason reason) { e_fail = (FailReason)(e_fail | reason); };
 
     struct DumpRange {
         Address start;
@@ -43,16 +42,21 @@ private slots:
     void machine_exception_reached();
 
 private:
-    QCoreApplication *app;
-    machine::Machine *machine;
+    BORROWED QCoreApplication *const app;
+    BORROWED machine::Machine *const machine;
     QVector<DumpRange> dump_ranges;
 
-    bool e_regs;
-    bool e_cache_stats;
-    bool e_cycles;
-    enum FailReason e_fail;
+    bool e_regs = false;
+    bool e_cache_stats = false;
+    bool e_cycles = false;
+    FailReason e_fail = FR_NONE;
 
     void report();
+    void report_regs() const;
+    void report_cache() const;
+    void report_range(const DumpRange &range) const;
+    void report_cop0reg(machine::Cop0State::Cop0Registers i) const;
+    void report_gp_reg(unsigned int i) const;
 };
 
 #endif // REPORTER_H

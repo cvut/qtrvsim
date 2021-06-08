@@ -34,9 +34,8 @@ void create_parser(QCommandLineParser &p) {
     p.addOption({ "asm", "Treat provided file argument as assembler source." });
     p.addOption({ "pipelined", "Configure CPU to use five stage pipeline." });
     p.addOption({ "no-delay-slot", "Disable jump delay slot." });
-    p.addOption({ "hazard-unit",
-                  "Specify hazard unit imeplementation [none|stall|forward].",
-                  "HUKIND" });
+    p.addOption(
+        { "hazard-unit", "Specify hazard unit implementation [none|stall|forward].", "HUKIND" });
     p.addOption(
         { { "trace-fetch", "tr-fetch" },
           "Trace fetched instruction (for both pipelined and not core)." });
@@ -268,13 +267,9 @@ void configure_reporter(
         for (int y = 0; y < fail[i].length(); y++) {
             enum Reporter::FailReason reason;
             switch (tolower(fail[i].toStdString()[y])) {
-            case 'i': reason = Reporter::FR_I; break;
-            case 'a': reason = Reporter::FR_A; break;
-            case 'o': reason = Reporter::FR_O; break;
-            case 'j': reason = Reporter::FR_J; break;
+            case 'i': reason = Reporter::FR_UNSUPPORTED_INSTR; break;
             default:
-                cout << "Unknown fail condition: " << fail[i].toStdString()[y]
-                     << endl;
+                cout << "Unknown fail condition: " << fail[i].toStdString()[y] << endl;
                 exit(1);
             }
             r.expect_fail(reason);
@@ -408,10 +403,8 @@ void load_ranges(Machine &machine, const QStringList &ranges) {
             exit(1);
         }
         ifstream in;
-        uint32_t val;
-        Address addr = start;
         in.open(range_arg.mid(comma1 + 1).toLocal8Bit().data(), ios::in);
-        start = start & ~3;
+        Address addr = start;
         for (std::string line; getline(in, line);) {
             size_t endpos = line.find_last_not_of(" \t\n");
             size_t startpos = line.find_first_not_of(" \t\n");
@@ -421,7 +414,7 @@ void load_ranges(Machine &machine, const QStringList &ranges) {
             }
             line = line.substr(0, endpos + 1);
             line = line.substr(startpos);
-            val = stoul(line, &idx, 0);
+            uint32_t val = stoul(line, &idx, 0);
             if (idx != line.size()) {
                 cout << "cannot parse load range data." << endl;
                 exit(1);
@@ -456,8 +449,8 @@ bool assemble(Machine &machine, MsgReport &msgrep, QString filename) {
 
 int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
-    QCoreApplication::setApplicationName("cli");
-    QCoreApplication::setApplicationVersion("0.7.5");
+    QCoreApplication::setApplicationName(APP_NAME);
+    QCoreApplication::setApplicationVersion(APP_VERSION);
     set_default_log_pattern();
 
     QCommandLineParser p;

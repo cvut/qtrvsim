@@ -8,6 +8,11 @@ Tracer::Tracer(Machine *machine) : core_state(machine->core()->state) {
     connect(machine->core(), &Core::step_done, this, &Tracer::step_output);
 }
 
+template<typename StageStruct>
+constexpr const char *exception_mark(StageStruct stage) {
+    return (stage.excause != EXCAUSE_NONE) ? "!" : "";
+}
+
 void Tracer::step_output() {
     const auto &if_id = core_state.pipeline.fetch.final;
     const auto &id_ex = core_state.pipeline.decode.final;

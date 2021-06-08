@@ -6,36 +6,15 @@
 using namespace machine;
 using namespace std;
 
-Reporter::Reporter(QCoreApplication *app, Machine *machine) : QObject() {
-    this->app = app;
-    this->machine = machine;
-
+Reporter::Reporter(QCoreApplication *app, Machine *machine)
+    : QObject()
+    , app(app)
+    , machine(machine) {
     connect(machine, &Machine::program_exit, this, &Reporter::machine_exit);
     connect(machine, &Machine::program_trap, this, &Reporter::machine_trap);
     connect(
         machine->core(), &Core::stop_on_exception_reached, this,
         &Reporter::machine_exception_reached);
-
-    e_regs = false;
-    e_cache_stats = false;
-    e_cycles = false;
-    e_fail = (enum FailReason)0;
-}
-
-void Reporter::regs() {
-    e_regs = true;
-}
-
-void Reporter::cache_stats() {
-    e_cache_stats = true;
-}
-
-void Reporter::cycles() {
-    e_cycles = true;
-}
-
-void Reporter::expect_fail(enum FailReason reason) {
-    e_fail = (enum FailReason)(e_fail | reason);
 }
 
 void Reporter::add_dump_range(Address start, size_t len, const QString &path_to_write) {
@@ -77,13 +56,7 @@ void Reporter::machine_trap(SimulatorException &e) {
     bool expected = false;
     auto &etype = typeid(e);
     if (etype == typeid(SimulatorExceptionUnsupportedInstruction)) {
-        expected = e_fail & FR_I;
-    } else if (etype == typeid(SimulatorExceptionUnsupportedAluOperation)) {
-        expected = e_fail & FR_A;
-    } else if (etype == typeid(SimulatorExceptionOverflow)) {
-        expected = e_fail & FR_O;
-    } else if (etype == typeid(SimulatorExceptionUnalignedJump)) {
-        expected = e_fail & FR_J;
+        expected = e_fail & FR_UNSUPPORTED_INSTR;
     }
 
     printf("Machine trapped: %s\n", qPrintable(e.msg(false)));

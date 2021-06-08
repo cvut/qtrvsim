@@ -4,8 +4,7 @@
 
 using namespace std;
 
-MsgReport::MsgReport(QCoreApplication *app) : Super(app) {
-}
+MsgReport::MsgReport(QCoreApplication *app) : Super(app) {}
 
 void MsgReport::report_message(
     messagetype::Type type,
@@ -25,14 +24,10 @@ void MsgReport::report_message(
     }
 
     cout << file.toLocal8Bit().data() << ":";
-    if (line != 0) {
-        cout << line << ":";
-    }
-    if (column != 0) {
-        cout << column << ":";
-    }
+    if (line != 0) { cout << line << ":"; }
+    if (column != 0) { cout << column << ":"; }
 
-    cout << typestr.toLocal8Bit().data() << ":";
-    cout << text.toLocal8Bit().data();
+    cout << qPrintable(typestr) << ":";
+    cout << qPrintable(text);
     cout << endl;
 }

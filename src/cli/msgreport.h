@@ -14,7 +14,7 @@ class MsgReport : public QObject {
     using Super = QObject;
 
 public:
-    MsgReport(QCoreApplication *app);
+    explicit MsgReport(QCoreApplication *app);
 
 public slots:
     static void report_message(

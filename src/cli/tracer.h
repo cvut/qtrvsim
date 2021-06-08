@@ -8,7 +8,7 @@
 
 #include <QObject>
 
-class Tracer : public QObject {
+class Tracer final : public QObject {
     Q_OBJECT
 public:
     explicit Tracer(machine::Machine *machine);
