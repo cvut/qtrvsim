@@ -208,51 +208,42 @@ void configure_machine(QCommandLineParser &p, MachineConfig &cc) {
 
 void configure_tracer(QCommandLineParser &p, Tracer &tr) {
     if (p.isSet("trace-fetch")) {
-        tr.fetch();
+        tr.trace_fetch = true;
     }
     if (p.isSet("pipelined")) { // Following are added only if we have stages
         if (p.isSet("trace-decode")) {
-            tr.decode();
+            tr.trace_decode = true;
         }
         if (p.isSet("trace-execute")) {
-            tr.execute();
+            tr.trace_fetch = true;
         }
         if (p.isSet("trace-memory")) {
-            tr.memory();
+            tr.trace_memory = true;
         }
         if (p.isSet("trace-writeback")) {
-            tr.writeback();
+            tr.trace_writeback = true;
         }
     }
 
     if (p.isSet("trace-pc")) {
-        tr.reg_pc();
+        tr.trace_regs_gp = true;
     }
 
     QStringList gps = p.values("trace-gp");
     for (int i = 0; i < gps.size(); i++) {
         if (gps[i] == "*") {
-            for (int y = 0; y < 32; y++) {
-                tr.reg_gp(y);
-            }
+            tr.regs_to_trace.fill(true);
         } else {
             bool res;
-            int num = gps[i].toInt(&res);
-            if (res && num <= 32) {
-                tr.reg_gp(num);
+            size_t num = gps[i].toInt(&res);
+            if (res && num <= machine::REGISTER_COUNT) {
+                tr.regs_to_trace.at(num) = true;
             } else {
                 cout << "Unknown register number given for trace-gp: "
                      << gps[i].toStdString() << endl;
                 exit(1);
             }
         }
-    }
-
-    if (p.isSet("trace-lo")) {
-        tr.reg_lo();
-    }
-    if (p.isSet("trace-hi")) {
-        tr.reg_hi();
     }
 
     // TODO

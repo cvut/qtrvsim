@@ -470,6 +470,7 @@ void CoreSingle::do_step(bool skip_break) {
 }
 
 void CoreSingle::do_reset() {
+    state.pipeline = {};
     prev_inst_addr = Address::null();
 }
 

@@ -26,8 +26,7 @@ public:
         FR_O = (1 << 2), // Overflow/underflow of numerical operation
         FR_J = (1 << 3), // Unaligned jump
     };
-    static const enum FailReason FailAny
-        = (enum FailReason)(FR_I | FR_A | FR_O | FR_J);
+    static const enum FailReason FailAny = (enum FailReason)(FR_I | FR_A | FR_O | FR_J);
     void expect_fail(enum FailReason reason);
 
     struct DumpRange {
@@ -57,4 +56,3 @@ private:
 };
 
 #endif // REPORTER_H
-
