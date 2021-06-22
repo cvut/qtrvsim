@@ -5,6 +5,13 @@ QtMips
 
 MIPS CPU simulator for education purposes.
 
+Ongoing Development
+-------------------
+
+* QtRVSim - [RISC-V](https://riscv.org/) architecture based edition ([https://github.com/cvut/qtrvsim](https://github.com/cvut/qtrvsim)), suggested for future contributions
+* QtMips development branch with little/endian support - [devel](https://github.com/cvut/QtMips/tree/devel)
+* Space for QtMips examples and students' contributions [https://github.com/cvut/QtMips-Playground](https://github.com/cvut/QtMips-Playground)
+
 Documentation
 -------------
 The project has started as diploma theses work of Karel Kočí.
@@ -411,3 +418,4 @@ Links to Resources and Similar Projects
 * SPIM/QtSPIM: A MIPS32 Simulator [http://spimsimulator.sourceforge.net/](http://spimsimulator.sourceforge.net/)
 * MARS: IDE with detailed help and hints [http://courses.missouristate.edu/KenVollmar/MARS/index.htm](http://courses.missouristate.edu/KenVollmar/MARS/index.htm)
 * EduMIPS64: 1x fixed and 3x FP pipelines [https://www.edumips.org/](https://www.edumips.org/)
+* Jakub Dupak: [Graphical RISC-V Architecture Simulator - Memory Model and Project Management](https://dspace.cvut.cz/bitstream/handle/10467/94446/F3-BP-2021-Dupak-Jakub-thesis.pdf) documents QtMips and QtRvSim development
