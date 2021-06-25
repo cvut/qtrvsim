@@ -56,7 +56,7 @@ CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &core_svg_
         case 'd': {
             if (component_name == DebugValue::COMPONENT_NAME) {
                 install_value(
-                    values.debug_values, VALUE_SOURCE_NAME_MAPS.DEBUG, component, core_state);
+                    values.debug_values, VALUE_SOURCE_NAME_MAPS.DEBUG_VAL, component, core_state);
             } else if (component_name == QStringLiteral("data-cache")) {
                 if (machine->config().cache_data().enabled()) {
                     auto texts = component.findAll<SimpleTextItem>();
