@@ -2,12 +2,20 @@
 
 using svgscene::SimpleTextItem;
 
+const QString BoolValue::COMPONENT_NAME = QStringLiteral("bool-value");
+const QString PCValue::COMPONENT_NAME = QStringLiteral("pc-value");
+const QString RegValue::COMPONENT_NAME = QStringLiteral("reg-value");
+const QString RegIdValue::COMPONENT_NAME = QStringLiteral("reg-id-value");
+const QString DebugValue::COMPONENT_NAME = QStringLiteral("debug-value");
+const QString MultiTextValue::COMPONENT_NAME = QStringLiteral("multi-text-value");
+const QString InstructionValue::COMPONENT_NAME = QStringLiteral("instruction-value");
+
 BoolValue::BoolValue(SimpleTextItem *const element, const bool &data)
     : element(element)
     , data(data) {}
 
 void BoolValue::update() {
-    element->setText(data ? "1" : "0");
+    element->setText(data ? QStringLiteral("1") : QStringLiteral("0"));
 }
 
 PCValue::PCValue(SimpleTextItem *element, const machine::Address &data)
@@ -24,7 +32,7 @@ void PCValue::clicked() {
 }
 
 void PCValue::update() {
-    element->setText(QString("0x%1").arg(data.get_raw(), 8, 16, QChar('0')).toUpper());
+    element->setText(QString("0x%1").arg(data.get_raw(), 8, 16, QChar('0')));
 }
 
 RegValue::RegValue(SimpleTextItem *element, const machine::RegisterValue &data)
@@ -32,7 +40,7 @@ RegValue::RegValue(SimpleTextItem *element, const machine::RegisterValue &data)
     , data(data) {}
 
 void RegValue::update() {
-    element->setText(QString("%1").arg(data.as_u32(), 8, 16, QChar('0')).toUpper());
+    element->setText(QString("%1").arg(data.as_u32(), 8, 16, QChar('0')));
 }
 
 RegIdValue::RegIdValue(svgscene::SimpleTextItem *element, const uint8_t &data)

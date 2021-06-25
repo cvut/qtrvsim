@@ -58,33 +58,15 @@ protected:
      *                                stored
      * @param value_source_name_map   maps of load_sections_indexes names used in svg to
      *                                references in the state struct
-     * @param element                 text element that will be updated
+     * @param component               text element that will be updated
      * @param source_name             name of data source, see
      *                                value_source_name_map
      */
-    template<typename T_handler, typename T>
+    template<typename T_handler, typename T_lens, typename T>
     void install_value(
         std::vector<T_handler> &handler_list,
-        const std::unordered_map<QStringView, T> &value_source_name_map,
-        svgscene::SimpleTextItem *element,
-        const QString &source_name,
-        const machine::CoreState &core_state);
-
-    /**
-     * Wrapper for `install_value` which searched all value components of
-     * the given type in the SVG document.
-     *
-     * @tparam T_handler            see install_value
-     * @tparam T                    see install_value
-     * @param document              SVG document
-     * @param handler_list          see install_value
-     * @param value_source_name_map see install_value
-     */
-    template<typename T_handler, typename T>
-    void install_values_from_document(
-        const svgscene::SvgDocument &document,
-        std::vector<T_handler> &handler_list,
-        const std::unordered_map<QStringView, T> &value_source_name_map,
+        const std::unordered_map<QStringView, T_lens> &value_source_name_map,
+        svgscene::SvgDomTree<T> component,
         const machine::CoreState &core_state);
 
     /**
