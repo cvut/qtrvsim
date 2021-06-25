@@ -91,6 +91,8 @@ protected:
         std::vector<PCValue> pc_values;
         std::vector<MultiTextValue> multi_text_values;
         std::vector<InstructionValue> instruction_values;
+        std::vector<Multiplexer<bool>> mux2_values;
+        std::vector<Multiplexer<unsigned>> mux3_values;
     } values;
 
     Box<Cache> program_cache;

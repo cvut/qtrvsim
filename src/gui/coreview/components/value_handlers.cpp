@@ -1,5 +1,7 @@
 #include "value_handlers.h"
 
+#include <QGraphicsPathItem>
+
 using svgscene::SimpleTextItem;
 
 const QString BoolValue::COMPONENT_NAME = QStringLiteral("bool-value");

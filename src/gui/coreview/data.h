@@ -90,9 +90,7 @@ const struct {
         { QStringLiteral("exec-mem-to-reg"), LENS(CoreState, pipeline.execute.result.memread) },
         { QStringLiteral("exec-mem-write"), LENS(CoreState, pipeline.execute.result.memwrite) },
         { QStringLiteral("exec-reg-write"), LENS(CoreState, pipeline.execute.result.regwrite) },
-        // TODO: NOT AVAILABLE IN MIPS CORE
-        //        { QStringLiteral("exec-branch"),
-        //          LENS(CoreState, pipeline.execute.inside.) },
+        { QStringLiteral("exec-branch"), LENS(CoreState, pipeline.execute.internal.branch) },
         { QStringLiteral("mem-mem-read"), LENS(CoreState, pipeline.memory.internal.memread) },
         { QStringLiteral("mem-mem-to-reg"), LENS(CoreState, pipeline.memory.result.memtoreg) },
         { QStringLiteral("mem-mem-write"), LENS(CoreState, pipeline.memory.internal.memwrite) },

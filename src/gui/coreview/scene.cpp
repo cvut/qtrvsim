@@ -84,6 +84,53 @@ CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &core_svg_
                 install_value(
                     values.multi_text_values, VALUE_SOURCE_NAME_MAPS.MULTI_TEXT, component,
                     core_state);
+            } else if (component_name == QStringLiteral("mux2")) {
+                const QString &source_name = component.getAttrValueOr("data-source");
+                // Draw.io does not allow to tag the paths, to I use this style identification hack.
+                auto conn_trees = component.findAll<QGraphicsPathItem>("stroke-linecap", "round");
+                if (conn_trees.size() != 2) {
+                    WARN(
+                        "Mux2 does not have 2 connections found %d (source: \"%s\").",
+                        conn_trees.size(), qPrintable(source_name));
+                    break;
+                }
+                std::vector<QGraphicsPathItem *> connections;
+                connections.reserve(conn_trees.size());
+                std::transform(
+                    conn_trees.begin(), conn_trees.end(), std::back_inserter(connections),
+                    [](SvgDomTree<QGraphicsPathItem> &e) { return e.getElement(); });
+                try {
+                    const bool &source = VALUE_SOURCE_NAME_MAPS.BOOL.at(source_name)(core_state);
+                    values.mux2_values.emplace_back(std::move(connections), source);
+                } catch (std::out_of_range &e) {
+                    WARN(
+                        "Source for mux2 value not found (source: \"%s\").",
+                        qPrintable(source_name));
+                }
+            } else if (component_name == QStringLiteral("mux3")) {
+                const QString &source_name = component.getAttrValueOr("data-source");
+                // Draw.io does not allow to tag the paths, to I use this style identification hack.
+                auto conn_trees = component.findAll<QGraphicsPathItem>("stroke-linecap", "round");
+                if (conn_trees.size() != 3) {
+                    WARN(
+                        "Mux3 does not have 3 connections found %d (source: \"%s\").",
+                        conn_trees.size(), qPrintable(source_name));
+                    break;
+                }
+                std::vector<QGraphicsPathItem *> connections;
+                connections.reserve(conn_trees.size());
+                std::transform(
+                    conn_trees.begin(), conn_trees.end(), std::back_inserter(connections),
+                    [](SvgDomTree<QGraphicsPathItem> &e) { return e.getElement(); });
+                try {
+                    const unsigned &source
+                        = VALUE_SOURCE_NAME_MAPS.DEBUG_VAL.at(source_name)(core_state);
+                    values.mux3_values.emplace_back(std::move(connections), source);
+                } catch (std::out_of_range &e) {
+                    WARN(
+                        "Source for mux3 value not found (source: \"%s\").",
+                        qPrintable(source_name));
+                }
             }
             break;
         }
@@ -162,7 +209,9 @@ void CoreViewScene::install_value(
             "Installing value %s with source %s.", qPrintable(T_handler::COMPONENT_NAME),
             qPrintable(source_name));
     } catch (std::out_of_range &) {
-        WARN("Source for bool value not found (source: \"%s\").", qPrintable(source_name));
+        WARN(
+            "Source for %s value not found (source: \"%s\").", typeid(T).name(),
+            qPrintable(source_name));
     }
 }
 
@@ -182,6 +231,8 @@ void CoreViewScene::update_values() {
     update_value_list(values.pc_values);
     update_value_list(values.multi_text_values);
     update_value_list(values.instruction_values);
+    update_value_list(values.mux2_values);
+    update_value_list(values.mux3_values);
 }
 
 CoreViewSceneSimple::CoreViewSceneSimple(machine::Machine *machine)
