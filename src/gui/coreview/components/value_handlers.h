@@ -16,6 +16,7 @@
 #include <machine/registers.h>
 #include <svgscene/components/simpletextitem.h>
 #include <svgscene/utils/memory_ownership.h>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -83,7 +84,8 @@ private:
 };
 
 class MultiTextValue {
-    using Data = std::pair<const unsigned int &, const std::vector<QString> &>;
+    using Source = const std::unordered_map<unsigned, QString> &;
+    using Data = std::pair<const unsigned int &, Source>;
 
 public:
     MultiTextValue(svgscene::SimpleTextItem *element, Data data);
@@ -93,7 +95,7 @@ public:
 private:
     BORROWED svgscene::SimpleTextItem *const element;
     const unsigned &current_text_index;
-    const std::vector<QString> &text_table;
+    Source &text_table;
 };
 
 class InstructionValue {

@@ -23,20 +23,26 @@ using machine::Instruction;
 using machine::RegisterId;
 using machine::RegisterValue;
 
-static const std::vector<QString> EXCEPTION_NAME_TABLE
-    = { { "NONE" },      // machine::EXCAUSE_NONE
-        { "INT" },       // machine::EXCAUSE_INT
-        { "ADDRL" },     // machine::EXCAUSE_ADDRL
-        { "ADDRS" },     // machine::EXCAUSE_ADDRS
-        { "IBUS" },      // machine::EXCAUSE_IBUS
-        { "DBUS" },      // machine::EXCAUSE_DBUS
-        { "SYSCALL" },   // machine::EXCAUSE_SYSCALL
-        { "BREAK" },     // machine::EXCAUSE_BREAK
-        { "OVERFLOW" },  // machine::EXCAUSE_OVERFLOW
-        { "TRAP" },      // machine::EXCAUSE_TRAP
-        { "HWBREAK" } }; // machine::EXCAUSE_HWBREAK
+static const std::unordered_map<unsigned, QString> EXCEPTION_NAME_TABLE = {
+    { machine::EXCAUSE_NONE, QStringLiteral("NONE") },
+    { machine::EXCAUSE_INT, QStringLiteral("INT") },
+    { machine::EXCAUSE_ADDRL, QStringLiteral("ADDRL") },
+    { machine::EXCAUSE_ADDRS, QStringLiteral("ADDRS") },
+    { machine::EXCAUSE_IBUS, QStringLiteral("IBUS") },
+    { machine::EXCAUSE_DBUS, QStringLiteral("DBUS") },
+    { machine::EXCAUSE_SYSCALL, QStringLiteral("SYSCALL") },
+    { machine::EXCAUSE_BREAK, QStringLiteral("BREAK") },
+    { machine::EXCAUSE_OVERFLOW, QStringLiteral("OVERFLOW") },
+    { machine::EXCAUSE_TRAP, QStringLiteral("TRAP") },
+    { machine::EXCAUSE_HWBREAK, QStringLiteral("HWBREAK") },
+    { machine::EXCAUSE_UNKNOWN, QStringLiteral("UNKNOWN") },
+};
 
-static const std::vector<QString> STALL_TEXT_TABLE = { { "NORMAL" }, { "STALL" }, { "FORWARD" } };
+static const std::unordered_map<unsigned, QString> STALL_TEXT_TABLE = {
+    { 0, QStringLiteral("NORMAL") },
+    { 1, QStringLiteral("STALL") },
+    { 2, QStringLiteral("FORWARD") },
+};
 
 /**
  * Link targets available for use in the SVG.
@@ -58,17 +64,7 @@ static const unordered_map<QString, void (::CoreViewScene::*)()> HYPERLINK_TARGE
     { "#terminal", &CoreViewScene::request_terminal },
 };
 
-using MultiTextData = pair<const unsigned &, const std::vector<QString> &>;
-using InstructionData = pair<const machine::Instruction &, const machine::Address &>;
-
-struct {
-    machine::Address pc { 0xABCDEF };
-    machine::RegisterValue reg { 0xAAFFAAFF };
-    machine::RegisterId regid { 12 };
-    bool b = true;
-    unsigned d { 2 };
-    machine::Instruction i { 0X8C022000 };
-} dummy;
+using MultiTextData = pair<const unsigned &, const std::unordered_map<unsigned, QString> &>;
 
 /**
  * Maps SVG usable value names to lenses (lazy references) to fields, where thy
@@ -137,22 +133,23 @@ const struct {
     };
 
 #define MULTITEXT_LENS(INDEX, TABLE)                                                               \
-    [](const CoreState &base) -> std::pair<const unsigned &, const vector<QString> &> {            \
-        return { base.INDEX, TABLE };                                                              \
-    }
+    [](const CoreState &base) -> MultiTextData { return { base.INDEX, TABLE }; }
 
-    const unordered_map<QStringView, LensPair<CoreState, unsigned, vector<QString>>> MULTI_TEXT {
-        { QStringLiteral("fetch-exception"),
-          MULTITEXT_LENS(pipeline.fetch.internal.excause_num, EXCEPTION_NAME_TABLE) },
-        { QStringLiteral("decode-exception"),
-          MULTITEXT_LENS(pipeline.decode.internal.excause_num, EXCEPTION_NAME_TABLE) },
-        { QStringLiteral("execute-exception"),
-          MULTITEXT_LENS(pipeline.execute.internal.excause_num, EXCEPTION_NAME_TABLE) },
-        { QStringLiteral("memory-exception"),
-          MULTITEXT_LENS(pipeline.memory.internal.excause_num, EXCEPTION_NAME_TABLE) },
-        { QStringLiteral("hazard"),
-          MULTITEXT_LENS(pipeline.execute.internal.stall_status, STALL_TEXT_TABLE) },
-    };
+    const unordered_map<
+        QStringView,
+        LensPair<CoreState, unsigned, const std::unordered_map<unsigned, QString>>>
+        MULTI_TEXT {
+            { QStringLiteral("fetch-exception"),
+              MULTITEXT_LENS(pipeline.fetch.internal.excause_num, EXCEPTION_NAME_TABLE) },
+            { QStringLiteral("decode-exception"),
+              MULTITEXT_LENS(pipeline.decode.internal.excause_num, EXCEPTION_NAME_TABLE) },
+            { QStringLiteral("execute-exception"),
+              MULTITEXT_LENS(pipeline.execute.internal.excause_num, EXCEPTION_NAME_TABLE) },
+            { QStringLiteral("memory-exception"),
+              MULTITEXT_LENS(pipeline.memory.internal.excause_num, EXCEPTION_NAME_TABLE) },
+            { QStringLiteral("hazard"),
+              MULTITEXT_LENS(pipeline.execute.internal.stall_status, STALL_TEXT_TABLE) },
+        };
 
     const unordered_map<QStringView, LensPair<CoreState, Instruction, Address>> INSTRUCTION {
         { QStringLiteral("fetch"),
