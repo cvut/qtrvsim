@@ -4,10 +4,11 @@ on:
   push:
     branches:
       - cmake
-      - rv-devel
-      - packaging
       - svgscene
+      - rv-core
       - rv-visualization
+      - rv-core
+      - rv2
   workflow_dispatch:
 
 jobs:
