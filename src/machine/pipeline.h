@@ -33,7 +33,13 @@ struct FetchInterstage {
     Instruction inst = Instruction::NOP; // Loaded instruction
     Address inst_addr = 0_addr;          // Address of instruction
     enum ExceptionCause excause = EXCAUSE_NONE;
-    bool is_valid = true;
+    bool is_valid = false;
+
+public:
+    /** Reset to value corresponding to NOP. */
+    void flush() {
+        *this = {};
+    }
 };
 
 struct FetchInternalState {
@@ -59,28 +65,26 @@ struct FetchState {
 
 struct DecodeInterstage {
     Instruction inst = Instruction::NOP;
-    bool memread = false;            // If memory should be read
-    bool memwrite = false;           // If memory should write input
-    bool alusrc = false;             // If second value to alu is immediate value (rt used
-                                     // otherwise)
-    bool regwrite = false;           // If output should be written back to register (which
-                                     // one depends on regd)
-    bool alu_req_rs = false;         // requires rs value for ALU
-    bool alu_req_rt = false;         // requires rt value for ALU or SW
-    bool branch = false;             // branch instruction
-    bool jump = false;               // jump
-    bool bj_not = false;             // negate branch condition
-    enum AluOp aluop;                // Decoded ALU operation
-    enum AccessControl memctl;       // Decoded memory access type
-    uint8_t num_rs = 0;              // Number of the register s1
-    uint8_t num_rt = 0;              // Number of the register s2
-    uint8_t num_rd = 0;              // Number of the register d
-    RegisterValue val_rs = 0;        // Value from register rs
-    RegisterValue val_rs_orig = 0;   // Value from register rs1 without forwarding
-    RegisterValue val_rt = 0;        // Value from register rt
-    RegisterValue val_rt_orig = 0;   // Value from register rs1 without forwarding
-    RegisterValue immediate_val = 0; // Sign-extended immediate value
-                                     // rd according to regd)
+    bool memread = false;          // If memory should be read
+    bool memwrite = false;         // If memory should write input
+    bool alusrc = false;           // If second value to alu is immediate value (rt used otherwise)
+    bool regwrite = true;          // If output should be written back to register
+    bool alu_req_rs = false;       // requires rs value for ALU
+    bool alu_req_rt = false;       // requires rt value for ALU or SW
+    bool branch = false;           // branch instruction
+    bool jump = false;             // jump
+    bool bj_not = false;           // negate branch condition
+    enum AluOp aluop = AluOp::ADD; // Decoded ALU operation
+    enum AccessControl memctl = AC_NONE; // Decoded memory access type
+    uint8_t num_rs = 0;                  // Number of the register s1
+    uint8_t num_rt = 0;                  // Number of the register s2
+    uint8_t num_rd = 0;                  // Number of the register d
+    RegisterValue val_rs = 0;            // Value from register rs
+    RegisterValue val_rs_orig = 0;       // Value from register rs1 without forwarding
+    RegisterValue val_rt = 0;            // Value from register rt
+    RegisterValue val_rt_orig = 0;       // Value from register rs1 without forwarding
+    RegisterValue immediate_val = 0;     // Sign-extended immediate value
+                                         // rd according to regd)
     ForwardFrom ff_rs = FORWARD_NONE;
     ForwardFrom ff_rt = FORWARD_NONE;
     Address inst_addr = 0_addr; // Address of instruction
@@ -90,6 +94,12 @@ struct DecodeInterstage {
     bool is_valid = false;
     bool alu_mod = false; // alternative versions of ADD and right-shift
     bool alu_pc = false;  // PC is input to ALU
+
+public:
+    /** Reset to value corresponding to NOP. */
+    void flush() {
+        *this = {};
+    }
 };
 
 struct DecodeInternalState {
@@ -122,7 +132,7 @@ struct ExecuteInterstage {
     Instruction inst;
     bool memread = false;
     bool memwrite = false;
-    bool regwrite = false;
+    bool regwrite = true;
     bool stop_if = false;
     bool is_valid = false;
     bool branch = false;
@@ -130,13 +140,19 @@ struct ExecuteInterstage {
     bool jump = false;
     bool bj_not = false;
     bool alu_zero = false;
-    enum AccessControl memctl;
+    enum AccessControl memctl = AC_NONE;
     RegisterValue val_rt = 0;
     uint8_t num_rd = 0;
     RegisterValue alu_val = 0;  // Result of ALU execution
     Address inst_addr = 0_addr; // Address of instruction
     enum ExceptionCause excause = EXCAUSE_NONE;
     Address branch_target = 0_addr;
+
+public:
+    /** Reset to value corresponding to NOP. */
+    void flush() {
+        *this = {};
+    }
 };
 
 struct ExecuteInternalState {
@@ -194,6 +210,12 @@ struct MemoryInterstage {
     enum ExceptionCause excause = EXCAUSE_NONE;
     bool stop_if = false;
     bool is_valid = false;
+
+public:
+    /** Reset to value corresponding to NOP. */
+    void flush() {
+        *this = {};
+    }
 };
 
 struct MemoryInternalState {

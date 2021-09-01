@@ -225,12 +225,6 @@ protected:
         RegisterValue &towrite_val,
         RegisterValue rt_value,
         Address mem_addr);
-
-    // Initialize structures to NOPE instruction
-    static void dtFetchInit(FetchInterstage &dt);
-    static void dtDecodeInit(DecodeInterstage &dt);
-    static void dtExecuteInit(ExecuteInterstage &dt);
-    static void dtMemoryInit(MemoryInterstage &dt);
 };
 
 class CoreSingle : public Core {

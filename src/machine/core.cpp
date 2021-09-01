@@ -6,8 +6,6 @@
 
 using namespace machine;
 
-constexpr uint32_t NOP_HEX = 0x00000013;
-
 Core::Core(
     Registers *regs,
     Predictor *predictor,
@@ -498,82 +496,21 @@ Address Core::handle_pc(const ExecuteInterstage &dt) {
 }
 
 void Core::flush() {
-    dtExecuteInit(state.pipeline.execute.final);
+    state.pipeline.execute.final.flush();
     emit instruction_executed(
         state.pipeline.execute.final.inst, state.pipeline.execute.final.inst_addr,
         state.pipeline.execute.final.excause, state.pipeline.execute.final.is_valid);
     emit execute_inst_addr_value(STAGEADDR_NONE);
-    dtDecodeInit(state.pipeline.decode.final);
+    state.pipeline.decode.final.flush();
     emit instruction_decoded(
         state.pipeline.decode.final.inst, state.pipeline.decode.final.inst_addr,
         state.pipeline.decode.final.excause, state.pipeline.decode.final.is_valid);
     emit decode_inst_addr_value(STAGEADDR_NONE);
-    dtFetchInit(state.pipeline.fetch.final);
+    state.pipeline.fetch.final.flush();
     emit instruction_fetched(
         state.pipeline.fetch.final.inst, state.pipeline.fetch.final.inst_addr,
         state.pipeline.fetch.final.excause, state.pipeline.fetch.final.is_valid);
     emit fetch_inst_addr_value(STAGEADDR_NONE);
-}
-
-void Core::dtFetchInit(FetchInterstage &dt) {
-    dt.inst_addr = Address(0);
-    dt.inst = Instruction(NOP_HEX);
-    dt.excause = EXCAUSE_NONE;
-    dt.is_valid = false;
-}
-
-void Core::dtDecodeInit(DecodeInterstage &dt) {
-    dt.inst_addr = Address(0);
-    dt.inst = Instruction(NOP_HEX);
-    dt.memread = false;
-    dt.memwrite = false;
-    dt.alusrc = false;
-    dt.regwrite = false;
-    dt.jump = false;
-    dt.bj_not = false;
-    // dt.aluop = ALU_OP_SLL;
-    dt.aluop = AluOp::ADD;
-    dt.memctl = AC_NONE;
-    dt.num_rs = 0;
-    dt.num_rt = 0;
-    dt.num_rd = 0;
-    dt.val_rs = 0;
-    dt.val_rt = 0;
-    dt.immediate_val = 0;
-    dt.ff_rs = FORWARD_NONE;
-    dt.ff_rt = FORWARD_NONE;
-    dt.excause = EXCAUSE_NONE;
-    dt.stall = false;
-    dt.stop_if = false;
-    dt.is_valid = false;
-}
-
-void Core::dtExecuteInit(ExecuteInterstage &dt) {
-    dt.inst_addr = Address(0);
-    dt.inst = Instruction(NOP_HEX);
-    dt.memread = false;
-    dt.memwrite = false;
-    dt.regwrite = false;
-    dt.memctl = AC_NONE;
-    dt.val_rt = 0;
-    dt.num_rd = 0;
-    dt.alu_val = 0;
-    dt.excause = EXCAUSE_NONE;
-    dt.stop_if = false;
-    dt.is_valid = false;
-}
-
-void Core::dtMemoryInit(MemoryInterstage &dt) {
-    dt.inst_addr = Address(0);
-    dt.inst = Instruction(NOP_HEX);
-    dt.memtoreg = false;
-    dt.regwrite = false;
-    dt.num_rd = false;
-    dt.towrite_val = 0;
-    dt.mem_addr = 0x0_addr;
-    dt.excause = EXCAUSE_NONE;
-    dt.stop_if = false;
-    dt.is_valid = false;
 }
 
 uint64_t Core::get_xlen_from_reg(RegisterValue reg) const {
@@ -727,22 +664,19 @@ void CorePipelined::do_step(bool skip_break) {
         if (state.pipeline.execute.final.is_valid
             && real_addr != state.pipeline.decode.final.inst_addr) {
             regs->write_pc(real_addr);
-            dtDecodeInit(state.pipeline.decode.final);
-            dtFetchInit(state.pipeline.fetch.final);
+            state.pipeline.decode.final.flush();
+            state.pipeline.fetch.final.flush();
         }
     } else {
         // Run fetch internal on empty
         fetch(skip_break);
         // clear decode latch (insert nope to execute internal)
         if (!state.pipeline.decode.final.stop_if) {
-            dtDecodeInit(state.pipeline.decode.final);
+            state.pipeline.decode.final.flush();
             state.pipeline.decode.final.stall = true;
         } else {
-            dtFetchInit(state.pipeline.fetch.final);
+            state.pipeline.fetch.final.flush();
         }
-        // emit instruction_decoded(state.pipeline.decode.inst,
-        // state.pipeline.decode.inst_addr, state.pipeline.decode.excause,
-        // state.pipeline.decode.is_valid);
     }
     if (stall || state.pipeline.decode.final.stop_if) {
         state.stall_count++;
@@ -751,22 +685,7 @@ void CorePipelined::do_step(bool skip_break) {
 }
 
 void CorePipelined::do_reset() {
-    dtFetchInit(state.pipeline.fetch.final);
-    dtFetchInit(state.pipeline.fetch.result);
-    state.pipeline.fetch.final.inst_addr = 0x0_addr;
-    state.pipeline.fetch.result.inst_addr = 0x0_addr;
-    dtDecodeInit(state.pipeline.decode.result);
-    dtDecodeInit(state.pipeline.decode.final);
-    state.pipeline.decode.result.inst_addr = 0x0_addr;
-    state.pipeline.decode.final.inst_addr = 0x0_addr;
-    dtExecuteInit(state.pipeline.execute.result);
-    dtExecuteInit(state.pipeline.execute.final);
-    state.pipeline.execute.result.inst_addr = 0x0_addr;
-    state.pipeline.execute.final.inst_addr = 0x0_addr;
-    dtMemoryInit(state.pipeline.memory.result);
-    dtMemoryInit(state.pipeline.memory.final);
-    state.pipeline.memory.result.inst_addr = 0x0_addr;
-    state.pipeline.memory.final.inst_addr = 0x0_addr;
+    state.pipeline = {};
 }
 
 bool StopExceptionHandler::handle_exception(
