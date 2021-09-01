@@ -7,6 +7,7 @@ set(common_HEADERS
         endian.h
         logging.h
         logging_format_colors.h
+		memory_ownership.h
         )
 
 # =============================================================================
