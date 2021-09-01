@@ -95,12 +95,10 @@ const char *const Rv_regnames[32] = {
 #define FLAGS_ALU_I (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_ALU_REQ_RS)
 #define FLAGS_ALU_I_ZE (FLAGS_ALU_I | IMF_ZERO_EXTEND)
 
-#define FLAGS_ALU_I_LOAD                                                       \
-    (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM         \
-     | IMF_ALU_REQ_RS)
-#define FLAGS_ALU_I_STORE                                                      \
-    (IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | IMF_MEM | IMF_ALU_REQ_RS      \
-     | IMF_ALU_REQ_RT)
+#define FLAGS_ALU_I_LOAD                                                                           \
+    (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM | IMF_ALU_REQ_RS)
+#define FLAGS_ALU_I_STORE                                                                          \
+    (IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | IMF_MEM | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
 
 #define FLAGS_ALU_T_R_D (IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE)
 #define FLAGS_ALU_T_R_STD (FLAGS_ALU_T_R_D | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
@@ -389,9 +387,7 @@ void Instruction::flags_alu_op_mem_ctl(
     alu_op = im.alu;
     mem_ctl = im.mem_ctl;
 #if 1
-    if ((dt ^ im.code) & (im.mask)) {
-        flags = (enum InstructionFlags)(flags & ~IMF_SUPPORTED);
-    }
+    if ((dt ^ im.code) & (im.mask)) { flags = (enum InstructionFlags)(flags & ~IMF_SUPPORTED); }
 #endif
 }
 
@@ -550,9 +546,7 @@ static void reloc_append(
     int i = 0;
     for (; i < fl.size(); i++) {
         QChar ch = fl.at(i);
-        if (ch.isSpace()) {
-            continue;
-        }
+        if (ch.isSpace()) { continue; }
         if (ch.isLetterOrNumber() || (ch == '_')) {
             expression.append(ch);
         } else if (allowed_operators.indexOf(ch) >= 0) {
@@ -565,9 +559,7 @@ static void reloc_append(
     reloc->append(new RelocExpression(
         inst_addr, expression, offset, adesc->min, adesc->max, &adesc->arg, filename, line,
         options));
-    if (chars_taken != nullptr) {
-        *chars_taken = i;
-    }
+    if (chars_taken != nullptr) { *chars_taken = i; }
 }
 
 // #define CFS_OPTION_SILENT_MASK 0x100
@@ -591,11 +583,8 @@ ssize_t Instruction::code_from_string(
     uint32_t inst_code = 0;
     auto i = str_to_instruction_code_map.lowerBound(inst_base);
     for (;; i++) {
-        if (i == str_to_instruction_code_map.end()) { break;
-        }
-        if (i.key() != inst_base) {
-            break;
-        }
+        if (i == str_to_instruction_code_map.end()) { break; }
+        if (i.key() != inst_base) { break; }
         inst_code = i.value();
         const InstructionMap &im = InstructionMapFind(inst_code);
 
@@ -612,9 +601,7 @@ ssize_t Instruction::code_from_string(
                 const char *p;
                 char *r;
                 uint a = ao.toLatin1();
-                if (!a) {
-                    continue;
-                }
+                if (!a) { continue; }
                 fl = fl.trimmed();
                 const ArgumentDesc *adesc = argdesbycode[a];
                 if (adesc == nullptr) {
@@ -714,17 +701,14 @@ ssize_t Instruction::code_from_string(
                 inst_code |= adesc->arg.encode(val);
                 fl = fl.mid(chars_taken);
             }
-            if (field == -1) {
-                break;
-            }
+            if (field == -1) { break; }
             if (fl.trimmed() != "") {
                 err = "excessive characters in argument";
                 field = -1;
                 break;
             }
         }
-        if (field != inst_fields.count()) {
-            continue; }
+        if (field != inst_fields.count()) { continue; }
 
         if (buffsize >= 4) { *code = inst_code; }
         return 4;
@@ -784,16 +768,13 @@ ssize_t Instruction::code_from_string(
     }
     l = k;
     while (l < str.count()) {
-        if (!str.at(l).isLetterOrNumber()) { break;
-        }
+        if (!str.at(l).isLetterOrNumber()) { break; }
         l++;
     }
     QString inst_base = str.mid(k, l - k).toLower();
     str = str.mid(l + 1).trimmed();
     QStringList inst_fields;
-    if (str.count()) {
-        inst_fields = str.split(",");
-    }
+    if (str.count()) { inst_fields = str.split(","); }
 
     if (!inst_base.count()) {
         error = "empty instruction field";
@@ -830,8 +811,7 @@ bool Instruction::update(int64_t val, RelocExpression *relocexp) {
 }
 
 void Instruction::append_recognized_instructions(QStringList &list) {
-    if (str_to_instruction_code_map.isEmpty()) {
-        instruction_from_string_build_base(); }
+    if (str_to_instruction_code_map.isEmpty()) { instruction_from_string_build_base(); }
 
     foreach (const QString &str, str_to_instruction_code_map.keys())
         list.append(str);

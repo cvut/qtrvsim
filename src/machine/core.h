@@ -59,8 +59,8 @@ public:
     ~Core() override;
 
     void step(bool skip_break = false); // Do single step
-    void reset(); // Reset core (only core, memory and registers has to be
-                  // reseted separately)
+    void reset();                       // Reset core (only core, memory and registers has to be
+                                        // reseted separately)
 
     unsigned get_cycle_count() const; // Returns number of executed
                                       // get_cycle_count
@@ -71,9 +71,7 @@ public:
     Predictor *get_predictor();
     FrontendMemory *get_mem_data();
     FrontendMemory *get_mem_program();
-    void register_exception_handler(
-        ExceptionCause excause,
-        ExceptionHandler *exhandler);
+    void register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler);
     void insert_hwbreak(Address address);
     void remove_hwbreak(Address address);
     bool is_hwbreak(Address address);

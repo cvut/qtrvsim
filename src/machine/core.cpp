@@ -103,9 +103,7 @@ bool Core::get_step_over_exception(enum ExceptionCause excause) const {
     return state.step_over_exception[excause];
 }
 
-void Core::register_exception_handler(
-    ExceptionCause excause,
-    ExceptionHandler *exhandler) {
+void Core::register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler) {
     if (excause == EXCAUSE_NONE) {
         delete ex_default_handler;
         ex_default_handler = exhandler;
@@ -151,9 +149,7 @@ bool Core::handle_exception(
         ret = ex_default_handler->handle_exception(
             core, regs, excause, inst_addr, next_addr, jump_branch_pc, mem_ref_addr);
     }
-    if (get_stop_on_exception(excause)) {
-        emit core->stop_on_exception_reached();
-    }
+    if (get_stop_on_exception(excause)) { emit core->stop_on_exception_reached(); }
 
     return ret;
 }
@@ -187,16 +183,12 @@ enum ExceptionCause Core::memory_special(
         mem_program->sync();
         break;
     case AC_STORE_CONDITIONAL:
-        if (!memwrite) {
-            break;
-        }
+        if (!memwrite) { break; }
         mem_data->write_u32(mem_addr, rt_value.as_u32());
         towrite_val = 1;
         break;
     case AC_LOAD_LINKED:
-        if (!memread) {
-            break;
-        }
+        if (!memread) { break; }
         towrite_val = mem_data->read_u32(mem_addr);
         break;
     case AC_WORD_RIGHT:
@@ -210,8 +202,7 @@ enum ExceptionCause Core::memory_special(
             shift = (3u - (mem_addr.get_raw() & 3u)) << 3;
             mask = 0xffffffff >> shift;
             towrite_val = mem_data->read_u32(mem_addr & ~3u);
-            towrite_val
-                = (towrite_val.as_u32() >> shift) | (rt_value.as_u32() & ~mask);
+            towrite_val = (towrite_val.as_u32() >> shift) | (rt_value.as_u32() & ~mask);
         }
         break;
     case AC_WORD_LEFT:
@@ -225,8 +216,7 @@ enum ExceptionCause Core::memory_special(
             shift = (mem_addr.get_raw() & 3u) << 3;
             mask = 0xffffffff << shift;
             towrite_val = mem_data->read_u32(mem_addr & ~3);
-            towrite_val
-                = (towrite_val.as_u32() << shift) | (rt_value.as_u32() & ~mask);
+            towrite_val = (towrite_val.as_u32() << shift) | (rt_value.as_u32() & ~mask);
         }
         break;
     default: break;
@@ -426,15 +416,10 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
     if (excause == EXCAUSE_NONE) {
         if (is_special_access(dt.memctl)) {
             excause = memory_special(
-                dt.memctl, dt.inst.rt(), memread, memwrite, towrite_val,
-                dt.val_rt, mem_addr);
+                dt.memctl, dt.inst.rt(), memread, memwrite, towrite_val, dt.val_rt, mem_addr);
         } else if (is_regular_access(dt.memctl)) {
-            if (memwrite) {
-                mem_data->write_ctl(dt.memctl, mem_addr, dt.val_rt);
-            }
-            if (memread) {
-                towrite_val = mem_data->read_ctl(dt.memctl, mem_addr);
-            }
+            if (memwrite) { mem_data->write_ctl(dt.memctl, mem_addr, dt.val_rt); }
+            if (memread) { towrite_val = mem_data->read_ctl(dt.memctl, mem_addr); }
         } else {
             Q_ASSERT(dt.memctl == AC_NONE);
             // AC_NONE is memory NOP
@@ -669,16 +654,10 @@ void CorePipelined::do_step(bool skip_break) {
           && (STAGE).final.num_rd == state.pipeline.decode.final.num_rs)                           \
          || (state.pipeline.decode.final.alu_req_rt                                                \
              && (STAGE).final.num_rd == state.pipeline.decode.final.num_rt))) //
-        // Note:
-        // We
-        // make
-        // exception
-        // with
-        // $0 as that has no effect and
-        // is used in nop instruction
+        // Note: We make exception with $0 as that has no effect and is used in nop instruction
 
-        // Write back internal combinatoricly propagates written instruction to
-        // decode internal so nothing has to be done for that internal
+        // Write back internal combinatoricly propagates written instruction to decode internal
+        // so nothing has to be done for that internal
         if (HAZARD(state.pipeline.memory)) {
             // Hazard with instruction in memory internal
             if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
