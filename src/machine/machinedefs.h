@@ -20,8 +20,6 @@ enum AccessControl {
     AC_U64,
     AC_LOAD_LINKED,
     AC_STORE_CONDITIONAL,
-    AC_WORD_RIGHT,
-    AC_WORD_LEFT,
     AC_CACHE_OP,
 };
 
@@ -38,7 +36,7 @@ constexpr bool is_special_access(AccessControl type) {
     return AC_FIRST_SPECIAL <= type and type <= AC_LAST_SPECIAL;
 }
 static_assert(is_special_access(AC_CACHE_OP), "");
-static_assert(is_special_access((AccessControl)13), "");
+static_assert(is_special_access((AccessControl)11), "");
 
 enum ExceptionCause {
     EXCAUSE_NONE = 0, // Use zero as default value when no exception is

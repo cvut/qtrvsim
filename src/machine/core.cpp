@@ -168,11 +168,7 @@ enum ExceptionCause Core::memory_special(
     RegisterValue &towrite_val,
     RegisterValue rt_value,
     Address mem_addr) {
-    UNUSED(mode)
-
-    uint32_t mask;
-    uint32_t shift;
-    uint32_t temp;
+    Q_UNUSED(mode)
 
     switch (memctl) {
     case AC_CACHE_OP:
@@ -187,34 +183,6 @@ enum ExceptionCause Core::memory_special(
     case AC_LOAD_LINKED:
         if (!memread) { break; }
         towrite_val = mem_data->read_u32(mem_addr);
-        break;
-    case AC_WORD_RIGHT:
-        if (memwrite) {
-            shift = (3u - (mem_addr.get_raw() & 3u)) << 3;
-            mask = 0xffffffff << shift;
-            temp = mem_data->read_u32(mem_addr & ~3u);
-            temp = (temp & ~mask) | (rt_value.as_u32() << shift);
-            mem_data->write_u32(mem_addr & ~3u, temp);
-        } else {
-            shift = (3u - (mem_addr.get_raw() & 3u)) << 3;
-            mask = 0xffffffff >> shift;
-            towrite_val = mem_data->read_u32(mem_addr & ~3u);
-            towrite_val = (towrite_val.as_u32() >> shift) | (rt_value.as_u32() & ~mask);
-        }
-        break;
-    case AC_WORD_LEFT:
-        if (memwrite) {
-            shift = (mem_addr.get_raw() & 3u) << 3;
-            mask = 0xffffffff >> shift;
-            temp = mem_data->read_u32(mem_addr & ~3);
-            temp = (temp & ~mask) | (rt_value.as_u32() >> shift);
-            mem_data->write_u32(mem_addr & ~3, temp);
-        } else {
-            shift = (mem_addr.get_raw() & 3u) << 3;
-            mask = 0xffffffff << shift;
-            towrite_val = mem_data->read_u32(mem_addr & ~3);
-            towrite_val = (towrite_val.as_u32() << shift) | (rt_value.as_u32() & ~mask);
-        }
         break;
     default: break;
     }
