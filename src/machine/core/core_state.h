@@ -3,6 +3,7 @@
 
 #include "machinedefs.h"
 #include "pipeline.h"
+#include "common/memory_ownership.h"
 
 #include <QMap>
 #include <cstdint>
@@ -24,7 +25,7 @@ struct CoreState {
     uint32_t cycle_count = 0;
     std::array<bool, EXCAUSE_COUNT> stop_on_exception {};
     std::array<bool, EXCAUSE_COUNT> step_over_exception {};
-    QMap<Address, hwBreak *> hw_breaks {};
+    QMap<Address, OWNED hwBreak *> hw_breaks {};
     uint32_t hwr_userlocal;
     uint32_t min_cache_row_size;
 };

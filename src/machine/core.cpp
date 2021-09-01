@@ -17,13 +17,13 @@ Core::Core(
     Cop0State *cop0state,
     Xlen xlen)
     : xlen(xlen)
-    , ex_handlers() {
-    this->regs = regs;
-    this->cop0state = cop0state;
-    this->predictor = predictor;
-    this->mem_program = mem_program;
-    this->mem_data = mem_data;
-    this->ex_default_handler = new StopExceptionHandler();
+    , regs(regs)
+    , cop0state(cop0state)
+    , predictor(predictor)
+    , mem_data(mem_data)
+    , mem_program(mem_program)
+    , ex_handlers()
+    , ex_default_handler(new StopExceptionHandler()) {
     this->state.min_cache_row_size = min_cache_row_size;
     this->state.hwr_userlocal = 0xe0000000;
     if (cop0state != nullptr) { cop0state->setup_core(this); }
@@ -32,10 +32,6 @@ Core::Core(
         state.step_over_exception[i] = true;
     }
     state.step_over_exception[EXCAUSE_INT] = false;
-}
-
-Core::~Core() {
-    delete ex_default_handler;
 }
 
 void Core::step(bool skip_break) {
@@ -107,8 +103,7 @@ bool Core::get_step_over_exception(enum ExceptionCause excause) const {
 
 void Core::register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler) {
     if (excause == EXCAUSE_NONE) {
-        delete ex_default_handler;
-        ex_default_handler = exhandler;
+        ex_default_handler.reset(exhandler);
     } else {
         ExceptionHandler *old = ex_handlers.take(excause);
         delete old;

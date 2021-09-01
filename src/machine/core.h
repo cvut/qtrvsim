@@ -12,6 +12,7 @@
 #include "register_value.h"
 #include "registers.h"
 #include "simulator_exception.h"
+#include "common/memory_ownership.h"
 
 #include <QObject>
 
@@ -57,7 +58,6 @@ public:
         unsigned int min_cache_row_size = 1,
         Cop0State *cop0state = nullptr,
         Xlen xlen = Xlen::_32);
-    ~Core() override;
 
     void step(bool skip_break = false); // Do single step
     void reset();                       // Reset core (only core, memory and registers has to be
@@ -202,12 +202,12 @@ protected:
     uint64_t get_xlen_from_reg(RegisterValue reg) const;
 
     const Xlen xlen;
-    Registers *regs;
-    Cop0State *cop0state;
-    Predictor *predictor;
-    FrontendMemory *mem_data, *mem_program;
-    QMap<ExceptionCause, ExceptionHandler *> ex_handlers;
-    ExceptionHandler *ex_default_handler;
+    BORROWED Registers *const regs;
+    BORROWED Cop0State *const cop0state;
+    BORROWED Predictor *const predictor;
+    BORROWED FrontendMemory *const mem_data, *const mem_program;
+    QMap<ExceptionCause, OWNED ExceptionHandler *> ex_handlers;
+    Box<ExceptionHandler> ex_default_handler;
 
     FetchState fetch(bool skip_break = false);
     DecodeState decode(const FetchInterstage &);
