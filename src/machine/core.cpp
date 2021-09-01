@@ -36,7 +36,6 @@ Core::Core(
 
 void Core::step(bool skip_break) {
     state.cycle_count++;
-    emit cycle_c_value(state.cycle_count);
     do_step(skip_break);
     emit step_done();
 }
@@ -243,18 +242,6 @@ DecodeState Core::decode(const FetchInterstage &dt) {
 
     emit decode_inst_addr_value(dt.inst_addr);
     emit instruction_decoded(dt.inst, dt.inst_addr, excause, dt.is_valid);
-    emit decode_instruction_value(dt.inst.data());
-    emit decode_reg1_value(val_rs.as_u32());
-    emit decode_reg2_value(val_rt.as_u32());
-    emit decode_immediate_value(immediate_val);
-    emit decode_regw_value(regwrite);
-    emit decode_memtoreg_value(bool(flags & IMF_MEMREAD));
-    emit decode_memwrite_value(bool(flags & IMF_MEMWRITE));
-    emit decode_memread_value(bool(flags & IMF_MEMREAD));
-    emit decode_alusrc_value(bool(flags & IMF_ALUSRC));
-    emit decode_rs_num_value(num_rs);
-    emit decode_rt_num_value(num_rt);
-    emit decode_rd_num_value(num_rd);
 
     return { DecodeInternalState {
                  .alu_op_num = static_cast<unsigned>(alu_op),
@@ -307,18 +294,6 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
 
     emit execute_inst_addr_value(dt.inst_addr);
     emit instruction_executed(dt.inst, dt.inst_addr, excause, dt.is_valid);
-    emit execute_alu_value(alu_val.as_u32());
-    emit execute_reg1_value(dt.val_rs.as_u32());
-    emit execute_reg2_value(dt.val_rt.as_u32());
-    emit execute_reg1_ff_value(dt.ff_rs);
-    emit execute_reg2_ff_value(dt.ff_rt);
-    //    emit execute_immediate_value(dt.immediate_val);
-    emit execute_regw_value(dt.regwrite);
-    emit execute_memtoreg_value(dt.memread);
-    emit execute_memread_value(dt.memread);
-    emit execute_memwrite_value(dt.memwrite);
-    emit execute_alusrc_value(dt.alusrc);
-    emit execute_rd_num_value(dt.num_rd);
 
     const unsigned stall_status = [&]() {
         if (dt.stall) {
@@ -329,7 +304,6 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
             return 0;
         }
     }();
-    emit execute_stall_forward_value(stall_status);
 
     return { ExecuteInternalState {
                  .alu_src = dt.alusrc,
@@ -399,15 +373,6 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
 
     emit memory_inst_addr_value(dt.inst_addr);
     emit instruction_memory(dt.inst, dt.inst_addr, dt.excause, dt.is_valid);
-    emit memory_alu_value(dt.alu_val.as_u32());
-    emit memory_rt_value(dt.val_rt.as_u32());
-    emit memory_mem_value(memread ? towrite_val.as_u32() : 0);
-    emit memory_regw_value(regwrite);
-    emit memory_memtoreg_value(dt.memread);
-    emit memory_memread_value(dt.memread);
-    emit memory_memwrite_value(memwrite);
-    emit memory_regw_num_value(dt.num_rd);
-    emit memory_excause_value(excause);
 
     return { MemoryInternalState {
                  .memwrite = dt.memwrite,
@@ -437,10 +402,6 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
 WritebackState Core::writeback(const MemoryInterstage &dt) {
     emit writeback_inst_addr_value(dt.inst_addr);
     emit instruction_writeback(dt.inst, dt.inst_addr, dt.excause, dt.is_valid);
-    emit writeback_value(dt.towrite_val.as_u32());
-    emit writeback_memtoreg_value(dt.memtoreg);
-    emit writeback_regw_value(dt.regwrite);
-    emit writeback_regw_num_value(dt.num_rd);
     if (dt.regwrite) { regs->write_gp(dt.num_rd, dt.towrite_val); }
 
     return { WritebackInternalState {
@@ -453,8 +414,6 @@ WritebackState Core::writeback(const MemoryInterstage &dt) {
 }
 
 Address Core::handle_pc(const ExecuteInterstage &dt) {
-    emit instruction_program_counter(dt.inst, dt.inst_addr, EXCAUSE_NONE, dt.is_valid);
-
     if (dt.jump) { return Address(get_xlen_from_reg(dt.alu_val)); }
     if (dt.branch_taken) { return dt.branch_target; }
     return dt.inst_addr + 4;
@@ -612,8 +571,6 @@ void CorePipelined::do_step(bool skip_break) {
     }
     if (p.execute.final.stop_if || p.memory.final.stop_if) { stall = true; }
 
-    emit hu_stall_value(stall);
-
     // Now process program counter (loop connections from decode internal)
     if (!stall && !p.decode.final.stop_if) {
         p.decode.final.stall = false;
@@ -636,10 +593,7 @@ void CorePipelined::do_step(bool skip_break) {
             p.fetch.final.flush();
         }
     }
-    if (stall || p.decode.final.stop_if) {
-        state.stall_count++;
-        emit stall_c_value(state.stall_count);
-    }
+    if (stall || p.decode.final.stop_if) { state.stall_count++; }
 }
 
 void CorePipelined::do_reset() {
