@@ -51,13 +51,13 @@ public:
     Registers();
     Registers(const Registers &);
 
-    Address read_pc() const;          // Return current value of program counter
-    Address pc_inc();                 // Increment program counter by four bytes
-    Address pc_jmp(int32_t offset);   // Relative jump from current
-                                      // location in
-                                      // program counter
-    void pc_abs_jmp(Address address); // Absolute jump in program counter (write
-                                      // to pc)
+    Address read_pc() const;             // Return current value of program counter
+    Address pc_inc();                    // Increment program counter by four bytes
+    Address pc_jmp(int32_t offset);      // Relative jump from current
+                                         // location in
+                                         // program counter
+    void pc_abs_jmp(Address address);    // Absolute jump in program counter (write
+                                         // to pc)
     void pc_abs_jmp_28(Address address); // Absolute jump in current 256MB
                                          // section (basically J implementation)
 

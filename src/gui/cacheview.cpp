@@ -384,17 +384,13 @@ void CacheViewBlock::cache_update(
     }
     // TODO calculate correct size of tag
     this->tag[set]->setText(
-        valid ? QString("0x")
-                    + QString("%1").arg(tag, 8, 16, QChar('0')).toUpper()
-              : "");
+        valid ? QString("0x") + QString("%1").arg(tag, 8, 16, QChar('0')).toUpper() : "");
     for (unsigned i = 0; i < columns; i++) {
         this->data[set][i]->setText(
             valid ? QString("0x")
                         + QString("%1")
                               .arg(
-                                  byteswap_if(
-                                      data[i], simulated_machine_endian
-                                                   != NATIVE_ENDIAN),
+                                  byteswap_if(data[i], simulated_machine_endian != NATIVE_ENDIAN),
                                   8, 16, QChar('0'))
                               .toUpper()
                   : "");

@@ -155,12 +155,10 @@ bool Core::handle_exception(
     ExceptionHandler *exhandler = ex_handlers.value(excause);
     if (exhandler != nullptr) {
         ret = exhandler->handle_exception(
-            core, regs, excause, inst_addr, next_addr, jump_branch_pc,
-            in_delay_slot, mem_ref_addr);
+            core, regs, excause, inst_addr, next_addr, jump_branch_pc, in_delay_slot, mem_ref_addr);
     } else if (ex_default_handler != nullptr) {
         ret = ex_default_handler->handle_exception(
-            core, regs, excause, inst_addr, next_addr, jump_branch_pc,
-            in_delay_slot, mem_ref_addr);
+            core, regs, excause, inst_addr, next_addr, jump_branch_pc, in_delay_slot, mem_ref_addr);
     }
     if (get_stop_on_exception(excause)) {
         emit core->stop_on_exception_reached();
@@ -285,8 +283,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
 
     if (!(flags & IMF_SUPPORTED)) {
         throw SIMULATOR_EXCEPTION(
-            UnsupportedInstruction,
-            "Instruction with following encoding is not supported",
+            UnsupportedInstruction, "Instruction with following encoding is not supported",
             QString::number(dt.inst.data(), 16));
     }
 
@@ -302,9 +299,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
 
     // requires rs for beq, bne, blez, bgtz, jr nad jalr
     bool bjr_req_rs = flags & IMF_BJR_REQ_RS;
-    if (flags & IMF_PC8_TO_RT) {
-        val_rt = (dt.inst_addr + 8).get_raw();
-    }
+    if (flags & IMF_PC8_TO_RT) { val_rt = (dt.inst_addr + 8).get_raw(); }
     // requires rt for beq, bne
     bool bjr_req_rt = flags & IMF_BJR_REQ_RT;
 
@@ -335,9 +330,7 @@ struct Core::dtDecode Core::decode(const struct dtFetch &dt) {
     emit decode_rd_num_value(num_rd);
     emit decode_regd31_value(regd31);
 
-    if (regd31) {
-        val_rt = (dt.inst_addr + 8).get_raw();
-    }
+    if (regd31) { val_rt = (dt.inst_addr + 8).get_raw(); }
 
     rwrite = regd31 ? 31 : regd ? num_rd : num_rt;
 
@@ -396,11 +389,8 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
 
     if (excause == EXCAUSE_NONE) {
         alu_val = alu_operate(
-            dt.aluop, dt.val_rs, alu_sec, dt.inst.shamt(), dt.num_rd, regs,
-            discard, excause);
-        if (discard) {
-            regwrite = false;
-        }
+            dt.aluop, dt.val_rs, alu_sec, dt.inst.shamt(), dt.num_rd, regs, discard, excause);
+        if (discard) { regwrite = false; }
 
         switch (dt.aluop) {
         case ALU_OP_RDHWR:
@@ -426,39 +416,32 @@ struct Core::dtExecute Core::execute(const struct dtDecode &dt) {
         case ALU_OP_MTC0:
             if (cop0state == nullptr) {
                 throw SIMULATOR_EXCEPTION(
-                    UnsupportedInstruction, "Cop0 not supported",
-                    "setup Cop0State");
+                    UnsupportedInstruction, "Cop0 not supported", "setup Cop0State");
             }
             cop0state->write_cop0reg(dt.num_rd, dt.inst.cop0sel(), dt.val_rt);
             break;
         case ALU_OP_MFC0:
             if (cop0state == nullptr) {
                 throw SIMULATOR_EXCEPTION(
-                    UnsupportedInstruction, "Cop0 not supported",
-                    "setup Cop0State");
+                    UnsupportedInstruction, "Cop0 not supported", "setup Cop0State");
             }
             alu_val = cop0state->read_cop0reg(dt.num_rd, dt.inst.cop0sel());
             break;
         case ALU_OP_MFMC0:
             if (cop0state == nullptr) {
                 throw SIMULATOR_EXCEPTION(
-                    UnsupportedInstruction, "Cop0 not supported",
-                    "setup Cop0State");
+                    UnsupportedInstruction, "Cop0 not supported", "setup Cop0State");
             }
             alu_val = cop0state->read_cop0reg(dt.num_rd, dt.inst.cop0sel());
             if (dt.inst.funct() & 0x20) {
-                cop0state->write_cop0reg(
-                    dt.num_rd, dt.inst.cop0sel(), dt.val_rt.as_u32() | 1);
+                cop0state->write_cop0reg(dt.num_rd, dt.inst.cop0sel(), dt.val_rt.as_u32() | 1);
             } else {
-                cop0state->write_cop0reg(
-                    dt.num_rd, dt.inst.cop0sel(), dt.val_rt.as_u32() & ~1U);
+                cop0state->write_cop0reg(dt.num_rd, dt.inst.cop0sel(), dt.val_rt.as_u32() & ~1U);
             }
             break;
         case ALU_OP_ERET:
             regs->pc_abs_jmp(Address(cop0state->read_cop0reg(Cop0State::EPC)));
-            if (cop0state != nullptr) {
-                cop0state->set_status_exl(false);
-            }
+            if (cop0state != nullptr) { cop0state->set_status_exl(false); }
             break;
         default: break;
         }
@@ -573,9 +556,7 @@ void Core::writeback(const struct dtMemory &dt) {
     emit writeback_memtoreg_value(dt.memtoreg);
     emit writeback_regw_value(dt.regwrite);
     emit writeback_regw_num_value(dt.rwrite);
-    if (dt.regwrite) {
-        regs->write_gp(dt.rwrite, dt.towrite_val);
-    }
+    if (dt.regwrite) { regs->write_gp(dt.rwrite, dt.towrite_val); }
 }
 
 bool Core::handle_pc(const struct dtDecode &dt) {
@@ -606,9 +587,7 @@ bool Core::handle_pc(const struct dtDecode &dt) {
             branch = dt.val_rs.as_i32() <= 0;
         }
 
-        if (dt.bj_not) {
-            branch = !branch;
-        }
+        if (dt.bj_not) { branch = !branch; }
     }
 
     emit fetch_jump_value(false);
@@ -617,9 +596,7 @@ bool Core::handle_pc(const struct dtDecode &dt) {
 
     if (branch) {
         int32_t rel_offset = dt.inst.immediate() << 2;
-        if (rel_offset & (1 << 17)) {
-            rel_offset -= 1 << 18;
-        }
+        if (rel_offset & (1 << 17)) { rel_offset -= 1 << 18; }
         regs->pc_abs_jmp(dt.inst_addr + rel_offset + 4);
     } else {
         regs->pc_inc();
@@ -732,8 +709,7 @@ void CoreSingle::do_step(bool skip_break) {
 
     if ((m.stop_if || (m.excause != EXCAUSE_NONE)) && dt_f != nullptr) {
         dtFetchInit(*dt_f);
-        emit instruction_fetched(
-            dt_f->inst, dt_f->inst_addr, dt_f->excause, dt_f->is_valid);
+        emit instruction_fetched(dt_f->inst, dt_f->inst_addr, dt_f->excause, dt_f->is_valid);
         emit fetch_inst_addr_value(STAGEADDR_NONE);
     } else {
         bool branch_taken = handle_pc(d);
@@ -749,12 +725,10 @@ void CoreSingle::do_step(bool skip_break) {
     }
 
     if (m.excause != EXCAUSE_NONE) {
-        if (dt_f != nullptr) {
-            regs->pc_abs_jmp(dt_f->inst_addr);
-        }
+        if (dt_f != nullptr) { regs->pc_abs_jmp(dt_f->inst_addr); }
         handle_exception(
-            this, regs, m.excause, m.inst_addr, regs->read_pc(), prev_inst_addr,
-            m.in_delay_slot, m.mem_addr);
+            this, regs, m.excause, m.inst_addr, regs->read_pc(), prev_inst_addr, m.in_delay_slot,
+            m.mem_addr);
         return;
     }
     prev_inst_addr = m.inst_addr;
@@ -796,28 +770,25 @@ void CorePipelined::do_step(bool skip_break) {
     excpt_in_progress = dt_m.excause != EXCAUSE_NONE;
     if (excpt_in_progress) {
         dtExecuteInit(dt_e);
-        emit instruction_executed(
-            dt_e.inst, dt_e.inst_addr, dt_e.excause, dt_e.is_valid);
+        emit instruction_executed(dt_e.inst, dt_e.inst_addr, dt_e.excause, dt_e.is_valid);
         emit execute_inst_addr_value(STAGEADDR_NONE);
     }
     excpt_in_progress = excpt_in_progress || dt_e.excause != EXCAUSE_NONE;
     if (excpt_in_progress) {
         dtDecodeInit(dt_d);
-        emit instruction_decoded(
-            dt_d.inst, dt_d.inst_addr, dt_d.excause, dt_d.is_valid);
+        emit instruction_decoded(dt_d.inst, dt_d.inst_addr, dt_d.excause, dt_d.is_valid);
         emit decode_inst_addr_value(STAGEADDR_NONE);
     }
     excpt_in_progress = excpt_in_progress || dt_e.excause != EXCAUSE_NONE;
     if (excpt_in_progress) {
         dtFetchInit(dt_f);
-        emit instruction_fetched(
-            dt_f.inst, dt_f.inst_addr, dt_f.excause, dt_f.is_valid);
+        emit instruction_fetched(dt_f.inst, dt_f.inst_addr, dt_f.excause, dt_f.is_valid);
         emit fetch_inst_addr_value(STAGEADDR_NONE);
         if (dt_m.excause != EXCAUSE_NONE) {
             regs->pc_abs_jmp(dt_e.inst_addr);
             handle_exception(
-                this, regs, dt_m.excause, dt_m.inst_addr, dt_e.inst_addr,
-                jump_branch_pc, dt_m.in_delay_slot, dt_m.mem_addr);
+                this, regs, dt_m.excause, dt_m.inst_addr, dt_e.inst_addr, jump_branch_pc,
+                dt_m.in_delay_slot, dt_m.mem_addr);
         }
         return;
     }
@@ -829,13 +800,12 @@ void CorePipelined::do_step(bool skip_break) {
         // Note: We make exception with $0 as that has no effect when
         // written and is used in nop instruction
 
-#define HAZARD(STAGE)                                                          \
-    ((STAGE).regwrite && (STAGE).rwrite != 0                                   \
-     && ((dt_d.alu_req_rs && (STAGE).rwrite == dt_d.num_rs)                    \
-         || (dt_d.alu_req_rt                                                   \
-             && (STAGE).rwrite == dt_d.num_rt))) // Note: We make exception with
-                                                 // $0 as that has no effect and
-                                                 // is used in nop instruction
+#define HAZARD(STAGE)                                                                              \
+    ((STAGE).regwrite && (STAGE).rwrite != 0                                                       \
+     && ((dt_d.alu_req_rs && (STAGE).rwrite == dt_d.num_rs)                                        \
+         || (dt_d.alu_req_rt && (STAGE).rwrite == dt_d.num_rt))) // Note: We make exception with
+                                                                 // $0 as that has no effect and
+                                                                 // is used in nop instruction
 
         // Write back stage combinatoricly propagates written instruction to
         // decode stage so nothing has to be done for that stage
@@ -882,8 +852,7 @@ void CorePipelined::do_step(bool skip_break) {
             stall = true;
             branch_stall = true;
         } else {
-            if (hazard_unit != MachineConfig::HU_STALL_FORWARD
-                || dt_m.memtoreg) {
+            if (hazard_unit != MachineConfig::HU_STALL_FORWARD || dt_m.memtoreg) {
                 if (dt_m.rwrite != 0 && dt_m.regwrite
                     && ((dt_d.bjr_req_rs && dt_d.num_rs == dt_m.rwrite)
                         || (dt_d.bjr_req_rt && dt_d.num_rt == dt_m.rwrite))) {
@@ -905,8 +874,7 @@ void CorePipelined::do_step(bool skip_break) {
         emit forward_m_d_rs_value(dt_d.forward_m_d_rs);
         emit forward_m_d_rt_value(dt_d.forward_m_d_rt);
     }
-    emit branch_forward_value(
-        (dt_d.forward_m_d_rs || dt_d.forward_m_d_rt) ? 2 : branch_stall);
+    emit branch_forward_value((dt_d.forward_m_d_rs || dt_d.forward_m_d_rt) ? 2 : branch_stall);
 #if 0
     if (stall)
         printf("STALL\n");
@@ -922,9 +890,7 @@ void CorePipelined::do_step(bool skip_break) {
     printf("PC 0x%08lx\n", (unsigned long)dt_f.inst_addr);
 #endif
 
-    if (dt_e.stop_if || dt_m.stop_if) {
-        stall = true;
-    }
+    if (dt_e.stop_if || dt_m.stop_if) { stall = true; }
 
     emit hu_stall_value(stall);
 
@@ -937,8 +903,7 @@ void CorePipelined::do_step(bool skip_break) {
         } else {
             if (dt_d.nb_skip_ds) {
                 dtFetchInit(dt_f);
-                emit instruction_fetched(
-                    dt_f.inst, dt_f.inst_addr, dt_f.excause, dt_f.is_valid);
+                emit instruction_fetched(dt_f.inst, dt_f.inst_addr, dt_f.excause, dt_f.is_valid);
                 emit fetch_inst_addr_value(STAGEADDR_NONE);
             }
         }

@@ -36,8 +36,7 @@ Address Registers::pc_inc() {
 Address Registers::pc_jmp(int32_t offset) {
     if (offset % 4) {
         throw SIMULATOR_EXCEPTION(
-            UnalignedJump, "Trying to jump by unaligned offset",
-            QString::number(offset, 16));
+            UnalignedJump, "Trying to jump by unaligned offset", QString::number(offset, 16));
     }
     this->pc += offset;
     emit pc_update(this->pc);

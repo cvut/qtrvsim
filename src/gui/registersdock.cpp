@@ -31,9 +31,7 @@ RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
     } while (false)
 
     for (int i = 0; i < 32; i++) {
-        INIT(
-            gp[i],
-            QString("$") + QString::number(i) + QString("/") + labels[i]);
+        INIT(gp[i], QString("$") + QString::number(i) + QString("/") + labels[i]);
     }
     INIT(pc, "pc");
     INIT(lo, "lo");

@@ -164,8 +164,7 @@ bool SimpleAsm::process_line(
                 && (operand_num == -1)) {
                 maybe_label = false;
                 if (token_beg != -1) {
-                    op = line.mid(token_beg, token_last - token_beg + 1)
-                             .toUpper();
+                    op = line.mid(token_beg, token_last - token_beg + 1).toUpper();
                 }
                 token_beg = -1;
                 operand_num = 0;
@@ -263,9 +262,7 @@ bool SimpleAsm::process_line(
         return true;
     }
 
-    if (op == "#PRAGMA") {
-        return process_pragma(operands, filename, line_number, error_ptr);
-    }
+    if (op == "#PRAGMA") { return process_pragma(operands, filename, line_number, error_ptr); }
     if (op == "#INCLUDE") {
         bool res = true;
         QString incname;
@@ -596,8 +593,7 @@ bool SimpleAsm::process_line(
             if (chars_taken != s.size()) {
                 val = 0;
                 reloc.append(new machine::RelocExpression(
-                    address, s, 0, -0xffffffff, 0xffffffff, 0, 32, 0, filename,
-                    line_number, 0));
+                    address, s, 0, -0xffffffff, 0xffffffff, 0, 32, 0, filename, line_number, 0));
             }
             if (!fatal_occured) {
                 mem->write_u32(address, val, ae::INTERNAL);

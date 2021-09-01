@@ -63,12 +63,10 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
 
     if (machine_config.pipelined()) {
         cr = new CorePipelined(
-            regs, cch_program, cch_data, machine_config.hazard_unit(),
-            min_cache_row_size, cop0st);
+            regs, cch_program, cch_data, machine_config.hazard_unit(), min_cache_row_size, cop0st);
     } else {
         cr = new CoreSingle(
-            regs, cch_program, cch_data, machine_config.delay_slot(),
-            min_cache_row_size, cop0st);
+            regs, cch_program, cch_data, machine_config.delay_slot(), min_cache_row_size, cop0st);
     }
     connect(
         this, &Machine::set_interrupt_signal, cop0st,

@@ -177,8 +177,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     foreach (
         QString file_name, settings->value("openSrcFiles").toStringList()) {
-        if (file_name.isEmpty())
-            continue;
+        if (file_name.isEmpty()) continue;
         SrcEditor *editor = new SrcEditor();
         if (editor->loadFile(file_name)) {
             add_src_editor_to_tabs(editor);
@@ -189,8 +188,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     QDir samples_dir(":/samples");
     for (QString fname : samples_dir.entryList(QDir::Files)) {
-        TextSignalAction *textsigac
-            = new TextSignalAction(fname, ":/samples/" + fname);
+        TextSignalAction *textsigac = new TextSignalAction(fname, ":/samples/" + fname);
         ui->menuExamples->addAction(textsigac);
         connect(
             textsigac, &TextSignalAction::activated, this,
@@ -1014,8 +1012,7 @@ bool SimpleAsmWithEditorCheck::process_pragma(
         {QString("registers"), static_cast<QDockWidget *MainWindow::*>(&MainWindow::registers)},
     };
 #endif
-    if ((operands.count() < 2)
-        || QString::compare(operands.at(0), "qtmips", Qt::CaseInsensitive)) {
+    if ((operands.count() < 2) || QString::compare(operands.at(0), "qtmips", Qt::CaseInsensitive)) {
         return true;
     }
     QString op = operands.at(1).toLower();
@@ -1081,13 +1078,11 @@ bool SimpleAsmWithEditorCheck::process_pragma(
         }
         emit report_message(
             messagetype::MSG_WARNING, filename, line_number, 0,
-            "unknown #pragma qtmisp focus unknown object " + operands.at(2),
-            "");
+            "unknown #pragma qtmisp focus unknown object " + operands.at(2), "");
         return true;
     }
     emit report_message(
-        messagetype::MSG_WARNING, filename, line_number, 0,
-        "unknown #pragma qtmisp " + op, "");
+        messagetype::MSG_WARNING, filename, line_number, 0, "unknown #pragma qtmisp " + op, "");
     return true;
 }
 

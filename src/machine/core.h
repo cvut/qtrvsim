@@ -212,27 +212,27 @@ protected:
     };
     struct dtDecode {
         Instruction inst;
-        bool memread;  // If memory should be read
-        bool memwrite; // If memory should write input
-        bool alusrc;   // If second value to alu is immediate value (rt used
-                       // otherwise)
-        bool regd;     // If rd is used (otherwise rt is used for write target)
-        bool regd31;   // Use R31 as destionation for JAL
-        bool regwrite; // If output should be written back to register (which
-                       // one depends on regd)
-        bool alu_req_rs; // requires rs value for ALU
-        bool alu_req_rt; // requires rt value for ALU or SW
-        bool bjr_req_rs; // requires rs for beq, bne, blez, bgtz, jr nad jalr
-        bool bjr_req_rt; // requires rt for beq, bne
-        bool branch;     // branch instruction
-        bool jump;       // jump
-        bool bj_not;     // negate branch condition
-        bool bgt_blez;   // BGTZ/BLEZ instead of BGEZ/BLTZ
-        bool nb_skip_ds; // Skip delay slot if branch is not taken
-        bool forward_m_d_rs; // forwarding required for beq, bne, blez, bgtz, jr
-                             // nad jalr
-        bool forward_m_d_rt; // forwarding required for beq, bne
-        enum AluOp aluop;    // Decoded ALU operation
+        bool memread;              // If memory should be read
+        bool memwrite;             // If memory should write input
+        bool alusrc;               // If second value to alu is immediate value (rt used
+                                   // otherwise)
+        bool regd;                 // If rd is used (otherwise rt is used for write target)
+        bool regd31;               // Use R31 as destionation for JAL
+        bool regwrite;             // If output should be written back to register (which
+                                   // one depends on regd)
+        bool alu_req_rs;           // requires rs value for ALU
+        bool alu_req_rt;           // requires rt value for ALU or SW
+        bool bjr_req_rs;           // requires rs for beq, bne, blez, bgtz, jr nad jalr
+        bool bjr_req_rt;           // requires rt for beq, bne
+        bool branch;               // branch instruction
+        bool jump;                 // jump
+        bool bj_not;               // negate branch condition
+        bool bgt_blez;             // BGTZ/BLEZ instead of BGEZ/BLTZ
+        bool nb_skip_ds;           // Skip delay slot if branch is not taken
+        bool forward_m_d_rs;       // forwarding required for beq, bne, blez, bgtz, jr
+                                   // nad jalr
+        bool forward_m_d_rt;       // forwarding required for beq, bne
+        enum AluOp aluop;          // Decoded ALU operation
         enum AccessControl memctl; // Decoded memory access type
         uint8_t num_rs;            // Number of the register s
         uint8_t num_rt;            // Number of the register t
@@ -240,8 +240,8 @@ protected:
         RegisterValue val_rs;      // Value from register rs
         RegisterValue val_rt;      // Value from register rt
         uint32_t immediate_val;    // zero or sign-extended immediate value
-        uint8_t rwrite; // Writeback register (multiplexed between rt and
-                        // rd according to regd)
+        uint8_t rwrite;            // Writeback register (multiplexed between rt and
+                                   // rd according to regd)
         ForwardFrom ff_rs;
         ForwardFrom ff_rt;
         Address inst_addr; // Address of instruction

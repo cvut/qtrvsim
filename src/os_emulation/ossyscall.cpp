@@ -79,10 +79,9 @@ static const QMap<int, int> map_target_o_flags_to_o_flags = {
 #endif
 };
 
-#if defined(S_IRUSR) & defined(S_IWUSR) & defined(S_IRGRP) & defined(S_IWGRP)  \
-    & defined(S_IROTH) & defined(S_IWOTH)
-    #define OPEN_MODE                                                          \
-        (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
+#if defined(S_IRUSR) & defined(S_IWUSR) & defined(S_IRGRP) & defined(S_IWGRP) & defined(S_IROTH)   \
+    & defined(S_IWOTH)
+    #define OPEN_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
 #else
     #define OPEN_MODE 0
 #endif
@@ -531,40 +530,33 @@ struct mips_syscall_desc_t {
 
 // The list copyied from QEMU
 
-#define MIPS_SYS(name, args, handler)                                          \
-    { #name, args, &OsSyscallExceptionHandler::handler },
+#define MIPS_SYS(name, args, handler) { #name, args, &OsSyscallExceptionHandler::handler },
 static const mips_syscall_desc_t mips_syscall_args[] = {
     MIPS_SYS(sys_syscall, 8, syscall_default_handler) /* 4000 */
-    MIPS_SYS(sys_exit, 1, do_sys_exit)
-        MIPS_SYS(sys_fork, 0, syscall_default_handler)
-            MIPS_SYS(sys_read, 3, do_sys_read)
-                MIPS_SYS(sys_write, 3, do_sys_write)
-                    MIPS_SYS(sys_open, 3, do_sys_open) /* 4005 */
-    MIPS_SYS(sys_close, 1, do_sys_close)
-        MIPS_SYS(sys_waitpid, 3, syscall_default_handler)
-            MIPS_SYS(sys_creat, 2, syscall_default_handler)
-                MIPS_SYS(sys_link, 2, syscall_default_handler)
-                    MIPS_SYS(sys_unlink, 1, syscall_default_handler) /* 4010 */
-    MIPS_SYS(sys_execve, 0, syscall_default_handler)
-        MIPS_SYS(sys_chdir, 1, syscall_default_handler)
-            MIPS_SYS(sys_time, 1, syscall_default_handler)
-                MIPS_SYS(sys_mknod, 3, syscall_default_handler)
-                    MIPS_SYS(sys_chmod, 2, syscall_default_handler) /* 4015 */
+    MIPS_SYS(sys_exit, 1, do_sys_exit) MIPS_SYS(sys_fork, 0, syscall_default_handler)
+        MIPS_SYS(sys_read, 3, do_sys_read) MIPS_SYS(sys_write, 3, do_sys_write)
+            MIPS_SYS(sys_open, 3, do_sys_open) /* 4005 */
+    MIPS_SYS(sys_close, 1, do_sys_close) MIPS_SYS(sys_waitpid, 3, syscall_default_handler)
+        MIPS_SYS(sys_creat, 2, syscall_default_handler)
+            MIPS_SYS(sys_link, 2, syscall_default_handler)
+                MIPS_SYS(sys_unlink, 1, syscall_default_handler) /* 4010 */
+    MIPS_SYS(sys_execve, 0, syscall_default_handler) MIPS_SYS(sys_chdir, 1, syscall_default_handler)
+        MIPS_SYS(sys_time, 1, syscall_default_handler)
+            MIPS_SYS(sys_mknod, 3, syscall_default_handler)
+                MIPS_SYS(sys_chmod, 2, syscall_default_handler) /* 4015 */
     MIPS_SYS(sys_lchown, 3, syscall_default_handler)
         MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler)
             MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler) /* was sys_stat
                                                                   */
     MIPS_SYS(sys_lseek, 3, syscall_default_handler)
         MIPS_SYS(sys_getpid, 0, syscall_default_handler) /* 4020 */
-    MIPS_SYS(sys_mount, 5, syscall_default_handler)
-        MIPS_SYS(sys_umount, 1, syscall_default_handler)
-            MIPS_SYS(sys_setuid, 1, syscall_default_handler)
-                MIPS_SYS(sys_getuid, 0, syscall_default_handler)
-                    MIPS_SYS(sys_stime, 1, syscall_default_handler) /* 4025 */
-    MIPS_SYS(sys_ptrace, 4, syscall_default_handler)
-        MIPS_SYS(sys_alarm, 1, syscall_default_handler)
-            MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler) /* was
-                                                                    sys_fstat */
+    MIPS_SYS(sys_mount, 5, syscall_default_handler) MIPS_SYS(sys_umount, 1, syscall_default_handler)
+        MIPS_SYS(sys_setuid, 1, syscall_default_handler)
+            MIPS_SYS(sys_getuid, 0, syscall_default_handler)
+                MIPS_SYS(sys_stime, 1, syscall_default_handler) /* 4025 */
+    MIPS_SYS(sys_ptrace, 4, syscall_default_handler) MIPS_SYS(sys_alarm, 1, syscall_default_handler)
+        MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler) /* was
+                                                                sys_fstat */
     MIPS_SYS(sys_pause, 0, syscall_default_handler)
         MIPS_SYS(sys_utime, 2, syscall_default_handler) /* 4030 */
     MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler)
@@ -573,41 +565,35 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
                 MIPS_SYS(sys_nice, 1, syscall_default_handler)
                     MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler) /* 4035
                                                                           */
-    MIPS_SYS(sys_sync, 0, syscall_default_handler)
-        MIPS_SYS(sys_kill, 2, syscall_default_handler)
-            MIPS_SYS(sys_rename, 2, syscall_default_handler)
-                MIPS_SYS(sys_mkdir, 2, syscall_default_handler)
-                    MIPS_SYS(sys_rmdir, 1, syscall_default_handler) /* 4040 */
-    MIPS_SYS(sys_dup, 1, syscall_default_handler)
-        MIPS_SYS(sys_pipe, 0, syscall_default_handler)
-            MIPS_SYS(sys_times, 1, syscall_default_handler)
-                MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler)
-                    MIPS_SYS(sys_brk, 1, do_sys_brk) /* 4045 */
+    MIPS_SYS(sys_sync, 0, syscall_default_handler) MIPS_SYS(sys_kill, 2, syscall_default_handler)
+        MIPS_SYS(sys_rename, 2, syscall_default_handler)
+            MIPS_SYS(sys_mkdir, 2, syscall_default_handler)
+                MIPS_SYS(sys_rmdir, 1, syscall_default_handler) /* 4040 */
+    MIPS_SYS(sys_dup, 1, syscall_default_handler) MIPS_SYS(sys_pipe, 0, syscall_default_handler)
+        MIPS_SYS(sys_times, 1, syscall_default_handler)
+            MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler)
+                MIPS_SYS(sys_brk, 1, do_sys_brk) /* 4045 */
     MIPS_SYS(sys_setgid, 1, syscall_default_handler)
-        MIPS_SYS(sys_getgid, 0, syscall_default_handler) MIPS_SYS(
-            sys_ni_syscall,
-            0,
-            syscall_default_handler) /* was
-                                        signal(2,
-                                        syscall_default_handler)
-                                      */
+        MIPS_SYS(sys_getgid, 0, syscall_default_handler)
+            MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler) /* was
+                                                                    signal(2,
+                                                                    syscall_default_handler)
+                                                                  */
     MIPS_SYS(sys_geteuid, 0, syscall_default_handler)
         MIPS_SYS(sys_getegid, 0, syscall_default_handler) /* 4050 */
-    MIPS_SYS(sys_acct, 0, syscall_default_handler)
-        MIPS_SYS(sys_umount2, 2, syscall_default_handler)
-            MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler)
-                MIPS_SYS(sys_ioctl, 3, syscall_default_handler)
-                    MIPS_SYS(sys_fcntl, 3, syscall_default_handler) /* 4055 */
+    MIPS_SYS(sys_acct, 0, syscall_default_handler) MIPS_SYS(sys_umount2, 2, syscall_default_handler)
+        MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler)
+            MIPS_SYS(sys_ioctl, 3, syscall_default_handler)
+                MIPS_SYS(sys_fcntl, 3, syscall_default_handler) /* 4055 */
     MIPS_SYS(sys_ni_syscall, 2, syscall_default_handler)
         MIPS_SYS(sys_setpgid, 2, syscall_default_handler)
             MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler)
                 MIPS_SYS(sys_olduname, 1, syscall_default_handler)
                     MIPS_SYS(sys_umask, 1, syscall_default_handler) /* 4060 */
-    MIPS_SYS(sys_chroot, 1, syscall_default_handler)
-        MIPS_SYS(sys_ustat, 2, syscall_default_handler)
-            MIPS_SYS(sys_dup2, 2, syscall_default_handler)
-                MIPS_SYS(sys_getppid, 0, syscall_default_handler)
-                    MIPS_SYS(sys_getpgrp, 0, syscall_default_handler) /* 4065 */
+    MIPS_SYS(sys_chroot, 1, syscall_default_handler) MIPS_SYS(sys_ustat, 2, syscall_default_handler)
+        MIPS_SYS(sys_dup2, 2, syscall_default_handler)
+            MIPS_SYS(sys_getppid, 0, syscall_default_handler)
+                MIPS_SYS(sys_getpgrp, 0, syscall_default_handler) /* 4065 */
     MIPS_SYS(sys_setsid, 0, syscall_default_handler)
         MIPS_SYS(sys_sigaction, 3, syscall_default_handler)
             MIPS_SYS(sys_sgetmask, 0, syscall_default_handler)
@@ -646,12 +632,9 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
             MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler)
                 MIPS_SYS(sys_statfs, 2, syscall_default_handler)
                     MIPS_SYS(sys_fstatfs, 2, syscall_default_handler) /* 4100 */
-    MIPS_SYS(
-        sys_ni_syscall,
-        0,
-        syscall_default_handler) /* was ioperm(2,
-                                    syscall_default_handler)
-                                  */
+    MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler)              /* was ioperm(2,
+                                                                         syscall_default_handler)
+                                                                       */
     MIPS_SYS(sys_socketcall, 2, syscall_default_handler)
         MIPS_SYS(sys_syslog, 3, syscall_default_handler)
             MIPS_SYS(sys_setitimer, 3, syscall_default_handler)
@@ -659,46 +642,37 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
     MIPS_SYS(sys_newstat, 2, syscall_default_handler)
         MIPS_SYS(sys_newlstat, 2, syscall_default_handler)
             MIPS_SYS(sys_newfstat, 2, syscall_default_handler)
-                MIPS_SYS(sys_uname, 1, syscall_default_handler) MIPS_SYS(
-                    sys_ni_syscall,
-                    0,
-                    syscall_default_handler) /* 4110
-                                                was
-                                                iopl(2,
-                                                syscall_default_handler)
-                                              */
-    MIPS_SYS(sys_vhangup, 0, syscall_default_handler) MIPS_SYS(
-        sys_ni_syscall,
-        0,
-        syscall_default_handler)                         /* was sys_idle(,
-                                                            syscall_default_handler)
-                                                          */
-    MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler) /* was sys_vm86 */
+                MIPS_SYS(sys_uname, 1, syscall_default_handler)
+                    MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler) /* 4110
+                                                                            was
+                                                                            iopl(2,
+                                                                            syscall_default_handler)
+                                                                          */
+    MIPS_SYS(sys_vhangup, 0, syscall_default_handler)
+        MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler) /* was sys_idle(,
+                                                                syscall_default_handler)
+                                                              */
+    MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler)     /* was sys_vm86 */
     MIPS_SYS(sys_wait4, 4, syscall_default_handler)
         MIPS_SYS(sys_swapoff, 1, syscall_default_handler) /* 4115 */
-    MIPS_SYS(sys_sysinfo, 1, syscall_default_handler)
-        MIPS_SYS(sys_ipc, 6, syscall_default_handler)
-            MIPS_SYS(sys_fsync, 1, syscall_default_handler)
-                MIPS_SYS(sys_sigreturn, 0, syscall_default_handler)
-                    MIPS_SYS(sys_clone, 6, syscall_default_handler) /* 4120 */
+    MIPS_SYS(sys_sysinfo, 1, syscall_default_handler) MIPS_SYS(sys_ipc, 6, syscall_default_handler)
+        MIPS_SYS(sys_fsync, 1, syscall_default_handler)
+            MIPS_SYS(sys_sigreturn, 0, syscall_default_handler)
+                MIPS_SYS(sys_clone, 6, syscall_default_handler) /* 4120 */
     MIPS_SYS(sys_setdomainname, 2, syscall_default_handler)
-        MIPS_SYS(sys_newuname, 1, syscall_default_handler) MIPS_SYS(
-            sys_ni_syscall,
-            0,
-            syscall_default_handler) /* sys_modify_ldt
-                                      */
+        MIPS_SYS(sys_newuname, 1, syscall_default_handler)
+            MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler) /* sys_modify_ldt
+                                                                  */
     MIPS_SYS(sys_adjtimex, 1, syscall_default_handler)
         MIPS_SYS(sys_mprotect, 3, syscall_default_handler) /* 4125 */
     MIPS_SYS(sys_sigprocmask, 3, syscall_default_handler)
         MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler) /* was
                                                                 create_module */
     MIPS_SYS(sys_init_module, 5, syscall_default_handler)
-        MIPS_SYS(sys_delete_module, 1, syscall_default_handler) MIPS_SYS(
-            sys_ni_syscall,
-            0,
-            syscall_default_handler) /* 4130 was
-                                        get_kernel_syms
-                                      */
+        MIPS_SYS(sys_delete_module, 1, syscall_default_handler)
+            MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler) /* 4130 was
+                                                                    get_kernel_syms
+                                                                  */
     MIPS_SYS(sys_quotactl, 0, syscall_default_handler)
         MIPS_SYS(sys_getpgid, 1, syscall_default_handler)
             MIPS_SYS(sys_fchdir, 1, syscall_default_handler)
@@ -715,12 +689,11 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
             MIPS_SYS(sys_flock, 2, syscall_default_handler)
                 MIPS_SYS(sys_msync, 3, syscall_default_handler)
                     MIPS_SYS(sys_readv, 3, do_sys_readv) /* 4145 */
-    MIPS_SYS(sys_writev, 3, do_sys_writev)
-        MIPS_SYS(sys_cacheflush, 3, syscall_default_handler)
-            MIPS_SYS(sys_cachectl, 3, syscall_default_handler)
-                MIPS_SYS(sys_sysmips, 4, syscall_default_handler)
-                    MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler) /* 4150
-                                                                          */
+    MIPS_SYS(sys_writev, 3, do_sys_writev) MIPS_SYS(sys_cacheflush, 3, syscall_default_handler)
+        MIPS_SYS(sys_cachectl, 3, syscall_default_handler)
+            MIPS_SYS(sys_sysmips, 4, syscall_default_handler)
+                MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler) /* 4150
+                                                                      */
     MIPS_SYS(sys_getsid, 1, syscall_default_handler)
         MIPS_SYS(sys_fdatasync, 0, syscall_default_handler)
             MIPS_SYS(sys_sysctl, 1, syscall_default_handler)
@@ -730,18 +703,12 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
         MIPS_SYS(sys_munlockall, 0, syscall_default_handler)
             MIPS_SYS(sys_sched_setparam, 2, syscall_default_handler)
                 MIPS_SYS(sys_sched_getparam, 2, syscall_default_handler)
-                    MIPS_SYS(
-                        sys_sched_setscheduler,
-                        3,
-                        syscall_default_handler) /* 4160 */
+                    MIPS_SYS(sys_sched_setscheduler, 3, syscall_default_handler) /* 4160 */
     MIPS_SYS(sys_sched_getscheduler, 1, syscall_default_handler)
         MIPS_SYS(sys_sched_yield, 0, syscall_default_handler)
             MIPS_SYS(sys_sched_get_priority_max, 1, syscall_default_handler)
                 MIPS_SYS(sys_sched_get_priority_min, 1, syscall_default_handler)
-                    MIPS_SYS(
-                        sys_sched_rr_get_interval,
-                        2,
-                        syscall_default_handler) /* 4165 */
+                    MIPS_SYS(sys_sched_rr_get_interval, 2, syscall_default_handler) /* 4165 */
     MIPS_SYS(sys_nanosleep, 2, syscall_default_handler)
         MIPS_SYS(sys_mremap, 5, syscall_default_handler)
             MIPS_SYS(sys_accept, 3, syscall_default_handler)
@@ -773,10 +740,8 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
     MIPS_SYS(sys_getresgid, 3, syscall_default_handler)
         MIPS_SYS(sys_prctl, 5, syscall_default_handler)
             MIPS_SYS(sys_rt_sigreturn, 0, syscall_default_handler)
-                MIPS_SYS(sys_rt_sigaction, 4, syscall_default_handler) MIPS_SYS(
-                    sys_rt_sigprocmask,
-                    4,
-                    syscall_default_handler) /* 4195 */
+                MIPS_SYS(sys_rt_sigaction, 4, syscall_default_handler)
+                    MIPS_SYS(sys_rt_sigprocmask, 4, syscall_default_handler) /* 4195 */
     MIPS_SYS(sys_rt_sigpending, 2, syscall_default_handler)
         MIPS_SYS(sys_rt_sigtimedwait, 4, syscall_default_handler)
             MIPS_SYS(sys_rt_sigqueueinfo, 3, syscall_default_handler)
@@ -817,18 +782,15 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
     MIPS_SYS(sys_llistxattr, 3, syscall_default_handler)
         MIPS_SYS(sys_flistxattr, 3, syscall_default_handler)
             MIPS_SYS(sys_removexattr, 2, syscall_default_handler)
-                MIPS_SYS(sys_lremovexattr, 2, syscall_default_handler) MIPS_SYS(
-                    sys_fremovexattr,
-                    2,
-                    syscall_default_handler) /* 4235
-                                              */
-    MIPS_SYS(sys_tkill, 2, syscall_default_handler) MIPS_SYS(
-        sys_sendfile64,
-        5,
-        syscall_default_handler) MIPS_SYS(sys_futex, 6, syscall_default_handler)
-        MIPS_SYS(sys_sched_setaffinity, 3, syscall_default_handler)
-            MIPS_SYS(sys_sched_getaffinity, 3, syscall_default_handler) /* 4240
-                                                                         */
+                MIPS_SYS(sys_lremovexattr, 2, syscall_default_handler)
+                    MIPS_SYS(sys_fremovexattr, 2, syscall_default_handler) /* 4235
+                                                                            */
+    MIPS_SYS(sys_tkill, 2, syscall_default_handler)
+        MIPS_SYS(sys_sendfile64, 5, syscall_default_handler)
+            MIPS_SYS(sys_futex, 6, syscall_default_handler)
+                MIPS_SYS(sys_sched_setaffinity, 3, syscall_default_handler)
+                    MIPS_SYS(sys_sched_getaffinity, 3, syscall_default_handler) /* 4240
+                                                                                 */
     MIPS_SYS(sys_io_setup, 2, syscall_default_handler)
         MIPS_SYS(sys_io_destroy, 1, syscall_default_handler)
             MIPS_SYS(sys_io_getevents, 5, syscall_default_handler)
@@ -851,27 +813,20 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
         MIPS_SYS(sys_timer_create, 3, syscall_default_handler)
             MIPS_SYS(sys_timer_settime, 4, syscall_default_handler)
                 MIPS_SYS(sys_timer_gettime, 2, syscall_default_handler)
-                    MIPS_SYS(
-                        sys_timer_getoverrun,
-                        1,
-                        syscall_default_handler) /* 4260
-                                                  */
+                    MIPS_SYS(sys_timer_getoverrun, 1, syscall_default_handler) /* 4260
+                                                                                */
     MIPS_SYS(sys_timer_delete, 1, syscall_default_handler)
         MIPS_SYS(sys_clock_settime, 2, syscall_default_handler)
             MIPS_SYS(sys_clock_gettime, 2, syscall_default_handler)
-                MIPS_SYS(sys_clock_getres, 2, syscall_default_handler) MIPS_SYS(
-                    sys_clock_nanosleep,
-                    4,
-                    syscall_default_handler) /* 4265 */
+                MIPS_SYS(sys_clock_getres, 2, syscall_default_handler)
+                    MIPS_SYS(sys_clock_nanosleep, 4, syscall_default_handler) /* 4265 */
     MIPS_SYS(sys_tgkill, 3, syscall_default_handler)
         MIPS_SYS(sys_utimes, 2, syscall_default_handler)
-            MIPS_SYS(sys_mbind, 4, syscall_default_handler) MIPS_SYS(
-                sys_ni_syscall,
-                0,
-                syscall_default_handler)                 /* sys_get_mempolicy
-                                                          */
-    MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler) /* 4270
-                                                            sys_set_mempolicy */
+            MIPS_SYS(sys_mbind, 4, syscall_default_handler)
+                MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler) /* sys_get_mempolicy
+                                                                      */
+    MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler)             /* 4270
+                                                                        sys_set_mempolicy */
     MIPS_SYS(sys_mq_open, 4, syscall_default_handler)
         MIPS_SYS(sys_mq_unlink, 1, syscall_default_handler)
             MIPS_SYS(sys_mq_timedsend, 5, syscall_default_handler)
@@ -888,10 +843,7 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
             MIPS_SYS(sys_keyctl, 5, syscall_default_handler)
                 MIPS_SYS(sys_set_thread_area, 1, do_sys_set_thread_area)
                     MIPS_SYS(sys_inotify_init, 0, syscall_default_handler)
-                        MIPS_SYS(
-                            sys_inotify_add_watch,
-                            3,
-                            syscall_default_handler) /* 4285 */
+                        MIPS_SYS(sys_inotify_add_watch, 3, syscall_default_handler) /* 4285 */
     MIPS_SYS(sys_inotify_rm_watch, 2, syscall_default_handler)
         MIPS_SYS(sys_migrate_pages, 4, syscall_default_handler)
             MIPS_SYS(sys_openat, 4, syscall_default_handler)
@@ -912,19 +864,13 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
     MIPS_SYS(sys_pselect6, 6, syscall_default_handler)
         MIPS_SYS(sys_ppoll, 5, syscall_default_handler)
             MIPS_SYS(sys_unshare, 1, syscall_default_handler)
-                MIPS_SYS(sys_splice, 6, syscall_default_handler) MIPS_SYS(
-                    sys_sync_file_range,
-                    7,
-                    syscall_default_handler) /* 4305 */
-    MIPS_SYS(sys_tee, 4, syscall_default_handler)
-        MIPS_SYS(sys_vmsplice, 4, syscall_default_handler)
-            MIPS_SYS(sys_move_pages, 6, syscall_default_handler)
-                MIPS_SYS(sys_set_robust_list, 2, syscall_default_handler)
-                    MIPS_SYS(
-                        sys_get_robust_list,
-                        3,
-                        syscall_default_handler) /* 4310
-                                                  */
+                MIPS_SYS(sys_splice, 6, syscall_default_handler)
+                    MIPS_SYS(sys_sync_file_range, 7, syscall_default_handler) /* 4305 */
+    MIPS_SYS(sys_tee, 4, syscall_default_handler) MIPS_SYS(sys_vmsplice, 4, syscall_default_handler)
+        MIPS_SYS(sys_move_pages, 6, syscall_default_handler)
+            MIPS_SYS(sys_set_robust_list, 2, syscall_default_handler)
+                MIPS_SYS(sys_get_robust_list, 3, syscall_default_handler) /* 4310
+                                                                           */
     MIPS_SYS(sys_kexec_load, 4, syscall_default_handler)
         MIPS_SYS(sys_getcpu, 3, syscall_default_handler)
             MIPS_SYS(sys_epoll_pwait, 6, syscall_default_handler)
@@ -932,10 +878,8 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
                     MIPS_SYS(sys_ioprio_get, 2, syscall_default_handler)
                         MIPS_SYS(sys_utimensat, 4, syscall_default_handler)
                             MIPS_SYS(sys_signalfd, 3, syscall_default_handler)
-                                MIPS_SYS(
-                                    sys_ni_syscall,
-                                    0,
-                                    syscall_default_handler) /* was timerfd */
+                                MIPS_SYS(sys_ni_syscall, 0, syscall_default_handler) /* was timerfd
+                                                                                      */
     MIPS_SYS(sys_eventfd, 1, syscall_default_handler)
         MIPS_SYS(sys_fallocate, 6, syscall_default_handler) /* 4320 */
     MIPS_SYS(sys_timerfd_create, 2, syscall_default_handler)
@@ -959,25 +903,18 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
         MIPS_SYS(sys_fanotify_mark, 6, syscall_default_handler)
             MIPS_SYS(sys_prlimit64, 4, syscall_default_handler)
                 MIPS_SYS(sys_name_to_handle_at, 5, syscall_default_handler)
-                    MIPS_SYS(
-                        sys_open_by_handle_at,
-                        3,
-                        syscall_default_handler) /* 4340 */
+                    MIPS_SYS(sys_open_by_handle_at, 3, syscall_default_handler) /* 4340 */
     MIPS_SYS(sys_clock_adjtime, 2, syscall_default_handler)
         MIPS_SYS(sys_syncfs, 1, syscall_default_handler)
             MIPS_SYS(sys_sendmmsg, 4, syscall_default_handler)
-                MIPS_SYS(sys_setns, 2, syscall_default_handler) MIPS_SYS(
-                    sys_process_vm_readv,
-                    6,
-                    syscall_default_handler) /* 345 */
+                MIPS_SYS(sys_setns, 2, syscall_default_handler)
+                    MIPS_SYS(sys_process_vm_readv, 6, syscall_default_handler) /* 345 */
     MIPS_SYS(sys_process_vm_writev, 6, syscall_default_handler)
         MIPS_SYS(sys_kcmp, 5, syscall_default_handler)
-            MIPS_SYS(sys_finit_module, 3, syscall_default_handler) MIPS_SYS(
-                sys_sched_setattr,
-                2,
-                syscall_default_handler)
-                MIPS_SYS(sys_sched_getattr, 3, syscall_default_handler) /* 350
-                                                                         */
+            MIPS_SYS(sys_finit_module, 3, syscall_default_handler)
+                MIPS_SYS(sys_sched_setattr, 2, syscall_default_handler)
+                    MIPS_SYS(sys_sched_getattr, 3, syscall_default_handler) /* 350
+                                                                             */
     MIPS_SYS(sys_renameat2, 5, syscall_default_handler)
         MIPS_SYS(sys_seccomp, 3, syscall_default_handler)
             MIPS_SYS(sys_getrandom, 3, syscall_default_handler)
@@ -986,16 +923,13 @@ static const mips_syscall_desc_t mips_syscall_args[] = {
     MIPS_SYS(sys_execveat, 5, syscall_default_handler)
         MIPS_SYS(sys_userfaultfd, 1, syscall_default_handler)
             MIPS_SYS(sys_membarrier, 2, syscall_default_handler)
-                MIPS_SYS(sys_mlock2, 3, syscall_default_handler) MIPS_SYS(
-                    sys_copy_file_range,
-                    6,
-                    syscall_default_handler) /* 360 */
+                MIPS_SYS(sys_mlock2, 3, syscall_default_handler)
+                    MIPS_SYS(sys_copy_file_range, 6, syscall_default_handler) /* 360 */
     MIPS_SYS(sys_preadv2, 6, syscall_default_handler)
         MIPS_SYS(sys_pwritev2, 6, syscall_default_handler)
 };
 
-const unsigned mips_syscall_args_size
-    = sizeof(mips_syscall_args) / sizeof(*mips_syscall_args);
+const unsigned mips_syscall_args_size = sizeof(mips_syscall_args) / sizeof(*mips_syscall_args);
 
 static const mips_syscall_desc_t spim_syscall_args[] = {
     MIPS_SYS(print_integer, 1, do_spim_print_integer)     /*  1 */
@@ -1017,8 +951,7 @@ static const mips_syscall_desc_t spim_syscall_args[] = {
     MIPS_SYS(exit, 1, do_sys_exit)                        /* 17 */
 };
 
-const unsigned spim_syscall_args_size
-    = sizeof(spim_syscall_args) / sizeof(*spim_syscall_args);
+const unsigned spim_syscall_args_size = sizeof(spim_syscall_args) / sizeof(*spim_syscall_args);
 
 OsSyscallExceptionHandler::OsSyscallExceptionHandler(
     bool known_syscall_stop,
@@ -1044,8 +977,7 @@ bool OsSyscallExceptionHandler::handle_exception(
     Address mem_ref_addr) {
     unsigned int syscall_num = regs->read_gp(2).as_u32();
     const mips_syscall_desc_t *sdesc;
-    RegisterValue a1 = 0, a2 = 0, a3 = 0, a4 = 0, a5 = 0, a6 = 0, a7 = 0,
-                  a8 = 0;
+    RegisterValue a1 = 0, a2 = 0, a3 = 0, a4 = 0, a5 = 0, a6 = 0, a7 = 0, a8 = 0;
     Address sp = Address(regs->read_gp(29).as_u32());
     uint32_t result;
     int status;
@@ -1059,11 +991,9 @@ bool OsSyscallExceptionHandler::handle_exception(
         "Exception cause %d instruction PC 0x%08lx next PC 0x%08lx jump branch "
         "PC 0x%08lx "
         "in_delay_slot %d registers PC 0x%08lx mem ref 0x%08lx\n",
-        excause, (unsigned long)inst_addr.get_raw(),
-        (unsigned long)next_addr.get_raw(),
+        excause, (unsigned long)inst_addr.get_raw(), (unsigned long)next_addr.get_raw(),
         (unsigned long)jump_branch_pc.get_raw(), (int)in_delay_slot,
-        (unsigned long)regs->read_pc().get_raw(),
-        (unsigned long)mem_ref_addr.get_raw());
+        (unsigned long)regs->read_pc().get_raw(), (unsigned long)mem_ref_addr.get_raw());
 #else
     (void)excause;
     (void)inst_addr;
@@ -1081,8 +1011,7 @@ bool OsSyscallExceptionHandler::handle_exception(
         sdesc = &mips_syscall_args[syscall_num];
     } else {
         throw SIMULATOR_EXCEPTION(
-            SyscallUnknown, "System call number unknown ",
-            QString::number(syscall_num));
+            SyscallUnknown, "System call number unknown ", QString::number(syscall_num));
     }
 
     a1 = regs->read_gp(4);
@@ -1100,15 +1029,13 @@ bool OsSyscallExceptionHandler::handle_exception(
 
 #if 1
     printf(
-        "Syscall %s number %d/0x%x a1=%" PRIu64 " a2=%" PRIu64 " a3=%" PRIu64
-        " a4=%" PRIu64 "\n",
-        sdesc->name, syscall_num, syscall_num, a1.as_u64(), a2.as_u64(),
-        a3.as_u64(), a4.as_u64());
+        "Syscall %s number %d/0x%x a1=%" PRIu64 " a2=%" PRIu64 " a3=%" PRIu64 " a4=%" PRIu64 "\n",
+        sdesc->name, syscall_num, syscall_num, a1.as_u64(), a2.as_u64(), a3.as_u64(), a4.as_u64());
 
 #endif
     status = (this->*sdesc->handler)(
-        result, core, syscall_num, a1.as_u32(), a2.as_u32(), a3.as_u32(),
-        a4.as_u32(), a5.as_u32(), a6.as_u32(), a7.as_u32(), a8.as_u32());
+        result, core, syscall_num, a1.as_u32(), a2.as_u32(), a3.as_u32(), a4.as_u32(), a5.as_u32(),
+        a6.as_u32(), a7.as_u32(), a8.as_u32());
     if (known_syscall_stop) {
         emit core->stop_on_exception_reached();
     }
@@ -1151,10 +1078,7 @@ int32_t OsSyscallExceptionHandler::read_mem(
     return count;
 }
 
-int32_t OsSyscallExceptionHandler::write_io(
-    int fd,
-    const QVector<uint8_t> &data,
-    uint32_t count) {
+int32_t OsSyscallExceptionHandler::write_io(int fd, const QVector<uint8_t> &data, uint32_t count) {
     if ((uint32_t)data.size() < count)
         count = data.size();
     if (fd == FD_UNUSED) {
@@ -1218,8 +1142,8 @@ int OsSyscallExceptionHandler::file_open(QString fname, int flags, int mode) {
     int targetfd, fd;
     int hostflags = 0;
     (void)mode;
-    for (auto i = map_target_o_flags_to_o_flags.begin();
-         i != map_target_o_flags_to_o_flags.end(); i++)
+    for (auto i = map_target_o_flags_to_o_flags.begin(); i != map_target_o_flags_to_o_flags.end();
+         i++)
         if (flags & i.key())
             hostflags |= i.value();
 
@@ -1302,9 +1226,9 @@ int OsSyscallExceptionHandler::syscall_default_handler(
     const mips_syscall_desc_t *sdesc = &mips_syscall_args[syscall_num];
 #if 1
     printf(
-        "Unimplemented syscall %s number %d/0x%x a1 %ld a2 %ld a3 %ld a4 %ld\n",
-        sdesc->name, syscall_num, syscall_num, (unsigned long)a1,
-        (unsigned long)a2, (unsigned long)a3, (unsigned long)a4);
+        "Unimplemented syscall %s number %d/0x%x a1 %ld a2 %ld a3 %ld a4 %ld\n", sdesc->name,
+        syscall_num, syscall_num, (unsigned long)a1, (unsigned long)a2, (unsigned long)a3,
+        (unsigned long)a4);
 
 #endif
     (void)core;
@@ -1803,13 +1727,12 @@ int OsSyscallExceptionHandler::do_sys_mmap2(
     printf(
         "sys_mmap2 addr = 0x%08lx lenght= 0x%08lx prot = 0x%08lx flags = "
         "0x%08lx fd = %d offset = 0x%08llx\n",
-        (unsigned long)addr, (unsigned long)lenght, (unsigned long)prot,
-        (unsigned long)flags, (int)fd, (unsigned long long)offset);
+        (unsigned long)addr, (unsigned long)lenght, (unsigned long)prot, (unsigned long)flags,
+        (int)fd, (unsigned long long)offset);
 
-    lenght = (lenght + TARGET_SYSCALL_MMAP2_UNIT - 1)
-             & ~(TARGET_SYSCALL_MMAP2_UNIT - 1);
-    anonymous_last = (anonymous_last + TARGET_SYSCALL_MMAP2_UNIT - 1)
-                     & ~(TARGET_SYSCALL_MMAP2_UNIT - 1);
+    lenght = (lenght + TARGET_SYSCALL_MMAP2_UNIT - 1) & ~(TARGET_SYSCALL_MMAP2_UNIT - 1);
+    anonymous_last
+        = (anonymous_last + TARGET_SYSCALL_MMAP2_UNIT - 1) & ~(TARGET_SYSCALL_MMAP2_UNIT - 1);
     result = anonymous_last;
     anonymous_last += lenght;
 
@@ -1881,8 +1804,7 @@ int OsSyscallExceptionHandler::do_spim_print_string(
         uint8_t ch;
         ch = mem->read_u8(str_ptr);
         str_ptr += 1;
-        if (ch == 0)
-            break;
+        if (ch == 0) break;
         data.append(ch);
     }
     write_io(1, data, data.size());
@@ -1979,8 +1901,7 @@ int OsSyscallExceptionHandler::do_spim_exit(
     (void)a7;
     (void)a8;
 
-    return do_sys_exit(
-        result, core, syscall_num, 0, a2, a3, a4, a5, a6, a7, a8);
+    return do_sys_exit(result, core, syscall_num, 0, a2, a3, a4, a5, a6, a7, a8);
 }
 
 int OsSyscallExceptionHandler::do_spim_print_character(

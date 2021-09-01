@@ -103,11 +103,8 @@ public:
         uint8_t rd,
         uint8_t shamt,
         uint8_t funct); // Type R
-    Instruction(
-        uint8_t opcode,
-        uint8_t rs,
-        uint8_t rt,
-        uint16_t immediate);                      // Type I
+    Instruction(uint8_t opcode, uint8_t rs, uint8_t rt,
+                uint16_t immediate);              // Type I
     Instruction(uint8_t opcode, Address address); // Type J
     Instruction(const Instruction &);
 

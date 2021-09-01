@@ -178,9 +178,7 @@ void Cop0State::reset() {
     last_core_cycles = 0;
 }
 
-void Cop0State::update_execption_cause(
-    enum ExceptionCause excause,
-    bool in_delay_slot) {
+void Cop0State::update_execption_cause(enum ExceptionCause excause, bool in_delay_slot) {
     if (in_delay_slot) {
         cop0reg[(int)Cause] |= 0x80000000;
     } else {
