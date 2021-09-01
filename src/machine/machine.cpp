@@ -65,9 +65,10 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
     if (machine_config.pipelined()) {
         cr = new CorePipelined(
             regs, predictor, cch_program, cch_data, machine_config.hazard_unit(),
-            min_cache_row_size, cop0st);
+            min_cache_row_size, cop0st, Xlen::_32);
     } else {
-        cr = new CoreSingle(regs, predictor, cch_program, cch_data, min_cache_row_size, cop0st);
+        cr = new CoreSingle(
+            regs, predictor, cch_program, cch_data, min_cache_row_size, cop0st, Xlen::_32);
     }
     connect(
         this, &Machine::set_interrupt_signal, cop0st,

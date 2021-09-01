@@ -177,7 +177,7 @@ void MachineTests::singlecore_regs() {
     Memory mem_used(mem); // Create memory copy
     TrivialBus mem_used_frontend(&mem);
 
-    CoreSingle core(&init, &mem_used_frontend, &mem_used_frontend, true);
+    CoreSingle core(&init, &mem_used_frontend, &mem_used_frontend, true, 0, nullptr, Xlen::_32);
     core.step(); // Single step should be enought as this is risc without
                  // pipeline
     core.step();
@@ -209,7 +209,9 @@ void MachineTests::pipecore_regs() {
 
     res.pc_jmp(0x14);
 
-    CorePipelined core(&init, &mem_used_frontend, &mem_used_frontend);
+    CorePipelined core(
+        &init, &mem_used_frontend, &mem_used_frontend, nullptr, MachineConfig::HU_NONE, 0, nullptr,
+        Xlen::_32);
     for (int i = 0; i < 5; i++) {
         core.step(); // Fire steps for five pipelines stages
     }
@@ -276,7 +278,8 @@ void MachineTests::singlecore_jmp() {
     TrivialBus mem_used_frontend(&mem_used);
     Registers regs_used(regs);
 
-    CoreSingle core(&regs_used, &mem_used_frontend, &mem_used_frontend, true);
+    CoreSingle core(
+        &regs_used, &mem_used_frontend, &mem_used_frontend, true, 0, nullptr, Xlen::_32);
     core.step();
     QCOMPARE(regs.read_pc() + 4, regs_used.read_pc()); // First execute delay
                                                        // slot
@@ -302,7 +305,9 @@ void MachineTests::pipecore_jmp() {
     TrivialBus mem_used_frontend(&mem_used);
     Registers regs_used(regs);
 
-    CorePipelined core(&regs_used, &mem_used_frontend, &mem_used_frontend);
+    CorePipelined core(
+        &regs_used, &mem_used_frontend, &mem_used_frontend, nullptr, MachineConfig::HU_NONE, 0,
+        nullptr, Xlen::_32);
     core.step();
     QCOMPARE(regs.read_pc() + 4, regs_used.read_pc()); // First just fetch
     core.step();
@@ -393,7 +398,8 @@ void MachineTests::singlecore_mem() {
     memory_write_u32(&mem_res, regs_init.read_pc().get_raw(), i.data());
 
     TrivialBus mem_init_frontend(&mem_init);
-    CoreSingle core(&regs_init, &mem_init_frontend, &mem_init_frontend, true);
+    CoreSingle core(
+        &regs_init, &mem_init_frontend, &mem_init_frontend, true, 0, nullptr, Xlen::_32);
     core.step();
     core.step();
 
@@ -416,7 +422,9 @@ void MachineTests::pipecore_mem() {
     memory_write_u32(&mem_res, regs_init.read_pc().get_raw(), i.data());
 
     TrivialBus mem_init_frontend(&mem_init);
-    CorePipelined core(&regs_init, &mem_init_frontend, &mem_init_frontend);
+    CorePipelined core(
+        &regs_init, &mem_init_frontend, &mem_init_frontend, nullptr, MachineConfig::HU_NONE, 0,
+        nullptr, Xlen::_32);
     for (int i = 0; i < 5; i++) {
         core.step(); // Fire steps for five pipelines stages
     }
@@ -688,7 +696,7 @@ void MachineTests::singlecore_alu_forward() {
     TrivialBus mem_init_frontend(&mem_init);
     Memory mem_res(BIG);
     TrivialBus mem_res_frontend(&mem_res);
-    CoreSingle core(&reg_init, &mem_init_frontend, &mem_init_frontend, true);
+    CoreSingle core(&reg_init, &mem_init_frontend, &mem_init_frontend, true, 0, nullptr, Xlen::_32);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -702,8 +710,8 @@ void MachineTests::pipecore_alu_forward() {
     Memory mem_res(BIG);
     TrivialBus mem_res_frontend(&mem_res);
     CorePipelined core(
-        &reg_init, &mem_init_frontend, &mem_init_frontend,
-        MachineConfig::HU_STALL_FORWARD);
+        &reg_init, &mem_init_frontend, &mem_init_frontend, MachineConfig::HU_STALL_FORWARD,
+        MachineConfig::HU_NONE, 0, nullptr, Xlen::_32);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -717,8 +725,8 @@ void MachineTests::pipecorestall_alu_forward() {
     Memory mem_res(BIG);
     TrivialBus mem_res_frontend(&mem_res);
     CorePipelined core(
-        &reg_init, &mem_init_frontend, &mem_init_frontend,
-        MachineConfig::HU_STALL);
+        &reg_init, &mem_init_frontend, &mem_init_frontend, MachineConfig::HU_STALL,
+        MachineConfig::HU_NONE, 0, nullptr, Xlen::_32);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -954,7 +962,7 @@ void MachineTests::singlecore_memory_tests() {
     QFETCH(Memory, mem_res);
     TrivialBus mem_init_frontend(&mem_init);
     TrivialBus mem_res_frontend(&mem_res);
-    CoreSingle core(&reg_init, &mem_init_frontend, &mem_init_frontend, true);
+    CoreSingle core(&reg_init, &mem_init_frontend, &mem_init_frontend, true, 0, nullptr, Xlen::_32);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -968,8 +976,8 @@ void MachineTests::pipecore_nc_memory_tests() {
     TrivialBus mem_init_frontend(&mem_init);
     TrivialBus mem_res_frontend(&mem_res);
     CorePipelined core(
-        &reg_init, &mem_init_frontend, &mem_init_frontend,
-        MachineConfig::HU_STALL_FORWARD);
+        &reg_init, &mem_init_frontend, &mem_init_frontend, MachineConfig::HU_STALL_FORWARD,
+        MachineConfig::HU_NONE, 0, nullptr, Xlen::_32);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -993,7 +1001,8 @@ void MachineTests::pipecore_wt_na_memory_tests() {
     Cache i_cache(&mem_init_frontend, &cache_conf);
     Cache d_cache(&mem_init_frontend, &cache_conf);
     CorePipelined core(
-        &reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD);
+        &reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD, MachineConfig::HU_NONE, 0,
+        nullptr, Xlen::_32);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -1016,7 +1025,8 @@ void MachineTests::pipecore_wt_a_memory_tests() {
     Cache i_cache(&mem_init_frontend, &cache_conf);
     Cache d_cache(&mem_init_frontend, &cache_conf);
     CorePipelined core(
-        &reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD);
+        &reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD, MachineConfig::HU_NONE, 0,
+        nullptr, Xlen::_32);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -1039,6 +1049,7 @@ void MachineTests::pipecore_wb_memory_tests() {
     Cache i_cache(&mem_init_frontend, &cache_conf);
     Cache d_cache(&mem_init_frontend, &cache_conf);
     CorePipelined core(
-        &reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD);
+        &reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD, MachineConfig::HU_NONE, 0,
+        nullptr, Xlen::_32);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }

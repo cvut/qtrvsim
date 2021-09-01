@@ -8,6 +8,16 @@
 
 namespace machine {
 
+/**
+ * There are two primary base integer variants, RV32I and RV64I, described in Chapters 2 and 5,
+ * which provide 32-bit or 64-bit address spaces respectively. We use the term XLEN to refer to
+ * the width of an integer register in bits (either 32 or 64). [RISC-V Unprivileged ISA, page 4]
+ *
+ * `RegisterValue` type is used to abstract the size of stored value. It provides methods to get
+ *  correct size. The `Core` can extract them with a special method.
+ */
+enum class Xlen { _32, _64 };
+
 enum ConfigPresets {
     CP_SINGLE,         // No pipeline cpu without cache
     CP_SINGLE_CACHE,   // No pipeline cpu with cache

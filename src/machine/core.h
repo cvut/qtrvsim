@@ -55,7 +55,8 @@ public:
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
         unsigned int min_cache_row_size = 1,
-        Cop0State *cop0state = nullptr);
+        Cop0State *cop0state = nullptr,
+        Xlen xlen = Xlen::_32);
     ~Core() override;
 
     void step(bool skip_break = false); // Do single step
@@ -194,6 +195,13 @@ protected:
         Address jump_branch_pc,
         Address mem_ref_addr);
 
+    /**
+     * Abstracts XLEN from code flow. XLEN core will obtain XLEN value from register value.
+     * The value will be zero extended to u64.
+     */
+    uint64_t get_xlen_from_reg(RegisterValue reg) const;
+
+    const Xlen xlen;
     Registers *regs;
     Cop0State *cop0state;
     Predictor *predictor;
@@ -232,8 +240,9 @@ public:
         Predictor *predictor,
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
-        unsigned int min_cache_row_size = 1,
-        Cop0State *cop0state = nullptr);
+        unsigned int min_cache_row_size,
+        Cop0State *cop0state,
+        Xlen xlen);
 
 protected:
     void do_step(bool skip_break = false) override;
@@ -250,9 +259,10 @@ public:
         Predictor *predictor,
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
-        enum MachineConfig::HazardUnit hazard_unit = MachineConfig::HU_STALL_FORWARD,
-        unsigned int min_cache_row_size = 1,
-        Cop0State *cop0state = nullptr);
+        enum MachineConfig::HazardUnit hazard_unit,
+        unsigned int min_cache_row_size,
+        Cop0State *cop0state,
+        Xlen xlen);
 
 protected:
     void do_step(bool skip_break = false) override;

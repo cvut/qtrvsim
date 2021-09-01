@@ -14,8 +14,10 @@ Core::Core(
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
     unsigned int min_cache_row_size,
-    Cop0State *cop0state)
-    : ex_handlers() {
+    Cop0State *cop0state,
+    Xlen xlen)
+    : xlen(xlen)
+    , ex_handlers() {
     this->regs = regs;
     this->cop0state = cop0state;
     this->predictor = predictor;
@@ -407,7 +409,7 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
 
 MemoryState Core::memory(const ExecuteInterstage &dt) {
     RegisterValue towrite_val = dt.alu_val;
-    Address mem_addr = Address(dt.alu_val.as_u32());
+    Address mem_addr = Address(get_xlen_from_reg(dt.alu_val));
     bool memread = dt.memread;
     bool memwrite = dt.memwrite;
     bool regwrite = dt.regwrite;
@@ -490,7 +492,7 @@ WritebackState Core::writeback(const MemoryInterstage &dt) {
 Address Core::handle_pc(const ExecuteInterstage &dt) {
     emit instruction_program_counter(dt.inst, dt.inst_addr, EXCAUSE_NONE, dt.is_valid);
 
-    if (dt.jump) { return Address(dt.alu_val.as_u32()); } // TODO handle XLEN
+    if (dt.jump) { return Address(get_xlen_from_reg(dt.alu_val)); }
     if (dt.branch_taken) { return dt.branch_target; }
     return dt.inst_addr + 4;
 }
@@ -574,14 +576,22 @@ void Core::dtMemoryInit(MemoryInterstage &dt) {
     dt.is_valid = false;
 }
 
+uint64_t Core::get_xlen_from_reg(RegisterValue reg) const {
+    switch (this->xlen) {
+    case Xlen::_32: return reg.as_u32();
+    case Xlen::_64: return reg.as_u64();
+    }
+}
+
 CoreSingle::CoreSingle(
     Registers *regs,
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
     unsigned int min_cache_row_size,
-    Cop0State *cop0state)
-    : Core(regs, predictor, mem_program, mem_data, min_cache_row_size, cop0state) {
+    Cop0State *cop0state,
+    Xlen xlen)
+    : Core(regs, predictor, mem_program, mem_data, min_cache_row_size, cop0state, xlen) {
     reset();
 }
 
@@ -615,10 +625,10 @@ CorePipelined::CorePipelined(
     FrontendMemory *mem_data,
     enum MachineConfig::HazardUnit hazard_unit,
     unsigned int min_cache_row_size,
-    Cop0State *cop0state)
-    : Core(regs, predictor, mem_program, mem_data, min_cache_row_size, cop0state) {
+    Cop0State *cop0state,
+    Xlen xlen)
+    : Core(regs, predictor, mem_program, mem_data, min_cache_row_size, cop0state, xlen) {
     this->hazard_unit = hazard_unit;
-
     reset();
 }
 
