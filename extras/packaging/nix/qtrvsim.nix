@@ -1,10 +1,9 @@
-{ libsForQt5, cmake, qt5, lib }:
-with libsForQt5;
-mkDerivation rec {
+{ lib, stdenv, cmake, wrapQtAppsHook, qtbase, qtsvg }:
+stdenv.mkDerivation {
     name = "QtRVSim";
     src = builtins.fetchGit ../../..;
-    nativeBuildInputs = [ cmake ];
-    buildInputs = [ qt5.qtbase qt5.qtsvg ];
+    nativeBuildInputs = [ cmake wrapQtAppsHook ];
+    buildInputs = [ qtbase qtsvg ];
     meta = {
         description = "RISC-V CPU simulator for education purposes.";
         longDescription = ''
