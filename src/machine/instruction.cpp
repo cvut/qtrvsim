@@ -21,28 +21,6 @@ bool Instruction::symbolic_registers_fl = false;
 #define IMF_SUB_GET_BITS(subcode) (((subcode) >> 8) & 0xff)
 #define IMF_SUB_GET_SHIFT(subcode) ((subcode)&0xff)
 
-#define RS_SHIFT 21
-#define RT_SHIFT 16
-#define RD_SHIFT 11
-#define SHAMT_SHIFT 6
-
-#define FIELD_RS IMF_SUB_ENCODE(5, RS_SHIFT)
-#define FIELD_RT IMF_SUB_ENCODE(5, RT_SHIFT)
-#define FIELD_RD IMF_SUB_ENCODE(5, RD_SHIFT)
-#define FIELD_SHAMT IMF_SUB_ENCODE(5, SHAMT_SHIFT)
-#define FIELD_IMMEDIATE IMF_SUB_ENCODE(16, 0)
-#define FIELD_DELTA IMF_SUB_ENCODE(16, 0)
-#define FIELD_TARGET IMF_SUB_ENCODE(26, 0)
-#define FIELD_COPZ IMF_SUB_ENCODE(25, 0)
-#define FIELD_CODE IMF_SUB_ENCODE(10, 16)
-#define FIELD_PREFX IMF_SUB_ENCODE(5, 11)
-#define FIELD_CACHE IMF_SUB_ENCODE(5, 16)
-#define FIELD_CODE2 IMF_SUB_ENCODE(10, 6)
-#define FIELD_CODE20 IMF_SUB_ENCODE(20, 6)
-#define FIELD_CODE19 IMF_SUB_ENCODE(19, 6)
-#define FIELD_SEL IMF_SUB_ENCODE(3, 0)
-#define FIELD_IGNORE 0
-
 struct ArgumentDesc {
     // TODO: maybe signed?
     char name;
@@ -91,28 +69,16 @@ const char *const Rv_regnames[32] = {
     "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
 };
 
-#define FLAGS_ALU_I_NO_RS (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE)
 #define FLAGS_ALU_I (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_ALU_REQ_RS)
-#define FLAGS_ALU_I_ZE (FLAGS_ALU_I | IMF_ZERO_EXTEND)
+#define FLAGS_ALU_I_LOAD                                                       \
+    (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM         \
+     | IMF_ALU_REQ_RS)
+#define FLAGS_ALU_I_STORE                                                      \
+    (IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | IMF_MEM | IMF_ALU_REQ_RS      \
+     | IMF_ALU_REQ_RT)
 
-#define FLAGS_ALU_I_LOAD                                                                           \
-    (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM | IMF_ALU_REQ_RS)
-#define FLAGS_ALU_I_STORE                                                                          \
-    (IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | IMF_MEM | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
-
-#define FLAGS_ALU_T_R_D (IMF_SUPPORTED | IMF_REGD | IMF_REGWRITE)
+#define FLAGS_ALU_T_R_D (IMF_SUPPORTED | IMF_REGWRITE)
 #define FLAGS_ALU_T_R_STD (FLAGS_ALU_T_R_D | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
-#define FLAGS_ALU_T_R_STD_SHV (FLAGS_ALU_T_R_STD | IMF_ALU_SHIFT)
-#define FLAGS_ALU_T_R_TD (FLAGS_ALU_T_R_D | IMF_ALU_REQ_RT)
-#define FLAGS_ALU_T_R_TD_SHAMT (FLAGS_ALU_T_R_TD | IMF_ALU_SHIFT)
-#define FLAGS_ALU_T_R_S (IMF_SUPPORTED | IMF_ALU_REQ_RS)
-#define FLAGS_ALU_T_R_SD (FLAGS_ALU_T_R_D | IMF_ALU_REQ_RS)
-#define FLAGS_ALU_T_R_ST (IMF_SUPPORTED | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
-
-#define FLAGS_ALU_TRAP_ST (IMF_SUPPORTED | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
-#define FLAGS_ALU_TRAP_SI (IMF_SUPPORTED | IMF_ALU_REQ_RS | IMF_ALUSRC)
-
-#define FLAGS_J_B_PC_TO_R31 (IMF_SUPPORTED | IMF_PC_TO_R31 | IMF_REGWRITE)
 
 // #define NOALU .alu = ALU_OP_SLL
 #define NOALU .alu = AluOp::ADD
@@ -208,7 +174,6 @@ static const struct InstructionMap OP_map[] = {
     {"and",  IT_R, AluOp::AND,  NOMEM, nullptr, {"d", "s", "t"}, 0x00007033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }}, // AND
 };
 
-constexpr const int FLAGS_BRANCH = IMF_SUPPORTED | IMF_BRANCH | IMF_BJR_REQ_RS;
 static const struct InstructionMap BRANCH_map[] = {
     {"beq",  IT_B, AluOp::ADD, NOMEM,  nullptr, {"s", "t", "p"}, 0x00000063, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_ALU_MOD }}, // BEQ
     {"bne",  IT_B, AluOp::ADD, NOMEM,  nullptr, {"s", "t", "p"}, 0x00001063, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_ALU_MOD | IMF_BJ_NOT }}, // BNE
@@ -562,8 +527,6 @@ static void reloc_append(
     if (chars_taken != nullptr) { *chars_taken = i; }
 }
 
-// #define CFS_OPTION_SILENT_MASK 0x100
-
 ssize_t Instruction::code_from_string(
     uint32_t *code,
     size_t buffsize,
@@ -618,15 +581,9 @@ ssize_t Instruction::code_from_string(
                     fl = fl.mid(1);
                     continue;
                 }
-                // uint bits = IMF_SUB_GET_BITS(adesc->loc);
-                // uint shift = IMF_SUB_GET_SHIFT(adesc->loc);
-                // int shift_right = adesc->shift;
+
                 uint64_t val = 0;
                 uint chars_taken = 0;
-
-                // if ((adesc->min < 0) && (field & (1 << bits - 1)))
-                //    field -= 1 << bits;
-                // field <<= adesc->shift;
 
                 switch (adesc->kind) {
                 case 'g': val += parse_reg_from_string(fl, &chars_taken); break;
@@ -677,11 +634,6 @@ ssize_t Instruction::code_from_string(
                     field = -1;
                     break;
                 }
-                // if (adesc->min >= 0) {
-                //     val = (val >> shift_right);
-                // } else {
-                //     val = (uint64_t)((int64_t)val >> shift_right);
-                // }
                 if (!silent) {
                     if (adesc->min < 0) {
                         if (((int64_t)val < adesc->min) || ((int64_t)val > adesc->max)) {
@@ -722,29 +674,6 @@ ssize_t Instruction::code_from_string(
                           // now.
         ret = 4;
     }
-    // if (pseudo_opt) {
-    //     if (((inst_base == "LA") || (inst_base == "LI"))
-    //         && (inst_fields.size() == 2)) {
-    //         if (code_from_string(
-    //                 code, buffsize, "LUI", inst_fields, error, inst_addr,
-    //                 reloc, filename, line, false, CFS_OPTION_SILENT_MASK +
-    //                 16)
-    //             < 0) {
-    //             error = QString("error in LUI element of " + inst_base);
-    //             return -1;
-    //         }
-    //         inst_fields.insert(1, inst_fields.at(0));
-    //         if (code_from_string(
-    //                 code + 1, buffsize - 4, "ORI", inst_fields, error,
-    //                 inst_addr + 4, reloc, filename, line, false,
-    //                 CFS_OPTION_SILENT_MASK + 0)
-    //             < 0) {
-    //             error = QString("error in ORI element of " + inst_base);
-    //             return -1;
-    //         }
-    //         return 8;
-    //     }
-    // }
     if (buffsize >= 4) { *code = inst_code; }
     if (ret < 0) { error = err; }
     return ret;
@@ -806,7 +735,6 @@ bool Instruction::update(int64_t val, RelocExpression *relocexp) {
         }
     }
     dt |= relocexp->arg->encode(val);
-    // (val << relocexp->lsb_bit) & mask;
     return true;
 }
 
