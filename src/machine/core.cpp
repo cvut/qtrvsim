@@ -205,7 +205,6 @@ FetchState Core::fetch(bool skip_break) {
     }
 
     emit fetch_inst_addr_value(inst_addr);
-    emit instruction_fetched(inst, inst_addr, excause, true);
     return { FetchInternalState { .fetched_value = inst.data() }, FetchInterstage {
                                                                       .inst = inst,
                                                                       .inst_addr = inst_addr,
@@ -241,7 +240,6 @@ DecodeState Core::decode(const FetchInterstage &dt) {
     }
 
     emit decode_inst_addr_value(dt.inst_addr);
-    emit instruction_decoded(dt.inst, dt.inst_addr, excause, dt.is_valid);
 
     return { DecodeInternalState {
                  .alu_op_num = static_cast<unsigned>(alu_op),
@@ -293,7 +291,6 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
     if (dt.branch) target = dt.inst_addr + dt.immediate_val.as_i64();
 
     emit execute_inst_addr_value(dt.inst_addr);
-    emit instruction_executed(dt.inst, dt.inst_addr, excause, dt.is_valid);
 
     const unsigned stall_status = [&]() {
         if (dt.stall) {
@@ -371,11 +368,10 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
     }
 
     emit memory_inst_addr_value(dt.inst_addr);
-    emit instruction_memory(dt.inst, dt.inst_addr, dt.excause, dt.is_valid);
 
     return { MemoryInternalState {
-                 .memwrite = dt.memwrite,
-                 .memread = dt.memread,
+                 .memwrite = memwrite,
+                 .memread = memread,
                  .branch = dt.branch,
                  .jump = dt.jump,
                  .branch_or_jump = dt.branch_taken || dt.jump,
@@ -400,7 +396,6 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
 
 WritebackState Core::writeback(const MemoryInterstage &dt) {
     emit writeback_inst_addr_value(dt.inst_addr);
-    emit instruction_writeback(dt.inst, dt.inst_addr, dt.excause, dt.is_valid);
     if (dt.regwrite) { regs->write_gp(dt.num_rd, dt.towrite_val); }
 
     return { WritebackInternalState {
@@ -420,13 +415,10 @@ Address Core::compute_next_pc(const ExecuteInterstage &exec) const {
 }
 
 void Core::flush() {
-    Pipeline &p = state.pipeline;
-    p = {};
-    emit instruction_executed(ex_mem.inst, ex_mem.inst_addr, ex_mem.excause, ex_mem.is_valid);
+    state.pipeline = {};
+
     emit execute_inst_addr_value(STAGEADDR_NONE);
-    emit instruction_decoded(id_ex.inst, id_ex.inst_addr, id_ex.excause, id_ex.is_valid);
     emit decode_inst_addr_value(STAGEADDR_NONE);
-    emit instruction_fetched(if_id.inst, if_id.inst_addr, if_id.excause, if_id.is_valid);
     emit fetch_inst_addr_value(STAGEADDR_NONE);
 }
 
