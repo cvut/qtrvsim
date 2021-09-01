@@ -39,7 +39,7 @@ Core::Core(
 void Core::step(bool skip_break) {
     state.cycle_count++;
     do_step(skip_break);
-    emit step_done();
+    emit step_done(state);
 }
 
 void Core::reset() {
@@ -204,7 +204,8 @@ FetchState Core::fetch(bool skip_break) {
         if (cop0state->core_interrupt_request()) { excause = EXCAUSE_INT; }
     }
 
-    emit fetch_inst_addr_value(inst_addr);
+    regs->write_pc(this->predictor->predict(inst, inst_addr));
+
     return { FetchInternalState { .fetched_value = inst.data() }, FetchInterstage {
                                                                       .inst = inst,
                                                                       .inst_addr = inst_addr,
@@ -238,8 +239,6 @@ DecodeState Core::decode(const FetchInterstage &dt) {
             excause = EXCAUSE_SYSCALL;
         }
     }
-
-    emit decode_inst_addr_value(dt.inst_addr);
 
     return { DecodeInternalState {
                  .alu_op_num = static_cast<unsigned>(alu_op),
@@ -289,8 +288,6 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
     }
     Address target = 0_addr;
     if (dt.branch) target = dt.inst_addr + dt.immediate_val.as_i64();
-
-    emit execute_inst_addr_value(dt.inst_addr);
 
     const unsigned stall_status = [&]() {
         if (dt.stall) {
@@ -367,8 +364,6 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
         regwrite = false;
     }
 
-    emit memory_inst_addr_value(dt.inst_addr);
-
     return { MemoryInternalState {
                  .memwrite = memwrite,
                  .memread = memread,
@@ -395,7 +390,6 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
 }
 
 WritebackState Core::writeback(const MemoryInterstage &dt) {
-    emit writeback_inst_addr_value(dt.inst_addr);
     if (dt.regwrite) { regs->write_gp(dt.num_rd, dt.towrite_val); }
 
     return { WritebackInternalState {
@@ -416,10 +410,6 @@ Address Core::compute_next_pc(const ExecuteInterstage &exec) const {
 
 void Core::flush() {
     state.pipeline = {};
-
-    emit execute_inst_addr_value(STAGEADDR_NONE);
-    emit decode_inst_addr_value(STAGEADDR_NONE);
-    emit fetch_inst_addr_value(STAGEADDR_NONE);
 }
 
 uint64_t Core::get_xlen_from_reg(RegisterValue reg) const {

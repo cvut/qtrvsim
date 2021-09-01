@@ -17,6 +17,7 @@
 
 #include "instruction.h"
 #include "memory/address.h"
+#include "machinedefs.h"
 
 #include <cstdint>
 #include <utility>
@@ -31,7 +32,7 @@ enum ForwardFrom {
 
 struct FetchInterstage {
     Instruction inst = Instruction::NOP; // Loaded instruction
-    Address inst_addr = 0_addr;          // Address of instruction
+    Address inst_addr = STAGEADDR_NONE;          // Address of instruction
     enum ExceptionCause excause = EXCAUSE_NONE;
     bool is_valid = false;
 
@@ -87,7 +88,7 @@ struct DecodeInterstage {
                                          // rd according to regd)
     ForwardFrom ff_rs = FORWARD_NONE;
     ForwardFrom ff_rt = FORWARD_NONE;
-    Address inst_addr = 0_addr; // Address of instruction
+    Address inst_addr = STAGEADDR_NONE; // Address of instruction
     enum ExceptionCause excause = EXCAUSE_NONE;
     bool stall = false;
     bool is_valid = false;
@@ -143,7 +144,7 @@ struct ExecuteInterstage {
     RegisterValue val_rt = 0;
     uint8_t num_rd = 0;
     RegisterValue alu_val = 0;  // Result of ALU execution
-    Address inst_addr = 0_addr; // Address of instruction
+    Address inst_addr = STAGEADDR_NONE; // Address of instruction
     enum ExceptionCause excause = EXCAUSE_NONE;
     Address branch_target = 0_addr;
 
@@ -205,7 +206,7 @@ struct MemoryInterstage {
     uint8_t num_rd = 0;
     RegisterValue towrite_val = 0;
     Address mem_addr = 0_addr;  // Address used to access memory
-    Address inst_addr = 0_addr; // Address of instruction
+    Address inst_addr = STAGEADDR_NONE; // Address of instruction
     Address next_pc = 0_addr;   // computed and expected `inst_addr` of next instruction in
                                 // pipeline.
     enum ExceptionCause excause = EXCAUSE_NONE;
@@ -248,7 +249,7 @@ struct MemoryState {
 
 struct WritebackInternalState {
     Instruction inst = Instruction::NOP;
-    Address inst_addr = 0_addr;
+    Address inst_addr = STAGEADDR_NONE;
     bool regwrite = true;
     bool memtoreg = false;
     uint8_t num_rd = 0;

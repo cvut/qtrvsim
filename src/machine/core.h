@@ -107,13 +107,8 @@ public:
     MemoryInterstage &mem_wb;
 
 signals:
-    void fetch_inst_addr_value(machine::Address);
-    void decode_inst_addr_value(machine::Address);
-    void execute_inst_addr_value(machine::Address);
-    void memory_inst_addr_value(machine::Address);
-    void writeback_inst_addr_value(machine::Address);
     void stop_on_exception_reached();
-    void step_done() const;
+    void step_done(const CoreState&);
 
 protected:
     virtual void do_step(bool skip_break = false) = 0;

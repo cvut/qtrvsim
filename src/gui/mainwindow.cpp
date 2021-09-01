@@ -82,71 +82,33 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
 
     // Connect signals from menu
     connect(ui->actionExit, &QAction::triggered, this, &QWidget::close);
-    connect(
-        ui->actionNewMachine, &QAction::triggered, this,
-        &MainWindow::new_machine);
+    connect(ui->actionNewMachine, &QAction::triggered, this, &MainWindow::new_machine);
     connect(ui->actionReload, &QAction::triggered, this, [this] { machine_reload(false, false); });
-    connect(
-        ui->actionPrint, &QAction::triggered, this, &MainWindow::print_action);
+    connect(ui->actionPrint, &QAction::triggered, this, &MainWindow::print_action);
     connect(ui->actionNew, &QAction::triggered, this, &MainWindow::new_source);
-    connect(
-        ui->actionOpen, &QAction::triggered, this, &MainWindow::open_source);
-    connect(
-        ui->actionSave, &QAction::triggered, this, &MainWindow::save_source);
-    connect(
-        ui->actionSaveAs, &QAction::triggered, this,
-        &MainWindow::save_source_as);
-    connect(
-        ui->actionClose, &QAction::triggered, this,
-        &MainWindow::close_source_check);
+    connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::open_source);
+    connect(ui->actionSave, &QAction::triggered, this, &MainWindow::save_source);
+    connect(ui->actionSaveAs, &QAction::triggered, this, &MainWindow::save_source_as);
+    connect(ui->actionClose, &QAction::triggered, this, &MainWindow::close_source_check);
     connect(
         ui->actionMnemonicRegisters, &QAction::triggered, this,
         &MainWindow::view_mnemonics_registers);
-    connect(
-        ui->actionCompileSource, &QAction::triggered, this,
-        &MainWindow::compile_source);
-    connect(
-        ui->actionBuildExe, &QAction::triggered, this,
-        &MainWindow::build_execute);
-    connect(
-        ui->actionShow_Symbol, &QAction::triggered, this,
-        &MainWindow::show_symbol_dialog);
-    connect(
-        ui->actionRegisters, &QAction::triggered, this,
-        &MainWindow::show_registers);
-    connect(
-        ui->actionProgram_memory, &QAction::triggered, this,
-        &MainWindow::show_program);
-    connect(
-        ui->actionMemory, &QAction::triggered, this, &MainWindow::show_memory);
-    connect(
-        ui->actionProgram_Cache, &QAction::triggered, this,
-        &MainWindow::show_cache_program);
-    connect(
-        ui->actionData_Cache, &QAction::triggered, this,
-        &MainWindow::show_cache_data);
-    connect(
-        ui->actionPeripherals, &QAction::triggered, this,
-        &MainWindow::show_peripherals);
-    connect(
-        ui->actionTerminal, &QAction::triggered, this,
-        &MainWindow::show_terminal);
-    connect(
-        ui->actionLcdDisplay, &QAction::triggered, this,
-        &MainWindow::show_lcd_display);
-    connect(
-        ui->actionCop0State, &QAction::triggered, this,
-        &MainWindow::show_cop0dock);
-    connect(
-        ui->actionCore_View_show, &QAction::triggered, this,
-        &MainWindow::show_hide_coreview);
-    connect(
-        ui->actionMessages, &QAction::triggered, this,
-        &MainWindow::show_messages);
-    connect(
-        ui->actionAbout, &QAction::triggered, this, &MainWindow::about_program);
-    connect(
-        ui->actionAboutQt, &QAction::triggered, this, &MainWindow::about_qt);
+    connect(ui->actionCompileSource, &QAction::triggered, this, &MainWindow::compile_source);
+    connect(ui->actionBuildExe, &QAction::triggered, this, &MainWindow::build_execute);
+    connect(ui->actionShow_Symbol, &QAction::triggered, this, &MainWindow::show_symbol_dialog);
+    connect(ui->actionRegisters, &QAction::triggered, this, &MainWindow::show_registers);
+    connect(ui->actionProgram_memory, &QAction::triggered, this, &MainWindow::show_program);
+    connect(ui->actionMemory, &QAction::triggered, this, &MainWindow::show_memory);
+    connect(ui->actionProgram_Cache, &QAction::triggered, this, &MainWindow::show_cache_program);
+    connect(ui->actionData_Cache, &QAction::triggered, this, &MainWindow::show_cache_data);
+    connect(ui->actionPeripherals, &QAction::triggered, this, &MainWindow::show_peripherals);
+    connect(ui->actionTerminal, &QAction::triggered, this, &MainWindow::show_terminal);
+    connect(ui->actionLcdDisplay, &QAction::triggered, this, &MainWindow::show_lcd_display);
+    connect(ui->actionCop0State, &QAction::triggered, this, &MainWindow::show_cop0dock);
+    connect(ui->actionCore_View_show, &QAction::triggered, this, &MainWindow::show_hide_coreview);
+    connect(ui->actionMessages, &QAction::triggered, this, &MainWindow::show_messages);
+    connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about_program);
+    connect(ui->actionAboutQt, &QAction::triggered, this, &MainWindow::about_qt);
     connect(ui->ips1, &QAction::toggled, this, &MainWindow::set_speed);
     connect(ui->ips2, &QAction::toggled, this, &MainWindow::set_speed);
     connect(ui->ips5, &QAction::toggled, this, &MainWindow::set_speed);
@@ -154,27 +116,18 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(ui->ipsUnlimited, &QAction::toggled, this, &MainWindow::set_speed);
     connect(ui->ipsMax, &QAction::toggled, this, &MainWindow::set_speed);
 
-    connect(
-        this, &MainWindow::report_message, messages,
-        &MessagesDock::insert_line);
-    connect(
-        this, &MainWindow::clear_messages, messages,
-        &MessagesDock::clear_messages);
-    connect(
-        messages, &MessagesDock::message_selected, this,
-        &MainWindow::message_selected);
+    connect(this, &MainWindow::report_message, messages, &MessagesDock::insert_line);
+    connect(this, &MainWindow::clear_messages, messages, &MessagesDock::clear_messages);
+    connect(messages, &MessagesDock::message_selected, this, &MainWindow::message_selected);
 
     // Restore application state from settings
     restoreState(settings->value("windowState").toByteArray());
     restoreGeometry(settings->value("windowGeometry").toByteArray());
 
     // Source editor related actions
-    connect(
-        central_window, &QTabWidget::currentChanged, this,
-        &MainWindow::central_tab_changed);
+    connect(central_window, &QTabWidget::currentChanged, this, &MainWindow::central_tab_changed);
 
-    foreach (
-        QString file_name, settings->value("openSrcFiles").toStringList()) {
+    foreach (QString file_name, settings->value("openSrcFiles").toStringList()) {
         if (file_name.isEmpty()) { continue; }
         auto *editor = new SrcEditor();
         if (editor->loadFile(file_name)) {
@@ -188,9 +141,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     for (const QString &fname : samples_dir.entryList(QDir::Files)) {
         auto *textsigac = new TextSignalAction(fname, ":/samples/" + fname);
         ui->menuExamples->addAction(textsigac);
-        connect(
-            textsigac, &TextSignalAction::activated, this,
-            &MainWindow::example_source);
+        connect(textsigac, &TextSignalAction::activated, this, &MainWindow::example_source);
     }
 
 #ifdef __EMSCRIPTEN__
@@ -224,20 +175,14 @@ void MainWindow::start() {
 
 void MainWindow::show_hide_coreview(bool show) {
     coreview_shown = show;
-    if (!show && (corescene == nullptr)) {
-        return;
-    }
+    if (!show && (corescene == nullptr)) { return; }
     if ((machine == nullptr) || !show) {
         delete corescene;
         corescene = nullptr;
-        if (coreview != nullptr) {
-            coreview->setScene(corescene);
-        }
+        if (coreview != nullptr) { coreview->setScene(corescene); }
         return;
     }
-    if (show && (corescene != nullptr)) {
-        return;
-    }
+    if (show && (corescene != nullptr)) { return; }
 
     if (machine->config().pipelined()) {
         corescene = new CoreViewScenePipelined(machine);
@@ -245,30 +190,17 @@ void MainWindow::show_hide_coreview(bool show) {
         corescene = new CoreViewSceneSimple(machine);
     }
     // Connect scene signals to actions
-    connect(
-        corescene, &CoreViewScene::request_registers, this,
-        &MainWindow::show_registers);
-    connect(
-        corescene, &CoreViewScene::request_program_memory, this,
-        &MainWindow::show_program);
-    connect(
-        corescene, &CoreViewScene::request_data_memory, this,
-        &MainWindow::show_memory);
+    connect(corescene, &CoreViewScene::request_registers, this, &MainWindow::show_registers);
+    connect(corescene, &CoreViewScene::request_program_memory, this, &MainWindow::show_program);
+    connect(corescene, &CoreViewScene::request_data_memory, this, &MainWindow::show_memory);
     connect(
         corescene, &CoreViewScene::request_jump_to_program_counter, program,
         &ProgramDock::jump_to_pc);
     connect(
-        corescene, &CoreViewScene::request_cache_program, this,
-        &MainWindow::show_cache_program);
-    connect(
-        corescene, &CoreViewScene::request_cache_data, this,
-        &MainWindow::show_cache_data);
-    connect(
-        corescene, &CoreViewScene::request_peripherals, this,
-        &MainWindow::show_peripherals);
-    connect(
-        corescene, &CoreViewScene::request_terminal, this,
-        &MainWindow::show_terminal);
+        corescene, &CoreViewScene::request_cache_program, this, &MainWindow::show_cache_program);
+    connect(corescene, &CoreViewScene::request_cache_data, this, &MainWindow::show_cache_data);
+    connect(corescene, &CoreViewScene::request_peripherals, this, &MainWindow::show_peripherals);
+    connect(corescene, &CoreViewScene::request_terminal, this, &MainWindow::show_terminal);
     coreview->setScene(corescene);
 }
 
@@ -298,42 +230,28 @@ void MainWindow::create_core(
         auto *osemu_handler = new osemu::OsSyscallExceptionHandler(
             config.osemu_known_syscall_stop(), config.osemu_unknown_syscall_stop(),
             config.osemu_fs_root());
-        machine->register_exception_handler(
-            machine::EXCAUSE_SYSCALL, osemu_handler);
+        machine->register_exception_handler(machine::EXCAUSE_SYSCALL, osemu_handler);
         connect(
-            osemu_handler, &osemu::OsSyscallExceptionHandler::char_written,
-            terminal, QOverload<int, unsigned int>::of(&TerminalDock::tx_byte));
+            osemu_handler, &osemu::OsSyscallExceptionHandler::char_written, terminal,
+            QOverload<int, unsigned int>::of(&TerminalDock::tx_byte));
         connect(
-            osemu_handler, &osemu::OsSyscallExceptionHandler::rx_byte_pool,
-            terminal, &TerminalDock::rx_byte_pool);
+            osemu_handler, &osemu::OsSyscallExceptionHandler::rx_byte_pool, terminal,
+            &TerminalDock::rx_byte_pool);
         machine->set_step_over_exception(machine::EXCAUSE_SYSCALL, true);
         machine->set_stop_on_exception(machine::EXCAUSE_SYSCALL, false);
     } else {
         machine->set_step_over_exception(machine::EXCAUSE_SYSCALL, false);
-        machine->set_stop_on_exception(
-            machine::EXCAUSE_SYSCALL, config.osemu_exception_stop());
+        machine->set_stop_on_exception(machine::EXCAUSE_SYSCALL, config.osemu_exception_stop());
     }
 
     // Connect machine signals and slots
-    connect(
-        ui->actionRun, &QAction::triggered, machine, &machine::Machine::play);
-    connect(
-        ui->actionPause, &QAction::triggered, machine,
-        &machine::Machine::pause);
-    connect(
-        ui->actionStep, &QAction::triggered, machine, &machine::Machine::step);
-    connect(
-        ui->actionRestart, &QAction::triggered, machine,
-        &machine::Machine::restart);
-    connect(
-        machine, &machine::Machine::status_change, this,
-        &MainWindow::machine_status);
-    connect(
-        machine, &machine::Machine::program_exit, this,
-        &MainWindow::machine_exit);
-    connect(
-        machine, &machine::Machine::program_trap, this,
-        &MainWindow::machine_trap);
+    connect(ui->actionRun, &QAction::triggered, machine, &machine::Machine::play);
+    connect(ui->actionPause, &QAction::triggered, machine, &machine::Machine::pause);
+    connect(ui->actionStep, &QAction::triggered, machine, &machine::Machine::step);
+    connect(ui->actionRestart, &QAction::triggered, machine, &machine::Machine::restart);
+    connect(machine, &machine::Machine::status_change, this, &MainWindow::machine_status);
+    connect(machine, &machine::Machine::program_exit, this, &MainWindow::machine_exit);
+    connect(machine, &machine::Machine::program_trap, this, &MainWindow::machine_trap);
     // Connect signal from break to machine pause
     connect(
         machine->core(), &machine::Core::stop_on_exception_reached, machine,
@@ -350,22 +268,8 @@ void MainWindow::create_core(
     lcd_display->setup(machine->peripheral_lcd_display());
     cop0dock->setup(machine);
 
-    // Connect signals for instruction address followup
     connect(
-        machine->core(), &machine::Core::fetch_inst_addr_value, program,
-        &ProgramDock::fetch_inst_addr);
-    connect(
-        machine->core(), &machine::Core::decode_inst_addr_value, program,
-        &ProgramDock::decode_inst_addr);
-    connect(
-        machine->core(), &machine::Core::execute_inst_addr_value, program,
-        &ProgramDock::execute_inst_addr);
-    connect(
-        machine->core(), &machine::Core::memory_inst_addr_value, program,
-        &ProgramDock::memory_inst_addr);
-    connect(
-        machine->core(), &machine::Core::writeback_inst_addr_value, program,
-        &ProgramDock::writeback_inst_addr);
+        machine->core(), &machine::Core::step_done, program, &ProgramDock::update_pipeline_addrs);
 
     // Set status to ready
     machine_status(machine::Machine::ST_READY);
@@ -380,16 +284,13 @@ void MainWindow::new_machine() {
 }
 
 void MainWindow::machine_reload(bool force_memory_reset, bool force_elf_load) {
-    if (machine == nullptr) {
-        return new_machine();
-    }
+    if (machine == nullptr) { return new_machine(); }
     bool load_executable = force_elf_load || machine->executable_loaded();
     machine::MachineConfig cnf(&machine->config()); // We have to make local
                                                     // copy as create_core will
                                                     // delete current machine
     try {
-        create_core(
-            cnf, load_executable, !load_executable && !force_memory_reset);
+        create_core(cnf, load_executable, !load_executable && !force_memory_reset);
     } catch (const machine::SimulatorExceptionInput &e) {
         QMessageBox msg(this);
         msg.setText(e.msg(false));
@@ -418,8 +319,7 @@ void MainWindow::print_action() {
 
         // Prepare printer for PDF printing with appropriate resize.
         QRectF scene_rect = corescene->sceneRect();
-        if (printer.outputFormat() == QPrinter::PdfFormat
-            && (scene_rect.height() != 0)) {
+        if (printer.outputFormat() == QPrinter::PdfFormat && (scene_rect.height() != 0)) {
             QPageLayout layout = printer.pageLayout();
             layout.setOrientation(QPageLayout::Portrait);
             QPageSize pagesize = layout.pageSize();
@@ -428,12 +328,10 @@ void MainWindow::print_action() {
             qreal ratio = scene_rect.width() / scene_rect.height();
             if (paint_rect.height() * ratio > paint_rect.width()) {
                 pointsize.setHeight(
-                    pointsize.height() - paint_rect.height()
-                    + paint_rect.width() / ratio);
+                    pointsize.height() - paint_rect.height() + paint_rect.width() / ratio);
             } else {
                 pointsize.setWidth(
-                    pointsize.width() - paint_rect.width()
-                    + paint_rect.height() * ratio);
+                    pointsize.width() - paint_rect.width() + paint_rect.height() * ratio);
             }
             pagesize = QPageSize(pointsize, "custom", QPageSize::ExactMatch);
             layout.setPageSize(pagesize, layout.margins());
@@ -458,10 +356,8 @@ void MainWindow::print_action() {
 #endif // WITH_PRINTING
 }
 
-#define SHOW_HANDLER(NAME, DEFAULT_AREA)                                       \
-    void MainWindow::show_##NAME() {                                           \
-        show_dockwidget(NAME, DEFAULT_AREA);                                   \
-    }
+#define SHOW_HANDLER(NAME, DEFAULT_AREA)                                                           \
+    void MainWindow::show_##NAME() { show_dockwidget(NAME, DEFAULT_AREA); }
 
 SHOW_HANDLER(registers, Qt::TopDockWidgetArea)
 SHOW_HANDLER(program, Qt::LeftDockWidgetArea)
@@ -476,26 +372,19 @@ SHOW_HANDLER(messages, Qt::BottomDockWidgetArea)
 #undef SHOW_HANDLER
 
 void MainWindow::show_symbol_dialog() {
-    if (machine == nullptr || machine->symbol_table() == nullptr) {
-        return;
-    }
+    if (machine == nullptr || machine->symbol_table() == nullptr) { return; }
     QStringList symbol_names = machine->symbol_table()->names();
     auto *gotosyboldialog = new GoToSymbolDialog(this, symbol_names);
     connect(
         gotosyboldialog, &GoToSymbolDialog::program_focus_addr, program,
         &ProgramDock::focus_addr_with_save);
     connect(
-        gotosyboldialog, &GoToSymbolDialog::program_focus_addr, this,
-        &MainWindow::show_program);
+        gotosyboldialog, &GoToSymbolDialog::program_focus_addr, this, &MainWindow::show_program);
+    connect(gotosyboldialog, &GoToSymbolDialog::memory_focus_addr, memory, &MemoryDock::focus_addr);
+    connect(gotosyboldialog, &GoToSymbolDialog::memory_focus_addr, this, &MainWindow::show_memory);
     connect(
-        gotosyboldialog, &GoToSymbolDialog::memory_focus_addr, memory,
-        &MemoryDock::focus_addr);
-    connect(
-        gotosyboldialog, &GoToSymbolDialog::memory_focus_addr, this,
-        &MainWindow::show_memory);
-    connect(
-        gotosyboldialog, &GoToSymbolDialog::obtain_value_for_name,
-        machine->symbol_table(), &machine::SymbolTable::name_to_value);
+        gotosyboldialog, &GoToSymbolDialog::obtain_value_for_name, machine->symbol_table(),
+        &machine::SymbolTable::name_to_value);
     gotosyboldialog->setAttribute(Qt::WA_DeleteOnClose);
     gotosyboldialog->open();
 }
@@ -531,9 +420,7 @@ void MainWindow::set_speed() {
 
 void MainWindow::view_mnemonics_registers(bool enable) {
     machine::Instruction::set_symbolic_registers(enable);
-    if (program == nullptr) {
-        return;
-    }
+    if (program == nullptr) { return; }
     program->request_update_all();
 }
 
@@ -547,21 +434,17 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         event->ignore();
         auto *dialog = new SaveChnagedDialog(list, this);
         int id = qMetaTypeId<QStringList>();
-        if (!QMetaType::isRegistered(id)) {
-            qRegisterMetaType<QStringList>();
-        }
+        if (!QMetaType::isRegistered(id)) { qRegisterMetaType<QStringList>(); }
         connect(
-            dialog, &SaveChnagedDialog::user_decision, this,
-            &MainWindow::save_exit_or_ignore, Qt::QueuedConnection);
+            dialog, &SaveChnagedDialog::user_decision, this, &MainWindow::save_exit_or_ignore,
+            Qt::QueuedConnection);
         dialog->open();
     }
 }
 
 void MainWindow::save_exit_or_ignore(bool cancel, const QStringList &tosavelist) {
     bool save_unnamed = false;
-    if (cancel) {
-        return;
-    }
+    if (cancel) { return; }
     for (const auto &fname : tosavelist) {
         SrcEditor *editor = source_editor_for_file(fname, false);
         if (editor->saveAsRequired()) {
@@ -580,12 +463,8 @@ void MainWindow::save_exit_or_ignore(bool cancel, const QStringList &tosavelist)
         for (int i = 0; i < central_window->count(); i++) {
             QWidget *w = central_window->widget(i);
             auto *editor = dynamic_cast<SrcEditor *>(w);
-            if (editor == nullptr) {
-                continue;
-            }
-            if (!editor->saveAsRequired()) {
-                continue;
-            }
+            if (editor == nullptr) { continue; }
+            if (!editor->saveAsRequired()) { continue; }
             central_window->setCurrentWidget(editor);
             save_source_as();
             return;
@@ -596,9 +475,7 @@ void MainWindow::save_exit_or_ignore(bool cancel, const QStringList &tosavelist)
 }
 
 void MainWindow::show_dockwidget(QDockWidget *dw, Qt::DockWidgetArea area) {
-    if (dw == nullptr) {
-        return;
-    }
+    if (dw == nullptr) { return; }
     if (dw->isHidden()) {
         dw->show();
         addDockWidget(area, dw);
@@ -672,40 +549,29 @@ void MainWindow::setCurrentSrcEditor(SrcEditor *srceditor) {
 }
 
 void MainWindow::tab_widget_destroyed(QObject *obj) {
-    if (obj == current_srceditor) {
-        setCurrentSrcEditor(nullptr);
-    }
+    if (obj == current_srceditor) { setCurrentSrcEditor(nullptr); }
 }
 
 void MainWindow::central_tab_changed(int index) {
     QWidget *widget = central_window->widget(index);
     auto *srceditor = dynamic_cast<SrcEditor *>(widget);
-    if (srceditor != nullptr) {
-        setCurrentSrcEditor(srceditor);
-    }
+    if (srceditor != nullptr) { setCurrentSrcEditor(srceditor); }
 }
 
 void MainWindow::add_src_editor_to_tabs(SrcEditor *editor) {
     central_window->addTab(editor, editor->title());
     central_window->setCurrentWidget(editor);
-    connect(
-        editor, &QObject::destroyed, this, &MainWindow::tab_widget_destroyed);
+    connect(editor, &QObject::destroyed, this, &MainWindow::tab_widget_destroyed);
 }
 
 void MainWindow::update_open_file_list() {
     QStringList open_src_files;
-    if ((central_window == nullptr) || (settings == nullptr)) {
-        return;
-    }
+    if ((central_window == nullptr) || (settings == nullptr)) { return; }
     for (int i = 0; i < central_window->count(); i++) {
         QWidget *w = central_window->widget(i);
         auto *editor = dynamic_cast<SrcEditor *>(w);
-        if (editor == nullptr) {
-            continue;
-        }
-        if (editor->filename() == "") {
-            continue;
-        }
+        if (editor == nullptr) { continue; }
+        if (editor->filename() == "") { continue; }
         open_src_files.append(editor->filename());
     }
     settings->setValue("openSrcFiles", open_src_files);
@@ -715,69 +581,46 @@ bool MainWindow::modified_file_list(QStringList &list, bool report_unnamed) {
     bool ret = false;
     list.clear();
     QStringList open_src_files;
-    if (central_window == nullptr) {
-        return false;
-    }
+    if (central_window == nullptr) { return false; }
     for (int i = 0; i < central_window->count(); i++) {
         QWidget *w = central_window->widget(i);
         auto *editor = dynamic_cast<SrcEditor *>(w);
-        if (editor == nullptr) {
-            continue;
-        }
-        if ((editor->filename() == "") && !report_unnamed) {
-            continue;
-        }
-        if (!editor->isModified()) {
-            continue;
-        }
+        if (editor == nullptr) { continue; }
+        if ((editor->filename() == "") && !report_unnamed) { continue; }
+        if (!editor->isModified()) { continue; }
         ret = true;
         list.append(editor->filename());
     }
     return ret;
 }
 
-static int
-compare_filenames(const QString &filename1, const QString &filename2) {
+static int compare_filenames(const QString &filename1, const QString &filename2) {
     QFileInfo fi1(filename1);
     QFileInfo fi2(filename2);
     QString canon1 = fi1.canonicalFilePath();
     QString canon2 = fi2.canonicalFilePath();
-    if (!canon1.isEmpty() && (canon1 == canon2)) {
-        return 2;
-    }
-    if (filename1 == filename2) {
-        return 1;
-    }
+    if (!canon1.isEmpty() && (canon1 == canon2)) { return 2; }
+    if (filename1 == filename2) { return 1; }
     return 0;
 }
 
-SrcEditor *
-MainWindow::source_editor_for_file(const QString &filename, bool open) {
-    if (central_window == nullptr) {
-        return nullptr;
-    }
+SrcEditor *MainWindow::source_editor_for_file(const QString &filename, bool open) {
+    if (central_window == nullptr) { return nullptr; }
     int found_match = 0;
     SrcEditor *found_editor = nullptr;
     for (int i = 0; i < central_window->count(); i++) {
         QWidget *w = central_window->widget(i);
         auto *editor = dynamic_cast<SrcEditor *>(w);
-        if (editor == nullptr) {
-            continue;
-        }
+        if (editor == nullptr) { continue; }
         int match = compare_filenames(filename, editor->filename());
-        if ((match > found_match)
-            || ((editor == current_srceditor) && (match >= found_match))) {
+        if ((match > found_match) || ((editor == current_srceditor) && (match >= found_match))) {
             found_editor = editor;
             found_match = match;
         }
     }
-    if (found_match > 0) {
-        return found_editor;
-    }
+    if (found_match > 0) { return found_editor; }
 
-    if (!open) {
-        return nullptr;
-    }
+    if (!open) { return nullptr; }
 
     auto *editor = new SrcEditor();
     if (!editor->loadFile(filename)) {
@@ -805,9 +648,7 @@ void MainWindow::open_source() {
     if (!file_name.isEmpty()) {
         SrcEditor *editor = source_editor_for_file(file_name, false);
         if (editor != nullptr) {
-            if (central_window != nullptr) {
-                central_window->setCurrentWidget(editor);
-            }
+            if (central_window != nullptr) { central_window->setCurrentWidget(editor); }
             return;
         }
         editor = new SrcEditor();
@@ -816,48 +657,38 @@ void MainWindow::open_source() {
             add_src_editor_to_tabs(editor);
         } else {
             QMessageBox::critical(
-                this, "Simulator Error",
-                tr("Cannot open file '%1' for reading.").arg(file_name));
+                this, "Simulator Error", tr("Cannot open file '%1' for reading.").arg(file_name));
             delete (editor);
         }
     }
 #else
-    QHtml5File::load(
-        "*", [&](const QByteArray &content, const QString &filename) {
-            SrcEditor *editor = new SrcEditor();
-            editor->loadByteArray(content, filename);
-            add_src_editor_to_tabs(editor);
-        });
+    QHtml5File::load("*", [&](const QByteArray &content, const QString &filename) {
+        SrcEditor *editor = new SrcEditor();
+        editor->loadByteArray(content, filename);
+        add_src_editor_to_tabs(editor);
+    });
 #endif
     update_open_file_list();
 }
 
 void MainWindow::save_source_as() {
-    if (current_srceditor == nullptr) {
-        return;
-    }
+    if (current_srceditor == nullptr) { return; }
 #ifndef __EMSCRIPTEN__
     QFileDialog fileDialog(this, tr("Save as..."));
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     fileDialog.setDefaultSuffix("s");
-    if (fileDialog.exec() != QDialog::Accepted) {
-        return;
-    }
+    if (fileDialog.exec() != QDialog::Accepted) { return; }
     const QString fn = fileDialog.selectedFiles().first();
     if (!current_srceditor->saveFile(fn)) {
-        QMessageBox::critical(
-            this, "Simulator Error", tr("Cannot save file '%1'.").arg(fn));
+        QMessageBox::critical(this, "Simulator Error", tr("Cannot save file '%1'.").arg(fn));
         return;
     }
     int idx = central_window->indexOf(current_srceditor);
-    if (idx >= 0) {
-        central_window->setTabText(idx, current_srceditor->title());
-    }
+    if (idx >= 0) { central_window->setTabText(idx, current_srceditor->title()); }
     update_open_file_list();
 #else
     QString filename = current_srceditor->filename();
-    if (filename.isEmpty())
-        filename = "unknown.s";
+    if (filename.isEmpty()) filename = "unknown.s";
     QInputDialog *dialog = new QInputDialog(this);
     dialog->setWindowTitle("Select file name");
     dialog->setLabelText("File name:");
@@ -865,34 +696,24 @@ void MainWindow::save_source_as() {
     dialog->setMinimumSize(QSize(200, 100));
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     connect(
-        dialog, &QInputDialog::textValueSelected, this,
-        &MainWindow::src_editor_save_to, Qt::QueuedConnection);
+        dialog, &QInputDialog::textValueSelected, this, &MainWindow::src_editor_save_to,
+        Qt::QueuedConnection);
     dialog->open();
 #endif
 }
 
 void MainWindow::src_editor_save_to(const QString &filename) {
-    if (filename.isEmpty() || (current_srceditor == nullptr)) {
-        return;
-    }
+    if (filename.isEmpty() || (current_srceditor == nullptr)) { return; }
     current_srceditor->setFileName(filename);
-    if (!current_srceditor->filename().isEmpty()) {
-        save_source();
-    }
+    if (!current_srceditor->filename().isEmpty()) { save_source(); }
     int idx = central_window->indexOf(current_srceditor);
-    if (idx >= 0) {
-        central_window->setTabText(idx, current_srceditor->title());
-    }
+    if (idx >= 0) { central_window->setTabText(idx, current_srceditor->title()); }
     update_open_file_list();
 }
 
 void MainWindow::save_source() {
-    if (current_srceditor == nullptr) {
-        return;
-    }
-    if (current_srceditor->saveAsRequired()) {
-        return save_source_as();
-    }
+    if (current_srceditor == nullptr) { return; }
+    if (current_srceditor->saveAsRequired()) { return save_source_as(); }
 #ifndef __EMSCRIPTEN__
     if (!current_srceditor->saveFile()) {
         QMessageBox::critical(
@@ -901,16 +722,13 @@ void MainWindow::save_source() {
     }
 #else
     QHtml5File::save(
-        current_srceditor->document()->toPlainText().toUtf8(),
-        current_srceditor->filename());
+        current_srceditor->document()->toPlainText().toUtf8(), current_srceditor->filename());
     current_srceditor->setModified(false);
 #endif
 }
 
 void MainWindow::close_source_check() {
-    if (current_srceditor == nullptr) {
-        return;
-    }
+    if (current_srceditor == nullptr) { return; }
     SrcEditor *editor = current_srceditor;
     if (!editor->isModified()) {
         close_source();
@@ -920,21 +738,17 @@ void MainWindow::close_source_check() {
     msgbox->setWindowTitle("Close unsaved source");
     msgbox->setText("Close unsaved source.");
     msgbox->setInformativeText("Do you want to save your changes?");
-    msgbox->setStandardButtons(
-        QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgbox->setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     msgbox->setDefaultButton(QMessageBox::Save);
     msgbox->setMinimumSize(QSize(200, 150));
     msgbox->setAttribute(Qt::WA_DeleteOnClose);
     connect(
-        msgbox, &QDialog::finished, this, &MainWindow::close_source_decided,
-        Qt::QueuedConnection);
+        msgbox, &QDialog::finished, this, &MainWindow::close_source_decided, Qt::QueuedConnection);
     msgbox->open();
 }
 
 void MainWindow::close_source_decided(int result) {
-    if (current_srceditor == nullptr) {
-        return;
-    }
+    if (current_srceditor == nullptr) { return; }
     SrcEditor *editor = current_srceditor;
     if (result == QMessageBox::Save) {
         if (editor->saveAsRequired()) {
@@ -949,15 +763,11 @@ void MainWindow::close_source_decided(int result) {
 }
 
 void MainWindow::close_source() {
-    if (current_srceditor == nullptr) {
-        return;
-    }
+    if (current_srceditor == nullptr) { return; }
     SrcEditor *editor = current_srceditor;
     setCurrentSrcEditor(nullptr);
     int idx = central_window->indexOf(editor);
-    if (idx >= 0) {
-        central_window->removeTab(idx);
-    }
+    if (idx >= 0) { central_window->removeTab(idx); }
     delete editor;
     update_open_file_list();
 }
@@ -989,31 +799,20 @@ void MainWindow::message_selected(
     (void)text;
     (void)hint;
 
-    if (file.isEmpty()) {
-        return;
-    }
+    if (file.isEmpty()) { return; }
     SrcEditor *editor = source_editor_for_file(file, true);
-    if (editor == nullptr) {
-        return;
-    }
+    if (editor == nullptr) { return; }
     editor->setCursorToLine(line);
     editor->setFocus();
-    if (central_window != nullptr) {
-        central_window->setCurrentWidget(editor);
-    }
+    if (central_window != nullptr) { central_window->setCurrentWidget(editor); }
 }
 
-bool SimpleAsmWithEditorCheck::process_file(
-    const QString &filename,
-    QString *error_ptr) {
+bool SimpleAsmWithEditorCheck::process_file(const QString &filename, QString *error_ptr) {
     SrcEditor *editor = mainwindow->source_editor_for_file(filename, false);
-    if (editor == nullptr) {
-        return Super::process_file(filename, error_ptr);
-    }
+    if (editor == nullptr) { return Super::process_file(filename, error_ptr); }
     QTextDocument *doc = editor->document();
     int ln = 1;
-    for (QTextBlock block = doc->begin(); block.isValid();
-         block = block.next(), ln++) {
+    for (QTextBlock block = doc->begin(); block.isValid(); block = block.next(), ln++) {
         QString line = block.text();
         process_line(line, filename, ln);
     }
@@ -1041,8 +840,7 @@ bool SimpleAsmWithEditorCheck::process_pragma(
         if (operands.count() < 3) { return true; }
         QString show_method = "show_" + operands.at(2);
         QString show_method_sig = show_method + "()";
-        if (mainwindow->metaObject()->indexOfMethod(show_method_sig.toLatin1().data())
-            == -1) {
+        if (mainwindow->metaObject()->indexOfMethod(show_method_sig.toLatin1().data()) == -1) {
             emit report_message(
                 messagetype::MSG_WARNING, filename, line_number, 0,
                 "#pragma qtrvsim show - unknown object " + operands.at(2), "");
@@ -1052,21 +850,16 @@ bool SimpleAsmWithEditorCheck::process_pragma(
         return true;
     }
     if (op == "tab") {
-        if ((operands.count() < 3) || error_occured) {
-            return true;
-        }
+        if ((operands.count() < 3) || error_occured) { return true; }
         if (!QString::compare(operands.at(2), "core", Qt::CaseInsensitive)
-            && (mainwindow->central_window != nullptr)
-            && (mainwindow->coreview != nullptr)) {
+            && (mainwindow->central_window != nullptr) && (mainwindow->coreview != nullptr)) {
             mainwindow->central_window->setCurrentWidget(mainwindow->coreview);
         }
         return true;
     }
     if (op == "focus") {
         bool ok;
-        if (operands.count() < 4) {
-            return true;
-        }
+        if (operands.count() < 4) { return true; }
         fixmatheval::FmeExpression expression;
         fixmatheval::FmeValue value;
         QString error;
@@ -1106,25 +899,19 @@ bool SimpleAsmWithEditorCheck::process_pragma(
 
 void MainWindow::compile_source() {
     bool error_occured = false;
-    if (current_srceditor == nullptr) {
-        return;
-    }
+    if (current_srceditor == nullptr) { return; }
     if (machine != nullptr) {
-        if (machine->config().reset_at_compile()) {
-            machine_reload(true);
-        }
+        if (machine->config().reset_at_compile()) { machine_reload(true); }
     }
     if (machine == nullptr) {
-        QMessageBox::critical(
-            this, "Simulator Error", tr("No machine to store program."));
+        QMessageBox::critical(this, "Simulator Error", tr("No machine to store program."));
         return;
     }
     SymbolTableDb symtab(machine->symbol_table_rw(true));
     machine::FrontendMemory *mem = machine->memory_data_bus_rw();
     if (mem == nullptr) {
         QMessageBox::critical(
-            this, "Simulator Error",
-            tr("No physical addresspace to store program."));
+            this, "Simulator Error", tr("No physical addresspace to store program."));
         return;
     }
     QString filename = current_srceditor->filename();
@@ -1136,26 +923,18 @@ void MainWindow::compile_source() {
     emit clear_messages();
     SimpleAsmWithEditorCheck sasm(this);
 
-    connect(
-        &sasm, &SimpleAsm::report_message, this, &MainWindow::report_message);
+    connect(&sasm, &SimpleAsm::report_message, this, &MainWindow::report_message);
 
     sasm.setup(mem, &symtab, machine::Address(0x80020000));
 
     int ln = 1;
-    for (QTextBlock block = doc->begin(); block.isValid();
-         block = block.next(), ln++) {
+    for (QTextBlock block = doc->begin(); block.isValid(); block = block.next(), ln++) {
         QString line = block.text();
-        if (!sasm.process_line(line, filename, ln)) {
-            error_occured = true;
-        }
+        if (!sasm.process_line(line, filename, ln)) { error_occured = true; }
     }
-    if (!sasm.finish()) {
-        error_occured = true;
-    }
+    if (!sasm.finish()) { error_occured = true; }
 
-    if (error_occured) {
-        show_messages();
-    }
+    if (error_occured) { show_messages(); }
 }
 
 void MainWindow::build_execute() {
@@ -1163,8 +942,7 @@ void MainWindow::build_execute() {
     if (modified_file_list(list)) {
         auto *dialog = new SaveChnagedDialog(list, this);
         connect(
-            dialog, &SaveChnagedDialog::user_decision, this,
-            &MainWindow::build_execute_with_save);
+            dialog, &SaveChnagedDialog::user_decision, this, &MainWindow::build_execute_with_save);
         dialog->open();
     } else {
         build_execute_no_check();
@@ -1174,9 +952,7 @@ void MainWindow::build_execute() {
 void MainWindow::build_execute_with_save(
     bool cancel,
     QStringList tosavelist) { // NOLINT(performance-unnecessary-value-param)
-    if (cancel) {
-        return;
-    }
+    if (cancel) { return; }
     for (const auto &fname : tosavelist) {
         SrcEditor *editor = source_editor_for_file(fname, false);
         editor->saveFile();
@@ -1197,11 +973,10 @@ void MainWindow::build_execute_no_check() {
     show_messages();
     proc = new ExtProcess(this);
     build_process = procptr;
+    connect(proc, &ExtProcess::report_message, this, &MainWindow::report_message);
     connect(
-        proc, &ExtProcess::report_message, this, &MainWindow::report_message);
-    connect(
-        proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-        this, &MainWindow::build_execute_finished);
+        proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
+        &MainWindow::build_execute_finished);
     if (current_srceditor != nullptr) {
         if (!current_srceditor->filename().isEmpty()) {
             QFileInfo fi(current_srceditor->filename());
@@ -1214,23 +989,15 @@ void MainWindow::build_execute_no_check() {
             work_dir = fi.dir().path();
         }
     }
-    if (!work_dir.isEmpty()) {
-        proc->setWorkingDirectory(work_dir);
-    }
+    if (!work_dir.isEmpty()) { proc->setWorkingDirectory(work_dir); }
     // API without args has been deprecated.
     proc->start("make", {}, QProcess::Unbuffered | QProcess::ReadOnly);
 }
 
-void MainWindow::build_execute_finished(
-    int exitCode,
-    QProcess::ExitStatus exitStatus) {
-    if ((exitStatus != QProcess::NormalExit) || (exitCode != 0)) {
-        return;
-    }
+void MainWindow::build_execute_finished(int exitCode, QProcess::ExitStatus exitStatus) {
+    if ((exitStatus != QProcess::NormalExit) || (exitCode != 0)) { return; }
 
     if (machine != nullptr) {
-        if (machine->config().reset_at_compile()) {
-            machine_reload(true, true);
-        }
+        if (machine->config().reset_at_compile()) { machine_reload(true, true); }
     }
 }
