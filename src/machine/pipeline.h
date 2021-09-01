@@ -123,24 +123,26 @@ struct ExecuteInterstage {
     bool memread = false;
     bool memwrite = false;
     bool regwrite = false;
+    bool stop_if = false;
+    bool is_valid = false;
+    bool branch = false;
+    bool branch_taken = false;
+    bool jump = false;
+    bool bj_not = false;
+    bool alu_zero = false;
     enum AccessControl memctl;
     RegisterValue val_rt = 0;
     uint8_t num_rd = 0;
     RegisterValue alu_val = 0;  // Result of ALU execution
     Address inst_addr = 0_addr; // Address of instruction
     enum ExceptionCause excause = EXCAUSE_NONE;
-    bool stop_if = false;
-    bool is_valid = false;
-    bool branch = false;
-    bool jump = false;
-    bool bj_not = false;
     Address branch_target = 0_addr;
 };
 
 struct ExecuteInternalState {
     bool alu_src = false;
-    bool alu_zero = false;
     bool branch = false;
+    bool alu_pc = false; // PC is input to ALU
     RegisterValue alu_src1 = 0;
     RegisterValue alu_src2 = 0;
     RegisterValue immediate = 0;
@@ -197,9 +199,13 @@ struct MemoryInterstage {
 struct MemoryInternalState {
     bool memwrite = false;
     bool memread = false;
+    bool branch = false;
+    bool jump = false;
+    bool branch_or_jump = false;
     RegisterValue mem_read_val = 0;
     RegisterValue mem_write_val = 0;
     unsigned excause_num = 0;
+    RegisterValue mem_addr = 0;
 };
 
 struct MemoryState {
@@ -222,7 +228,8 @@ struct WritebackInternalState {
     Instruction inst = Instruction::NOP;
     Address inst_addr = 0_addr;
     bool regwrite = false;
-    uint8_t num_rd;
+    uint8_t num_rd = 0;
+    RegisterValue value = 0;
 };
 
 struct WritebackState {

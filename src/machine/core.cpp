@@ -378,8 +378,8 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
 
     return { ExecuteInternalState {
                  .alu_src = dt.alusrc,
-                 .alu_zero = alu_val == 0,
                  .branch = dt.branch,
+                 .alu_pc = dt.alu_pc,
                  .alu_src1 = dt.val_rs,
                  .alu_src2 = alu_sec,
                  .immediate = dt.immediate_val,
@@ -396,17 +396,21 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
                  .memread = dt.memread,
                  .memwrite = dt.memwrite,
                  .regwrite = dt.regwrite,
+                 .stop_if = dt.stop_if,
+                 .is_valid = dt.is_valid,
+                 .branch = dt.branch,
+                 // In the diagram `branch_taken` is computed in memory/handle_pc, but here it can
+                 // be done on one place only.
+                 .branch_taken = dt.branch && (!dt.bj_not ^ (alu_val != 0)),
+                 .jump = dt.jump,
+                 .bj_not = dt.bj_not,
+                 .alu_zero = alu_val == 0,
                  .memctl = dt.memctl,
                  .val_rt = dt.val_rt,
                  .num_rd = dt.num_rd,
                  .alu_val = alu_val,
                  .inst_addr = dt.inst_addr,
                  .excause = excause,
-                 .stop_if = dt.stop_if,
-                 .is_valid = dt.is_valid,
-                 .branch = dt.branch,
-                 .jump = dt.jump,
-                 .bj_not = dt.bj_not,
                  .branch_target = target,
              } };
 }
@@ -458,8 +462,13 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
     return { MemoryInternalState {
                  .memwrite = dt.memwrite,
                  .memread = dt.memread,
-                 .mem_read_val = memread ? towrite_val.as_u32() : 0,
+                 .branch = dt.branch,
+                 .jump = dt.jump,
+                 .branch_or_jump = dt.branch_taken || dt.jump,
+                 .mem_read_val = towrite_val,
                  .mem_write_val = dt.val_rt,
+                 .excause_num = static_cast<unsigned>(excause),
+                 .mem_addr = dt.alu_val,
              },
              MemoryInterstage {
                  .inst = dt.inst,
@@ -489,19 +498,15 @@ WritebackState Core::writeback(const MemoryInterstage &dt) {
         .inst_addr = dt.inst_addr,
         .regwrite = dt.regwrite,
         .num_rd = dt.num_rd,
+        .value = dt.towrite_val,
     } };
 }
 
 Address Core::handle_pc(const ExecuteInterstage &dt) {
     emit instruction_program_counter(dt.inst, dt.inst_addr, EXCAUSE_NONE, dt.is_valid);
 
-    if (dt.jump) { return Address(dt.alu_val.as_u32()); }
-
-    if (dt.branch) {
-        bool taken = !dt.bj_not ^ bool(dt.alu_val.as_u64());
-        return taken ? dt.branch_target : dt.inst_addr + 4;
-    }
-
+    if (dt.jump) { return Address(dt.alu_val.as_u32()); } // TODO handle XLEN
+    if (dt.branch_taken) { return dt.branch_target; }
     return dt.inst_addr + 4;
 }
 
