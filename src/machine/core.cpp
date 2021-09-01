@@ -1,8 +1,10 @@
 #include "core.h"
 
+#include "common/logging.h"
 #include "execute/alu.h"
-#include "programloader.h"
 #include "utils.h"
+
+LOG_CATEGORY("machine.core");
 
 using namespace machine;
 
@@ -496,20 +498,18 @@ Address Core::handle_pc(const ExecuteInterstage &dt) {
 }
 
 void Core::flush() {
-    state.pipeline.execute.final.flush();
+    Pipeline &p = state.pipeline;
+    p = {};
     emit instruction_executed(
-        state.pipeline.execute.final.inst, state.pipeline.execute.final.inst_addr,
-        state.pipeline.execute.final.excause, state.pipeline.execute.final.is_valid);
+        p.execute.final.inst, p.execute.final.inst_addr, p.execute.final.excause,
+        p.execute.final.is_valid);
     emit execute_inst_addr_value(STAGEADDR_NONE);
-    state.pipeline.decode.final.flush();
     emit instruction_decoded(
-        state.pipeline.decode.final.inst, state.pipeline.decode.final.inst_addr,
-        state.pipeline.decode.final.excause, state.pipeline.decode.final.is_valid);
+        p.decode.final.inst, p.decode.final.inst_addr, p.decode.final.excause,
+        p.decode.final.is_valid);
     emit decode_inst_addr_value(STAGEADDR_NONE);
-    state.pipeline.fetch.final.flush();
     emit instruction_fetched(
-        state.pipeline.fetch.final.inst, state.pipeline.fetch.final.inst_addr,
-        state.pipeline.fetch.final.excause, state.pipeline.fetch.final.is_valid);
+        p.fetch.final.inst, p.fetch.final.inst_addr, p.fetch.final.excause, p.fetch.final.is_valid);
     emit fetch_inst_addr_value(STAGEADDR_NONE);
 }
 
@@ -533,22 +533,23 @@ CoreSingle::CoreSingle(
 }
 
 void CoreSingle::do_step(bool skip_break) {
-    state.pipeline.fetch = fetch(skip_break);
-    state.pipeline.decode = decode(state.pipeline.fetch.final);
-    state.pipeline.execute = execute(state.pipeline.decode.final);
-    state.pipeline.memory = memory(state.pipeline.execute.final);
-    state.pipeline.writeback = writeback(state.pipeline.memory.final);
+    Pipeline &p = state.pipeline;
 
-    regs->write_pc(handle_pc(state.pipeline.execute.final));
+    p.fetch = fetch(skip_break);
+    p.decode = decode(p.fetch.final);
+    p.execute = execute(p.decode.final);
+    p.memory = memory(p.execute.final);
+    p.writeback = writeback(p.memory.final);
 
-    if (state.pipeline.memory.final.excause != EXCAUSE_NONE) {
+    regs->write_pc(handle_pc(p.execute.final));
+
+    if (p.memory.final.excause != EXCAUSE_NONE) {
         handle_exception(
-            this, regs, state.pipeline.memory.final.excause, state.pipeline.memory.final.inst,
-            state.pipeline.memory.final.inst_addr, regs->read_pc(), prev_inst_addr,
-            state.pipeline.memory.final.mem_addr);
+            this, regs, p.memory.final.excause, p.memory.final.inst, p.memory.final.inst_addr,
+            regs->read_pc(), prev_inst_addr, p.memory.final.mem_addr);
         return;
     }
-    prev_inst_addr = state.pipeline.memory.final.inst_addr;
+    prev_inst_addr = p.memory.final.inst_addr;
 }
 
 void CoreSingle::do_reset() {
@@ -569,116 +570,110 @@ CorePipelined::CorePipelined(
     reset();
 }
 
+template<typename StageStruct>
+bool is_hazard_is_stage(const StageStruct &stage, const Pipeline &p) {
+    return (
+        stage.final.regwrite && stage.final.num_rd != 0
+        && ((p.decode.final.alu_req_rs && stage.final.num_rd == p.decode.final.num_rs)
+            || (p.decode.final.alu_req_rt && stage.final.num_rd == p.decode.final.num_rt)));
+    // Note: We make exception with $0 as that has no effect and is used in nop instruction
+}
+
 void CorePipelined::do_step(bool skip_break) {
+    Pipeline &p = state.pipeline;
+
     bool stall = false;
-    Address jump_branch_pc = state.pipeline.memory.final.inst_addr;
+    Address jump_branch_pc = p.memory.final.inst_addr;
 
     // Process stages
-    state.pipeline.writeback = writeback(state.pipeline.memory.final);
-    state.pipeline.memory = memory(state.pipeline.execute.final);
-    state.pipeline.execute = execute(state.pipeline.decode.final);
-    state.pipeline.decode = decode(state.pipeline.fetch.final);
+    p.writeback = writeback(p.memory.final);
+    p.memory = memory(p.execute.final);
+    p.execute = execute(p.decode.final);
+    p.decode = decode(p.fetch.final);
 
-    if (state.pipeline.memory.final.excause != EXCAUSE_NONE) {
-        regs->write_pc(state.pipeline.execute.final.inst_addr);
+    if (p.memory.final.excause != EXCAUSE_NONE) {
+        regs->write_pc(p.execute.final.inst_addr);
         flush();
         handle_exception(
-            this, regs, state.pipeline.memory.final.excause, state.pipeline.memory.final.inst,
-            state.pipeline.memory.final.inst_addr, state.pipeline.execute.final.inst_addr,
-            jump_branch_pc, state.pipeline.memory.final.mem_addr);
+            this, regs, p.memory.final.excause, p.memory.final.inst, p.memory.final.inst_addr,
+            p.execute.final.inst_addr, jump_branch_pc, p.memory.final.mem_addr);
     }
 
-    state.pipeline.decode.final.ff_rs = FORWARD_NONE;
-    state.pipeline.decode.final.ff_rt = FORWARD_NONE;
+    p.decode.final.ff_rs = FORWARD_NONE;
+    p.decode.final.ff_rt = FORWARD_NONE;
 
     if (hazard_unit != MachineConfig::HU_NONE) {
         // Note: We make exception with $0 as that has no effect when
         // written and is used in nop instruction
 
-#define HAZARD(STAGE)                                                                              \
-    ((STAGE).final.regwrite && (STAGE).final.num_rd != 0                                           \
-     && ((state.pipeline.decode.final.alu_req_rs                                                   \
-          && (STAGE).final.num_rd == state.pipeline.decode.final.num_rs)                           \
-         || (state.pipeline.decode.final.alu_req_rt                                                \
-             && (STAGE).final.num_rd == state.pipeline.decode.final.num_rt))) //
-        // Note: We make exception with $0 as that has no effect and is used in nop instruction
-
         // Write back internal combinatoricly propagates written instruction to decode internal
         // so nothing has to be done for that internal
-        if (HAZARD(state.pipeline.memory)) {
+        if (is_hazard_is_stage(p.memory, p)) {
             // Hazard with instruction in memory internal
             if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
                 // Forward result value
-                if (state.pipeline.decode.final.alu_req_rs
-                    && state.pipeline.memory.final.num_rd == state.pipeline.decode.final.num_rs) {
-                    state.pipeline.decode.final.val_rs = state.pipeline.memory.final.towrite_val;
-                    state.pipeline.decode.final.ff_rs = FORWARD_FROM_W;
+                if (p.decode.final.alu_req_rs && p.memory.final.num_rd == p.decode.final.num_rs) {
+                    p.decode.final.val_rs = p.memory.final.towrite_val;
+                    p.decode.final.ff_rs = FORWARD_FROM_W;
                 }
-                if (state.pipeline.decode.final.alu_req_rt
-                    && state.pipeline.memory.final.num_rd == state.pipeline.decode.final.num_rt) {
-                    state.pipeline.decode.final.val_rt = state.pipeline.memory.final.towrite_val;
-                    state.pipeline.decode.final.ff_rt = FORWARD_FROM_W;
+                if (p.decode.final.alu_req_rt && p.memory.final.num_rd == p.decode.final.num_rt) {
+                    p.decode.final.val_rt = p.memory.final.towrite_val;
+                    p.decode.final.ff_rt = FORWARD_FROM_W;
                 }
             } else {
                 stall = true;
             }
         }
-        if (HAZARD(state.pipeline.execute)) {
+        if (is_hazard_is_stage(p.execute, p)) {
             // Hazard with instruction in execute internal
             if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
-                if (state.pipeline.execute.final.memread) {
+                if (p.execute.final.memread) {
                     stall = true;
                 } else {
                     // Forward result value
-                    if (state.pipeline.decode.final.alu_req_rs
-                        && state.pipeline.execute.final.num_rd
-                               == state.pipeline.decode.final.num_rs) {
-                        state.pipeline.decode.final.val_rs = state.pipeline.execute.final.alu_val;
-                        state.pipeline.decode.final.ff_rs = FORWARD_FROM_M;
+                    if (p.decode.final.alu_req_rs
+                        && p.execute.final.num_rd == p.decode.final.num_rs) {
+                        p.decode.final.val_rs = p.execute.final.alu_val;
+                        p.decode.final.ff_rs = FORWARD_FROM_M;
                     }
-                    if (state.pipeline.decode.final.alu_req_rt
-                        && state.pipeline.execute.final.num_rd
-                               == state.pipeline.decode.final.num_rt) {
-                        state.pipeline.decode.final.val_rt = state.pipeline.execute.final.alu_val;
-                        state.pipeline.decode.final.ff_rt = FORWARD_FROM_M;
+                    if (p.decode.final.alu_req_rt
+                        && p.execute.final.num_rd == p.decode.final.num_rt) {
+                        p.decode.final.val_rt = p.execute.final.alu_val;
+                        p.decode.final.ff_rt = FORWARD_FROM_M;
                     }
                 }
             } else {
                 stall = true;
             }
         }
-#undef HAZARD
     }
-    if (state.pipeline.execute.final.stop_if || state.pipeline.memory.final.stop_if) {
-        stall = true;
-    }
+    if (p.execute.final.stop_if || p.memory.final.stop_if) { stall = true; }
 
     emit hu_stall_value(stall);
 
     // Now process program counter (loop connections from decode internal)
-    if (!stall && !state.pipeline.decode.final.stop_if) {
-        state.pipeline.decode.final.stall = false;
-        state.pipeline.fetch = fetch(skip_break);
+    if (!stall && !p.decode.final.stop_if) {
+        p.decode.final.stall = false;
+        p.fetch = fetch(skip_break);
         // figure out stalling...
-        Address real_addr = handle_pc(state.pipeline.execute.final);
-        if (state.pipeline.execute.final.is_valid
-            && real_addr != state.pipeline.decode.final.inst_addr) {
+        Address real_addr = handle_pc(p.execute.final);
+        if (p.execute.final.is_valid && real_addr != p.decode.final.inst_addr) {
             regs->write_pc(real_addr);
-            state.pipeline.decode.final.flush();
-            state.pipeline.fetch.final.flush();
+            p.decode.final.flush();
+            p.fetch.final.flush();
         }
     } else {
         // Run fetch internal on empty
         fetch(skip_break);
         // clear decode latch (insert nope to execute internal)
-        if (!state.pipeline.decode.final.stop_if) {
-            state.pipeline.decode.final.flush();
-            state.pipeline.decode.final.stall = true;
+        if (!p.decode.final.stop_if) {
+            p.decode.final.flush();
+            p.decode.final.stall = true;
         } else {
-            state.pipeline.fetch.final.flush();
+            p.fetch.final.flush();
         }
     }
-    if (stall || state.pipeline.decode.final.stop_if) {
+    if (stall || p.decode.final.stop_if) {
         state.stall_count++;
         emit stall_c_value(state.stall_count);
     }
@@ -696,20 +691,11 @@ bool StopExceptionHandler::handle_exception(
     Address next_addr,
     Address jump_branch_pc,
     Address mem_ref_addr) {
-#if 0
-    printf("Exception cause %d instruction PC 0x%08lx next PC 0x%08lx jump branch PC 0x%08lx "
-           "in_delay_slot %d registers PC 0x%08lx mem ref 0x%08lx\n",
-           excause, (unsigned long)inst_addr, (unsigned long)next_addr,
-           (unsigned long)jump_branch_pc, (int)in_delay_slot,
-           (unsigned long)regs->read_pc(), (unsigned long)mem_ref_addr);
-#else
-    (void)excause;
-    (void)inst_addr;
-    (void)next_addr;
-    (void)mem_ref_addr;
-    (void)regs;
-    (void)jump_branch_pc;
-    (void)core;
-#endif
+    Q_UNUSED(core)
+    DEBUG(
+        "Exception cause %d instruction PC 0x%08lx next PC 0x%08lx jump branch PC 0x%08lx "
+        "registers PC 0x%08lx mem ref 0x%08lx",
+        excause, inst_addr.get_raw(), next_addr.get_raw(), jump_branch_pc.get_raw(),
+        regs->read_pc().get_raw(), mem_ref_addr.get_raw());
     return true;
 }
