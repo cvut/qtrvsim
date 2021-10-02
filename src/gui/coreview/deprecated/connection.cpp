@@ -134,7 +134,7 @@ void Connection::recalc_line() {
 
 bool Connection::recalc_line_add_point(const QLineF &l1, const QLineF &l2) {
     QPointF intersec;
-    if (l1.intersect(l2, &intersec) == QLineF::NoIntersection) { return false; }
+    if (l1.intersects(l2, &intersec) == QLineF::NoIntersection) { return false; }
     points.append(intersec);
     return true;
 }
@@ -173,7 +173,7 @@ static qreal cu_closest(const QLineF &l, const QPointF &p, QPointF *intersec) {
     QLineF nline = normal.translated(-normal.p1()).translated(p);
     // And now found intersection
     SANITY_ASSERT(
-        l.intersect(nline, intersec) != QLineF::NoIntersection,
+        l.intersects(nline, intersec) != QLineF::NoIntersection,
         "We are calculating intersection with normal vector and that should "
         "always have intersection");
     // Now check if that point belongs to given line

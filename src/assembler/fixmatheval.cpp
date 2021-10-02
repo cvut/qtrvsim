@@ -184,7 +184,7 @@ bool FmeExpression::parse(const QString &expression, QString &error) {
     bool is_unary = true;
     QString optxtx;
     for (i = 0; true; i++) {
-        QChar ch = 0;
+        QChar ch {};
         if (i < expression.size()) {
             ch = expression.at(i);
         }

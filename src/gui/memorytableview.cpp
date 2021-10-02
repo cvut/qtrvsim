@@ -9,6 +9,7 @@
 #include <QHeaderView>
 #include <QKeyEvent>
 #include <QScrollBar>
+#include <QtGlobal>
 
 MemoryTableView::MemoryTableView(QWidget *parent, QSettings *settings)
     : Super(parent) {
@@ -46,22 +47,25 @@ void MemoryTableView::adjustColumnCount() {
         QModelIndex idx;
         QFontMetrics fm(*m->getFont());
         idx = m->index(0, 0);
+
+        QStyleOptionViewItem viewOpts;
+#if QT_VERSION >= 0x060000
+        initViewItemOption(&viewOpts);
+#else
+        viewOpts = viewOptions();
+#endif
+
         // int width0_dh = itemDelegate(idx)->sizeHint(viewOptions(),
         // idx).get_width() + 2;
-        int width0_dh
-            = delegate->sizeHintForText(viewOptions(), idx, "0x00000000").width()
-              + 2;
+        int width0_dh = delegate->sizeHintForText(viewOpts, idx, "0x00000000").width() + 2;
         horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
         horizontalHeader()->resizeSection(0, width0_dh);
 
         idx = m->index(0, 1);
         QString t = "";
         t.fill(QChar('0'), m->cellSizeBytes() * 2);
-        int width1_dh
-            = delegate->sizeHintForText(viewOptions(), idx, t).width() + 2;
-        if (width1_dh < fm.width("+99")) {
-            width1_dh = fm.width("+99");
-        }
+        int width1_dh = delegate->sizeHintForText(viewOpts, idx, t).width() + 2;
+        if (width1_dh < fm.horizontalAdvance("+99")) { width1_dh = fm.horizontalAdvance("+99"); }
         horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
         horizontalHeader()->resizeSection(1, width1_dh);
 

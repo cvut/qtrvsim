@@ -34,8 +34,8 @@ inline RegisterId::RegisterId(uint8_t value) : data(value) {
     // Main advantege is, that possible errors will appear when creating the
     // value, which is probably close to the bug source.
     SANITY_ASSERT(
-        data < REGISTER_COUNT,
-        QString("Trying to create register id for out-of-bounds register ") + QString(data));
+        data < REGISTER_COUNT, QString("Trying to create register id for out-of-bounds register ")
+                                   + QString::number(data));
 }
 inline RegisterId::RegisterId() : RegisterId(0) {}
 

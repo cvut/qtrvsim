@@ -456,17 +456,17 @@ bool SimpleAsm::process_line(
             for (pos = 0; pos < s.count(); pos++) {
                 QChar ch = s.at(pos);
                 if (ch == '\\') {
-                    ch = 0;
+                    ch = '\0';
                     if (pos + 1 < s.count()) {
                         switch (s.at(++pos).toLatin1()) {
                         case '\\': ch = '\\'; break;
-                        case '0': ch = 0x00; break;
-                        case 'r': ch = 0x0d; break;
-                        case 'n': ch = 0x0a; break;
-                        case 't': ch = 0x09; break;
-                        case 'b': ch = 0x08; break;
+                        case '0': ch = '\0'; break;
+                        case 'r': ch = '\r'; break;
+                        case 'n': ch = '\n'; break;
+                        case 't': ch = '\t'; break;
+                        case 'b': ch = '\b'; break;
                         case '"': ch = '"'; break;
-                        default: ch = 0;
+                        default: ch = '\0';
                         }
                     }
                     if (ch == '\0') {
