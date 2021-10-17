@@ -454,36 +454,56 @@ bool SimpleAsm::process_line(
             }
             s = s.mid(1, s.count() - 2);
             for (pos = 0; pos < s.count(); pos++) {
-                QChar ch = s.at(pos);
-                if (ch == '\\') {
-                    ch = '\0';
-                    if (pos + 1 < s.count()) {
-                        switch (s.at(++pos).toLatin1()) {
-                        case '\\': ch = '\\'; break;
-                        case '0': ch = '\0'; break;
-                        case 'r': ch = '\r'; break;
-                        case 'n': ch = '\n'; break;
-                        case 't': ch = '\t'; break;
-                        case 'b': ch = '\b'; break;
-                        case '"': ch = '"'; break;
-                        default: ch = '\0';
-                        }
-                    }
-                    if (ch == '\0') {
-                        error = "ascii - incorrect escape sequence";
-                        emit report_message(
-                            messagetype::MSG_ERROR, filename, line_number, 0,
-                            error, "");
+                // target byte is in ASCII encoding
+                uint8_t target_byte = 0x00;
+
+                QChar host_char = s.at(pos);
+                if (host_char == '\\') {
+                    // if the host encoding recognizes this as a backslash (escape char)
+
+                    // handle end of the string check
+                    if (pos + 1 >= s.count()) {
+                        error = "ascii - invalid escape sequence at the end of the string";
+                        emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
                         error_occured = true;
                         if (error_ptr != nullptr) {
                             *error_ptr = error;
                         }
                         return false;
                     }
+
+                    // compare the host_char in host encoding but emit byte in ASCII encoding
+                    host_char = s.at(++pos);
+                    if (host_char == '0') {
+                        target_byte = 0x00;
+                    } else if (host_char == 'b') {
+                        target_byte = 0x08;
+                    } else if (host_char == 't') {
+                        target_byte = 0x09;
+                    } else if (host_char == 'n') {
+                        target_byte = 0x0A;
+                    } else if (host_char == 'r') {
+                        target_byte = 0x0D;
+                    } else if (host_char == '"') {
+                        target_byte = 0x22;
+                    }  else if (host_char == '\\') {
+                        target_byte = 0x5C;
+                    } else {
+                        error = QString("ascii - incorrect escape sequence '\\") + host_char + "'";
+                        emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+                        error_occured = true;
+                        if (error_ptr != nullptr) {
+                            *error_ptr = error;
+                        }
+                        return false;
+                    }
+                } else {
+                    // otherwise convert it to ASCII and write it as-is
+                    target_byte = host_char.toLatin1();
                 }
+
                 if (!fatal_occured) {
-                    mem->write_u8(
-                        address, (uint8_t)ch.toLatin1(), ae::INTERNAL);
+                    mem->write_u8(address, target_byte, ae::INTERNAL);
                 }
                 address += 1;
             }
