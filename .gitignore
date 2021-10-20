@@ -12,3 +12,4 @@ test_dir
 # Build directory
 build
 /CMakeFiles/
+compile_commands.json
