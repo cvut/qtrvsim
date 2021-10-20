@@ -48,11 +48,11 @@ HighlighterAsm::HighlighterAsm(QTextDocument *parent)
     QStringList reg_list;
     machine::Instruction::append_recognized_registers(reg_list);
     foreach (const QString &str, reg_list) {
-        rule.pattern = QRegularExpression("\\$" + str + "\\b");
+        rule.pattern = QRegularExpression("\\b" + str + "\\b");
         rule.format = registerFormat;
         highlightingRules.append(rule);
     }
-    rule.pattern = QRegularExpression("\\$[0-9]+\\b");
+    rule.pattern = QRegularExpression("\\bx[0-9]+\\b");
     rule.format = registerFormat;
     highlightingRules.append(rule);
 

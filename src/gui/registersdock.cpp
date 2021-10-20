@@ -1,9 +1,11 @@
 #include "registersdock.h"
 
-static const QString labels[]
-    = { "zero", "at", "v0", "v1", "a0", "a1", "a2", "a3", "t0", "t1", "t2",
-        "t3",   "t4", "t5", "t6", "t7", "s0", "s1", "s2", "s3", "s4", "s5",
-        "s6",   "s7", "t8", "t9", "k0", "k1", "gp", "sp", "fp", "ra" };
+// This table also exists in machine/instruction.cpp...
+const QString labels[32] = {
+    "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
+    "a1",   "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
+    "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
+};
 
 RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
     static const QColor defaultTextColor(0, 0, 0);
@@ -31,7 +33,7 @@ RegistersDock::RegistersDock(QWidget *parent) : QDockWidget(parent) {
     } while (false)
 
     for (int i = 0; i < 32; i++) {
-        INIT(gp[i], QString("$") + QString::number(i) + QString("/") + labels[i]);
+        INIT(gp[i], QString("x") + QString::number(i) + QString("/") + labels[i]);
     }
     INIT(pc, "pc");
     INIT(lo, "lo");
