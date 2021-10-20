@@ -1,19 +1,18 @@
 //  Template file with defines of peripheral registers
-//  QtMips simulator https://github.com/cvut/QtMips/
-//  developed by Karel Koci and Pavel Pisa.
+//  QtRVSim simulator https://github.com/cvut/qtrvsim/
 //
 //  template.S       - example file
 //
-//  (C) 2019 by Pavel Pisa
+//  (C) 2021 by Pavel Pisa
 //      e-mail:   pisa@cmp.felk.cvut.cz
 //      homepage: http://cmp.felk.cvut.cz/~pisa
 //      work:     http://www.pikron.com/
 //      license:  public domain
 
-// Directives to make interresting windows visible
-#pragma qtmips show terminal
-#pragma qtmips show registers
-#pragma qtmips show memory
+// Directives to make interesting windows visible
+#pragma qtrvsim show terminal
+#pragma qtrvsim show registers
+#pragma qtrvsim show memory
 
 .globl _start
 .globl __start
@@ -74,44 +73,41 @@
 //  3 / HW1      11                There is received character ready to be read
 //  7 / HW5      15                Counter reached value in Compare register
 
-// Original MIPS start address after reset
-.org    0x80020000
+// Start address after reset
+.org 0x80020000
 
 .text
 
 __start:
 _start:
 
-loop:	la	$a0, SERIAL_PORT_BASE  // load base address of serial port
-	// it is pseodooperation lui $a0, 0xffff ; ori $a0, $a0, 0xc000
-	// can be optimized as addi $a0, $zero, 0xffffc000-0x100000000
-	// in this particular case
+loop:
+    lui  a0, SERIAL_PORT_BASE           // load base address of serial port
+    addi a1, zero, text_1               // load address of text
 
-	la	$a1, text_1	// load address of text
+next_char:
+    lb   t1, 0(a1)                      // load one byte after another
+    beq  t1, zero, end_char             // is this the terminal zero byte
+    addi a1, a1, 1                      // move pointer to next text byte
+tx_busy:
+    lw   t0, SERP_TX_ST_REG_o(a0)       // read status of transmitter
+    andi t0, t0, SERP_TX_ST_REG_READY_m // mask ready bit
+    beq  t0, zero, tx_busy              // if not ready wait for ready condition
+    sw   t1, SERP_TX_DATA_REG_o(a0)     // write byte to Tx data register
+    jal  zero, next_char                // unconditional branch to process next byte
 
-next_char:lb	$t1, 0($a1)	// load one byte after another
-	beq	$t1, $zero, end_char // is this the terminal zero byte
-	addi	$a1, $a1, 1	// move pointer to next text byte
-tx_busy:	lw	$t0, SERP_TX_ST_REG_o($a0) // read status of transmitter
-	andi	$t0, $t0, SERP_TX_ST_REG_READY_m // mask ready bit
-	beq	$t0, $zero, tx_busy	// if not ready wait for ready condition
-	nop			// fill branch instruction delay slot
-	sw	$t1,SERP_TX_DATA_REG_o($a0) // write byte to Tx data register
-	beq       $zero, $zero, next_char // unconditional branch to process next byte
-	nop			// fill delay slot
-
-end_char:	break			// stop continuous execution
-				// request developer interaction
-	beq	$zero, $zero, loop
-	nop			// fill delay slot
+end_char:
+    ebreak // stop continuous execution, request developer interaction
+    jal  zero, end_char
 
 .end _start
 
+.org 0x200
 .data
 
 data_1:	.word	1, 2, 3, 4	// example how to fill data words
 
-text_1:	.asciz	"Hello word.\n"	// store zero terminated ASCII text
+text_1: .asciz  "Hello world.\n"    // store zero terminated ASCII text
 
 // if whole source compile is OK the switch to core tab
-#pragma qtmips tab core
+#pragma qtrvsim tab core

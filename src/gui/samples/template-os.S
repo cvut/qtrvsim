@@ -1,123 +1,62 @@
-//  Template file with defines of peripheral registers
-//  QtMips simulator https://github.com/cvut/QtMips/
-//  developed by Karel Koci and Pavel Pisa.
+//  Template file with defines of system calls
+//  QtRVSim simulator https://github.com/cvut/qtrvsim/
 //
-//  template.S       - example file
+//  template-os.S       - example file
 //
-//  (C) 2019 by Pavel Pisa
+//  (C) 2021 by Pavel Pisa
 //      e-mail:   pisa@cmp.felk.cvut.cz
 //      homepage: http://cmp.felk.cvut.cz/~pisa
 //      work:     http://www.pikron.com/
 //      license:  public domain
 
-// Directives to make interresting windows visible
-#pragma qtmips show terminal
-#pragma qtmips show registers
-#pragma qtmips show cop0dock
-#pragma qtmips show memory
+// Directives to make interesting windows visible
+#pragma qtrvsim show terminal
+#pragma qtrvsim show registers
+#pragma qtrvsim show cop0dock
+#pragma qtrvsim show memory
 
 .globl _start
 .globl __start
 .set noreorder
 .ent _start
 
-// Serial port/terminal registers
-// There is mirror of this region at address 0xffff0000
-// to match QtSpim and Mars emulators
-
-.equ SERIAL_PORT_BASE,      0xffffc000 // base address of serial port region
-
-.equ SERP_RX_ST_REG,        0xffffc000 // Receiver status register
-.equ SERP_RX_ST_REG_o,          0x0000 // Offset of RX_ST_REG
-.equ SERP_RX_ST_REG_READY_m,       0x1 // Data byte is ready to be read
-.equ SERP_RX_ST_REG_IE_m,          0x2 // Enable Rx ready interrupt
-
-.equ SERP_RX_DATA_REG,      0xffffc004 // Received data byte in 8 LSB bits
-.equ SERP_RX_DATA_REG_o,        0x0004 // Offset of RX_DATA_REG
-
-.equ SERP_TX_ST_REG,        0xffffc008 // Transmitter status register
-.equ SERP_TX_ST_REG_o,          0x0008 // Offset of TX_ST_REG
-.equ SERP_TX_ST_REG_READY_m,       0x1 // Transmitter can accept next byte
-.equ SERP_TX_ST_REG_IE_m,          0x2 // Enable Tx ready interrupt
-
-.equ SERP_TX_DATA_REG,      0xffffc00c // Write word to send 8 LSB bits to terminal
-.equ SERP_TX_DATA_REG_o,        0x000c // Offset of TX_DATA_REG
-
-
-// Memory mapped peripheral for dial knobs input,
-// LED and RGB LEDs output designed to match
-// MZ_APO education Zynq based board developed
-// by Petr Porazil and Pavel Pisa at PiKRON.com company
-
-.equ SPILED_REG_BASE,       0xffffc100 // base of SPILED port region
-
-.equ SPILED_REG_LED_LINE,   0xffffc104 // 32 bit word mapped as output
-.equ SPILED_REG_LED_LINE_o,     0x0004 // Offset of the LED_LINE
-.equ SPILED_REG_LED_RGB1,   0xffffc110 // RGB LED 1 color components
-.equ SPILED_REG_LED_RGB1_o,     0x0010 // Offset of LED_RGB1
-.equ SPILED_REG_LED_RGB2,   0xffffc114 // RGB LED 2 color components
-.equ SPILED_REG_LED_RGB2_o,     0x0014 // Offset of LED_RGB2
-.equ SPILED_REG_KNOBS_8BIT, 0xffffc124 // Three 8 bit knob values
-.equ SPILED_REG_KNOBS_8BIT_o,   0x0024 // Offset of KNOBS_8BIT
-
-// The simple 16-bit per pixel (RGB565) frame-buffer
-// display size is 480 x 320 pixel
-// Pixel format RGB565 expect
-//   bits 11 .. 15 red component
-//   bits  5 .. 10 green component
-//   bits  0 ..  4 blue component
-.equ LCD_FB_START,          0xffe00000
-.equ LCD_FB_END,            0xffe4afff
-
-// Mapping of interrupts
-// Irq number   Cause/Status Bit   Source
-//  2 / HW0      10                Serial port ready to accept character to Tx
-//  3 / HW1      11                There is received character ready to be read
-//  7 / HW5      15                Counter reached value in Compare register
-
-
 // Linux kernel compatible system calls subset
 
-.equ __NR_exit,     4001	// void exit(int status)
-.equ __NR_read,     4003	// ssize_t read(int fd, void *buf, size_t count)
-.equ __NR_write,    4004	// ssize_t write(int fd, const void *buf, size_t count)
-.equ __NR_close,    4006	// int close(int fd)
-.equ __NR_open,     4005	// int open(const char *pathname, int flags, mode_t mode)
-.equ __NR_brk,      4045	// void * brk(void *addr)
-.equ __NR_truncate, 4092	// int ftruncate(int fd, off_t length)
-.equ __NR_readv,    4145	// ssize_t readv(int fd, const struct iovec *iov, int iovcnt)
-.equ __NR_writev,   4146	// ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
-.equ __NR_set_thread_area, 4283 // int set_thread_area(unsigned long addr)
-
-// Original MIPS start address after reset
-.org    0x80020000
+.equ __NR_exit,        93  // void exit(int status)
+.equ __NR_read,        63  // ssize_t read(int fd, void *buf, size_t count)
+.equ __NR_write,       64  // ssize_t write(int fd, const void *buf, size_t count)
+.equ __NR_close,       57  // int close(int fd)
+.equ __NR_openat,      56  // int openat(int fd, const char *pathname, int flags, mode_t mode)
+	// use fd = -100 for normal open behaviour. Full openat not supported.
+.equ __NR_brk,         214 // void * brk(void *addr)
+.equ __NR_ftruncate64, 46  // int ftruncate64(int fd, off_t length)
+.equ __NR_readv,       65  // ssize_t readv(int fd, const struct iovec *iov, int iovcnt)
+.equ __NR_writev,      66  // ssize_t writev(int fd, const struct iovec *iov, int iovcnt)
 
 .text
 
 __start:
 _start:
+	addi  a7, zero, __NR_write        // load syscall number
+	addi  a0, zero, 1                 // load file descriptor
+	addi  a1, zero, text_1            // load text address
+	addi  a2, zero, text_1_e - text_1 // load text length
+	ecall                             // print the text
 
-	addi	$v0, $zero, __NR_write
-	addi	$a0, $zero, 1
-	la	$a1, text_1
-	addi	$a2, $zero, text_1_e - text_1
-	syscall
+	addi  a7, zero, __NR_exit         // load syscall numver
+	addi  a0, zero, 0                 // load status argument
+	ecall                             // exit
 
-	addi	$v0, $zero, __NR_exit
-	addi	$a0, $zero, 0
-
-final:	break
-	beq	$zero, $zero, final
-	nop
+final:
+	ebreak                            // request developer interaction
+	jal   zero, final
 
 .end _start
 
 .data
+.org 0x200
 
 data_1:	.word	1, 2, 3, 4
 
-text_1:	.ascii	"Hello word.\n"	// store ASCII text, no termination
+text_1:	.ascii	"Hello world.\n"	// store ASCII text, no termination
 text_1_e:
-
-// if whole source compile is OK the switch to core tab
-#pragma qtmips tab core
