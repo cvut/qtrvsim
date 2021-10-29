@@ -32,10 +32,16 @@ HighlighterAsm::HighlighterAsm(QTextDocument *parent)
         rule.pattern = QRegularExpression("\\b" + str + "\\b");
         rule.format = keywordFormat;
         highlightingRules.append(rule);
-        rule.pattern = QRegularExpression("\\b" + str.toLower() + "\\b");
+        rule.pattern = QRegularExpression("\\b" + str.toUpper() + "\\b");
         rule.format = keywordFormat;
         highlightingRules.append(rule);
     }
+    rule.pattern = QRegularExpression("\\bnop\\b");
+    rule.format = keywordFormat;
+    highlightingRules.append(rule);
+    rule.pattern = QRegularExpression("\\bNOP\\b");
+    rule.format = keywordFormat;
+    highlightingRules.append(rule);
 
     registerFormat.setFontWeight(QFont::Bold);
     registerFormat.setForeground(Qt::darkMagenta);

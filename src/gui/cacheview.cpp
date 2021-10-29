@@ -18,18 +18,12 @@
 #include <iostream>
 using namespace std;
 
-CacheAddressBlock::CacheAddressBlock(
-    const machine::Cache *cache,
-    unsigned width) {
+CacheAddressBlock::CacheAddressBlock(const machine::Cache *cache, unsigned width) {
     rows = cache->get_config().set_count();
     columns = cache->get_config().block_size();
-    s_row = cache->get_config().set_count() > 1
-                ? sqrt(cache->get_config().set_count())
-                : 0;
+    s_row = cache->get_config().set_count() > 1 ? sqrt(cache->get_config().set_count()) : 0;
     this->width = width;
-    s_col = cache->get_config().block_size() > 1
-                ? sqrt(cache->get_config().block_size())
-                : 0;
+    s_col = cache->get_config().block_size() > 1 ? sqrt(cache->get_config().block_size()) : 0;
     s_tag = 30 - s_row - s_col; // 32 bits - 2 unused  and then every bit used
                                 // for different index
     this->width = width;
@@ -38,9 +32,7 @@ CacheAddressBlock::CacheAddressBlock(
     row = 0;
     col = 0;
 
-    connect(
-        cache, &machine::Cache::cache_update, this,
-        &CacheAddressBlock::cache_update);
+    connect(cache, &machine::Cache::cache_update, this, &CacheAddressBlock::cache_update);
 }
 
 QRectF CacheAddressBlock::boundingRect() const {
@@ -63,8 +55,7 @@ void CacheAddressBlock::paint(
     unsigned tag_center = wpos + wid * LETTERW / 2 + 1;
     QRectF rect(wpos, 16, wid * LETTERW + 2, ROW_HEIGHT);
     painter->drawRect(rect);
-    painter->drawText(
-        rect, Qt::AlignCenter, QString("%1").arg(tag, wid, 16, QChar('0')));
+    painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(tag, wid, 16, QChar('0')));
     wpos += wid * LETTERW + 2;
     // Part used for set
     unsigned row_center = wpos;
@@ -73,8 +64,7 @@ void CacheAddressBlock::paint(
         row_center += wid * LETTERW / 2 + 1;
         rect = QRectF(wpos, 16, wid * LETTERW + 2, ROW_HEIGHT);
         painter->drawRect(rect);
-        painter->drawText(
-            rect, Qt::AlignCenter, QString("%1").arg(row, wid, 16, QChar('0')));
+        painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(row, wid, 16, QChar('0')));
         wpos += wid * LETTERW + 2;
     }
     // Part used for block
@@ -84,8 +74,7 @@ void CacheAddressBlock::paint(
         col_center += wid * LETTERW / 2 + 1;
         rect = QRectF(wpos, 16, wid * LETTERW + 2, ROW_HEIGHT);
         painter->drawRect(rect);
-        painter->drawText(
-            rect, Qt::AlignCenter, QString("%1").arg(col, wid, 16, QChar('0')));
+        painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(col, wid, 16, QChar('0')));
         wpos += wid * LETTERW + 2;
     }
     // Part used for two lowers bits
@@ -144,10 +133,7 @@ void CacheAddressBlock::cache_update(
     update();
 }
 
-CacheViewBlock::CacheViewBlock(
-    const machine::Cache *cache,
-    unsigned block,
-    bool last)
+CacheViewBlock::CacheViewBlock(const machine::Cache *cache, unsigned block, bool last)
     : QGraphicsObject(nullptr)
     , simulated_machine_endian(cache->simulated_machine_endian) {
     islast = last;
@@ -200,15 +186,13 @@ CacheViewBlock::CacheViewBlock(
     }
 
     unsigned wd = 1;
-    QGraphicsSimpleTextItem *l_validity
-        = new QGraphicsSimpleTextItem("V", this);
+    QGraphicsSimpleTextItem *l_validity = new QGraphicsSimpleTextItem("V", this);
     l_validity->setFont(font);
     QRectF box = l_validity->boundingRect();
     l_validity->setPos(wd + (VD_WIDTH - box.width()) / 2, -1 - box.height());
     wd += VD_WIDTH;
     if (cache->get_config().write_policy() == machine::CacheConfig::WP_BACK) {
-        QGraphicsSimpleTextItem *l_dirty
-            = new QGraphicsSimpleTextItem("D", this);
+        QGraphicsSimpleTextItem *l_dirty = new QGraphicsSimpleTextItem("D", this);
         l_dirty->setFont(font);
         box = l_dirty->boundingRect();
         l_dirty->setPos(wd + (VD_WIDTH - box.width()) / 2, -1 - box.height());
@@ -222,12 +206,9 @@ CacheViewBlock::CacheViewBlock(
     QGraphicsSimpleTextItem *l_data = new QGraphicsSimpleTextItem("Data", this);
     l_data->setFont(font);
     box = l_data->boundingRect();
-    l_data->setPos(
-        wd + (columns * DATA_WIDTH - box.width()) / 2, -1 - box.height());
+    l_data->setPos(wd + (columns * DATA_WIDTH - box.width()) / 2, -1 - box.height());
 
-    connect(
-        cache, &machine::Cache::cache_update, this,
-        &CacheViewBlock::cache_update);
+    connect(cache, &machine::Cache::cache_update, this, &CacheViewBlock::cache_update);
 }
 
 CacheViewBlock::~CacheViewBlock() {
@@ -243,8 +224,8 @@ CacheViewBlock::~CacheViewBlock() {
 QRectF CacheViewBlock::boundingRect() const {
     return QRectF(
         -PENW / 2 - 11, -PENW / 2 - 16,
-        VD_WIDTH + (dirty ? VD_WIDTH : 0) + DATA_WIDTH * (columns + 1) + PENW
-            + 12 + (columns > 1 ? 7 : 0),
+        VD_WIDTH + (dirty ? VD_WIDTH : 0) + DATA_WIDTH * (columns + 1) + PENW + 12
+            + (columns > 1 ? 7 : 0),
         ROW_HEIGHT * rows + PENW + 50);
 }
 
@@ -255,8 +236,7 @@ void CacheViewBlock::paint(
     // Draw horizontal lines
     for (unsigned i = 0; i <= rows; i++) {
         painter->drawLine(
-            0, i * ROW_HEIGHT,
-            VD_WIDTH + (dirty ? VD_WIDTH : 0) + DATA_WIDTH * (columns + 1),
+            0, i * ROW_HEIGHT, VD_WIDTH + (dirty ? VD_WIDTH : 0) + DATA_WIDTH * (columns + 1),
             i * ROW_HEIGHT);
     }
     // Draw vertical lines
@@ -285,19 +265,15 @@ void CacheViewBlock::paint(
     unsigned bottom = ROW_HEIGHT * rows;
     unsigned tag_center = (dirty ? 2 : 1) * VD_WIDTH + DATA_WIDTH / 2;
     painter->drawEllipse(QPointF(tag_center, bottom + 15), 5, 5);
-    painter->drawText(
-        QRectF(tag_center - 5, bottom + 9.5, 10, 10), Qt::AlignCenter, "=");
+    painter->drawText(QRectF(tag_center - 5, bottom + 9.5, 10, 10), Qt::AlignCenter, "=");
     painter->setPen(p_wide);
     painter->drawLine(tag_center, bottom, tag_center, bottom + 10);
     painter->setPen(p);
 
     // And
-    painter->drawLine(
-        tag_center + 10, bottom + 25, tag_center + 10, bottom + 35);
-    painter->drawLine(
-        tag_center + 10, bottom + 25, tag_center + 15, bottom + 25);
-    painter->drawLine(
-        tag_center + 10, bottom + 35, tag_center + 15, bottom + 35);
+    painter->drawLine(tag_center + 10, bottom + 25, tag_center + 10, bottom + 35);
+    painter->drawLine(tag_center + 10, bottom + 25, tag_center + 15, bottom + 25);
+    painter->drawLine(tag_center + 10, bottom + 35, tag_center + 15, bottom + 35);
     painter->drawArc(tag_center + 10, bottom + 25, 10, 10, 270 * 16, 180 * 16);
 
     // Connection from and to right
@@ -312,11 +288,10 @@ void CacheViewBlock::paint(
     unsigned data_start = (dirty ? 2 : 1) * VD_WIDTH + DATA_WIDTH;
     if (columns > 1) {
         // Output mutex
-        const QPointF poly[]
-            = { QPointF(data_start, bottom + 10),
-                QPointF(data_start + columns * DATA_WIDTH, bottom + 10),
-                QPointF(data_start + columns * DATA_WIDTH - 10, bottom + 20),
-                QPointF(data_start + 10, bottom + 20) };
+        const QPointF poly[] = { QPointF(data_start, bottom + 10),
+                                 QPointF(data_start + columns * DATA_WIDTH, bottom + 10),
+                                 QPointF(data_start + columns * DATA_WIDTH - 10, bottom + 20),
+                                 QPointF(data_start + 10, bottom + 20) };
         painter->drawPolygon(poly, sizeof(poly) / sizeof(QPointF));
         unsigned data_center = data_start + DATA_WIDTH * columns / 2;
         painter->setPen(p_wide);
@@ -330,28 +305,21 @@ void CacheViewBlock::paint(
         // Mutex source
         painter->drawLine(allright + 5, -16, allright + 5, bottom + 15);
         painter->drawLine(
-            allright + 5, bottom + 15, data_start + columns * DATA_WIDTH - 4,
-            bottom + 15);
-        if (!islast)
-            painter->drawLine(
-                allright + 5, bottom + 15, allright + 5, bottom + 40);
+            allright + 5, bottom + 15, data_start + columns * DATA_WIDTH - 4, bottom + 15);
+        if (!islast) painter->drawLine(allright + 5, bottom + 15, allright + 5, bottom + 40);
     } else {
         // Wire with data to right
         painter->setPen(p_wide);
         painter->drawLine(
-            data_start + DATA_WIDTH / 2, bottom, data_start + DATA_WIDTH / 2,
-            bottom + 25);
-        painter->drawLine(
-            data_start + DATA_WIDTH / 2, bottom + 25, allright, bottom + 25);
+            data_start + DATA_WIDTH / 2, bottom, data_start + DATA_WIDTH / 2, bottom + 25);
+        painter->drawLine(data_start + DATA_WIDTH / 2, bottom + 25, allright, bottom + 25);
     }
 
     // Connection with tag
     painter->setPen(p_wide);
     painter->drawLine(-9, -16, -9, bottom + 15);
     painter->drawLine(-9, bottom + 15, tag_center - 5, bottom + 15);
-    if (!islast) {
-        painter->drawLine(-9, bottom + 15, -9, bottom + 40);
-    }
+    if (!islast) { painter->drawLine(-9, bottom + 15, -9, bottom + 40); }
 
     // Connection with row
     if (rows > 1) {
@@ -372,34 +340,25 @@ void CacheViewBlock::cache_update(
     bool write) {
     (void)col;
     if (associat != block) {
-        if (last_highlighted) {
-            this->data[last_set][last_col]->setBrush(QBrush(QColor(0, 0, 0)));
-        }
+        if (last_highlighted) { this->data[last_set][last_col]->setBrush(QBrush(QColor(0, 0, 0))); }
         last_highlighted = false;
         return; // Ignore blocks that are not us
     }
     validity[set]->setText(valid ? "1" : "0");
-    if (this->dirty) {
-        this->dirty[set]->setText(valid ? (dirty ? "1" : "0") : "");
-    }
+    if (this->dirty) { this->dirty[set]->setText(valid ? (dirty ? "1" : "0") : ""); }
     // TODO calculate correct size of tag
-    this->tag[set]->setText(
-        valid ? QString("0x") + QString("%1").arg(tag, 8, 16, QChar('0')).toUpper() : "");
+    this->tag[set]->setText(valid ? QString("0x") + QString("%1").arg(tag, 8, 16, QChar('0')) : "");
     for (unsigned i = 0; i < columns; i++) {
         this->data[set][i]->setText(
             valid ? QString("0x")
-                        + QString("%1")
-                              .arg(
-                                  byteswap_if(data[i], simulated_machine_endian != NATIVE_ENDIAN),
-                                  8, 16, QChar('0'))
-                              .toUpper()
+                        + QString("%1").arg(
+                            byteswap_if(data[i], simulated_machine_endian != NATIVE_ENDIAN), 8, 16,
+                            QChar('0'))
                   : "");
         //  TODO Use cache API
     }
 
-    if (last_highlighted) {
-        this->data[last_set][last_col]->setBrush(QBrush(QColor(0, 0, 0)));
-    }
+    if (last_highlighted) { this->data[last_set][last_col]->setBrush(QBrush(QColor(0, 0, 0))); }
     if (write) {
         this->data[set][col]->setBrush(QBrush(QColor(240, 0, 0)));
     } else {

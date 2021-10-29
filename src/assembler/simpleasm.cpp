@@ -166,7 +166,7 @@ bool SimpleAsm::process_line(
                 && (operand_num == -1)) {
                 maybe_label = false;
                 if (token_beg != -1) {
-                    op = line.mid(token_beg, token_last - token_beg + 1).toUpper();
+                    op = line.mid(token_beg, token_last - token_beg + 1).toLower();
                 }
                 token_beg = -1;
                 operand_num = 0;
@@ -264,8 +264,8 @@ bool SimpleAsm::process_line(
         return true;
     }
 
-    if (op == "#PRAGMA") { return process_pragma(operands, filename, line_number, error_ptr); }
-    if (op == "#INCLUDE") {
+    if (op == "#pragma") { return process_pragma(operands, filename, line_number, error_ptr); }
+    if (op == "#include") {
         bool res = true;
         QString incname;
         if ((operands.count() != 1) || operands.at(0).isEmpty()) {
@@ -295,8 +295,7 @@ bool SimpleAsm::process_line(
             }
         }
         if (!res) {
-            emit report_message(
-                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
             if (error_ptr != nullptr) {
                 if (error_ptr->isEmpty()) {
@@ -307,11 +306,11 @@ bool SimpleAsm::process_line(
         include_stack.removeLast();
         return res;
     }
-    if ((op == ".DATA") || (op == ".TEXT") || (op == ".GLOBL") || (op == ".END")
-        || (op == ".ENT")) {
+    if ((op == ".data") || (op == ".text") || (op == ".globl") || (op == ".end")
+        || (op == ".ent")) {
         return true;
     }
-    if (op == ".ORG") {
+    if (op == ".org") {
         bool ok;
         fixmatheval::FmeExpression expression;
         fixmatheval::FmeValue value;
@@ -352,7 +351,7 @@ bool SimpleAsm::process_line(
         address = machine::Address(value);
         return true;
     }
-    if ((op == ".SPACE") || (op == ".SKIP")) {
+    if ((op == ".space") || (op == ".skip")) {
         bool ok;
         fixmatheval::FmeExpression expression;
         fixmatheval::FmeValue value;
@@ -414,9 +413,7 @@ bool SimpleAsm::process_line(
             emit report_message(
                 messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr) {
-                *error_ptr = error;
-            }
+            if (error_ptr != nullptr) { *error_ptr = error; }
             return false;
         }
         while (value-- > 0) {
@@ -427,7 +424,7 @@ bool SimpleAsm::process_line(
         }
         return true;
     }
-    if ((op == ".EQU") || (op == ".SET")) {
+    if ((op == ".equ") || (op == ".set")) {
         if ((operands.count() > 2) || (operands.count() < 1)) {
             error = tr(".set or .equ incorrect arguments number.");
             emit report_message(
@@ -439,9 +436,7 @@ bool SimpleAsm::process_line(
             return false;
         }
         QString name = operands.at(0).trimmed();
-        if ((name == "noat") || (name == "noreored")) {
-            return true;
-        }
+        if ((name == "noat") || (name == "noreored")) { return true; }
         bool ok;
         fixmatheval::FmeValue value = 1;
         if (operands.count() > 1) {
@@ -452,9 +447,7 @@ bool SimpleAsm::process_line(
             }
             if (!ok) {
                 error = tr(".set or .equ %1 parse error.").arg(operands.at(1));
-                emit report_message(
-                    messagetype::MSG_ERROR, filename, line_number, 0, error,
-                    "");
+                emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
                 error_occured = true;
                 if (error_ptr != nullptr) {
                     *error_ptr = error;
@@ -465,8 +458,8 @@ bool SimpleAsm::process_line(
         symtab->setSymbol(name, value, 0);
         return true;
     }
-    if ((op == ".ASCII") || (op == ".ASCIZ")) {
-        bool append_zero = op == ".ASCIZ";
+    if ((op == ".ascii") || (op == ".asciz")) {
+        bool append_zero = op == ".asciz";
         for (QString s : operands) {
             if (s.count() < 2) {
                 error = "ascii empty string";
@@ -534,7 +527,7 @@ bool SimpleAsm::process_line(
         }
         return true;
     }
-    if (op == ".BYTE") {
+    if (op == ".byte") {
         bool ok;
         for (const QString &s : operands) {
             uint32_t val = 0;
@@ -586,7 +579,7 @@ bool SimpleAsm::process_line(
         address += 1;
     }
 
-    if (op == ".WORD") {
+    if (op == ".word") {
         for (QString s : operands) {
             s = s.simplified();
             uint32_t val = 0;

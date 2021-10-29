@@ -55,7 +55,7 @@ void HexLineEdit::set_value(uint32_t value) {
     if (s.count() < digits) {
         t.fill('0', digits - s.count());
     }
-    setText(prefix + t + s.toUpper());
+    setText(prefix + t + s);
 }
 
 void HexLineEdit::on_edit_finished() {

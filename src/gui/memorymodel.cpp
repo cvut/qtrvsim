@@ -83,7 +83,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
         if (index.column() == 0) {
             t = QString::number(address.get_raw(), 16);
             s.fill('0', 8 - t.count());
-            return "0x" + s + t.toUpper();
+            return "0x" + s + t;
         }
         if (machine == nullptr) {
             return QString("");
@@ -108,7 +108,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
 
         t = QString::number(data, 16);
         s.fill('0', cellSizeBytes() * 2 - t.count());
-        t = s + t.toUpper();
+        t = s + t;
 #if 0
         machine::LocationStatus loc_stat = machine::LOCSTAT_NONE;
         if (machine->cache_data() != nullptr) {

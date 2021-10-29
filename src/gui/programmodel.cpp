@@ -80,7 +80,7 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
         if (index.column() == 1) {
             t = QString::number(address.get_raw(), 16);
             s.fill('0', 8 - t.count());
-            return "0x" + s + t.toUpper();
+            return "0x" + s + t;
         }
 
         mem = mem_access();
@@ -100,7 +100,7 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
         case 2:
             t = QString::number(inst.data(), 16);
             s.fill('0', 8 - t.count());
-            return s + t.toUpper();
+            return s + t;
         case 3: return inst.to_str(address);
         default: return tr("");
         }
