@@ -29,6 +29,7 @@ set(machine_HEADERS
         execute/alu.h
         cop0state.h
         core.h
+        core/core_state.h
         instruction.h
         machine.h
         machineconfig.h
@@ -47,7 +48,8 @@ set(machine_HEADERS
         memory/memory_bus.h
         memory/memory_utils.h
         programloader.h
-        registers.h
+		pipeline.h
+		registers.h
         register_value.h
         simulator_exception.h
         symboltable.h
