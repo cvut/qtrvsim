@@ -73,10 +73,7 @@ void SimpleAsm::clear() {
     fatal_occured = false;
 }
 
-void SimpleAsm::setup(
-    machine::FrontendMemory *mem,
-    SymbolTableDb *symtab,
-    machine::Address address) {
+void SimpleAsm::setup(machine::FrontendMemory *mem, SymbolTableDb *symtab, machine::Address address) {
     this->mem = mem;
     this->symtab = symtab;
     this->address = address;
@@ -253,12 +250,9 @@ bool SimpleAsm::process_line(
     if (op.isEmpty()) {
         if (operands.count() != 0) {
             error = "operands for empty operation";
-            emit report_message(
-                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr) {
-                *error_ptr = error;
-            }
+            if (error_ptr != nullptr) { *error_ptr = error; }
             return false;
         }
         return true;
@@ -270,12 +264,9 @@ bool SimpleAsm::process_line(
         QString incname;
         if ((operands.count() != 1) || operands.at(0).isEmpty()) {
             error = "the single file has to be specified for include";
-            emit report_message(
-                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr) {
-                *error_ptr = error;
-            }
+            if (error_ptr != nullptr) { *error_ptr = error; }
             return false;
         }
         incname = operands.at(0);
@@ -298,9 +289,7 @@ bool SimpleAsm::process_line(
             emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
             if (error_ptr != nullptr) {
-                if (error_ptr->isEmpty()) {
-                    *error_ptr = error;
-                }
+                if (error_ptr->isEmpty()) { *error_ptr = error; }
             }
         }
         include_stack.removeLast();
@@ -316,12 +305,9 @@ bool SimpleAsm::process_line(
         fixmatheval::FmeValue value;
         if (operands.count() != 1) {
             error = ".org unexpected number of operands";
-            emit report_message(
-                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr) {
-                *error_ptr = error;
-            }
+            if (error_ptr != nullptr) { *error_ptr = error; }
             return false;
         }
         ok = expression.parse(operands.at(0), error);
@@ -340,12 +326,9 @@ bool SimpleAsm::process_line(
         if (!ok) {
             fatal_occured = true;
             error = tr(".orig %1 evaluation error.").arg(line);
-            emit report_message(
-                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr) {
-                *error_ptr = error;
-            }
+            if (error_ptr != nullptr) { *error_ptr = error; }
             return false;
         }
         address = machine::Address(value);
@@ -358,12 +341,9 @@ bool SimpleAsm::process_line(
         fixmatheval::FmeValue fill = 0;
         if ((operands.count() != 1) && (operands.count() != 2)) {
             error = ".space/.skip unexpected number of operands";
-            emit report_message(
-                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr) {
-                *error_ptr = error;
-            }
+            if (error_ptr != nullptr) { *error_ptr = error; }
             return false;
         }
         if (operands.count() > 1) {
@@ -417,9 +397,7 @@ bool SimpleAsm::process_line(
             return false;
         }
         while (value-- > 0) {
-            if (!fatal_occured) {
-                mem->write_u8(address, (uint8_t)fill, ae::INTERNAL);
-            }
+            if (!fatal_occured) { mem->write_u8(address, (uint8_t)fill, ae::INTERNAL); }
             address += 1;
         }
         return true;
@@ -427,12 +405,9 @@ bool SimpleAsm::process_line(
     if ((op == ".equ") || (op == ".set")) {
         if ((operands.count() > 2) || (operands.count() < 1)) {
             error = tr(".set or .equ incorrect arguments number.");
-            emit report_message(
-                messagetype::MSG_ERROR, filename, line_number, 0, error, "");
+            emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
             error_occured = true;
-            if (error_ptr != nullptr) {
-                *error_ptr = error;
-            }
+            if (error_ptr != nullptr) { *error_ptr = error; }
             return false;
         }
         QString name = operands.at(0).trimmed();
@@ -449,9 +424,7 @@ bool SimpleAsm::process_line(
                 error = tr(".set or .equ %1 parse error.").arg(operands.at(1));
                 emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
                 error_occured = true;
-                if (error_ptr != nullptr) {
-                    *error_ptr = error;
-                }
+                if (error_ptr != nullptr) { *error_ptr = error; }
                 return false;
             }
         }
@@ -463,13 +436,9 @@ bool SimpleAsm::process_line(
         for (QString s : operands) {
             if (s.count() < 2) {
                 error = "ascii empty string";
-                emit report_message(
-                    messagetype::MSG_ERROR, filename, line_number, 0, error,
-                    "");
+                emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
                 error_occured = true;
-                if (error_ptr != nullptr) {
-                    *error_ptr = error;
-                }
+                if (error_ptr != nullptr) { *error_ptr = error; }
                 return false;
             }
             if ((s.at(0) != '"') || (s.at(s.count() - 1) != '"')) {
@@ -519,9 +488,7 @@ bool SimpleAsm::process_line(
                 address += 1;
             }
             if (append_zero) {
-                if (!fatal_occured) {
-                    mem->write_u8(address, 0, ae::INTERNAL);
-                }
+                if (!fatal_occured) { mem->write_u8(address, 0, ae::INTERNAL); }
                 address += 1;
             }
         }
