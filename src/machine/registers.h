@@ -23,6 +23,7 @@ class RegisterId {
 public:
     // TODO: Should this constructor allow implicit conversion?
     inline RegisterId(uint8_t value);
+    inline RegisterId();
 
     uint8_t data;
 };
@@ -34,9 +35,9 @@ inline RegisterId::RegisterId(uint8_t value) : data(value) {
     // value, which is probably close to the bug source.
     SANITY_ASSERT(
         data < REGISTER_COUNT,
-        QString("Trying to create register id for out-of-bounds register ")
-            + QString(data));
-};
+        QString("Trying to create register id for out-of-bounds register ") + QString(data));
+}
+inline RegisterId::RegisterId() : RegisterId(0) {}
 
 inline RegisterId operator"" _reg(unsigned long long value) {
     return { static_cast<uint8_t>(value) };
@@ -51,21 +52,14 @@ public:
     Registers();
     Registers(const Registers &);
 
-    Address read_pc() const;             // Return current value of program counter
-    Address pc_inc();                    // Increment program counter by four bytes
-    Address pc_jmp(int32_t offset);      // Relative jump from current
-                                         // location in
-                                         // program counter
-    void pc_abs_jmp(Address address);    // Absolute jump in program counter (write
-                                         // to pc)
-    void pc_abs_jmp_28(Address address); // Absolute jump in current 256MB
-                                         // section (basically J implementation)
+    Address read_pc() const;        // Return current value of program counter
+    void write_pc(Address address); // Absolute jump in program counter
 
     RegisterValue read_gp(RegisterId reg) const;        // Read general-purpose
                                                         // register
     void write_gp(RegisterId reg, RegisterValue value); // Write general-purpose
                                                         // register
-    RegisterValue read_hi_lo(bool hi) const; // true - read HI / false - read LO
+    RegisterValue read_hi_lo(bool hi) const;            // true - read HI / false - read LO
     void write_hi_lo(bool hi, RegisterValue value);
 
     bool operator==(const Registers &c) const;

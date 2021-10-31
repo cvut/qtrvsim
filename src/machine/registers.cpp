@@ -27,23 +27,7 @@ Address Registers::read_pc() const {
     return this->pc;
 }
 
-Address Registers::pc_inc() {
-    this->pc += 4;
-    emit pc_update(this->pc);
-    return this->pc;
-}
-
-Address Registers::pc_jmp(int32_t offset) {
-    if (offset % 4) {
-        throw SIMULATOR_EXCEPTION(
-            UnalignedJump, "Trying to jump by unaligned offset", QString::number(offset, 16));
-    }
-    this->pc += offset;
-    emit pc_update(this->pc);
-    return this->pc;
-}
-
-void Registers::pc_abs_jmp(machine::Address address) {
+void Registers::write_pc(machine::Address address) {
     if (address.get_raw() % 4) {
         throw SIMULATOR_EXCEPTION(
             UnalignedJump, "Trying to jump to unaligned address",
@@ -51,10 +35,6 @@ void Registers::pc_abs_jmp(machine::Address address) {
     }
     this->pc = address;
     emit pc_update(this->pc);
-}
-
-void Registers::pc_abs_jmp_28(Address address) {
-    this->pc_abs_jmp((pc & 0xF0000000) | (address & 0x0FFFFFFF).get_raw());
 }
 
 RegisterValue Registers::read_gp(RegisterId reg) const {
@@ -112,7 +92,7 @@ bool Registers::operator!=(const Registers &c) const {
 }
 
 void Registers::reset() {
-    pc_abs_jmp(PC_INIT); // Initialize to beginning program section
+    write_pc(PC_INIT); // Initialize to beginning program section
     for (int i = 1; i < 32; i++) {
         write_gp(i, 0);
     }

@@ -133,14 +133,14 @@ bool Core::handle_exception(
             QString::number(inst.data(), 16));
     }
 
-    if (excause == EXCAUSE_HWBREAK) { regs->pc_abs_jmp(inst_addr); }
+    if (excause == EXCAUSE_HWBREAK) { regs->write_pc(inst_addr); }
 
     if (cop0state != nullptr) {
         cop0state->write_cop0reg(Cop0State::EPC, inst_addr.get_raw());
         cop0state->update_execption_cause(excause);
         if (cop0state->read_cop0reg(Cop0State::EBase) != 0 && !get_step_over_exception(excause)) {
             cop0state->set_status_exl(true);
-            regs->pc_abs_jmp(cop0state->exception_pc_address());
+            regs->write_pc(cop0state->exception_pc_address());
         }
     }
 
@@ -249,9 +249,7 @@ FetchState Core::fetch(bool skip_break) {
         if (cop0state->core_interrupt_request()) { excause = EXCAUSE_INT; }
     }
 
-    regs->pc_abs_jmp(this->predictor->predict(inst, inst_addr));
-
-    regs->pc_abs_jmp(this->predictor->predict(inst, inst_addr));
+    regs->write_pc(this->predictor->predict(inst, inst_addr));
 
     emit fetch_inst_addr_value(inst_addr);
     emit instruction_fetched(inst, inst_addr, excause, true);
@@ -605,7 +603,7 @@ void CoreSingle::do_step(bool skip_break) {
     state.pipeline.memory = memory(state.pipeline.execute.final);
     state.pipeline.writeback = writeback(state.pipeline.memory.final);
 
-    regs->pc_abs_jmp(handle_pc(state.pipeline.execute.final));
+    regs->write_pc(handle_pc(state.pipeline.execute.final));
 
     if (state.pipeline.memory.final.excause != EXCAUSE_NONE) {
         handle_exception(
@@ -646,7 +644,7 @@ void CorePipelined::do_step(bool skip_break) {
     state.pipeline.decode = decode(state.pipeline.fetch.final);
 
     if (state.pipeline.memory.final.excause != EXCAUSE_NONE) {
-        regs->pc_abs_jmp(state.pipeline.execute.final.inst_addr);
+        regs->write_pc(state.pipeline.execute.final.inst_addr);
         flush();
         handle_exception(
             this, regs, state.pipeline.memory.final.excause, state.pipeline.memory.final.inst,
@@ -735,7 +733,7 @@ void CorePipelined::do_step(bool skip_break) {
         Address real_addr = handle_pc(state.pipeline.execute.final);
         if (state.pipeline.execute.final.is_valid
             && real_addr != state.pipeline.decode.final.inst_addr) {
-            regs->pc_abs_jmp(real_addr);
+            regs->write_pc(real_addr);
             dtDecodeInit(state.pipeline.decode.final);
             dtFetchInit(state.pipeline.fetch.final);
         }

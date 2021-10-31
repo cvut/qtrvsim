@@ -23,7 +23,7 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         }
         program_end = program.end();
         if (program.get_executable_entry() != 0x0_addr) {
-            regs->pc_abs_jmp(program.get_executable_entry());
+            regs->write_pc(program.get_executable_entry());
         }
         mem = new Memory(*mem_program_only);
     } else {
