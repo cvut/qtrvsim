@@ -178,16 +178,10 @@ void Cop0State::reset() {
     last_core_cycles = 0;
 }
 
-void Cop0State::update_execption_cause(enum ExceptionCause excause, bool in_delay_slot) {
-    if (in_delay_slot) {
-        cop0reg[(int)Cause] |= 0x80000000;
-    } else {
-        cop0reg[(int)Cause] &= ~0x80000000;
-    }
+void Cop0State::update_execption_cause(enum ExceptionCause excause) {
+    cop0reg[(int)Cause] &= ~0x80000000;
     cop0reg[(int)Cause] &= ~0x0000007f;
-    if (excause != EXCAUSE_INT) {
-        cop0reg[(int)Cause] |= (int)excause << 2;
-    }
+    if (excause != EXCAUSE_INT) { cop0reg[(int)Cause] |= (int)excause << 2; }
     emit cop0reg_update(Cause, cop0reg[(int)Cause]);
 }
 

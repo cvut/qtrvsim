@@ -209,11 +209,11 @@ CoreViewScene::CoreViewScene(machine::Machine *machine) : QGraphicsScene() {
     NEW_V(360, 250, decode_reg1_value);        // Register output 1
     NEW_V(360, 270, decode_reg2_value);        // Register output 2
     NEW_V(335, 413, decode_immediate_value);   // Sign extended immediate value
-    NEW_V(370, 99, decode_regd31_value, false, 1);
+    // NEW_V(370, 99, decode_regd31_value, false, 1);
     NEW_V(370, 113, decode_memtoreg_value, false, 1);
     NEW_V(360, 120, decode_memwrite_value, false, 1);
     NEW_V(370, 127, decode_memread_value, false, 1);
-    NEW_V(360, 140, decode_regdest_value, false, 1);
+    // NEW_V(360, 140, decode_regdest_value, false, 1);
     NEW_V(370, 148, decode_alusrc_value, false, 1);
     // Execute stage
     NEW_V(450, 230, execute_reg1_value, true); // Register 1

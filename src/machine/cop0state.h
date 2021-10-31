@@ -72,7 +72,7 @@ public slots:
 
 protected:
     void setup_core(Core *core);
-    void update_execption_cause(enum ExceptionCause excause, bool in_delay_slot);
+    void update_execption_cause(enum ExceptionCause excause);
     void update_count_and_compare_irq();
 
 private:

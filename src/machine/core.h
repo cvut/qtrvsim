@@ -2,10 +2,12 @@
 #define CORE_H
 
 #include "cop0state.h"
+#include "core/core_state.h"
 #include "instruction.h"
 #include "machineconfig.h"
 #include "memory/address.h"
 #include "memory/frontend_memory.h"
+#include "pipeline.h"
 #include "predictor.h"
 #include "register_value.h"
 #include "registers.h"
@@ -84,11 +86,8 @@ public:
 
     void set_c0_userlocal(uint32_t address);
 
-    enum ForwardFrom {
-        FORWARD_NONE = 0b00,
-        FORWARD_FROM_W = 0b01,
-        FORWARD_FROM_M = 0b10,
-    };
+public:
+    CoreState state {};
 
 signals:
     void instruction_fetched(
@@ -136,11 +135,9 @@ signals:
     void decode_memwrite_value(uint32_t);
     void decode_memread_value(uint32_t);
     void decode_alusrc_value(uint32_t);
-    void decode_regdest_value(uint32_t);
     void decode_rs_num_value(uint32_t);
     void decode_rt_num_value(uint32_t);
     void decode_rd_num_value(uint32_t);
-    void decode_regd31_value(uint32_t);
     void forward_m_d_rs_value(uint32_t);
     void forward_m_d_rt_value(uint32_t);
     void execute_inst_addr_value(machine::Address);
@@ -185,6 +182,8 @@ signals:
 
     void stop_on_exception_reached();
 
+    void step_done() const;
+
 protected:
     virtual void do_step(bool skip_break = false) = 0;
     virtual void do_reset() = 0;
@@ -193,6 +192,7 @@ protected:
         Core *core,
         Registers *regs,
         ExceptionCause excause,
+        Instruction inst,
         Address inst_addr,
         Address next_addr,
         Address jump_branch_pc,
@@ -206,90 +206,13 @@ protected:
     QMap<ExceptionCause, ExceptionHandler *> ex_handlers;
     ExceptionHandler *ex_default_handler;
 
-    struct dtFetch {
-        Instruction inst;  // Loaded instruction
-        Address inst_addr; // Address of instruction
-        enum ExceptionCause excause;
-        bool in_delay_slot;
-        bool is_valid;
-    };
-    struct dtDecode {
-        Instruction inst;
-        bool memread;              // If memory should be read
-        bool memwrite;             // If memory should write input
-        bool alusrc;               // If second value to alu is immediate value (rt used
-                                   // otherwise)
-        bool regd;                 // If rd is used (otherwise rt is used for write target)
-        bool regd31;               // Use R31 as destionation for JAL
-        bool regwrite;             // If output should be written back to register (which
-                                   // one depends on regd)
-        bool alu_req_rs;           // requires rs value for ALU
-        bool alu_req_rt;           // requires rt value for ALU or SW
-        bool bjr_req_rs;           // requires rs for beq, bne, blez, bgtz, jr nad jalr
-        bool bjr_req_rt;           // requires rt for beq, bne
-        bool branch;               // branch instruction
-        bool jump;                 // jump
-        bool bj_not;               // negate branch condition
-        bool bgt_blez;             // BGTZ/BLEZ instead of BGEZ/BLTZ
-        bool nb_skip_ds;           // Skip delay slot if branch is not taken
-        bool forward_m_d_rs;       // forwarding required for beq, bne, blez, bgtz, jr
-                                   // nad jalr
-        bool forward_m_d_rt;       // forwarding required for beq, bne
-        enum AluOp aluop;          // Decoded ALU operation
-        enum AccessControl memctl; // Decoded memory access type
-        uint8_t num_rs;            // Number of the register s
-        uint8_t num_rt;            // Number of the register t
-        uint8_t num_rd;            // Number of the register d
-        RegisterValue val_rs;      // Value from register rs
-        RegisterValue val_rt;      // Value from register rt
-        uint32_t immediate_val;    // zero or sign-extended immediate value
-        uint8_t rwrite;            // Writeback register (multiplexed between rt and
-                                   // rd according to regd)
-        ForwardFrom ff_rs;
-        ForwardFrom ff_rt;
-        Address inst_addr; // Address of instruction
-        enum ExceptionCause excause;
-        bool in_delay_slot;
-        bool stall;
-        bool stop_if;
-        bool is_valid;
-    };
-    struct dtExecute {
-        Instruction inst;
-        bool memread;
-        bool memwrite;
-        bool regwrite;
-        enum AccessControl memctl;
-        RegisterValue val_rt;
-        uint8_t rwrite;
-        // Writeback register (multiplexed between rt and rd according to regd)
-        RegisterValue alu_val; // Result of ALU execution
-        Address inst_addr;     // Address of instruction
-        enum ExceptionCause excause;
-        bool in_delay_slot;
-        bool stop_if;
-        bool is_valid;
-    };
-    struct dtMemory {
-        Instruction inst;
-        bool memtoreg;
-        bool regwrite;
-        uint8_t rwrite;
-        RegisterValue towrite_val;
-        Address mem_addr;  // Address used to access memory
-        Address inst_addr; // Address of instruction
-        enum ExceptionCause excause;
-        bool in_delay_slot;
-        bool stop_if;
-        bool is_valid;
-    };
-
-    struct dtFetch fetch(bool skip_break = false);
-    struct dtDecode decode(const struct dtFetch &);
-    struct dtExecute execute(const struct dtDecode &);
-    struct dtMemory memory(const struct dtExecute &);
-    void writeback(const struct dtMemory &);
-    bool handle_pc(const struct dtDecode &);
+    FetchState fetch(bool skip_break = false);
+    DecodeState decode(const FetchInterstage &);
+    ExecuteState execute(const DecodeInterstage &);
+    MemoryState memory(const ExecuteInterstage &);
+    WritebackState writeback(const MemoryInterstage &);
+    Address handle_pc(const ExecuteInterstage &);
+    void flush();
 
     enum ExceptionCause memory_special(
         enum AccessControl memctl,
@@ -301,27 +224,10 @@ protected:
         Address mem_addr);
 
     // Initialize structures to NOPE instruction
-    static void dtFetchInit(struct dtFetch &dt);
-    static void dtDecodeInit(struct dtDecode &dt);
-    static void dtExecuteInit(struct dtExecute &dt);
-    static void dtMemoryInit(struct dtMemory &dt);
-
-protected:
-    unsigned int stall_c;
-
-private:
-    struct hwBreak {
-        hwBreak(Address addr);
-        Address addr;
-        unsigned int flags;
-        unsigned int count;
-    };
-    unsigned int cycle_c;
-    unsigned int min_cache_row_size;
-    uint32_t hwr_userlocal;
-    QMap<Address, hwBreak *> hw_breaks;
-    bool stop_on_exception[EXCAUSE_COUNT] {};
-    bool step_over_exception[EXCAUSE_COUNT] {};
+    static void dtFetchInit(FetchInterstage &dt);
+    static void dtDecodeInit(DecodeInterstage &dt);
+    static void dtExecuteInit(ExecuteInterstage &dt);
+    static void dtMemoryInit(MemoryInterstage &dt);
 };
 
 class CoreSingle : public Core {
@@ -331,17 +237,14 @@ public:
         Predictor *predictor,
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
-        bool jmp_delay_slot,
         unsigned int min_cache_row_size = 1,
         Cop0State *cop0state = nullptr);
-    ~CoreSingle() override;
 
 protected:
     void do_step(bool skip_break = false) override;
     void do_reset() override;
 
 private:
-    struct Core::dtFetch *dt_f;
     Address prev_inst_addr {};
 };
 
@@ -352,8 +255,7 @@ public:
         Predictor *predictor,
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
-        enum MachineConfig::HazardUnit hazard_unit
-        = MachineConfig::HU_STALL_FORWARD,
+        enum MachineConfig::HazardUnit hazard_unit = MachineConfig::HU_STALL_FORWARD,
         unsigned int min_cache_row_size = 1,
         Cop0State *cop0state = nullptr);
 
@@ -362,12 +264,7 @@ protected:
     void do_reset() override;
 
 private:
-    struct Core::dtFetch dt_f;
-    struct Core::dtDecode dt_d;
-    struct Core::dtExecute dt_e;
-    struct Core::dtMemory dt_m;
-
-    enum MachineConfig::HazardUnit hazard_unit;
+    MachineConfig::HazardUnit hazard_unit;
 };
 
 std::tuple<bool, Address> predict(Instruction inst, Address addr);
