@@ -17,8 +17,8 @@ namespace osemu {
 
 #define OSSYCALL_HANDLER_DECLARE(name)                                                             \
     int name(                                                                                      \
-        uint32_t &result, machine::Core *core, uint32_t syscall_num, uint32_t a1, uint32_t a2,     \
-        uint32_t a3, uint32_t a4, uint32_t a5, uint32_t a6, uint32_t a7, uint32_t a8)
+        uint64_t &result, machine::Core *core, uint64_t syscall_num, uint64_t a1, uint64_t a2,     \
+        uint64_t a3, uint64_t a4, uint64_t a5, uint64_t a6)
 
 class OsSyscallExceptionHandler : public machine::ExceptionHandler {
     Q_OBJECT
@@ -42,11 +42,11 @@ public:
     OSSYCALL_HANDLER_DECLARE(do_sys_write);
     OSSYCALL_HANDLER_DECLARE(do_sys_readv);
     OSSYCALL_HANDLER_DECLARE(do_sys_read);
-    OSSYCALL_HANDLER_DECLARE(do_sys_open);
+    OSSYCALL_HANDLER_DECLARE(do_sys_openat);
     OSSYCALL_HANDLER_DECLARE(do_sys_close);
     OSSYCALL_HANDLER_DECLARE(do_sys_ftruncate);
     OSSYCALL_HANDLER_DECLARE(do_sys_brk);
-    OSSYCALL_HANDLER_DECLARE(do_sys_mmap2);
+    OSSYCALL_HANDLER_DECLARE(do_sys_mmap);
 
     OSSYCALL_HANDLER_DECLARE(do_spim_print_integer);
     OSSYCALL_HANDLER_DECLARE(do_spim_print_string);
@@ -77,11 +77,7 @@ private:
         QVector<uint8_t> &data,
         uint32_t count);
     int32_t write_io(int fd, const QVector<uint8_t> &data, uint32_t count);
-    int32_t read_io(
-        int fd,
-        QVector<uint8_t> &data,
-        uint32_t count,
-        bool add_nl_at_eof = false);
+    int32_t read_io(int fd, QVector<uint8_t> &data, uint32_t count, bool add_nl_at_eof = false);
     int allocate_fd(int val = FD_UNUSED);
     int file_open(QString fname, int flags, int mode);
     int targetfd_to_fd(int targetfd);
