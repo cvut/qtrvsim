@@ -8,6 +8,7 @@ using namespace machine;
 
 Core::Core(
     Registers *regs,
+    Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
     unsigned int min_cache_row_size,
@@ -18,6 +19,7 @@ Core::Core(
     stall_c = 0;
     this->regs = regs;
     this->cop0state = cop0state;
+    this->predictor = predictor;
     this->mem_program = mem_program;
     this->mem_data = mem_data;
     this->ex_default_handler = new StopExceptionHandler();
@@ -261,6 +263,8 @@ struct Core::dtFetch Core::fetch(bool skip_break) {
             excause = EXCAUSE_INT;
         }
     }
+
+    regs->pc_abs_jmp(this->predictor->predict(inst, inst_addr));
 
     emit fetch_inst_addr_value(inst_addr);
     emit instruction_fetched(inst, inst_addr, excause, true);
@@ -679,12 +683,13 @@ void Core::dtMemoryInit(struct dtMemory &dt) {
 
 CoreSingle::CoreSingle(
     Registers *regs,
+    Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
     bool jmp_delay_slot,
     unsigned int min_cache_row_size,
     Cop0State *cop0state)
-    : Core(regs, mem_program, mem_data, min_cache_row_size, cop0state) {
+    : Core(regs, predictor, mem_program, mem_data, min_cache_row_size, cop0state) {
     if (jmp_delay_slot) {
         dt_f = new struct Core::dtFetch();
     } else {
@@ -748,13 +753,15 @@ void CoreSingle::do_reset() {
 
 CorePipelined::CorePipelined(
     Registers *regs,
+    Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
     enum MachineConfig::HazardUnit hazard_unit,
     unsigned int min_cache_row_size,
     Cop0State *cop0state)
-    : Core(regs, mem_program, mem_data, min_cache_row_size, cop0state) {
+    : Core(regs, predictor, mem_program, mem_data, min_cache_row_size, cop0state) {
     this->hazard_unit = hazard_unit;
+
     reset();
 }
 
