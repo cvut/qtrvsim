@@ -1014,22 +1014,21 @@ bool SimpleAsmWithEditorCheck::process_pragma(
         {QString("registers"), static_cast<QDockWidget *MainWindow::*>(&MainWindow::registers)},
     };
 #endif
-    if ((operands.count() < 2) || QString::compare(operands.at(0), "qtmips", Qt::CaseInsensitive)) {
+    if (operands.count() < 2
+        || (QString::compare(operands.at(0), "qtrvsim", Qt::CaseInsensitive)
+            && QString::compare(operands.at(0), "qtmips", Qt::CaseInsensitive))) {
         return true;
     }
     QString op = operands.at(1).toLower();
     if (op == "show") {
-        if (operands.count() < 3) {
-            return true;
-        }
+        if (operands.count() < 3) { return true; }
         QString show_method = "show_" + operands.at(2);
         QString show_method_sig = show_method + "()";
-        if (mainwindow->metaObject()->indexOfMethod(
-                show_method_sig.toLatin1().data())
+        if (mainwindow->metaObject()->indexOfMethod(show_method_sig.toLatin1().data())
             == -1) {
             emit report_message(
                 messagetype::MSG_WARNING, filename, line_number, 0,
-                "#pragma qtmisp show - unknown object " + operands.at(2), "");
+                "#pragma qtrvsim show - unknown object " + operands.at(2), "");
             return true;
         }
         QMetaObject::invokeMethod(mainwindow, show_method.toLatin1().data());
@@ -1058,14 +1057,14 @@ bool SimpleAsmWithEditorCheck::process_pragma(
         if (!ok) {
             emit report_message(
                 messagetype::MSG_WARNING, filename, line_number, 0,
-                "epression parse error " + error, "");
+                "expression parse error " + error, "");
             return true;
         }
         ok = expression.eval(value, symtab, error);
         if (!ok) {
             emit report_message(
                 messagetype::MSG_WARNING, filename, line_number, 0,
-                "epression evaluation error " + error, "");
+                "expression evaluation error " + error, "");
             return true;
         }
         if (!QString::compare(operands.at(2), "memory", Qt::CaseInsensitive)
@@ -1080,11 +1079,11 @@ bool SimpleAsmWithEditorCheck::process_pragma(
         }
         emit report_message(
             messagetype::MSG_WARNING, filename, line_number, 0,
-            "unknown #pragma qtmisp focus unknown object " + operands.at(2), "");
+            "unknown #pragma qtrvsim focus unknown object " + operands.at(2), "");
         return true;
     }
     emit report_message(
-        messagetype::MSG_WARNING, filename, line_number, 0, "unknown #pragma qtmisp " + op, "");
+        messagetype::MSG_WARNING, filename, line_number, 0, "unknown #pragma qtrvsim " + op, "");
     return true;
 }
 
