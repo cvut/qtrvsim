@@ -34,7 +34,6 @@ public:
         machine::Address inst_addr,
         machine::Address next_addr,
         machine::Address jump_branch_pc,
-        bool in_delay_slot,
         machine::Address mem_ref_addr) override;
     OSSYCALL_HANDLER_DECLARE(syscall_default_handler);
     OSSYCALL_HANDLER_DECLARE(do_sys_exit);

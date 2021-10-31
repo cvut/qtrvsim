@@ -124,7 +124,6 @@ bool Core::handle_exception(
     Address inst_addr,
     Address next_addr,
     Address jump_branch_pc,
-    bool in_delay_slot,
     Address mem_ref_addr) {
     bool ret = false;
     if (excause == EXCAUSE_UNKNOWN) {
@@ -147,10 +146,10 @@ bool Core::handle_exception(
     ExceptionHandler *exhandler = ex_handlers.value(excause);
     if (exhandler != nullptr) {
         ret = exhandler->handle_exception(
-            core, regs, excause, inst_addr, next_addr, jump_branch_pc, in_delay_slot, mem_ref_addr);
+            core, regs, excause, inst_addr, next_addr, jump_branch_pc, mem_ref_addr);
     } else if (ex_default_handler != nullptr) {
         ret = ex_default_handler->handle_exception(
-            core, regs, excause, inst_addr, next_addr, jump_branch_pc, in_delay_slot, mem_ref_addr);
+            core, regs, excause, inst_addr, next_addr, jump_branch_pc, mem_ref_addr);
     }
     if (get_stop_on_exception(excause)) {
         emit core->stop_on_exception_reached();
@@ -609,7 +608,7 @@ void CoreSingle::do_step(bool skip_break) {
         handle_exception(
             this, regs, state.pipeline.memory.final.excause, state.pipeline.memory.final.inst,
             state.pipeline.memory.final.inst_addr, regs->read_pc(), prev_inst_addr,
-            false, state.pipeline.memory.final.mem_addr);
+            state.pipeline.memory.final.mem_addr);
         return;
     }
     prev_inst_addr = state.pipeline.memory.final.inst_addr;
@@ -649,7 +648,7 @@ void CorePipelined::do_step(bool skip_break) {
         handle_exception(
             this, regs, state.pipeline.memory.final.excause, state.pipeline.memory.final.inst,
             state.pipeline.memory.final.inst_addr, state.pipeline.execute.final.inst_addr,
-            jump_branch_pc, false, state.pipeline.memory.final.mem_addr);
+            jump_branch_pc, state.pipeline.memory.final.mem_addr);
     }
 
     state.pipeline.decode.final.ff_rs = FORWARD_NONE;
@@ -783,7 +782,6 @@ bool StopExceptionHandler::handle_exception(
     Address inst_addr,
     Address next_addr,
     Address jump_branch_pc,
-    bool in_delay_slot,
     Address mem_ref_addr) {
 #if 0
     printf("Exception cause %d instruction PC 0x%08lx next PC 0x%08lx jump branch PC 0x%08lx "
@@ -798,7 +796,7 @@ bool StopExceptionHandler::handle_exception(
     (void)mem_ref_addr;
     (void)regs;
     (void)jump_branch_pc;
-    (void)in_delay_slot, (void)core;
+    (void)core;
 #endif
     return true;
 }

@@ -29,7 +29,6 @@ public:
         Address inst_addr,
         Address next_addr,
         Address jump_branch_pc,
-        bool in_delay_slot,
         Address mem_ref_addr)
         = 0;
 };
@@ -44,7 +43,6 @@ public:
         Address inst_addr,
         Address next_addr,
         Address jump_branch_pc,
-        bool in_delay_slot,
         Address mem_ref_addr) override;
 };
 
@@ -196,7 +194,6 @@ protected:
         Address inst_addr,
         Address next_addr,
         Address jump_branch_pc,
-        bool in_delay_slot,
         Address mem_ref_addr);
 
     Registers *regs;
