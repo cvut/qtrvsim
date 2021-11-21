@@ -1,5 +1,6 @@
 #include "memorytableview.h"
 
+#include "common/polyfills/qt5/qfontmetrics.h"
 #include "hinttabledelegate.h"
 #include "memorymodel.h"
 
@@ -32,16 +33,11 @@ void MemoryTableView::addr0_save_change(machine::Address val) {
 }
 
 void MemoryTableView::adjustColumnCount() {
-    MemoryModel *m = dynamic_cast<MemoryModel *>(model());
-    if (m == nullptr) {
-        return;
-    }
+    auto *m = dynamic_cast<MemoryModel *>(model());
+    if (m == nullptr) { return; }
 
-    HintTableDelegate *delegate
-        = dynamic_cast<HintTableDelegate *>(itemDelegate());
-    if (delegate == nullptr) {
-        return;
-    }
+    auto *delegate = dynamic_cast<HintTableDelegate *>(itemDelegate());
+    if (delegate == nullptr) { return; }
 
     if (horizontalHeader()->count() >= 2) {
         QModelIndex idx;
@@ -49,11 +45,8 @@ void MemoryTableView::adjustColumnCount() {
         idx = m->index(0, 0);
 
         QStyleOptionViewItem viewOpts;
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+
         initViewItemOption(&viewOpts);
-#else
-        viewOpts = viewOptions();
-#endif
 
         // int width0_dh = itemDelegate(idx)->sizeHint(viewOptions(),
         // idx).get_width() + 2;
@@ -65,7 +58,9 @@ void MemoryTableView::adjustColumnCount() {
         QString t = "";
         t.fill(QChar('0'), m->cellSizeBytes() * 2);
         int width1_dh = delegate->sizeHintForText(viewOpts, idx, t).width() + 2;
-        if (width1_dh < fm.horizontalAdvance("+99")) { width1_dh = fm.horizontalAdvance("+99"); }
+        if (width1_dh < QFontMetrics_horizontalAdvance(fm, "+99")) {
+            width1_dh = QFontMetrics_horizontalAdvance(fm, "+99");
+        }
         horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
         horizontalHeader()->resizeSection(1, width1_dh);
 

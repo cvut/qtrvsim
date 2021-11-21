@@ -1,5 +1,6 @@
 #include "connection.h"
 
+#include "common/polyfills/qt5/qlinef.h"
 #include "machine/simulator_exception.h"
 
 #include <cmath>
@@ -134,12 +135,7 @@ void Connection::recalc_line() {
 
 bool Connection::recalc_line_add_point(const QLineF &l1, const QLineF &l2) {
     QPointF intersec;
-#if QT_VERSION                                                                                     \
-    >= QT_VERSION_CHECK(5, 14, 0) if (l1.intersects(l2, &intersec) == QLineF::NoIntersection) {    \
-           return false;                                                                           \
-       } #else
-    if (l1.intersect(l2, &intersec) == QLineF::NoIntersection) { return false; }
-#endif
+    if (QLineF_intersect(l1, l2, &intersec) == QLineF::NoIntersection) { return false; }
     points.append(intersec);
     return true;
 }
