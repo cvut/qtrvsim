@@ -125,8 +125,8 @@ void Connection::recalc_line() {
     points.append(ax_start.p1());
 
     QLineF cur_l = ax_start;
-    for (int i = 0; i < break_axes.size(); i++) {
-        if (recalc_line_add_point(cur_l, break_axes[i])) cur_l = break_axes[i];
+    for (auto &break_axe : break_axes) {
+        if (recalc_line_add_point(cur_l, break_axe)) cur_l = break_axe;
     }
     recalc_line_add_point(cur_l, ax_end);
 
@@ -145,8 +145,9 @@ Bus::Bus(const Connector *start, const Connector *end, unsigned width) : Connect
 }
 
 Bus::~Bus() {
-    for (int i = 0; i < conns.size(); i++)
-        delete conns[i].c;
+    for (auto &conn : conns) {
+        delete conn.c;
+    }
 }
 
 void Bus::setAxes(QVector<QLineF> axes) {
@@ -155,7 +156,7 @@ void Bus::setAxes(QVector<QLineF> axes) {
 }
 
 const Connector *Bus::new_connector(qreal x, qreal y, enum Connector::Axis axis) {
-    Connector *c = new Connector(axis);
+    auto *c = new Connector(axis);
     conns.append({ .c = c, .p = QPoint(x, y) });
     conns_update();
     return c;
