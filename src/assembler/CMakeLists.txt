@@ -17,4 +17,4 @@ add_library(assembler STATIC
         ${assembler_SOURCES}
         ${assembler_HEADERS})
 target_link_libraries(assembler
-        PRIVATE Qt5::Core)
+		PRIVATE ${QtLib}::Core)

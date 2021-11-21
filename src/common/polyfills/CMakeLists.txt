@@ -29,12 +29,12 @@ if(NOT "${WASM}")
 	set(CMAKE_AUTOMOC ON)
 
 	add_executable(mulh64_test
-	               mulh64.h
-	               mulh64.test.h
-	               mulh64.test.cpp
-	               )
-	target_link_libraries(mulh64_test PRIVATE Qt5::Test)
+			mulh64.h
+			mulh64.test.h
+			mulh64.test.cpp
+			)
+	target_link_libraries(mulh64_test PRIVATE ${QtLib}::Test)
 	add_test(NAME mulh64
-	         COMMAND mulh64_test)
+			COMMAND mulh64_test)
 endif()
 

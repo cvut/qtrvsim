@@ -165,12 +165,25 @@ if("${WASM}" OR "${FORCE_ELFLIB_STATIC}" OR NOT "${LibElf_FOUND}")
 	add_subdirectory("external/libelf")
 endif()
 
-find_package(Qt5
-             REQUIRED COMPONENTS Core Widgets Gui Test
-             OPTIONAL_COMPONENTS PrintSupport)
+# Detect Qt used qt version
+# Based on article https://www.steinzone.de/wordpress/how-to-support-both-qt5-and-qt6-using-cmake/
+# Cannot use version-less approach due to Qt 5.9.5 support constraint.
+find_package(OpenGL)
 
-message(STATUS "Qt5 version: ${Qt5Core_VERSION}")
-message(STATUS "Qt5 print support: ${Qt5PrintSupport_FOUND}")
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
+# Normally, we would use variable Qt5 or Qt6 to reference the Qt library. Here we do that through
+# this variable based on detected version major of Qt.
+set(QtLib "Qt${QT_VERSION_MAJOR}")
+find_package(${QtLib}
+		REQUIRED COMPONENTS Core Widgets Gui Test
+		OPTIONAL_COMPONENTS PrintSupport)
+
+message(STATUS "${QtLib} version: ${${QtLib}Core_VERSION}")
+message(STATUS "${QtLib} print support: ${${QtLib}PrintSupport_FOUND}")
+
+
+# Qt 5.9.5 is the oldest supported
+add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050905)
 
 add_subdirectory("external/svgscene")
 
