@@ -13,6 +13,7 @@
 #include <QStack>
 #include <QXmlStreamReader>
 #include <QtMath>
+#include <QStringRef>
 #include <components/hyperlinkitem.h>
 
 LOG_CATEGORY("svgscene.parsing");
