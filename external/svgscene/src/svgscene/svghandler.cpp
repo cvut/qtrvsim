@@ -3,10 +3,10 @@
 #include "components/groupitem.h"
 #include "components/hyperlinkitem.h"
 #include "components/simpletextitem.h"
+#include "polyfills/qt5/qstringview.h"
 #include "svgmetadata.h"
 #include "svgspec.h"
 #include "utils/logging.h"
-#include "polyfills/qt5/qstringview.h"
 
 #include <QFontMetrics>
 #include <QGraphicsItem>
@@ -296,9 +296,9 @@ static QColor parseColor(const QString &color, const QString &opacity) {
     return ret;
 }
 
-static QMatrix parseTransformationMatrix(const QStringView &value) {
+static QTransform parseTransformationMatrix(const QStringView &value) {
     if (value.isEmpty()) return {};
-    QMatrix matrix;
+    QTransform matrix;
     const QChar *str = value.cbegin();
     const QChar *end = str + value.length();
     while (str < end) {
@@ -361,7 +361,7 @@ static QMatrix parseTransformationMatrix(const QStringView &value) {
         ++str;
         if (state == Matrix) {
             if (points.count() != 6) goto error;
-            matrix = QMatrix(points[0], points[1], points[2], points[3], points[4], points[5])
+            matrix = QTransform(points[0], points[1], points[2], points[3], points[4], points[5])
                      * matrix;
         } else if (state == Translate) {
             if (points.count() == 1)
@@ -543,9 +543,9 @@ static bool parsePathDataFast(const QStringView &dataStr, QPainterPath &path) {
         QChar pathElem = *str;
         ++str;
         QChar endc = *end;
-        *const_cast<QChar *>(end) = 0; // parseNumbersArray requires
-                                       // 0-termination that QStringView cannot
-                                       // guarantee
+        *const_cast<QChar *>(end) = QChar('\0'); // parseNumbersArray requires
+                                                 // 0-termination that QStringView cannot
+                                                 // guarantee
         QVarLengthArray<qreal, 8> arg;
         parseNumbersArray(str, arg);
         *const_cast<QChar *>(end) = endc;
@@ -1103,7 +1103,7 @@ void SvgHandler::setXmlAttributes(QGraphicsItem *git, const SvgHandler::SvgEleme
 
 void SvgHandler::setTransform(QGraphicsItem *it, const QString &str_val) {
     QStringView transform(str_val);
-    QMatrix mx = parseTransformationMatrix(transform.trimmed());
+    QTransform mx = parseTransformationMatrix(transform.trimmed());
     if (!mx.isIdentity()) {
         QTransform t(mx);
         // logSvgI() << typeid (*it).name() << "setting matrix:" << t.dx() <<
