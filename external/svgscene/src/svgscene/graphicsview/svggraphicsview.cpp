@@ -36,7 +36,7 @@ void SvgGraphicsView::paintEvent(QPaintEvent *event) {
 }
 
 void SvgGraphicsView::wheelEvent(QWheelEvent *ev) {
-    if (ev->orientation() == Qt::Vertical) {
+    if (ev->angleDelta().y() != 0) { // vertical orientation
         if (ev->modifiers() == Qt::ControlModifier) {
             double delta = ev->angleDelta().y();
             zoom(delta / 10, ev->pos());
