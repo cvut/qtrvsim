@@ -1,10 +1,12 @@
 ﻿#include "svghandler.h"
 
 #include "components/groupitem.h"
+#include "components/hyperlinkitem.h"
 #include "components/simpletextitem.h"
 #include "svgmetadata.h"
 #include "svgspec.h"
 #include "utils/logging.h"
+#include "polyfills/qt5/qstringview.h"
 
 #include <QFontMetrics>
 #include <QGraphicsItem>
@@ -13,8 +15,6 @@
 #include <QStack>
 #include <QXmlStreamReader>
 #include <QtMath>
-#include <QStringRef>
-#include <components/hyperlinkitem.h>
 
 LOG_CATEGORY("svgscene.parsing");
 
@@ -120,7 +120,7 @@ static qreal toDouble(const QString &str, bool *ok = nullptr) {
 }
 
 /*
-static qreal toDouble(const QStringRef &str, bool *ok = nullptr)
+static qreal toDouble(const QStringView &str, bool *ok = nullptr)
 {
     const QChar *c = str.constData();
     qreal res = toDouble(c);
@@ -231,11 +231,11 @@ bool qsvg_get_hex_rgb(const char *name, QRgb *rgb) {
     return true;
 }
 
-bool qsvg_get_hex_rgb(const QChar *str, int len, QRgb *rgb) {
+bool qsvg_get_hex_rgb(const QByteArray &str, int len, QRgb *rgb) {
     if (len > 13) return false;
     char tmp[16];
     for (int i = 0; i < len; ++i)
-        tmp[i] = str[i].toLatin1();
+        tmp[i] = str[i];
     tmp[len] = 0;
     return qsvg_get_hex_rgb(tmp, rgb);
 }
@@ -243,14 +243,14 @@ bool qsvg_get_hex_rgb(const QChar *str, int len, QRgb *rgb) {
 static QColor parseColor(const QString &color, const QString &opacity) {
     QColor ret;
     {
-        QStringRef color_str = QStringRef(&color).trimmed();
+        QStringView color_str = QStringView(color).trimmed();
         if (color_str.isEmpty()) return ret;
         switch (color_str.at(0).unicode()) {
         case '#': {
             // #rrggbb is very very common, so let's tackle it here
             // rather than falling back to QColor
             QRgb rgb;
-            bool ok = qsvg_get_hex_rgb(color_str.unicode(), color_str.length(), &rgb);
+            bool ok = qsvg_get_hex_rgb(color_str.toUtf8(), color_str.length(), &rgb);
             if (ok) ret.setRgb(rgb);
             break;
         }
@@ -258,14 +258,13 @@ static QColor parseColor(const QString &color, const QString &opacity) {
             // starts with "rgb(", ends with ")" and consists of at least 7
             // characters "rgb(,,)"
             if (color_str.length() >= 7 && color_str.at(color_str.length() - 1) == QLatin1Char(')')
-                && QStringRef(color_str.string(), color_str.position(), 4)
-                       == QLatin1String("rgb(")) {
-                const QChar *s = color_str.constData() + 4;
+                && QStringView(color_str.cbegin(), 4) == QLatin1String("rgb(")) {
+                const QChar *s = color_str.cbegin() + 4;
                 QVector<qreal> compo = parseNumbersList(s);
                 // 1 means that it failed after reaching non-parsable
                 // character which is going to be "%"
                 if (compo.size() == 1) {
-                    s = color_str.constData() + 4;
+                    s = color_str.cbegin() + 4;
                     compo = parsePercentageList(s);
                     for (double &i : compo)
                         i *= (qreal)2.55;
@@ -285,7 +284,7 @@ static QColor parseColor(const QString &color, const QString &opacity) {
         case 'i':
             if (color_str == QLatin1String("inherit")) return ret;
             break;
-        default: ret = QColor(color_str.toString()); break;
+        default: ret = QColor(QString(color_str.cbegin(), color_str.length())); break;
         }
     }
     if (!opacity.isEmpty() && ret.isValid()) {
@@ -297,10 +296,10 @@ static QColor parseColor(const QString &color, const QString &opacity) {
     return ret;
 }
 
-static QMatrix parseTransformationMatrix(const QStringRef &value) {
+static QMatrix parseTransformationMatrix(const QStringView &value) {
     if (value.isEmpty()) return {};
     QMatrix matrix;
-    const QChar *str = value.constData();
+    const QChar *str = value.cbegin();
     const QChar *end = str + value.length();
     while (str < end) {
         if (str->isSpace() || *str == QLatin1Char(',')) {
@@ -531,12 +530,12 @@ static void pathArc(
     }
 }
 
-static bool parsePathDataFast(const QStringRef &dataStr, QPainterPath &path) {
+static bool parsePathDataFast(const QStringView &dataStr, QPainterPath &path) {
     qreal x0 = 0, y0 = 0; // starting point
     qreal x = 0, y = 0;   // current point
     char lastMode = 0;
     QPointF ctrlPt;
-    const QChar *str = dataStr.constData();
+    const QChar *str = dataStr.cbegin();
     const QChar *end = str + dataStr.size();
     while (str != end) {
         while (str->isSpace())
@@ -545,7 +544,7 @@ static bool parsePathDataFast(const QStringRef &dataStr, QPainterPath &path) {
         ++str;
         QChar endc = *end;
         *const_cast<QChar *>(end) = 0; // parseNumbersArray requires
-                                       // 0-termination that QStringRef cannot
+                                       // 0-termination that QStringView cannot
                                        // guarantee
         QVarLengthArray<qreal, 8> arg;
         parseNumbersArray(str, arg);
@@ -1022,7 +1021,7 @@ bool SvgHandler::startElement() {
             setXmlAttributes(item, el);
             QString data = el.xmlAttributes.value(QStringLiteral("d"));
             QPainterPath p;
-            parsePathDataFast(QStringRef(&data), p);
+            parsePathDataFast(QStringView(data), p);
             setStyle(item, el.styleAttributes);
             static auto FILL_RULE = QStringLiteral("fill-rule");
             if (el.styleAttributes.value(FILL_RULE) == QLatin1String("evenodd"))
@@ -1103,7 +1102,7 @@ void SvgHandler::setXmlAttributes(QGraphicsItem *git, const SvgHandler::SvgEleme
 }
 
 void SvgHandler::setTransform(QGraphicsItem *it, const QString &str_val) {
-    QStringRef transform(&str_val);
+    QStringView transform(str_val);
     QMatrix mx = parseTransformationMatrix(transform.trimmed());
     if (!mx.isIdentity()) {
         QTransform t(mx);

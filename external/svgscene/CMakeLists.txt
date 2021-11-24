@@ -32,6 +32,7 @@ add_library(svgscene STATIC
 		src/svgscene/svgmetadata.h
 		src/svgscene/svgspec.h
 		src/svgscene/polyfills/qt5/qwheelevent.h
+		src/svgscene/polyfills/qt5/qstringview.h
 		src/svgscene/utils/logging.h
 		src/svgscene/utils/memory_ownership.h
 		)
