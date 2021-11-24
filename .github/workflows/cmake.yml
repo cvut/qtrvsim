@@ -3,6 +3,8 @@ name: CMake
 on:
   push:
     branches:
+      - master
+      - devel
       - cmake
       - svgscene
       - rv-core
