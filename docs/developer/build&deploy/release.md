@@ -18,11 +18,25 @@ After that, changes are committed and git tag is updated.
 - Decide, whether this should be replaced with CMake.
 - Get version from CMake
 
-## `open_build_service` target
+## `open_build_service_bundle` target
 
 At configure time, package related files are injected with up to date information from CMake (variables prefixed
 `PACKAGE_`) and copied to `<executable output directory>`/`pkg`. This target bundles sources to `tar.xz` and updates
 hashes in the package files.
+
+### Generate using GitHub Actions (CI)
+
+In the repository page at GitHub go to actions tab and choose release in the left menu.
+
+![](./media/obs-ci-step-1.png)
+
+Click `run workflow` and select a branch.
+
+![](./media/obs-ci-step-2.png)
+
+One the workflow has finished, the bundle is to be found in the artifacts section. Upload this bundle to OBS.
+
+![](./media/obs-ci-step-3.png)
 
 ### TODO
 
