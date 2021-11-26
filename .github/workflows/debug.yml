@@ -26,7 +26,9 @@ jobs:
             name: "Ubuntu Latest GCC",
             os: ubuntu-latest,
             build_type: "Debug",
-            cc: "gcc", cxx: "g++", qt_version: "5.11.2"
+            cc: "gcc", cxx: "g++", qt_version: "native",
+            qt_install_command: "sudo apt-get install qt5-default"
+            # Apt is significantly faster that aqt.
           }
           - {
             name: "Ubuntu Latest GCC + Qt6",
@@ -38,26 +40,32 @@ jobs:
             name: "Ubuntu 18 GCC",
             os: ubuntu-18.04,
             build_type: "Debug",
-            cc: "gcc", cxx: "g++", qt_version: "5.9.6"
+            cc: "gcc", cxx: "g++", qt_version: "native",
+            qt_install_command: "sudo apt-get install qt5-default"
+              # Apt is significantly faster that aqt.
           }
           - {
             name: "macOS Latest Clang",
             os: macos-latest,
             build_type: "Debug",
-            cc: "clang", cxx: "clang++", qt_version: "5.11.2"
+            cc: "clang", cxx: "clang++", qt_version: "5.15.2",
+            # Cached aqt is faster that brew.
           }
 
     steps:
       - uses: actions/checkout@v2
 
       - name: Cache Qt
+        # Cache only when not installed by os package manager
+        if: matrix.config.qt_version != 'native'
         id: cache-qt
         uses: actions/cache@v2.1.5
         with:
           path: ${{ github.workspace }}/Qt
           key: ${{ runner.os }}-${{ matrix.config.qt_version }}-Qt
 
-      - name: Install Qt
+      - name: Install specified Qt version
+        if: matrix.config.qt_version != 'native'
         uses: jurplel/install-qt-action@v2
         with:
           version: ${{ matrix.config.qt_version }}
@@ -65,6 +73,9 @@ jobs:
           arch: ${{ matrix.config.qt_arch }}
           dir: ${{ github.workspace }}/Qt
 
+      - name: Install native Qt by package manager
+        if: matrix.config.qt_version == 'native'
+        run: ${{ matrix.config.qt_install_command }}
 
       - name: Create Build Environment
         run: cmake -E make_directory ${{ github.workspace }}/build
