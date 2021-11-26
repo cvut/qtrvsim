@@ -6,6 +6,8 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
+    # Avoid duplicate builds on PR from the same repository
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     strategy:
       fail-fast: false
       matrix:
@@ -107,6 +109,7 @@ jobs:
   build-emscripten:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     strategy:
       fail-fast: false
       matrix:
