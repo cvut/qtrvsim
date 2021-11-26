@@ -59,7 +59,7 @@ jobs:
         # Cache only when not installed by os package manager
         if: matrix.config.qt_version != 'native'
         id: cache-qt
-        uses: actions/cache@v2.1.5
+        uses: actions/cache@v2
         with:
           path: ${{ github.workspace }}/Qt
           key: ${{ runner.os }}-${{ matrix.config.qt_version }}-Qt
@@ -124,7 +124,7 @@ jobs:
 
       - name: Cache Qt
         id: cache-qt
-        uses: actions/cache@v2.1.5
+        uses: actions/cache@v2
         with:
           path: ${{ github.workspace }}/Qt
           key: ${{ runner.os }}-${{ matrix.config.qt_version }}-wasm-Qt
