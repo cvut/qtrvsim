@@ -1,0 +1,48 @@
+name: Release
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        config:
+          - {
+            name: "OBS bundle (Ubuntu Latest GCC)",
+            os: ubuntu-latest,
+            build_type: "Release",
+            cc: "gcc", cxx: "g++"
+          }
+
+    steps:
+      - uses: actions/checkout@v2
+
+      # CMake will not configure without Qt installed
+      - name: Install Qt
+        run: sudo apt-get install qt5-default
+
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{ github.workspace }}/build
+
+      - name: Configure CMake
+        shell: bash
+        working-directory: ${{ github.workspace }}/build
+        env:
+          CC: ${{ matrix.config.cc }}
+          CXX: ${{ matrix.config.cxx }}
+        run: "cmake $GITHUB_WORKSPACE
+                    -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
+                    -DDEV_MODE=true"
+
+      - name: Create OBS bundle
+        working-directory: ${{ github.workspace }}/build
+        run: make open_build_service_bundle
+
+      - name: Store OBS bundle
+        uses: actions/upload-artifact@v2
+        with:
+          name: obs-package-bundle
+          path: ${{ github.workspace }}/build/target/pkg

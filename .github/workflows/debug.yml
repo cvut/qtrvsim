@@ -1,23 +1,13 @@
-name: CMake
+name: Debug
 
-on:
-  push:
-    branches:
-      - master
-      - devel
-      - cmake
-      - svgscene
-      - rv-core
-      - rv-visualization
-      - rv-packaging
-      - rv-core
-      - rv2
-  workflow_dispatch:
+on: [ push, workflow_dispatch, pull_request ]
 
 jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
+    # Avoid duplicate builds on PR from the same repository
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     strategy:
       fail-fast: false
       matrix:
@@ -25,85 +15,40 @@ jobs:
           - {
             name: "Ubuntu Latest GCC",
             os: ubuntu-latest,
-            build_type: "Release",
-            cc: "gcc", cxx: "g++", qt_version: "5.11.2"
+            build_type: "Debug",
+            cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
+            qt_version: "native",
+            qt_install_command: "sudo apt-get install qt5-default"
+              # Apt is significantly faster that aqt.
           }
           - {
             name: "Ubuntu Latest GCC + Qt6",
             os: ubuntu-latest,
-            build_type: "Release",
-            cc: "gcc", cxx: "g++", qt_version: "6.2.1"
+            build_type: "Debug",
+            cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
+            qt_version: "6.2.1"
           }
           - {
             name: "Ubuntu 18 GCC",
             os: ubuntu-18.04,
-            build_type: "Release",
-            cc: "gcc", cxx: "g++", qt_version: "5.9.6"
+            build_type: "Debug",
+            cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
+            qt_version: "native",
+            qt_install_command: "sudo apt-get install qt5-default"
+              # Apt is significantly faster that aqt.
           }
           - {
             name: "macOS Latest Clang",
             os: macos-latest,
-            build_type: "Release",
-            cc: "clang", cxx: "clang++", qt_version: "5.11.2"
+            build_type: "Debug",
+            cc: "clang", cxx: "clang++", build_system: "Unix Makefiles",
+            qt_version: "5.15.2",
+            # Cached aqt is faster that brew.
           }
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v2.1.5
-        with:
-          path: ${{ github.workspace }}/Qt
-          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-Qt
-
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v2
-        with:
-          version: ${{ matrix.config.qt_version }}
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
-          arch: ${{ matrix.config.qt_arch }}
-          dir: ${{ github.workspace }}/Qt
-
-
-      - name: Create Build Environment
-        run: cmake -E make_directory ${{ github.workspace }}/build
-
-      - name: Configure CMake
-        shell: bash
-        working-directory: ${{ github.workspace }}/build
-        env:
-          CC: ${{ matrix.config.cc }}
-          CXX: ${{ matrix.config.cxx }}
-        run: "cmake $GITHUB_WORKSPACE
-                    -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}"
-
-      - name: Build
-        working-directory: ${{ github.workspace }}/build
-        run: cmake --build . -j3
-
-      - name: Test
-        working-directory: ${{ github.workspace }}/build
-        shell: bash
-        run: ctest
-
-      - name: Store created artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: target-${{ runner.os }}-qt${{ matrix.config.qt_version }}
-          path: ${{ github.workspace }}/build/target
-
-  build-mingw:
-    name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
           - {
             name: "Windows Latest MinGW",
             os: windows-latest,
-            build_type: "Release",
+            build_type: "Debug",
             cc: "gcc", cxx: "g++", build_system: "MinGW Makefiles",
             # Older Qt releases do not have 64bit mingw release
             qt_version: "5.12.9", qt_arch: "win64_mingw73"
@@ -113,13 +58,16 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Cache Qt
+        # Cache only when not installed by os package manager
+        if: matrix.config.qt_version != 'native'
         id: cache-qt
-        uses: actions/cache@v2.1.5
+        uses: actions/cache@v2
         with:
           path: ${{ github.workspace }}/Qt
           key: ${{ runner.os }}-${{ matrix.config.qt_version }}-Qt
 
-      - name: Install Qt
+      - name: Install specified Qt version
+        if: matrix.config.qt_version != 'native'
         uses: jurplel/install-qt-action@v2
         with:
           version: ${{ matrix.config.qt_version }}
@@ -127,8 +75,12 @@ jobs:
           arch: ${{ matrix.config.qt_arch }}
           dir: ${{ github.workspace }}/Qt
 
+      - name: Install native Qt by package manager
+        if: matrix.config.qt_version == 'native'
+        run: ${{ matrix.config.qt_install_command }}
+
       - name: Create Build Environment
-        run: cmake -E make_directory ${{github.workspace}}/build
+        run: cmake -E make_directory ${{ github.workspace }}/build
 
       - name: Configure CMake
         shell: bash
@@ -157,6 +109,7 @@ jobs:
   build-emscripten:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     strategy:
       fail-fast: false
       matrix:
@@ -174,7 +127,7 @@ jobs:
 
       - name: Cache Qt
         id: cache-qt
-        uses: actions/cache@v2.1.5
+        uses: actions/cache@v2
         with:
           path: ${{ github.workspace }}/Qt
           key: ${{ runner.os }}-${{ matrix.config.qt_version }}-wasm-Qt
