@@ -1,17 +1,17 @@
 #ifndef MEMORYTABLEVIEW_H
 #define MEMORYTABLEVIEW_H
 
+#include "common/polyfills/qt5/qtableview.h"
 #include "machine/memory/address.h"
 
 #include <QObject>
 #include <QSettings>
 #include <QSharedPointer>
-#include <QTableView>
 
-class MemoryTableView : public QTableView {
+class MemoryTableView : public Poly_QTableView {
     Q_OBJECT
 
-    using Super = QTableView;
+    using Super = Poly_QTableView;
 
 public:
     MemoryTableView(QWidget *parent, QSettings *settings);

@@ -486,8 +486,8 @@ static int parse_reg_from_string(QString str, uint *chars_taken = nullptr) {
     } else {
         auto data = str.toLocal8Bit();
         for (int i = 0; i < REGISTER_CODES; i++) {
-            int len = std::strlen(Rv_regnames[i]);
-            if (std::strncmp(data.data(), Rv_regnames[i], std::min(str.size(), len)) == 0) {
+            size_t len = std::strlen(Rv_regnames[i]);
+            if (std::strncmp(data.data(), Rv_regnames[i], std::min(size_t(str.size()), len)) == 0) {
                 *chars_taken = len;
                 return i;
             }

@@ -286,7 +286,8 @@ void NewDialog::osemu_exception_stop_change(bool v) {
 
 void NewDialog::browse_osemu_fs_root() {
     QFileDialog osemu_fs_root_dialog(this);
-    osemu_fs_root_dialog.setFileMode(QFileDialog::DirectoryOnly);
+    osemu_fs_root_dialog.setFileMode(QFileDialog::Directory);
+    osemu_fs_root_dialog.setOption(QFileDialog::ShowDirsOnly, true);
     if (osemu_fs_root_dialog.exec()) {
         QString path = osemu_fs_root_dialog.selectedFiles()[0];
         ui->osemu_fs_root->setText(path);

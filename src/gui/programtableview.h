@@ -1,17 +1,17 @@
 #ifndef PROGRAMTABLEVIEW_H
 #define PROGRAMTABLEVIEW_H
 
+#include "common/polyfills/qt5/qtableview.h"
 #include "machine/memory/address.h"
 
 #include <QObject>
 #include <QSettings>
 #include <QSharedPointer>
-#include <QTableView>
 
-class ProgramTableView : public QTableView {
+class ProgramTableView : public Poly_QTableView {
     Q_OBJECT
 
-    using Super = QTableView;
+    using Super = Poly_QTableView;
 
 public:
     ProgramTableView(QWidget *parent, QSettings *settings);

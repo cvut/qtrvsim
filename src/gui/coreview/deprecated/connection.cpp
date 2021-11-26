@@ -1,5 +1,6 @@
 #include "connection.h"
 
+#include "common/polyfills/qt5/qlinef.h"
 #include "machine/simulator_exception.h"
 
 #include <cmath>
@@ -124,8 +125,8 @@ void Connection::recalc_line() {
     points.append(ax_start.p1());
 
     QLineF cur_l = ax_start;
-    for (int i = 0; i < break_axes.size(); i++) {
-        if (recalc_line_add_point(cur_l, break_axes[i])) cur_l = break_axes[i];
+    for (auto &break_axe : break_axes) {
+        if (recalc_line_add_point(cur_l, break_axe)) cur_l = break_axe;
     }
     recalc_line_add_point(cur_l, ax_end);
 
@@ -134,7 +135,7 @@ void Connection::recalc_line() {
 
 bool Connection::recalc_line_add_point(const QLineF &l1, const QLineF &l2) {
     QPointF intersec;
-    if (l1.intersect(l2, &intersec) == QLineF::NoIntersection) { return false; }
+    if (QLineF_intersect(l1, l2, &intersec) == QLineF::NoIntersection) { return false; }
     points.append(intersec);
     return true;
 }
@@ -144,8 +145,9 @@ Bus::Bus(const Connector *start, const Connector *end, unsigned width) : Connect
 }
 
 Bus::~Bus() {
-    for (int i = 0; i < conns.size(); i++)
-        delete conns[i].c;
+    for (auto &conn : conns) {
+        delete conn.c;
+    }
 }
 
 void Bus::setAxes(QVector<QLineF> axes) {
@@ -154,7 +156,7 @@ void Bus::setAxes(QVector<QLineF> axes) {
 }
 
 const Connector *Bus::new_connector(qreal x, qreal y, enum Connector::Axis axis) {
-    Connector *c = new Connector(axis);
+    auto *c = new Connector(axis);
     conns.append({ .c = c, .p = QPoint(x, y) });
     conns_update();
     return c;
@@ -173,7 +175,11 @@ static qreal cu_closest(const QLineF &l, const QPointF &p, QPointF *intersec) {
     QLineF nline = normal.translated(-normal.p1()).translated(p);
     // And now found intersection
     SANITY_ASSERT(
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+        l.intersects(nline, intersec) != QLineF::NoIntersection,
+#else
         l.intersect(nline, intersec) != QLineF::NoIntersection,
+#endif
         "We are calculating intersection with normal vector and that should "
         "always have intersection");
     // Now check if that point belongs to given line

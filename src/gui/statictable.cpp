@@ -58,12 +58,15 @@ QSize StaticTableLayout::minimumSize() const {
     for (int i = 0; i < items.size(); i++) {
         QSize ss;
         for (int y = 0; y < items[i].size(); y++) {
-            ss = cch_minSize.size.expandedTo(
-                items[i][y]->minimumSize() + QSize(shspace, 0));
+            ss = cch_minSize.size.expandedTo(items[i][y]->minimumSize() + QSize(shspace, 0));
         }
         cch_minSize.size = cch_minSize.size.expandedTo(ss - QSize(shspace, 0));
     }
-    cch_minSize.size += QSize(2 * margin(), 2 * margin());
+
+    int left, top, right, bottom;
+    getContentsMargins(&left, &top, &right, &bottom);
+    cch_minSize.size += QSize(left + right, top + bottom);
+
     return cch_minSize.size;
 }
 

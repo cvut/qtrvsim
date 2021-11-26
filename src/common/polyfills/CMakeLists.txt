@@ -1,14 +1,17 @@
 project(polyfills
-        DESCRIPTION "Helper code to unify access to compiler intrinsics and
+		DESCRIPTION "Helper code to unify access to compiler intrinsics and
                      provide fallback implementations.")
 
 set(polyfills_HEADERS
-        endian_detection.h
-        mulh64.h
-        clz32.h
-        byteswap.h
-        qstring_hash.h
-        )
+		endian_detection.h
+		mulh64.h
+		clz32.h
+		byteswap.h
+		qstring_hash.h
+		qt5/qfontmetrics.h
+		qt5/qlinef.h
+		qt5/qtableview.h
+		)
 
 # =============================================================================
 # Target for usage of this header library
@@ -26,12 +29,12 @@ if(NOT "${WASM}")
 	set(CMAKE_AUTOMOC ON)
 
 	add_executable(mulh64_test
-	               mulh64.h
-	               mulh64.test.h
-	               mulh64.test.cpp
-	               )
-	target_link_libraries(mulh64_test PRIVATE Qt5::Test)
+			mulh64.h
+			mulh64.test.h
+			mulh64.test.cpp
+			)
+	target_link_libraries(mulh64_test PRIVATE ${QtLib}::Test)
 	add_test(NAME mulh64
-	         COMMAND mulh64_test)
+			COMMAND mulh64_test)
 endif()
 

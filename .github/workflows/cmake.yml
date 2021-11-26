@@ -3,6 +3,8 @@ name: CMake
 on:
   push:
     branches:
+      - master
+      - devel
       - cmake
       - svgscene
       - rv-core
@@ -25,6 +27,12 @@ jobs:
             os: ubuntu-latest,
             build_type: "Release",
             cc: "gcc", cxx: "g++", qt_version: "5.11.2"
+          }
+          - {
+            name: "Ubuntu Latest GCC + Qt6",
+            os: ubuntu-latest,
+            build_type: "Release",
+            cc: "gcc", cxx: "g++", qt_version: "6.2.1"
           }
           - {
             name: "Ubuntu 18 GCC",

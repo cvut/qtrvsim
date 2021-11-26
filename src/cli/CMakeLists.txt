@@ -23,7 +23,7 @@ add_executable(cli
                ${cli_SOURCES}
                ${cli_HEADERS})
 target_link_libraries(cli
-                      PRIVATE Qt5::Core machine assembler)
+		PRIVATE ${QtLib}::Core machine assembler)
 target_compile_definitions(cli
                            PRIVATE
                            APP_ORGANIZATION=\"${MAIN_PROJECT_ORGANIZATION}\"

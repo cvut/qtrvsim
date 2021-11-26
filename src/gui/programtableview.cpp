@@ -5,13 +5,12 @@
 
 #include <QApplication>
 #include <QClipboard>
-#include <QFontMetrics>
 #include <QHeaderView>
 #include <QKeyEvent>
 #include <QScrollBar>
+#include <QtGlobal>
 
-ProgramTableView::ProgramTableView(QWidget *parent, QSettings *settings)
-    : Super(parent) {
+ProgramTableView::ProgramTableView(QWidget *parent, QSettings *settings) : Super(parent) {
     setItemDelegate(new HintTableDelegate);
     connect(
         verticalScrollBar(), &QAbstractSlider::valueChanged, this,
@@ -20,8 +19,7 @@ ProgramTableView::ProgramTableView(QWidget *parent, QSettings *settings)
         this, &ProgramTableView::adjust_scroll_pos_queue, this,
         &ProgramTableView::adjust_scroll_pos_process, Qt::QueuedConnection);
     this->settings = settings;
-    initial_address = machine::Address(
-        settings->value("ProgramViewAddr0", 0).toULongLong());
+    initial_address = machine::Address(settings->value("ProgramViewAddr0", 0).toULongLong());
     adjust_scroll_pos_in_progress = false;
     need_addr0_save = false;
     setTextElideMode(Qt::ElideNone);
@@ -37,46 +35,38 @@ void ProgramTableView::adjustColumnCount() {
     int cwidth_dh;
     int totwidth;
 
-    ProgramModel *m = dynamic_cast<ProgramModel *>(model());
+    auto *m = dynamic_cast<ProgramModel *>(model());
 
-    if (m == nullptr) {
-        return;
-    }
+    if (m == nullptr) { return; }
 
-    HintTableDelegate *delegate
-        = dynamic_cast<HintTableDelegate *>(itemDelegate());
-    if (delegate == nullptr) {
-        return;
-    }
+    auto *delegate = dynamic_cast<HintTableDelegate *>(itemDelegate());
+    if (delegate == nullptr) { return; }
+
+    QStyleOptionViewItem viewOpts;
+
+    initViewItemOption(&viewOpts);
 
     idx = m->index(0, 0);
-    cwidth_dh = delegate->sizeHintForText(viewOptions(), idx, "Bp").width() + 2;
+    cwidth_dh = delegate->sizeHintForText(viewOpts, idx, "Bp").width() + 2;
     horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
     horizontalHeader()->resizeSection(0, cwidth_dh);
     totwidth = cwidth_dh;
 
     idx = m->index(0, 1);
-    cwidth_dh
-        = delegate->sizeHintForText(viewOptions(), idx, "0x00000000").width()
-          + 2;
+    cwidth_dh = delegate->sizeHintForText(viewOpts, idx, "0x00000000").width() + 2;
     horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
     horizontalHeader()->resizeSection(1, cwidth_dh);
     totwidth += cwidth_dh;
 
     idx = m->index(0, 2);
-    cwidth_dh
-        = delegate->sizeHintForText(viewOptions(), idx, "00000000").width() + 2;
+    cwidth_dh = delegate->sizeHintForText(viewOpts, idx, "00000000").width() + 2;
     horizontalHeader()->setSectionResizeMode(2, QHeaderView::Fixed);
     horizontalHeader()->resizeSection(2, cwidth_dh);
     totwidth += cwidth_dh;
 
     horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
     idx = m->index(0, 3);
-    totwidth
-        += delegate
-               ->sizeHintForText(viewOptions(), idx, "BEQ $18, $17, 0x80020058")
-               .width()
-           + 2;
+    totwidth += delegate->sizeHintForText(viewOpts, idx, "BEQ $18, $17, 0x80020058").width() + 2;
     totwidth += verticalHeader()->width();
     setColumnHidden(2, totwidth > width());
 
@@ -96,10 +86,8 @@ void ProgramTableView::adjust_scroll_pos_check() {
 void ProgramTableView::adjust_scroll_pos_process() {
     adjust_scroll_pos_in_progress = false;
     machine::Address address;
-    ProgramModel *m = dynamic_cast<ProgramModel *>(model());
-    if (m == nullptr) {
-        return;
-    }
+    auto *m = dynamic_cast<ProgramModel *>(model());
+    if (m == nullptr) { return; }
 
     QModelIndex prev_index = currentIndex();
     machine::Address row_bytes = machine::Address(m->cellSizeBytes());
@@ -109,8 +97,7 @@ void ProgramTableView::adjust_scroll_pos_process() {
         int row = rowAt(0);
         int prev_row = row;
         if (row < m->rowCount() / 8) {
-            if ((row == 0) && (index0_offset < row_bytes)
-                && (!index0_offset.is_null())) {
+            if ((row == 0) && (index0_offset < row_bytes) && (!index0_offset.is_null())) {
                 m->adjustRowAndOffset(row, machine::Address::null());
             } else if (index0_offset >= row_bytes) {
                 m->get_row_address(address, row);
@@ -125,19 +112,16 @@ void ProgramTableView::adjust_scroll_pos_process() {
             break;
         }
         scrollTo(m->index(row, 0), QAbstractItemView::PositionAtTop);
-        setCurrentIndex(
-            m->index(prev_index.row() + row - prev_row, prev_index.column()));
+        setCurrentIndex(m->index(prev_index.row() + row - prev_row, prev_index.column()));
         emit m->update_all();
     } while (false);
     m->get_row_address(address, rowAt(0));
-    if (need_addr0_save) {
-        addr0_save_change(address);
-    }
+    if (need_addr0_save) { addr0_save_change(address); }
     emit address_changed(address.get_raw());
 }
 
 void ProgramTableView::resizeEvent(QResizeEvent *event) {
-    ProgramModel *m = dynamic_cast<ProgramModel *>(model());
+    auto *m = dynamic_cast<ProgramModel *>(model());
     machine::Address address;
     bool keep_row0 = false;
 
@@ -157,17 +141,13 @@ void ProgramTableView::resizeEvent(QResizeEvent *event) {
 }
 
 void ProgramTableView::go_to_address_priv(machine::Address address) {
-    ProgramModel *m = dynamic_cast<ProgramModel *>(model());
+    auto *m = dynamic_cast<ProgramModel *>(model());
     int row;
-    if (m == nullptr) {
-        return;
-    }
+    if (m == nullptr) { return; }
     m->adjustRowAndOffset(row, address);
     scrollTo(m->index(row, 0), QAbstractItemView::PositionAtTop);
     setCurrentIndex(m->index(row, 1));
-    if (need_addr0_save) {
-        addr0_save_change(address);
-    }
+    if (need_addr0_save) { addr0_save_change(address); }
     emit m->update_all();
 }
 
@@ -178,16 +158,10 @@ void ProgramTableView::go_to_address(machine::Address address) {
 
 void ProgramTableView::focus_address(machine::Address address) {
     int row;
-    ProgramModel *m = dynamic_cast<ProgramModel *>(model());
-    if (m == nullptr) {
-        return;
-    }
-    if (!m->get_row_for_address(row, address)) {
-        go_to_address_priv(address);
-    }
-    if (!m->get_row_for_address(row, address)) {
-        return;
-    }
+    auto *m = dynamic_cast<ProgramModel *>(model());
+    if (m == nullptr) { return; }
+    if (!m->get_row_for_address(row, address)) { go_to_address_priv(address); }
+    if (!m->get_row_for_address(row, address)) { return; }
     setCurrentIndex(m->index(row, 1));
 }
 

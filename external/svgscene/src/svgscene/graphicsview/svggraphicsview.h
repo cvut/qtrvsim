@@ -13,7 +13,7 @@ public:
     void zoomToFit();
 
 protected:
-    void zoom(double delta, const QPoint &mouse_pos);
+    void zoom(double delta, const QPointF &mouse_pos);
 
     void paintEvent(QPaintEvent *event) override;
 

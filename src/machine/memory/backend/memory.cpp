@@ -17,12 +17,10 @@ MemorySection::MemorySection(const MemorySection &other)
     : BackendMemory(other.simulated_machine_endian)
     , dt(other.dt) {}
 
-WriteResult MemorySection::write(
-    Offset destination,
-    const void *source,
-    size_t size,
-    WriteOptions options) {
+WriteResult MemorySection::write(Offset dst_offset, const void *source, size_t size, WriteOptions options) {
     UNUSED(options)
+
+    size_t destination = static_cast<size_t>(dst_offset);
 
     if (destination >= length()) {
         throw SIMULATOR_EXCEPTION(
@@ -31,8 +29,7 @@ WriteResult MemorySection::write(
     }
 
     // Size the can be read from this section
-    const size_t available_size
-        = std::min(destination + size, length()) - destination;
+    const size_t available_size = std::min(destination + size, length()) - destination;
 
     // TODO, make swap conditional for big endian machines
     bool changed = memcmp(source, &dt[destination], available_size) != 0;
@@ -43,12 +40,10 @@ WriteResult MemorySection::write(
     return { .n_bytes = available_size, .changed = changed };
 }
 
-ReadResult MemorySection::read(
-    void *destination,
-    Offset source,
-    size_t size,
-    ReadOptions options) const {
+ReadResult MemorySection::read(void *destination, Offset src_offset, size_t size, ReadOptions options) const {
     UNUSED(options)
+
+    size_t source = static_cast<size_t>(src_offset);
 
     size = std::min(source + size, length()) - source;
 

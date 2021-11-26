@@ -1,5 +1,6 @@
 #include "memorytableview.h"
 
+#include "common/polyfills/qt5/qfontmetrics.h"
 #include "hinttabledelegate.h"
 #include "memorymodel.h"
 
@@ -9,9 +10,9 @@
 #include <QHeaderView>
 #include <QKeyEvent>
 #include <QScrollBar>
+#include <QtGlobal>
 
-MemoryTableView::MemoryTableView(QWidget *parent, QSettings *settings)
-    : Super(parent) {
+MemoryTableView::MemoryTableView(QWidget *parent, QSettings *settings) : Super(parent) {
     setItemDelegate(new HintTableDelegate);
     connect(
         verticalScrollBar(), &QAbstractSlider::valueChanged, this,
@@ -20,8 +21,7 @@ MemoryTableView::MemoryTableView(QWidget *parent, QSettings *settings)
         this, &MemoryTableView::adjust_scroll_pos_queue, this,
         &MemoryTableView::adjust_scroll_pos_process, Qt::QueuedConnection);
     this->settings = settings;
-    initial_address
-        = machine::Address(settings->value("DataViewAddr0", 0).toULongLong());
+    initial_address = machine::Address(settings->value("DataViewAddr0", 0).toULongLong());
     adjust_scroll_pos_in_progress = false;
     setTextElideMode(Qt::ElideNone);
 }
@@ -31,36 +31,33 @@ void MemoryTableView::addr0_save_change(machine::Address val) {
 }
 
 void MemoryTableView::adjustColumnCount() {
-    MemoryModel *m = dynamic_cast<MemoryModel *>(model());
-    if (m == nullptr) {
-        return;
-    }
+    auto *m = dynamic_cast<MemoryModel *>(model());
+    if (m == nullptr) { return; }
 
-    HintTableDelegate *delegate
-        = dynamic_cast<HintTableDelegate *>(itemDelegate());
-    if (delegate == nullptr) {
-        return;
-    }
+    auto *delegate = dynamic_cast<HintTableDelegate *>(itemDelegate());
+    if (delegate == nullptr) { return; }
 
     if (horizontalHeader()->count() >= 2) {
         QModelIndex idx;
         QFontMetrics fm(*m->getFont());
         idx = m->index(0, 0);
+
+        QStyleOptionViewItem viewOpts;
+
+        initViewItemOption(&viewOpts);
+
         // int width0_dh = itemDelegate(idx)->sizeHint(viewOptions(),
         // idx).get_width() + 2;
-        int width0_dh
-            = delegate->sizeHintForText(viewOptions(), idx, "0x00000000").width()
-              + 2;
+        int width0_dh = delegate->sizeHintForText(viewOpts, idx, "0x00000000").width() + 2;
         horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
         horizontalHeader()->resizeSection(0, width0_dh);
 
         idx = m->index(0, 1);
         QString t = "";
         t.fill(QChar('0'), m->cellSizeBytes() * 2);
-        int width1_dh
-            = delegate->sizeHintForText(viewOptions(), idx, t).width() + 2;
-        if (width1_dh < fm.width("+99")) {
-            width1_dh = fm.width("+99");
+        int width1_dh = delegate->sizeHintForText(viewOpts, idx, t).width() + 2;
+        if (width1_dh < QFontMetrics_horizontalAdvance(fm, "+99")) {
+            width1_dh = QFontMetrics_horizontalAdvance(fm, "+99");
         }
         horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
         horizontalHeader()->resizeSection(1, width1_dh);
@@ -75,9 +72,7 @@ void MemoryTableView::adjustColumnCount() {
         } else {
             cells = w / (width1 + 4);
         }
-        if (cells != m->cellsPerRow()) {
-            m->setCellsPerRow(cells);
-        }
+        if (cells != m->cellsPerRow()) { m->setCellsPerRow(cells); }
         for (unsigned int i = 1; i < m->cellsPerRow() + 1; i++) {
             horizontalHeader()->setSectionResizeMode(i, QHeaderView::Fixed);
             horizontalHeader()->resizeSection(i, width1);
@@ -97,7 +92,7 @@ void MemoryTableView::set_cell_size(int index) {
     machine::Address address;
     int row;
     bool keep_row0 = false;
-    MemoryModel *m = dynamic_cast<MemoryModel *>(model());
+    auto *m = dynamic_cast<MemoryModel *>(model());
     if (m != nullptr) {
         keep_row0 = m->get_row_address(address, rowAt(0));
         m->set_cell_size(index);
@@ -119,22 +114,18 @@ void MemoryTableView::adjust_scroll_pos_check() {
 void MemoryTableView::adjust_scroll_pos_process() {
     adjust_scroll_pos_in_progress = false;
     machine::Address address;
-    MemoryModel *m = dynamic_cast<MemoryModel *>(model());
-    if (m == nullptr) {
-        return;
-    }
+    auto *m = dynamic_cast<MemoryModel *>(model());
+    if (m == nullptr) { return; }
 
     QModelIndex prev_index = currentIndex();
-    machine::Address row_bytes
-        = machine::Address(m->cellSizeBytes() * m->cellsPerRow());
+    machine::Address row_bytes = machine::Address(m->cellSizeBytes() * m->cellsPerRow());
     machine::Address index0_offset = m->getIndex0Offset();
 
     do {
         int row = rowAt(0);
         int prev_row = row;
         if (row < m->rowCount() / 8) {
-            if ((row == 0) && (index0_offset < row_bytes)
-                && (!index0_offset.is_null())) {
+            if ((row == 0) && (index0_offset < row_bytes) && (!index0_offset.is_null())) {
                 m->adjustRowAndOffset(row, machine::Address::null());
             } else if (index0_offset > row_bytes) {
                 m->get_row_address(address, row);
@@ -149,8 +140,7 @@ void MemoryTableView::adjust_scroll_pos_process() {
             break;
         }
         scrollTo(m->index(row, 0), QAbstractItemView::PositionAtTop);
-        setCurrentIndex(
-            m->index(prev_index.row() + row - prev_row, prev_index.column()));
+        setCurrentIndex(m->index(prev_index.row() + row - prev_row, prev_index.column()));
         emit m->update_all();
     } while (false);
     m->get_row_address(address, rowAt(0));
@@ -159,7 +149,7 @@ void MemoryTableView::adjust_scroll_pos_process() {
 }
 
 void MemoryTableView::resizeEvent(QResizeEvent *event) {
-    MemoryModel *m = dynamic_cast<MemoryModel *>(model());
+    auto *m = dynamic_cast<MemoryModel *>(model());
     machine::Address address;
     bool keep_row0 = false;
 
@@ -179,11 +169,9 @@ void MemoryTableView::resizeEvent(QResizeEvent *event) {
 }
 
 void MemoryTableView::go_to_address(machine::Address address) {
-    MemoryModel *m = dynamic_cast<MemoryModel *>(model());
+    auto *m = dynamic_cast<MemoryModel *>(model());
     int row;
-    if (m == nullptr) {
-        return;
-    }
+    if (m == nullptr) { return; }
     m->adjustRowAndOffset(row, address);
     scrollTo(m->index(row, 0), QAbstractItemView::PositionAtTop);
     setCurrentIndex(m->index(row, 1));
@@ -193,16 +181,10 @@ void MemoryTableView::go_to_address(machine::Address address) {
 
 void MemoryTableView::focus_address(machine::Address address) {
     int row;
-    MemoryModel *m = dynamic_cast<MemoryModel *>(model());
-    if (m == nullptr) {
-        return;
-    }
-    if (!m->get_row_for_address(row, address)) {
-        go_to_address(address);
-    }
-    if (!m->get_row_for_address(row, address)) {
-        return;
-    }
+    auto *m = dynamic_cast<MemoryModel *>(model());
+    if (m == nullptr) { return; }
+    if (!m->get_row_for_address(row, address)) { go_to_address(address); }
+    if (!m->get_row_for_address(row, address)) { return; }
     setCurrentIndex(m->index(row, 1));
 }
 

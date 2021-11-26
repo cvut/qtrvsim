@@ -139,8 +139,8 @@ add_executable(gui
                ${gui_RESOURCES})
 target_include_directories(gui PUBLIC . coreview)
 target_link_libraries(gui
-                      PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui
-                      PRIVATE machine os_emulation assembler svgscene)
+		PRIVATE ${QtLib}::Core ${QtLib}::Widgets ${QtLib}::Gui
+		PRIVATE machine os_emulation assembler svgscene)
 target_compile_definitions(gui
                            PRIVATE
                            APP_ORGANIZATION=\"${MAIN_PROJECT_ORGANIZATION}\"
@@ -152,9 +152,9 @@ target_compile_definitions(gui
 set_target_properties(gui PROPERTIES
                       OUTPUT_NAME "${MAIN_PROJECT_NAME_LOWER}_${PROJECT_NAME}")
 
-if(${Qt5PrintSupport_FOUND})
-    target_link_libraries(gui PRIVATE Qt5::PrintSupport)
-    target_compile_definitions(gui PRIVATE WITH_PRINTING=1)
+if(${${QtLib}PrintSupport_FOUND})
+	target_link_libraries(gui PRIVATE ${QtLib}::PrintSupport)
+	target_compile_definitions(gui PRIVATE WITH_PRINTING=1)
 endif()
 
 # MACOS

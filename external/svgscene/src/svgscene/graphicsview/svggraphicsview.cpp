@@ -1,8 +1,9 @@
 #include "svggraphicsview.h"
 
+#include "polyfills/qt5/qwheelevent.h"
 #include "utils/logging.h"
 
-#include <QMouseEvent>
+#include <QWheelEvent>
 
 LOG_CATEGORY("svgscene.view");
 
@@ -15,7 +16,7 @@ void SvgGraphicsView::zoomToFit() {
     }
 }
 
-void SvgGraphicsView::zoom(double delta, const QPoint &mouse_pos) {
+void SvgGraphicsView::zoom(double delta, const QPointF &mouse_pos) {
     LOG() << "delta:" << delta << "center_pos:" << mouse_pos.x() << mouse_pos.y();
     double factor = delta / 100;
     factor = 1 + factor;
@@ -36,10 +37,10 @@ void SvgGraphicsView::paintEvent(QPaintEvent *event) {
 }
 
 void SvgGraphicsView::wheelEvent(QWheelEvent *ev) {
-    if (ev->orientation() == Qt::Vertical) {
+    if (ev->angleDelta().y() != 0) { // vertical orientation
         if (ev->modifiers() == Qt::ControlModifier) {
             double delta = ev->angleDelta().y();
-            zoom(delta / 10, ev->pos());
+            zoom(delta / 10, QWheelEvent_poly(ev).position());
             ev->accept();
             return;
         }

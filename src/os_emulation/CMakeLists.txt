@@ -16,4 +16,4 @@ add_library(os_emulation STATIC
         ${os_emulation_SOURCES}
         ${os_emulation_HEADERS})
 target_link_libraries(os_emulation
-        PRIVATE Qt5::Core)
+		PRIVATE ${QtLib}::Core)
