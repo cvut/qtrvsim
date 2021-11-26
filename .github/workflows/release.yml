@@ -14,28 +14,15 @@ jobs:
             name: "OBS bundle (Ubuntu Latest GCC)",
             os: ubuntu-latest,
             build_type: "Release",
-            cc: "gcc", cxx: "g++", qt_version: "5.15.2"
+            cc: "gcc", cxx: "g++"
           }
 
     steps:
       - uses: actions/checkout@v2
 
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v2.1.5
-        with:
-          path: ${{ github.workspace }}/Qt
-          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-Qt
-
       # CMake will not configure without Qt installed
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
-        with:
-          version: ${{ matrix.config.qt_version }}
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
-          arch: ${{ matrix.config.qt_arch }}
-          dir: ${{ github.workspace }}/Qt
-
+        run: sudo apt-get install qt5-default
 
       - name: Create Build Environment
         run: cmake -E make_directory ${{ github.workspace }}/build
