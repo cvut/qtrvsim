@@ -202,8 +202,6 @@ FetchState Core::fetch(bool skip_break) {
         if (cop0state->core_interrupt_request()) { excause = EXCAUSE_INT; }
     }
 
-    regs->write_pc(this->predictor->predict(inst, inst_addr));
-
     emit fetch_inst_addr_value(inst_addr);
     emit instruction_fetched(inst, inst_addr, excause, true);
     return { FetchInternalState { .fetched_value = inst.data() }, FetchInterstage {
@@ -328,8 +326,8 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
                  .stop_if = dt.stop_if,
                  .is_valid = dt.is_valid,
                  .branch = dt.branch,
-                 // In the diagram `branch_taken` is computed in memory/handle_pc, but here it can
-                 // be done on one place only.
+                 // In the diagram `branch_taken` is computed in memory/handle_pc, but here it
+                 // can be done on one place only.
                  .branch_taken = dt.branch && (!dt.bj_not ^ (alu_val != 0)),
                  .jump = dt.jump,
                  .bj_not = dt.bj_not,
@@ -413,10 +411,10 @@ WritebackState Core::writeback(const MemoryInterstage &dt) {
     } };
 }
 
-Address Core::handle_pc(const ExecuteInterstage &dt) {
-    if (dt.jump) { return Address(get_xlen_from_reg(dt.alu_val)); }
-    if (dt.branch_taken) { return dt.branch_target; }
-    return dt.inst_addr + 4;
+Address Core::handle_pc(const ExecuteInterstage &exec) {
+    if (exec.jump) { return Address(get_xlen_from_reg(exec.alu_val)); }
+    if (exec.branch_taken) { return exec.branch_target; }
+    return exec.inst_addr + 4;
 }
 
 void Core::flush() {
@@ -571,21 +569,20 @@ void CorePipelined::do_step(bool skip_break) {
     }
     if (p.execute.final.stop_if || p.memory.final.stop_if) { stall = true; }
 
-    // Now process program counter (loop connections from decode internal)
+    auto saved_fetch_decode_interstage = p.fetch.final;
+    p.fetch = fetch(skip_break);
     if (!stall && !p.decode.final.stop_if) {
-        p.decode.final.stall = false;
-        p.fetch = fetch(skip_break);
-        // figure out stalling...
-        Address real_addr = handle_pc(p.execute.final);
-        if (p.execute.final.is_valid && real_addr != p.decode.final.inst_addr) {
-            regs->write_pc(real_addr);
+        regs->write_pc(predictor->predict(p.fetch.final.inst, p.fetch.final.inst_addr));
+        Address expected_decode_pc = handle_pc(p.execute.final);
+        if (p.execute.final.is_valid && expected_decode_pc != p.decode.result.inst_addr) {
+            // Mis-predicted jump
+            regs->write_pc(expected_decode_pc);
             p.decode.final.flush();
             p.fetch.final.flush();
         }
     } else {
-        // Run fetch internal on empty
-        fetch(skip_break);
-        // clear decode latch (insert nope to execute internal)
+        // Do not save new value to interstage, due to stall. Done by restoring original value.
+        p.fetch.final = saved_fetch_decode_interstage;
         if (!p.decode.final.stop_if) {
             p.decode.final.flush();
             p.decode.final.stall = true;
