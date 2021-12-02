@@ -167,7 +167,7 @@ protected:
      * Under normal circumstances, the computed PC value is the same as the PC on instruction in
      * previous stage. If not, mis-prediction occurred and has to be resolved.
      */
-    Address compute_next_pc(const ExecuteInterstage &exec);
+    Address compute_next_pc(const ExecuteInterstage &exec) const;
     void flush();
 
     enum ExceptionCause memory_special(

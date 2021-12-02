@@ -391,6 +391,7 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
                  .towrite_val = towrite_val,
                  .mem_addr = mem_addr,
                  .inst_addr = dt.inst_addr,
+                 .next_pc = compute_next_pc(dt),
                  .excause = dt.excause,
                  .stop_if = dt.stop_if,
                  .is_valid = dt.is_valid,
@@ -411,7 +412,7 @@ WritebackState Core::writeback(const MemoryInterstage &dt) {
     } };
 }
 
-Address Core::compute_next_pc(const ExecuteInterstage &exec) {
+Address Core::compute_next_pc(const ExecuteInterstage &exec) const {
     if (exec.jump) { return Address(get_xlen_from_reg(exec.alu_val)); }
     if (exec.branch_taken) { return exec.branch_target; }
     return exec.inst_addr + 4;
@@ -461,7 +462,7 @@ void CoreSingle::do_step(bool skip_break) {
     p.memory = memory(p.execute.final);
     p.writeback = writeback(p.memory.final);
 
-    regs->write_pc(compute_next_pc(p.execute.final));
+    regs->write_pc(p.memory.final.next_pc);
 
     if (p.memory.final.excause != EXCAUSE_NONE) {
         handle_exception(
@@ -573,10 +574,11 @@ void CorePipelined::do_step(bool skip_break) {
     p.fetch = fetch(skip_break);
     if (!stall && !p.decode.final.stop_if) {
         regs->write_pc(predictor->predict(p.fetch.final.inst, p.fetch.final.inst_addr));
-        Address expected_decode_pc = compute_next_pc(p.execute.final);
-        if (p.execute.final.is_valid && expected_decode_pc != p.decode.result.inst_addr) {
+        if (p.memory.final.is_valid && p.execute.final.is_valid
+            && p.memory.final.next_pc != p.execute.result.inst_addr) {
             // Mis-predicted jump
-            regs->write_pc(expected_decode_pc);
+            regs->write_pc(p.memory.final.next_pc);
+            p.execute.final.flush();
             p.decode.final.flush();
             p.fetch.final.flush();
         }

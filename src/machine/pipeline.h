@@ -207,6 +207,8 @@ struct MemoryInterstage {
     RegisterValue towrite_val = 0;
     Address mem_addr = 0_addr;  // Address used to access memory
     Address inst_addr = 0_addr; // Address of instruction
+    Address next_pc = 0_addr;   // computed and expected `inst_addr` of next instruction in
+                                // pipeline.
     enum ExceptionCause excause = EXCAUSE_NONE;
     bool stop_if = false;
     bool is_valid = false;
