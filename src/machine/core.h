@@ -241,6 +241,8 @@ private:
     bool handle_data_hazards();
     void process_exception(Address jump_branch_pc);
     bool detect_mispredicted_jump() const;
+    void handle_pc();
+    void handle_stall(const FetchInterstage &saved_if_id);
 };
 
 std::tuple<bool, Address> predict(Instruction inst, Address addr);

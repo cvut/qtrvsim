@@ -90,7 +90,6 @@ struct DecodeInterstage {
     Address inst_addr = 0_addr; // Address of instruction
     enum ExceptionCause excause = EXCAUSE_NONE;
     bool stall = false;
-    bool stop_if = false;
     bool is_valid = false;
     bool alu_mod = false; // alternative versions of ADD and right-shift
     bool alu_pc = false;  // PC is input to ALU
@@ -133,7 +132,6 @@ struct ExecuteInterstage {
     bool memread = false;
     bool memwrite = false;
     bool regwrite = true;
-    bool stop_if = false;
     bool is_valid = false;
     bool branch = false;
     bool branch_taken = false;
@@ -210,7 +208,6 @@ struct MemoryInterstage {
     Address next_pc = 0_addr;   // computed and expected `inst_addr` of next instruction in
                                 // pipeline.
     enum ExceptionCause excause = EXCAUSE_NONE;
-    bool stop_if = false;
     bool is_valid = false;
 
 public:

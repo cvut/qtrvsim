@@ -274,7 +274,6 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .inst_addr = dt.inst_addr,
                                 .excause = excause,
                                 .stall = false,
-                                .stop_if = bool(flags & IMF_STOP_IF),
                                 .is_valid = dt.is_valid,
                                 .alu_mod = bool(flags & IMF_ALU_MOD),
                                 .alu_pc = bool(flags & IMF_PC_TO_ALU) } };
@@ -327,7 +326,6 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
                  .memread = dt.memread,
                  .memwrite = dt.memwrite,
                  .regwrite = dt.regwrite,
-                 .stop_if = dt.stop_if,
                  .is_valid = dt.is_valid,
                  .branch = dt.branch,
                  // In the diagram `branch_taken` is computed in memory/compute_next_pc, but here it
@@ -397,7 +395,6 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
                  .inst_addr = dt.inst_addr,
                  .next_pc = compute_next_pc(dt),
                  .excause = dt.excause,
-                 .stop_if = dt.stop_if,
                  .is_valid = dt.is_valid,
              } };
 }
@@ -494,7 +491,6 @@ void CorePipelined::do_step(bool skip_break) {
     Pipeline &p = state.pipeline;
     Address jump_branch_pc = mem_wb.inst_addr;
 
-    // Process stages
     p.writeback = writeback(mem_wb);
     p.memory = memory(ex_mem);
     p.execute = execute(id_ex);
@@ -504,30 +500,40 @@ void CorePipelined::do_step(bool skip_break) {
 
     bool stall = false;
     if (hazard_unit != MachineConfig::HU_NONE) { stall |= handle_data_hazards(); }
-    if (ex_mem.stop_if || mem_wb.stop_if) { stall = true; }
 
-    FetchInterstage saved_fetch_decode_interstage = if_id;
+    FetchInterstage saved_if_id = if_id;
     p.fetch = fetch(skip_break);
-    if (!stall && !id_ex.stop_if) {
-        if (detect_mispredicted_jump()) {
-            regs->write_pc(mem_wb.next_pc);
-            ex_mem.flush();
-            id_ex.flush();
-            if_id.flush();
-        } else {
-            regs->write_pc(predictor->predict(if_id.inst, if_id.inst_addr));
-        }
+    if (!stall) {
+        handle_pc();
     } else {
-        // Do not save new value to interstage, due to stall. Done by restoring original value.
-        p.fetch.final = saved_fetch_decode_interstage;
-        if (!id_ex.stop_if) {
-            id_ex.flush();
-            id_ex.stall = true;
-        } else {
-            if_id.flush();
-        }
+        handle_stall(saved_if_id);
     }
-    if (stall || id_ex.stop_if) { state.stall_count++; }
+}
+void CorePipelined::handle_pc() {
+    if (detect_mispredicted_jump()) {
+        regs->write_pc(mem_wb.next_pc);
+        ex_mem.flush();
+        id_ex.flush();
+        if_id.flush();
+    } else {
+        regs->write_pc(predictor->predict(if_id.inst, if_id.inst_addr));
+    }
+}
+
+void CorePipelined::handle_stall(const FetchInterstage &saved_if_id) {
+    /*
+     * Stall handing:
+     * - IF fetches new instruction, but it is not allowed to save into IF/ID register. This is
+     * simulated by restoring the `if_id` to its original value.
+     * - ID continues normally. On next cycle, perform the same as before as IF/ID will be
+     * unchanged.
+     * - EX is where stall is inserted by flush. The flushed instruction will be re-executed
+     * as ID repeats its execution.
+     */
+    if_id = saved_if_id;
+    id_ex.flush();
+    id_ex.stall = true; // for visualization
+    state.stall_count++;
 }
 
 bool CorePipelined::detect_mispredicted_jump() const {
