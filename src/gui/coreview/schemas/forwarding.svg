@@ -459,8 +459,8 @@
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-112"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;mux2&quot; source=&quot;wb-reg-write&quot;/&gt;"
-           data-label="" data-tags="simple pipeline forwarding" data-component="mux2" data-source="wb-reg-write">
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;mux2&quot; source=&quot;wb-mem-to-reg&quot;/&gt;"
+           data-label="" data-tags="simple pipeline forwarding" data-component="mux2" data-source="wb-mem-to-reg">
             <path d="M 691.64 271 L 701.36 275.17 L 701.36 291.83 L 691.64 296 L 691.64 286.28 L 691.64 280.72 Z"
                   fill="#ffffff" stroke="#000000" stroke-linejoin="bevel" stroke-miterlimit="10" pointer-events="none"/>
             <path d="M 691.08 279.75 L 701.92 283.5 Z" fill="#ffffff" stroke="#000000" stroke-width="2.78"
@@ -896,8 +896,8 @@
             </g>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-58"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;wb-reg-write&quot;/&gt;"
-           data-label="0" data-tags="pipeline forwarding" data-component="bool-value" data-source="wb-reg-write">
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;wb-mem-to-reg&quot;/&gt;"
+           data-label="0" data-tags="pipeline forwarding" data-component="bool-value" data-source="wb-mem-to-reg">
             <rect x="693" y="255" width="7" height="8" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"/>
             <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
                 <text x="696" y="260.5">0</text>

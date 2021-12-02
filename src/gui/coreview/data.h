@@ -102,6 +102,7 @@ const struct {
         { QStringLiteral("mem-branch-or-jump"),
           LENS(CoreState, pipeline.memory.internal.branch_or_jump) },
         { QStringLiteral("wb-reg-write"), LENS(CoreState, pipeline.writeback.internal.regwrite) },
+        { QStringLiteral("wb-mem-to-reg"), LENS(CoreState, pipeline.writeback.internal.memtoreg) },
     };
     const unordered_map<QStringView, Lens<CoreState, RegisterValue>> REG {
         { QStringLiteral("alu-res"), LENS(CoreState, pipeline.execute.result.alu_val) },

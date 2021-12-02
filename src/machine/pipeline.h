@@ -201,7 +201,7 @@ struct ExecuteState {
 struct MemoryInterstage {
     Instruction inst = Instruction::NOP;
     bool memtoreg = false;
-    bool regwrite = false;
+    bool regwrite = true;
     uint8_t num_rd = 0;
     RegisterValue towrite_val = 0;
     Address mem_addr = 0_addr;  // Address used to access memory
@@ -249,7 +249,8 @@ struct MemoryState {
 struct WritebackInternalState {
     Instruction inst = Instruction::NOP;
     Address inst_addr = 0_addr;
-    bool regwrite = false;
+    bool regwrite = true;
+    bool memtoreg = false;
     uint8_t num_rd = 0;
     RegisterValue value = 0;
 };
