@@ -160,7 +160,14 @@ protected:
     ExecuteState execute(const DecodeInterstage &);
     MemoryState memory(const ExecuteInterstage &);
     WritebackState writeback(const MemoryInterstage &);
-    Address handle_pc(const ExecuteInterstage &);
+
+    /**
+     * This function computes the PC value, the next executed instruction should have. The word
+     * `computed` is used in contrast with predicted value by the branch predictor.
+     * Under normal circumstances, the computed PC value is the same as the PC on instruction in
+     * previous stage. If not, mis-prediction occurred and has to be resolved.
+     */
+    Address compute_next_pc(const ExecuteInterstage &exec);
     void flush();
 
     enum ExceptionCause memory_special(

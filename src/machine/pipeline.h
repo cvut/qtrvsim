@@ -129,7 +129,7 @@ struct DecodeState {
 };
 
 struct ExecuteInterstage {
-    Instruction inst;
+    Instruction inst = Instruction::NOP;
     bool memread = false;
     bool memwrite = false;
     bool regwrite = true;
@@ -200,7 +200,7 @@ struct ExecuteState {
 };
 
 struct MemoryInterstage {
-    Instruction inst;
+    Instruction inst = Instruction::NOP;
     bool memtoreg = false;
     bool regwrite = false;
     uint8_t num_rd = 0;
@@ -255,7 +255,7 @@ struct WritebackInternalState {
 };
 
 struct WritebackState {
-    WritebackInternalState internal;
+    WritebackInternalState internal {};
 
     WritebackState(WritebackInternalState stage) : internal(std::move(stage)) {}
     WritebackState() = default;
