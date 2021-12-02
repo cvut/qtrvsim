@@ -109,6 +109,7 @@ struct DecodeInternalState {
      */
     unsigned alu_op_num = 0;
     unsigned excause_num = 0;
+    RegisterValue inst_bus = 0;
 };
 
 struct DecodeState {

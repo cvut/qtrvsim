@@ -248,6 +248,7 @@ DecodeState Core::decode(const FetchInterstage &dt) {
     return { DecodeInternalState {
                  .alu_op_num = static_cast<unsigned>(alu_op),
                  .excause_num = static_cast<unsigned>(excause),
+                 .inst_bus = dt.inst.data(),
              },
              DecodeInterstage { .inst = dt.inst,
                                 .memread = bool(flags & IMF_MEMREAD),

@@ -888,7 +888,7 @@
             <mxGeometry x="29" y="2" width="14" height="8" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="00000000" tags="simple pipeline forwarding" component="reg-value" source="fetched-value" id="uWEq7-W_z53UrtFael4O-42">
+        <UserObject label="00000000" tags="simple pipeline forwarding" component="reg-value" source="decode-inst-bus" id="uWEq7-W_z53UrtFael4O-42">
           <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;fontStyle=0" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
             <mxGeometry x="177" y="208" width="56" height="8" as="geometry" />
           </mxCell>

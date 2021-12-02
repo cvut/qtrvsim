@@ -109,7 +109,7 @@ const struct {
         { QStringLiteral("alu-src2"), LENS(CoreState, pipeline.execute.internal.alu_src2) },
         { QStringLiteral("decode-imm"), LENS(CoreState, pipeline.decode.result.immediate_val) },
         { QStringLiteral("exec-imm"), LENS(CoreState, pipeline.execute.internal.immediate) },
-        { QStringLiteral("fetched-value"), LENS(CoreState, pipeline.fetch.internal.fetched_value) },
+        { QStringLiteral("decode-inst-bus"), LENS(CoreState, pipeline.decode.internal.inst_bus) },
         { QStringLiteral("mem-write-val"),
           LENS(CoreState, pipeline.memory.internal.mem_write_val) },
         { QStringLiteral("mem-write-addr"), LENS(CoreState, pipeline.memory.internal.mem_addr) },
