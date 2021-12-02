@@ -237,6 +237,10 @@ protected:
 
 private:
     MachineConfig::HazardUnit hazard_unit;
+
+    bool handle_data_hazards();
+    void process_exception(Address jump_branch_pc);
+    bool detect_mispredicted_jump() const;
 };
 
 std::tuple<bool, Address> predict(Instruction inst, Address addr);

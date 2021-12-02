@@ -490,19 +490,8 @@ CorePipelined::CorePipelined(
     reset();
 }
 
-template<typename InterstageReg>
-bool is_hazard_is_stage(const InterstageReg &interstage, const DecodeInterstage &id_ex) {
-    return (
-        interstage.regwrite && interstage.num_rd != 0
-        && ((id_ex.alu_req_rs && interstage.num_rd == id_ex.num_rs)
-            || (id_ex.alu_req_rt && interstage.num_rd == id_ex.num_rt)));
-    // Note: We make exception with $0 as that has no effect and is used in nop instruction
-}
-
 void CorePipelined::do_step(bool skip_break) {
     Pipeline &p = state.pipeline;
-
-    bool stall = false;
     Address jump_branch_pc = mem_wb.inst_addr;
 
     // Process stages
@@ -511,72 +500,22 @@ void CorePipelined::do_step(bool skip_break) {
     p.execute = execute(id_ex);
     p.decode = decode(if_id);
 
-    if (mem_wb.excause != EXCAUSE_NONE) {
-        regs->write_pc(ex_mem.inst_addr);
-        flush();
-        handle_exception(
-            this, regs, mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, ex_mem.inst_addr,
-            jump_branch_pc, mem_wb.mem_addr);
-    }
+    if (mem_wb.excause != EXCAUSE_NONE) { process_exception(jump_branch_pc); }
 
-    id_ex.ff_rs = FORWARD_NONE;
-    id_ex.ff_rt = FORWARD_NONE;
-
-    if (hazard_unit != MachineConfig::HU_NONE) {
-        // Note: We make exception with $0 as that has no effect when
-        // written and is used in nop instruction
-
-        // Write back internal combinatoricly propagates written instruction to decode internal
-        // so nothing has to be done for that internal
-        if (is_hazard_is_stage(mem_wb, id_ex)) {
-            // Hazard with instruction in memory internal
-            if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
-                // Forward result value
-                if (id_ex.alu_req_rs && mem_wb.num_rd == id_ex.num_rs) {
-                    id_ex.val_rs = mem_wb.towrite_val;
-                    id_ex.ff_rs = FORWARD_FROM_W;
-                }
-                if (id_ex.alu_req_rt && mem_wb.num_rd == id_ex.num_rt) {
-                    id_ex.val_rt = mem_wb.towrite_val;
-                    id_ex.ff_rt = FORWARD_FROM_W;
-                }
-            } else {
-                stall = true;
-            }
-        }
-        if (is_hazard_is_stage(ex_mem, id_ex)) {
-            // Hazard with instruction in execute internal
-            if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
-                if (ex_mem.memread) {
-                    stall = true;
-                } else {
-                    // Forward result value
-                    if (id_ex.alu_req_rs && ex_mem.num_rd == id_ex.num_rs) {
-                        id_ex.val_rs = ex_mem.alu_val;
-                        id_ex.ff_rs = FORWARD_FROM_M;
-                    }
-                    if (id_ex.alu_req_rt && ex_mem.num_rd == id_ex.num_rt) {
-                        id_ex.val_rt = ex_mem.alu_val;
-                        id_ex.ff_rt = FORWARD_FROM_M;
-                    }
-                }
-            } else {
-                stall = true;
-            }
-        }
-    }
+    bool stall = false;
+    if (hazard_unit != MachineConfig::HU_NONE) { stall |= handle_data_hazards(); }
     if (ex_mem.stop_if || mem_wb.stop_if) { stall = true; }
 
-    auto saved_fetch_decode_interstage = p.fetch.final;
+    FetchInterstage saved_fetch_decode_interstage = if_id;
     p.fetch = fetch(skip_break);
     if (!stall && !id_ex.stop_if) {
-        regs->write_pc(predictor->predict(if_id.inst, if_id.inst_addr));
-        if (mem_wb.is_valid && ex_mem.is_valid && mem_wb.next_pc != ex_mem.inst_addr) {
-            // Mis-predicted jump
+        if (detect_mispredicted_jump()) {
             regs->write_pc(mem_wb.next_pc);
             ex_mem.flush();
             id_ex.flush();
             if_id.flush();
+        } else {
+            regs->write_pc(predictor->predict(if_id.inst, if_id.inst_addr));
         }
     } else {
         // Do not save new value to interstage, due to stall. Done by restoring original value.
@@ -589,6 +528,69 @@ void CorePipelined::do_step(bool skip_break) {
         }
     }
     if (stall || id_ex.stop_if) { state.stall_count++; }
+}
+
+bool CorePipelined::detect_mispredicted_jump() const {
+    return mem_wb.is_valid && ex_mem.is_valid && mem_wb.next_pc != ex_mem.inst_addr;
+}
+
+void CorePipelined::process_exception(Address jump_branch_pc) {
+    regs->write_pc(ex_mem.inst_addr);
+    flush();
+    handle_exception(
+        this, regs, mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, ex_mem.inst_addr, jump_branch_pc,
+        mem_wb.mem_addr);
+}
+
+template<typename InterstageReg>
+bool is_hazard_in_stage(const InterstageReg &interstage, const DecodeInterstage &id_ex) {
+    return (
+        interstage.regwrite && interstage.num_rd != 0
+        && ((id_ex.alu_req_rs && interstage.num_rd == id_ex.num_rs)
+            || (id_ex.alu_req_rt && interstage.num_rd == id_ex.num_rt)));
+    // Note: We make exception with $0 as that has no effect and is used in nop instruction
+}
+
+bool CorePipelined::handle_data_hazards() {
+    // Note: We make exception with $0 as that has no effect when
+    // written and is used in nop instruction
+    bool stall = false;
+
+    if (is_hazard_in_stage(mem_wb, id_ex)) {
+        if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
+            // Forward result value
+            if (id_ex.alu_req_rs && mem_wb.num_rd == id_ex.num_rs) {
+                id_ex.val_rs = mem_wb.towrite_val;
+                id_ex.ff_rs = FORWARD_FROM_W;
+            }
+            if (id_ex.alu_req_rt && mem_wb.num_rd == id_ex.num_rt) {
+                id_ex.val_rt = mem_wb.towrite_val;
+                id_ex.ff_rt = FORWARD_FROM_W;
+            }
+        } else {
+            stall = true;
+        }
+    }
+    if (is_hazard_in_stage(ex_mem, id_ex)) {
+        if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
+            if (ex_mem.memread) {
+                stall = true;
+            } else {
+                // Forward result value
+                if (id_ex.alu_req_rs && ex_mem.num_rd == id_ex.num_rs) {
+                    id_ex.val_rs = ex_mem.alu_val;
+                    id_ex.ff_rs = FORWARD_FROM_M;
+                }
+                if (id_ex.alu_req_rt && ex_mem.num_rd == id_ex.num_rt) {
+                    id_ex.val_rt = ex_mem.alu_val;
+                    id_ex.ff_rt = FORWARD_FROM_M;
+                }
+            }
+        } else {
+            stall = true;
+        }
+    }
+    return stall;
 }
 
 void CorePipelined::do_reset() {
