@@ -31,10 +31,8 @@ Core::Core(
     this->state.min_cache_row_size = min_cache_row_size;
     this->state.hwr_userlocal = 0xe0000000;
     if (cop0state != nullptr) { cop0state->setup_core(this); }
-    for (int i = 0; i < EXCAUSE_COUNT; i++) {
-        state.stop_on_exception[i] = true;
-        state.step_over_exception[i] = true;
-    }
+    state.stop_on_exception.fill(true);
+    state.step_over_exception.fill(true);
     state.step_over_exception[EXCAUSE_INT] = false;
 }
 
