@@ -1,6 +1,7 @@
 #ifndef CORE_H
 #define CORE_H
 
+#include "common/memory_ownership.h"
 #include "cop0state.h"
 #include "core/core_state.h"
 #include "instruction.h"
@@ -12,7 +13,6 @@
 #include "register_value.h"
 #include "registers.h"
 #include "simulator_exception.h"
-#include "common/memory_ownership.h"
 
 #include <QObject>
 
@@ -85,6 +85,26 @@ public:
 
 public:
     CoreState state {};
+
+    /**
+     * Shortcuts to interstage registers
+     * Interstage registers are stored in the core state struct in 2 copies. One (result) is the
+     * state after combinatorial logic of each stage has been applied. This is used to visualize
+     * the internal state of a stage. The should be modified ONLY by the stage logic functions. The
+     * other (final) is the one actually written to HW interstage register. Any operation within
+     * core should happen on the final registers.
+     *
+     * The bellow references provide shortcuts to the final interstage registers.
+     */
+
+    /** Reference to interstage register IF/ID inside core state. */
+    FetchInterstage &if_id;
+    /** Reference to interstage register ID/EX inside core state. */
+    DecodeInterstage &id_ex;
+    /** Reference to interstage register EX/MEM inside core state. */
+    ExecuteInterstage &ex_mem;
+    /** Reference to interstage register MEM/WB inside core state. */
+    MemoryInterstage &mem_wb;
 
 signals:
     void instruction_fetched(

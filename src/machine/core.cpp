@@ -16,7 +16,11 @@ Core::Core(
     unsigned int min_cache_row_size,
     Cop0State *cop0state,
     Xlen xlen)
-    : xlen(xlen)
+    : if_id(state.pipeline.fetch.final)
+    , id_ex(state.pipeline.decode.final)
+    , ex_mem(state.pipeline.execute.final)
+    , mem_wb(state.pipeline.memory.final)
+    , xlen(xlen)
     , regs(regs)
     , cop0state(cop0state)
     , predictor(predictor)
@@ -421,16 +425,11 @@ Address Core::compute_next_pc(const ExecuteInterstage &exec) const {
 void Core::flush() {
     Pipeline &p = state.pipeline;
     p = {};
-    emit instruction_executed(
-        p.execute.final.inst, p.execute.final.inst_addr, p.execute.final.excause,
-        p.execute.final.is_valid);
+    emit instruction_executed(ex_mem.inst, ex_mem.inst_addr, ex_mem.excause, ex_mem.is_valid);
     emit execute_inst_addr_value(STAGEADDR_NONE);
-    emit instruction_decoded(
-        p.decode.final.inst, p.decode.final.inst_addr, p.decode.final.excause,
-        p.decode.final.is_valid);
+    emit instruction_decoded(id_ex.inst, id_ex.inst_addr, id_ex.excause, id_ex.is_valid);
     emit decode_inst_addr_value(STAGEADDR_NONE);
-    emit instruction_fetched(
-        p.fetch.final.inst, p.fetch.final.inst_addr, p.fetch.final.excause, p.fetch.final.is_valid);
+    emit instruction_fetched(if_id.inst, if_id.inst_addr, if_id.excause, if_id.is_valid);
     emit fetch_inst_addr_value(STAGEADDR_NONE);
 }
 
@@ -462,15 +461,15 @@ void CoreSingle::do_step(bool skip_break) {
     p.memory = memory(p.execute.final);
     p.writeback = writeback(p.memory.final);
 
-    regs->write_pc(p.memory.final.next_pc);
+    regs->write_pc(mem_wb.next_pc);
 
-    if (p.memory.final.excause != EXCAUSE_NONE) {
+    if (mem_wb.excause != EXCAUSE_NONE) {
         handle_exception(
-            this, regs, p.memory.final.excause, p.memory.final.inst, p.memory.final.inst_addr,
-            regs->read_pc(), prev_inst_addr, p.memory.final.mem_addr);
+            this, regs, mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, regs->read_pc(),
+            prev_inst_addr, mem_wb.mem_addr);
         return;
     }
-    prev_inst_addr = p.memory.final.inst_addr;
+    prev_inst_addr = mem_wb.inst_addr;
 }
 
 void CoreSingle::do_reset() {
@@ -491,12 +490,12 @@ CorePipelined::CorePipelined(
     reset();
 }
 
-template<typename StageStruct>
-bool is_hazard_is_stage(const StageStruct &stage, const Pipeline &p) {
+template<typename InterstageReg>
+bool is_hazard_is_stage(const InterstageReg &interstage, const DecodeInterstage &id_ex) {
     return (
-        stage.final.regwrite && stage.final.num_rd != 0
-        && ((p.decode.final.alu_req_rs && stage.final.num_rd == p.decode.final.num_rs)
-            || (p.decode.final.alu_req_rt && stage.final.num_rd == p.decode.final.num_rt)));
+        interstage.regwrite && interstage.num_rd != 0
+        && ((id_ex.alu_req_rs && interstage.num_rd == id_ex.num_rs)
+            || (id_ex.alu_req_rt && interstage.num_rd == id_ex.num_rt)));
     // Note: We make exception with $0 as that has no effect and is used in nop instruction
 }
 
@@ -504,24 +503,24 @@ void CorePipelined::do_step(bool skip_break) {
     Pipeline &p = state.pipeline;
 
     bool stall = false;
-    Address jump_branch_pc = p.memory.final.inst_addr;
+    Address jump_branch_pc = mem_wb.inst_addr;
 
     // Process stages
-    p.writeback = writeback(p.memory.final);
-    p.memory = memory(p.execute.final);
-    p.execute = execute(p.decode.final);
-    p.decode = decode(p.fetch.final);
+    p.writeback = writeback(mem_wb);
+    p.memory = memory(ex_mem);
+    p.execute = execute(id_ex);
+    p.decode = decode(if_id);
 
-    if (p.memory.final.excause != EXCAUSE_NONE) {
-        regs->write_pc(p.execute.final.inst_addr);
+    if (mem_wb.excause != EXCAUSE_NONE) {
+        regs->write_pc(ex_mem.inst_addr);
         flush();
         handle_exception(
-            this, regs, p.memory.final.excause, p.memory.final.inst, p.memory.final.inst_addr,
-            p.execute.final.inst_addr, jump_branch_pc, p.memory.final.mem_addr);
+            this, regs, mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, ex_mem.inst_addr,
+            jump_branch_pc, mem_wb.mem_addr);
     }
 
-    p.decode.final.ff_rs = FORWARD_NONE;
-    p.decode.final.ff_rt = FORWARD_NONE;
+    id_ex.ff_rs = FORWARD_NONE;
+    id_ex.ff_rt = FORWARD_NONE;
 
     if (hazard_unit != MachineConfig::HU_NONE) {
         // Note: We make exception with $0 as that has no effect when
@@ -529,38 +528,36 @@ void CorePipelined::do_step(bool skip_break) {
 
         // Write back internal combinatoricly propagates written instruction to decode internal
         // so nothing has to be done for that internal
-        if (is_hazard_is_stage(p.memory, p)) {
+        if (is_hazard_is_stage(mem_wb, id_ex)) {
             // Hazard with instruction in memory internal
             if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
                 // Forward result value
-                if (p.decode.final.alu_req_rs && p.memory.final.num_rd == p.decode.final.num_rs) {
-                    p.decode.final.val_rs = p.memory.final.towrite_val;
-                    p.decode.final.ff_rs = FORWARD_FROM_W;
+                if (id_ex.alu_req_rs && mem_wb.num_rd == id_ex.num_rs) {
+                    id_ex.val_rs = mem_wb.towrite_val;
+                    id_ex.ff_rs = FORWARD_FROM_W;
                 }
-                if (p.decode.final.alu_req_rt && p.memory.final.num_rd == p.decode.final.num_rt) {
-                    p.decode.final.val_rt = p.memory.final.towrite_val;
-                    p.decode.final.ff_rt = FORWARD_FROM_W;
+                if (id_ex.alu_req_rt && mem_wb.num_rd == id_ex.num_rt) {
+                    id_ex.val_rt = mem_wb.towrite_val;
+                    id_ex.ff_rt = FORWARD_FROM_W;
                 }
             } else {
                 stall = true;
             }
         }
-        if (is_hazard_is_stage(p.execute, p)) {
+        if (is_hazard_is_stage(ex_mem, id_ex)) {
             // Hazard with instruction in execute internal
             if (hazard_unit == MachineConfig::HU_STALL_FORWARD) {
-                if (p.execute.final.memread) {
+                if (ex_mem.memread) {
                     stall = true;
                 } else {
                     // Forward result value
-                    if (p.decode.final.alu_req_rs
-                        && p.execute.final.num_rd == p.decode.final.num_rs) {
-                        p.decode.final.val_rs = p.execute.final.alu_val;
-                        p.decode.final.ff_rs = FORWARD_FROM_M;
+                    if (id_ex.alu_req_rs && ex_mem.num_rd == id_ex.num_rs) {
+                        id_ex.val_rs = ex_mem.alu_val;
+                        id_ex.ff_rs = FORWARD_FROM_M;
                     }
-                    if (p.decode.final.alu_req_rt
-                        && p.execute.final.num_rd == p.decode.final.num_rt) {
-                        p.decode.final.val_rt = p.execute.final.alu_val;
-                        p.decode.final.ff_rt = FORWARD_FROM_M;
+                    if (id_ex.alu_req_rt && ex_mem.num_rd == id_ex.num_rt) {
+                        id_ex.val_rt = ex_mem.alu_val;
+                        id_ex.ff_rt = FORWARD_FROM_M;
                     }
                 }
             } else {
@@ -568,31 +565,30 @@ void CorePipelined::do_step(bool skip_break) {
             }
         }
     }
-    if (p.execute.final.stop_if || p.memory.final.stop_if) { stall = true; }
+    if (ex_mem.stop_if || mem_wb.stop_if) { stall = true; }
 
     auto saved_fetch_decode_interstage = p.fetch.final;
     p.fetch = fetch(skip_break);
-    if (!stall && !p.decode.final.stop_if) {
-        regs->write_pc(predictor->predict(p.fetch.final.inst, p.fetch.final.inst_addr));
-        if (p.memory.final.is_valid && p.execute.final.is_valid
-            && p.memory.final.next_pc != p.execute.result.inst_addr) {
+    if (!stall && !id_ex.stop_if) {
+        regs->write_pc(predictor->predict(if_id.inst, if_id.inst_addr));
+        if (mem_wb.is_valid && ex_mem.is_valid && mem_wb.next_pc != ex_mem.inst_addr) {
             // Mis-predicted jump
-            regs->write_pc(p.memory.final.next_pc);
-            p.execute.final.flush();
-            p.decode.final.flush();
-            p.fetch.final.flush();
+            regs->write_pc(mem_wb.next_pc);
+            ex_mem.flush();
+            id_ex.flush();
+            if_id.flush();
         }
     } else {
         // Do not save new value to interstage, due to stall. Done by restoring original value.
         p.fetch.final = saved_fetch_decode_interstage;
-        if (!p.decode.final.stop_if) {
-            p.decode.final.flush();
-            p.decode.final.stall = true;
+        if (!id_ex.stop_if) {
+            id_ex.flush();
+            id_ex.stall = true;
         } else {
-            p.fetch.final.flush();
+            if_id.flush();
         }
     }
-    if (stall || p.decode.final.stop_if) { state.stall_count++; }
+    if (stall || id_ex.stop_if) { state.stall_count++; }
 }
 
 void CorePipelined::do_reset() {
