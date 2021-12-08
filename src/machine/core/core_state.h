@@ -20,7 +20,7 @@ struct hwBreak {
 };
 
 struct CoreState {
-    Pipeline pipeline;
+    Pipeline pipeline = {};
     uint32_t stall_count = 0;
     uint32_t cycle_count = 0;
     std::array<bool, EXCAUSE_COUNT> stop_on_exception {};

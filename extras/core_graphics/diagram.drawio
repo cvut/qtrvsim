@@ -545,7 +545,7 @@
             <mxGeometry x="651" y="276.00000000000006" width="7" height="64" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="" tags="simple pipeline forwarding" component="mux2" source="wb-reg-write" id="Haz_8EwUBin59iLyk_8Q-112">
+        <UserObject label="" tags="simple pipeline forwarding" component="mux2" source="wb-mem-to-reg" id="Haz_8EwUBin59iLyk_8Q-112">
           <mxCell style="shape=stencil(3VXBUoMwEP2aHHUgEStHB/Xm0RmvKWxtLE0YwLb+vUsW2kYk7aQeHGcYYN+yL5uXl8BE1ixlBYxHWq6BiQfG+fPLK8Yc3/CxJCyNKNxSKBIKZVNB3hK2UDsoCG7a2qxgq4q2L1d6CbVqu6x4ZNE9ftNdIsuN1sigjG6czFEeyaTSWBvtiKxv5bOProdmGH8K5rgN4Ii/cYS0MRTtSaKQTsY06ZQoIkNkSnWRzWW+eqvNhy5+HLyS3YqOEkO6VBrejdIY2YdtZg4bKH1zGqrXZgOTK3QOQTf8gUC4msReXc+imAVQuNNIA+bhMiQX9+DfLnublaaBk18tVFnSZvc4FvGRbyw6YTakNTV4XHh8vOCRdDhmYq+8JEsuKwy6uy2hUbxVJ0zv2vaKu2LH/mNhwnczh+TmL6zYb6iR3P0XNSw6sqlF6YdqgS8=);rounded=1;fontSize=7;align=right;spacingRight=0;spacingBottom=0;fontStyle=1;spacing=0;arcSize=19;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
             <mxGeometry x="687" y="271" width="19" height="25" as="geometry" />
           </mxCell>
@@ -888,7 +888,7 @@
             <mxGeometry x="29" y="2" width="14" height="8" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="00000000" tags="simple pipeline forwarding" component="reg-value" source="fetched-value" id="uWEq7-W_z53UrtFael4O-42">
+        <UserObject label="00000000" tags="simple pipeline forwarding" component="reg-value" source="decode-inst-bus" id="uWEq7-W_z53UrtFael4O-42">
           <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;fontStyle=0" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
             <mxGeometry x="177" y="208" width="56" height="8" as="geometry" />
           </mxCell>
@@ -929,7 +929,7 @@
             <mxGeometry x="374.5" y="118" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="0" tags="pipeline forwarding" component="bool-value" source="wb-reg-write" id="uWEq7-W_z53UrtFael4O-58">
+        <UserObject label="0" tags="pipeline forwarding" component="bool-value" source="wb-mem-to-reg" id="uWEq7-W_z53UrtFael4O-58">
           <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=1;recursiveResize=0;editable=1;expand=0;resizable=1;rotatable=1;movable=1;deletable=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
             <mxGeometry x="693" y="255" width="7" height="8" as="geometry" />
           </mxCell>

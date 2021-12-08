@@ -90,7 +90,6 @@ struct DecodeInterstage {
     Address inst_addr = 0_addr; // Address of instruction
     enum ExceptionCause excause = EXCAUSE_NONE;
     bool stall = false;
-    bool stop_if = false;
     bool is_valid = false;
     bool alu_mod = false; // alternative versions of ADD and right-shift
     bool alu_pc = false;  // PC is input to ALU
@@ -110,6 +109,7 @@ struct DecodeInternalState {
      */
     unsigned alu_op_num = 0;
     unsigned excause_num = 0;
+    RegisterValue inst_bus = 0;
 };
 
 struct DecodeState {
@@ -129,11 +129,10 @@ struct DecodeState {
 };
 
 struct ExecuteInterstage {
-    Instruction inst;
+    Instruction inst = Instruction::NOP;
     bool memread = false;
     bool memwrite = false;
     bool regwrite = true;
-    bool stop_if = false;
     bool is_valid = false;
     bool branch = false;
     bool branch_taken = false;
@@ -200,15 +199,16 @@ struct ExecuteState {
 };
 
 struct MemoryInterstage {
-    Instruction inst;
+    Instruction inst = Instruction::NOP;
     bool memtoreg = false;
-    bool regwrite = false;
+    bool regwrite = true;
     uint8_t num_rd = 0;
     RegisterValue towrite_val = 0;
     Address mem_addr = 0_addr;  // Address used to access memory
     Address inst_addr = 0_addr; // Address of instruction
+    Address next_pc = 0_addr;   // computed and expected `inst_addr` of next instruction in
+                                // pipeline.
     enum ExceptionCause excause = EXCAUSE_NONE;
-    bool stop_if = false;
     bool is_valid = false;
 
 public:
@@ -249,13 +249,14 @@ struct MemoryState {
 struct WritebackInternalState {
     Instruction inst = Instruction::NOP;
     Address inst_addr = 0_addr;
-    bool regwrite = false;
+    bool regwrite = true;
+    bool memtoreg = false;
     uint8_t num_rd = 0;
     RegisterValue value = 0;
 };
 
 struct WritebackState {
-    WritebackInternalState internal;
+    WritebackInternalState internal {};
 
     WritebackState(WritebackInternalState stage) : internal(std::move(stage)) {}
     WritebackState() = default;
