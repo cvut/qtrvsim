@@ -8,6 +8,9 @@
 
 #include <QObject>
 
+/**
+ * Watches the step by step execution of the machine and prints requested state.
+ */
 class Tracer final : public QObject {
     Q_OBJECT
 public:
