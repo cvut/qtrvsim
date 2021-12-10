@@ -252,15 +252,9 @@ void configure_reporter(
     QCommandLineParser &p,
     Reporter &r,
     const SymbolTable *symtab) {
-    if (p.isSet("dump-registers")) {
-        r.regs();
-    }
-    if (p.isSet("dump-cache-stats")) {
-        r.cache_stats();
-    }
-    if (p.isSet("dump-cycles")) {
-        r.cycles();
-    }
+    if (p.isSet("dump-registers")) { r.enable_regs_reporting(); }
+    if (p.isSet("dump-cache-stats")) { r.enable_cache_stats(); }
+    if (p.isSet("dump-cycles")) { r.enable_cycles_reporting(); }
 
     QStringList fail = p.values("fail-match");
     for (int i = 0; i < fail.size(); i++) {

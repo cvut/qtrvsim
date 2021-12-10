@@ -31,21 +31,27 @@ void Reporter::machine_exit() {
     }
 }
 
+/* TODO: Decide whether this should be moved to machine to avoid duplication or kept aside as
+         a visualization concern */
+constexpr const char *get_exception_name(ExceptionCause exception_cause) {
+    switch (exception_cause) {
+    case EXCAUSE_NONE: return "NONE";
+    case EXCAUSE_INT: return "INT";
+    case EXCAUSE_ADDRL: return "ADDRL";
+    case EXCAUSE_ADDRS: return "ADDRS";
+    case EXCAUSE_IBUS: return "IBUS";
+    case EXCAUSE_DBUS: return "DBUS";
+    case EXCAUSE_SYSCALL: return "SYSCALL";
+    case EXCAUSE_OVERFLOW: return "OVERFLOW";
+    case EXCAUSE_TRAP: return "TRAP";
+    case EXCAUSE_HWBREAK: return "HWBREAK";
+    default: UNREACHABLE;
+    }
+}
+
 void Reporter::machine_exception_reached() {
     ExceptionCause excause = machine->get_exception_cause();
-    switch (excause) {
-    case EXCAUSE_NONE: printf("Machine stopped on NONE exception.\n"); break;
-    case EXCAUSE_INT: printf("Machine stopped on INT exception.\n"); break;
-    case EXCAUSE_ADDRL: printf("Machine stopped on ADDRL exception.\n"); break;
-    case EXCAUSE_ADDRS: printf("Machine stopped on ADDRS exception.\n"); break;
-    case EXCAUSE_IBUS: printf("Machine stopped on IBUS exception.\n"); break;
-    case EXCAUSE_DBUS: printf("Machine stopped on DBUS exception.\n"); break;
-    case EXCAUSE_SYSCALL: printf("Machine stopped on SYSCALL exception.\n"); break;
-    case EXCAUSE_OVERFLOW: printf("Machine stopped on OVERFLOW exception.\n"); break;
-    case EXCAUSE_TRAP: printf("Machine stopped on TRAP exception.\n"); break;
-    case EXCAUSE_HWBREAK: printf("Machine stopped on HWBREAK exception.\n"); break;
-    default: break;
-    }
+    printf("Machine stopped on %s exception.\n", get_exception_name(excause));
     report();
     QCoreApplication::exit();
 }
@@ -54,8 +60,7 @@ void Reporter::machine_trap(SimulatorException &e) {
     report();
 
     bool expected = false;
-    auto &etype = typeid(e);
-    if (etype == typeid(SimulatorExceptionUnsupportedInstruction)) {
+    if (typeid(e) == typeid(SimulatorExceptionUnsupportedInstruction)) {
         expected = e_fail & FR_UNSUPPORTED_INSTR;
     }
 
@@ -64,61 +69,72 @@ void Reporter::machine_trap(SimulatorException &e) {
 }
 
 void Reporter::report() {
-    if (e_regs) {
-        printf("Machine state report:\n");
-        printf("PC:0x%08" PRIx64 "\n", machine->registers()->read_pc().get_raw());
-        for (unsigned i = 0; i < 32; i++) {
-            printf(
-                "R%u:0x%08" PRIx64 "%s", i, machine->registers()->read_gp(i).as_u64(),
-                (i == 31) ? "\n" : " ");
-        }
-    }
-    for (int i = 1; i < Cop0State::COP0REGS_CNT; i++) {
-        printf(
-            "%s: 0x%08" PRIx32 "%s",
-            Cop0State::cop0reg_name((Cop0State::Cop0Registers)i).toLocal8Bit().data(),
-            machine->cop0state()->read_cop0reg((Cop0State::Cop0Registers)i),
-            (i == Cop0State::COP0REGS_CNT - 1) ? "\n" : " ");
-    }
-    if (e_cache_stats) {
-        printf("Cache statistics report:\n");
-        printf("i-cache:reads: %" PRIu32 "\n", machine->cache_program()->get_read_count());
-        printf("i-cache:hit: %" PRIu32 "\n", machine->cache_program()->get_hit_count());
-        printf("i-cache:miss: %" PRIu32 "\n", machine->cache_program()->get_miss_count());
-        printf("i-cache:hit-rate: %.3lf\n", machine->cache_program()->get_hit_rate());
-        printf(
-            "i-cache:stalled-cycles: %" PRIu32 "\n", machine->cache_program()->get_stall_count());
-        printf(
-            "i-cache:improved-speed: %.3lf\n", machine->cache_program()->get_speed_improvement());
-        printf("d-cache:reads: %" PRIu32 "\n", machine->cache_data()->get_read_count());
-        printf("d-cache:writes: %" PRIu32 "\n", machine->cache_data()->get_write_count());
-        printf("d-cache:hit: %" PRIu32 "\n", machine->cache_data()->get_hit_count());
-        printf("d-cache:miss: %" PRIu32 "\n", machine->cache_data()->get_miss_count());
-        printf("d-cache:hit-rate: %.3lf\n", machine->cache_data()->get_hit_rate());
-        printf("d-cache:stalled-cycles: %" PRIu32 "\n", machine->cache_data()->get_stall_count());
-        printf("d-cache:improved-speed: %.3lf\n", machine->cache_data()->get_speed_improvement());
-    }
+    if (e_regs | e_cycles | e_cycles | e_fail) { printf("Machine state report:\n"); }
+
+    if (e_regs) { report_regs(); }
+    if (e_cache_stats) { report_caches(); }
     if (e_cycles) {
         printf("cycles: %" PRIu32 "\n", machine->core()->get_cycle_count());
         printf("stalls: %" PRIu32 "\n", machine->core()->get_stall_count());
     }
     for (const DumpRange &range : dump_ranges) {
-        FILE *out = fopen(range.path_to_write.toLocal8Bit().data(), "w");
-        if (out == nullptr) {
-            fprintf(
-                stderr, "Failed to open %s for writing\n",
-                range.path_to_write.toLocal8Bit().data());
-            return;
-        }
-        Address start = range.start & ~3;
-        Address end = range.start + range.len;
-        if (end < start) { end = 0xffffffff_addr; }
-        const MemoryDataBus *mem = machine->memory_data_bus();
-        for (Address addr = start; addr < end; addr += 4) {
-            fprintf(out, "0x%08" PRIu32 "\n", mem->read_u32(addr, ae::INTERNAL));
-        }
-        if (!fclose(out)) {
-            fprintf(stderr, "Failure closing %s\n", range.path_to_write.toLocal8Bit().data());
-        }
+        report_range(range);
+    }
+}
+
+void Reporter::report_regs() const {
+    printf("PC:0x%08" PRIx64 "\n", machine->registers()->read_pc().get_raw());
+    for (unsigned i = 0; i < REGISTER_COUNT; i++) {
+        report_gp_reg(i, (i == REGISTER_COUNT - 1));
+    }
+    for (int i = 1; i < Cop0State::COP0REGS_CNT; i++) {
+        report_cop0reg(
+            static_cast<Cop0State::Cop0Registers>(i), (i == Cop0State::COP0REGS_CNT - 1));
+    }
+}
+
+void Reporter::report_gp_reg(unsigned int i, bool last) const {
+    printf(
+        "R%u:0x%08" PRIx64 "%s", i, machine->registers()->read_gp(i).as_u64(), (last) ? "\n" : " ");
+};
+
+void Reporter::report_cop0reg(Cop0State::Cop0Registers reg, bool last) const {
+    printf(
+        "%s: 0x%08" PRIx32 "%s", Cop0State::cop0reg_name(reg).toLocal8Bit().data(),
+        machine->cop0state()->read_cop0reg(reg), (last) ? "\n" : " ");
+}
+
+void Reporter::report_caches() const {
+    printf("Cache statistics report:\n");
+    report_cache("i-cache", *machine->cache_program());
+    report_cache("d-cache", *machine->cache_data());
+}
+
+void Reporter::report_cache(const char *cache_name, const Cache &cache) {
+    printf("%s:reads: %" PRIu32 "\n", cache_name, cache.get_read_count());
+    printf("%s:hit: %" PRIu32 "\n", cache_name, cache.get_hit_count());
+    printf("%s:miss: %" PRIu32 "\n", cache_name, cache.get_miss_count());
+    printf("%s:hit-rate: %.3lf\n", cache_name, cache.get_hit_rate());
+    printf("%s:stalled-cycles: %" PRIu32 "\n", cache_name, cache.get_stall_count());
+    printf("%s:improved-speed: %.3lf\n", cache_name, cache.get_speed_improvement());
+}
+
+void Reporter::report_range(const Reporter::DumpRange &range) const {
+    FILE *out = fopen(range.path_to_write.toLocal8Bit().data(), "w");
+    if (out == nullptr) {
+        fprintf(
+            stderr, "Failed to open %s for writing\n", range.path_to_write.toLocal8Bit().data());
+        return;
+    }
+    Address start = range.start & ~3;
+    Address end = range.start + range.len;
+    if (end < start) { end = 0xffffffff_addr; }
+    // TODO: report also cached memory?
+    const MemoryDataBus *mem = machine->memory_data_bus();
+    for (Address addr = start; addr < end; addr += 4) {
+        fprintf(out, "0x%08" PRIu32 "\n", mem->read_u32(addr, ae::INTERNAL));
+    }
+    if (!fclose(out)) {
+        fprintf(stderr, "Failure closing %s\n", range.path_to_write.toLocal8Bit().data());
     }
 }

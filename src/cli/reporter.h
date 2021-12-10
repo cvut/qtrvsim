@@ -11,15 +11,19 @@
 
 using machine::Address;
 
+/**
+ * Watches for special events in the machine (e.g. stop, exception, trap) and prints related
+ * information.
+ */
 class Reporter : public QObject {
     Q_OBJECT
 
 public:
     Reporter(QCoreApplication *app, machine::Machine *machine);
 
-    void regs() { e_regs = true; }; // Report status of registers
-    void cache_stats() { e_cache_stats = true; };
-    void cycles() { e_cycles = true; };
+    void enable_regs_reporting() { e_regs = true; };
+    void enable_cache_stats() { e_cache_stats = true; };
+    void enable_cycles_reporting() { e_cycles = true; };
 
     enum FailReason {
         FR_NONE = 0,
@@ -53,10 +57,11 @@ private:
 
     void report();
     void report_regs() const;
-    void report_cache() const;
+    void report_caches() const;
     void report_range(const DumpRange &range) const;
-    void report_cop0reg(machine::Cop0State::Cop0Registers i) const;
-    void report_gp_reg(unsigned int i) const;
+    void report_cop0reg(machine::Cop0State::Cop0Registers reg, bool last) const;
+    void report_gp_reg(unsigned int i, bool last) const;
+    static void report_cache(const char *cache_name, const machine::Cache &cache);
 };
 
 #endif // REPORTER_H
