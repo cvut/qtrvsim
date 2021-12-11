@@ -119,7 +119,7 @@ jobs:
             os: ubuntu-latest,
             build_type: Release,
             qt_arch: wasm_32,
-            emsdk_version: 1.39.20,
+            emsdk_version: 1.39.8,
             qt_version: 5.15.2,
           }
     steps:
