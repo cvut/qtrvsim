@@ -37,11 +37,13 @@ constexpr const char *get_exception_name(ExceptionCause exception_cause) {
     switch (exception_cause) {
     case EXCAUSE_NONE: return "NONE";
     case EXCAUSE_INT: return "INT";
+    case EXCAUSE_UNKNOWN: return "UNKNOWN";
     case EXCAUSE_ADDRL: return "ADDRL";
     case EXCAUSE_ADDRS: return "ADDRS";
     case EXCAUSE_IBUS: return "IBUS";
     case EXCAUSE_DBUS: return "DBUS";
     case EXCAUSE_SYSCALL: return "SYSCALL";
+    case EXCAUSE_BREAK: return "BREAK";
     case EXCAUSE_OVERFLOW: return "OVERFLOW";
     case EXCAUSE_TRAP: return "TRAP";
     case EXCAUSE_HWBREAK: return "HWBREAK";
