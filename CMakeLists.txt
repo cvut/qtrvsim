@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.10)
 cmake_policy(VERSION 3.10)
 
 project(QtRVSim
-        LANGUAGES C CXX
-        VERSION 0.8.0
-        DESCRIPTION "RISC-V CPU simulator for education purposes")
+		LANGUAGES C CXX
+		VERSION 0.8.1
+		DESCRIPTION "RISC-V CPU simulator for education purposes")
 
 set(KAREL_KOCI "Karel Koci <cynerd@email.cz>")
 set(PAVEL_PISA "Pavel Pisa <pisa@cmp.felk.cvut.cz>")

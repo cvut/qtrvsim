@@ -1,3 +1,13 @@
+qtrvsim (0.8.1-1) unstable; urgency=medium
+
+  * Debian package updated to version 0.8.1-1.
+  * Fixes visualization of stalls.
+  * Moves jump evaluation from EX to MEM as initially intended and as shown in the cpu diagram.
+  * Fixes WASM build - keyboard handling.
+  * Adds Qt6 support.
+
+ -- Jakub Dupak <dev@jakubdupak.com>  Wed, 15 Dec 2021 18:55:55 +0100
+
 qtrvsim (0.8.0) unstable; urgency=medium
 
   * Debian package updated to version 0.8.0.
