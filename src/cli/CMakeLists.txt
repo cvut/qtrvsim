@@ -43,5 +43,16 @@ set_target_properties(cli PROPERTIES
 # in corresponding CMakeLists.txt.
 
 install(TARGETS cli
-        RUNTIME DESTINATION bin)
+		RUNTIME DESTINATION bin)
 
+include(../../cmake/TestingTools.cmake)
+
+enable_testing()
+
+add_cli_test(
+		NAME stalls
+		ARGS
+		--asm "${CMAKE_SOURCE_DIR}/tests/cli/stalls/program.S"
+		--dump-registers
+		EXPECTED_OUTPUT "tests/cli/stalls/stdout.txt"
+)
