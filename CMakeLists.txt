@@ -103,7 +103,7 @@ endif()
 
 if("${BUILD_RELEASE}")
 	message(STATUS "Debug prints globally suppressed.")
-	add_compile_definitions(QT_NO_DEBUG_OUTPUT=1)
+	add_definitions(-DQT_NO_DEBUG_OUTPUT=1)
 endif()
 
 include_directories("src" "src/machine")
@@ -141,7 +141,7 @@ if("${WASM}")
 	add_link_options("SHELL:-s EXTRA_EXPORTED_RUNTIME_METHODS=[\"UTF16ToString\",\"stringToUTF16\"]")
 	add_link_options("--bind")
 
-	add_compile_definitions(QT_NO_DEBUG_OUTPUT=1)
+	add_definitions(-DQT_NO_DEBUG_OUTPUT=1)
 	message(STATUS "Debug output disabled")
 
 else()
@@ -183,7 +183,7 @@ message(STATUS "${QtLib} print support: ${${QtLib}PrintSupport_FOUND}")
 
 
 # Qt 5.9.5 is the oldest supported
-add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050905)
+add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x050905)
 
 add_subdirectory("external/svgscene")
 
