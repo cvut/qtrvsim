@@ -26,7 +26,8 @@ RegisterValue alu_combined_operate(
  * Other bits of the operand may be used as flags and need to be masked out
  * before any ALU operation is performed.
  */
-constexpr uint64_t SHIFT_MASK = 0b11111; // == 31
+constexpr uint64_t SHIFT_MASK32 = 0b011111; // == 31
+constexpr uint64_t SHIFT_MASK64 = 0b111111; // == 63
 
 int64_t alu64_operate(AluOp op, bool modified, RegisterValue a, RegisterValue b) {
     uint64_t _a = a.as_u64();
@@ -34,13 +35,13 @@ int64_t alu64_operate(AluOp op, bool modified, RegisterValue a, RegisterValue b)
 
     switch (op) {
     case AluOp::ADD: return _a + ((modified) ? -_b : _b);
-    case AluOp::SLL: return _a << (_b & SHIFT_MASK);
+    case AluOp::SLL: return _a << (_b & SHIFT_MASK64);
     case AluOp::SLT: return a.as_i64() < b.as_i64();
     case AluOp::SLTU: return _a < _b;
     case AluOp::XOR:
         return _a ^ _b;
         // Most compilers should calculate SRA correctly, but it is UB.
-    case AluOp::SR: return (modified) ? (a.as_i64() >> _b) : (_a >> (_b & SHIFT_MASK));
+    case AluOp::SR: return (modified) ? (a.as_i64() >> (_b & SHIFT_MASK64)) : (_a >> (_b & SHIFT_MASK64));
     case AluOp::OR: return _a | _b;
     case AluOp::AND: return _a & _b;
     default: qDebug("ERROR, unknown alu operation: %hhx", uint8_t(op)); return 0;
@@ -53,14 +54,14 @@ int32_t alu32_operate(AluOp op, bool modified, RegisterValue a, RegisterValue b)
 
     switch (op) {
     case AluOp::ADD: return _a + ((modified) ? -_b : _b);
-    case AluOp::SLL: return _a << (_b & SHIFT_MASK);
+    case AluOp::SLL: return _a << (_b & SHIFT_MASK32);
     case AluOp::SLT: return a.as_i64() < b.as_i64();
     case AluOp::SLTU: return _a < _b;
     case AluOp::XOR:
         return _a ^ _b;
         // Most compilers should calculate SRA correctly, but it is UB.
     case AluOp::SR:
-        return (modified) ? (a.as_i64() >> (_b & SHIFT_MASK)) : (_a >> (_b & SHIFT_MASK));
+        return (modified) ? (a.as_i64() >> (_b & SHIFT_MASK32)) : (_a >> (_b & SHIFT_MASK32));
     case AluOp::OR: return _a | _b;
     case AluOp::AND: return _a & _b;
     default: qDebug("ERROR, unknown alu operation: %hhx", uint8_t(op)); return 0;
