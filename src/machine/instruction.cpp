@@ -128,7 +128,7 @@ static const struct InstructionMap LOAD_map[] = {
 
 static const struct InstructionMap SRI_map[] = {
     {"srli", IT_I, AluOp::SR, NOMEM, nullptr, {"d", "s", ">"}, 0x00005013, 0xfe00707f, { .flags = FLAGS_ALU_I }}, // SRLI
-    {"srai", IT_I, AluOp::SR, NOMEM, nullptr, {"d", "s", ">"}, 0x40005013, 0xfe00707f, { .flags = FLAGS_ALU_I }}, // SRAI
+    {"srai", IT_I, AluOp::SR, NOMEM, nullptr, {"d", "s", ">"}, 0x40005013, 0xfe00707f, { .flags = FLAGS_ALU_I | IMF_ALU_MOD }}, // SRAI
 };
 
 static const struct InstructionMap OP_IMM_map[] = {
@@ -160,7 +160,7 @@ static const struct InstructionMap ADD_map[] = {
 
 static const struct InstructionMap SR_map[] = {
     {"srl", IT_R, AluOp::SR, NOMEM, nullptr, {"d", "s", "t"}, 0x00005033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }}, // SRL
-    {"sra", IT_R, AluOp::SR, NOMEM, nullptr, {"d", "s", "t"}, 0x40005033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }}, // SRA
+    {"sra", IT_R, AluOp::SR, NOMEM, nullptr, {"d", "s", "t"}, 0x40005033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_MOD }}, // SRA
 };
 
 static const struct InstructionMap OP_map[] = {
