@@ -55,13 +55,13 @@ int32_t alu32_operate(AluOp op, bool modified, RegisterValue a, RegisterValue b)
     switch (op) {
     case AluOp::ADD: return _a + ((modified) ? -_b : _b);
     case AluOp::SLL: return _a << (_b & SHIFT_MASK32);
-    case AluOp::SLT: return a.as_i64() < b.as_i64();
+    case AluOp::SLT: return a.as_i32() < b.as_i32();
     case AluOp::SLTU: return _a < _b;
     case AluOp::XOR:
         return _a ^ _b;
         // Most compilers should calculate SRA correctly, but it is UB.
     case AluOp::SR:
-        return (modified) ? (a.as_i64() >> (_b & SHIFT_MASK32)) : (_a >> (_b & SHIFT_MASK32));
+        return (modified) ? (a.as_i32() >> (_b & SHIFT_MASK32)) : (_a >> (_b & SHIFT_MASK32));
     case AluOp::OR: return _a | _b;
     case AluOp::AND: return _a & _b;
     default: qDebug("ERROR, unknown alu operation: %hhx", uint8_t(op)); return 0;
