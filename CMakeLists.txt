@@ -198,6 +198,8 @@ add_subdirectory("src/os_emulation")
 add_subdirectory("src/gui")
 if(NOT "${WASM}")
 	add_subdirectory("src/cli")
+	add_custom_target(all_unit_tests
+			DEPENDS common_unit_tests machine_unit_tests)
 endif()
 
 # =============================================================================

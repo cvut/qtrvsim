@@ -194,4 +194,7 @@ if(NOT ${WASM})
 	target_link_libraries(core_test
 			PRIVATE ${QtLib}::Core ${QtLib}::Test libelf)
 	add_test(NAME core COMMAND core_test)
+
+	add_custom_target(machine_unit_tests
+			DEPENDS alu_test registers_test memory_test cache_test instruction_test program_loader_test core_test)
 endif()
