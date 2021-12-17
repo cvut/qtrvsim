@@ -64,7 +64,7 @@ set(machine_TESTS
 		tests/testcore.cpp
 		tests/testinstruction.cpp
 		tests/testprogramloader.cpp
-		tests/testregisters.cpp
+		registers.test.cpp
 		tests/tst_machine.cpp
 		)
 

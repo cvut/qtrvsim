@@ -1,6 +1,7 @@
 #include "machine/registers.h"
+
 #include "machine/simulator_exception.h"
-#include "tst_machine.h"
+#include "tests/tst_machine.h"
 
 using namespace machine;
 
