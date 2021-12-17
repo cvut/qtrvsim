@@ -1,10 +1,11 @@
+#include "machine/memory/cache/cache.h"
+
+#include "../../tests/tst_machine.h"
 #include "common/endian.h"
 #include "machine/memory/backend/memory.h"
-#include "machine/memory/cache/cache.h"
 #include "machine/memory/cache/cache_policy.h"
 #include "machine/memory/memory_bus.h"
 #include "tests/data/cache_test_performance_data.h"
-#include "tst_machine.h"
 
 #include <tests/utils/integer_decomposition.h>
 #include <unordered_map>

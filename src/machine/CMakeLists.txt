@@ -63,8 +63,8 @@ set(machine_TESTS
         tests/data/cache_test_performance_data.h
         tests/tst_machine.h
         tests/utils/integer_decomposition.h
-        tests/testcache.cpp
-        tests/testcore.cpp
+		memory/cache/cache.test.cpp
+		tests/testcore.cpp
         tests/testinstruction.cpp
         tests/testmemory.cpp
         tests/testprogramloader.cpp
