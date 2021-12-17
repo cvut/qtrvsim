@@ -1,20 +1,12 @@
-#ifndef TST_MACHINE_H
-#define TST_MACHINE_H
+#ifndef CORE_TEST_H
+#define CORE_TEST_H
 
-#include <QtTest/QTest>
-#include <cstdint>
+#include <QtTest>
 
-class MachineTests : public QObject {
-Q_OBJECT
-private Q_SLOTS:
-    // Test utils
-    // Registers
-    // Memory
-    // Program loader
-    // Instruction
-    // Cache
-    // Core depends on cache, therefore it is tested first.
-    // Core
+class TestCore : public QObject {
+    Q_OBJECT
+
+public slots:
     void singlecore_regs();
     void singlecore_regs_data();
     void pipecore_regs();
@@ -45,4 +37,4 @@ private Q_SLOTS:
     void pipecore_wb_memory_tests();
 };
 
-#endif // TST_MACHINE_H
+#endif // CORE_TEST_H

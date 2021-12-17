@@ -180,4 +180,30 @@ if(NOT ${WASM})
 	target_link_libraries(program_loader_test
 			PRIVATE ${QtLib}::Core ${QtLib}::Test libelf)
 	add_test(NAME program_loader COMMAND program_loader_test)
+
+
+	add_executable(core_test
+			cop0state.cpp
+			cop0state.h
+			core.cpp
+			core.h
+			core.test.cpp
+			core.test.h
+			execute/alu.cpp
+			execute/alu.h
+			instruction.cpp
+			instruction.h
+			memory/backend/backend_memory.h
+			memory/backend/memory.cpp
+			memory/backend/memory.h
+			memory/frontend_memory.cpp
+			memory/frontend_memory.h
+			registers.cpp
+			registers.h
+			simulator_exception.cpp
+			simulator_exception.h
+			)
+	target_link_libraries(core_test
+			PRIVATE ${QtLib}::Core ${QtLib}::Test libelf)
+	add_test(NAME core COMMAND core_test)
 endif()
