@@ -64,7 +64,6 @@ set(machine_TESTS
 		tests/testcore.cpp
 		tests/testinstruction.cpp
 		tests/testprogramloader.cpp
-		registers.test.cpp
 		tests/tst_machine.cpp
 		)
 
@@ -96,6 +95,18 @@ if(NOT ${WASM})
 			PRIVATE ${QtLib}::Core ${QtLib}::Test)
 	add_test(NAME alu COMMAND alu_test)
 
+	add_executable(registers_test
+			register_value.h
+			registers.cpp
+			registers.h
+			registers.test.cpp
+			registers.test.h
+			simulator_exception.cpp
+			simulator_exception.h
+			)
+	target_link_libraries(registers_test
+			PRIVATE ${QtLib}::Core ${QtLib}::Test)
+	add_test(NAME registers COMMAND registers_test)
 
 	add_executable(memory_test
 			memory/backend/backend_memory.h

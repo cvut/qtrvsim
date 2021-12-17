@@ -9,11 +9,6 @@ Q_OBJECT
 private Q_SLOTS:
     // Test utils
     // Registers
-    void registers_gp0();
-    void registers_rw_gp();
-    void registers_rw_hi_lo();
-    void registers_pc();
-    void registers_compare();
     // Memory
     // Program loader
     void program_loader();
