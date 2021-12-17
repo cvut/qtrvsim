@@ -59,12 +59,6 @@ set(machine_HEADERS
 		execute/alu_op.h
 		execute/mul_op.h
 		)
-set(machine_TESTS
-		tests/tst_machine.h
-		tests/testcore.cpp
-		programloader.test.cpp
-		tests/tst_machine.cpp
-		)
 
 # Object library is preferred, because the library archive is never really
 # needed. This option skips the archive creation and links directly .o files.
@@ -77,12 +71,6 @@ target_link_libraries(machine
 
 if(NOT ${WASM})
 	# Machine tests (not available on WASM)
-	#    add_executable(machine_unit_tests ${machine_TESTS})
-	#    target_link_libraries(machine_unit_tests
-	#            PRIVATE machine ${QtLib}::Core ${QtLib}::Test)
-	#
-	#    add_test(NAME machine_unit_tests
-	#            COMMAND machine_unit_tests)
 
 	add_executable(alu_test
 			execute/alu.test.cpp
