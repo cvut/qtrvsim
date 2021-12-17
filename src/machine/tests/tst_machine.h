@@ -8,7 +8,6 @@ class MachineTests : public QObject {
 Q_OBJECT
 private Q_SLOTS:
     // Test utils
-    static void integer_decomposition();
     // Registers
     void registers_gp0();
     void registers_rw_gp();
@@ -16,16 +15,6 @@ private Q_SLOTS:
     void registers_pc();
     void registers_compare();
     // Memory
-    static void memory();
-    static void memory_data();
-    static void memory_section();
-    static void memory_section_data();
-    void memory_compare();
-    void memory_compare_data();
-    static void memory_write_ctl_data();
-    static void memory_write_ctl();
-    static void memory_read_ctl_data();
-    static void memory_read_ctl();
     // Program loader
     void program_loader();
     // Instruction

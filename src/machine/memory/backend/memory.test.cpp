@@ -1,4 +1,5 @@
-#include "../../tests/tst_machine.h"
+#include "memory.test.h"
+
 #include "common/endian.h"
 #include "machine/machinedefs.h"
 #include "machine/memory/backend/memory.h"
@@ -11,15 +12,14 @@ using namespace machine;
 // Default memory testing data. Some tests may use other values, where it
 // makes better sense.
 constexpr array<Endian, 2> default_endians { BIG, LITTLE };
-constexpr array<Offset, 5> default_addresses { 0x0, 0xFFFFFFFC, 0xFFFF0,
-                                               0xFFFF1, 0xFFFFFF };
+constexpr array<Offset, 5> default_addresses { 0x0, 0xFFFFFFFC, 0xFFFF0, 0xFFFF1, 0xFFFFFF };
 constexpr array<Offset, 4> default_strides { 0, 1, 2, 3 };
 constexpr array<uint64_t, 1> default_values { 0x4142434445464748 };
 
 /**
  * Test the IntegerDecomposition util, that is used for testing later.
  */
-void MachineTests::integer_decomposition() {
+void TestMemory::integer_decomposition() {
     const uint64_t value = 0x0102030405060708;
 
     IntegerDecomposition big_endian(value, BIG);
@@ -82,14 +82,12 @@ constexpr void prepare_data(
             for (auto stride : strides) {
                 for (auto value : values) {
                     // Result when read has `stride` bytes offset to the write.
-                    auto result_value = (endian == BIG)
-                                            ? (value << (stride * 8))
-                                            : (value >> (stride * 8));
+                    auto result_value
+                        = (endian == BIG) ? (value << (stride * 8)) : (value >> (stride * 8));
                     QTest::addRow(
-                        "endian=%s, address=0x%lx, stride=%ld, value=0x%lx",
-                        to_string(endian), address, stride, value)
-                        << endian << address << stride
-                        << IntegerDecomposition(value, endian)
+                        "endian=%s, address=0x%lx, stride=%ld, value=0x%lx", to_string(endian),
+                        address, stride, value)
+                        << endian << address << stride << IntegerDecomposition(value, endian)
                         << IntegerDecomposition(result_value, endian);
                 }
             }
@@ -97,12 +95,11 @@ constexpr void prepare_data(
     }
 }
 
-void MachineTests::memory_data() {
-    prepare_data(
-        default_endians, default_addresses, default_strides, default_values);
+void TestMemory::memory_data() {
+    prepare_data(default_endians, default_addresses, default_strides, default_values);
 }
 
-void MachineTests::memory() {
+void TestMemory::memory() {
     QFETCH(Endian, endian);
     QFETCH(Offset, address);
     QFETCH(Offset, stride);
@@ -144,25 +141,22 @@ void MachineTests::memory() {
     memory_write_u64(&m, address, value.u64);
     QCOMPARE(memory_read_u64(&m, address + stride), result.u64);
     for (size_t i = 0; i < 2; ++i) {
-        QCOMPARE(
-            memory_read_u32(&m, address + stride + 4 * i), result.u32.at(i));
+        QCOMPARE(memory_read_u32(&m, address + stride + 4 * i), result.u32.at(i));
     }
     for (size_t i = 0; i < 4; ++i) {
-        QCOMPARE(
-            memory_read_u16(&m, address + stride + 2 * i), result.u16.at(i));
+        QCOMPARE(memory_read_u16(&m, address + stride + 2 * i), result.u16.at(i));
     }
     for (size_t i = 0; i < 8; ++i) {
         QCOMPARE(memory_read_u8(&m, address + stride + i), result.u8.at(i));
     }
 }
 
-void MachineTests::memory_section_data() {
-    constexpr array<Offset, 4> addresses { 0x0, 0xFFFFFFF4, 0xFFFF00,
-                                           0xFFFFF2 };
+void TestMemory::memory_section_data() {
+    constexpr array<Offset, 4> addresses { 0x0, 0xFFFFFFF4, 0xFFFF00, 0xFFFFF2 };
     prepare_data(default_endians, addresses, default_strides, default_values);
 }
 
-void MachineTests::memory_section() {
+void TestMemory::memory_section() {
     QFETCH(Endian, endian);
     QFETCH(Offset, address);
     QFETCH(Offset, stride);
@@ -197,8 +191,7 @@ void MachineTests::memory_section() {
         memory_write_u32(&m, address, value.u32.at(0));
         QCOMPARE(memory_read_u32(s, section_offset), result.u32.at(0));
         for (size_t i = 0; i < 2; ++i) {
-            QCOMPARE(
-                memory_read_u16(s, section_offset + 2 * i), result.u16.at(i));
+            QCOMPARE(memory_read_u16(s, section_offset + 2 * i), result.u16.at(i));
         }
         for (size_t i = 0; i < 4; ++i) {
             QCOMPARE(memory_read_u8(s, section_offset + i), result.u8.at(i));
@@ -227,11 +220,11 @@ void prepare_endian_test() {
     }
 }
 
-void MachineTests::memory_compare_data() {
+void TestMemory::memory_compare_data() {
     prepare_endian_test();
 }
 
-void MachineTests::memory_compare() {
+void TestMemory::memory_compare() {
     QFETCH(Endian, endian);
 
     Memory m1(endian), m2(endian);
@@ -258,15 +251,14 @@ void MachineTests::memory_compare() {
     QVERIFY(m1 != m3);
 }
 
-void MachineTests::memory_write_ctl_data() {
+void TestMemory::memory_write_ctl_data() {
     QTest::addColumn<AccessControl>("ctl");
     QTest::addColumn<Memory>("result");
 
     for (auto endian : default_endians) {
         Memory mem(endian);
 
-        QTest::addRow("AC_NONE, endian=%s", to_string(endian))
-            << AC_NONE << mem;
+        QTest::addRow("AC_NONE, endian=%s", to_string(endian)) << AC_NONE << mem;
         memory_write_u8(&mem, 0x20, 0x30);
         QTest::addRow("AC_I8, endian=%s", to_string(endian)) << AC_I8 << mem;
         QTest::addRow("AC_U8, endian=%s", to_string(endian)) << AC_U8 << mem;
@@ -282,7 +274,7 @@ void MachineTests::memory_write_ctl_data() {
     }
 }
 
-void MachineTests::memory_write_ctl() {
+void TestMemory::memory_write_ctl() {
     QFETCH(AccessControl, ctl);
     QFETCH(Memory, result);
 
@@ -295,13 +287,11 @@ void MachineTests::memory_write_ctl() {
     QCOMPARE(mem, result);
 }
 
-void MachineTests::memory_read_ctl_data() {
-    prepare_data(
-        default_endians, default_addresses, default_strides, default_values);
+void TestMemory::memory_read_ctl_data() {
+    prepare_data(default_endians, default_addresses, default_strides, default_values);
 }
 
-
-void MachineTests::memory_read_ctl() {
+void TestMemory::memory_read_ctl() {
     QFETCH(Endian, endian);
     QFETCH(Offset, address);
     QFETCH(Offset, stride);
@@ -314,18 +304,15 @@ void MachineTests::memory_read_ctl() {
 
     bus.write_u64(frontend_address, value.u64);
 
-    QCOMPARE(
-        bus.read_ctl(AC_U64, frontend_address + stride).as_u64(), result.u64);
+    QCOMPARE(bus.read_ctl(AC_U64, frontend_address + stride).as_u64(), result.u64);
 
     for (size_t i = 0; i < 2; ++i) {
         QCOMPARE(
-            bus.read_ctl(AC_U32, frontend_address + stride + 4 * i).as_u32(),
-            result.u32.at(i));
+            bus.read_ctl(AC_U32, frontend_address + stride + 4 * i).as_u32(), result.u32.at(i));
     }
     for (size_t i = 0; i < 4; ++i) {
         QCOMPARE(
-            bus.read_ctl(AC_U16, frontend_address + stride + 2 * i).as_u16(),
-            result.u16.at(i));
+            bus.read_ctl(AC_U16, frontend_address + stride + 2 * i).as_u16(), result.u16.at(i));
     }
     for (size_t i = 0; i < 4; ++i) {
         QCOMPARE(
@@ -333,13 +320,12 @@ void MachineTests::memory_read_ctl() {
             (int16_t)result.u16.at(i));
     }
     for (size_t i = 0; i < 8; ++i) {
-        QCOMPARE(
-            bus.read_ctl(AC_U8, frontend_address + stride + i).as_u8(),
-            result.u8.at(i));
+        QCOMPARE(bus.read_ctl(AC_U8, frontend_address + stride + i).as_u8(), result.u8.at(i));
     }
     for (size_t i = 0; i < 8; ++i) {
         QCOMPARE(
-            bus.read_ctl(AC_I8, frontend_address + stride + i).as_i8(),
-            (int8_t)result.u8.at(i));
+            bus.read_ctl(AC_I8, frontend_address + stride + i).as_i8(), (int8_t)result.u8.at(i));
     }
 }
+
+QTEST_APPLESS_MAIN(TestMemory)

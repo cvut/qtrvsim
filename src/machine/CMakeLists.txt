@@ -61,15 +61,12 @@ set(machine_HEADERS
 		)
 set(machine_TESTS
 		tests/tst_machine.h
-		tests/utils/integer_decomposition.h
 		tests/testcore.cpp
 		tests/testinstruction.cpp
-		memory/backend/memory.test.cpp
 		tests/testprogramloader.cpp
 		tests/testregisters.cpp
 		tests/tst_machine.cpp
 		)
-
 
 # Object library is preferred, because the library archive is never really
 # needed. This option skips the archive creation and links directly .o files.
@@ -99,6 +96,25 @@ if(NOT ${WASM})
 			PRIVATE ${QtLib}::Core ${QtLib}::Test)
 	add_test(NAME alu COMMAND alu_test)
 
+
+	add_executable(memory_test
+			memory/backend/backend_memory.h
+			memory/backend/memory.cpp
+			memory/backend/memory.h
+			memory/backend/memory.test.cpp
+			memory/backend/memory.test.h
+			memory/frontend_memory.cpp
+			memory/frontend_memory.h
+			memory/memory_bus.cpp
+			memory/memory_bus.h
+			simulator_exception.cpp
+			simulator_exception.h
+			tests/utils/integer_decomposition.h
+			)
+	target_link_libraries(memory_test
+			PRIVATE ${QtLib}::Core ${QtLib}::Test)
+	add_test(NAME memory COMMAND memory_test)
+
 	add_executable(cache_test
 			machineconfig.cpp
 			machineconfig.h
@@ -118,6 +134,7 @@ if(NOT ${WASM})
 			simulator_exception.cpp
 			simulator_exception.h
 			tests/data/cache_test_performance_data.h
+			tests/utils/integer_decomposition.h
 			)
 	target_link_libraries(cache_test
 			PRIVATE ${QtLib}::Core ${QtLib}::Test)
