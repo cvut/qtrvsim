@@ -1,8 +1,9 @@
+#include "machine/programloader.h"
+
 #include "machine/instruction.h"
 #include "machine/memory/memory_utils.h"
-#include "machine/programloader.h"
 #include "memory/backend/memory.h"
-#include "tst_machine.h"
+#include "tests/tst_machine.h"
 
 using namespace machine;
 
