@@ -1,5 +1,6 @@
 #include "machine/instruction.h"
-#include "tst_machine.h"
+
+#include "tests/tst_machine.h"
 
 using namespace machine;
 

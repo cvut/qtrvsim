@@ -62,7 +62,7 @@ set(machine_HEADERS
 set(machine_TESTS
 		tests/tst_machine.h
 		tests/testcore.cpp
-		tests/testinstruction.cpp
+		instruction.test.cpp
 		tests/testprogramloader.cpp
 		tests/tst_machine.cpp
 		)
