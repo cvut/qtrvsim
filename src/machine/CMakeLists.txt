@@ -64,7 +64,7 @@ set(machine_TESTS
 		tests/utils/integer_decomposition.h
 		tests/testcore.cpp
 		tests/testinstruction.cpp
-		tests/testmemory.cpp
+		memory/backend/memory.test.cpp
 		tests/testprogramloader.cpp
 		tests/testregisters.cpp
 		tests/tst_machine.cpp

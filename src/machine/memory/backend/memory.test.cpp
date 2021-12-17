@@ -1,10 +1,10 @@
+#include "../../tests/tst_machine.h"
 #include "common/endian.h"
 #include "machine/machinedefs.h"
 #include "machine/memory/backend/memory.h"
 #include "machine/memory/memory_bus.h"
 #include "machine/memory/memory_utils.h"
 #include "tests/utils/integer_decomposition.h"
-#include "tst_machine.h"
 
 using namespace machine;
 
