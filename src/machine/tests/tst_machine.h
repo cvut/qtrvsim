@@ -13,8 +13,6 @@ private Q_SLOTS:
     // Program loader
     void program_loader();
     // Instruction
-    void instruction();
-    void instruction_access();
     // Cache
     // Core depends on cache, therefore it is tested first.
     // Core

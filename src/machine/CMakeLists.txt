@@ -62,7 +62,6 @@ set(machine_HEADERS
 set(machine_TESTS
 		tests/tst_machine.h
 		tests/testcore.cpp
-		instruction.test.cpp
 		tests/testprogramloader.cpp
 		tests/tst_machine.cpp
 		)
@@ -150,4 +149,16 @@ if(NOT ${WASM})
 	target_link_libraries(cache_test
 			PRIVATE ${QtLib}::Core ${QtLib}::Test)
 	add_test(NAME cache COMMAND cache_test)
+
+	add_executable(instruction_test
+			instruction.cpp
+			instruction.h
+			instruction.test.cpp
+			instruction.test.h
+			simulator_exception.cpp
+			simulator_exception.h
+			)
+	target_link_libraries(instruction_test
+			PRIVATE ${QtLib}::Core ${QtLib}::Test)
+	add_test(NAME instruction COMMAND instruction_test)
 endif()
