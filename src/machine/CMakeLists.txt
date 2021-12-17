@@ -161,4 +161,23 @@ if(NOT ${WASM})
 	target_link_libraries(instruction_test
 			PRIVATE ${QtLib}::Core ${QtLib}::Test)
 	add_test(NAME instruction COMMAND instruction_test)
+
+	add_executable(program_loader_test
+			instruction.cpp
+			instruction.h
+			memory/backend/backend_memory.h
+			memory/backend/memory.cpp
+			memory/backend/memory.h
+			programloader.cpp
+			programloader.h
+			programloader.test.cpp
+			programloader.test.h
+			simulator_exception.cpp
+			simulator_exception.h
+			symboltable.cpp
+			symboltable.h
+			)
+	target_link_libraries(program_loader_test
+			PRIVATE ${QtLib}::Core ${QtLib}::Test libelf)
+	add_test(NAME program_loader COMMAND program_loader_test)
 endif()

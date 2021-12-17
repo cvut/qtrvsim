@@ -11,7 +11,6 @@ private Q_SLOTS:
     // Registers
     // Memory
     // Program loader
-    void program_loader();
     // Instruction
     // Cache
     // Core depends on cache, therefore it is tested first.
