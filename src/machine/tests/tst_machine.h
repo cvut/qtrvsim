@@ -33,10 +33,6 @@ private Q_SLOTS:
     void instruction_access();
     // Cache
     // Core depends on cache, therefore it is tested first.
-    static void cache_data();
-    static void cache();
-    static void cache_correctness_data();
-    static void cache_correctness();
     // Core
     void singlecore_regs();
     void singlecore_regs_data();
