@@ -1,140 +1,39 @@
 #include "tracer.h"
 
-#include <iostream>
-#include <string>
+#include <cinttypes>
 
-using namespace std;
 using namespace machine;
 
-Tracer::Tracer(Machine *machine) {
-    this->machine = machine;
-    for (bool &gp_reg : gp_regs) {
-        gp_reg = false;
+Tracer::Tracer(Machine *machine) : core_state(machine->core()->state) {
+    connect(machine->core(), &Core::step_done, this, &Tracer::step_output);
+}
+
+template<typename StageStruct>
+void trace_instruction_in_stage(
+    const char *stage_name,
+    const StageStruct &stage,
+    const WritebackInternalState &wb) {
+    printf(
+        "%s: %s%s\n", stage_name, (stage.excause != EXCAUSE_NONE) ? "!" : "",
+        qPrintable(wb.inst.to_str(stage.inst_addr)));
+}
+
+void Tracer::step_output() {
+    const auto &if_id = core_state.pipeline.fetch.final;
+    const auto &id_ex = core_state.pipeline.decode.final;
+    const auto &ex_mem = core_state.pipeline.execute.final;
+    const auto &mem_wb = core_state.pipeline.memory.final;
+    const auto &wb = core_state.pipeline.writeback.internal;
+    if (trace_fetch) { trace_instruction_in_stage("Fetch", if_id, wb); }
+    if (trace_decode) { trace_instruction_in_stage("Decode", id_ex, wb); }
+    if (trace_execute) { trace_instruction_in_stage("Execute", ex_mem, wb); }
+    if (trace_memory) { trace_instruction_in_stage("Memory", mem_wb, wb); }
+    if (trace_writeback) {
+        // All exceptions are resolved in memory, therefore there is no excause field in WB.
+        printf("Writeback: %s\n", qPrintable(wb.inst.to_str(wb.inst_addr)));
     }
-    r_hi = false;
-    r_lo = false;
-
-    con_regs_pc = false;
-    con_regs_gp = false;
-    con_regs_hi_lo = false;
-}
-
-#define CON(VAR, FROM, SIG, SLT)                                               \
-    do {                                                                       \
-        if (!(VAR)) {                                                          \
-            connect(FROM, SIG, this, SLT);                                     \
-            (VAR) = true;                                                      \
-        }                                                                      \
-    } while (false)
-
-void Tracer::fetch() {
-    CON(con_fetch, machine->core(), &Core::instruction_fetched,
-        &Tracer::instruction_fetch);
-}
-
-void Tracer::decode() {
-    CON(con_decode, machine->core(), &Core::instruction_decoded,
-        &Tracer::instruction_decode);
-}
-
-void Tracer::execute() {
-    CON(con_execute, machine->core(), &Core::instruction_executed,
-        &Tracer::instruction_execute);
-}
-
-void Tracer::memory() {
-    CON(con_memory, machine->core(), &Core::instruction_memory,
-        &Tracer::instruction_memory);
-}
-
-void Tracer::writeback() {
-    CON(con_writeback, machine->core(), &Core::instruction_writeback,
-        &Tracer::instruction_writeback);
-}
-
-void Tracer::reg_pc() {
-    CON(con_regs_pc, machine->registers(), &Registers::pc_update,
-        &Tracer::regs_pc_update);
-}
-
-void Tracer::reg_gp(RegisterId i) {
-    CON(con_regs_gp, machine->registers(), &Registers::gp_update,
-        &Tracer::regs_gp_update);
-    gp_regs[i.data] = true;
-}
-
-void Tracer::reg_lo() {
-    CON(con_regs_hi_lo, machine->registers(), &Registers::hi_lo_update,
-        &Tracer::regs_hi_lo_update);
-    r_lo = true;
-}
-
-void Tracer::reg_hi() {
-    CON(con_regs_hi_lo, machine->registers(), &Registers::hi_lo_update,
-        &Tracer::regs_hi_lo_update);
-    r_hi = true;
-}
-
-void Tracer::instruction_fetch(
-    const machine::Instruction &inst,
-    Address inst_addr,
-    ExceptionCause excause,
-    bool valid) {
-    cout << "Fetch: " << (excause != EXCAUSE_NONE ? "!" : "")
-         << (valid ? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
-}
-
-void Tracer::instruction_decode(
-    const machine::Instruction &inst,
-    Address inst_addr,
-    ExceptionCause excause,
-    bool valid) {
-    cout << "Decode: " << (excause != EXCAUSE_NONE ? "!" : "")
-         << (valid ? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
-}
-
-void Tracer::instruction_execute(
-    const machine::Instruction &inst,
-    Address inst_addr,
-    ExceptionCause excause,
-    bool valid) {
-    cout << "Execute: " << (excause != EXCAUSE_NONE ? "!" : "")
-         << (valid ? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
-}
-
-void Tracer::instruction_memory(
-    const machine::Instruction &inst,
-    Address inst_addr,
-    ExceptionCause excause,
-    bool valid) {
-    cout << "Memory: " << (excause != EXCAUSE_NONE ? "!" : "")
-         << (valid ? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
-}
-
-void Tracer::instruction_writeback(
-    const machine::Instruction &inst,
-    Address inst_addr,
-    ExceptionCause excause,
-    bool valid) {
-    cout << "Writeback: " << (excause != EXCAUSE_NONE ? "!" : "")
-         << (valid ? inst.to_str(inst_addr).toStdString() : "Idle") << endl;
-}
-
-void Tracer::regs_pc_update(Address val) {
-    cout << "PC:" << hex << val.get_raw() << endl;
-}
-
-void Tracer::regs_gp_update(RegisterId i, RegisterValue val) {
-    if (gp_regs[i.data]) {
-        cout << "GP" << dec << (unsigned)i.data << ":" << hex << val.as_u32()
-             << endl;
-    }
-}
-
-void Tracer::regs_hi_lo_update(bool hi, RegisterValue val) const {
-    if (hi && r_hi) {
-        cout << "HI:" << hex << val.as_u32() << endl;
-    } else if (!hi && r_lo) {
-        cout << "LO:" << hex << val.as_u32() << endl;
+    if (trace_pc) { printf("PC: %" PRIx64 "\n", if_id.inst_addr.get_raw()); }
+    if (trace_regs_gp && wb.regwrite && regs_to_trace.at(wb.num_rd)) {
+        printf("GP %d: %" PRIx64 "\n", wb.num_rd, wb.value.as_u64());
     }
 }

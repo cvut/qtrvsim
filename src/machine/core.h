@@ -107,44 +107,12 @@ public:
     MemoryInterstage &mem_wb;
 
 signals:
-    void instruction_fetched(
-        const machine::Instruction &inst,
-        Address inst_addr,
-        ExceptionCause excause,
-        bool valid);
-    void instruction_decoded(
-        const machine::Instruction &inst,
-        Address inst_addr,
-        ExceptionCause excause,
-        bool valid);
-    void instruction_executed(
-        const machine::Instruction &inst,
-        Address inst_addr,
-        ExceptionCause excause,
-        bool valid);
-    void instruction_memory(
-        const machine::Instruction &inst,
-        Address inst_addr,
-        ExceptionCause excause,
-        bool valid);
-    void instruction_writeback(
-        const machine::Instruction &inst,
-        Address inst_addr,
-        ExceptionCause excause,
-        bool valid);
-    void instruction_program_counter(
-        const machine::Instruction &inst,
-        Address inst_addr,
-        ExceptionCause excause,
-        bool valid);
-
     void fetch_inst_addr_value(machine::Address);
     void decode_inst_addr_value(machine::Address);
     void execute_inst_addr_value(machine::Address);
     void memory_inst_addr_value(machine::Address);
     void writeback_inst_addr_value(machine::Address);
     void stop_on_exception_reached();
-
     void step_done() const;
 
 protected:

@@ -9,6 +9,7 @@ namespace machine {
 class Predictor {
 public:
     virtual Address predict(Instruction inst, Address addr) = 0;
+    virtual ~Predictor() = default;
 };
 
 // Always predicts not taking the branch, even on JAL(R) instructions

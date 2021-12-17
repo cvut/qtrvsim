@@ -4,65 +4,28 @@
 #include "machine/instruction.h"
 #include "machine/machine.h"
 #include "machine/memory/address.h"
+#include "machine/registers.h"
 
 #include <QObject>
 
-class Tracer : public QObject {
+/**
+ * Watches the step by step execution of the machine and prints requested state.
+ */
+class Tracer final : public QObject {
     Q_OBJECT
 public:
-    Tracer(machine::Machine *machine);
-
-    // Trace instructions in different stages/sections
-    void fetch();
-    void decode();
-    void execute();
-    void memory();
-    void writeback();
-    // Trace registers
-    void reg_pc();
-    void reg_gp(machine::RegisterId i);
-    void reg_lo();
-    void reg_hi();
+    explicit Tracer(machine::Machine *machine);
 
 private slots:
-    void instruction_fetch(
-        const machine::Instruction &inst,
-        machine::Address inst_addr,
-        machine::ExceptionCause excause,
-        bool valid);
-    void instruction_decode(
-        const machine::Instruction &inst,
-        machine::Address inst_addr,
-        machine::ExceptionCause excause,
-        bool valid);
-    void instruction_execute(
-        const machine::Instruction &inst,
-        machine::Address inst_addr,
-        machine::ExceptionCause excause,
-        bool valid);
-    void instruction_memory(
-        const machine::Instruction &inst,
-        machine::Address inst_addr,
-        machine::ExceptionCause excause,
-        bool valid);
-    void instruction_writeback(
-        const machine::Instruction &inst,
-        machine::Address inst_addr,
-        machine::ExceptionCause excause,
-        bool valid);
-
-    void regs_pc_update(machine::Address val);
-    void regs_gp_update(machine::RegisterId i, machine::RegisterValue val);
-    void regs_hi_lo_update(bool hi, machine::RegisterValue val) const;
+    void step_output();
 
 private:
-    machine::Machine *machine;
+    const machine::CoreState &core_state;
 
-    bool gp_regs[32] {};
-    bool r_hi, r_lo;
-
-    bool con_fetch {}, con_decode {}, con_execute {}, con_memory {},
-        con_writeback {}, con_regs_pc, con_regs_gp, con_regs_hi_lo;
+public:
+    std::array<bool, machine::REGISTER_COUNT> regs_to_trace = {};
+    bool trace_fetch = false, trace_decode = false, trace_execute = false, trace_memory = false,
+         trace_writeback = false, trace_pc = false, trace_regs_gp = false;
 };
 
 #endif // TRACER_H

@@ -1,99 +1,59 @@
 #include "reporter.h"
 
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <string>
+#include <cinttypes>
 #include <utility>
 
 using namespace machine;
 using namespace std;
 
-Reporter::Reporter(QCoreApplication *app, Machine *machine) : QObject() {
-    this->app = app;
-    this->machine = machine;
-
+Reporter::Reporter(QCoreApplication *app, Machine *machine)
+    : QObject()
+    , app(app)
+    , machine(machine) {
     connect(machine, &Machine::program_exit, this, &Reporter::machine_exit);
     connect(machine, &Machine::program_trap, this, &Reporter::machine_trap);
     connect(
         machine->core(), &Core::stop_on_exception_reached, this,
         &Reporter::machine_exception_reached);
-
-    e_regs = false;
-    e_cache_stats = false;
-    e_cycles = false;
-    e_fail = (enum FailReason)0;
 }
 
-void Reporter::regs() {
-    e_regs = true;
-}
-
-void Reporter::cache_stats() {
-    e_cache_stats = true;
-}
-
-void Reporter::cycles() {
-    e_cycles = true;
-}
-
-void Reporter::expect_fail(enum FailReason reason) {
-    e_fail = (enum FailReason)(e_fail | reason);
-}
-
-void Reporter::add_dump_range(
-    Address start,
-    size_t len,
-    const QString &path_to_write) {
+void Reporter::add_dump_range(Address start, size_t len, const QString &path_to_write) {
     dump_ranges.append({ start, len, path_to_write });
 }
 
 void Reporter::machine_exit() {
     report();
     if (e_fail != 0) {
-        cout << "Machine was expected to fail but it didn't." << endl;
+        printf("Machine was expected to fail but it didn't.\n");
         QCoreApplication::exit(1);
     } else {
         QCoreApplication::exit();
     }
 }
 
-void Reporter::machine_exception_reached() {
-    ExceptionCause excause;
-    excause = machine->get_exception_cause();
-    switch (excause) {
-    case EXCAUSE_NONE:
-        cout << "Machine stopped on NONE exception." << endl;
-        break;
-    case EXCAUSE_INT:
-        cout << "Machine stopped on INT exception." << endl;
-        break;
-    case EXCAUSE_ADDRL:
-        cout << "Machine stopped on ADDRL exception." << endl;
-        break;
-    case EXCAUSE_ADDRS:
-        cout << "Machine stopped on ADDRS exception." << endl;
-        break;
-    case EXCAUSE_IBUS:
-        cout << "Machine stopped on IBUS exception." << endl;
-        break;
-    case EXCAUSE_DBUS:
-        cout << "Machine stopped on DBUS exception." << endl;
-        break;
-    case EXCAUSE_SYSCALL:
-        cout << "Machine stopped on SYSCALL exception." << endl;
-        break;
-    case EXCAUSE_OVERFLOW:
-        cout << "Machine stopped on OVERFLOW exception." << endl;
-        break;
-    case EXCAUSE_TRAP:
-        cout << "Machine stopped on TRAP exception." << endl;
-        break;
-    case EXCAUSE_HWBREAK:
-        cout << "Machine stopped on HWBREAK exception." << endl;
-        break;
-    default: break;
+/* TODO: Decide whether this should be moved to machine to avoid duplication or kept aside as
+         a visualization concern */
+constexpr const char *get_exception_name(ExceptionCause exception_cause) {
+    switch (exception_cause) {
+    case EXCAUSE_NONE: return "NONE";
+    case EXCAUSE_INT: return "INT";
+    case EXCAUSE_UNKNOWN: return "UNKNOWN";
+    case EXCAUSE_ADDRL: return "ADDRL";
+    case EXCAUSE_ADDRS: return "ADDRS";
+    case EXCAUSE_IBUS: return "IBUS";
+    case EXCAUSE_DBUS: return "DBUS";
+    case EXCAUSE_SYSCALL: return "SYSCALL";
+    case EXCAUSE_BREAK: return "BREAK";
+    case EXCAUSE_OVERFLOW: return "OVERFLOW";
+    case EXCAUSE_TRAP: return "TRAP";
+    case EXCAUSE_HWBREAK: return "HWBREAK";
+    default: UNREACHABLE;
     }
+}
+
+void Reporter::machine_exception_reached() {
+    ExceptionCause excause = machine->get_exception_cause();
+    printf("Machine stopped on %s exception.\n", get_exception_name(excause));
     report();
     QCoreApplication::exit();
 }
@@ -102,122 +62,81 @@ void Reporter::machine_trap(SimulatorException &e) {
     report();
 
     bool expected = false;
-    auto &etype = typeid(e);
-    if (etype == typeid(SimulatorExceptionUnsupportedInstruction)) {
-        expected = e_fail & FR_I;
-    } else if (etype == typeid(SimulatorExceptionUnsupportedAluOperation)) {
-        expected = e_fail & FR_A;
-    } else if (etype == typeid(SimulatorExceptionOverflow)) {
-        expected = e_fail & FR_O;
-    } else if (etype == typeid(SimulatorExceptionUnalignedJump)) {
-        expected = e_fail & FR_J;
+    if (typeid(e) == typeid(SimulatorExceptionUnsupportedInstruction)) {
+        expected = e_fail & FR_UNSUPPORTED_INSTR;
     }
 
-    cout << "Machine trapped: " << e.msg(false).toStdString() << endl;
+    printf("Machine trapped: %s\n", qPrintable(e.msg(false)));
     QCoreApplication::exit(expected ? 0 : 1);
 }
 
-static void out_hex(ostream &out, uint64_t val, int digits) {
-    std::ios_base::fmtflags saveflg(out.flags());
-    char prevfill = out.fill('0');
-    out.setf(ios::hex, ios::basefield);
-    out << setfill('0') << setw(digits) << val;
-    out.fill(prevfill);
-    out.flags(saveflg);
+void Reporter::report() {
+    if (e_regs | e_cycles | e_cycles | e_fail) { printf("Machine state report:\n"); }
+
+    if (e_regs) { report_regs(); }
+    if (e_cache_stats) { report_caches(); }
+    if (e_cycles) {
+        printf("cycles: %" PRIu32 "\n", machine->core()->get_cycle_count());
+        printf("stalls: %" PRIu32 "\n", machine->core()->get_stall_count());
+    }
+    for (const DumpRange &range : dump_ranges) {
+        report_range(range);
+    }
 }
 
-void Reporter::report() {
-    cout << dec;
-    if (e_regs) {
-        cout << "Machine state report:" << endl;
-        cout << "PC:0x";
-        out_hex(cout, machine->registers()->read_pc().get_raw(), 8);
-        cout << endl;
-        for (int i = 0; i < 32; i++) {
-            cout << "R" << i << ":0x";
-            out_hex(cout, machine->registers()->read_gp(i).as_u64(), 8);
-            if (i != 31) {
-                cout << " ";
-            } else {
-                cout << endl;
-            }
-        }
-        cout << "HI:0x";
-        out_hex(cout, machine->registers()->read_hi_lo(true).as_u64(), 8);
-        cout << " LO:0x";
-        out_hex(cout, machine->registers()->read_hi_lo(false).as_u64(), 8);
-        cout << endl;
-        for (int i = 1; i < Cop0State::COP0REGS_CNT; i++) {
-            cout << Cop0State::cop0reg_name((Cop0State::Cop0Registers)i)
-                        .toLocal8Bit()
-                        .data()
-                 << ":0x";
-            out_hex(
-                cout,
-                machine->cop0state()->read_cop0reg((Cop0State::Cop0Registers)i),
-                8);
-            if (i != Cop0State::COP0REGS_CNT - 1) {
-                cout << " ";
-            } else {
-                cout << endl;
-            }
-        }
+void Reporter::report_regs() const {
+    printf("PC:0x%08" PRIx64 "\n", machine->registers()->read_pc().get_raw());
+    for (unsigned i = 0; i < REGISTER_COUNT; i++) {
+        report_gp_reg(i, (i == REGISTER_COUNT - 1));
     }
-    if (e_cache_stats) {
-        cout << "Cache statistics report:" << endl;
-        cout << "i-cache:reads:" << machine->cache_program()->get_read_count()
-             << endl;
-        cout << "i-cache:hit:" << machine->cache_program()->get_hit_count()
-             << endl;
-        cout << "i-cache:miss:" << machine->cache_program()->get_miss_count()
-             << endl;
-        cout << "i-cache:hit-rate:" << machine->cache_program()->get_hit_rate()
-             << endl;
-        cout << "i-cache:stalled-cycles:"
-             << machine->cache_program()->get_stall_count() << endl;
-        cout << "i-cache:improved-speed:"
-             << machine->cache_program()->get_speed_improvement() << endl;
-        cout << "d-cache:reads:" << machine->cache_data()->get_read_count()
-             << endl;
-        cout << "d-cache:writes:" << machine->cache_data()->get_write_count()
-             << endl;
-        cout << "d-cache:hit:" << machine->cache_data()->get_hit_count()
-             << endl;
-        cout << "d-cache:miss:" << machine->cache_data()->get_miss_count()
-             << endl;
-        cout << "d-cache:hit-rate:" << machine->cache_data()->get_hit_rate()
-             << endl;
-        cout << "d-cache:stalled-cycles:"
-             << machine->cache_data()->get_stall_count() << endl;
-        cout << "d-cache:improved-speed:"
-             << machine->cache_data()->get_speed_improvement() << endl;
+    for (int i = 1; i < Cop0State::COP0REGS_CNT; i++) {
+        report_cop0reg(
+            static_cast<Cop0State::Cop0Registers>(i), (i == Cop0State::COP0REGS_CNT - 1));
     }
-    if (e_cycles) {
-        cout << "d-cache:stalled-cycles:"
-             << machine->cache_data()->get_stall_count() << endl;
-        cout << "d-cache:improved-speed:"
-             << machine->cache_data()->get_speed_improvement() << endl;
+}
+
+void Reporter::report_gp_reg(unsigned int i, bool last) const {
+    printf(
+        "R%u:0x%08" PRIx64 "%s", i, machine->registers()->read_gp(i).as_u64(), (last) ? "\n" : " ");
+};
+
+void Reporter::report_cop0reg(Cop0State::Cop0Registers reg, bool last) const {
+    printf(
+        "%s: 0x%08" PRIx32 "%s", Cop0State::cop0reg_name(reg).toLocal8Bit().data(),
+        machine->cop0state()->read_cop0reg(reg), (last) ? "\n" : " ");
+}
+
+void Reporter::report_caches() const {
+    printf("Cache statistics report:\n");
+    report_cache("i-cache", *machine->cache_program());
+    report_cache("d-cache", *machine->cache_data());
+}
+
+void Reporter::report_cache(const char *cache_name, const Cache &cache) {
+    printf("%s:reads: %" PRIu32 "\n", cache_name, cache.get_read_count());
+    printf("%s:hit: %" PRIu32 "\n", cache_name, cache.get_hit_count());
+    printf("%s:miss: %" PRIu32 "\n", cache_name, cache.get_miss_count());
+    printf("%s:hit-rate: %.3lf\n", cache_name, cache.get_hit_rate());
+    printf("%s:stalled-cycles: %" PRIu32 "\n", cache_name, cache.get_stall_count());
+    printf("%s:improved-speed: %.3lf\n", cache_name, cache.get_speed_improvement());
+}
+
+void Reporter::report_range(const Reporter::DumpRange &range) const {
+    FILE *out = fopen(range.path_to_write.toLocal8Bit().data(), "w");
+    if (out == nullptr) {
+        fprintf(
+            stderr, "Failed to open %s for writing\n", range.path_to_write.toLocal8Bit().data());
+        return;
     }
-    if (e_cycles) {
-        cout << "cycles:" << machine->core()->get_cycle_count() << endl;
-        cout << "stalls:" << machine->core()->get_stall_count() << endl;
+    Address start = range.start & ~3;
+    Address end = range.start + range.len;
+    if (end < start) { end = 0xffffffff_addr; }
+    // TODO: report also cached memory?
+    const MemoryDataBus *mem = machine->memory_data_bus();
+    for (Address addr = start; addr < end; addr += 4) {
+        fprintf(out, "0x%08" PRIu32 "\n", mem->read_u32(addr, ae::INTERNAL));
     }
-    foreach (DumpRange range, dump_ranges) {
-        ofstream out;
-        out.open(
-            range.path_to_write.toLocal8Bit().data(), ios::out | ios::trunc);
-        Address start = range.start & ~3;
-        Address end = range.start + range.len;
-        if (end < start) {
-            end = 0xffffffff_addr;
-        }
-        const MemoryDataBus *mem = machine->memory_data_bus();
-        for (Address addr = start; addr < end; addr += 4) {
-            out << "0x";
-            out_hex(
-                out, mem->read_u32(addr, ae::INTERNAL), 8);
-            out << endl;
-        }
-        out.close();
+    if (!fclose(out)) {
+        fprintf(stderr, "Failure closing %s\n", range.path_to_write.toLocal8Bit().data());
     }
 }

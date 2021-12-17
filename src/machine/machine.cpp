@@ -130,6 +130,8 @@ Machine::~Machine() {
     mem_program_only = nullptr;
     delete symtab;
     symtab = nullptr;
+    delete predictor;
+    predictor = nullptr;
 }
 
 const MachineConfig &Machine::config() {

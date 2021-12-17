@@ -98,7 +98,7 @@ jobs:
       - name: Test
         working-directory: ${{ github.workspace }}/build
         shell: bash
-        run: ctest
+        run: ctest --output-on-failure --verbose
 
       - name: Store created artifacts
         uses: actions/upload-artifact@v2
