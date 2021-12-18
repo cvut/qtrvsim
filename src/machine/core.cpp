@@ -73,6 +73,10 @@ Predictor *Core::get_predictor() const {
     return predictor;
 }
 
+const CoreState &Core::get_state() const {
+    return state;
+}
+
 void Core::insert_hwbreak(Address address) {
     hw_breaks.insert(address, new hwBreak(address));
 }

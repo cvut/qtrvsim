@@ -45,6 +45,7 @@ public:
     Predictor *get_predictor() const;
     FrontendMemory *get_mem_data() const;
     FrontendMemory *get_mem_program() const;
+    const CoreState &get_state() const;
 
     void insert_hwbreak(Address address);
     void remove_hwbreak(Address address);
@@ -57,7 +58,7 @@ public:
 
     void set_c0_userlocal(uint32_t address);
 
-public:
+protected:
     CoreState state {};
 
     /**

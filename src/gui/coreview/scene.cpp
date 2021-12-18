@@ -34,7 +34,7 @@ CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &core_svg_
      *      - colored frames on special values
      */
 
-    const machine::CoreState &core_state = machine->core()->state;
+    const machine::CoreState &core_state = machine->core()->get_state();
 
     // Find all components in the DOM tree and install controllers for them.
     for (auto component : document.getRoot().findAll("data-component")) {
