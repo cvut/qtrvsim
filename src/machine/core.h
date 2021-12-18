@@ -75,7 +75,7 @@ public:
     void register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler);
     void insert_hwbreak(Address address);
     void remove_hwbreak(Address address);
-    bool is_hwbreak(Address address);
+    bool is_hwbreak(Address address) const;
     void set_stop_on_exception(enum ExceptionCause excause, bool value);
     bool get_stop_on_exception(enum ExceptionCause excause) const;
     void set_step_over_exception(enum ExceptionCause excause, bool value);
@@ -202,10 +202,16 @@ private:
     MachineConfig::HazardUnit hazard_unit;
 
     bool handle_data_hazards();
-    void process_exception(Address jump_branch_pc);
     bool detect_mispredicted_jump() const;
-    void handle_pc();
     void handle_stall(const FetchInterstage &saved_if_id);
+    /**
+     * Typically, problem in execution is discovered in memory stage. This function flushed all
+     * stages containing instructions, that would not execute in a single cycle CPU and continues
+     * execution from given address.
+     *
+     * @param next_pc   address to continue execution from
+     */
+    void flush_and_continue_from_address(Address next_pc);
 };
 
 std::tuple<bool, Address> predict(Instruction inst, Address addr);

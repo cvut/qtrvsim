@@ -81,7 +81,7 @@ void Core::remove_hwbreak(Address address) {
     delete hwbrk;
 }
 
-bool Core::is_hwbreak(Address address) {
+bool Core::is_hwbreak(Address address) const {
     hwBreak *hwbrk = state.hw_breaks.value(address);
     return hwbrk != nullptr;
 }
@@ -470,35 +470,39 @@ CorePipelined::CorePipelined(
 
 void CorePipelined::do_step(bool skip_break) {
     Pipeline &p = state.pipeline;
-    Address jump_branch_pc = mem_wb.inst_addr;
+
+    const Address jump_branch_pc = mem_wb.inst_addr;
+    const FetchInterstage saved_if_id = if_id;
 
     p.writeback = writeback(mem_wb);
     p.memory = memory(ex_mem);
     p.execute = execute(id_ex);
     p.decode = decode(if_id);
-
-    if (mem_wb.excause != EXCAUSE_NONE) { process_exception(jump_branch_pc); }
+    p.fetch = fetch(skip_break);
 
     bool stall = false;
     if (hazard_unit != MachineConfig::HU_NONE) { stall |= handle_data_hazards(); }
 
-    FetchInterstage saved_if_id = if_id;
-    p.fetch = fetch(skip_break);
-    if (!stall) {
-        handle_pc();
-    } else {
+    // After all stages are processed one of the following options will handle the PC.
+    if (mem_wb.excause != EXCAUSE_NONE) {
+        flush_and_continue_from_address(ex_mem.inst_addr);
+        handle_exception(
+            this, regs, mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, ex_mem.inst_addr,
+            jump_branch_pc, mem_wb.mem_addr);
+    } else if (stall) {
+        // PC is not allowed to advance.
         handle_stall(saved_if_id);
-    }
-}
-void CorePipelined::handle_pc() {
-    if (detect_mispredicted_jump()) {
-        regs->write_pc(mem_wb.next_pc);
-        ex_mem.flush();
-        id_ex.flush();
-        if_id.flush();
+    } else if (detect_mispredicted_jump()) {
+        flush_and_continue_from_address(mem_wb.next_pc);
     } else {
         regs->write_pc(predictor->predict(if_id.inst, if_id.inst_addr));
     }
+}
+void CorePipelined::flush_and_continue_from_address(Address next_pc) {
+    regs->write_pc(next_pc);
+    if_id.flush();
+    id_ex.flush();
+    ex_mem.flush();
 }
 
 void CorePipelined::handle_stall(const FetchInterstage &saved_if_id) {
@@ -519,14 +523,6 @@ void CorePipelined::handle_stall(const FetchInterstage &saved_if_id) {
 
 bool CorePipelined::detect_mispredicted_jump() const {
     return mem_wb.is_valid && ex_mem.is_valid && mem_wb.next_pc != ex_mem.inst_addr;
-}
-
-void CorePipelined::process_exception(Address jump_branch_pc) {
-    regs->write_pc(ex_mem.inst_addr);
-    flush();
-    handle_exception(
-        this, regs, mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, ex_mem.inst_addr, jump_branch_pc,
-        mem_wb.mem_addr);
 }
 
 template<typename InterstageReg>
