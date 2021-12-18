@@ -18,34 +18,10 @@
 
 namespace machine {
 
-class Core;
+using std::array;
 
-class ExceptionHandler : public QObject {
-    Q_OBJECT
-public:
-    virtual bool handle_exception(
-        Core *core,
-        Registers *regs,
-        ExceptionCause excause,
-        Address inst_addr,
-        Address next_addr,
-        Address jump_branch_pc,
-        Address mem_ref_addr)
-        = 0;
-};
-
-class StopExceptionHandler : public ExceptionHandler {
-    Q_OBJECT
-public:
-    bool handle_exception(
-        Core *core,
-        Registers *regs,
-        ExceptionCause excause,
-        Address inst_addr,
-        Address next_addr,
-        Address jump_branch_pc,
-        Address mem_ref_addr) override;
-};
+class ExceptionHandler;
+class StopExceptionHandler;
 
 class Core : public QObject {
     Q_OBJECT
@@ -55,27 +31,25 @@ public:
         Predictor *predictor,
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
-        unsigned int min_cache_row_size = 1,
-        Cop0State *cop0state = nullptr,
-        Xlen xlen = Xlen::_32);
+        Cop0State *cop0state,
+        Xlen xlen);
 
-    void step(bool skip_break = false); // Do single step
-    void reset();                       // Reset core (only core, memory and registers has to be
-                                        // reseted separately)
+    void step(bool skip_break = false);
+    void reset(); // Reset core (only core, memory and registers has to be reset separately).
 
-    unsigned get_cycle_count() const; // Returns number of executed
-                                      // get_cycle_count
-    unsigned get_stall_count() const; // Returns number of stall get_cycle_count
+    unsigned get_cycle_count() const;
+    unsigned get_stall_count() const;
 
-    Registers *get_regs();
-    Cop0State *get_cop0state();
-    Predictor *get_predictor();
-    FrontendMemory *get_mem_data();
-    FrontendMemory *get_mem_program();
-    void register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler);
+    Registers *get_regs() const;
+    Cop0State *get_cop0state() const;
+    Predictor *get_predictor() const;
+    FrontendMemory *get_mem_data() const;
+    FrontendMemory *get_mem_program() const;
+
     void insert_hwbreak(Address address);
     void remove_hwbreak(Address address);
     bool is_hwbreak(Address address) const;
+    void register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler);
     void set_stop_on_exception(enum ExceptionCause excause, bool value);
     bool get_stop_on_exception(enum ExceptionCause excause) const;
     void set_step_over_exception(enum ExceptionCause excause, bool value);
@@ -111,7 +85,7 @@ signals:
     void step_done(const CoreState &);
 
 protected:
-    virtual void do_step(bool skip_break = false) = 0;
+    virtual void do_step(bool skip_break) = 0;
     virtual void do_reset() = 0;
 
     bool handle_exception(
@@ -133,6 +107,10 @@ protected:
     BORROWED Cop0State *const cop0state;
     BORROWED Predictor *const predictor;
     BORROWED FrontendMemory *const mem_data, *const mem_program;
+
+    array<bool, EXCAUSE_COUNT> stop_on_exception {};
+    array<bool, EXCAUSE_COUNT> step_over_exception {};
+    QMap<Address, OWNED hwBreak *> hw_breaks {};
     QMap<ExceptionCause, OWNED ExceptionHandler *> ex_handlers;
     Box<ExceptionHandler> ex_default_handler;
 
@@ -149,7 +127,6 @@ protected:
      * previous stage. If not, mis-prediction occurred and has to be resolved.
      */
     Address compute_next_pc(const ExecuteInterstage &exec) const;
-    void flush();
 
     enum ExceptionCause memory_special(
         enum AccessControl memctl,
@@ -168,12 +145,11 @@ public:
         Predictor *predictor,
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
-        unsigned int min_cache_row_size,
         Cop0State *cop0state,
         Xlen xlen);
 
 protected:
-    void do_step(bool skip_break = false) override;
+    void do_step(bool skip_break) override;
     void do_reset() override;
 
 private:
@@ -193,7 +169,7 @@ public:
         Xlen xlen);
 
 protected:
-    void do_step(bool skip_break = false) override;
+    void do_step(bool skip_break) override;
     void do_reset() override;
 
 private:
@@ -212,7 +188,32 @@ private:
     void flush_and_continue_from_address(Address next_pc);
 };
 
-std::tuple<bool, Address> predict(Instruction inst, Address addr);
+class ExceptionHandler : public QObject {
+    Q_OBJECT
+public:
+    virtual bool handle_exception(
+        Core *core,
+        Registers *regs,
+        ExceptionCause excause,
+        Address inst_addr,
+        Address next_addr,
+        Address jump_branch_pc,
+        Address mem_ref_addr)
+        = 0;
+};
+
+class StopExceptionHandler : public ExceptionHandler {
+    Q_OBJECT
+public:
+    bool handle_exception(
+        Core *core,
+        Registers *regs,
+        ExceptionCause excause,
+        Address inst_addr,
+        Address next_addr,
+        Address jump_branch_pc,
+        Address mem_ref_addr) override;
+};
 
 } // namespace machine
 

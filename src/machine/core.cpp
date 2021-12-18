@@ -13,7 +13,6 @@ Core::Core(
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
-    unsigned int min_cache_row_size,
     Cop0State *cop0state,
     Xlen xlen)
     : if_id(state.pipeline.fetch.final)
@@ -28,12 +27,10 @@ Core::Core(
     , mem_program(mem_program)
     , ex_handlers()
     , ex_default_handler(new StopExceptionHandler()) {
-    this->state.min_cache_row_size = min_cache_row_size;
-    this->state.hwr_userlocal = 0xe0000000;
     if (cop0state != nullptr) { cop0state->setup_core(this); }
-    state.stop_on_exception.fill(true);
-    state.step_over_exception.fill(true);
-    state.step_over_exception[EXCAUSE_INT] = false;
+    stop_on_exception.fill(true);
+    step_over_exception.fill(true);
+    step_over_exception[EXCAUSE_INT] = false;
 }
 
 void Core::step(bool skip_break) {
@@ -56,50 +53,54 @@ unsigned Core::get_stall_count() const {
     return state.stall_count;
 }
 
-Registers *Core::get_regs() {
+Registers *Core::get_regs() const {
     return regs;
 }
 
-Cop0State *Core::get_cop0state() {
+Cop0State *Core::get_cop0state() const {
     return cop0state;
 }
 
-FrontendMemory *Core::get_mem_data() {
+FrontendMemory *Core::get_mem_data() const {
     return mem_data;
 }
 
-FrontendMemory *Core::get_mem_program() {
+FrontendMemory *Core::get_mem_program() const {
     return mem_program;
 }
 
+Predictor *Core::get_predictor() const {
+    return predictor;
+}
+
 void Core::insert_hwbreak(Address address) {
-    state.hw_breaks.insert(address, new hwBreak(address));
+    hw_breaks.insert(address, new hwBreak(address));
 }
 
 void Core::remove_hwbreak(Address address) {
-    hwBreak *hwbrk = state.hw_breaks.take(address);
+    hwBreak *hwbrk = hw_breaks.take(address);
     delete hwbrk;
 }
 
 bool Core::is_hwbreak(Address address) const {
-    hwBreak *hwbrk = state.hw_breaks.value(address);
+    hwBreak *hwbrk = hw_breaks.value(address);
     return hwbrk != nullptr;
 }
 
 void Core::set_stop_on_exception(enum ExceptionCause excause, bool value) {
-    state.stop_on_exception[excause] = value;
+    stop_on_exception[excause] = value;
 }
 
 bool Core::get_stop_on_exception(enum ExceptionCause excause) const {
-    return state.stop_on_exception[excause];
+    return stop_on_exception[excause];
 }
 
 void Core::set_step_over_exception(enum ExceptionCause excause, bool value) {
-    state.step_over_exception[excause] = value;
+    step_over_exception[excause] = value;
 }
 
 bool Core::get_step_over_exception(enum ExceptionCause excause) const {
-    return state.step_over_exception[excause];
+    return step_over_exception[excause];
 }
 
 void Core::register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler) {
@@ -137,7 +138,7 @@ bool Core::handle_exception(
     }
 
     bool ret = false;
-    ExceptionHandler *exhandler = ex_handlers.value(excause, ex_default_handler.get());
+    ExceptionHandler *exhandler = ex_handlers.value(excause, ex_default_handler.data());
     if (exhandler != nullptr) {
         ret = exhandler->handle_exception(
             this, regs, excause, inst_addr, next_addr, jump_branch_pc, mem_ref_addr);
@@ -149,7 +150,6 @@ bool Core::handle_exception(
 }
 
 void Core::set_c0_userlocal(uint32_t address) {
-    state.hwr_userlocal = address;
     if (cop0state != nullptr) {
         if (address != cop0state->read_cop0reg(Cop0State::UserLocal)) {
             cop0state->write_cop0reg(Cop0State::UserLocal, address);
@@ -193,7 +193,7 @@ FetchState Core::fetch(bool skip_break) {
     Instruction inst(mem_program->read_u32(inst_addr));
 
     if (!skip_break) {
-        hwBreak *brk = state.hw_breaks.value(inst_addr);
+        hwBreak *brk = hw_breaks.value(inst_addr);
         if (brk != nullptr) { excause = EXCAUSE_HWBREAK; }
     }
     if (cop0state != nullptr && excause == EXCAUSE_NONE) {
@@ -402,10 +402,6 @@ Address Core::compute_next_pc(const ExecuteInterstage &exec) const {
     return exec.inst_addr + 4;
 }
 
-void Core::flush() {
-    state.pipeline = {};
-}
-
 uint64_t Core::get_xlen_from_reg(RegisterValue reg) const {
     switch (this->xlen) {
     case Xlen::_32: return reg.as_u32();
@@ -418,10 +414,9 @@ CoreSingle::CoreSingle(
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
-    unsigned int min_cache_row_size,
     Cop0State *cop0state,
     Xlen xlen)
-    : Core(regs, predictor, mem_program, mem_data, min_cache_row_size, cop0state, xlen) {
+    : Core(regs, predictor, mem_program, mem_data, cop0state, xlen) {
     reset();
 }
 
@@ -459,7 +454,7 @@ CorePipelined::CorePipelined(
     unsigned int min_cache_row_size,
     Cop0State *cop0state,
     Xlen xlen)
-    : Core(regs, predictor, mem_program, mem_data, min_cache_row_size, cop0state, xlen) {
+    : Core(regs, predictor, mem_program, mem_data, cop0state, xlen) {
     this->hazard_unit = hazard_unit;
     reset();
 }
