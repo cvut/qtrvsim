@@ -113,8 +113,6 @@ void Core::register_exception_handler(ExceptionCause excause, ExceptionHandler *
 }
 
 bool Core::handle_exception(
-    Core *core,
-    Registers *regs,
     ExceptionCause excause,
     Instruction inst,
     Address inst_addr,
@@ -142,12 +140,12 @@ bool Core::handle_exception(
     ExceptionHandler *exhandler = ex_handlers.value(excause);
     if (exhandler != nullptr) {
         ret = exhandler->handle_exception(
-            core, regs, excause, inst_addr, next_addr, jump_branch_pc, mem_ref_addr);
+            this, regs, excause, inst_addr, next_addr, jump_branch_pc, mem_ref_addr);
     } else if (ex_default_handler != nullptr) {
         ret = ex_default_handler->handle_exception(
-            core, regs, excause, inst_addr, next_addr, jump_branch_pc, mem_ref_addr);
+            this, regs, excause, inst_addr, next_addr, jump_branch_pc, mem_ref_addr);
     }
-    if (get_stop_on_exception(excause)) { emit core->stop_on_exception_reached(); }
+    if (get_stop_on_exception(excause)) { emit stop_on_exception_reached(); }
 
     return ret;
 }
@@ -442,8 +440,8 @@ void CoreSingle::do_step(bool skip_break) {
 
     if (mem_wb.excause != EXCAUSE_NONE) {
         handle_exception(
-            this, regs, mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, regs->read_pc(),
-            prev_inst_addr, mem_wb.mem_addr);
+            mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, regs->read_pc(), prev_inst_addr,
+            mem_wb.mem_addr);
         return;
     }
     prev_inst_addr = mem_wb.inst_addr;
@@ -487,8 +485,8 @@ void CorePipelined::do_step(bool skip_break) {
     if (mem_wb.excause != EXCAUSE_NONE) {
         flush_and_continue_from_address(ex_mem.inst_addr);
         handle_exception(
-            this, regs, mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, ex_mem.inst_addr,
-            jump_branch_pc, mem_wb.mem_addr);
+            mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, ex_mem.inst_addr, jump_branch_pc,
+            mem_wb.mem_addr);
     } else if (stall) {
         // PC is not allowed to advance.
         handle_stall(saved_if_id);

@@ -115,8 +115,6 @@ protected:
     virtual void do_reset() = 0;
 
     bool handle_exception(
-        Core *core,
-        Registers *regs,
         ExceptionCause excause,
         Instruction inst,
         Address inst_addr,
