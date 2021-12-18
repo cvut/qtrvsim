@@ -33,6 +33,7 @@ public slots:
     void memory_inst_addr(machine::Address addr);
     void writeback_inst_addr(machine::Address addr);
     void report_error(const QString &error);
+    void update_pipeline_addrs(const machine::CoreState &p);
 
 private:
     enum FollowSource {
@@ -46,6 +47,7 @@ private:
     };
 
     void update_follow_position();
+
     enum FollowSource follow_source;
     machine::Address follow_addr[FOLLOWSRC_COUNT] {};
     QSettings *settings;

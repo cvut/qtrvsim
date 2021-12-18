@@ -16,6 +16,7 @@
 #define STAGES_H
 
 #include "instruction.h"
+#include "machinedefs.h"
 #include "memory/address.h"
 
 #include <cstdint>
@@ -31,15 +32,13 @@ enum ForwardFrom {
 
 struct FetchInterstage {
     Instruction inst = Instruction::NOP; // Loaded instruction
-    Address inst_addr = 0_addr;          // Address of instruction
+    Address inst_addr = STAGEADDR_NONE;  // Address of instruction
     enum ExceptionCause excause = EXCAUSE_NONE;
     bool is_valid = false;
 
 public:
     /** Reset to value corresponding to NOP. */
-    void flush() {
-        *this = {};
-    }
+    void flush() { *this = {}; }
 };
 
 struct FetchInternalState {
@@ -87,7 +86,7 @@ struct DecodeInterstage {
                                          // rd according to regd)
     ForwardFrom ff_rs = FORWARD_NONE;
     ForwardFrom ff_rt = FORWARD_NONE;
-    Address inst_addr = 0_addr; // Address of instruction
+    Address inst_addr = STAGEADDR_NONE; // Address of instruction
     enum ExceptionCause excause = EXCAUSE_NONE;
     bool stall = false;
     bool is_valid = false;
@@ -96,9 +95,7 @@ struct DecodeInterstage {
 
 public:
     /** Reset to value corresponding to NOP. */
-    void flush() {
-        *this = {};
-    }
+    void flush() { *this = {}; }
 };
 
 struct DecodeInternalState {
@@ -142,16 +139,14 @@ struct ExecuteInterstage {
     enum AccessControl memctl = AC_NONE;
     RegisterValue val_rt = 0;
     uint8_t num_rd = 0;
-    RegisterValue alu_val = 0;  // Result of ALU execution
-    Address inst_addr = 0_addr; // Address of instruction
+    RegisterValue alu_val = 0;          // Result of ALU execution
+    Address inst_addr = STAGEADDR_NONE; // Address of instruction
     enum ExceptionCause excause = EXCAUSE_NONE;
     Address branch_target = 0_addr;
 
 public:
     /** Reset to value corresponding to NOP. */
-    void flush() {
-        *this = {};
-    }
+    void flush() { *this = {}; }
 };
 
 struct ExecuteInternalState {
@@ -204,18 +199,16 @@ struct MemoryInterstage {
     bool regwrite = true;
     uint8_t num_rd = 0;
     RegisterValue towrite_val = 0;
-    Address mem_addr = 0_addr;  // Address used to access memory
-    Address inst_addr = 0_addr; // Address of instruction
-    Address next_pc = 0_addr;   // computed and expected `inst_addr` of next instruction in
-                                // pipeline.
+    Address mem_addr = 0_addr;          // Address used to access memory
+    Address inst_addr = STAGEADDR_NONE; // Address of instruction
+    Address next_pc = 0_addr;           // computed and expected `inst_addr` of next instruction in
+                                        // pipeline.
     enum ExceptionCause excause = EXCAUSE_NONE;
     bool is_valid = false;
 
 public:
     /** Reset to value corresponding to NOP. */
-    void flush() {
-        *this = {};
-    }
+    void flush() { *this = {}; }
 };
 
 struct MemoryInternalState {
@@ -248,7 +241,7 @@ struct MemoryState {
 
 struct WritebackInternalState {
     Instruction inst = Instruction::NOP;
-    Address inst_addr = 0_addr;
+    Address inst_addr = STAGEADDR_NONE;
     bool regwrite = true;
     bool memtoreg = false;
     uint8_t num_rd = 0;
