@@ -119,7 +119,6 @@ bool Core::handle_exception(
     Address next_addr,
     Address jump_branch_pc,
     Address mem_ref_addr) {
-    bool ret = false;
     if (excause == EXCAUSE_UNKNOWN) {
         throw SIMULATOR_EXCEPTION(
             UnsupportedInstruction, "Instruction with following encoding is not supported",
@@ -137,14 +136,13 @@ bool Core::handle_exception(
         }
     }
 
-    ExceptionHandler *exhandler = ex_handlers.value(excause);
+    bool ret = false;
+    ExceptionHandler *exhandler = ex_handlers.value(excause, ex_default_handler.get());
     if (exhandler != nullptr) {
         ret = exhandler->handle_exception(
             this, regs, excause, inst_addr, next_addr, jump_branch_pc, mem_ref_addr);
-    } else if (ex_default_handler != nullptr) {
-        ret = ex_default_handler->handle_exception(
-            this, regs, excause, inst_addr, next_addr, jump_branch_pc, mem_ref_addr);
     }
+
     if (get_stop_on_exception(excause)) { emit stop_on_exception_reached(); }
 
     return ret;
