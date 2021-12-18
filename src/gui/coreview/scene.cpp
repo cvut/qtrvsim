@@ -31,7 +31,6 @@ CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &core_svg_
     /*
      * TODO:
      *      Components not implemented:
-     *      - MUX
      *      - colored frames on special values
      */
 
