@@ -13,10 +13,13 @@
 using std::array;
 using std::bitset;
 
+/**
+ * NOTE: RV64 ready
+ */
 class RegistersDock final : public QDockWidget {
     Q_OBJECT
 public:
-    explicit RegistersDock(QWidget *parent);
+    explicit RegistersDock(QWidget *parent, machine::Xlen xlen);
     ~RegistersDock() override = default;
 
     void connectToMachine(machine::Machine *machine);
@@ -28,6 +31,8 @@ private slots:
     void clear_highlights();
 
 private:
+    const machine::Xlen xlen;
+
     Box<QScrollArea> scroll_area;
     Box<StaticTable> table_widget;
 
@@ -41,7 +46,7 @@ private:
     QPalette pal_read;
 
 private:
-    static void setLabelHexValue(QLabel *label, uint32_t val);
+    void setRegisterValueToLabel(QLabel *label, machine::RegisterValue value);
     BORROWED QLabel *addRegisterLabel(const QString &title);
     QPalette createPalette(const QColor &color) const;
 };

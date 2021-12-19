@@ -2,8 +2,9 @@
 
 #include "machine/instruction.h"
 
-RegistersDock::RegistersDock(QWidget *parent)
+RegistersDock::RegistersDock(QWidget *parent, machine::Xlen xlen)
     : QDockWidget(parent)
+    , xlen(xlen)
     , scroll_area(new QScrollArea(this))
     , table_widget(new StaticTable(scroll_area.data()))
     , pal_normal(createPalette(QColor(0, 0, 0)))
@@ -15,11 +16,11 @@ RegistersDock::RegistersDock(QWidget *parent)
     for (size_t i = 0; i < gp.size(); i++) {
         gp[i] = addRegisterLabel(QString("x%1/%2").arg(i).arg(machine::Rv_regnames[i]));
     }
-
     pc = addRegisterLabel("pc");
-    scroll_area->setWidget(table_widget.data());
 
+    scroll_area->setWidget(table_widget.data());
     setWidget(scroll_area.data());
+
     setObjectName("Registers");
     setWindowTitle("Registers");
 }
@@ -53,9 +54,9 @@ void RegistersDock::connectToMachine(machine::Machine *machine) {
     const machine::Registers *regs = machine->registers();
 
     // Load values
-    setLabelHexValue(pc, regs->read_pc().get_raw());
-    for (size_t i = 0; i < 32; i++) {
-        setLabelHexValue(gp[i], regs->read_gp(i).as_u32());
+    setRegisterValueToLabel(pc, regs->read_pc().get_raw());
+    for (size_t i = 0; i < gp.size(); i++) {
+        setRegisterValueToLabel(gp[i], regs->read_gp(i).as_u32());
     }
 
     connect(regs, &machine::Registers::pc_update, this, &RegistersDock::pc_changed);
@@ -65,11 +66,11 @@ void RegistersDock::connectToMachine(machine::Machine *machine) {
 }
 
 void RegistersDock::pc_changed(machine::Address val) {
-    setLabelHexValue(pc, val.get_raw());
+    setRegisterValueToLabel(pc, val.get_raw());
 }
 
 void RegistersDock::gp_changed(machine::RegisterId i, machine::RegisterValue val) {
-    setLabelHexValue(gp[i], val.as_u32());
+    setRegisterValueToLabel(gp[i], val.as_u32());
     gp[i]->setPalette(pal_updated);
     gp_highlighted[i] = true;
 }
@@ -91,8 +92,8 @@ void RegistersDock::clear_highlights() {
     gp_highlighted.reset();
 }
 
-void RegistersDock::setLabelHexValue(QLabel *label, uint32_t value) {
-    label->setText(QString("0x%1").arg(value, 8, 16));
+void RegistersDock::setRegisterValueToLabel(QLabel *label, machine::RegisterValue value) {
+    label->setText(QString("0x%1").arg(value.as_xlen(xlen), 0, 16));
 }
 
 QPalette RegistersDock::createPalette(const QColor &color) const {
