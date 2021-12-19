@@ -12,13 +12,6 @@ using std::uint32_t;
 
 namespace machine {
 
-struct hwBreak {
-    explicit hwBreak(Address addr) : addr(addr), flags(0), count(0) {};
-    Address addr;
-    unsigned int flags;
-    unsigned int count;
-};
-
 struct CoreState {
     Pipeline pipeline = {};
     uint32_t stall_count = 0;
