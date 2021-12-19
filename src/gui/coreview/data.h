@@ -121,7 +121,7 @@ const struct {
         { QStringLiteral("exec-rs2"), LENS(CoreState, pipeline.execute.internal.rt) },
         { QStringLiteral("wb"), LENS(CoreState, pipeline.writeback.internal.value) },
     };
-    const unordered_map<QStringView, Lens<CoreState, uint8_t>> REG_ID {
+    const unordered_map<QStringView, Lens<CoreState, machine::RegisterId>> REG_ID {
         { QStringLiteral("decode-rd"), LENS(CoreState, pipeline.decode.result.num_rd) },
         { QStringLiteral("exec-rd"), LENS(CoreState, pipeline.execute.result.num_rd) },
         { QStringLiteral("mem-rd"), LENS(CoreState, pipeline.memory.result.num_rd) },

@@ -14,15 +14,14 @@ namespace machine {
 /**
  * General-purpose register count
  */
-static const size_t REGISTER_COUNT = 32;
+constexpr size_t REGISTER_COUNT = 32;
 
 /**
  * General-purpose register identifier
  */
 class RegisterId {
 public:
-    // TODO: Should this constructor allow implicit conversion?
-    inline RegisterId(uint8_t value); // NOLINT(google-explicit-constructor)
+    inline constexpr RegisterId(uint8_t value); // NOLINT(google-explicit-constructor)
     inline RegisterId();
 
     constexpr operator size_t() const { return data; }; // NOLINT(google-explicit-constructor)
@@ -31,14 +30,15 @@ private:
     uint8_t data;
 };
 
-inline RegisterId::RegisterId(uint8_t value) : data(value) {
+inline constexpr RegisterId::RegisterId(uint8_t value) : data(value) {
     // Bounds on the id are checked at creation time and its value is immutable.
     // Therefore, all check at when used are redundant.
     // Main advantage is, that possible errors will appear when creating the
     // value, which is probably close to the bug source.
+
     SANITY_ASSERT(
-        data < REGISTER_COUNT, QString("Trying to create register id for out-of-bounds register ")
-                                   + QString::number(data));
+        value < REGISTER_COUNT, QString("Trying to create register id for out-of-bounds register ")
+                                    + QString::number(data));
 }
 inline RegisterId::RegisterId() : RegisterId(0) {}
 

@@ -18,6 +18,7 @@
 #include "instruction.h"
 #include "machinedefs.h"
 #include "memory/address.h"
+#include "registers.h"
 
 #include <cstdint>
 #include <utility>
@@ -90,9 +91,9 @@ struct DecodeInterstage {
     ForwardFrom ff_rt = FORWARD_NONE;
     AluOp aluop = AluOp::ADD;       // Decoded ALU operation
     AccessControl memctl = AC_NONE; // Decoded memory access type
-    uint8_t num_rs = 0;             // Number of the register s1
-    uint8_t num_rt = 0;             // Number of the register s2
-    uint8_t num_rd = 0;             // Number of the register d
+    RegisterId num_rs = 0;             // Number of the register s1
+    RegisterId num_rt = 0;             // Number of the register s2
+    RegisterId num_rd = 0;             // Number of the register d
     bool memread = false;           // If memory should be read
     bool memwrite = false;          // If memory should write input
     bool alusrc = false;            // If second value to alu is immediate value (rt used otherwise)
@@ -149,7 +150,7 @@ struct ExecuteInterstage {
     RegisterValue alu_val = 0; // Result of ALU execution
     ExceptionCause excause = EXCAUSE_NONE;
     AccessControl memctl = AC_NONE;
-    uint8_t num_rd = 0;
+    RegisterId num_rd = 0;
     bool memread = false;
     bool memwrite = false;
     bool regwrite = true;
@@ -217,7 +218,7 @@ struct MemoryInterstage {
     Address mem_addr = 0_addr; // Address used to access memory
     RegisterValue towrite_val = 0;
     ExceptionCause excause = EXCAUSE_NONE;
-    uint8_t num_rd = 0;
+    RegisterId num_rd = 0;
     bool memtoreg = false;
     bool regwrite = true;
     bool is_valid = false;
@@ -259,7 +260,7 @@ struct WritebackInternalState {
     Instruction inst = Instruction::NOP;
     Address inst_addr = STAGEADDR_NONE;
     RegisterValue value = 0;
-    uint8_t num_rd = 0;
+    RegisterId num_rd = 0;
     bool regwrite = true;
     bool memtoreg = false;
 };
