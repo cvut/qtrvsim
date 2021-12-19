@@ -61,14 +61,6 @@ static bool fill_argdesbycode() {
 
 bool argdesbycode_filled = fill_argdesbycode();
 
-#define REGISTER_CODES 32
-
-const char *const Rv_regnames[32] = {
-    "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
-    "a1",   "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
-    "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
-};
-
 #define FLAGS_ALU_I (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_ALU_REQ_RS)
 #define FLAGS_ALU_I_LOAD                                                       \
     (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM         \

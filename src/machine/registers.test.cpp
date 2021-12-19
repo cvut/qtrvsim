@@ -19,14 +19,6 @@ void TestRegisters::registers_rw_gp() {
     }
 }
 
-void TestRegisters::registers_rw_hi_lo() {
-    Registers r;
-    r.write_hi_lo(false, 0xee);
-    r.write_hi_lo(true, 0xaa);
-    QCOMPARE(r.read_hi_lo(false), RegisterValue(0xee));
-    QCOMPARE(r.read_hi_lo(true), RegisterValue(0xaa));
-}
-
 void TestRegisters::registers_compare() {
     Registers r1, r2;
     QCOMPARE(r1, r2);
@@ -39,11 +31,6 @@ void TestRegisters::registers_compare() {
     r1.write_pc(r1.read_pc() + 4);
     QVERIFY(r1 != r2);
     r2.write_pc(r2.read_pc() + 4);
-    QCOMPARE(r1, r2);
-    // LO/HI (testing just one as they have common codepath)
-    r1.write_hi_lo(false, 18);
-    QVERIFY(r1 != r2);
-    r2.write_hi_lo(false, 18);
     QCOMPARE(r1, r2);
     // Now let's try copy (and verify only with gp this time)
     Registers r3(r1);

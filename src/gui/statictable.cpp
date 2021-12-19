@@ -27,9 +27,9 @@ StaticTableLayout::StaticTableLayout(
 }
 
 StaticTableLayout::~StaticTableLayout() {
-    for (int i = 0; i < items.size(); i++) {
-        for (int y = 0; y < items[i].size(); y++)
-            delete items[i][y];
+    for (auto &row : items) {
+        for (auto &col : row)
+            delete col;
     }
 }
 

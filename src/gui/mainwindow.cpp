@@ -258,7 +258,7 @@ void MainWindow::create_core(
         &machine::Machine::pause);
 
     // Setup docks
-    registers->setup(machine);
+    registers->connectToMachine(machine);
     program->setup(machine);
     memory->setup(machine);
     cache_program->setup(machine->cache_program());

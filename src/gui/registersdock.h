@@ -5,46 +5,45 @@
 #include "statictable.h"
 
 #include <QDockWidget>
-#include <QFormLayout>
 #include <QLabel>
 #include <QPalette>
-#include <QPropertyAnimation>
 #include <QScrollArea>
+#include <bitset>
 
-class RegistersDock : public QDockWidget {
+using std::array;
+using std::bitset;
+
+class RegistersDock final : public QDockWidget {
     Q_OBJECT
 public:
-    RegistersDock(QWidget *parent);
-    ~RegistersDock() override;
+    explicit RegistersDock(QWidget *parent);
+    ~RegistersDock() override = default;
 
-    void setup(machine::Machine *machine);
+    void connectToMachine(machine::Machine *machine);
 
 private slots:
     void pc_changed(machine::Address val);
     void gp_changed(machine::RegisterId i, machine::RegisterValue val);
-    void hi_lo_changed(bool hi, machine::RegisterValue val);
     void gp_read(machine::RegisterId i, machine::RegisterValue val);
-    void hi_lo_read(bool hi, machine::RegisterValue val);
     void clear_highlights();
 
 private:
-    StaticTable *widg;
-    QScrollArea *scrollarea;
+    Box<QScrollArea> scroll_area;
+    Box<StaticTable> table_widget;
 
-    QLabel *pc {};
-    QLabel *hi {};
-    QLabel *lo {};
-    QLabel *gp[32] {};
+    BORROWED QLabel *pc {};
+    array<BORROWED QLabel *, machine::REGISTER_COUNT> gp {};
 
-    uint32_t gp_highlighted;
-    bool hi_highlighted;
-    bool lo_highlighted;
+    bitset<machine::REGISTER_COUNT> gp_highlighted { false };
 
     QPalette pal_normal;
     QPalette pal_updated;
     QPalette pal_read;
 
-    void labelVal(QLabel *label, uint32_t val);
+private:
+    static void setLabelHexValue(QLabel *label, uint32_t val);
+    BORROWED QLabel *addRegisterLabel(const QString &title);
+    QPalette createPalette(const QColor &color) const;
 };
 
 #endif // REGISTERSDOCK_H
