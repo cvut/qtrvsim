@@ -55,7 +55,6 @@ set(machine_HEADERS
 		simulator_exception.h
 		symboltable.h
 		utils.h
-		machine_global.h
 		execute/alu_op.h
 		execute/mul_op.h
 		)
