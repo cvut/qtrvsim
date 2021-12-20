@@ -137,6 +137,14 @@ protected:
         RegisterValue &towrite_val,
         RegisterValue rt_value,
         Address mem_addr);
+
+    /**
+     * Clears both stage and interstage register as if instruction has never been executed.
+     * @tparam T      stage state type
+     * @param stage   stage state
+     */
+    template<typename T>
+    void set_stage_to_stall(T &stage);
 };
 
 class CoreSingle : public Core {
@@ -187,6 +195,7 @@ private:
      * @param next_pc   address to continue execution from
      */
     void flush_and_continue_from_address(Address next_pc);
+    bool is_exception_in_pipeline();
 };
 
 class ExceptionHandler : public QObject {

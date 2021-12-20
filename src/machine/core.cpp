@@ -412,6 +412,11 @@ uint64_t Core::get_xlen_from_reg(RegisterValue reg) const {
     case Xlen::_64: return reg.as_u64();
     }
 }
+template<typename T>
+void Core::set_stage_to_stall(T &stage) {
+    if (stage.final.is_valid) { state.stall_count += 1; }
+    stage = {};
+}
 
 CoreSingle::CoreSingle(
     Registers *regs,
@@ -479,24 +484,37 @@ void CorePipelined::do_step(bool skip_break) {
     if (hazard_unit != MachineConfig::HU_NONE) { stall |= handle_data_hazards(); }
 
     // After all stages are processed one of the following options will handle the PC.
+    // The order is critical.
     if (mem_wb.excause != EXCAUSE_NONE) {
-        flush_and_continue_from_address(ex_mem.inst_addr);
+        set_stage_to_stall(p.fetch);
+        set_stage_to_stall(p.decode);
+        set_stage_to_stall(p.execute);
+        regs->write_pc(mem_wb.next_pc);
         handle_exception(
-            mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, ex_mem.inst_addr, jump_branch_pc,
+            mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, mem_wb.next_pc, jump_branch_pc,
             mem_wb.mem_addr);
+    } else if (detect_mispredicted_jump()) {
+        flush_and_continue_from_address(mem_wb.next_pc);
+    } else if (ex_mem.excause != EXCAUSE_NONE) {
+        set_stage_to_stall(p.fetch);
+        set_stage_to_stall(p.decode);
+    } else if (id_ex.excause != EXCAUSE_NONE) {
+        set_stage_to_stall(p.fetch);
     } else if (stall) {
         // PC is not allowed to advance.
         handle_stall(saved_if_id);
-    } else if (detect_mispredicted_jump()) {
-        flush_and_continue_from_address(mem_wb.next_pc);
     } else {
         regs->write_pc(predictor->predict(if_id.inst, if_id.inst_addr));
     }
 }
+
 void CorePipelined::flush_and_continue_from_address(Address next_pc) {
     regs->write_pc(next_pc);
+    if (if_id.is_valid) { state.stall_count += 1; }
     if_id.flush();
+    if (id_ex.is_valid) { state.stall_count += 1; }
     id_ex.flush();
+    if (ex_mem.is_valid) { state.stall_count += 1; }
     ex_mem.flush();
 }
 
