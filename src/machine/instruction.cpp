@@ -760,3 +760,6 @@ void Instruction::append_recognized_registers(QStringList &list) {
         if (name != "") { list.append(name); }
     }
 }
+uint8_t Instruction::size() const {
+    return 4;
+}

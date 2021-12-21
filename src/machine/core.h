@@ -119,17 +119,15 @@ protected:
 
     FetchState fetch(PCInterstage pc, bool skip_break);
     DecodeState decode(const FetchInterstage &);
-    ExecuteState execute(const DecodeInterstage &);
+    static ExecuteState execute(const DecodeInterstage &);
     MemoryState memory(const ExecuteInterstage &);
     WritebackState writeback(const MemoryInterstage &);
 
     /**
-     * This function computes the PC value, the next executed instruction should have. The word
+     * This function computes the address, the next executed instruction should be on. The word
      * `computed` is used in contrast with predicted value by the branch predictor.
-     * Under normal circumstances, the computed PC value is the same as the PC on instruction in
-     * previous stage. If not, mis-prediction occurred and has to be resolved.
      */
-    Address compute_next_pc(const ExecuteInterstage &exec) const;
+    Address compute_next_inst_addr(const ExecuteInterstage &exec, bool branch_taken) const;
 
     enum ExceptionCause memory_special(
         enum AccessControl memctl,
@@ -189,7 +187,6 @@ private:
      * @param next_pc   address to continue execution from
      */
     void flush_and_continue_from_address(Address next_pc);
-    bool is_exception_in_pipeline();
 };
 
 class ExceptionHandler : public QObject {

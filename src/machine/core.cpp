@@ -195,31 +195,32 @@ enum ExceptionCause Core::memory_special(
 FetchState Core::fetch(PCInterstage pc, bool skip_break) {
     if (pc.stop_if) { return {}; }
 
-    enum ExceptionCause excause = EXCAUSE_NONE;
-    Address inst_addr = Address(regs->read_pc());
-    Instruction inst(mem_program->read_u32(inst_addr));
+    const Address inst_addr = Address(regs->read_pc());
+    const Instruction inst(mem_program->read_u32(inst_addr));
+    ExceptionCause excause = EXCAUSE_NONE;
 
-    if (!skip_break) {
-        hwBreak *brk = hw_breaks.value(inst_addr);
-        if (brk != nullptr) { excause = EXCAUSE_HWBREAK; }
-    }
+    if (!skip_break && hw_breaks.contains(inst_addr)) { excause = EXCAUSE_HWBREAK; }
+
     if (cop0state != nullptr && excause == EXCAUSE_NONE) {
         if (cop0state->core_interrupt_request()) { excause = EXCAUSE_INT; }
     }
 
-    return { FetchInternalState { .fetched_value = inst.data() }, FetchInterstage {
-                                                                      .inst = inst,
-                                                                      .inst_addr = inst_addr,
-                                                                      .excause = excause,
-                                                                      .is_valid = true,
-                                                                  } };
+    return { FetchInternalState { .fetched_value = inst.data() },
+             FetchInterstage {
+                 .inst = inst,
+                 .inst_addr = inst_addr,
+                 .next_inst_addr = inst_addr + inst.size(),
+                 .predicted_next_inst_addr = predictor->predict(inst, inst_addr),
+                 .excause = excause,
+                 .is_valid = true,
+             } };
 }
 
 DecodeState Core::decode(const FetchInterstage &dt) {
-    enum InstructionFlags flags;
-    enum AluOp alu_op;
-    enum AccessControl mem_ctl;
-    enum ExceptionCause excause = dt.excause;
+    InstructionFlags flags;
+    AluOp alu_op;
+    AccessControl mem_ctl;
+    ExceptionCause excause = dt.excause;
 
     dt.inst.flags_alu_op_mem_ctl(flags, alu_op, mem_ctl);
 
@@ -247,6 +248,22 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                  .inst_bus = dt.inst.data(),
              },
              DecodeInterstage { .inst = dt.inst,
+                                .inst_addr = dt.inst_addr,
+                                .next_inst_addr = dt.next_inst_addr,
+                                .predicted_next_inst_addr = dt.predicted_next_inst_addr,
+                                .val_rs = val_rs,
+                                .val_rs_orig = val_rs,
+                                .val_rt = val_rt,
+                                .val_rt_orig = val_rt,
+                                .immediate_val = immediate_val,
+                                .excause = excause,
+                                .ff_rs = FORWARD_NONE,
+                                .ff_rt = FORWARD_NONE,
+                                .aluop = alu_op,
+                                .memctl = mem_ctl,
+                                .num_rs = num_rs,
+                                .num_rt = num_rt,
+                                .num_rd = num_rd,
                                 .memread = bool(flags & IMF_MEMREAD),
                                 .memwrite = bool(flags & IMF_MEMWRITE),
                                 .alusrc = bool(flags & IMF_ALUSRC),
@@ -256,20 +273,6 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .branch = bool(flags & IMF_BRANCH),
                                 .jump = bool(flags & IMF_JUMP),
                                 .bj_not = bool(flags & IMF_BJ_NOT),
-                                .aluop = alu_op,
-                                .memctl = mem_ctl,
-                                .num_rs = num_rs,
-                                .num_rt = num_rt,
-                                .num_rd = num_rd,
-                                .val_rs = val_rs,
-                                .val_rs_orig = val_rs,
-                                .val_rt = val_rt,
-                                .val_rt_orig = val_rt,
-                                .immediate_val = immediate_val,
-                                .ff_rs = FORWARD_NONE,
-                                .ff_rt = FORWARD_NONE,
-                                .inst_addr = dt.inst_addr,
-                                .excause = excause,
                                 .stall = false,
                                 .is_valid = dt.is_valid,
                                 .alu_mod = bool(flags & IMF_ALU_MOD),
@@ -301,9 +304,6 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
     }();
 
     return { ExecuteInternalState {
-                 .alu_src = dt.alusrc,
-                 .branch = dt.branch,
-                 .alu_pc = dt.alu_pc,
                  .alu_src1 = dt.val_rs,
                  .alu_src2 = alu_sec,
                  .immediate = dt.immediate_val,
@@ -314,27 +314,29 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
                  .forward_from_rs1_num = static_cast<unsigned>(dt.ff_rs),
                  .forward_from_rs2_num = static_cast<unsigned>(dt.ff_rt),
                  .excause_num = static_cast<unsigned>(dt.excause),
+                 .alu_src = dt.alusrc,
+                 .branch = dt.branch,
+                 .alu_pc = dt.alu_pc,
              },
              ExecuteInterstage {
                  .inst = dt.inst,
+                 .inst_addr = dt.inst_addr,
+                 .next_inst_addr = dt.next_inst_addr,
+                 .predicted_next_inst_addr = dt.predicted_next_inst_addr,
+                 .branch_target = target,
+                 .val_rt = dt.val_rt,
+                 .alu_val = alu_val,
+                 .excause = excause,
+                 .memctl = dt.memctl,
+                 .num_rd = dt.num_rd,
                  .memread = dt.memread,
                  .memwrite = dt.memwrite,
                  .regwrite = dt.regwrite,
                  .is_valid = dt.is_valid,
                  .branch = dt.branch,
-                 // In the diagram `branch_taken` is computed in memory/compute_next_pc, but here it
-                 // can be done on one place only.
-                 .branch_taken = dt.branch && (!dt.bj_not ^ (alu_val != 0)),
                  .jump = dt.jump,
                  .bj_not = dt.bj_not,
                  .alu_zero = alu_val == 0,
-                 .memctl = dt.memctl,
-                 .val_rt = dt.val_rt,
-                 .num_rd = dt.num_rd,
-                 .alu_val = alu_val,
-                 .inst_addr = dt.inst_addr,
-                 .excause = excause,
-                 .branch_target = target,
              } };
 }
 
@@ -365,27 +367,31 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
         regwrite = false;
     }
 
+    const bool branch_taken = dt.branch && (!dt.bj_not ^ (dt.alu_val != 0));
+
     return { MemoryInternalState {
+                 .mem_read_val = towrite_val,
+                 .mem_write_val = dt.val_rt,
+                 .mem_addr = dt.alu_val,
+                 .excause_num = static_cast<unsigned>(excause),
                  .memwrite = memwrite,
                  .memread = memread,
                  .branch = dt.branch,
                  .jump = dt.jump,
-                 .branch_or_jump = dt.branch_taken || dt.jump,
-                 .mem_read_val = towrite_val,
-                 .mem_write_val = dt.val_rt,
-                 .excause_num = static_cast<unsigned>(excause),
-                 .mem_addr = dt.alu_val,
+                 .branch_or_jump = branch_taken || dt.jump,
              },
              MemoryInterstage {
                  .inst = dt.inst,
+                 .inst_addr = dt.inst_addr,
+                 .next_inst_addr = dt.next_inst_addr,
+                 .predicted_next_inst_addr = dt.predicted_next_inst_addr,
+                 .computed_next_inst_addr = compute_next_inst_addr(dt, branch_taken),
+                 .mem_addr = mem_addr,
+                 .towrite_val = towrite_val,
+                 .excause = dt.excause,
+                 .num_rd = dt.num_rd,
                  .memtoreg = memread,
                  .regwrite = regwrite,
-                 .num_rd = dt.num_rd,
-                 .towrite_val = towrite_val,
-                 .mem_addr = mem_addr,
-                 .inst_addr = dt.inst_addr,
-                 .next_pc = compute_next_pc(dt),
-                 .excause = dt.excause,
                  .is_valid = dt.is_valid,
              } };
 }
@@ -393,20 +399,20 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
 WritebackState Core::writeback(const MemoryInterstage &dt) {
     if (dt.regwrite) { regs->write_gp(dt.num_rd, dt.towrite_val); }
 
-    return { WritebackInternalState {
+    return WritebackState { WritebackInternalState {
         .inst = dt.inst,
         .inst_addr = dt.inst_addr,
+        .value = dt.towrite_val,
+        .num_rd = dt.num_rd,
         .regwrite = dt.regwrite,
         .memtoreg = dt.memtoreg,
-        .num_rd = dt.num_rd,
-        .value = dt.towrite_val,
     } };
 }
 
-Address Core::compute_next_pc(const ExecuteInterstage &exec) const {
+Address Core::compute_next_inst_addr(const ExecuteInterstage &exec, bool branch_taken) const {
     if (exec.jump) { return Address(get_xlen_from_reg(exec.alu_val)); }
-    if (exec.branch_taken) { return exec.branch_target; }
-    return exec.inst_addr + 4;
+    if (branch_taken) { return exec.branch_target; }
+    return exec.next_inst_addr;
 }
 
 uint64_t Core::get_xlen_from_reg(RegisterValue reg) const {
@@ -436,7 +442,7 @@ void CoreSingle::do_step(bool skip_break) {
     p.memory = memory(p.execute.final);
     p.writeback = writeback(p.memory.final);
 
-    regs->write_pc(mem_wb.next_pc);
+    regs->write_pc(mem_wb.computed_next_inst_addr);
 
     if (mem_wb.excause != EXCAUSE_NONE) {
         handle_exception(
@@ -493,14 +499,14 @@ void CorePipelined::do_step(bool skip_break) {
     pc_if = {};
     if (mem_wb.excause != EXCAUSE_NONE) {
         /* By default, execution continues with the next instruction after exception. */
-        regs->write_pc(mem_wb.next_pc);
+        regs->write_pc(mem_wb.computed_next_inst_addr);
         /* Exception handler may override this behavior and change the PC (e.g. hwbreak). */
         handle_exception(
-            mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, mem_wb.next_pc, jump_branch_pc,
-            mem_wb.mem_addr);
+            mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, mem_wb.computed_next_inst_addr,
+            jump_branch_pc, mem_wb.mem_addr);
     } else if (detect_mispredicted_jump()) {
         /* If the jump was predicted incorrectly, we need to flush the pipeline. */
-        flush_and_continue_from_address(mem_wb.next_pc);
+        flush_and_continue_from_address(mem_wb.computed_next_inst_addr);
     } else if (exception_in_progress) {
         /* An exception is in progress which caused the pipeline before the exception to be flushed.
          * Therefore, next pc cannot be determined from if_id (now NOP).
@@ -512,7 +518,7 @@ void CorePipelined::do_step(bool skip_break) {
         handle_stall(saved_if_id);
     } else {
         /* Normal execution. */
-        regs->write_pc(predictor->predict(if_id.inst, if_id.inst_addr));
+        regs->write_pc(if_id.predicted_next_inst_addr);
     }
 }
 
@@ -540,7 +546,7 @@ void CorePipelined::handle_stall(const FetchInterstage &saved_if_id) {
 }
 
 bool CorePipelined::detect_mispredicted_jump() const {
-    return mem_wb.is_valid && ex_mem.is_valid && mem_wb.next_pc != ex_mem.inst_addr;
+    return mem_wb.computed_next_inst_addr != mem_wb.predicted_next_inst_addr;
 }
 
 template<typename InterstageReg>
