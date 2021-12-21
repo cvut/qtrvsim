@@ -15,7 +15,8 @@ Core::Core(
     FrontendMemory *mem_data,
     Cop0State *cop0state,
     Xlen xlen)
-    : if_id(state.pipeline.fetch.final)
+    : pc_if(state.pipeline.pc.final)
+    , if_id(state.pipeline.fetch.final)
     , id_ex(state.pipeline.decode.final)
     , ex_mem(state.pipeline.execute.final)
     , mem_wb(state.pipeline.memory.final)
@@ -191,7 +192,9 @@ enum ExceptionCause Core::memory_special(
     return EXCAUSE_NONE;
 }
 
-FetchState Core::fetch(bool skip_break) {
+FetchState Core::fetch(PCInterstage pc, bool skip_break) {
+    if (pc.stop_if) { return {}; }
+
     enum ExceptionCause excause = EXCAUSE_NONE;
     Address inst_addr = Address(regs->read_pc());
     Instruction inst(mem_program->read_u32(inst_addr));
@@ -412,11 +415,6 @@ uint64_t Core::get_xlen_from_reg(RegisterValue reg) const {
     case Xlen::_64: return reg.as_u64();
     }
 }
-template<typename T>
-void Core::set_stage_to_stall(T &stage) {
-    if (stage.final.is_valid) { state.stall_count += 1; }
-    stage = {};
-}
 
 CoreSingle::CoreSingle(
     Registers *regs,
@@ -432,7 +430,7 @@ CoreSingle::CoreSingle(
 void CoreSingle::do_step(bool skip_break) {
     Pipeline &p = state.pipeline;
 
-    p.fetch = fetch(skip_break);
+    p.fetch = fetch(pc_if, skip_break);
     p.decode = decode(p.fetch.final);
     p.execute = execute(p.decode.final);
     p.memory = memory(p.execute.final);
@@ -478,43 +476,50 @@ void CorePipelined::do_step(bool skip_break) {
     p.memory = memory(ex_mem);
     p.execute = execute(id_ex);
     p.decode = decode(if_id);
-    p.fetch = fetch(skip_break);
+    p.fetch = fetch(pc_if, skip_break);
+
+    bool exception_in_progress = mem_wb.excause != EXCAUSE_NONE;
+    if (exception_in_progress) { ex_mem.flush(); }
+    exception_in_progress |= ex_mem.excause != EXCAUSE_NONE;
+    if (exception_in_progress) { id_ex.flush(); }
+    exception_in_progress |= id_ex.excause != EXCAUSE_NONE;
+    if (exception_in_progress) { if_id.flush(); }
 
     bool stall = false;
     if (hazard_unit != MachineConfig::HU_NONE) { stall |= handle_data_hazards(); }
 
-    // After all stages are processed one of the following options will handle the PC.
-    // The order is critical.
+    /* PC and exception pseudo stage
+     * ============================== */
+    pc_if = {};
     if (mem_wb.excause != EXCAUSE_NONE) {
-        set_stage_to_stall(p.fetch);
-        set_stage_to_stall(p.decode);
-        set_stage_to_stall(p.execute);
+        /* By default, execution continues with the next instruction after exception. */
         regs->write_pc(mem_wb.next_pc);
+        /* Exception handler may override this behavior and change the PC (e.g. hwbreak). */
         handle_exception(
             mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, mem_wb.next_pc, jump_branch_pc,
             mem_wb.mem_addr);
     } else if (detect_mispredicted_jump()) {
+        /* If the jump was predicted incorrectly, we need to flush the pipeline. */
         flush_and_continue_from_address(mem_wb.next_pc);
-    } else if (ex_mem.excause != EXCAUSE_NONE) {
-        set_stage_to_stall(p.fetch);
-        set_stage_to_stall(p.decode);
-    } else if (id_ex.excause != EXCAUSE_NONE) {
-        set_stage_to_stall(p.fetch);
+    } else if (exception_in_progress) {
+        /* An exception is in progress which caused the pipeline before the exception to be flushed.
+         * Therefore, next pc cannot be determined from if_id (now NOP).
+         * To make the visualization cleaner we stop fetching (and PC update) until the exception
+         * is handled. */
+        pc_if.stop_if = true;
     } else if (stall) {
-        // PC is not allowed to advance.
+        /* Fetch from the same PC is repeated due to stall in the pipeline. */
         handle_stall(saved_if_id);
     } else {
+        /* Normal execution. */
         regs->write_pc(predictor->predict(if_id.inst, if_id.inst_addr));
     }
 }
 
 void CorePipelined::flush_and_continue_from_address(Address next_pc) {
     regs->write_pc(next_pc);
-    if (if_id.is_valid) { state.stall_count += 1; }
     if_id.flush();
-    if (id_ex.is_valid) { state.stall_count += 1; }
     id_ex.flush();
-    if (ex_mem.is_valid) { state.stall_count += 1; }
     ex_mem.flush();
 }
 

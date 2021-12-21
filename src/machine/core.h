@@ -72,6 +72,8 @@ protected:
      * The bellow references provide shortcuts to the final interstage registers.
      */
 
+    /** Reference to pseudo interstage register PC/IF inside core state. */
+    PCInterstage &pc_if;
     /** Reference to interstage register IF/ID inside core state. */
     FetchInterstage &if_id;
     /** Reference to interstage register ID/EX inside core state. */
@@ -115,7 +117,7 @@ protected:
     QMap<ExceptionCause, OWNED ExceptionHandler *> ex_handlers;
     Box<ExceptionHandler> ex_default_handler;
 
-    FetchState fetch(bool skip_break = false);
+    FetchState fetch(PCInterstage pc, bool skip_break);
     DecodeState decode(const FetchInterstage &);
     ExecuteState execute(const DecodeInterstage &);
     MemoryState memory(const ExecuteInterstage &);
@@ -137,14 +139,6 @@ protected:
         RegisterValue &towrite_val,
         RegisterValue rt_value,
         Address mem_addr);
-
-    /**
-     * Clears both stage and interstage register as if instruction has never been executed.
-     * @tparam T      stage state type
-     * @param stage   stage state
-     */
-    template<typename T>
-    void set_stage_to_stall(T &stage);
 };
 
 class CoreSingle : public Core {

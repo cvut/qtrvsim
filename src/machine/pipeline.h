@@ -30,6 +30,14 @@ enum ForwardFrom {
     FORWARD_FROM_M = 0b10,
 };
 
+struct PCInterstage {
+    bool stop_if = false;
+};
+
+struct PCState {
+    PCInterstage final {};
+};
+
 struct FetchInterstage {
     Instruction inst = Instruction::NOP; // Loaded instruction
     Address inst_addr = STAGEADDR_NONE;  // Address of instruction
@@ -257,6 +265,7 @@ struct WritebackState {
 };
 
 struct Pipeline {
+    PCState pc {};
     FetchState fetch {};
     DecodeState decode {};
     ExecuteState execute {};
