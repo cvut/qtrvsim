@@ -13,12 +13,12 @@
 namespace machine {
 
 enum InstructionFlags {
-    IMF_SUPPORTED = 1L << 0,  /**< Instruction is supported */
-    IMF_MEMWRITE = 1L << 1,   /**< Write to the memory when memory stage is reached */
-    IMF_MEMREAD = 1L << 2,    /**< Read from the memory when memory stage is reached */
-    IMF_ALUSRC = 1L << 3,     /**< The second ALU source is immediate operand */
-    IMF_REGWRITE = 1L << 5,   /**< Instruction result (ALU or memory) is written to register file */
-    IMF_MEM = 1L << 11,       /**< Instruction is memory access instruction */
+    IMF_SUPPORTED = 1L << 0, /**< Instruction is supported */
+    IMF_MEMWRITE = 1L << 1,  /**< Write to the memory when memory stage is reached */
+    IMF_MEMREAD = 1L << 2,   /**< Read from the memory when memory stage is reached */
+    IMF_ALUSRC = 1L << 3,    /**< The second ALU source is immediate operand */
+    IMF_REGWRITE = 1L << 5,  /**< Instruction result (ALU or memory) is written to register file */
+    IMF_MEM = 1L << 11,      /**< Instruction is memory access instruction */
     IMF_ALU_REQ_RS = 1L << 12, /**< Execution phase/ALU requires RS value */
     IMF_ALU_REQ_RT = 1L << 13, /**< Execution phase/ALU/mem requires RT value */
     IMF_BRANCH = 1L << 17, /**< Operation is conditional or unconditional branch or branch and link
@@ -50,12 +50,8 @@ struct BitArg {
     const size_t shift;
 
     BitArg(const std::vector<Field> fields, size_t shift = 0) : fields(fields), shift(shift) {}
-    std::vector<Field>::const_iterator begin() const {
-        return fields.begin();
-    }
-    std::vector<Field>::const_iterator end() const {
-        return fields.end();
-    }
+    std::vector<Field>::const_iterator begin() const { return fields.begin(); }
+    std::vector<Field>::const_iterator end() const { return fields.end(); }
     uint32_t decode(uint32_t ins) const {
         uint32_t ret = 0;
         size_t offset = 0;
@@ -134,6 +130,8 @@ public:
 
     enum Type { R, I, S, B, U, J, UNKNOWN };
 
+    /** Returns size of instruction in bytes */
+    uint8_t size() const;
     uint8_t opcode() const;
     uint8_t rs() const;
     uint8_t rt() const;

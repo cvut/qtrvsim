@@ -13,10 +13,10 @@ Core::Core(
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
-    unsigned int min_cache_row_size,
     Cop0State *cop0state,
     Xlen xlen)
-    : if_id(state.pipeline.fetch.final)
+    : pc_if(state.pipeline.pc.final)
+    , if_id(state.pipeline.fetch.final)
     , id_ex(state.pipeline.decode.final)
     , ex_mem(state.pipeline.execute.final)
     , mem_wb(state.pipeline.memory.final)
@@ -28,12 +28,10 @@ Core::Core(
     , mem_program(mem_program)
     , ex_handlers()
     , ex_default_handler(new StopExceptionHandler()) {
-    this->state.min_cache_row_size = min_cache_row_size;
-    this->state.hwr_userlocal = 0xe0000000;
     if (cop0state != nullptr) { cop0state->setup_core(this); }
-    state.stop_on_exception.fill(true);
-    state.step_over_exception.fill(true);
-    state.step_over_exception[EXCAUSE_INT] = false;
+    stop_on_exception.fill(true);
+    step_over_exception.fill(true);
+    step_over_exception[EXCAUSE_INT] = false;
 }
 
 void Core::step(bool skip_break) {
@@ -56,50 +54,58 @@ unsigned Core::get_stall_count() const {
     return state.stall_count;
 }
 
-Registers *Core::get_regs() {
+Registers *Core::get_regs() const {
     return regs;
 }
 
-Cop0State *Core::get_cop0state() {
+Cop0State *Core::get_cop0state() const {
     return cop0state;
 }
 
-FrontendMemory *Core::get_mem_data() {
+FrontendMemory *Core::get_mem_data() const {
     return mem_data;
 }
 
-FrontendMemory *Core::get_mem_program() {
+FrontendMemory *Core::get_mem_program() const {
     return mem_program;
 }
 
+Predictor *Core::get_predictor() const {
+    return predictor;
+}
+
+const CoreState &Core::get_state() const {
+    return state;
+}
+
 void Core::insert_hwbreak(Address address) {
-    state.hw_breaks.insert(address, new hwBreak(address));
+    hw_breaks.insert(address, new hwBreak(address));
 }
 
 void Core::remove_hwbreak(Address address) {
-    hwBreak *hwbrk = state.hw_breaks.take(address);
+    hwBreak *hwbrk = hw_breaks.take(address);
     delete hwbrk;
 }
 
-bool Core::is_hwbreak(Address address) {
-    hwBreak *hwbrk = state.hw_breaks.value(address);
+bool Core::is_hwbreak(Address address) const {
+    hwBreak *hwbrk = hw_breaks.value(address);
     return hwbrk != nullptr;
 }
 
 void Core::set_stop_on_exception(enum ExceptionCause excause, bool value) {
-    state.stop_on_exception[excause] = value;
+    stop_on_exception[excause] = value;
 }
 
 bool Core::get_stop_on_exception(enum ExceptionCause excause) const {
-    return state.stop_on_exception[excause];
+    return stop_on_exception[excause];
 }
 
 void Core::set_step_over_exception(enum ExceptionCause excause, bool value) {
-    state.step_over_exception[excause] = value;
+    step_over_exception[excause] = value;
 }
 
 bool Core::get_step_over_exception(enum ExceptionCause excause) const {
-    return state.step_over_exception[excause];
+    return step_over_exception[excause];
 }
 
 void Core::register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler) {
@@ -113,15 +119,12 @@ void Core::register_exception_handler(ExceptionCause excause, ExceptionHandler *
 }
 
 bool Core::handle_exception(
-    Core *core,
-    Registers *regs,
     ExceptionCause excause,
     Instruction inst,
     Address inst_addr,
     Address next_addr,
     Address jump_branch_pc,
     Address mem_ref_addr) {
-    bool ret = false;
     if (excause == EXCAUSE_UNKNOWN) {
         throw SIMULATOR_EXCEPTION(
             UnsupportedInstruction, "Instruction with following encoding is not supported",
@@ -139,21 +142,19 @@ bool Core::handle_exception(
         }
     }
 
-    ExceptionHandler *exhandler = ex_handlers.value(excause);
+    bool ret = false;
+    ExceptionHandler *exhandler = ex_handlers.value(excause, ex_default_handler.data());
     if (exhandler != nullptr) {
         ret = exhandler->handle_exception(
-            core, regs, excause, inst_addr, next_addr, jump_branch_pc, mem_ref_addr);
-    } else if (ex_default_handler != nullptr) {
-        ret = ex_default_handler->handle_exception(
-            core, regs, excause, inst_addr, next_addr, jump_branch_pc, mem_ref_addr);
+            this, regs, excause, inst_addr, next_addr, jump_branch_pc, mem_ref_addr);
     }
-    if (get_stop_on_exception(excause)) { emit core->stop_on_exception_reached(); }
+
+    if (get_stop_on_exception(excause)) { emit stop_on_exception_reached(); }
 
     return ret;
 }
 
 void Core::set_c0_userlocal(uint32_t address) {
-    state.hwr_userlocal = address;
     if (cop0state != nullptr) {
         if (address != cop0state->read_cop0reg(Cop0State::UserLocal)) {
             cop0state->write_cop0reg(Cop0State::UserLocal, address);
@@ -191,32 +192,35 @@ enum ExceptionCause Core::memory_special(
     return EXCAUSE_NONE;
 }
 
-FetchState Core::fetch(bool skip_break) {
-    enum ExceptionCause excause = EXCAUSE_NONE;
-    Address inst_addr = Address(regs->read_pc());
-    Instruction inst(mem_program->read_u32(inst_addr));
+FetchState Core::fetch(PCInterstage pc, bool skip_break) {
+    if (pc.stop_if) { return {}; }
 
-    if (!skip_break) {
-        hwBreak *brk = state.hw_breaks.value(inst_addr);
-        if (brk != nullptr) { excause = EXCAUSE_HWBREAK; }
-    }
+    const Address inst_addr = Address(regs->read_pc());
+    const Instruction inst(mem_program->read_u32(inst_addr));
+    ExceptionCause excause = EXCAUSE_NONE;
+
+    if (!skip_break && hw_breaks.contains(inst_addr)) { excause = EXCAUSE_HWBREAK; }
+
     if (cop0state != nullptr && excause == EXCAUSE_NONE) {
         if (cop0state->core_interrupt_request()) { excause = EXCAUSE_INT; }
     }
 
-    return { FetchInternalState { .fetched_value = inst.data() }, FetchInterstage {
-                                                                      .inst = inst,
-                                                                      .inst_addr = inst_addr,
-                                                                      .excause = excause,
-                                                                      .is_valid = true,
-                                                                  } };
+    return { FetchInternalState { .fetched_value = inst.data() },
+             FetchInterstage {
+                 .inst = inst,
+                 .inst_addr = inst_addr,
+                 .next_inst_addr = inst_addr + inst.size(),
+                 .predicted_next_inst_addr = predictor->predict(inst, inst_addr),
+                 .excause = excause,
+                 .is_valid = true,
+             } };
 }
 
 DecodeState Core::decode(const FetchInterstage &dt) {
-    enum InstructionFlags flags;
-    enum AluOp alu_op;
-    enum AccessControl mem_ctl;
-    enum ExceptionCause excause = dt.excause;
+    InstructionFlags flags;
+    AluOp alu_op;
+    AccessControl mem_ctl;
+    ExceptionCause excause = dt.excause;
 
     dt.inst.flags_alu_op_mem_ctl(flags, alu_op, mem_ctl);
 
@@ -244,6 +248,22 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                  .inst_bus = dt.inst.data(),
              },
              DecodeInterstage { .inst = dt.inst,
+                                .inst_addr = dt.inst_addr,
+                                .next_inst_addr = dt.next_inst_addr,
+                                .predicted_next_inst_addr = dt.predicted_next_inst_addr,
+                                .val_rs = val_rs,
+                                .val_rs_orig = val_rs,
+                                .val_rt = val_rt,
+                                .val_rt_orig = val_rt,
+                                .immediate_val = immediate_val,
+                                .excause = excause,
+                                .ff_rs = FORWARD_NONE,
+                                .ff_rt = FORWARD_NONE,
+                                .aluop = alu_op,
+                                .memctl = mem_ctl,
+                                .num_rs = num_rs,
+                                .num_rt = num_rt,
+                                .num_rd = num_rd,
                                 .memread = bool(flags & IMF_MEMREAD),
                                 .memwrite = bool(flags & IMF_MEMWRITE),
                                 .alusrc = bool(flags & IMF_ALUSRC),
@@ -253,20 +273,6 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .branch = bool(flags & IMF_BRANCH),
                                 .jump = bool(flags & IMF_JUMP),
                                 .bj_not = bool(flags & IMF_BJ_NOT),
-                                .aluop = alu_op,
-                                .memctl = mem_ctl,
-                                .num_rs = num_rs,
-                                .num_rt = num_rt,
-                                .num_rd = num_rd,
-                                .val_rs = val_rs,
-                                .val_rs_orig = val_rs,
-                                .val_rt = val_rt,
-                                .val_rt_orig = val_rt,
-                                .immediate_val = immediate_val,
-                                .ff_rs = FORWARD_NONE,
-                                .ff_rt = FORWARD_NONE,
-                                .inst_addr = dt.inst_addr,
-                                .excause = excause,
                                 .stall = false,
                                 .is_valid = dt.is_valid,
                                 .alu_mod = bool(flags & IMF_ALU_MOD),
@@ -298,9 +304,6 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
     }();
 
     return { ExecuteInternalState {
-                 .alu_src = dt.alusrc,
-                 .branch = dt.branch,
-                 .alu_pc = dt.alu_pc,
                  .alu_src1 = dt.val_rs,
                  .alu_src2 = alu_sec,
                  .immediate = dt.immediate_val,
@@ -311,27 +314,29 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
                  .forward_from_rs1_num = static_cast<unsigned>(dt.ff_rs),
                  .forward_from_rs2_num = static_cast<unsigned>(dt.ff_rt),
                  .excause_num = static_cast<unsigned>(dt.excause),
+                 .alu_src = dt.alusrc,
+                 .branch = dt.branch,
+                 .alu_pc = dt.alu_pc,
              },
              ExecuteInterstage {
                  .inst = dt.inst,
+                 .inst_addr = dt.inst_addr,
+                 .next_inst_addr = dt.next_inst_addr,
+                 .predicted_next_inst_addr = dt.predicted_next_inst_addr,
+                 .branch_target = target,
+                 .val_rt = dt.val_rt,
+                 .alu_val = alu_val,
+                 .excause = excause,
+                 .memctl = dt.memctl,
+                 .num_rd = dt.num_rd,
                  .memread = dt.memread,
                  .memwrite = dt.memwrite,
                  .regwrite = dt.regwrite,
                  .is_valid = dt.is_valid,
                  .branch = dt.branch,
-                 // In the diagram `branch_taken` is computed in memory/compute_next_pc, but here it
-                 // can be done on one place only.
-                 .branch_taken = dt.branch && (!dt.bj_not ^ (alu_val != 0)),
                  .jump = dt.jump,
                  .bj_not = dt.bj_not,
                  .alu_zero = alu_val == 0,
-                 .memctl = dt.memctl,
-                 .val_rt = dt.val_rt,
-                 .num_rd = dt.num_rd,
-                 .alu_val = alu_val,
-                 .inst_addr = dt.inst_addr,
-                 .excause = excause,
-                 .branch_target = target,
              } };
 }
 
@@ -362,27 +367,31 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
         regwrite = false;
     }
 
+    const bool branch_taken = dt.branch && (!dt.bj_not ^ (dt.alu_val != 0));
+
     return { MemoryInternalState {
+                 .mem_read_val = towrite_val,
+                 .mem_write_val = dt.val_rt,
+                 .mem_addr = dt.alu_val,
+                 .excause_num = static_cast<unsigned>(excause),
                  .memwrite = memwrite,
                  .memread = memread,
                  .branch = dt.branch,
                  .jump = dt.jump,
-                 .branch_or_jump = dt.branch_taken || dt.jump,
-                 .mem_read_val = towrite_val,
-                 .mem_write_val = dt.val_rt,
-                 .excause_num = static_cast<unsigned>(excause),
-                 .mem_addr = dt.alu_val,
+                 .branch_or_jump = branch_taken || dt.jump,
              },
              MemoryInterstage {
                  .inst = dt.inst,
+                 .inst_addr = dt.inst_addr,
+                 .next_inst_addr = dt.next_inst_addr,
+                 .predicted_next_inst_addr = dt.predicted_next_inst_addr,
+                 .computed_next_inst_addr = compute_next_inst_addr(dt, branch_taken),
+                 .mem_addr = mem_addr,
+                 .towrite_val = towrite_val,
+                 .excause = dt.excause,
+                 .num_rd = dt.num_rd,
                  .memtoreg = memread,
                  .regwrite = regwrite,
-                 .num_rd = dt.num_rd,
-                 .towrite_val = towrite_val,
-                 .mem_addr = mem_addr,
-                 .inst_addr = dt.inst_addr,
-                 .next_pc = compute_next_pc(dt),
-                 .excause = dt.excause,
                  .is_valid = dt.is_valid,
              } };
 }
@@ -390,24 +399,20 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
 WritebackState Core::writeback(const MemoryInterstage &dt) {
     if (dt.regwrite) { regs->write_gp(dt.num_rd, dt.towrite_val); }
 
-    return { WritebackInternalState {
+    return WritebackState { WritebackInternalState {
         .inst = dt.inst,
         .inst_addr = dt.inst_addr,
+        .value = dt.towrite_val,
+        .num_rd = dt.num_rd,
         .regwrite = dt.regwrite,
         .memtoreg = dt.memtoreg,
-        .num_rd = dt.num_rd,
-        .value = dt.towrite_val,
     } };
 }
 
-Address Core::compute_next_pc(const ExecuteInterstage &exec) const {
+Address Core::compute_next_inst_addr(const ExecuteInterstage &exec, bool branch_taken) const {
     if (exec.jump) { return Address(get_xlen_from_reg(exec.alu_val)); }
-    if (exec.branch_taken) { return exec.branch_target; }
-    return exec.inst_addr + 4;
-}
-
-void Core::flush() {
-    state.pipeline = {};
+    if (branch_taken) { return exec.branch_target; }
+    return exec.next_inst_addr;
 }
 
 uint64_t Core::get_xlen_from_reg(RegisterValue reg) const {
@@ -422,28 +427,27 @@ CoreSingle::CoreSingle(
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
-    unsigned int min_cache_row_size,
     Cop0State *cop0state,
     Xlen xlen)
-    : Core(regs, predictor, mem_program, mem_data, min_cache_row_size, cop0state, xlen) {
+    : Core(regs, predictor, mem_program, mem_data, cop0state, xlen) {
     reset();
 }
 
 void CoreSingle::do_step(bool skip_break) {
     Pipeline &p = state.pipeline;
 
-    p.fetch = fetch(skip_break);
+    p.fetch = fetch(pc_if, skip_break);
     p.decode = decode(p.fetch.final);
     p.execute = execute(p.decode.final);
     p.memory = memory(p.execute.final);
     p.writeback = writeback(p.memory.final);
 
-    regs->write_pc(mem_wb.next_pc);
+    regs->write_pc(mem_wb.computed_next_inst_addr);
 
     if (mem_wb.excause != EXCAUSE_NONE) {
         handle_exception(
-            this, regs, mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, regs->read_pc(),
-            prev_inst_addr, mem_wb.mem_addr);
+            mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, regs->read_pc(), prev_inst_addr,
+            mem_wb.mem_addr);
         return;
     }
     prev_inst_addr = mem_wb.inst_addr;
@@ -463,42 +467,66 @@ CorePipelined::CorePipelined(
     unsigned int min_cache_row_size,
     Cop0State *cop0state,
     Xlen xlen)
-    : Core(regs, predictor, mem_program, mem_data, min_cache_row_size, cop0state, xlen) {
+    : Core(regs, predictor, mem_program, mem_data, cop0state, xlen) {
     this->hazard_unit = hazard_unit;
     reset();
 }
 
 void CorePipelined::do_step(bool skip_break) {
     Pipeline &p = state.pipeline;
-    Address jump_branch_pc = mem_wb.inst_addr;
+
+    const Address jump_branch_pc = mem_wb.inst_addr;
+    const FetchInterstage saved_if_id = if_id;
 
     p.writeback = writeback(mem_wb);
     p.memory = memory(ex_mem);
     p.execute = execute(id_ex);
     p.decode = decode(if_id);
+    p.fetch = fetch(pc_if, skip_break);
 
-    if (mem_wb.excause != EXCAUSE_NONE) { process_exception(jump_branch_pc); }
+    bool exception_in_progress = mem_wb.excause != EXCAUSE_NONE;
+    if (exception_in_progress) { ex_mem.flush(); }
+    exception_in_progress |= ex_mem.excause != EXCAUSE_NONE;
+    if (exception_in_progress) { id_ex.flush(); }
+    exception_in_progress |= id_ex.excause != EXCAUSE_NONE;
+    if (exception_in_progress) { if_id.flush(); }
 
     bool stall = false;
     if (hazard_unit != MachineConfig::HU_NONE) { stall |= handle_data_hazards(); }
 
-    FetchInterstage saved_if_id = if_id;
-    p.fetch = fetch(skip_break);
-    if (!stall) {
-        handle_pc();
-    } else {
+    /* PC and exception pseudo stage
+     * ============================== */
+    pc_if = {};
+    if (mem_wb.excause != EXCAUSE_NONE) {
+        /* By default, execution continues with the next instruction after exception. */
+        regs->write_pc(mem_wb.computed_next_inst_addr);
+        /* Exception handler may override this behavior and change the PC (e.g. hwbreak). */
+        handle_exception(
+            mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, mem_wb.computed_next_inst_addr,
+            jump_branch_pc, mem_wb.mem_addr);
+    } else if (detect_mispredicted_jump()) {
+        /* If the jump was predicted incorrectly, we need to flush the pipeline. */
+        flush_and_continue_from_address(mem_wb.computed_next_inst_addr);
+    } else if (exception_in_progress) {
+        /* An exception is in progress which caused the pipeline before the exception to be flushed.
+         * Therefore, next pc cannot be determined from if_id (now NOP).
+         * To make the visualization cleaner we stop fetching (and PC update) until the exception
+         * is handled. */
+        pc_if.stop_if = true;
+    } else if (stall) {
+        /* Fetch from the same PC is repeated due to stall in the pipeline. */
         handle_stall(saved_if_id);
+    } else {
+        /* Normal execution. */
+        regs->write_pc(if_id.predicted_next_inst_addr);
     }
 }
-void CorePipelined::handle_pc() {
-    if (detect_mispredicted_jump()) {
-        regs->write_pc(mem_wb.next_pc);
-        ex_mem.flush();
-        id_ex.flush();
-        if_id.flush();
-    } else {
-        regs->write_pc(predictor->predict(if_id.inst, if_id.inst_addr));
-    }
+
+void CorePipelined::flush_and_continue_from_address(Address next_pc) {
+    regs->write_pc(next_pc);
+    if_id.flush();
+    id_ex.flush();
+    ex_mem.flush();
 }
 
 void CorePipelined::handle_stall(const FetchInterstage &saved_if_id) {
@@ -518,15 +546,7 @@ void CorePipelined::handle_stall(const FetchInterstage &saved_if_id) {
 }
 
 bool CorePipelined::detect_mispredicted_jump() const {
-    return mem_wb.is_valid && ex_mem.is_valid && mem_wb.next_pc != ex_mem.inst_addr;
-}
-
-void CorePipelined::process_exception(Address jump_branch_pc) {
-    regs->write_pc(ex_mem.inst_addr);
-    flush();
-    handle_exception(
-        this, regs, mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, ex_mem.inst_addr, jump_branch_pc,
-        mem_wb.mem_addr);
+    return mem_wb.computed_next_inst_addr != mem_wb.predicted_next_inst_addr;
 }
 
 template<typename InterstageReg>

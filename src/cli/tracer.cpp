@@ -4,7 +4,7 @@
 
 using namespace machine;
 
-Tracer::Tracer(Machine *machine) : core_state(machine->core()->state) {
+Tracer::Tracer(Machine *machine) : core_state(machine->core()->get_state()) {
     connect(machine->core(), &Core::step_done, this, &Tracer::step_output);
 }
 

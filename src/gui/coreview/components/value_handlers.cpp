@@ -63,9 +63,16 @@ void DebugValue::update() {
 MultiTextValue::MultiTextValue(SimpleTextItem *const element, Data data)
     : element(element)
     , current_text_index(data.first)
-    , text_table(data.second) {}
+    , text_table(data.second)
+    , originalBrush(element->brush()) {}
 
 void MultiTextValue::update() {
+    if (current_text_index != 0) {
+        // Highlight non-default value.
+        element->setBrush(Qt::red);
+    } else {
+        element->setBrush(originalBrush);
+    }
     element->setText(text_table.at(current_text_index));
 }
 

@@ -177,7 +177,7 @@ void MachineTests::singlecore_regs() {
     Memory mem_used(mem); // Create memory copy
     TrivialBus mem_used_frontend(&mem);
 
-    CoreSingle core(&init, &mem_used_frontend, &mem_used_frontend, true, 0, nullptr, Xlen::_32);
+    CoreSingle core(&init, &mem_used_frontend, &mem_used_frontend, true, nullptr, Xlen::_32);
     core.step(); // Single step should be enought as this is risc without
                  // pipeline
     core.step();
@@ -278,8 +278,7 @@ void MachineTests::singlecore_jmp() {
     TrivialBus mem_used_frontend(&mem_used);
     Registers regs_used(regs);
 
-    CoreSingle core(
-        &regs_used, &mem_used_frontend, &mem_used_frontend, true, 0, nullptr, Xlen::_32);
+    CoreSingle core(&regs_used, &mem_used_frontend, &mem_used_frontend, true, nullptr, Xlen::_32);
     core.step();
     QCOMPARE(regs.read_pc() + 4, regs_used.read_pc()); // First execute delay
                                                        // slot
@@ -398,8 +397,7 @@ void MachineTests::singlecore_mem() {
     memory_write_u32(&mem_res, regs_init.read_pc().get_raw(), i.data());
 
     TrivialBus mem_init_frontend(&mem_init);
-    CoreSingle core(
-        &regs_init, &mem_init_frontend, &mem_init_frontend, true, 0, nullptr, Xlen::_32);
+    CoreSingle core(&regs_init, &mem_init_frontend, &mem_init_frontend, true, nullptr, Xlen::_32);
     core.step();
     core.step();
 
@@ -696,7 +694,7 @@ void MachineTests::singlecore_alu_forward() {
     TrivialBus mem_init_frontend(&mem_init);
     Memory mem_res(BIG);
     TrivialBus mem_res_frontend(&mem_res);
-    CoreSingle core(&reg_init, &mem_init_frontend, &mem_init_frontend, true, 0, nullptr, Xlen::_32);
+    CoreSingle core(&reg_init, &mem_init_frontend, &mem_init_frontend, true, nullptr, Xlen::_32);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -962,7 +960,7 @@ void MachineTests::singlecore_memory_tests() {
     QFETCH(Memory, mem_res);
     TrivialBus mem_init_frontend(&mem_init);
     TrivialBus mem_res_frontend(&mem_res);
-    CoreSingle core(&reg_init, &mem_init_frontend, &mem_init_frontend, true, 0, nullptr, Xlen::_32);
+    CoreSingle core(&reg_init, &mem_init_frontend, &mem_init_frontend, true, nullptr, Xlen::_32);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 

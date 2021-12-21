@@ -96,6 +96,7 @@ private:
     BORROWED svgscene::SimpleTextItem *const element;
     const unsigned &current_text_index;
     Source &text_table;
+    QBrush originalBrush;
 };
 
 class InstructionValue {
