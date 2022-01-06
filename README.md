@@ -92,8 +92,7 @@ Now build the project the same way as in general compilation (above).
 - [https://github.com/cvut/qtrvsim/releases](https://github.com/cvut/qtrvsim/releases)
     - archives with Windows and generic GNU/Linux binaries
 - [https://build.opensuse.org/repositories/home:jdupak/qtrvsim](https://build.opensuse.org/repositories/home:jdupak/qtrvsim)
-- [https://software.opensuse.org/download.html?project=home%3Ajdupak&package=qtrvsim](https://software.opensuse.
-  org/download.html?project=home%3Ajdupak&package=qtrvsim)
+- [https://software.opensuse.org/download.html?project=home%3Ajdupak&package=qtrvsim](https://software.opensuse.org/download.html?project=home%3Ajdupak&package=qtrvsim)
     - Open Build Service binary packages
 
 ### Nix package
