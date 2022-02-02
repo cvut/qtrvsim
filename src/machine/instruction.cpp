@@ -1,5 +1,6 @@
 #include "instruction.h"
 
+#include "common/logging.h"
 #include "memory/backend/memory.h"
 #include "simulator_exception.h"
 #include "utils.h"
@@ -12,6 +13,8 @@
 #include <initializer_list>
 #include <string>
 #include <utility>
+
+LOG_CATEGORY("instruction");
 
 using namespace machine;
 
