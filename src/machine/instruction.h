@@ -138,6 +138,8 @@ public:
 
     enum Type { R, I, S, B, U, J, UNKNOWN };
 
+    struct ParseError;
+
     /** Returns size of instruction in bytes */
     uint8_t size() const;
     uint8_t opcode() const;
@@ -202,6 +204,12 @@ private:
     uint32_t dt;
     static bool symbolic_registers_fl;
     inline int32_t extend(uint32_t value, uint32_t used_bits) const;
+}
+
+struct Instruction::ParseError : public std::exception {
+    QString message;
+
+    explicit ParseError(QString message);
 };
 
 } // namespace machine

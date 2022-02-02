@@ -760,3 +760,5 @@ void Instruction::append_recognized_registers(QStringList &list) {
 uint8_t Instruction::size() const {
     return 4;
 }
+
+Instruction::ParseError::ParseError(QString message) : message(std::move(message)) {}
