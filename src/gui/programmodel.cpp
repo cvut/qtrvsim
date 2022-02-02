@@ -6,9 +6,7 @@
 using ae = machine::AccessEffects; // For enum values, type is obvious from
                                    // context.
 
-ProgramModel::ProgramModel(QObject *parent)
-    : Super(parent)
-    , data_font("Monospace") {
+ProgramModel::ProgramModel(QObject *parent) : Super(parent), data_font("Monospace") {
     index0_offset = machine::Address::null();
     data_font.setStyleHint(QFont::TypeWriter);
     machine = nullptr;
@@ -21,23 +19,15 @@ ProgramModel::ProgramModel(QObject *parent)
 }
 
 const machine::FrontendMemory *ProgramModel::mem_access() const {
-    if (machine == nullptr) {
-        return nullptr;
-    }
-    if (machine->memory_data_bus() != nullptr) {
-        return machine->memory_data_bus();
-    }
+    if (machine == nullptr) { return nullptr; }
+    if (machine->memory_data_bus() != nullptr) { return machine->memory_data_bus(); }
     throw std::logic_error("Use of backend memory in frontend."); // TODO
     //    return machine->memory();
 }
 
 machine::FrontendMemory *ProgramModel::mem_access_rw() const {
-    if (machine == nullptr) {
-        return nullptr;
-    }
-    if (machine->memory_data_bus_rw() != nullptr) {
-        return machine->memory_data_bus_rw();
-    }
+    if (machine == nullptr) { return nullptr; }
+    if (machine->memory_data_bus_rw() != nullptr) { return machine->memory_data_bus_rw(); }
     throw std::logic_error("Use of backend memory in frontend."); // TODO
     //    return machine->memory_rw();
 }
@@ -49,10 +39,7 @@ int ProgramModel::rowCount(const QModelIndex & /*parent*/) const {
 int ProgramModel::columnCount(const QModelIndex & /*parent*/) const {
     return 4;
 }
-QVariant ProgramModel::headerData(
-    int section,
-    Qt::Orientation orientation,
-    int role) const {
+QVariant ProgramModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (orientation == Qt::Horizontal) {
         if (role == Qt::DisplayRole) {
             switch (section) {
@@ -73,9 +60,7 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
     if (role == Qt::DisplayRole || role == Qt::EditRole) {
         QString s, t;
         machine::Address address;
-        if (!get_row_address(address, index.row())) {
-            return QString("");
-        }
+        if (!get_row_address(address, index.row())) { return QString(""); }
 
         if (index.column() == 1) {
             t = QString::number(address.get_raw(), 16);
@@ -84,9 +69,7 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
         }
 
         mem = mem_access();
-        if (mem == nullptr) {
-            return QString(" ");
-        }
+        if (mem == nullptr) { return QString(" "); }
 
         machine::Instruction inst(mem->read_u32(address));
 
@@ -107,9 +90,7 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
     }
     if (role == Qt::BackgroundRole) {
         machine::Address address;
-        if (!get_row_address(address, index.row()) || machine == nullptr) {
-            return QVariant();
-        }
+        if (!get_row_address(address, index.row()) || machine == nullptr) { return QVariant(); }
         if (index.column() == 2 && machine->cache_program() != nullptr) {
             machine::LocationStatus loc_stat;
             loc_stat = machine->cache_program()->location_status(address);
@@ -140,9 +121,7 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
         }
         return QVariant();
     }
-    if (role == Qt::FontRole) {
-        return data_font;
-    }
+    if (role == Qt::FontRole) { return data_font; }
     return QVariant();
 }
 
@@ -152,14 +131,12 @@ void ProgramModel::setup(machine::Machine *machine) {
         i = machine::STAGEADDR_NONE;
     }
     if (machine != nullptr) {
-        connect(
-            machine, &machine::Machine::post_tick, this,
-            &ProgramModel::check_for_updates);
+        connect(machine, &machine::Machine::post_tick, this, &ProgramModel::check_for_updates);
     }
     if (mem_access() != nullptr) {
         connect(
-            mem_access(), &machine::FrontendMemory::external_change_notify,
-            this, &ProgramModel::check_for_updates);
+            mem_access(), &machine::FrontendMemory::external_change_notify, this,
+            &ProgramModel::check_for_updates);
     }
     emit update_all();
 }
@@ -170,8 +147,7 @@ void ProgramModel::update_all() {
     if (mem != nullptr) {
         memory_change_counter = mem->get_change_counter();
         if (machine->cache_program() != nullptr) {
-            cache_program_change_counter
-                = machine->cache_program()->get_change_counter();
+            cache_program_change_counter = machine->cache_program()->get_change_counter();
         }
     }
     stages_need_update = false;
@@ -182,22 +158,15 @@ void ProgramModel::check_for_updates() {
     bool need_update = stages_need_update;
     const machine::FrontendMemory *mem;
     mem = mem_access();
-    if (mem == nullptr) {
-        return;
-    }
+    if (mem == nullptr) { return; }
 
-    if (memory_change_counter != mem->get_change_counter()) {
-        need_update = true;
-    }
+    if (memory_change_counter != mem->get_change_counter()) { need_update = true; }
     if (machine->cache_data() != nullptr) {
-        if (cache_program_change_counter
-            != machine->cache_program()->get_change_counter()) {
+        if (cache_program_change_counter != machine->cache_program()->get_change_counter()) {
             need_update = true;
         }
     }
-    if (!need_update) {
-        return;
-    }
+    if (!need_update) { return; }
     update_all();
 }
 
@@ -221,13 +190,9 @@ bool ProgramModel::adjustRowAndOffset(int &row, machine::Address address) {
 
 void ProgramModel::toggle_hw_break(const QModelIndex &index) {
     machine::Address address;
-    if (index.column() != 0 || machine == nullptr) {
-        return;
-    }
+    if (index.column() != 0 || machine == nullptr) { return; }
 
-    if (!get_row_address(address, index.row())) {
-        return;
-    }
+    if (!get_row_address(address, index.row())) { return; }
 
     if (machine->is_hwbreak(address)) {
         machine->remove_hwbreak(address);
@@ -245,44 +210,29 @@ Qt::ItemFlags ProgramModel::flags(const QModelIndex &index) const {
     }
 }
 
-bool ProgramModel::setData(
-    const QModelIndex &index,
-    const QVariant &value,
-    int role) {
+bool ProgramModel::setData(const QModelIndex &index, const QVariant &value, int role) {
     if (role == Qt::EditRole) {
         bool ok;
         QString error;
         machine::Address address;
         uint32_t data;
         machine::FrontendMemory *mem;
-        if (!get_row_address(address, index.row())) {
-            return false;
-        }
-        if (index.column() == 0 || machine == nullptr) {
-            return false;
-        }
+        if (!get_row_address(address, index.row())) { return false; }
+        if (index.column() == 0 || machine == nullptr) { return false; }
         mem = mem_access_rw();
-        if (mem == nullptr) {
-            return false;
-        }
+        if (mem == nullptr) { return false; }
         switch (index.column()) {
         case 2:
             data = value.toString().toULong(&ok, 16);
-            if (!ok) {
-                return false;
-            }
-            mem->write_u32(address, data,ae::INTERNAL);
+            if (!ok) { return false; }
+            mem->write_u32(address, data, ae::INTERNAL);
             break;
-        case 3:
-            if (machine::Instruction::code_from_string(
-                    &data, 4, value.toString(), error, address)
-                < 0) {
-                emit report_error(
-                    tr("instruction 1 parse error - %2.").arg(error));
-
+        case 3: try { machine::Instruction::code_from_string(&data, 4, value.toString(), address);
+            } catch (machine::Instruction::ParseError &e) {
+                emit report_error(tr("instruction 1 parse error - %2.").arg(e.message));
                 return false;
             }
-            mem->write_u32(address, data,ae::INTERNAL);
+            mem->write_u32(address, data, ae::INTERNAL);
             break;
         default: return false;
         }

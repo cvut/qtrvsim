@@ -169,24 +169,27 @@ public:
 
     QString to_str(Address inst_addr = Address::null()) const;
 
-    static ssize_t code_from_string(
+    static size_t code_from_string(
         uint32_t *code,
         size_t buffsize,
         const QString &inst_base,
         QStringList &inst_fields,
-        QString &error,
-        Address inst_addr = Address::null(),
-        RelocExpressionList *reloc = nullptr,
-        const QString &filename = "",
-        int line = 0,
-        bool pseudo_opt = false,
-        bool silent = false);
+        Address inst_addr,
+        RelocExpressionList *reloc,
+        const QString &filename,
+        int line,
+        bool pseudo_opt,
+        bool silent);
 
-    static ssize_t code_from_string(
+    /**
+     * Parses instruction from tokens.
+     *
+     * @throws Instruction::ParseError if unable to parse
+     */
+    static size_t code_from_string(
         uint32_t *code,
         size_t buffsize,
         QString str,
-        QString &error,
         Address inst_addr = Address::null(),
         RelocExpressionList *reloc = nullptr,
         const QString &filename = "",
@@ -204,7 +207,23 @@ private:
     uint32_t dt;
     static bool symbolic_registers_fl;
     inline int32_t extend(uint32_t value, uint32_t used_bits) const;
-}
+    static uint32_t parse_field(
+        Address &inst_addr,
+        RelocExpressionList *reloc,
+        const QString &filename,
+        int line,
+        bool silent,
+        const QString &arg,
+        QString &field_token);
+    static Instruction base_from_string(
+        const QString &inst_base,
+        const QStringList &inst_fields,
+        Address &inst_addr,
+        RelocExpressionList *reloc,
+        const QString &filename,
+        int line,
+        bool silent);
+};
 
 struct Instruction::ParseError : public std::exception {
     QString message;
