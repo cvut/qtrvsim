@@ -80,6 +80,31 @@ struct BitArg {
     }
 };
 
+/**
+ * Collection of data necessary to parse instruction from tokens.
+ *
+ * @TODO Switch to QStringView
+ */
+struct TokenizedInstruction {
+    QString base;
+    QStringList fields;
+    Address address;
+    QString filename;
+    unsigned line;
+
+public:
+    TokenizedInstruction(
+        QString base,
+        QStringList fields,
+        const Address &address,
+        QString filename,
+        unsigned int line);
+
+    /** Tokenize assembler line */
+    static TokenizedInstruction
+    from_line(QString line_str, Address inst_addr, const QString &filename, unsigned line);
+};
+
 struct RelocExpression;
 typedef QVector<RelocExpression *> RelocExpressionList;
 
@@ -157,19 +182,8 @@ public:
 
     QString to_str(Address inst_addr = Address::null()) const;
 
-    static size_t code_from_string(
-        uint32_t *code,
-        size_t buffsize,
-        const QString &inst_base,
-        QStringList &inst_fields,
-        Address inst_addr,
-        RelocExpressionList *reloc,
-        const QString &filename,
-        int line,
-        bool pseudoinst_enabled = true);
-
     /**
-     * Parses instruction from tokens.
+     * Parses instruction from string containing one assembler line.
      *
      * @throws Instruction::ParseError if unable to parse
      */
@@ -177,12 +191,23 @@ public:
         uint32_t *code,
         size_t buffsize,
         QString str,
-        Address inst_addr = Address::null(),
+        Address inst_addr,
         RelocExpressionList *reloc = nullptr,
         const QString &filename = "",
-        int line = 0,
-        bool pseudo_opt = false,
-        bool silent = false);
+        unsigned line = 0,
+        bool pseudoinst_enabled = true);
+
+    /**
+     * Parses instruction from prepare tokenized form.
+     *
+     * @throws Instruction::ParseError if unable to parse
+     */
+    static size_t code_from_tokens(
+        uint32_t *code,
+        size_t buffsize,
+        TokenizedInstruction &inst,
+        RelocExpressionList *reloc = nullptr,
+        bool pseudoinst_enabled = true);
 
     bool update(int64_t val, RelocExpression *relocexp);
 
@@ -197,21 +222,17 @@ private:
 
     inline int32_t extend(uint32_t value, uint32_t used_bits) const;
     static uint32_t parse_field(
-        Address inst_addr,
-        RelocExpressionList *reloc,
-        const QString &filename,
-        int line,
-        Modifier pseudo_mod,
-        const QString &arg,
         QString &field_token,
-        uint64_t value);
-    static Instruction base_from_string(
-        const QString &inst_base,
-        const QStringList &inst_fields,
+        const QString &arg,
         Address inst_addr,
         RelocExpressionList *reloc,
         const QString &filename,
-        int line,
+        unsigned int line,
+        Modifier pseudo_mod,
+        uint64_t initial_immediate_value);
+    static Instruction base_from_string(
+        const TokenizedInstruction &inst,
+        RelocExpressionList *reloc,
         Modifier pseudo_mod = Modifier::NONE,
         uint64_t initial_immediate_value = 0);
 };

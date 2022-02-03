@@ -1,9 +1,9 @@
 #include "instruction.h"
 
 #include "common/logging.h"
+#include "common/math/bit_ops.h"
 #include "simulator_exception.h"
 #include "utils.h"
-#include "common/math/bit_ops.h"
 
 #include <QChar>
 #include <QMultiMap>
@@ -552,67 +552,61 @@ static void reloc_append(
     if (chars_taken != nullptr) { *chars_taken = i; }
 }
 
-size_t Instruction::code_from_string(
+size_t Instruction::code_from_tokens(
     uint32_t *code,
     size_t buffsize,
-    const QString &inst_base,
-    QStringList &inst_fields,
-    Address inst_addr,
+    TokenizedInstruction &inst,
     RelocExpressionList *reloc,
-    const QString &filename,
-    int line,
     bool pseudoinst_enabled) {
     if (str_to_instruction_code_map.isEmpty()) { instruction_from_string_build_base(); }
 
-    Instruction inst = base_from_string(inst_base, inst_fields, inst_addr, reloc, filename, line);
-    if (inst.data() != 0) {
-        if (inst.size() > buffsize) {
+    Instruction result = base_from_string(inst, reloc);
+    if (result.data() != 0) {
+        if (result.size() > buffsize) {
             // NOTE: this is bug, not user error.
             throw ParseError("insufficient buffer size to write parsed instruction");
         }
-        *code = inst.data();
-        return inst.size();
+        *code = result.data();
+        return result.size();
     }
 
     if (pseudoinst_enabled) {
-        if (inst_base == "la") {
+        constexpr Modifier UPPER = Modifier::COMPOSED_IMM_UPPER;
+        constexpr Modifier LOWER = Modifier::COMPOSED_IMM_LOWER;
+
+        if (inst.base == QLatin1String("la")) {
             // la rd, symbol
             // auipc rd, symbol[31:12] + symbol[11]
             *code = base_from_string(
-                        "auipc", inst_fields, inst_addr, reloc, filename, line,
-                        Modifier::COMPOSED_IMM_UPPER, -inst_addr.get_raw())
+                        { "auipc", inst.fields, inst.address, inst.filename, inst.line }, reloc,
+                        UPPER, -inst.address.get_raw())
                         .data();
             code += 1;
             // addi rd, rd, symbol[11:0]
-            inst_fields.insert(1, inst_fields.at(0)); // duplicate rd
+            inst.fields.insert(1, inst.fields.at(0)); // duplicate rd
             *code = base_from_string(
-                        "addi", inst_fields, inst_addr + 4, reloc, filename, line,
-                        Modifier::COMPOSED_IMM_LOWER, -inst_addr.get_raw())
+                        { "addi", inst.fields, inst.address + 4, inst.filename, inst.line }, reloc,
+                        LOWER, -inst.address.get_raw())
                         .data();
             return 8;
         }
-        if (inst_base == "nop") {
-            if (!inst_fields.empty()) { throw ParseError("`nop` does not allow any arguments"); }
-            inst = Instruction::NOP;
-            *code = inst.data();
-            return inst.size();
-        } else {
-            throw ParseError("unknown instruction");
+        if (inst.base == QLatin1String("nop")) {
+            if (!inst.fields.empty()) { throw ParseError("`nop` does not allow any arguments"); }
+            result = Instruction::NOP;
+            *code = result.data();
+            return result.size();
         }
     }
+    throw ParseError("unknown instruction");
 }
 Instruction Instruction::base_from_string(
-    const QString &inst_base,
-    const QStringList &inst_fields,
-    Address inst_addr,
+    const TokenizedInstruction &inst,
     RelocExpressionList *reloc,
-    const QString &filename,
-    int line,
     Modifier pseudo_mod,
     uint64_t initial_immediate_value) {
-    auto iter_range = str_to_instruction_code_map.equal_range(inst_base);
+    auto iter_range = str_to_instruction_code_map.equal_range(inst.base);
     if (iter_range.first == iter_range.second) {
-        DEBUG("Base instruction of the name %s not found.", qPrintable(inst_base));
+        DEBUG("Base instruction of the name %s not found.", qPrintable(inst.base));
         return Instruction(0);
     }
     // Process all codes associated with given instruction name and try matching the supplied
@@ -623,13 +617,13 @@ Instruction Instruction::base_from_string(
         uint32_t inst_code = iter_range.first.value();
         const InstructionMap &imap = InstructionMapFind(inst_code);
 
-        if (inst_fields.count() != imap.args.count()) { continue; }
+        if (inst.fields.count() != imap.args.count()) { continue; }
 
         for (int field_index = 0; field_index < imap.args.count(); field_index += 1) {
             const QString &arg = imap.args[field_index];
-            QString field_token = inst_fields[field_index];
+            QString field_token = inst.fields[field_index];
             inst_code |= parse_field(
-                inst_addr, reloc, filename, line, pseudo_mod, arg, field_token,
+                field_token, arg, inst.address, reloc, inst.filename, inst.line, pseudo_mod,
                 initial_immediate_value);
         }
         return Instruction(inst_code);
@@ -637,18 +631,18 @@ Instruction Instruction::base_from_string(
 
     ERROR(
         "No instruction map associated with name \"%s\" has matching number of fields (%u).",
-        qPrintable(inst_base), inst_fields.size());
+        qPrintable(inst.base), inst.fields.size());
     throw ParseError("number of arguments does not match");
 }
 
 uint32_t Instruction::parse_field(
+    QString &field_token,
+    const QString &arg,
     Address inst_addr,
     RelocExpressionList *reloc,
     const QString &filename,
-    int line,
+    unsigned int line,
     Modifier pseudo_mod,
-    const QString &arg,
-    QString &field_token,
     uint64_t initial_immediate_value) {
     uint32_t inst_code = 0;
     for (QChar ao : arg) {
@@ -733,37 +727,6 @@ uint32_t Instruction::parse_field(
     return inst_code;
 }
 
-size_t Instruction::code_from_string(
-    uint32_t *code,
-    size_t buffsize,
-    QString str,
-    Address inst_addr,
-    RelocExpressionList *reloc,
-    const QString &filename,
-    int line,
-    bool pseudo_opt,
-    bool silent) {
-    int k = 0, l;
-    while (k < str.count()) {
-        if (!str.at(k).isSpace()) { break; }
-        k++;
-    }
-    l = k;
-    while (l < str.count()) {
-        if (!str.at(l).isLetterOrNumber()) { break; }
-        l++;
-    }
-    QString inst_base = str.mid(k, l - k).toLower();
-    str = str.mid(l + 1).trimmed();
-    QStringList inst_fields;
-    if (str.count()) { inst_fields = str.split(","); }
-
-    if (!inst_base.count()) { throw ParseError("empty instruction field"); }
-
-    return code_from_string(
-        code, buffsize, inst_base, inst_fields, inst_addr, reloc, filename, line, pseudo_opt);
-}
-
 bool Instruction::update(int64_t val, RelocExpression *relocexp) {
     // Clear all bit of the updated argument.
     dt &= ~relocexp->arg->encode(~0);
@@ -827,5 +790,54 @@ void Instruction::append_recognized_registers(QStringList &list) {
 uint8_t Instruction::size() const {
     return 4;
 }
+size_t Instruction::code_from_string(
+    uint32_t *code,
+    size_t buffsize,
+    QString str,
+    Address inst_addr,
+    RelocExpressionList *reloc,
+    const QString &filename,
+    unsigned line,
+    bool pseudoinst_enabled) {
+    auto inst = TokenizedInstruction::from_line(std::move(str), inst_addr, filename, line);
+    return Instruction::code_from_tokens(code, buffsize, inst, reloc, pseudoinst_enabled);
+}
 
 Instruction::ParseError::ParseError(QString message) : message(std::move(message)) {}
+
+TokenizedInstruction TokenizedInstruction::from_line(
+    QString line_str,
+    Address inst_addr,
+    const QString &filename,
+    unsigned line) {
+    int start = 0, end;
+    while (start < line_str.size()) {
+        if (!line_str.at(start).isSpace()) { break; }
+        start++;
+    }
+    end = start;
+    while (end < line_str.size()) {
+        if (!line_str.at(end).isLetterOrNumber()) { break; }
+        end++;
+    }
+    QString inst_base = line_str.mid(start, end - start).toLower();
+    if (!inst_base.size()) { throw Instruction::ParseError("empty instruction field"); }
+
+    line_str = line_str.mid(end + 1).trimmed();
+    QStringList inst_fields;
+    if (line_str.size() > 0) { inst_fields = line_str.split(","); }
+
+    return { inst_base, inst_fields, inst_addr, filename, line };
+}
+
+TokenizedInstruction::TokenizedInstruction(
+    QString base,
+    QStringList fields,
+    const Address &address,
+    QString filename,
+    unsigned int line)
+    : base(std::move(base))
+    , fields(std::move(fields))
+    , address(address)
+    , filename(std::move(filename))
+    , line(line) {}

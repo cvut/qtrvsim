@@ -505,8 +505,9 @@ bool SimpleAsm::process_line(
     uint32_t inst[2] = { 0, 0 };
     size_t size = 0;
     try {
-        size = machine::Instruction::code_from_string(
-            inst, 8, op, operands, address, &reloc, filename, line_number);
+        machine::TokenizedInstruction inst_tok { op, operands, address, filename,
+                                                 static_cast<unsigned>(line_number) };
+        size = machine::Instruction::code_from_tokens(inst, 8, inst_tok, &reloc);
     } catch (machine::Instruction::ParseError &e) {
         error = tr("instruction %1 parse error - %2.").arg(line, e.message);
         emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, e.message, "");
