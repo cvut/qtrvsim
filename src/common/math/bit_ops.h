@@ -43,7 +43,7 @@ constexpr inline T mask_bits(T val, size_t start, size_t end) {
  */
 template<typename T>
 constexpr inline T get_bits(T val, size_t start, size_t end) {
-    return mask_bits(val >> end, start, 0);
+    return mask_bits(val >> end, start - end, 0);
 }
 
 /**
