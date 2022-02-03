@@ -80,39 +80,7 @@ struct BitArg {
     }
 };
 
-struct RelocExpression {
-    // TODO is location a address
-    inline RelocExpression(
-        Address location,
-        QString expression,
-        int64_t offset,
-        int64_t min,
-        int64_t max,
-        const BitArg *arg,
-        QString filename,
-        int line,
-        bool silent) {
-        this->location = location;
-        this->expression = std::move(expression);
-        this->offset = offset;
-        this->min = min;
-        this->max = max;
-        this->arg = arg;
-        this->filename = std::move(filename);
-        this->line = line;
-        this->silent = silent;
-    }
-    Address location;
-    QString expression;
-    int64_t offset;
-    int64_t min;
-    int64_t max;
-    const BitArg *arg;
-    QString filename;
-    int line;
-    bool silent;
-};
-
+struct RelocExpression;
 typedef QVector<RelocExpression *> RelocExpressionList;
 
 class Instruction {
@@ -137,6 +105,26 @@ public:
     static const Instruction NOP;
 
     enum Type { R, I, S, B, U, J, UNKNOWN };
+
+    /** Modified encoding to enable pseudoinstructions. */
+    enum class Modifier {
+        /** Normal processing. All fields are checked for value max and min. */
+        NONE,
+        /**
+         * Encodes upper part of immediate from a pseudoinstruction.
+         *
+         * `imm = symbol[31:12] + symbol[11]`
+         * NOTE: `symbol[11]` compensates for sign extension from addition of the lower part.
+         */
+        COMPOSED_IMM_UPPER,
+        /**
+         * Encodes lower part of immediate from a pseudoinstruction.
+         *
+         * `imm = symbol[11:0]`
+         * Upper bits of immediate may are discarded.
+         */
+        COMPOSED_IMM_LOWER,
+    };
 
     struct ParseError;
 
@@ -178,8 +166,7 @@ public:
         RelocExpressionList *reloc,
         const QString &filename,
         int line,
-        bool pseudo_opt,
-        bool silent);
+        bool pseudoinst_enabled = true);
 
     /**
      * Parses instruction from tokens.
@@ -202,33 +189,69 @@ public:
     static void append_recognized_instructions(QStringList &list);
     static void set_symbolic_registers(bool enable);
     static void append_recognized_registers(QStringList &list);
+    static constexpr uint64_t modify_pseudoinst_imm(Modifier mod, uint64_t value);
 
 private:
     uint32_t dt;
     static bool symbolic_registers_fl;
+
     inline int32_t extend(uint32_t value, uint32_t used_bits) const;
     static uint32_t parse_field(
-        Address &inst_addr,
+        Address inst_addr,
         RelocExpressionList *reloc,
         const QString &filename,
         int line,
-        bool silent,
+        Modifier pseudo_mod,
         const QString &arg,
-        QString &field_token);
+        QString &field_token,
+        uint64_t value);
     static Instruction base_from_string(
         const QString &inst_base,
         const QStringList &inst_fields,
-        Address &inst_addr,
+        Address inst_addr,
         RelocExpressionList *reloc,
         const QString &filename,
         int line,
-        bool silent);
+        Modifier pseudo_mod = Modifier::NONE,
+        uint64_t initial_immediate_value = 0);
 };
 
 struct Instruction::ParseError : public std::exception {
     QString message;
 
     explicit ParseError(QString message);
+};
+
+struct RelocExpression {
+    inline RelocExpression(
+        Address location,
+        QString expression,
+        int64_t offset,
+        int64_t min,
+        int64_t max,
+        const BitArg *arg,
+        QString filename,
+        int line,
+        Instruction::Modifier pseudo_mod = Instruction::Modifier::NONE) {
+        this->location = location;
+        this->expression = std::move(expression);
+        this->offset = offset;
+        this->min = min;
+        this->max = max;
+        this->arg = arg;
+        this->filename = std::move(filename);
+        this->line = line;
+        this->pseudo_mod = pseudo_mod;
+    }
+    Address location;
+    QString expression;
+    int64_t offset;
+    int64_t min;
+    int64_t max;
+    const BitArg *arg;
+    QString filename;
+    int line;
+    Instruction::Modifier pseudo_mod;
 };
 
 } // namespace machine

@@ -3,6 +3,7 @@
 #include "common/logging.h"
 #include "simulator_exception.h"
 #include "utils.h"
+#include "common/math/bit_ops.h"
 
 #include <QChar>
 #include <QMultiMap>
@@ -529,7 +530,7 @@ static void reloc_append(
     uint *chars_taken = nullptr,
     const QString &filename = "",
     int line = 0,
-    int options = 0) {
+    Instruction::Modifier pseudo_mod = machine::Instruction::Modifier::NONE) {
     QString expression = "";
     QString allowed_operators = "+-/*|&^~";
     int i = 0;
@@ -547,7 +548,7 @@ static void reloc_append(
 
     reloc->append(new RelocExpression(
         inst_addr, expression, offset, adesc->min, adesc->max, &adesc->arg, filename, line,
-        options));
+        pseudo_mod));
     if (chars_taken != nullptr) { *chars_taken = i; }
 }
 
@@ -560,13 +561,10 @@ size_t Instruction::code_from_string(
     RelocExpressionList *reloc,
     const QString &filename,
     int line,
-    bool pseudo_opt,
-    bool silent) {
-    Q_UNUSED(pseudo_opt);
+    bool pseudoinst_enabled) {
     if (str_to_instruction_code_map.isEmpty()) { instruction_from_string_build_base(); }
 
-    Instruction inst
-        = base_from_string(inst_base, inst_fields, inst_addr, reloc, filename, line, silent);
+    Instruction inst = base_from_string(inst_base, inst_fields, inst_addr, reloc, filename, line);
     if (inst.data() != 0) {
         if (inst.size() > buffsize) {
             // NOTE: this is bug, not user error.
@@ -576,23 +574,42 @@ size_t Instruction::code_from_string(
         return inst.size();
     }
 
-    if (inst_base == "nop") {
-        if (!inst_fields.empty()) { throw ParseError("`nop` does not allow any arguments"); }
-        inst = Instruction::NOP;
-        *code = inst.data();
-        return inst.size();
-    } else {
-        throw ParseError("unknown instruction");
+    if (pseudoinst_enabled) {
+        if (inst_base == "la") {
+            // la rd, symbol
+            // auipc rd, symbol[31:12] + symbol[11]
+            *code = base_from_string(
+                        "auipc", inst_fields, inst_addr, reloc, filename, line,
+                        Modifier::COMPOSED_IMM_UPPER, -inst_addr.get_raw())
+                        .data();
+            code += 1;
+            // addi rd, rd, symbol[11:0]
+            inst_fields.insert(1, inst_fields.at(0)); // duplicate rd
+            *code = base_from_string(
+                        "addi", inst_fields, inst_addr + 4, reloc, filename, line,
+                        Modifier::COMPOSED_IMM_LOWER, -inst_addr.get_raw())
+                        .data();
+            return 8;
+        }
+        if (inst_base == "nop") {
+            if (!inst_fields.empty()) { throw ParseError("`nop` does not allow any arguments"); }
+            inst = Instruction::NOP;
+            *code = inst.data();
+            return inst.size();
+        } else {
+            throw ParseError("unknown instruction");
+        }
     }
 }
 Instruction Instruction::base_from_string(
     const QString &inst_base,
     const QStringList &inst_fields,
-    Address &inst_addr,
+    Address inst_addr,
     RelocExpressionList *reloc,
     const QString &filename,
     int line,
-    bool silent) {
+    Modifier pseudo_mod,
+    uint64_t initial_immediate_value) {
     auto iter_range = str_to_instruction_code_map.equal_range(inst_base);
     if (iter_range.first == iter_range.second) {
         DEBUG("Base instruction of the name %s not found.", qPrintable(inst_base));
@@ -611,7 +628,9 @@ Instruction Instruction::base_from_string(
         for (int field_index = 0; field_index < imap.args.count(); field_index += 1) {
             const QString &arg = imap.args[field_index];
             QString field_token = inst_fields[field_index];
-            inst_code |= parse_field(inst_addr, reloc, filename, line, silent, arg, field_token);
+            inst_code |= parse_field(
+                inst_addr, reloc, filename, line, pseudo_mod, arg, field_token,
+                initial_immediate_value);
         }
         return Instruction(inst_code);
     }
@@ -621,14 +640,16 @@ Instruction Instruction::base_from_string(
         qPrintable(inst_base), inst_fields.size());
     throw ParseError("number of arguments does not match");
 }
+
 uint32_t Instruction::parse_field(
-    Address &inst_addr,
+    Address inst_addr,
     RelocExpressionList *reloc,
     const QString &filename,
     int line,
-    bool silent,
+    Modifier pseudo_mod,
     const QString &arg,
-    QString &field_token) {
+    QString &field_token,
+    uint64_t initial_immediate_value) {
     uint32_t inst_code = 0;
     for (QChar ao : arg) {
         bool need_reloc = false;
@@ -647,6 +668,9 @@ uint32_t Instruction::parse_field(
             continue;
         }
 
+        // Only apply modifier to immediate fields
+        const Modifier effective_mod = (adesc->is_imm()) ? pseudo_mod : Modifier::NONE;
+
         uint64_t val = 0;
         uint chars_taken = 0;
 
@@ -655,7 +679,8 @@ uint32_t Instruction::parse_field(
         case 'p':
         case 'a': val -= inst_addr.get_raw(); FALLTROUGH
         case 'o':
-        case 'n':
+        case 'n': {
+            val += initial_immediate_value;
             if (field_token.at(0).isDigit() || field_token.at(0) == '-' || (reloc == nullptr)) {
                 uint64_t num_val;
                 int i;
@@ -689,16 +714,17 @@ uint32_t Instruction::parse_field(
             }
             if (need_reloc && (reloc != nullptr)) {
                 reloc_append(
-                    reloc, field_token, inst_addr, val, adesc, &chars_taken, filename, line);
+                    reloc, field_token, inst_addr, val, adesc, &chars_taken, filename, line,
+                    effective_mod);
                 val = 0;
             }
             break;
         }
+        }
         if (chars_taken <= 0) { throw ParseError("argument parse error"); }
 
-        if (!silent && !adesc->is_value_in_field_range(val)) {
-            throw ParseError("argument range exceed");
-        }
+        if (effective_mod != Modifier::NONE) { val = modify_pseudoinst_imm(effective_mod, val); }
+        if (!adesc->is_value_in_field_range(val)) { throw ParseError("argument range exceed"); }
 
         inst_code |= adesc->arg.encode(val);
         field_token = field_token.mid(chars_taken);
@@ -735,31 +761,43 @@ size_t Instruction::code_from_string(
     if (!inst_base.count()) { throw ParseError("empty instruction field"); }
 
     return code_from_string(
-        code, buffsize, inst_base, inst_fields, inst_addr, reloc, filename, line, pseudo_opt,
-        silent);
+        code, buffsize, inst_base, inst_fields, inst_addr, reloc, filename, line, pseudo_opt);
 }
 
 bool Instruction::update(int64_t val, RelocExpression *relocexp) {
+    // Clear all bit of the updated argument.
     dt &= ~relocexp->arg->encode(~0);
     val += relocexp->offset;
-    if (!relocexp->silent && (val & ((1 << relocexp->arg->shift) - 1))) { return false; }
-    if (!(relocexp->silent)) {
-        if (relocexp->min < 0) {
-            if (((int64_t)val < relocexp->min) || ((int64_t)val > relocexp->max)) {
-                if (((int64_t)val - 0x100000000 < relocexp->min)
-                    || ((int64_t)val - 0x100000000 > relocexp->max)) {
-                    return false;
-                }
-            }
-        } else {
-            if (((uint64_t)val < (uint64_t)relocexp->min)
-                || ((uint64_t)val > (uint64_t)relocexp->max)) {
+
+    if (relocexp->pseudo_mod != Modifier::NONE) {
+        val = (int64_t)modify_pseudoinst_imm(relocexp->pseudo_mod, val);
+    }
+
+    if ((val & ((1 << relocexp->arg->shift) - 1))) { return false; }
+    if (relocexp->min < 0) {
+        if (((int64_t)val < relocexp->min) || ((int64_t)val > relocexp->max)) {
+            if (((int64_t)val - 0x100000000 < relocexp->min)
+                || ((int64_t)val - 0x100000000 > relocexp->max)) {
                 return false;
             }
         }
+    } else {
+        if (((uint64_t)val < (uint64_t)relocexp->min)
+            || ((uint64_t)val > (uint64_t)relocexp->max)) {
+            return false;
+        }
     }
+
     dt |= relocexp->arg->encode(val);
     return true;
+}
+
+constexpr uint64_t Instruction::modify_pseudoinst_imm(Instruction::Modifier mod, uint64_t value) {
+    switch (mod) {
+    case Modifier::NONE: return value;
+    case Modifier::COMPOSED_IMM_UPPER: return get_bits(value, 31, 12) + get_bit(value, 11);
+    case Modifier::COMPOSED_IMM_LOWER: return get_bits(value, 11, 0);
+    }
 }
 
 // highlighter

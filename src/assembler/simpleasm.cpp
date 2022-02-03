@@ -494,8 +494,7 @@ bool SimpleAsm::process_line(
             if (chars_taken != s.size()) {
                 val = 0;
                 reloc.append(new machine::RelocExpression(
-                    address, s, 0, -0xffffffff, 0xffffffff, &wordArg, filename, line_number,
-                    false));
+                    address, s, 0, -0xffffffff, 0xffffffff, &wordArg, filename, line_number));
             }
             if (!fatal_occured) { mem->write_u32(address, val, ae::INTERNAL); }
             address += 4;
@@ -507,7 +506,7 @@ bool SimpleAsm::process_line(
     size_t size = 0;
     try {
         size = machine::Instruction::code_from_string(
-            inst, 8, op, operands, address, &reloc, filename, line_number, true, false);
+            inst, 8, op, operands, address, &reloc, filename, line_number);
     } catch (machine::Instruction::ParseError &e) {
         error = tr("instruction %1 parse error - %2.").arg(line, e.message);
         emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, e.message, "");
