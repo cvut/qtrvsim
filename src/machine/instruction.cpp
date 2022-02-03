@@ -404,10 +404,10 @@ QString Instruction::to_str(Address inst_addr) const {
     if (this->dt == NOP.dt) { return QString("nop"); }
 
     res += im.name;
-    foreach (const QString &arg, im.args) {
+    for (const QString &arg : im.args) {
         res += next_delim;
         next_delim = ", ";
-        foreach (QChar ao, arg) {
+        for (QChar ao : arg) {
             uint a = ao.toLatin1();
             if (!a) { continue; }
             const ArgumentDesc *adesc = argdesbycode[a];
@@ -766,8 +766,9 @@ bool Instruction::update(int64_t val, RelocExpression *relocexp) {
 void Instruction::append_recognized_instructions(QStringList &list) {
     if (str_to_instruction_code_map.isEmpty()) { instruction_from_string_build_base(); }
 
-    foreach (const QString &str, str_to_instruction_code_map.keys())
+    for (const QString &str : str_to_instruction_code_map.keys()) {
         list.append(str);
+    }
 }
 
 void Instruction::set_symbolic_registers(bool enable) {

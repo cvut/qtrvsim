@@ -547,7 +547,7 @@ bool SimpleAsm::process_file(const QString &filename, QString *error_ptr) {
 
 bool SimpleAsm::finish(QString *error_ptr) {
     bool error_reported = false;
-    foreach (machine::RelocExpression *r, reloc) {
+    for (machine::RelocExpression *r : reloc) {
         QString error;
         fixmatheval::FmeExpression expression;
         if (!expression.parse(r->expression, error)) {
