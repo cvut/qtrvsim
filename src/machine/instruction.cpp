@@ -53,6 +53,8 @@ struct ArgumentDesc {
                    && val.as_u64() >= static_cast<uint64_t>(min);
         }
     }
+
+    constexpr bool is_imm() const { return kind != 'g'; }
 };
 
 static const ArgumentDesc argdeslist[] = {
