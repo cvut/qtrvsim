@@ -54,7 +54,7 @@ static const ArgumentDesc argdeslist[] = {
     ArgumentDesc('j', 'n', -0x800, 0x7ff, { { { 12, 20 } }, 0 }),
     ArgumentDesc('>', 'n', 0, 0x1f, { { { 5, 20 } }, 0 }),
     ArgumentDesc('a', 'a', -0x80000, 0x7ffff, { { { 10, 21 }, { 1, 20 }, { 8, 12 }, { 1, 31 } }, 1 }),
-    ArgumentDesc('u', 'n', 0, 0xfffff000, { { { 20, 12 } }, 12 }),
+    ArgumentDesc('u', 'n', 0, 0xfffff000, { { { 20, 12 } }, 0 }),
     ArgumentDesc('p', 'p', -0x800, 0x7ff, { { { 4, 8 }, { 6, 25 }, { 1, 7 }, { 1, 31 } }, 1 }),
     ArgumentDesc('o', 'o', -0x800, 0x7ff, { { { 12, 20 } }, 0 }),
     ArgumentDesc('q', 'o', -0x800, 0x7ff, { { { 5, 7 }, { 7, 25 } }, 0 }),
