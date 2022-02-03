@@ -273,6 +273,8 @@ static inline const struct InstructionMap &InstructionMapFind(uint32_t code) {
 #undef IMF_SUB_GET_BITS
 #undef IMF_SUB_GET_SHIFT
 
+const std::array<const QString, 2> RECOGNIZED_PSEUDOINSTRUCTIONS { "nop", "la" };
+
 const Instruction Instruction::NOP = Instruction(0x00000013);
 
 Instruction::Instruction() {
@@ -768,6 +770,9 @@ void Instruction::append_recognized_instructions(QStringList &list) {
     if (str_to_instruction_code_map.isEmpty()) { instruction_from_string_build_base(); }
 
     for (const QString &str : str_to_instruction_code_map.keys()) {
+        list.append(str);
+    }
+    for (const auto &str : RECOGNIZED_PSEUDOINSTRUCTIONS) {
         list.append(str);
     }
 }
