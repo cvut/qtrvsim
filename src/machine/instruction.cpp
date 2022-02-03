@@ -25,6 +25,14 @@ bool Instruction::symbolic_registers_fl = false;
 
 struct ArgumentDesc {
     char name;
+    /**
+     * Possible values:
+     *  @val g: gp register id
+     *  @val n: numeric immediate
+     *  @val a: pc relative address offset
+     *  @val b: pc relative address offset
+     *  @val o: offset immediate
+     */
     char kind;
     int64_t min;
     int64_t max;
@@ -48,15 +56,25 @@ struct ArgumentDesc {
 };
 
 static const ArgumentDesc argdeslist[] = {
+    // Destination register (rd)
     ArgumentDesc('d', 'g', 0, 0x1f, { { { 5, 7 } }, 0 }),
+    // Source register 1 (rs1/rs)
     ArgumentDesc('s', 'g', 0, 0x1f, { { { 5, 15 } }, 0 }),
+    // Source register 2 (rs2/rt)
     ArgumentDesc('t', 'g', 0, 0x1f, { { { 5, 20 } }, 0 }),
+    // I-type immediate for arithmetic instructions (12bits)
     ArgumentDesc('j', 'n', -0x800, 0x7ff, { { { 12, 20 } }, 0 }),
+    // Shaft for bit shift instructions (5bits)
     ArgumentDesc('>', 'n', 0, 0x1f, { { { 5, 20 } }, 0 }),
+    // Address offset immediate (20bits), encoded in multiples of 2 bytes
     ArgumentDesc('a', 'a', -0x80000, 0x7ffff, { { { 10, 21 }, { 1, 20 }, { 8, 12 }, { 1, 31 } }, 1 }),
+    // U-type immediate for LUI and AUIPC (20bits)
     ArgumentDesc('u', 'n', 0, 0xfffff000, { { { 20, 12 } }, 0 }),
+    // B-type immediate for branches (12 bits)
     ArgumentDesc('p', 'p', -0x800, 0x7ff, { { { 4, 8 }, { 6, 25 }, { 1, 7 }, { 1, 31 } }, 1 }),
+    // Offset immediate for load instructions (12 bits)
     ArgumentDesc('o', 'o', -0x800, 0x7ff, { { { 12, 20 } }, 0 }),
+    // Offset immediate for store instructions (12 bits)
     ArgumentDesc('q', 'o', -0x800, 0x7ff, { { { 5, 7 }, { 7, 25 } }, 0 }),
 };
 
