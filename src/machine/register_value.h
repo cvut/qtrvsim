@@ -45,6 +45,7 @@ public:
     constexpr inline RegisterValue() : data(0) {};
 
     constexpr inline RegisterValue(const RegisterValue &other) = default;
+    constexpr inline RegisterValue &operator=(const RegisterValue &other) = default;
 
     /* Sign-extending constructors */
 

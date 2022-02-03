@@ -33,7 +33,8 @@ public:
      */
     constexpr Address();
 
-    constexpr Address(const Address &address) = default; //> Copy constructor
+    constexpr Address(const Address &address) = default;            //> Copy constructor
+    constexpr Address &operator=(const Address &address) = default; //> Assign constructor
 
     /**
      * Extracts raw numeric value of the address.

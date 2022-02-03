@@ -34,6 +34,6 @@ void Tracer::step_output() {
     }
     if (trace_pc) { printf("PC: %" PRIx64 "\n", if_id.inst_addr.get_raw()); }
     if (trace_regs_gp && wb.regwrite && regs_to_trace.at(wb.num_rd)) {
-        printf("GP %d: %" PRIx64 "\n", wb.num_rd, wb.value.as_u64());
+        printf("GP %zu: %" PRIx64 "\n", size_t(wb.num_rd), wb.value.as_u64());
     }
 }

@@ -73,6 +73,7 @@ struct FetchState {
 
     FetchState() = default;
     FetchState(const FetchState &) = default;
+    FetchState &operator=(const FetchState &) = default;
 };
 
 struct DecodeInterstage {
@@ -138,6 +139,7 @@ struct DecodeState {
     }
     DecodeState() = default;
     DecodeState(const DecodeState &) = default;
+    DecodeState &operator=(const DecodeState &) = default;
 };
 
 struct ExecuteInterstage {
@@ -207,6 +209,7 @@ struct ExecuteState {
     }
     ExecuteState() = default;
     ExecuteState(const ExecuteState &) = default;
+    ExecuteState &operator=(const ExecuteState &) = default;
 };
 
 struct MemoryInterstage {
@@ -254,6 +257,7 @@ struct MemoryState {
 
     MemoryState() = default;
     MemoryState(const MemoryState &) = default;
+    MemoryState &operator=(const MemoryState &) = default;
 };
 
 struct WritebackInternalState {
@@ -271,6 +275,7 @@ struct WritebackState {
     explicit WritebackState(WritebackInternalState stage) : internal(std::move(stage)) {}
     WritebackState() = default;
     WritebackState(const WritebackState &) = default;
+    WritebackState &operator=(const WritebackState &) = default;
 };
 
 struct Pipeline {

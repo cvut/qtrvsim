@@ -470,6 +470,7 @@ CorePipelined::CorePipelined(
     Cop0State *cop0state,
     Xlen xlen)
     : Core(regs, predictor, mem_program, mem_data, cop0state, xlen) {
+    Q_UNUSED(min_cache_row_size);
     this->hazard_unit = hazard_unit;
     reset();
 }
