@@ -363,7 +363,7 @@ bool assemble(Machine &machine, MsgReport &msgrep, const QString &filename) {
 
     SimpleAsm::connect(&sasm, &SimpleAsm::report_message, &msgrep, &MsgReport::report_message);
 
-    sasm.setup(mem, &symtab, 0x80020000_addr);
+    sasm.setup(mem, &symtab, 0x80020000_addr, machine.core()->get_xlen());
 
     if (!sasm.process_file(filename)) { return false; }
 

@@ -47,6 +47,7 @@ public:
     FrontendMemory *get_mem_data() const;
     FrontendMemory *get_mem_program() const;
     const CoreState &get_state() const;
+    Xlen get_xlen() const;
 
     void insert_hwbreak(Address address);
     void remove_hwbreak(Address address);

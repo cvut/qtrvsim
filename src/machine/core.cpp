@@ -107,6 +107,9 @@ void Core::set_step_over_exception(enum ExceptionCause excause, bool value) {
 bool Core::get_step_over_exception(enum ExceptionCause excause) const {
     return step_over_exception[excause];
 }
+Xlen Core::get_xlen() const {
+    return xlen;
+}
 
 void Core::register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler) {
     if (excause == EXCAUSE_NONE) {
@@ -470,7 +473,7 @@ CorePipelined::CorePipelined(
     Cop0State *cop0state,
     Xlen xlen)
     : Core(regs, predictor, mem_program, mem_data, cop0state, xlen) {
-    Q_UNUSED(min_cache_row_size);
+    Q_UNUSED(min_cache_row_size)
     this->hazard_unit = hazard_unit;
     reset();
 }

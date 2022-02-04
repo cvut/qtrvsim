@@ -68,10 +68,15 @@ void SimpleAsm::clear() {
     fatal_occured = false;
 }
 
-void SimpleAsm::setup(machine::FrontendMemory *mem, SymbolTableDb *symtab, machine::Address address) {
+void SimpleAsm::setup(
+    machine::FrontendMemory *mem,
+    SymbolTableDb *symtab,
+    machine::Address address,
+    machine::Xlen xlen) {
     this->mem = mem;
     this->symtab = symtab;
     this->address = address;
+    this->symtab->setSymbol("XLEN", static_cast<uint64_t>(xlen), sizeof(uint64_t));
 }
 
 static const auto wordArg = machine::BitArg({ { 32, 0 } }, 0);
