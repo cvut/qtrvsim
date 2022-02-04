@@ -9,12 +9,11 @@
 #include <QStringList>
 #include <QVector>
 #include <utility>
+#include <array>
 
 namespace machine {
 
-#define REGISTER_CODES 32
-
-const char *const Rv_regnames[REGISTER_CODES] = {
+static constexpr std::array<const char *const, 32> Rv_regnames = {
     "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
     "a1",   "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
     "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
@@ -128,6 +127,7 @@ public:
     Instruction(const Instruction &);
 
     static const Instruction NOP;
+    static const Instruction UNKNOWN_INST;
 
     enum Type { R, I, S, B, U, J, UNKNOWN };
 
@@ -218,7 +218,7 @@ public:
 
 private:
     uint32_t dt;
-    static bool symbolic_registers_fl;
+    static bool symbolic_registers_enabled;
 
     inline int32_t extend(uint32_t value, uint32_t used_bits) const;
     static uint32_t parse_field(
@@ -230,11 +230,25 @@ private:
         unsigned int line,
         Modifier pseudo_mod,
         uint64_t initial_immediate_value);
-    static Instruction base_from_string(
+    static Instruction base_from_tokens(
         const TokenizedInstruction &inst,
         RelocExpressionList *reloc,
         Modifier pseudo_mod = Modifier::NONE,
         uint64_t initial_immediate_value = 0);
+    static size_t partially_apply(
+        const char *base,
+        int argument_count,
+        int position,
+        const char *value,
+        uint32_t *code,
+        size_t buffsize,
+        TokenizedInstruction &inst,
+        RelocExpressionList *reloc);
+    static size_t pseudo_from_tokens(
+        uint32_t *code,
+        size_t buffsize,
+        TokenizedInstruction &inst,
+        RelocExpressionList *reloc);
 };
 
 struct Instruction::ParseError : public std::exception {

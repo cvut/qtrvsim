@@ -16,7 +16,7 @@ namespace machine {
  * `RegisterValue` type is used to abstract the size of stored value. It provides methods to get
  *  correct size. The `Core` can extract them with a special method.
  */
-enum class Xlen { _32, _64 };
+enum class Xlen { _32 = 32, _64 = 64 };
 
 enum ConfigPresets {
     CP_SINGLE,         // No pipeline cpu without cache

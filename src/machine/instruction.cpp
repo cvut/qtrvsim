@@ -18,12 +18,6 @@ LOG_CATEGORY("instruction");
 
 using namespace machine;
 
-bool Instruction::symbolic_registers_fl = false;
-
-#define IMF_SUB_ENCODE(bits, shift) (((bits) << 8) | (shift))
-#define IMF_SUB_GET_BITS(subcode) (((subcode) >> 8) & 0xff)
-#define IMF_SUB_GET_SHIFT(subcode) ((subcode)&0xff)
-
 struct ArgumentDesc {
     char name;
     /**
@@ -58,7 +52,7 @@ struct ArgumentDesc {
     constexpr bool is_imm() const { return kind != 'g'; }
 };
 
-static const ArgumentDesc argdeslist[] = {
+static const ArgumentDesc arg_desc_list[] = {
     // Destination register (rd)
     ArgumentDesc('d', 'g', 0, 0x1f, { { { 5, 7 } }, 0 }),
     // Source register 1 (rs1/rs)
@@ -81,12 +75,11 @@ static const ArgumentDesc argdeslist[] = {
     ArgumentDesc('q', 'o', -0x800, 0x7ff, { { { 5, 7 }, { 7, 25 } }, 0 }),
 };
 
-static const ArgumentDesc *argdesbycode[(int)('z' + 1)];
+static const ArgumentDesc *arg_desc_by_code[(int)('z' + 1)];
 
 static bool fill_argdesbycode() {
-    uint i;
-    for (i = 0; i < sizeof(argdeslist) / sizeof(*argdeslist); i++) {
-        argdesbycode[(uint)argdeslist[i].name] = &argdeslist[i];
+    for (const auto &desc : arg_desc_list) {
+        arg_desc_by_code[(uint)(unsigned char)desc.name] = &desc;
     }
     return true;
 }
@@ -98,20 +91,18 @@ bool argdesbycode_filled = fill_argdesbycode();
     (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM | IMF_ALU_REQ_RS)
 #define FLAGS_ALU_I_STORE                                                                          \
     (IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | IMF_MEM | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
-
 #define FLAGS_ALU_T_R_D (IMF_SUPPORTED | IMF_REGWRITE)
 #define FLAGS_ALU_T_R_STD (FLAGS_ALU_T_R_D | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
 
-// #define NOALU .alu = ALU_OP_SLL
 #define NOALU .alu = AluOp::ADD
 #define NOMEM .mem_ctl = AC_NONE
 
+// TODO NOTE: if unknown is defined as all 0, instruction map can be significantly simplified
+//  using zero initialization.
 #define IM_UNKNOWN                                                                                 \
     {                                                                                              \
         "unknown", Instruction::UNKNOWN, NOALU, NOMEM, nullptr, {}, 0, 0, { 0 }                    \
     }
-// TODO NOTE: if unknown is defined as all 0, instruction map can be
-// significanly simplified using zero initialization.
 
 struct InstructionMap {
     const char *name;
@@ -120,7 +111,7 @@ struct InstructionMap {
     enum AccessControl mem_ctl;
     const struct InstructionMap *subclass; // when subclass is used then flags
                                            // has special meaning
-    const QStringList args;
+    const QList<QString> args;
     uint32_t code;
     uint32_t mask;
     union {
@@ -268,14 +259,15 @@ static inline const struct InstructionMap &InstructionMapFind(uint32_t code) {
     return *im;
 }
 
-#undef IM_UNKNOWN
-#undef IMF_SUB_ENCODE
-#undef IMF_SUB_GET_BITS
-#undef IMF_SUB_GET_SHIFT
+const std::array<const QString, 29> RECOGNIZED_PSEUDOINSTRUCTIONS {
+    "nop",    "la",     "li",     "mv",   "not",  "neg",  "negw", "sext.b", "sext.h", "sext.w",
+    "zext.b", "zext.h", "zext.w", "seqz", "snez", "sltz", "slgz", "beqz",   "bnez",   "blez",
+    "bgez",   "bltz",   "bgtz",   "bgt",  "ble",  "bgtu", "bleu", "j",      "jal",
+};
 
-const std::array<const QString, 2> RECOGNIZED_PSEUDOINSTRUCTIONS { "nop", "la" };
-
+bool Instruction::symbolic_registers_enabled = false;
 const Instruction Instruction::NOP = Instruction(0x00000013);
+const Instruction Instruction::UNKNOWN_INST = Instruction(0x0);
 
 Instruction::Instruction() {
     this->dt = 0;
@@ -378,9 +370,7 @@ void Instruction::flags_alu_op_mem_ctl(
     flags = (enum InstructionFlags)im.flags;
     alu_op = im.alu;
     mem_ctl = im.mem_ctl;
-#if 1
     if ((dt ^ im.code) & (im.mask)) { flags = (enum InstructionFlags)(flags & ~IMF_SUPPORTED); }
-#endif
 }
 
 bool Instruction::operator==(const Instruction &c) const {
@@ -403,51 +393,54 @@ QString Instruction::to_str(Address inst_addr) const {
     SANITY_ASSERT(argdesbycode_filled, QString("argdesbycode_filled not initialized"));
     QString res;
     QString next_delim = " ";
-    if (im.type == UNKNOWN) { return QString("unknown"); }
-    if (this->dt == NOP.dt) { return QString("nop"); }
+    if (im.type == UNKNOWN) { return { "unknown" }; }
+    if (this->dt == NOP.dt) { return { "nop" }; }
 
     res += im.name;
-    for (const QString &arg : im.args) {
+    for (const QString &arg_string : im.args) {
         res += next_delim;
         next_delim = ", ";
-        for (QChar ao : arg) {
-            uint a = ao.toLatin1();
-            if (!a) { continue; }
-            const ArgumentDesc *adesc = argdesbycode[a];
-            if (adesc == nullptr) {
-                res += ao;
+        for (int pos = 0; pos < arg_string.size(); pos += 1) {
+            char arg_letter = arg_string[pos].toLatin1();
+            const ArgumentDesc *arg_desc = arg_desc_by_code[(unsigned char)arg_letter];
+            if (arg_desc == nullptr) {
+                res += arg_letter;
                 continue;
             }
-            int32_t field = adesc->arg.decode(this->dt);
-            if (adesc->min < 0) {
+            auto field = (int32_t)arg_desc->arg.decode(this->dt);
+            if (arg_desc->min < 0) {
                 field = extend(field, [&]() {
-                    int sum = adesc->arg.shift;
-                    for (auto chunk : adesc->arg)
+                    int sum = (int)arg_desc->arg.shift;
+                    for (auto chunk : arg_desc->arg) {
                         sum += chunk.count;
+                    }
                     return sum - 1;
                 }());
             }
-            switch (adesc->kind) {
-            case 'g':
-                if (symbolic_registers_fl) {
+            switch (arg_desc->kind) {
+            case 'g': {
+                if (symbolic_registers_enabled) {
                     res += QString(Rv_regnames[field]);
                 } else {
                     res += "x" + QString::number(field);
                 }
                 break;
+            }
             case 'p':
-            case 'a':
-                field += inst_addr.get_raw();
+            case 'a': {
+                field += (int32_t)inst_addr.get_raw();
                 res += "0x" + QString::number(uint32_t(field), 16);
                 break;
+            }
             case 'o':
-            case 'n':
-                if (adesc->min < 0) {
+            case 'n': {
+                if (arg_desc->min < 0) {
                     res += QString::number((int32_t)field, 10);
                 } else {
                     res += "0x" + QString::number(uint32_t(field), 16);
                 }
                 break;
+            }
             }
         }
     }
@@ -472,9 +465,7 @@ void instruction_from_string_build_base(
         }
         if (!(im->flags & IMF_SUPPORTED)) { continue; }
         if (im->code != code) {
-#if 0
-            printf("code mitchmatch %s computed 0x%08x found 0x%08x\n", im->name, code, im->code);
-#endif
+            DEBUG("code mismatch %s computed 0x%08x found 0x%08x", im->name, code, im->code);
             continue;
         }
         str_to_instruction_code_map.insert(im->name, code);
@@ -490,7 +481,7 @@ void instruction_from_string_build_base() {
     return instruction_from_string_build_base(C_inst_map, instruction_map_opcode_field, 0);
 }
 
-static int parse_reg_from_string(QString str, uint *chars_taken = nullptr) {
+static int parse_reg_from_string(const QString &str, uint *chars_taken = nullptr) {
     if (str.size() < 2) { return -1; }
     if (str.at(0) == 'x') {
         int res = 0;
@@ -512,11 +503,11 @@ static int parse_reg_from_string(QString str, uint *chars_taken = nullptr) {
         }
     } else {
         auto data = str.toLocal8Bit();
-        for (int i = 0; i < REGISTER_CODES; i++) {
+        for (size_t i = 0; i < Rv_regnames.size(); i++) {
             size_t len = std::strlen(Rv_regnames[i]);
             if (std::strncmp(data.data(), Rv_regnames[i], std::min(size_t(str.size()), len)) == 0) {
                 *chars_taken = len;
-                return i;
+                return (int)i;
             }
         }
         return -1;
@@ -562,7 +553,7 @@ size_t Instruction::code_from_tokens(
     bool pseudoinst_enabled) {
     if (str_to_instruction_code_map.isEmpty()) { instruction_from_string_build_base(); }
 
-    Instruction result = base_from_string(inst, reloc);
+    Instruction result = base_from_tokens(inst, reloc);
     if (result.data() != 0) {
         if (result.size() > buffsize) {
             // NOTE: this is bug, not user error.
@@ -573,35 +564,205 @@ size_t Instruction::code_from_tokens(
     }
 
     if (pseudoinst_enabled) {
-        constexpr Modifier UPPER = Modifier::COMPOSED_IMM_UPPER;
-        constexpr Modifier LOWER = Modifier::COMPOSED_IMM_LOWER;
-
-        if (inst.base == QLatin1String("la")) {
-            // la rd, symbol
-            // auipc rd, symbol[31:12] + symbol[11]
-            *code = base_from_string(
-                        { "auipc", inst.fields, inst.address, inst.filename, inst.line }, reloc,
-                        UPPER, -inst.address.get_raw())
-                        .data();
-            code += 1;
-            // addi rd, rd, symbol[11:0]
-            inst.fields.insert(1, inst.fields.at(0)); // duplicate rd
-            *code = base_from_string(
-                        { "addi", inst.fields, inst.address + 4, inst.filename, inst.line }, reloc,
-                        LOWER, -inst.address.get_raw())
-                        .data();
-            return 8;
-        }
-        if (inst.base == QLatin1String("nop")) {
-            if (!inst.fields.empty()) { throw ParseError("`nop` does not allow any arguments"); }
-            result = Instruction::NOP;
-            *code = result.data();
-            return result.size();
-        }
+        size_t pseudo_result = pseudo_from_tokens(code, buffsize, inst, reloc);
+        if (pseudo_result != 0) { return pseudo_result; }
     }
     throw ParseError("unknown instruction");
 }
-Instruction Instruction::base_from_string(
+size_t Instruction::pseudo_from_tokens(
+    uint32_t *code,
+    size_t buffsize,
+    TokenizedInstruction &inst,
+    RelocExpressionList *reloc) {
+    constexpr Modifier UPPER = Modifier::COMPOSED_IMM_UPPER;
+    constexpr Modifier LOWER = Modifier::COMPOSED_IMM_LOWER;
+
+    if (inst.base == QLatin1String("nop")) {
+        Instruction result;
+        if (!inst.fields.empty()) { throw ParseError("`nop` does not allow any arguments"); }
+        result = Instruction::NOP;
+        *code = result.data();
+        return result.size();
+    }
+    if (inst.base == QLatin1String("la")) {
+        if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
+        *code = base_from_tokens(
+                    { "auipc", inst.fields, inst.address, inst.filename, inst.line }, reloc, UPPER,
+                    -inst.address.get_raw())
+                    .data();
+        code += 1;
+        inst.fields.insert(0, inst.fields.at(0));
+        *code = base_from_tokens(
+                    { "addi", inst.fields, inst.address + 4, inst.filename, inst.line }, reloc,
+                    LOWER, -inst.address.get_raw())
+                    .data();
+        return 8;
+    }
+
+    if (inst.base == QLatin1String("li")) {
+        if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
+        *code = base_from_tokens(
+                    { "lui", inst.fields, inst.address, inst.filename, inst.line }, reloc, UPPER)
+                    .data();
+        code += 1;
+        inst.fields.insert(0, inst.fields.at(0));
+        *code
+            = base_from_tokens(
+                  { "addi", inst.fields, inst.address + 4, inst.filename, inst.line }, reloc, LOWER)
+                  .data();
+        return 8;
+    }
+    if (inst.base == QLatin1String("mv")) {
+        return partially_apply("addi", 2, 2, "0", code, buffsize, inst, reloc);
+    }
+    if (inst.base == QLatin1String("not")) {
+        return partially_apply("xori", 2, 2, "-1", code, buffsize, inst, reloc);
+    }
+    if (inst.base == QLatin1String("neg")) {
+        return partially_apply("sub", 2, 1, "x0", code, buffsize, inst, reloc);
+    }
+    if (inst.base == QLatin1String("negw")) {
+        return partially_apply("subw", 2, 1, "x0", code, buffsize, inst, reloc);
+    }
+    if (inst.base == QLatin1String("sext.b")) {
+        if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
+        inst.base = "slli";
+        inst.fields.append("XLEN-8");
+        *code = base_from_tokens(inst, reloc).data();
+        code += 1;
+        inst.base = "srai";
+        inst.fields[1] = inst.fields[0];
+        *code = base_from_tokens(inst, reloc).data();
+        return 8;
+    }
+    if (inst.base == QLatin1String("sext.h")) {
+        if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
+        inst.base = "slli";
+        inst.fields.append("XLEN-16");
+        *code = base_from_tokens(inst, reloc).data();
+        code += 1;
+        inst.base = "srai";
+        inst.fields[1] = inst.fields[0];
+        *code = base_from_tokens(inst, reloc).data();
+        return 8;
+    }
+    if (inst.base == QLatin1String("sext.w")) {
+        return partially_apply("addiw", 2, 2, "0", code, buffsize, inst, reloc);
+    }
+    if (inst.base == QLatin1String("zext.b")) {
+        return partially_apply("addi", 2, 2, "255", code, buffsize, inst, reloc);
+    }
+    if (inst.base == QLatin1String("zext.h")) {
+        if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
+        inst.base = "slli";
+        inst.fields.append("XLEN-16");
+        *code = base_from_tokens(inst, reloc).data();
+        code += 1;
+        inst.base = "srli";
+        inst.fields[1] = inst.fields[0];
+        inst.fields.append("XLEN-16");
+        *code = base_from_tokens(inst, reloc).data();
+        return 8;
+    }
+    if (inst.base == QLatin1String("zext.w")) {
+        if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
+        inst.base = "slli";
+        inst.fields.append("XLEN-32");
+        *code = base_from_tokens(inst, reloc).data();
+        code += 1;
+        inst.base = "srli";
+        inst.fields[1] = inst.fields[0];
+        inst.fields.append("XLEN-32");
+        *code = base_from_tokens(inst, reloc).data();
+        return 8;
+    }
+    if (inst.base == QLatin1String("seqz")) {
+        return partially_apply("sltiu", 2, 2, "1", code, buffsize, inst, reloc);
+    }
+    if (inst.base == QLatin1String("snez")) {
+        return partially_apply("sltu", 2, 1, "x0", code, buffsize, inst, reloc);
+    }
+    if (inst.base == QLatin1String("sltz")) {
+        return partially_apply("slt", 2, 2, "x0", code, buffsize, inst, reloc);
+    }
+    if (inst.base == QLatin1String("slgz")) {
+        return partially_apply("slt", 2, 1, "x0", code, buffsize, inst, reloc);
+    }
+    if (inst.base == QLatin1String("beqz")) {
+        return partially_apply("beq", 2, 1, "x0", code, buffsize, inst, reloc);
+    }
+    if (inst.base == QLatin1String("bnez")) {
+        return partially_apply("bne", 2, 1, "x0", code, buffsize, inst, reloc);
+    }
+    if (inst.base == QLatin1String("blez")) {
+        return partially_apply("ble", 2, 0, "x0", code, buffsize, inst, reloc);
+    }
+    if (inst.base == QLatin1String("bgez")) {
+        return partially_apply("bge", 2, 0, "x0", code, buffsize, inst, reloc);
+    }
+
+    if (inst.base == QLatin1String("bltz")) {
+        return partially_apply("blt", 2, 1, "x0", code, buffsize, inst, reloc);
+    }
+    if (inst.base == QLatin1String("bgtz")) {
+        return partially_apply("blt", 2, 0, "x0", code, buffsize, inst, reloc);
+    }
+    if (inst.base == QLatin1String("bgt")) {
+        if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
+        inst.base = "blt";
+        std::swap(inst.fields[0], inst.fields[1]);
+        return code_from_tokens(code, buffsize, inst, reloc, false);
+    }
+    if (inst.base == QLatin1String("ble")) {
+        if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
+        inst.base = "bgt";
+        std::swap(inst.fields[0], inst.fields[1]);
+        return code_from_tokens(code, buffsize, inst, reloc, false);
+    }
+    if (inst.base == QLatin1String("bgtu")) {
+        if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
+        inst.base = "bltu";
+        std::swap(inst.fields[0], inst.fields[1]);
+        return code_from_tokens(code, buffsize, inst, reloc, false);
+    }
+    if (inst.base == QLatin1String("bleu")) {
+        if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
+        inst.base = "bgeu";
+        std::swap(inst.fields[0], inst.fields[1]);
+        return code_from_tokens(code, buffsize, inst, reloc, false);
+    }
+    if (inst.base == QLatin1String("j")) {
+        if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
+        inst.base = "jal";
+        inst.fields.insert(0, "x0");
+        return code_from_tokens(code, buffsize, inst, reloc, false);
+    }
+    // TODO must not throw in base part
+    if (inst.base == QLatin1String("jal")) {
+        if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
+        inst.base = "jal";
+        inst.fields.insert(0, "x1");
+        return code_from_tokens(code, buffsize, inst, reloc, false);
+    }
+    return 0;
+}
+size_t Instruction::partially_apply(
+    const char *base,
+    int argument_count,
+    int position,
+    const char *value,
+    uint32_t *code,
+    size_t buffsize,
+    TokenizedInstruction &inst,
+    RelocExpressionList *reloc) {
+    if (inst.fields.size() != argument_count) {
+        throw ParseError("number of arguments does not match");
+    }
+    inst.base = base;
+    inst.fields.insert(position, value);
+    return code_from_tokens(code, buffsize, inst, reloc, false);
+}
+Instruction Instruction::base_from_tokens(
     const TokenizedInstruction &inst,
     RelocExpressionList *reloc,
     Modifier pseudo_mod,
@@ -609,7 +770,7 @@ Instruction Instruction::base_from_string(
     auto iter_range = str_to_instruction_code_map.equal_range(inst.base);
     if (iter_range.first == iter_range.second) {
         DEBUG("Base instruction of the name %s not found.", qPrintable(inst.base));
-        return Instruction(0);
+        return Instruction::UNKNOWN_INST;
     }
     // Process all codes associated with given instruction name and try matching the supplied
     // instruction field tokens to fields. First matching instruction is used.
@@ -631,11 +792,24 @@ Instruction Instruction::base_from_string(
         return Instruction(inst_code);
     }
 
-    ERROR(
-        "No instruction map associated with name \"%s\" has matching number of fields (%u).",
-        qPrintable(inst.base), inst.fields.size());
-    throw ParseError("number of arguments does not match");
+    DEBUG(
+        "Base instruction of the name %s not matched to any known base format.",
+        qPrintable(inst.base));
+    // Another instruction format for this base may be found in pseudoinstructions.
+    return Instruction::UNKNOWN_INST;
 }
+
+void parse_immediate_value(
+    const QString &field_token,
+    Address &inst_addr,
+    RelocExpressionList *reloc,
+    const QString &filename,
+    unsigned int line,
+    bool need_reloc,
+    const ArgumentDesc *adesc,
+    const Instruction::Modifier &effective_mod,
+    uint64_t &val,
+    uint &chars_taken);
 
 uint32_t Instruction::parse_field(
     QString &field_token,
@@ -649,12 +823,10 @@ uint32_t Instruction::parse_field(
     uint32_t inst_code = 0;
     for (QChar ao : arg) {
         bool need_reloc = false;
-        const char *p;
-        char *r;
         uint a = ao.toLatin1();
         if (!a) { continue; }
         field_token = field_token.trimmed();
-        const ArgumentDesc *adesc = argdesbycode[a];
+        const ArgumentDesc *adesc = arg_desc_by_code[a];
         if (adesc == nullptr) {
             if (!field_token.count()) { throw ParseError("empty argument encountered"); }
             if (field_token.at(0) != ao) {
@@ -677,43 +849,9 @@ uint32_t Instruction::parse_field(
         case 'o':
         case 'n': {
             val += initial_immediate_value;
-            if (field_token.at(0).isDigit() || field_token.at(0) == '-' || (reloc == nullptr)) {
-                uint64_t num_val;
-                int i;
-                // Qt functions are limited, toLongLong would be usable
-                // but does not return information how many characters
-                // are processed. Used solution has horrible overhead
-                // but is usable for now
-                char cstr[field_token.count() + 1];
-                for (i = 0; i < field_token.count(); i++) {
-                    cstr[i] = field_token.at(i).toLatin1();
-                }
-                cstr[i] = 0;
-                p = cstr;
-                if (adesc->min < 0) {
-                    num_val = strtoll(p, &r, 0);
-                } else {
-                    num_val = strtoull(p, &r, 0);
-                }
-                while (*r && isspace(*r)) {
-                    r++;
-                }
-                if (*r && strchr("+-/*|&^~", *r)) {
-                    need_reloc = true;
-                } else {
-                    // extend signed bits
-                    val += num_val;
-                }
-                chars_taken = r - p;
-            } else {
-                need_reloc = true;
-            }
-            if (need_reloc && (reloc != nullptr)) {
-                reloc_append(
-                    reloc, field_token, inst_addr, val, adesc, &chars_taken, filename, line,
-                    effective_mod);
-                val = 0;
-            }
+            parse_immediate_value(
+                field_token, inst_addr, reloc, filename, line, need_reloc, adesc, effective_mod,
+                val, chars_taken);
             break;
         }
         }
@@ -727,6 +865,56 @@ uint32_t Instruction::parse_field(
     }
     if (field_token.trimmed() != "") { throw ParseError("excessive characters in argument"); }
     return inst_code;
+}
+
+void parse_immediate_value(
+    const QString &field_token,
+    Address &inst_addr,
+    RelocExpressionList *reloc,
+    const QString &filename,
+    unsigned int line,
+    bool need_reloc,
+    const ArgumentDesc *adesc,
+    const Instruction::Modifier &effective_mod,
+    uint64_t &val,
+    uint &chars_taken) {
+    if (field_token.at(0).isDigit() || field_token.at(0) == '-' || (reloc == nullptr)) {
+        uint64_t num_val = 0;
+        // Qt functions are limited, toLongLong would be usable
+        // but does not return information how many characters
+        // are processed. Used solution has horrible overhead
+        // but is usable for now
+        int i;
+        char cstr[field_token.count() + 1];
+        for (i = 0; i < field_token.count(); i++) {
+            cstr[i] = field_token.at(i).toLatin1();
+        }
+        cstr[i] = 0;
+        const char *p = cstr;
+        char *r;
+        if (adesc->min < 0) {
+            num_val = strtoll(p, &r, 0);
+        } else {
+            num_val = strtoull(p, &r, 0);
+        }
+        while (*r && isspace(*r)) {
+            r++;
+        }
+        chars_taken = r - p;
+        if (*r && strchr("+-/*|&^~", *r)) {
+            need_reloc = true;
+        } else {
+            // extend signed bits
+            val += num_val;
+        }
+    } else {
+        need_reloc = true;
+    }
+    if (need_reloc && (reloc != nullptr)) {
+        reloc_append(
+            reloc, field_token, inst_addr, val, adesc, &chars_taken, filename, line, effective_mod);
+        val = 0;
+    }
 }
 
 bool Instruction::update(int64_t val, RelocExpression *relocexp) {
@@ -758,10 +946,16 @@ bool Instruction::update(int64_t val, RelocExpression *relocexp) {
 }
 
 constexpr uint64_t Instruction::modify_pseudoinst_imm(Instruction::Modifier mod, uint64_t value) {
+    // Sign-extension is extra work, but it allows the value to be checked against argument
+    // description limits.
+
+    // Example: la rd, symbol -> auipc rd, symbol[31:12] + symbol[11], addi rd, rd, symbol[11:0]
+
     switch (mod) {
     case Modifier::NONE: return value;
-    case Modifier::COMPOSED_IMM_UPPER: return get_bits(value, 31, 12) + get_bit(value, 11);
-    case Modifier::COMPOSED_IMM_LOWER: return get_bits(value, 11, 0);
+    case Modifier::COMPOSED_IMM_UPPER:
+        return sign_extend(get_bits(value, 31, 12) + get_bit(value, 11), 20);
+    case Modifier::COMPOSED_IMM_LOWER: return sign_extend(get_bits(value, 11, 0), 12);
     }
 }
 
@@ -769,8 +963,9 @@ constexpr uint64_t Instruction::modify_pseudoinst_imm(Instruction::Modifier mod,
 void Instruction::append_recognized_instructions(QStringList &list) {
     if (str_to_instruction_code_map.isEmpty()) { instruction_from_string_build_base(); }
 
-    for (const QString &str : str_to_instruction_code_map.keys()) {
-        list.append(str);
+    for (auto iter = str_to_instruction_code_map.keyBegin();
+         iter != str_to_instruction_code_map.keyEnd(); iter++) {
+        list.append(*iter);
     }
     for (const auto &str : RECOGNIZED_PSEUDOINSTRUCTIONS) {
         list.append(str);
@@ -778,7 +973,7 @@ void Instruction::append_recognized_instructions(QStringList &list) {
 }
 
 void Instruction::set_symbolic_registers(bool enable) {
-    symbolic_registers_fl = enable;
+    symbolic_registers_enabled = enable;
 }
 
 inline int32_t Instruction::extend(uint32_t value, uint32_t used_bits) const {
@@ -786,10 +981,8 @@ inline int32_t Instruction::extend(uint32_t value, uint32_t used_bits) const {
 }
 
 void Instruction::append_recognized_registers(QStringList &list) {
-    int i;
-    for (i = 0; i < REGISTER_CODES; i++) {
-        QString name = Rv_regnames[i];
-        if (name != "") { list.append(name); }
+    for (auto name : Rv_regnames) {
+        list.append(name);
     }
 }
 uint8_t Instruction::size() const {
