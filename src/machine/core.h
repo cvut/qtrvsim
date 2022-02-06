@@ -22,6 +22,7 @@ using std::array;
 
 class ExceptionHandler;
 class StopExceptionHandler;
+struct hwBreak;
 
 class Core : public QObject {
     Q_OBJECT
@@ -214,6 +215,13 @@ public:
         Address next_addr,
         Address jump_branch_pc,
         Address mem_ref_addr) override;
+};
+
+struct hwBreak {
+    explicit hwBreak(Address addr) : addr(addr), flags(0), count(0) {};
+    Address addr;
+    unsigned int flags;
+    unsigned int count;
 };
 
 } // namespace machine

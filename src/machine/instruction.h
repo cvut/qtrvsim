@@ -12,6 +12,14 @@
 
 namespace machine {
 
+#define REGISTER_CODES 32
+
+const char *const Rv_regnames[REGISTER_CODES] = {
+    "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
+    "a1",   "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
+    "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
+};
+
 enum InstructionFlags {
     IMF_SUPPORTED = 1L << 0, /**< Instruction is supported */
     IMF_MEMWRITE = 1L << 1,  /**< Write to the memory when memory stage is reached */

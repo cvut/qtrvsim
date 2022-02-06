@@ -61,21 +61,11 @@ static bool fill_argdesbycode() {
 
 bool argdesbycode_filled = fill_argdesbycode();
 
-#define REGISTER_CODES 32
-
-const char *const Rv_regnames[32] = {
-    "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
-    "a1",   "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
-    "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
-};
-
 #define FLAGS_ALU_I (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_ALU_REQ_RS)
-#define FLAGS_ALU_I_LOAD                                                       \
-    (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM         \
-     | IMF_ALU_REQ_RS)
-#define FLAGS_ALU_I_STORE                                                      \
-    (IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | IMF_MEM | IMF_ALU_REQ_RS      \
-     | IMF_ALU_REQ_RT)
+#define FLAGS_ALU_I_LOAD                                                                           \
+    (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM | IMF_ALU_REQ_RS)
+#define FLAGS_ALU_I_STORE                                                                          \
+    (IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | IMF_MEM | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
 
 #define FLAGS_ALU_T_R_D (IMF_SUPPORTED | IMF_REGWRITE)
 #define FLAGS_ALU_T_R_STD (FLAGS_ALU_T_R_D | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
@@ -85,7 +75,9 @@ const char *const Rv_regnames[32] = {
 #define NOMEM .mem_ctl = AC_NONE
 
 #define IM_UNKNOWN                                                                                 \
-    { "unknown", Instruction::UNKNOWN, NOALU, NOMEM, nullptr, {}, 0, 0, 0 }
+    {                                                                                              \
+        "unknown", Instruction::UNKNOWN, NOALU, NOMEM, nullptr, {}, 0, 0, { 0 }                    \
+    }
 // TODO NOTE: if unknown is defined as all 0, instruction map can be
 // significanly simplified using zero initialization.
 
@@ -308,6 +300,7 @@ int32_t Instruction::immediate() const {
         ret = extend(
             MASK(10, 21) << 1 | MASK(1, 20) << 11 | MASK(8, 12) << 12 | MASK(1, 31) << 20, 21);
         break;
+    case UNKNOWN: break;
     }
     return ret;
 }
@@ -539,6 +532,7 @@ ssize_t Instruction::code_from_string(
     int line,
     bool pseudo_opt,
     bool silent) {
+    Q_UNUSED(pseudo_opt);
     const char *err = "unknown instruction";
     if (str_to_instruction_code_map.isEmpty()) { instruction_from_string_build_base(); }
 

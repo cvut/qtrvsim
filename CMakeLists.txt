@@ -15,17 +15,17 @@ set(PROJECT_HOMEPAGE_URL "https://github.com/cvut/qtrvsim")
 set(GENERIC_NAME "RISC-V CPU simulator")
 set(LICENCE "GPL-3.0-or-later")
 set(LONG_DESCRIPTION
-    "RISC-V CPU simulator for education purposes with pipeline and cache visualization.")
+		"RISC-V CPU simulator for education purposes with pipeline and cache visualization.")
 string(TIMESTAMP YEAR "%Y")
 
 include(cmake/CopyrightTools.cmake)
 
 
 copyright(
-    "Copyright (c) 2017-2019 ${KAREL_KOCI}"
-    "Copyright (c) 2019-${YEAR} ${PAVEL_PISA}"
-	"Copyright (c) 2020-${YEAR} ${JAKUB_DUPAK}"
-    "Copyright (c) 2020-${YEAR} ${MAX_HOLLMANN}")
+		"Copyright (c) 2017-2019 ${KAREL_KOCI}"
+		"Copyright (c) 2019-${YEAR} ${PAVEL_PISA}"
+		"Copyright (c) 2020-${YEAR} ${JAKUB_DUPAK}"
+		"Copyright (c) 2020-${YEAR} ${MAX_HOLLMANN}")
 
 include(cmake/GPL-3.0-or-later.cmake)
 
@@ -36,16 +36,16 @@ include(cmake/GPL-3.0-or-later.cmake)
 set(DEV_MODE false CACHE BOOL "Enable developer options in this CMake, like packaging.\
     They should be ignored, when user just wants to build this project.")
 set(FORCE_ELFLIB_STATIC false CACHE BOOL
-    "Use included statically linked libelf even if system one is available.")
+		"Use included statically linked libelf even if system one is available.")
 set(SANITIZERS "address,undefined" CACHE STRING
-    "Runtime sanitizers to use in debug builds.
+		"Runtime sanitizers to use in debug builds.
     Column separated subset of {address, memory, undefined, thread} or none.
     Memory and address cannot be used at the same time.")
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/target"
-    CACHE STRING "Absolute path to place executables to.")
+		CACHE STRING "Absolute path to place executables to.")
 set(PACKAGE_OUTPUT_PATH "${EXECUTABLE_OUTPUT_PATH}/pkg"
-    CACHE STRING "Absolute path to place generated package files.")
-
+		CACHE STRING "Absolute path to place generated package files.")
+set(FORCE_COLORED_OUTPUT false CACHE BOOL "Always produce ANSI-colored output (GNU/Clang only).")
 
 # =============================================================================
 # Generated variables
@@ -107,6 +107,15 @@ if("${BUILD_RELEASE}")
 endif()
 
 include_directories("src" "src/machine")
+
+
+if(${FORCE_COLORED_OUTPUT})
+	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+		add_compile_options(-fdiagnostics-color=always)
+	elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		add_compile_options(-fcolor-diagnostics)
+	endif()
+endif()
 
 ## ============================================================================
 ## Warning level
@@ -211,16 +220,16 @@ endif()
 # in corresponding CMakeLists.txt.
 
 configure_file(data/gui.desktop.in
-               "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop")
+		"${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop")
 
 install(FILES "data/icons/gui.svg"
-        DESTINATION "share/icons/hicolor/scalable/apps"
-        RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.svg")
+		DESTINATION "share/icons/hicolor/scalable/apps"
+		RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.svg")
 install(FILES "data/icons/48x48/gui.png"
-        DESTINATION "share/icons/hicolor/48x48/apps"
-        RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.png")
+		DESTINATION "share/icons/hicolor/48x48/apps"
+		RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.png")
 install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop"
-        DESTINATION share/applications)
+		DESTINATION share/applications)
 
 # =============================================================================
 # Packages
@@ -252,16 +261,16 @@ if("${DEV_MODE}")
 	package_config_file(rpm ${PACKAGE_NAME}.spec extras/packaging/rpm/spec.in)
 	# Debian uses whole directory which has to be saved to archive and shipped.
 	package_debian_quilt(deb
-	                     ${PACKAGE_NAME}_${PACKAGE_VERSION}-${PACKAGE_RELEASE}.dsc
-	                     extras/packaging/deb/dsc.in
-	                     extras/packaging/deb/debian
-	                     ${PACKAGE_NAME}_${PACKAGE_VERSION}-${PACKAGE_RELEASE}.debian.tar.xz)
+			${PACKAGE_NAME}_${PACKAGE_VERSION}-${PACKAGE_RELEASE}.dsc
+			extras/packaging/deb/dsc.in
+			extras/packaging/deb/debian
+			${PACKAGE_NAME}_${PACKAGE_VERSION}-${PACKAGE_RELEASE}.debian.tar.xz)
 	# Creates bunch of files in ${CMAKE_BINARY_DIR}/target/pkg that you can just pass to
 	# Open Build Service and it will build all packaging.
 	# TODO: Currently changelog is not handled automatically.
 	add_custom_target(open_build_service_bundle
-	                  DEPENDS ${PACKAGE_SOURCE_ARCHIVE_FILE} appimage archlinux deb rpm
-	                  WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/pkg)
+			DEPENDS ${PACKAGE_SOURCE_ARCHIVE_FILE} appimage archlinux deb rpm
+			WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/pkg)
 endif()
 
 configure_file(src/project_info.h.in ${CMAKE_CURRENT_LIST_DIR}/src/project_info.h @ONLY)

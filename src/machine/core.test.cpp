@@ -101,24 +101,14 @@ static void core_regs_data() {
     // Move instructions
     {
         Registers regs_init;
-        regs_init.write_hi_lo(true, 24);
-        regs_init.write_hi_lo(false, 28);
-        regs_init.write_gp(24, 55);
-        regs_init.write_gp(25, 56);
-        regs_init.write_gp(27, 21);
-        regs_init.write_gp(28, 22);
         Registers regs_res(regs_init);
         regs_res.write_gp(26, 24);
         //        QTest::newRow("MFHI") << Instruction(0, 0, 0, 26, 0, 16) << regs_init << regs_res;
         regs_res.write_gp(26, 28);
         //        QTest::newRow("MFLO") << Instruction(0, 0, 0, 26, 0, 18) << regs_init << regs_res;
         regs_res.write_gp(26, 0);
-        regs_res.write_hi_lo(true, 21);
         //        QTest::newRow("MTHI") << Instruction(0, 27, 0, 0, 0, 17) << regs_init << regs_res;
-        regs_res.write_hi_lo(true, 24);
-        regs_res.write_hi_lo(false, 22);
         //        QTest::newRow("MTLO") << Instruction(0, 28, 0, 0, 0, 19) << regs_init << regs_res;
-        regs_res.write_hi_lo(false, 28);
         //        QTest::newRow("MOVZ-F") << Instruction(0, 24, 24, 25, 0, 10) << regs_init <<
         //        regs_res; QTest::newRow("MOVN-F") << Instruction(0, 24, 1, 25, 0, 11) << regs_init
         //        << regs_res;
@@ -544,8 +534,6 @@ static void core_alu_forward_data() {
         regs_res.write_gp(21, (uint32_t)((int32_t)val_b % (int32_t)val_a));
         regs_res.write_gp(22, val_b / val_a);
         regs_res.write_gp(23, val_b % val_a);
-        regs_res.write_hi_lo(false, regs_res.read_gp(22));
-        regs_res.write_hi_lo(true, regs_res.read_gp(23));
         regs_res.write_pc(regs_init.read_pc() + 4 * code.length() - 4);
         QTest::newRow("mul-div") << code << regs_init << regs_res;
     }

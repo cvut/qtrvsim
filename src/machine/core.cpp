@@ -226,13 +226,15 @@ DecodeState Core::decode(const FetchInterstage &dt) {
 
     if (!(flags & IMF_SUPPORTED)) { excause = EXCAUSE_UNKNOWN; }
 
-    uint8_t num_rs = dt.inst.rs();
-    uint8_t num_rt = dt.inst.rt();
-    uint8_t num_rd = dt.inst.rd();
+    RegisterId num_rs = (flags & IMF_ALU_REQ_RS) ? dt.inst.rs() : 0;
+    RegisterId num_rt = (flags & IMF_ALU_REQ_RT) ? dt.inst.rt() : 0;
+    RegisterId num_rd = (flags & IMF_REGWRITE) ? dt.inst.rd() : 0;
+    // When instruction does not specify register, it is set to x0 as operations on x0 have no
+    // side effects (not even visualization).
     RegisterValue val_rs = regs->read_gp(num_rs);
     RegisterValue val_rt = regs->read_gp(num_rt);
     int32_t immediate_val = dt.inst.immediate();
-    bool regwrite = flags & IMF_REGWRITE;
+    const bool regwrite = flags & IMF_REGWRITE;
 
     if ((flags & IMF_EXCEPTION) && (excause == EXCAUSE_NONE)) {
         if (flags & IMF_EBREAK) {
@@ -468,6 +470,7 @@ CorePipelined::CorePipelined(
     Cop0State *cop0state,
     Xlen xlen)
     : Core(regs, predictor, mem_program, mem_data, cop0state, xlen) {
+    Q_UNUSED(min_cache_row_size);
     this->hazard_unit = hazard_unit;
     reset();
 }

@@ -48,7 +48,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     central_window->addTab(coreview, "Core");
     // Create/prepare other widgets
     ndialog = new NewDialog(this, settings);
-    registers = new RegistersDock(this);
+    registers = new RegistersDock(this, machine::Xlen::_32);
     registers->hide();
     program = new ProgramDock(this, settings);
     addDockWidget(Qt::LeftDockWidgetArea, program);
@@ -258,7 +258,7 @@ void MainWindow::create_core(
         &machine::Machine::pause);
 
     // Setup docks
-    registers->setup(machine);
+    registers->connectToMachine(machine);
     program->setup(machine);
     memory->setup(machine);
     cache_program->setup(machine->cache_program());
