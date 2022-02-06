@@ -260,10 +260,11 @@ static inline const struct InstructionMap &InstructionMapFind(uint32_t code) {
     return *im;
 }
 
-const std::array<const QString, 29> RECOGNIZED_PSEUDOINSTRUCTIONS {
-    "nop",    "la",     "li",     "mv",   "not",  "neg",  "negw", "sext.b", "sext.h", "sext.w",
-    "zext.b", "zext.h", "zext.w", "seqz", "snez", "sltz", "slgz", "beqz",   "bnez",   "blez",
-    "bgez",   "bltz",   "bgtz",   "bgt",  "ble",  "bgtu", "bleu", "j",      "jal",
+const std::array<const QString, 31> RECOGNIZED_PSEUDOINSTRUCTIONS {
+    "nop",    "la",     "li",     "mv",     "not",    "neg",  "negw", "sext.b",
+    "sext.h", "sext.w", "zext.b", "zext.h", "zext.w", "seqz", "snez", "sltz",
+    "slgz",   "beqz",   "bnez",   "blez",   "bgez",   "bltz", "bgtz", "bgt",
+    "ble",    "bgtu",   "bleu",   "j",      "jal",    "jr",   "jalr",
 };
 
 bool Instruction::symbolic_registers_enabled = false;
@@ -738,11 +739,24 @@ size_t Instruction::pseudo_from_tokens(
         inst.fields.insert(0, "x0");
         return code_from_tokens(code, buffsize, inst, reloc, false);
     }
-    // TODO must not throw in base part
     if (inst.base == QLatin1String("jal")) {
         if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
         inst.base = "jal";
         inst.fields.insert(0, "x1");
+        return code_from_tokens(code, buffsize, inst, reloc, false);
+    }
+    if (inst.base == QLatin1String("jr")) {
+        if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
+        inst.base = "jalr";
+        inst.fields.insert(0, "x0");
+        inst.fields[1] = QString("0x0(%0)").arg(inst.fields[1]);
+        return code_from_tokens(code, buffsize, inst, reloc, false);
+    }
+    if (inst.base == QLatin1String("jalr")) {
+        if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
+        inst.base = "jalr";
+        inst.fields.insert(0, "x1");
+        inst.fields[1] = QString("0x0(%0)").arg(inst.fields[1]);
         return code_from_tokens(code, buffsize, inst, reloc, false);
     }
     return 0;
