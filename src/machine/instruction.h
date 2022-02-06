@@ -32,11 +32,12 @@ enum InstructionFlags {
                               when PC_TO_R31 is set */
     IMF_JUMP = 1L << 18,   /**< Jump operation - JAL, JALR */
     IMF_BJ_NOT = 1L << 19, /**< Negate condition for branch instruction */
-    IMF_EXCEPTION = 1L << 22, /**< Instruction causes synchronous exception */
-    IMF_ALU_MOD = 1L << 24,   /**< ADD and right-shift modifier */
-    IMF_PC_TO_ALU = 1L << 25, /**< PC is loaded instead of RS to ALU */
-    IMF_ECALL = 1L << 26,     // seems easiest to encode ecall and ebreak as flags, but they might
-    IMF_EBREAK = 1L << 27,    // be moved elsewhere in case we run out of InstructionFlag space.
+    IMF_BRANCH_JALR = 1L << 20, /**< Use ALU output as branch/jump target. Used by JALR. */
+    IMF_EXCEPTION = 1L << 22,   /**< Instruction causes synchronous exception */
+    IMF_ALU_MOD = 1L << 24,     /**< ADD and right-shift modifier */
+    IMF_PC_TO_ALU = 1L << 25,   /**< PC is loaded instead of RS to ALU */
+    IMF_ECALL = 1L << 26,       // seems easiest to encode ecall and ebreak as flags, but they might
+    IMF_EBREAK = 1L << 27,      // be moved elsewhere in case we run out of InstructionFlag space.
     // TODO do we want to add those signals to the visualization?
 };
 

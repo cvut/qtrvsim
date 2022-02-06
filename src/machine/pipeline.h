@@ -104,6 +104,7 @@ struct DecodeInterstage {
     bool branch = false;            // branch instruction
     bool jump = false;              // jump
     bool bj_not = false;            // negate branch condition
+    bool branch_jalr = false;       // JALR: write PC+4 to register and jump to ALU result
     bool stall = false;
     bool is_valid = false;
     bool alu_mod = false; // alternative versions of ADD and right-shift
@@ -147,7 +148,7 @@ struct ExecuteInterstage {
     Address inst_addr = STAGEADDR_NONE;
     Address next_inst_addr = 0_addr;
     Address predicted_next_inst_addr = 0_addr;
-    Address branch_target = 0_addr; //> Potential branch target (inst_addr + 4 + imm).
+    Address branch_jal_target = 0_addr; //> Potential branch target (inst_addr + 4 + imm).
     RegisterValue val_rt = 0;
     RegisterValue alu_val = 0; // Result of ALU execution
     ExceptionCause excause = EXCAUSE_NONE;
@@ -160,6 +161,7 @@ struct ExecuteInterstage {
     bool branch = false;
     bool jump = false;
     bool bj_not = false;
+    bool branch_jalr = false; //> @copydoc DecodeInterstage::branch_jalr
     bool alu_zero = false;
 
 public:

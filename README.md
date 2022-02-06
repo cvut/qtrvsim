@@ -423,6 +423,8 @@ This is initial implementation of the RISC-V edition. Everything is limited.
   - **STORE**: `sw, sh, sb`
   - **OP**: `add, sub, sll, slt, sltu, xor, srl, sra, or, and`
   - **OP-IMM**: `addi, sll, slti, sltiu, xori, srli, srai, ori, andi`
+  - **BRANCH**: `beq, bne, btl, bge, bltu, bgtu`
+  - **JUMP**: `jal, jalr`
 - **Pseudoinstructions**
   - **BASIC**: `nop`
   - **LOAD**: `la, li`,

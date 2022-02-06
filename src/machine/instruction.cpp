@@ -231,7 +231,8 @@ static const struct InstructionMap I_inst_map[] = {
     IM_UNKNOWN, // custom-2/rv128
     IM_UNKNOWN, // 48b
     {"branch", IT_B, NOALU, NOMEM, BRANCH_map, {}, 0x63, 0x7f, { .subfield = {3, 12} }}, // BRANCH
-    IM_UNKNOWN, // JALR
+    {"jalr", IT_I, AluOp::ADD, NOMEM, nullptr, {"d", "o(s)"}, 0x67, 0x7f, { .flags =
+IMF_SUPPORTED | IMF_REGWRITE | IMF_BRANCH_JALR | IMF_ALUSRC | IMF_ALU_REQ_RS }}, // JALR
     IM_UNKNOWN, // reserved
     {"jal", IT_J, AluOp::ADD, NOMEM, nullptr, {"d", "a"}, 0x6f, 0x7f, { .flags = IMF_SUPPORTED | IMF_REGWRITE | IMF_JUMP | IMF_PC_TO_ALU | IMF_ALUSRC }}, // JAL
     {"system", IT_I, NOALU, NOMEM, SYSTEM_map, {}, 0x73, 0x7f, { .subfield = {1, 20} }}, // SYSTEM
