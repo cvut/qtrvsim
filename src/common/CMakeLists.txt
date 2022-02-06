@@ -27,3 +27,6 @@ enable_testing()
 set(CMAKE_AUTOMOC ON)
 
 # Put tests here...
+
+add_custom_target(common_unit_tests
+		DEPENDS mulh64_test)

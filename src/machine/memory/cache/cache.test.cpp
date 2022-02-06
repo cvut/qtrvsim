@@ -1,26 +1,21 @@
+#include "cache.test.h"
+
 #include "common/endian.h"
 #include "machine/memory/backend/memory.h"
 #include "machine/memory/cache/cache.h"
 #include "machine/memory/cache/cache_policy.h"
 #include "machine/memory/memory_bus.h"
 #include "tests/data/cache_test_performance_data.h"
-#include "tst_machine.h"
 
 #include <tests/utils/integer_decomposition.h>
-#include <unordered_map>
 
 using namespace machine;
 using std::array;
 using std::pair;
 using std::size_t;
 using std::tuple;
-using Testcase = tuple<
-    Endian,
-    Address,
-    size_t,
-    IntegerDecomposition,
-    IntegerDecomposition,
-    CacheConfig>;
+using Testcase
+    = tuple<Endian, Address, size_t, IntegerDecomposition, IntegerDecomposition, CacheConfig>;
 
 /*
  * Testing data for memory accesses
@@ -37,11 +32,18 @@ constexpr array<uint64_t, 1> values { 0x4142434445464748 };
  * Cache configuration parameters for testing
  * (all combinations are tested)
  */
-constexpr array<CacheConfig::ReplacementPolicy, 3> replacement_policies {
-    CacheConfig::RP_RAND, CacheConfig::RP_LFU, CacheConfig::RP_LRU
-};
+constexpr array<CacheConfig::ReplacementPolicy, 3> replacement_policies { CacheConfig::RP_RAND,
+                                                                          CacheConfig::RP_LFU,
+                                                                          CacheConfig::RP_LRU };
 constexpr array<CacheConfig::WritePolicy, 3> write_policies {
-    CacheConfig::WP_THROUGH_NOALLOC, // THIS IS BROKEN IN CACHE FOR STRIDE 1
+    CacheConfig::WP_THROUGH_NOALLOC, // THIS
+                                     // IS
+                                     // BROKEN
+                                     // IN
+                                     // CACHE
+                                     // FOR
+                                     // STRIDE
+                                     // 1
     CacheConfig::WP_THROUGH_ALLOC, CacheConfig::WP_BACK
 };
 constexpr array<pair<unsigned, unsigned>, 3> organizations { {
@@ -52,10 +54,9 @@ constexpr array<pair<unsigned, unsigned>, 3> organizations { {
 constexpr array<unsigned, 3> associativity_degrees { 1, 2, 4 };
 
 // + 1 is  for disabled cache
-constexpr size_t CONFIG_COUNT
-    = (replacement_policies.size() * write_policies.size()
-       * organizations.size() * associativity_degrees.size())
-      + 1;
+constexpr size_t CONFIG_COUNT = (replacement_policies.size() * write_policies.size()
+                                 * organizations.size() * associativity_degrees.size())
+                                + 1;
 
 /**
  * Creates cache_config objects from all combinations of the above given
@@ -84,7 +85,7 @@ array<CacheConfig, CONFIG_COUNT> get_testing_cache_configs() {
     return configs;
 }
 
-void MachineTests::cache_data() {
+void TestCache::cache_data() {
     QTest::addColumn<CacheConfig>("cache_c");
     QTest::addColumn<unsigned>("hit");
     QTest::addColumn<unsigned>("miss");
@@ -104,7 +105,7 @@ void MachineTests::cache_data() {
     QTest::newRow("Square") << cache_c << (unsigned)4 << (unsigned)6;
 }
 
-void MachineTests::cache() {
+void TestCache::cache() {
     QFETCH(CacheConfig, cache_c);
     QFETCH(unsigned, hit);
     QFETCH(unsigned, miss);
@@ -136,7 +137,7 @@ void MachineTests::cache() {
     QCOMPARE(cache.get_miss_count(), miss);
 }
 
-void MachineTests::cache_correctness_data() {
+void TestCache::cache_correctness_data() {
     QTest::addColumn<Endian>("endian");
     QTest::addColumn<Address>("address");
     QTest::addColumn<size_t>("stride");
@@ -154,23 +155,19 @@ void MachineTests::cache_correctness_data() {
                     for (auto value : values) {
                         // Result when read has `stride` bytes offset to the
                         // write.
-                        auto result_value = (endian == BIG)
-                                                ? (value << (stride * 8))
-                                                : (value >> (stride * 8));
+                        auto result_value
+                            = (endian == BIG) ? (value << (stride * 8)) : (value >> (stride * 8));
                         QTest::addRow(
                             "endian=%s, address=0x%lx, stride=%ld, "
                             "value=0x%lx, cache_config={ %d, "
                             "r=%d, wr=%d, s=%d, b=%d, a=%d }",
-                            to_string(endian), address, stride, value,
-                            cache_config.enabled(),
-                            cache_config.replacement_policy(),
-                            cache_config.write_policy(),
+                            to_string(endian), address, stride, value, cache_config.enabled(),
+                            cache_config.replacement_policy(), cache_config.write_policy(),
                             cache_config.set_count(), cache_config.block_size(),
                             cache_config.associativity())
                             << endian << Address(address) << stride
                             << IntegerDecomposition(value, endian)
-                            << IntegerDecomposition(result_value, endian)
-                            << cache_config << i;
+                            << IntegerDecomposition(result_value, endian) << cache_config << i;
                         i += 1;
                     }
                 }
@@ -179,7 +176,7 @@ void MachineTests::cache_correctness_data() {
     }
 }
 
-void MachineTests::cache_correctness() {
+void TestCache::cache_correctness() {
     QFETCH(Endian, endian);
     QFETCH(Address, address);
     QFETCH(size_t, stride);
@@ -236,8 +233,7 @@ void MachineTests::cache_correctness() {
         QCOMPARE(cache.read_u8(address + stride + i), result.u8.at(i));
     }
 
-    tuple<unsigned, unsigned> performance { cache.get_hit_count(),
-                                            cache.get_miss_count() };
+    tuple<unsigned, unsigned> performance { cache.get_hit_count(), cache.get_miss_count() };
 
     // CODE USED FOR PERFORMANCE DATA GENERATION
     //        fprintf(
@@ -250,3 +246,5 @@ void MachineTests::cache_correctness() {
         QCOMPARE(performance, cache_test_performance_data.at(case_number));
     }
 }
+
+QTEST_APPLESS_MAIN(TestCache)
