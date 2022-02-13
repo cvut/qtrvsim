@@ -102,7 +102,7 @@ end_char:
 
 .end _start
 
-.org 0x200
+.org 0x400
 .data
 
 data_1:	.word	1, 2, 3, 4	// example how to fill data words

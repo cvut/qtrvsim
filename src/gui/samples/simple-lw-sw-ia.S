@@ -22,9 +22,9 @@
 _start:
 loop:
 	// load the word from absolute address
-	lw     x2, 0x200(x0)
+	lw     x2, 0x400(x0)
 	// store the word to absolute address
-	sw     x2, 0x204(x0)
+	sw     x2, 0x404(x0)
 
 	// stop execution wait for debugger/user
 	// break
@@ -36,7 +36,7 @@ loop:
 	ebreak
 
 .data
-.org 0x200
+.org 0x400
 
 src_val:
 	.word  0x12345678
