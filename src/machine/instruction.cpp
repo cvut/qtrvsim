@@ -872,8 +872,11 @@ uint32_t Instruction::parse_field(
         }
         if (chars_taken <= 0) { throw ParseError("argument parse error"); }
 
-        if (effective_mod != Modifier::NONE) { val = modify_pseudoinst_imm(effective_mod, val); }
-        if (!adesc->is_value_in_field_range(val)) { throw ParseError("argument range exceed"); }
+        if (effective_mod != Modifier::NONE) {
+            val = modify_pseudoinst_imm(effective_mod, val);
+        } else if (!adesc->is_value_in_field_range(val)) {
+            throw ParseError("argument range exceed");
+        }
 
         inst_code |= adesc->arg.encode(val);
         field_token = field_token.mid(chars_taken);
@@ -939,20 +942,20 @@ bool Instruction::update(int64_t val, RelocExpression *relocexp) {
 
     if (relocexp->pseudo_mod != Modifier::NONE) {
         val = (int64_t)modify_pseudoinst_imm(relocexp->pseudo_mod, val);
-    }
-
-    if ((val & ((1 << relocexp->arg->shift) - 1))) { return false; }
-    if (relocexp->min < 0) {
-        if (((int64_t)val < relocexp->min) || ((int64_t)val > relocexp->max)) {
-            if (((int64_t)val - 0x100000000 < relocexp->min)
-                || ((int64_t)val - 0x100000000 > relocexp->max)) {
+    } else {
+        if ((val & ((1 << relocexp->arg->shift) - 1))) { return false; }
+        if (relocexp->min < 0) {
+            if (((int64_t)val < relocexp->min) || ((int64_t)val > relocexp->max)) {
+                if (((int64_t)val - 0x100000000 < relocexp->min)
+                    || ((int64_t)val - 0x100000000 > relocexp->max)) {
+                    return false;
+                }
+            }
+        } else {
+            if (((uint64_t)val < (uint64_t)relocexp->min)
+                || ((uint64_t)val > (uint64_t)relocexp->max)) {
                 return false;
             }
-        }
-    } else {
-        if (((uint64_t)val < (uint64_t)relocexp->min)
-            || ((uint64_t)val > (uint64_t)relocexp->max)) {
-            return false;
         }
     }
 
@@ -961,16 +964,12 @@ bool Instruction::update(int64_t val, RelocExpression *relocexp) {
 }
 
 constexpr uint64_t Instruction::modify_pseudoinst_imm(Instruction::Modifier mod, uint64_t value) {
-    // Sign-extension is extra work, but it allows the value to be checked against argument
-    // description limits.
-
     // Example: la rd, symbol -> auipc rd, symbol[31:12] + symbol[11], addi rd, rd, symbol[11:0]
 
     switch (mod) {
     case Modifier::NONE: return value;
-    case Modifier::COMPOSED_IMM_UPPER:
-        return sign_extend(get_bits(value, 31, 12) + get_bit(value, 11), 20);
-    case Modifier::COMPOSED_IMM_LOWER: return sign_extend(get_bits(value, 11, 0), 12);
+    case Modifier::COMPOSED_IMM_UPPER: return get_bits(value, 31, 12) + get_bit(value, 11);
+    case Modifier::COMPOSED_IMM_LOWER: return get_bits(value, 11, 0);
     }
 }
 
