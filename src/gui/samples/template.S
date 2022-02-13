@@ -82,7 +82,7 @@ __start:
 _start:
 
 loop:
-    lui  a0, SERIAL_PORT_BASE           // load base address of serial port
+    li   a0, SERIAL_PORT_BASE           // load base address of serial port
     addi a1, zero, text_1               // load address of text
 
 next_char:
