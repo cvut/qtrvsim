@@ -925,7 +925,7 @@ void MainWindow::compile_source() {
 
     connect(&sasm, &SimpleAsm::report_message, this, &MainWindow::report_message);
 
-    sasm.setup(mem, &symtab, machine::Address(0x80020000), machine->core()->get_xlen());
+    sasm.setup(mem, &symtab, machine::Address(0x00000200), machine->core()->get_xlen());
 
     int ln = 1;
     for (QTextBlock block = doc->begin(); block.isValid(); block = block.next(), ln++) {

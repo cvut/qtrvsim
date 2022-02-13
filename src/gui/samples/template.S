@@ -74,7 +74,7 @@
 //  7 / HW5      15                Counter reached value in Compare register
 
 // Start address after reset
-.org 0x80020000
+.org 0x00000200
 
 .text
 
