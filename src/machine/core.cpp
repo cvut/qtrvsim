@@ -107,6 +107,9 @@ void Core::set_step_over_exception(enum ExceptionCause excause, bool value) {
 bool Core::get_step_over_exception(enum ExceptionCause excause) const {
     return step_over_exception[excause];
 }
+Xlen Core::get_xlen() const {
+    return xlen;
+}
 
 void Core::register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler) {
     if (excause == EXCAUSE_NONE) {
@@ -275,6 +278,7 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .branch = bool(flags & IMF_BRANCH),
                                 .jump = bool(flags & IMF_JUMP),
                                 .bj_not = bool(flags & IMF_BJ_NOT),
+                                .branch_jalr = bool(flags & IMF_BRANCH_JALR),
                                 .stall = false,
                                 .is_valid = dt.is_valid,
                                 .alu_mod = bool(flags & IMF_ALU_MOD),
@@ -292,8 +296,7 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
         alu_val = alu_combined_operate(
             { .alu_op = dt.aluop }, AluComponent::ALU, true, dt.alu_mod, alu_fst, alu_sec);
     }
-    Address target = 0_addr;
-    if (dt.branch) target = dt.inst_addr + dt.immediate_val.as_i64();
+    Address branch_jal_target = dt.inst_addr + dt.immediate_val.as_i64();
 
     const unsigned stall_status = [&]() {
         if (dt.stall) {
@@ -325,7 +328,7 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
                  .inst_addr = dt.inst_addr,
                  .next_inst_addr = dt.next_inst_addr,
                  .predicted_next_inst_addr = dt.predicted_next_inst_addr,
-                 .branch_target = target,
+                 .branch_jal_target = branch_jal_target,
                  .val_rt = dt.val_rt,
                  .alu_val = alu_val,
                  .excause = excause,
@@ -338,6 +341,7 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
                  .branch = dt.branch,
                  .jump = dt.jump,
                  .bj_not = dt.bj_not,
+                 .branch_jalr = dt.branch_jalr,
                  .alu_zero = alu_val == 0,
              } };
 }
@@ -369,7 +373,7 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
         regwrite = false;
     }
 
-    const bool branch_taken = dt.branch && (!dt.bj_not ^ (dt.alu_val != 0));
+    const bool branch_taken = dt.branch && (!dt.bj_not ^ !dt.alu_zero);
 
     return { MemoryInternalState {
                  .mem_read_val = towrite_val,
@@ -389,7 +393,7 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
                  .predicted_next_inst_addr = dt.predicted_next_inst_addr,
                  .computed_next_inst_addr = compute_next_inst_addr(dt, branch_taken),
                  .mem_addr = mem_addr,
-                 .towrite_val = towrite_val,
+                 .towrite_val = (dt.branch_jalr) ? dt.next_inst_addr.get_raw() : towrite_val,
                  .excause = dt.excause,
                  .num_rd = dt.num_rd,
                  .memtoreg = memread,
@@ -412,8 +416,8 @@ WritebackState Core::writeback(const MemoryInterstage &dt) {
 }
 
 Address Core::compute_next_inst_addr(const ExecuteInterstage &exec, bool branch_taken) const {
-    if (exec.jump) { return Address(get_xlen_from_reg(exec.alu_val)); }
-    if (branch_taken) { return exec.branch_target; }
+    if (branch_taken || exec.jump) { return exec.branch_jal_target; }
+    if (exec.branch_jalr) { return Address(get_xlen_from_reg(exec.alu_val)); }
     return exec.next_inst_addr;
 }
 
@@ -470,7 +474,7 @@ CorePipelined::CorePipelined(
     Cop0State *cop0state,
     Xlen xlen)
     : Core(regs, predictor, mem_program, mem_data, cop0state, xlen) {
-    Q_UNUSED(min_cache_row_size);
+    Q_UNUSED(min_cache_row_size)
     this->hazard_unit = hazard_unit;
     reset();
 }

@@ -54,7 +54,8 @@ public:
     void setup(
         machine::FrontendMemory *mem,
         SymbolTableDb *symtab,
-        machine::Address address);
+        machine::Address address,
+        machine::Xlen xlen);
     bool process_line(
         const QString &line,
         const QString &filename = "",

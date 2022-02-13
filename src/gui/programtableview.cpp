@@ -66,7 +66,7 @@ void ProgramTableView::adjustColumnCount() {
 
     horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
     idx = m->index(0, 3);
-    totwidth += delegate->sizeHintForText(viewOpts, idx, "BEQ $18, $17, 0x80020058").width() + 2;
+    totwidth += delegate->sizeHintForText(viewOpts, idx, "BEQ $18, $17, 0x00000258").width() + 2;
     totwidth += verticalHeader()->width();
     setColumnHidden(2, totwidth > width());
 

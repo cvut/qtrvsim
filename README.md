@@ -419,10 +419,19 @@ This is initial implementation of the RISC-V edition. Everything is limited.
 ## List of Actually Supported Instructions
 
 - **RV32G**:
-    - **LOAD**: `lw, lh, lb`
-    - **STORE**: `sw, sh, sb`
-    - **OP**: `add, sub, sll, slt, sltu, xor, srl, sra, or, and`
-    - **OP-IMM**: `addi, sll, slti, sltiu, xori, srli, srai, ori, andi`
+  - **LOAD**: `lw, lh, lb, lwu, lhu, lbu`
+  - **STORE**: `sw, sh, sb, swu, shu, sbu`
+  - **OP**: `add, sub, sll, slt, sltu, xor, srl, sra, or, and`
+  - **OP-IMM**: `addi, sll, slti, sltiu, xori, srli, srai, ori, andi, auipc, lui`
+  - **BRANCH**: `beq, bne, btl, bge, bltu, bgtu`
+  - **JUMP**: `jal, jalr`
+  - **SYSTEM**: `ecall, break`
+- **Pseudoinstructions**
+  - **BASIC**: `nop`
+  - **LOAD**: `la, li`,
+  - **OP**: `mv, not, neg, negw, sext.b, sext.h, sext.w, zext.b, zext.h, zext.w, seqz, snez, sltz, slgz`
+  - **BRANCH**: `beqz, bnez, blez, bgez, bltz, bgtz, bgt, ble, bgtu, bleu`
+  - **JUMP**: `j, jal, jr, jalr`
 
 For details about RISC-V, refer to the ISA specification:
 [https://riscv.org/technical/specifications/](https://riscv.org/technical/specifications/).

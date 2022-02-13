@@ -54,7 +54,7 @@ final:
 .end _start
 
 .data
-.org 0x200
+.org 0x400
 
 data_1:	.word	1, 2, 3, 4
 

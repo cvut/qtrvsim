@@ -74,7 +74,7 @@
 //  7 / HW5      15                Counter reached value in Compare register
 
 // Start address after reset
-.org 0x80020000
+.org 0x00000200
 
 .text
 
@@ -82,7 +82,7 @@ __start:
 _start:
 
 loop:
-    lui  a0, SERIAL_PORT_BASE           // load base address of serial port
+    li   a0, SERIAL_PORT_BASE           // load base address of serial port
     addi a1, zero, text_1               // load address of text
 
 next_char:
@@ -102,7 +102,7 @@ end_char:
 
 .end _start
 
-.org 0x200
+.org 0x400
 .data
 
 data_1:	.word	1, 2, 3, 4	// example how to fill data words
