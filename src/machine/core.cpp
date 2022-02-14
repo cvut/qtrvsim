@@ -393,7 +393,7 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
                  .predicted_next_inst_addr = dt.predicted_next_inst_addr,
                  .computed_next_inst_addr = compute_next_inst_addr(dt, branch_taken),
                  .mem_addr = mem_addr,
-                 .towrite_val = (dt.branch_jalr) ? dt.next_inst_addr.get_raw() : towrite_val,
+                 .towrite_val = (dt.branch_jalr || dt.jump) ? dt.next_inst_addr.get_raw() : towrite_val,
                  .excause = dt.excause,
                  .num_rd = dt.num_rd,
                  .memtoreg = memread,
