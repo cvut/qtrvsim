@@ -254,8 +254,8 @@ bool SimpleAsm::process_line(
         include_stack.removeLast();
         return res;
     }
-    if ((op == ".data") || (op == ".text") || (op == ".globl") || (op == ".end")
-        || (op == ".ent")) {
+    if ((op == ".text") || (op == ".data")  || (op == ".bss") || (op == ".globl") || (op == ".end")
+        || (op == ".ent") || (op == ".option")) {
         return true;
     }
     if (op == ".org") {

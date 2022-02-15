@@ -14,6 +14,7 @@ HighlighterAsm::HighlighterAsm(QTextDocument *parent)
     const QString keywordPatterns[]
         = { QStringLiteral("\\.org\\b"),   QStringLiteral("\\.word\\b"),
             QStringLiteral("\\.text\\b"),  QStringLiteral("\\.data\\b"),
+            QStringLiteral("\\.bss\\b"),   QStringLiteral("\\.option\\b"),
             QStringLiteral("\\.globl\\b"), QStringLiteral("\\.set\\b"),
             QStringLiteral("\\.equ\\b"),   QStringLiteral("\\.end\\b"),
             QStringLiteral("\\.ent\\b"),   QStringLiteral("\\.ascii\\b"),
