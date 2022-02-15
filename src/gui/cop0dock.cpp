@@ -16,17 +16,15 @@ Cop0Dock::Cop0Dock(QWidget *parent) : QDockWidget(parent) {
 
     cop0reg[0] = nullptr;
     for (int i = 1; i < machine::Cop0State::COP0REGS_CNT; i++) {
-        INIT(
-            cop0reg[i], machine::Cop0State::cop0reg_name(
-                            (machine::Cop0State::Cop0Registers)i));
+        INIT(cop0reg[i], machine::Cop0State::cop0reg_name((machine::Cop0State::Cop0Registers)i));
         cop0reg_highlighted[i] = false;
     }
 #undef INIT
     scrollarea->setWidget(widg);
 
     setWidget(scrollarea);
-    setObjectName("Coprocessor0");
-    setWindowTitle("Coprocessor0");
+    setObjectName("Control and Status Registers");
+    setWindowTitle("Control and Status Registers");
 
     pal_normal = QPalette(cop0reg[1]->palette());
     pal_updated = QPalette(cop0reg[1]->palette());

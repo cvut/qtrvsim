@@ -99,10 +99,10 @@ void Cop0State::setup_core(Core *core) {
 
 uint32_t Cop0State::read_cop0reg(uint8_t rd, uint8_t sel) const {
     SANITY_ASSERT(
-        rd < 32, QString("Trying to read from cop0 register ") + QString::number(rd) + ','
+        rd < 32, QString("Trying to read from CSR register ") + QString::number(rd) + ','
                      + QString::number(sel));
     SANITY_ASSERT(
-        sel < 8, QString("Trying to read from cop0 register ") + QString::number(rd) + ','
+        sel < 8, QString("Trying to read from CSR register ") + QString::number(rd) + ','
                      + QString::number(sel));
     enum Cop0Registers reg = cop0reg_map[rd][sel];
     SANITY_ASSERT(
@@ -113,10 +113,10 @@ uint32_t Cop0State::read_cop0reg(uint8_t rd, uint8_t sel) const {
 
 void Cop0State::write_cop0reg(uint8_t rd, uint8_t sel, RegisterValue value) {
     SANITY_ASSERT(
-        rd < 32, QString("Trying to write to cop0 register ") + QString::number(rd) + ','
+        rd < 32, QString("Trying to write to CSR register ") + QString::number(rd) + ','
                      + QString::number(sel));
     SANITY_ASSERT(
-        sel < 8, QString("Trying to write to cop0 register ") + QString::number(rd) + ','
+        sel < 8, QString("Trying to write to CSR register ") + QString::number(rd) + ','
                      + QString::number(sel));
     enum Cop0Registers reg = cop0reg_map[rd][sel];
     SANITY_ASSERT(
@@ -128,14 +128,14 @@ void Cop0State::write_cop0reg(uint8_t rd, uint8_t sel, RegisterValue value) {
 uint32_t Cop0State::read_cop0reg(enum Cop0Registers reg) const {
     SANITY_ASSERT(
         reg != Unsupported && reg < COP0REGS_CNT,
-        QString("Trying to read from cop0 register ") + QString::number(reg));
+        QString("Trying to read from CSR register ") + QString::number(reg));
     return (this->*cop0reg_desc[reg].reg_read)(reg);
 }
 
 void Cop0State::write_cop0reg(enum Cop0Registers reg, RegisterValue value) {
     SANITY_ASSERT(
         reg != Unsupported && reg < COP0REGS_CNT,
-        QString("Trying to write to cop0 register ") + QString::number(reg));
+        QString("Trying to write to CSR register ") + QString::number(reg));
     (this->*cop0reg_desc[reg].reg_write)(reg, value.as_u32());
 }
 

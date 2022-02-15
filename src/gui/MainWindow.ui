@@ -443,7 +443,7 @@
   </action>
   <action name="actionCop0State">
    <property name="text">
-    <string>Cop0 State</string>
+    <string>Control and Status Registers</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+I</string>
