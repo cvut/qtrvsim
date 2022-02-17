@@ -617,147 +617,158 @@ size_t Instruction::pseudo_from_tokens(
     if (inst.base == QLatin1String("mv")) {
         return partially_apply("addi", 2, 2, "0", code, buffsize, inst, reloc);
     }
-    if (inst.base == QLatin1String("not")) {
-        return partially_apply("xori", 2, 2, "-1", code, buffsize, inst, reloc);
+    if (inst.base[0] == 'n') {
+        if (inst.base == QLatin1String("not")) {
+            return partially_apply("xori", 2, 2, "-1", code, buffsize, inst, reloc);
+        }
+        if (inst.base == QLatin1String("neg")) {
+            return partially_apply("sub", 2, 1, "x0", code, buffsize, inst, reloc);
+        }
+        if (inst.base == QLatin1String("negw")) {
+            return partially_apply("subw", 2, 1, "x0", code, buffsize, inst, reloc);
+        }
     }
-    if (inst.base == QLatin1String("neg")) {
-        return partially_apply("sub", 2, 1, "x0", code, buffsize, inst, reloc);
+    if (inst.base[0] == 's') {
+        if (inst.base == QLatin1String("sext.b")) {
+            if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
+            inst.base = "slli";
+            inst.fields.append("XLEN-8");
+            *code = base_from_tokens(inst, reloc).data();
+            code += 1;
+            inst.base = "srai";
+            inst.fields[1] = inst.fields[0];
+            *code = base_from_tokens(inst, reloc).data();
+            return 8;
+        }
+        if (inst.base == QLatin1String("sext.h")) {
+            if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
+            inst.base = "slli";
+            inst.fields.append("XLEN-16");
+            *code = base_from_tokens(inst, reloc).data();
+            code += 1;
+            inst.base = "srai";
+            inst.fields[1] = inst.fields[0];
+            *code = base_from_tokens(inst, reloc).data();
+            return 8;
+        }
+        if (inst.base == QLatin1String("sext.w")) {
+            return partially_apply("addiw", 2, 2, "0", code, buffsize, inst, reloc);
+        }
     }
-    if (inst.base == QLatin1String("negw")) {
-        return partially_apply("subw", 2, 1, "x0", code, buffsize, inst, reloc);
+    if (inst.base[0] == 'z') {
+        if (inst.base == QLatin1String("zext.b")) {
+            return partially_apply("addi", 2, 2, "255", code, buffsize, inst, reloc);
+        }
+        if (inst.base == QLatin1String("zext.h")) {
+            if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
+            inst.base = "slli";
+            inst.fields.append("XLEN-16");
+            *code = base_from_tokens(inst, reloc).data();
+            code += 1;
+            inst.base = "srli";
+            inst.fields[1] = inst.fields[0];
+            inst.fields.append("XLEN-16");
+            *code = base_from_tokens(inst, reloc).data();
+            return 8;
+        }
+        if (inst.base == QLatin1String("zext.w")) {
+            if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
+            inst.base = "slli";
+            inst.fields.append("XLEN-32");
+            *code = base_from_tokens(inst, reloc).data();
+            code += 1;
+            inst.base = "srli";
+            inst.fields[1] = inst.fields[0];
+            inst.fields.append("XLEN-32");
+            *code = base_from_tokens(inst, reloc).data();
+            return 8;
+        }
     }
-    if (inst.base == QLatin1String("sext.b")) {
-        if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
-        inst.base = "slli";
-        inst.fields.append("XLEN-8");
-        *code = base_from_tokens(inst, reloc).data();
-        code += 1;
-        inst.base = "srai";
-        inst.fields[1] = inst.fields[0];
-        *code = base_from_tokens(inst, reloc).data();
-        return 8;
+    if (inst.base[0] == 's') {
+        if (inst.base == QLatin1String("seqz")) {
+            return partially_apply("sltiu", 2, 2, "1", code, buffsize, inst, reloc);
+        }
+        if (inst.base == QLatin1String("snez")) {
+            return partially_apply("sltu", 2, 1, "x0", code, buffsize, inst, reloc);
+        }
+        if (inst.base == QLatin1String("sltz")) {
+            return partially_apply("slt", 2, 2, "x0", code, buffsize, inst, reloc);
+        }
+        if (inst.base == QLatin1String("slgz")) {
+            return partially_apply("slt", 2, 1, "x0", code, buffsize, inst, reloc);
+        }
     }
-    if (inst.base == QLatin1String("sext.h")) {
-        if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
-        inst.base = "slli";
-        inst.fields.append("XLEN-16");
-        *code = base_from_tokens(inst, reloc).data();
-        code += 1;
-        inst.base = "srai";
-        inst.fields[1] = inst.fields[0];
-        *code = base_from_tokens(inst, reloc).data();
-        return 8;
+    if (inst.base[0] == 'b') {
+        if (inst.base == QLatin1String("beqz")) {
+            return partially_apply("beq", 2, 1, "x0", code, buffsize, inst, reloc);
+        }
+        if (inst.base == QLatin1String("bnez")) {
+            return partially_apply("bne", 2, 1, "x0", code, buffsize, inst, reloc);
+        }
+        if (inst.base == QLatin1String("blez")) {
+            return partially_apply("ble", 2, 0, "x0", code, buffsize, inst, reloc);
+        }
+        if (inst.base == QLatin1String("bgez")) {
+            return partially_apply("bge", 2, 0, "x0", code, buffsize, inst, reloc);
+        }
+        if (inst.base == QLatin1String("bltz")) {
+            return partially_apply("blt", 2, 1, "x0", code, buffsize, inst, reloc);
+        }
+        if (inst.base == QLatin1String("bgtz")) {
+            return partially_apply("blt", 2, 0, "x0", code, buffsize, inst, reloc);
+        }
+        if (inst.base == QLatin1String("bgt")) {
+            if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
+            inst.base = "blt";
+            std::swap(inst.fields[0], inst.fields[1]);
+            return code_from_tokens(code, buffsize, inst, reloc, false);
+        }
+        if (inst.base == QLatin1String("ble")) {
+            if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
+            inst.base = "bgt";
+            std::swap(inst.fields[0], inst.fields[1]);
+            return code_from_tokens(code, buffsize, inst, reloc, false);
+        }
+        if (inst.base == QLatin1String("bgtu")) {
+            if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
+            inst.base = "bltu";
+            std::swap(inst.fields[0], inst.fields[1]);
+            return code_from_tokens(code, buffsize, inst, reloc, false);
+        }
+        if (inst.base == QLatin1String("bleu")) {
+            if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
+            inst.base = "bgeu";
+            std::swap(inst.fields[0], inst.fields[1]);
+            return code_from_tokens(code, buffsize, inst, reloc, false);
+        }
     }
-    if (inst.base == QLatin1String("sext.w")) {
-        return partially_apply("addiw", 2, 2, "0", code, buffsize, inst, reloc);
-    }
-    if (inst.base == QLatin1String("zext.b")) {
-        return partially_apply("addi", 2, 2, "255", code, buffsize, inst, reloc);
-    }
-    if (inst.base == QLatin1String("zext.h")) {
-        if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
-        inst.base = "slli";
-        inst.fields.append("XLEN-16");
-        *code = base_from_tokens(inst, reloc).data();
-        code += 1;
-        inst.base = "srli";
-        inst.fields[1] = inst.fields[0];
-        inst.fields.append("XLEN-16");
-        *code = base_from_tokens(inst, reloc).data();
-        return 8;
-    }
-    if (inst.base == QLatin1String("zext.w")) {
-        if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
-        inst.base = "slli";
-        inst.fields.append("XLEN-32");
-        *code = base_from_tokens(inst, reloc).data();
-        code += 1;
-        inst.base = "srli";
-        inst.fields[1] = inst.fields[0];
-        inst.fields.append("XLEN-32");
-        *code = base_from_tokens(inst, reloc).data();
-        return 8;
-    }
-    if (inst.base == QLatin1String("seqz")) {
-        return partially_apply("sltiu", 2, 2, "1", code, buffsize, inst, reloc);
-    }
-    if (inst.base == QLatin1String("snez")) {
-        return partially_apply("sltu", 2, 1, "x0", code, buffsize, inst, reloc);
-    }
-    if (inst.base == QLatin1String("sltz")) {
-        return partially_apply("slt", 2, 2, "x0", code, buffsize, inst, reloc);
-    }
-    if (inst.base == QLatin1String("slgz")) {
-        return partially_apply("slt", 2, 1, "x0", code, buffsize, inst, reloc);
-    }
-    if (inst.base == QLatin1String("beqz")) {
-        return partially_apply("beq", 2, 1, "x0", code, buffsize, inst, reloc);
-    }
-    if (inst.base == QLatin1String("bnez")) {
-        return partially_apply("bne", 2, 1, "x0", code, buffsize, inst, reloc);
-    }
-    if (inst.base == QLatin1String("blez")) {
-        return partially_apply("ble", 2, 0, "x0", code, buffsize, inst, reloc);
-    }
-    if (inst.base == QLatin1String("bgez")) {
-        return partially_apply("bge", 2, 0, "x0", code, buffsize, inst, reloc);
-    }
-
-    if (inst.base == QLatin1String("bltz")) {
-        return partially_apply("blt", 2, 1, "x0", code, buffsize, inst, reloc);
-    }
-    if (inst.base == QLatin1String("bgtz")) {
-        return partially_apply("blt", 2, 0, "x0", code, buffsize, inst, reloc);
-    }
-    if (inst.base == QLatin1String("bgt")) {
-        if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
-        inst.base = "blt";
-        std::swap(inst.fields[0], inst.fields[1]);
-        return code_from_tokens(code, buffsize, inst, reloc, false);
-    }
-    if (inst.base == QLatin1String("ble")) {
-        if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
-        inst.base = "bgt";
-        std::swap(inst.fields[0], inst.fields[1]);
-        return code_from_tokens(code, buffsize, inst, reloc, false);
-    }
-    if (inst.base == QLatin1String("bgtu")) {
-        if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
-        inst.base = "bltu";
-        std::swap(inst.fields[0], inst.fields[1]);
-        return code_from_tokens(code, buffsize, inst, reloc, false);
-    }
-    if (inst.base == QLatin1String("bleu")) {
-        if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
-        inst.base = "bgeu";
-        std::swap(inst.fields[0], inst.fields[1]);
-        return code_from_tokens(code, buffsize, inst, reloc, false);
-    }
-    if (inst.base == QLatin1String("j")) {
-        if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
-        inst.base = "jal";
-        inst.fields.insert(0, "x0");
-        return code_from_tokens(code, buffsize, inst, reloc, false);
-    }
-    if (inst.base == QLatin1String("jal")) {
-        if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
-        inst.base = "jal";
-        inst.fields.insert(0, "x1");
-        return code_from_tokens(code, buffsize, inst, reloc, false);
-    }
-    if (inst.base == QLatin1String("jr")) {
-        if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
-        inst.base = "jalr";
-        inst.fields.insert(0, "x0");
-        inst.fields[1] = QString("0x0(%0)").arg(inst.fields[1]);
-        return code_from_tokens(code, buffsize, inst, reloc, false);
-    }
-    if (inst.base == QLatin1String("jalr")) {
-        if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
-        inst.base = "jalr";
-        inst.fields.insert(0, "x1");
-        inst.fields[1] = QString("0x0(%0)").arg(inst.fields[1]);
-        return code_from_tokens(code, buffsize, inst, reloc, false);
+    if (inst.base[0] == 'j') {
+        if (inst.base == QLatin1String("j")) {
+            if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
+            inst.base = "jal";
+            inst.fields.insert(0, "x0");
+            return code_from_tokens(code, buffsize, inst, reloc, false);
+        }
+        if (inst.base == QLatin1String("jal")) {
+            if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
+            inst.base = "jal";
+            inst.fields.insert(0, "x1");
+            return code_from_tokens(code, buffsize, inst, reloc, false);
+        }
+        if (inst.base == QLatin1String("jr")) {
+            if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
+            inst.base = "jalr";
+            inst.fields.insert(0, "x0");
+            inst.fields[1] = QString("0x0(%0)").arg(inst.fields[1]);
+            return code_from_tokens(code, buffsize, inst, reloc, false);
+        }
+        if (inst.base == QLatin1String("jalr")) {
+            if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
+            inst.base = "jalr";
+            inst.fields.insert(0, "x1");
+            inst.fields[1] = QString("0x0(%0)").arg(inst.fields[1]);
+            return code_from_tokens(code, buffsize, inst, reloc, false);
+        }
     }
     if (inst.base == QLatin1String("ret")) {
         if (inst.fields.size() != 0) { throw ParseError("number of arguments does not match"); }
