@@ -260,11 +260,11 @@ static inline const struct InstructionMap &InstructionMapFind(uint32_t code) {
     return *im;
 }
 
-const std::array<const QString, 31> RECOGNIZED_PSEUDOINSTRUCTIONS {
-    "nop",    "la",     "li",     "mv",     "not",    "neg",  "negw", "sext.b",
-    "sext.h", "sext.w", "zext.b", "zext.h", "zext.w", "seqz", "snez", "sltz",
-    "slgz",   "beqz",   "bnez",   "blez",   "bgez",   "bltz", "bgtz", "bgt",
-    "ble",    "bgtu",   "bleu",   "j",      "jal",    "jr",   "jalr",
+const std::array<const QString, 34> RECOGNIZED_PSEUDOINSTRUCTIONS {
+    "nop",    "la",     "li",     "mv",     "not",  "neg",  "negw", "sext.b", "sext.h",
+    "sext.w", "zext.b", "zext.h", "zext.w", "seqz", "snez", "sltz", "slgz",   "beqz",
+    "bnez",   "blez",   "bgez",   "bltz",   "bgtz", "bgt",  "ble",  "bgtu",   "bleu",
+    "j",      "jal",    "jr",     "jalr",   "ret",  "call", "tail"
 };
 
 bool Instruction::symbolic_registers_enabled = false;
@@ -759,6 +759,46 @@ size_t Instruction::pseudo_from_tokens(
         inst.fields[1] = QString("0x0(%0)").arg(inst.fields[1]);
         return code_from_tokens(code, buffsize, inst, reloc, false);
     }
+    if (inst.base == QLatin1String("ret")) {
+        if (inst.fields.size() != 0) { throw ParseError("number of arguments does not match"); }
+        inst.base = "jalr";
+        inst.fields.append("x0");
+        inst.fields.append("0x0(x1)");
+        return code_from_tokens(code, buffsize, inst, reloc, false);
+    }
+    if (inst.base == QLatin1String("call")) {
+        if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
+        inst.fields.insert(0, "x6");
+        *code = base_from_tokens(
+                    { "auipc", inst.fields, inst.address, inst.filename, inst.line }, reloc, UPPER,
+                    -inst.address.get_raw())
+                    .data();
+        code += 1;
+        inst.fields[0] = QString("x1");
+        inst.fields[1] = QString("%0(x6)").arg(inst.fields[1]);
+        *code = base_from_tokens(
+                    { "jalr", inst.fields, inst.address + 4, inst.filename, inst.line }, reloc,
+                    LOWER, -inst.address.get_raw())
+                    .data();
+        return 8;
+    }
+    if (inst.base == QLatin1String("tail")) {
+        if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
+        inst.fields.insert(0, "x6");
+        *code = base_from_tokens(
+                    { "auipc", inst.fields, inst.address, inst.filename, inst.line }, reloc, UPPER,
+                    -inst.address.get_raw())
+                    .data();
+        code += 1;
+        inst.fields[0] = QString("x0");
+        inst.fields[1] = QString("%0(x6)").arg(inst.fields[1]);
+        *code = base_from_tokens(
+                    { "jalr", inst.fields, inst.address + 4, inst.filename, inst.line }, reloc,
+                    LOWER, -inst.address.get_raw())
+                    .data();
+        return 8;
+    }
+
     return 0;
 }
 size_t Instruction::partially_apply(
