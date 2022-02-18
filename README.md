@@ -361,7 +361,7 @@ Write `count` bytes from memory location `buf` to the open file descriptor
 
 Close file associated to descriptor `fd` and release descriptor.
 
-#### int [open](http://man7.org/linux/man-pages/man2/open.2.html)(int dirfd, const char *pathname, int flags, mode_t mode) __NR_openat (56)
+#### int [openat](http://man7.org/linux/man-pages/man2/open.2.html)(int dirfd, const char *pathname, int flags, mode_t mode) __NR_openat (56)
 
 Open file and associate it with the first unused file descriptor number and return that number. If the
 option `OS Emulation`->`Filesystem root`
