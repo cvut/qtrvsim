@@ -318,52 +318,50 @@ Use next linker option to place section start at right address
 
 ### System Calls Support
 
-(Not tested for RISC-V; coprocessor0 will have to be replaced.)
-
-The emulator includes support for a few Linux kernel systemcalls. The MIPS O32 ABI is used.
+The emulator includes support for a few Linux kernel systemcalls. The RV32 ilp32 ABI is used.
 
 | Register                           | use on input          | use on output                     | Note
 |:-----------------------------------|:----------------------|:----------------------------------|:-------
-| $at ($1)                           | —                     | (caller saved)                    |
-| $v0 ($2)                           | syscall number        | return value                      |
-| $v1 ($3)                           | —                     | 2nd fd only for pipe(2)           |
-| $a0 ... $a2 ($4 ... $6)            | syscall arguments     | returned unmodified               |
-| $a3 ($7)                           | 4th syscall argument  | $a3 set to 0/1 for success/error  |
-| $t0 ... $t9 ($8 ... $15, $24, $25) | —                     | (caller saved)                    |
-| $s0 ... $s7 ($16 ... $23)          | —                     | (callee saved)                    |
-| $k0, $k1 ($26, $27)                |                       |                                   |
-| $gp ($28)                          |                       | (callee saved)                    |
-| $sp ($29)                          |                       | (callee saved)                    |
-| $fp or $s8 ($30)                   |                       | (callee saved)                    |
-| $ra ($31)                          |                       | (callee saved)                    |
-| $hi, $lo                           | —                     | (caller saved)                    |
+| zero (x0)                          | —                     | -                                 |
+| ra (x1)                            | —                     | (caller saved)                    |
+| sp (x2)                            | —                     | (caller saved)                    |
+| gp (x3)                            | —                     | (caller saved)                    |
+| tp (x4)                            | —                     | (caller saved)                    |
+| t0 .. t2 (x5 .. x7)                | —                     | -                                 |
+| s0, s1 (x8, x9)                    | —                     | (caller saved)                    |
+| a0 (x10)                           | 1st syscall argument  | return value                      |
+| a1 .. a5 (x11 .. x15)              | syscall arguments     | -                                 |
+| a6 (x16)                           | -                     | -                                 |
+| a7 (x17)                           | syscall number        | -                                 |
+| s2 .. s11 (x18 .. x27)             | —                     | (caller saved)                    |
+| t3 .. t6 (x28 .. x31)              | —                     | -                                 |
 
-The first four input arguments are passed in registers $a0 to $a3, if more arguments are required then fifth and
-following arguments are stored on the stack.
+
+The all system acll input arguments are passed in register.
 
 Supported syscalls:
 
-#### void [exit](http://man7.org/linux/man-pages/man2/exit.2.html)(int status) __NR_exit (4001)
+#### void [exit](http://man7.org/linux/man-pages/man2/exit.2.html)(int status) __NR_exit (93)
 
 Stop/end execution of the program. The argument is exit status code, zero means OK, other values informs about error.
 
-#### ssize_t [read](http://man7.org/linux/man-pages/man2/read.2.html)(int fd, void *buf, size_t count) __NR_read (4003)
+#### ssize_t [read](http://man7.org/linux/man-pages/man2/read.2.html)(int fd, void *buf, size_t count) __NR_read (63)
 
 Read `count` bytes from open file descriptor `fd`. The emulator maps file descriptors 0, 1 and 2 to the internal
 terminal/console emulator. They can be used without `open` call. If there are no more characters to read from the
 console, newline is appended. At most the count bytes read are stored to the memory location specified by `buf`
 argument. Actual number of read bytes is returned.
 
-#### ssize_t [write](http://man7.org/linux/man-pages/man2/write.2.html)(int fd, const void *buf, size_t count) __NR_write (4004)
+#### ssize_t [write](http://man7.org/linux/man-pages/man2/write.2.html)(int fd, const void *buf, size_t count) __NR_write (64)
 
 Write `count` bytes from memory location `buf` to the open file descriptor
 `fd`. The same about console for file handles 0, 1 and 2 is valid as for `read`.
 
-#### int [close](http://man7.org/linux/man-pages/man2/close.2.html)(int fd) __NR_close (4006)
+#### int [close](http://man7.org/linux/man-pages/man2/close.2.html)(int fd) __NR_close (57)
 
 Close file associated to descriptor `fd` and release descriptor.
 
-#### int [open](http://man7.org/linux/man-pages/man2/open.2.html)(const char *pathname, int flags, mode_t mode) __NR_open (4005)
+#### int [open](http://man7.org/linux/man-pages/man2/open.2.html)(int dirfd, const char *pathname, int flags, mode_t mode) __NR_openat (56)
 
 Open file and associate it with the first unused file descriptor number and return that number. If the
 option `OS Emulation`->`Filesystem root`
@@ -371,30 +369,26 @@ is not empty then the file path `pathname` received from emulated environment is
 by `Filesystem root`. The host filesystem is protected against attempt to traverse to random directory by use of `..`
 path elements. If the root is not specified then all open files are targetted to the emulated terminal.
 
-#### void * [brk](http://man7.org/linux/man-pages/man2/brk.2.html)(void *addr) __NR_brk (4045)
+#### void * [brk](http://man7.org/linux/man-pages/man2/brk.2.html)(void *addr) __NR_brk (214)
 
 Set end of the area used by standard heap after end of the program data/bss. The syscall is emulated by dummy
 implementation. Whole address space up to 0xffff0000 is backuped by automatically attached RAM.
 
-#### int [ftruncate](http://man7.org/linux/man-pages/man2/ftruncate.2.html)(int fd, off_t length) __NR_truncate (4092)
+#### int [ftruncate](http://man7.org/linux/man-pages/man2/ftruncate.2.html)(int fd, off_t length) __NR_truncate (46)
 
 Set length of the open file specified by `fd` to the new `length`. The `length`
 argument is 64-bit even on 32-bit system and for big-endian MIPS it is apssed as higher part and the lower part in the
 second and third argument.
 
-#### ssize_t [readv](http://man7.org/linux/man-pages/man2/readv.2.html)(int fd, const struct iovec *iov, int iovcnt) __NR_Linux (4145)
+#### ssize_t [readv](http://man7.org/linux/man-pages/man2/readv.2.html)(int fd, const struct iovec *iov, int iovcnt) __NR_Linux (65)
 
 The variant of `read` system call where data to read are would be stored to locations specified by `iovcnt` pairs of
 base address, length pairs stored in memory at address pass in `iov`.
 
-#### ssize_t [writev](http://man7.org/linux/man-pages/man2/writev.2.html)(int fd, const struct iovec *iov, int iovcnt) __NR_Linux (4146)
+#### ssize_t [writev](http://man7.org/linux/man-pages/man2/writev.2.html)(int fd, const struct iovec *iov, int iovcnt) __NR_Linux (66)
 
 The variant of `write` system call where data to write are defined by `iovcnt`
 pairs of base address, length pairs stored in memory at address pass in `iov`.
-
-#### int [set_thread_area](http://man7.org/linux/man-pages/man2/set_thread_area.2.html)(unsigned long addr) __NR_set_thread_area (4283)
-
-Set TLS base into `C0` `user_local` register accessible by `rdhwr` instruction..
 
 ## Special instructions support
 
@@ -438,9 +432,8 @@ For details about RISC-V, refer to the ISA specification:
 
 ## Links to Resources and Similar Projects
 
-- QtRVSim - MIPS predecessor of this simulator [https://github.com/cvut/QtRVSim](https://github.com/cvut/QtRVSim)
-- Jakub Dupak: [Graphical RISC-V Architecture Simulator - Memory Model and Project Management](https://dspace.cvut.
-  cz/bitstream/handle/10467/94446/F3-BP-2021-Dupak-Jakub-thesis.pdf) documents QtMips and QtRvSim development
+- QtMips - MIPS predecessor of this simulator [https://github.com/cvut/QtRVSim](https://github.com/cvut/QtRVSim)
+- Jakub Dupak: [Graphical RISC-V Architecture Simulator - Memory Model and Project Management](https://dspace.cvut.cz/bitstream/handle/10467/94446/F3-BP-2021-Dupak-Jakub-thesis.pdf) documents QtMips and QtRvSim development
 
 ## Copyright
 
