@@ -161,6 +161,55 @@ riscv32-elf-gcc test.S -o test
 riscv32-elf-objdump -S test
 ```
 
+### GNU 64-bit toolchain use for RV32I target
+
+Multilib supporting 64-bit embedded toolchain can be used for to build executable
+
+```shell
+riscv64-unknown-elf-gcc -march=rv32i -mabi=ilp32 -nostdlib -o test test.c crt0local.S -lgcc
+```
+
+The global pointer and stack has to be set to setup runtime C code conformant environment.
+When no other C library is used then next simple `crt0local.S` can be used.
+
+```asm
+/* minimal replacement of crt0.o which is else provided by C library */
+
+.globl main
+.globl _start
+.globl __start
+
+.option norelax
+
+.text
+
+__start:
+_start:
+        .option push
+        .option norelax
+        la gp, __global_pointer$
+        .option pop
+        la      sp, __stack_end
+        addi    a0, zero, 0
+        addi    a1, zero, 0
+        jal     main
+quit:
+        addi    a0, zero, 0
+        addi    a7, zero, 93  /* SYS_exit */
+        ecall
+
+loop:   ebreak
+        beq     zero, zero, loop
+
+.bss
+
+__stack_start:
+        .skip   4096
+__stack_end:
+
+.end _start
+```
+
 ## Integrated Assembler
 
 Basic integrated assembler is included in the simulator. Small subset of
@@ -180,13 +229,10 @@ even that is not an option then default directory when the emulator has been sta
 
 ## Advanced functionalities
 
-**THIS PART IS FROM MIPS EDITION AND HAS NOT BEEN TESTED ON RISC-V**
-
 ### Peripherals
 
 
-The simulator implements emulation of two peripherals for now. Base addresses are selected such way that they are
-accessible by 16 immediate offset which uses register 0 (`zero`) as base.
+The simulator implements emulation of two peripherals for now.
 
 The first is simple serial port (UART). It support transmission
 (Tx) and reception (Rx). Receiver status register (`SERP_RX_ST_REG`)
@@ -250,7 +296,7 @@ Limitation: actual concept of memory view updates and access does not allow to r
 I/O memory content. It is possible to write into framebuffer memory when cached (from CPU perspective) access to memory
 is selected.
 
-### Interrupts and Coprocessor 0 Support
+### Interrupts and Control and Status Registers
 
 (NOTICE: Coprocessor0 will have to be replaced with RISC-V status registers)
 
