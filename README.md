@@ -318,26 +318,28 @@ Use next linker option to place section start at right address
 
 ### System Calls Support
 
-The emulator includes support for a few Linux kernel systemcalls. The RV32 ilp32 ABI is used.
+The emulator includes support for a few Linux kernel systemcalls. The RV32G ilp32 ABI is used.
 
-| Register                           | use on input          | use on output                     | Note
-|:-----------------------------------|:----------------------|:----------------------------------|:-------
-| zero (x0)                          | —                     | -                                 |
-| ra (x1)                            | —                     | (caller saved)                    |
-| sp (x2)                            | —                     | (caller saved)                    |
-| gp (x3)                            | —                     | (caller saved)                    |
-| tp (x4)                            | —                     | (caller saved)                    |
-| t0 .. t2 (x5 .. x7)                | —                     | -                                 |
-| s0, s1 (x8, x9)                    | —                     | (caller saved)                    |
-| a0 (x10)                           | 1st syscall argument  | return value                      |
-| a1 .. a5 (x11 .. x15)              | syscall arguments     | -                                 |
-| a6 (x16)                           | -                     | -                                 |
-| a7 (x17)                           | syscall number        | -                                 |
-| s2 .. s11 (x18 .. x27)             | —                     | (caller saved)                    |
-| t3 .. t6 (x28 .. x31)              | —                     | -                                 |
+| Register                           | use on input          | use on output   | Calling Convention
+|:-----------------------------------|:----------------------|:----------------|:-------
+| zero (x0)                          | —                     | -               | Hard-wired zero
+| ra (x1)                            | —                     | -               | Return address
+| sp (x2)                            | —                     | (caller saved)  | Stack pointer
+| gp (x3)                            | —                     | (caller saved)  | Stack pointer
+| tp (x4)                            | —                     | (caller saved)  | Thread pointer
+| t0 .. t2 (x5 .. x7)                | —                     | -               | Temporaries
+| s0/fp (x8)                         | —                     | (caller saved)  | Saved register/frame pointer
+| s1 (x9)                            | —                     | (caller saved)  | Saved register
+| a0 (x10)                           | 1st syscall argument  | return value    | Function argument/return value
+| a1 (x11)                           | 2nd syscall argument  | -               | Function argument/return value
+| a2 .. a5 (x12 .. x15)              | syscall arguments     | -               | Function arguments
+| a6 (x16)                           | -                     | -               | Function arguments
+| a7 (x17)                           | syscall number        | -               | Function arguments
+| s2 .. s11 (x18 .. x27)             | —                     | (caller saved)  | Saved registers
+| t3 .. t6 (x28 .. x31)              | —                     | -               | Temporaries
 
 
-The all system acll input arguments are passed in register.
+The all system call input arguments are passed in register.
 
 Supported syscalls:
 
