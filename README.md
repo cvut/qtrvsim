@@ -432,8 +432,9 @@ For details about RISC-V, refer to the ISA specification:
 
 ## Links to Resources and Similar Projects
 
-- QtMips - MIPS predecessor of this simulator [https://github.com/cvut/QtRVSim](https://github.com/cvut/QtRVSim)
+- QtMips - MIPS predecessor of this simulator [https://github.com/cvut/QtMips/](https://github.com/cvut/QtMips/)
 - Jakub Dupak: [Graphical RISC-V Architecture Simulator - Memory Model and Project Management](https://dspace.cvut.cz/bitstream/handle/10467/94446/F3-BP-2021-Dupak-Jakub-thesis.pdf) documents QtMips and QtRvSim development
+- RARS - RISC-V Assembler and Runtime Simulator [https://github.com/TheThirdOne/rars](https://github.com/TheThirdOne/rars)
 
 ## Copyright
 
