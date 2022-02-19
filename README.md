@@ -230,7 +230,8 @@ even that is not an option then default directory when the emulator has been sta
 ## Advanced functionalities
 
 ### Peripherals
-
+<details>
+  <summary>Emuated LCD, knobs, buttons, serial port...</summary>
 
 The simulator implements emulation of two peripherals for now.
 
@@ -296,7 +297,12 @@ Limitation: actual concept of memory view updates and access does not allow to r
 I/O memory content. It is possible to write into framebuffer memory when cached (from CPU perspective) access to memory
 is selected.
 
+</details>  
+  
 ### Interrupts and Control and Status Registers
+
+<details>
+  <summary>Implemented CSR registers and their usage</summary>
 
 (NOTICE: Coprocessor0 will have to be replaced with RISC-V status registers)
 
@@ -361,8 +367,13 @@ Use next linker option to place section start at right address
 ```
  -Wl,--section-start=.irq_handler=0x80000180
 ```
+  
+</details>
 
 ### System Calls Support
+
+<details>
+  <summary>Syscall table and documentation</summary>
 
 The emulator includes support for a few Linux kernel systemcalls. The RV32G ilp32 ABI is used.
 
@@ -437,6 +448,8 @@ base address, length pairs stored in memory at address pass in `iov`.
 
 The variant of `write` system call where data to write are defined by `iovcnt`
 pairs of base address, length pairs stored in memory at address pass in `iov`.
+  
+</details>
 
 ## Special instructions support
 
