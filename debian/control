@@ -1,0 +1,15 @@
+Source: qtrvsim
+Section: devel
+Priority: optional
+Maintainer: Jakub Dupak <dev@jakubdupak.com>
+Build-Depends: debhelper (>= 9), qtbase5-dev, libelf-dev, cmake
+Standards-Version: 3.9.8
+Homepage: https://github.com/cvut/qtrvsim
+Vcs-Git: github.com:cvut/qtrvsim.git
+Vcs-Browser: https://github.com/cvut/qtrvsim
+
+Package: qtrvsim
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: RISC-V CPU simulator for education purposes
+ RISC-V CPU simulator for education purposes with pipeline and cache visualization.
