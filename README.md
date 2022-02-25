@@ -99,9 +99,10 @@ Now build the project the same way as in general compilation (above).
     - Open Build Service binary packages
 - [https://launchpad.net/~qtrvsimteam/+archive/ubuntu/ppa](https://launchpad.net/~qtrvsimteam/+archive/ubuntu/ppa)
     - Ubuntu PPA archive
-```
+```bash
 sudo add-apt-repository ppa:qtrvsimteam/ppa
 sudo apt-get update
+sudo apt-get install qtrvsim
 ```
 
 ### Nix package
