@@ -97,6 +97,12 @@ Now build the project the same way as in general compilation (above).
 - [https://build.opensuse.org/repositories/home:jdupak/qtrvsim](https://build.opensuse.org/repositories/home:jdupak/qtrvsim)
 - [https://software.opensuse.org/download.html?project=home%3Ajdupak&package=qtrvsim](https://software.opensuse.org/download.html?project=home%3Ajdupak&package=qtrvsim)
     - Open Build Service binary packages
+- [https://launchpad.net/~qtrvsimteam/+archive/ubuntu/ppa](https://launchpad.net/~qtrvsimteam/+archive/ubuntu/ppa)
+    - Ubuntu PPA archive
+```
+sudo add-apt-repository ppa:qtrvsimteam/ppa
+sudo apt-get update
+```
 
 ### Nix package
 
