@@ -416,7 +416,7 @@ QString Instruction::to_str(Address inst_addr) const {
                     for (auto chunk : arg_desc->arg) {
                         sum += chunk.count;
                     }
-                    return sum - 1;
+                    return sum;
                 }());
             }
             switch (arg_desc->kind) {
