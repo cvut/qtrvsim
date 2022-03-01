@@ -225,6 +225,8 @@ inline RESULT_TYPE repeat_access_until_completed(
         RESULT_TYPE result = function(
             (DST_TYPE)(current_dst), (SRC_TYPE)(current_src), remaining_size,
             options);
+        if (result.n_bytes == 0)
+            break;
         total_result += result;
         current_src += result.n_bytes;
         current_dst += result.n_bytes;
