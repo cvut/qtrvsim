@@ -207,7 +207,7 @@ static const struct InstructionMap SYSTEM_map[] = {
 
 static const struct InstructionMap MISC_MEM_map[] = {
     {"fence", IT_I, NOALU, AC_CACHE_OP, nullptr, {}, 0x0000000f, 0x0000703f, { .flags = IMF_SUPPORTED | IMF_MEM }},
-    {"fence.i", IT_I, NOALU, AC_CACHE_OP, nullptr, {}, 0x000010f, 0x0000703f, { .flags = IMF_SUPPORTED | IMF_MEM }},
+    {"fence.i", IT_I, NOALU, AC_CACHE_OP, nullptr, {}, 0x000100f, 0x0000703f, { .flags = IMF_SUPPORTED | IMF_MEM }},
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
