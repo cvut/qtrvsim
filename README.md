@@ -487,6 +487,7 @@ This is initial implementation of the RISC-V edition. Everything is limited.
   - **LOAD**: `lw, lh, lb, lwu, lhu, lbu`
   - **STORE**: `sw, sh, sb, swu, shu, sbu`
   - **OP**: `add, sub, sll, slt, sltu, xor, srl, sra, or, and`
+  - **MISC-MEM**: `fence, fence.i`
   - **OP-IMM**: `addi, sll, slti, sltiu, xori, srli, srai, ori, andi, auipc, lui`
   - **BRANCH**: `beq, bne, btl, bge, bltu, bgtu`
   - **JUMP**: `jal, jalr`
