@@ -45,7 +45,7 @@ void RegValue::update() {
     element->setText(QString("%1").arg(data.as_u32(), 8, 16, QChar('0')));
 }
 
-RegIdValue::RegIdValue(svgscene::SimpleTextItem *element, const uint8_t &data)
+RegIdValue::RegIdValue(svgscene::SimpleTextItem *element, const machine::RegisterId &data)
     : element(element)
     , data(data) {}
 

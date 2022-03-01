@@ -63,13 +63,13 @@ private:
 
 class RegIdValue {
 public:
-    RegIdValue(svgscene::SimpleTextItem *element, const uint8_t &data);
+    RegIdValue(svgscene::SimpleTextItem *element, const machine::RegisterId &data);
     void update();
     static const QString COMPONENT_NAME;
 
 private:
     BORROWED svgscene::SimpleTextItem *const element;
-    const uint8_t &data;
+    const machine::RegisterId &data;
 };
 
 class DebugValue {
