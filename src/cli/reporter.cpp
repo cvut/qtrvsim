@@ -134,7 +134,7 @@ void Reporter::report_range(const Reporter::DumpRange &range) const {
     // TODO: report also cached memory?
     const MemoryDataBus *mem = machine->memory_data_bus();
     for (Address addr = start; addr < end; addr += 4) {
-        fprintf(out, "0x%08" PRIu32 "\n", mem->read_u32(addr, ae::INTERNAL));
+        fprintf(out, "0x%08" PRIx32 "\n", mem->read_u32(addr, ae::INTERNAL));
     }
     if (!fclose(out)) {
         fprintf(stderr, "Failure closing %s\n", range.path_to_write.toLocal8Bit().data());
