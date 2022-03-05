@@ -6,7 +6,8 @@
 class TestCore : public QObject {
     Q_OBJECT
 
-public slots:
+private slots:
+    // Not ported to RV:
     void singlecore_regs();
     void singlecore_regs_data();
     void pipecore_regs();
@@ -15,8 +16,8 @@ public slots:
     void singlecore_jmp_data();
     void pipecore_jmp();
     void pipecore_jmp_data();
-    void singlecore_mem();
     void singlecore_mem_data();
+    void singlecore_mem();
     void pipecore_mem();
     void pipecore_mem_data();
     void singlecore_alu_forward();
@@ -35,6 +36,15 @@ public slots:
     void pipecore_wt_na_memory_tests();
     void pipecore_wt_a_memory_tests();
     void pipecore_wb_memory_tests();
+
+    // Extensions:
+    // =============================================================================================
+
+    // RV32M
+    void singlecore_extension_m_data();
+    void pipecore_extension_m_data();
+    void singlecore_extension_m();
+    void pipecore_extension_m();
 };
 
 #endif // CORE_TEST_H

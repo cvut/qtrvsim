@@ -471,12 +471,10 @@ CorePipelined::CorePipelined(
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
-    enum MachineConfig::HazardUnit hazard_unit,
-    unsigned int min_cache_row_size,
     Cop0State *cop0state,
-    Xlen xlen)
+    Xlen xlen,
+    MachineConfig::HazardUnit hazard_unit)
     : Core(regs, predictor, mem_program, mem_data, cop0state, xlen) {
-    Q_UNUSED(min_cache_row_size)
     this->hazard_unit = hazard_unit;
     reset();
 }

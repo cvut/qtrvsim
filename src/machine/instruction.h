@@ -226,6 +226,11 @@ private:
     uint32_t dt;
     static bool symbolic_registers_enabled;
 
+    static Instruction base_from_tokens(
+        const TokenizedInstruction &inst,
+        RelocExpressionList *reloc,
+        Modifier pseudo_mod = Modifier::NONE,
+        uint64_t initial_immediate_value = 0);
     inline int32_t extend(uint32_t value, uint32_t used_bits) const;
     static uint32_t parse_field(
         QString &field_token,
@@ -236,11 +241,6 @@ private:
         unsigned int line,
         Modifier pseudo_mod,
         uint64_t initial_immediate_value);
-    static Instruction base_from_tokens(
-        const TokenizedInstruction &inst,
-        RelocExpressionList *reloc,
-        Modifier pseudo_mod = Modifier::NONE,
-        uint64_t initial_immediate_value = 0);
     static size_t partially_apply(
         const char *base,
         int argument_count,
@@ -261,6 +261,8 @@ struct Instruction::ParseError : public std::exception {
     QString message;
 
     explicit ParseError(QString message);
+
+    const char *what() const noexcept override { return message.toUtf8().data(); }
 };
 
 struct RelocExpression {
