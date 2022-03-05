@@ -25,7 +25,7 @@ copyright(
 		"Copyright (c) 2017-2019 ${KAREL_KOCI}"
 		"Copyright (c) 2019-${YEAR} ${PAVEL_PISA}"
 		"Copyright (c) 2020-${YEAR} ${JAKUB_DUPAK}"
-		"Copyright (c) 2020-${YEAR} ${MAX_HOLLMANN}")
+		"Copyright (c) 2020-2021 ${MAX_HOLLMANN}")
 
 include(cmake/GPL-3.0-or-later.cmake)
 

@@ -4,8 +4,8 @@ Source: https://github.com/cvut/qtrvsim/
 
 Files: *
 Copyright: 2017-2019 Karel Koci<cynerd@email.cz>
-           2019-2021 Pavel Pisa <pisa@cmp.felk.cvut.cz>
-           2020-2021 Jakub Dupak <dev@jakubdupak.com>
+           2019-2022 Pavel Pisa <pisa@cmp.felk.cvut.cz>
+           2020-2022 Jakub Dupak <dev@jakubdupak.com>
            2020-2021 Max Hollmann <hollmmax@fel.cvut.cz>
 License: GPL-3.0+
  This program is free software: you can redistribute it and/or modify it under the terms of the
