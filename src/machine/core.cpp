@@ -221,7 +221,7 @@ FetchState Core::fetch(PCInterstage pc, bool skip_break) {
 
 DecodeState Core::decode(const FetchInterstage &dt) {
     InstructionFlags flags;
-    AluOp alu_op;
+    AluCombinedOp alu_op {};
     AccessControl mem_ctl;
     ExceptionCause excause = dt.excause;
 
@@ -248,7 +248,7 @@ DecodeState Core::decode(const FetchInterstage &dt) {
     }
 
     return { DecodeInternalState {
-                 .alu_op_num = static_cast<unsigned>(alu_op),
+                 .alu_op_num = static_cast<unsigned>(alu_op.alu_op),
                  .excause_num = static_cast<unsigned>(excause),
                  .inst_bus = dt.inst.data(),
              },
@@ -264,6 +264,8 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .excause = excause,
                                 .ff_rs = FORWARD_NONE,
                                 .ff_rt = FORWARD_NONE,
+                                .alu_component
+                                = (flags & IMF_MUL) ? AluComponent::MUL : AluComponent::ALU,
                                 .aluop = alu_op,
                                 .memctl = mem_ctl,
                                 .num_rs = num_rs,
@@ -293,8 +295,8 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
 
     RegisterValue alu_val = 0;
     if (excause == EXCAUSE_NONE) {
-        alu_val = alu_combined_operate(
-            { .alu_op = dt.aluop }, AluComponent::ALU, true, dt.alu_mod, alu_fst, alu_sec);
+        alu_val
+            = alu_combined_operate(dt.aluop, dt.alu_component, true, dt.alu_mod, alu_fst, alu_sec);
     }
     Address branch_jal_target = dt.inst_addr + dt.immediate_val.as_i64();
 
@@ -315,7 +317,7 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
                  .rs = dt.val_rs_orig,
                  .rt = dt.val_rt_orig,
                  .stall_status = stall_status,
-                 .alu_op_num = static_cast<unsigned>(dt.aluop),
+                 .alu_op_num = static_cast<unsigned>(dt.aluop.alu_op),
                  .forward_from_rs1_num = static_cast<unsigned>(dt.ff_rs),
                  .forward_from_rs2_num = static_cast<unsigned>(dt.ff_rt),
                  .excause_num = static_cast<unsigned>(dt.excause),

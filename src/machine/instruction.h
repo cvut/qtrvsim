@@ -38,6 +38,11 @@ enum InstructionFlags {
     IMF_PC_TO_ALU = 1L << 25,   /**< PC is loaded instead of RS to ALU */
     IMF_ECALL = 1L << 26,       // seems easiest to encode ecall and ebreak as flags, but they might
     IMF_EBREAK = 1L << 27,      // be moved elsewhere in case we run out of InstructionFlag space.
+
+    // Extensions:
+    // =============================================================================================
+    // RV64/32M
+    IMF_MUL = 1L << 28, /**< Enables multiplication component of ALU. */
     // TODO do we want to add those signals to the visualization?
 };
 
@@ -169,12 +174,12 @@ public:
     bool imm_sign() const;
     enum Type type() const;
     enum InstructionFlags flags() const;
-    enum AluOp alu_op() const;
+    AluCombinedOp alu_op() const;
     enum AccessControl mem_ctl() const;
 
     void flags_alu_op_mem_ctl(
         enum InstructionFlags &flags,
-        enum AluOp &alu_op,
+        AluCombinedOp &alu_op,
         enum AccessControl &mem_ctl) const;
 
     bool operator==(const Instruction &c) const;

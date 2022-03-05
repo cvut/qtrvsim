@@ -90,21 +90,22 @@ struct DecodeInterstage {
     ExceptionCause excause = EXCAUSE_NONE;
     ForwardFrom ff_rs = FORWARD_NONE;
     ForwardFrom ff_rt = FORWARD_NONE;
-    AluOp aluop = AluOp::ADD;       // Decoded ALU operation
-    AccessControl memctl = AC_NONE; // Decoded memory access type
-    RegisterId num_rs = 0;             // Number of the register s1
-    RegisterId num_rt = 0;             // Number of the register s2
-    RegisterId num_rd = 0;             // Number of the register d
-    bool memread = false;           // If memory should be read
-    bool memwrite = false;          // If memory should write input
-    bool alusrc = false;            // If second value to alu is immediate value (rt used otherwise)
-    bool regwrite = true;           // If output should be written back to register
-    bool alu_req_rs = false;        // requires rs value for ALU
-    bool alu_req_rt = false;        // requires rt value for ALU or SW
-    bool branch = false;            // branch instruction
-    bool jump = false;              // jump
-    bool bj_not = false;            // negate branch condition
-    bool branch_jalr = false;       // JALR: write PC+4 to register and jump to ALU result
+    AluComponent alu_component; // Selects computational component in alu - basic ALU / MUL.
+    AluCombinedOp aluop = { .alu_op = AluOp::ADD }; // Decoded ALU operation
+    AccessControl memctl = AC_NONE;                 // Decoded memory access type
+    RegisterId num_rs = 0;                          // Number of the register s1
+    RegisterId num_rt = 0;                          // Number of the register s2
+    RegisterId num_rd = 0;                          // Number of the register d
+    bool memread = false;                           // If memory should be read
+    bool memwrite = false;                          // If memory should write input
+    bool alusrc = false;      // If second value to alu is immediate value (rt used otherwise)
+    bool regwrite = true;     // If output should be written back to register
+    bool alu_req_rs = false;  // requires rs value for ALU
+    bool alu_req_rt = false;  // requires rt value for ALU or SW
+    bool branch = false;      // branch instruction
+    bool jump = false;        // jump
+    bool bj_not = false;      // negate branch condition
+    bool branch_jalr = false; // JALR: write PC+4 to register and jump to ALU result
     bool stall = false;
     bool is_valid = false;
     bool alu_mod = false; // alternative versions of ADD and right-shift
@@ -136,7 +137,7 @@ struct DecodeState {
         , result(interstage)
         , final(interstage) {
         this->internal.excause_num = static_cast<unsigned>(interstage.excause);
-        this->internal.alu_op_num = static_cast<unsigned>(interstage.aluop);
+        this->internal.alu_op_num = static_cast<unsigned>(interstage.aluop.alu_op);
     }
     DecodeState() = default;
     DecodeState(const DecodeState &) = default;
