@@ -185,6 +185,8 @@ if(NOT ${WASM})
 			memory/backend/memory.h
 			memory/frontend_memory.cpp
 			memory/frontend_memory.h
+			memory/memory_bus.cpp
+			memory/memory_bus.h
 			registers.cpp
 			registers.h
 			simulator_exception.cpp

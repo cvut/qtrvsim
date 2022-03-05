@@ -166,10 +166,11 @@ public:
         Predictor *predictor,
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
-        enum MachineConfig::HazardUnit hazard_unit,
-        unsigned int min_cache_row_size,
         Cop0State *cop0state,
-        Xlen xlen);
+        Xlen xlen,
+        // Default value is used to keep same interface as core single.
+        // Forward was chosen as the most conservative variant (regarding correctness).
+        MachineConfig::HazardUnit hazard_unit = MachineConfig::HazardUnit::HU_STALL_FORWARD);
 
 protected:
     void do_step(bool skip_break) override;
