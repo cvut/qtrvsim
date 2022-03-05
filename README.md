@@ -498,6 +498,8 @@ This is initial implementation of the RISC-V edition. Everything is limited.
   - **OP**: `mv, not, neg, negw, sext.b, sext.h, sext.w, zext.b, zext.h, zext.w, seqz, snez, sltz, slgz`
   - **BRANCH**: `beqz, bnez, blez, bgez, bltz, bgtz, bgt, ble, bgtu, bleu`
   - **JUMP**: `j, jal, jr, jalr, ret, call, tail`
+- **Extensions**
+  - **RV32M**: `mul, mulh, mulhsu, div, divu, rem, remu`
 
 For details about RISC-V, refer to the ISA specification:
 [https://riscv.org/technical/specifications/](https://riscv.org/technical/specifications/).
