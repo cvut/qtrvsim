@@ -158,7 +158,7 @@ private:
     QString osem_fs_root;
     QString elf_path;
     CacheConfig cch_program, cch_data;
-    Endian simulated_endian = BIG;
+    Endian simulated_endian = LITTLE;
 };
 
 } // namespace machine
