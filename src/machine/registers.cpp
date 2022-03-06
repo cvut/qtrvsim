@@ -69,6 +69,6 @@ void Registers::reset() {
     for (int i = 1; i < 32; i++) {
         write_gp(i, 0);
     }
-    write_gp(29_reg, SP_INIT.get_raw()); // initialize to safe RAM area -
+    write_gp(2_reg, SP_INIT.get_raw()); // initialize to safe RAM area -
                                          // corresponds to Linux
 }
