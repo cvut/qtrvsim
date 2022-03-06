@@ -14,8 +14,7 @@
 #pragma qtrvsim show memory
 
 .globl _start
-.set noat
-.set noreorder
+.option norelax
 
 .text
 

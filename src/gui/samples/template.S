@@ -16,8 +16,7 @@
 
 .globl _start
 .globl __start
-.set noreorder
-.ent _start
+.option norelax
 
 // Serial port/terminal registers
 // There is mirror of this region at address 0xffff0000
@@ -99,8 +98,6 @@ tx_busy:
 end_char:
     ebreak // stop continuous execution, request developer interaction
     jal  zero, end_char
-
-.end _start
 
 .org 0x400
 .data

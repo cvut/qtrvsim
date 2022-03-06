@@ -17,8 +17,7 @@
 
 .globl _start
 .globl __start
-.set noreorder
-.ent _start
+.option norelax
 
 // Linux kernel compatible system calls subset
 
@@ -50,8 +49,6 @@ _start:
 final:
 	ebreak                            // request developer interaction
 	jal   zero, final
-
-.end _start
 
 .data
 .org 0x400
