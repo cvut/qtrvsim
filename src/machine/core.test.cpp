@@ -826,109 +826,92 @@ static void core_memory_tests_data() {
         QTest::newRow("cache_insert_sort") << code << regs_init << regs_res << mem_init << mem_res;
     }
 
-    return;
-
-    // lwr, lwl, swr, swl
+    // unaligned lw a lw and sw
     {
         QVector<uint32_t> code {
-            // __start:
-            0x3c1c8003, // lui     gp,0x8003
-            0x279c90d0, // addiu   gp,gp,-28464
-            // main:
-            0x3c1aaabb, // lui     k0,0xaabb
-            0x375accdd, // ori     k0,k0,0xccdd
-            0x23420000, // addi    v0,k0,0
-            0x23430000, // addi    v1,k0,0
-            0x23440000, // addi    a0,k0,0
-            0x23450000, // addi    a1,k0,0
-            0x23460000, // addi    a2,k0,0
-            0x23470000, // addi    a3,k0,0
-            0x23480000, // addi    t0,k0,0
-            0x23490000, // addi    t1,k0,0
-            0x234a0000, // addi    t2,k0,0
-            0x3c1b8002, // lui     k1,0x8002
-            0x277b0100, // addiu   k1,k1,0x100
-            0x9b620000, // lwr     v0,0(k1)
-            0x9b630001, // lwr     v1,1(k1)
-            0x9b640002, // lwr     a0,2(k1)
-            0x9b650003, // lwr     a1,3(k1)
-            0x8b660000, // lwl     a2,0(k1)
-            0x8b670001, // lwl     a3,1(k1)
-            0x8b680002, // lwl     t0,2(k1)
-            0x8b690003, // lwl     t1,3(k1)
-            0xbb7a0000, // swr     k0,0(k1)
-            0xbb7a0005, // swr     k0,5(k1)
-            0xbb7a000a, // swr     k0,10(k1)
-            0xbb7a000f, // swr     k0,15(k1)
-            0xab7a0014, // swl     k0,20(k1)
-            0xab7a0019, // swl     k0,25(k1)
-            0xab7a001e, // swl     k0,30(k1)
-            0xab7a0023, // swl     k0,35(k1)
-            0x8f6a0000, // lw      t2,0(k1)
-            0x8f6b0004, // lw      t3,4(k1)
-            0x8f6c0008, // lw      t4,8(k1)
-            0x8f6d000c, // lw      t5,12(k1)
-            0x8f6e0010, // lw      t6,16(k1)
-            0x8f6f0014, // lw      t7,20(k1)
-            0x8f700018, // lw      s0,24(k1)
-            0x8f71001c, // lw      s1,28(k1)
-            0x8f720020, // lw      s2,32(k1)
-            0x8f730020, // lw      s3,32(k1)
-            0xbd090000, // cache   0x9,0(t0)
-            // loop:
-            0x1000ffff, // b       800200a4 <loop>
-            0x00000000, // nop
-            // mem:
+            0xaabbdd37, // lui      x26,0xaabbd
+            0xcddd0d13, // addi     x26,x26,-803
+            0x000d0113, // addi     x2,x26,0
+            0x000d0193, // addi     x3,x26,0
+            0x000d0213, // addi     x4,x26,0
+            0x000d0293, // addi     x5,x26,0
+            0x000d0313, // addi     x6,x26,0
+            0x000d0393, // addi     x7,x26,0
+            0x000d0413, // addi     x8,x26,0
+            0x000d0493, // addi     x9,x26,0
+            0x000d0513, // addi     x10,x26,0
+            0x80020db7, // lui      x27,0x80020
+            0x100d8d93, // addi     x27,x27,256
+            0x000da103, // lw       x2,0(x27)
+            0x001da183, // lw       x3,1(x27)
+            0x002da203, // lw       x4,2(x27)
+            0x003da283, // lw       x5,3(x27)
+            0x01ada023, // sw       x26,0(x27)
+            0x01ada2a3, // sw       x26,5(x27)
+            0x01ada523, // sw       x26,10(x27)
+            0x01ada7a3, // sw       x26,15(x27)
+            0x000da503, // lw       x10,0(x27)
+            0x004da583, // lw       x11,4(x27)
+            0x008da603, // lw       x12,8(x27)
+            0x00cda683, // lw       x13,12(x27)
+            0x010da703, // lw       x14,16(x27)
+            0x014da783, // lw       x15,20(x27)
+            0x018da803, // lw       x16,24(x27)
+            0x01cda883, // lw       x17,28(x27)
+            0x020da903, // lw       x18,32(x27)
+            0x020da983, // lw       x19,32(x27)
+            0x0ff0000f, // fence    iorw,iorw
+            0x00000013, // addi     x0,x0,0
+            0x00000013, // addi     x0,x0,0
+            0xfe000ce3, // beq      x0,x0,27c <loop>
         };
         Registers regs_init;
-        regs_init.write_pc(0x80020000_addr);
+        regs_init.write_pc(0x200_addr);
         Registers regs_res(regs_init);
 
-        regs_res.write_gp(2, 0xaabbcc01);
-        regs_res.write_gp(3, 0xaabb0102);
-        regs_res.write_gp(4, 0xaa010203);
-        regs_res.write_gp(5, 0x01020304);
-        regs_res.write_gp(6, 0x01020304);
-        regs_res.write_gp(7, 0x020304dd);
-        regs_res.write_gp(8, 0x0304ccdd);
-        regs_res.write_gp(9, 0x04bbccdd);
-        regs_res.write_gp(10, 0xdd020304);
-        regs_res.write_gp(11, 0xccdd0708);
-        regs_res.write_gp(12, 0xbbccdd0c);
-        regs_res.write_gp(13, 0xaabbccdd);
-        regs_res.write_gp(14, 0x11121314);
-        regs_res.write_gp(15, 0xaabbccdd);
-        regs_res.write_gp(16, 0x19aabbcc);
-        regs_res.write_gp(17, 0x1d1eaabb);
-        regs_res.write_gp(18, 0x212223aa);
-        regs_res.write_gp(19, 0x212223aa);
-
-        regs_res.write_gp(26, 0xaabbccdd);
-        regs_res.write_gp(27, 0x80020100);
-        regs_res.write_gp(28, 0x800290d0);
+        regs_res.write_gp(2, (int32_t)0x04030201);
+        regs_res.write_gp(3, (int32_t)0x05040302);
+        regs_res.write_gp(4, (int32_t)0x06050403);
+        regs_res.write_gp(5, (int32_t)0x07060504);
+        regs_res.write_gp(6, (int32_t)0xaabbccdd);
+        regs_res.write_gp(7, (int32_t)0xaabbccdd);
+        regs_res.write_gp(8, (int32_t)0xaabbccdd);
+        regs_res.write_gp(9, (int32_t)0xaabbccdd);
+        regs_res.write_gp(10, (int32_t)0xaabbccdd);
+        regs_res.write_gp(11, (int32_t)0xbbccdd05);
+        regs_res.write_gp(12, (int32_t)0xccdd0aaa);
+        regs_res.write_gp(13, (int32_t)0xdd0faabb);
+        regs_res.write_gp(14, (int32_t)0x14aabbcc);
+        regs_res.write_gp(15, (int32_t)0x18171615);
+        regs_res.write_gp(16, (int32_t)0x1c1b1a19);
+        regs_res.write_gp(17, (int32_t)0x101f1e1d);
+        regs_res.write_gp(18, (int32_t)0x24232221);
+        regs_res.write_gp(19, (int32_t)0x24232221);
+        regs_res.write_gp(26, (int32_t)0xaabbccdd);
+        regs_res.write_gp(27, (int32_t)0x80020100);
 
         uint32_t addr;
-        Memory mem_init(BIG);
+        Memory mem_init(LITTLE);
         addr = 0x80020100;
-        QVector<uint32_t> data_init { 0x01020304, 0x05060708, 0x090a0b0c, 0x0d0e0f00,
-                                      0x11121314, 0x15161718, 0x191a1b1c, 0x1d1e1f10,
-                                      0x21222324, 0x25262728, 0x292a2b2c, 0x2d2e2f20 };
+        QVector<uint32_t> data_init { 0x04030201, 0x08070605, 0x0c0b0a09, 0x000f0e0d,
+                                      0x14131211, 0x18171615, 0x1c1b1a19, 0x101f1e1d,
+                                      0x24232221, 0x28272625, 0x2c2b2a29, 0x202f2e2d };
         foreach (uint32_t i, data_init) {
             memory_write_u32(&mem_init, addr, i);
             addr += 4;
         }
-        Memory mem_res(BIG);
+        Memory mem_res(LITTLE);
         addr = 0x80020100;
-        QVector<uint32_t> data_res { 0xdd020304, 0xccdd0708, 0xbbccdd0c, 0xaabbccdd,
-                                     0x11121314, 0xaabbccdd, 0x19aabbcc, 0x1d1eaabb,
-                                     0x212223aa, 0x25262728, 0x292a2b2c, 0x2d2e2f20 };
+        QVector<uint32_t> data_res { 0xaabbccdd, 0xbbccdd05, 0xccdd0aaa, 0xdd0faabb,
+                                     0x14aabbcc, 0x18171615, 0x1c1b1a19, 0x101f1e1d,
+                                     0x24232221, 0x28272625, 0x2c2b2a29, 0x202f2e2d };
         foreach (uint32_t i, data_res) {
             memory_write_u32(&mem_res, addr, i);
             addr += 4;
         }
 
         regs_res.write_pc(regs_init.read_pc() + 4 * code.length() - 4);
-        QTest::newRow("lwr_lrl_swr_swl") << code << regs_init << regs_res << mem_init << mem_res;
+        QTest::newRow("lw_sw_unaligned_be") << code << regs_init << regs_res << mem_init << mem_res;
     }
 }
 
@@ -1036,7 +1019,6 @@ void TestCore::pipecore_wt_a_memory_tests() {
 }
 
 void TestCore::pipecore_wb_memory_tests() {
-    QSKIP("Switched ALU to RV.");
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
