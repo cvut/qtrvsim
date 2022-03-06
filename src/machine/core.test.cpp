@@ -460,7 +460,6 @@ void TestCore::pipecore_mem() {
 /*======================================================================*/
 
 static void core_alu_forward_data() {
-    QSKIP("Switched RV.");
     QTest::addColumn<QVector<uint32_t>>("code");
     QTest::addColumn<Registers>("reg_init");
     QTest::addColumn<Registers>("reg_res");
@@ -470,108 +469,99 @@ static void core_alu_forward_data() {
     // Test forwarding of ALU operands
     {
         QVector<uint32_t> code {
-            // objdump -D to src: ^[^ \t]+[ \t]+([^ \t]+)[ \t]+([^ \t].*)$
-            0x20020001, // addi    v0,zero,1
-            0x20011111, // addi    at,zero,4369
-            0x20012222, // addi    at,zero,8738
-            0x00221820, // add     v1,at,v0
-            0x00222020, // add     a0,at,v0
-            0x20020003, // addi    v0,zero,3
-            0x20011111, // addi    at,zero,4369
-            0x20012222, // addi    at,zero,8738
-            0x00412820, // add     a1,v0,at
-            0x00413020, // add     a2,v0,at
-            0x00000000, // nop
+            // objdump --disassembler-options=no-aliases,numeric -d test-hazards
+            // sed -n -e 's/^[ \t]*[^ \t]\+:[ \t]\+\([0-9a-f]\+\)[ \t]\+\([^ \t].*\)$/0x\1, \/\/ \2/p'
+            0x00100113, // addi     x2,x0,1
+            0x11100093, // addi     x1,x0,273
+            0x22200093, // addi     x1,x0,546
+            0x002081b3, // add      x3,x1,x2
+            0x00208233, // add      x4,x1,x2
+            0x00300113, // addi     x2,x0,3
+            0x11100093, // addi     x1,x0,273
+            0x22200093, // addi     x1,x0,546
+            0x001102b3, // add      x5,x2,x1
+            0x00110333, // add      x6,x2,x1
+            0x00000013, // addi     x0,x0,0
+            0x00000063, // beq      x0,x0,10080 <loop>
         };
         Registers regs_init;
-        //        regs_init.pc_abs_jmp(0x80020000_addr);
-        //        Registers regs_res(regs_init);
-        //        regs_res.write_gp(1, 0x2222);
-        //        regs_res.write_gp(2, 3);
-        //        regs_res.write_gp(3, 0x2223);
-        //        regs_res.write_gp(4, 0x2223);
-        //        regs_res.write_gp(5, 0x2225);
-        //        regs_res.write_gp(6, 0x2225);
-        //        regs_res.pc_abs_jmp(regs_init.read_pc() + 4 * code.length());
-        //        QTest::newRow("alu_forward_1") << code << regs_init << regs_res;
+                regs_init.write_pc(0x200_addr);
+                Registers regs_res(regs_init);
+                regs_res.write_gp(1, 0x222);
+                regs_res.write_gp(2, 3);
+                regs_res.write_gp(3, 0x223);
+                regs_res.write_gp(4, 0x223);
+                regs_res.write_gp(5, 0x225);
+                regs_res.write_gp(6, 0x225);
+                regs_res.write_pc(regs_init.read_pc() + 4 * code.length() - 4);
+                QTest::newRow("alu_forward_1") << code << regs_init << regs_res;
     }
 
     // Test forwarding in JR and JALR
     {
         QVector<uint32_t> code {
-            // start: = 0x80020000
-            0x3c041111, // lui     a0,0x1111
-            0x3c052222, // lui     a1,0x2222
-            0x0c008012, // jal     80020048 <fnc_add3>
-            0x3c063333, // lui     a2,0x3333
-            0x00021820, // add     v1,zero,v0
-            0x0800800a, // j       80020028 <skip>
-            0x20107777, // addi    s0,zero, 0x7777
-            0x20128888, // addi    s2,zero, 0x8888
-            0x20139999, // addi    s3,zero, 0x9999
-            0x2014aaaa, // addi    s4,zero, 0xaaaa
+            // start:
+            0x01111537, // lui      x10,0x1111
+            0x022225b7, // lui      x11,0x2222
+            0x03333637, // lui      x12,0x3333
+            0x034000ef, // jal      x1,240 <fnc_add3>
+            0x00a00733, // add      x14,x0,x10
+            0x0140006f, // jal      x0,228 <skip>
+            0x44400413, // addi     x8,x0,1092
+            0x55500913, // addi     x18,x0,1365
+            0x66600993, // addi     x19,x0,1638
+            0x77700a13, // addi     x20,x0,1911
             // skip:
-            0x3c088002, // lui     t0,0x8002
-            0x25080058, // addiu   t0,t0,88
-            0x0100f809, // jalr    t0
-            0x2004abcd, // addi    a0,zero, 0xabcd
-            0x20040000, // addi    a0,zero,0
-            0x20510000, // addi    s1,v0,0
-            0x08008018, // j       80020060 <loop>
-            0x00000000, // nop
-            // fnc_add3:
-            0x00851020, // add     v0,a0,a1
-            0x00461020, // add     v0,v0,a2
-            0x03e00008, // jr      ra
-            0x00000000, // nop
-            // fnc_short:
-            0x03e00008, // jr      ra
-            0x20820000, // addi    v0,a0,0
+            0x00000297, // auipc    x5,0x0
+            0x02828293, // addi     x5,x5,40 # 250 <fnc_short>
+            0x000280e7, // jalr     x1,0(x5)
+            0x2cd00513, // addi     x10,x0,717
+            0x00050493, // addi     x9,x10,0 # 1111000 <__global_pointer$+0x1108400>
+            0x01c0006f, // jal      x0,258 <test_end>
+            // fnc_add:
+            0x00b50533, // add      x10,x10,x11
+            0x00c50533, // add      x10,x10,x12
+            0x00008067, // jalr     x0,0(x1)
+            0x7f100693, // addi     x13,x0,2033
+            // fnc_short
+            0x00008067, // jalr     x0,0(x1)
+            0x7f200693, // addi     x13,x0,2034
+            // test_end:
+            0x00000013, // addi     x0,x0,0
+            0x00000013, // addi     x0,x0,0
             // loop:
-            0x1000ffff, // b       80020060 <loop>
-            0x00000000, // nop
+            0x00000063, // beq      x0,x0,260 <loop>
         };
         Registers regs_init;
-        regs_init.write_pc(0x80020000_addr);
+        regs_init.write_pc(0x200_addr);
         Registers regs_res(regs_init);
-        regs_res.write_gp(1, 0x00000000);
-        regs_res.write_gp(2, 0xffffabcd);
-        regs_res.write_gp(3, 0x66660000);
-        regs_res.write_gp(4, 0x00000000);
-        regs_res.write_gp(5, 0x22220000);
-        regs_res.write_gp(6, 0x33330000);
-        regs_res.write_gp(7, 0x00000000);
-        regs_res.write_gp(8, 0x80020058);
-        regs_res.write_gp(16, 0x00007777);
-        regs_res.write_gp(17, 0xffffabcd);
-        regs_res.write_gp(31, 0x80020038);
-        regs_res.write_pc(0x80020060_addr);
+        regs_res.write_gp( 1, 0x00000234);
+        regs_res.write_gp( 5, 0x00000250);
+        regs_res.write_gp( 9, 0x000002cd);
+        regs_res.write_gp(10, 0x000002cd);
+        regs_res.write_gp(11, 0x02222000);
+        regs_res.write_gp(12, 0x03333000);
+        regs_res.write_gp(14, 0x06666000);
+        regs_res.write_pc(regs_init.read_pc() + 4 * code.length() - 4);
         QTest::newRow("j_jal_jalr") << code << regs_init << regs_res;
     }
 
     // Test multiplication and division
     {
         QVector<uint32_t> code {
-            // start:
-            0x3c021234, // lui     v0,0x1234
-            0x34425678, // ori     v0,v0,0x5678
-            0x3c03abcd, // lui     v1,0xabcd
-            0x3463ef01, // ori     v1,v1,0xef01
-            0x00430018, // mult    v0,v1
-            0x00008012, // mflo    s0
-            0x00008810, // mfhi    s1
-            0x00430019, // multu   v0,v1
-            0x00009012, // mflo    s2
-            0x00009810, // mfhi    s3
-            0x0062001a, // div     zero,v1,v0
-            0x0000a012, // mflo    s4
-            0x0000a810, // mfhi    s5
-            0x0062001b, // divu    zero,v1,v0
-            0x0000b012, // mflo    s6
-            0x0000b810, // mfhi    s7
-            // loop:
-            0x1000ffff, // b       80020070 <loop>
-            0x00000000, // nop
+            0x12345137, // lui      x2,0x12345
+            0x67810113, // addi     x2,x2,1656
+            0xabcdf1b7, // lui      x3,0xabcdf
+            0xf0118193, // addi     x3,x3,-255
+            0x02310833, // mul      x16,x2,x3
+            0x023118b3, // mulh     x17,x2,x3
+            0x02310933, // mul      x18,x2,x3
+            0x023139b3, // mulhu    x19,x2,x3
+            0x0221ca33, // div      x20,x3,x2
+            0x0221eab3, // rem      x21,x3,x2
+            0x0221db33, // divu     x22,x3,x2
+            0x0221fbb3, // remu     x23,x3,x2
+            0x0000006f, // jal      x0,230 <loop>
         };
         Registers regs_init;
         regs_init.write_pc(0x80020000_addr);
@@ -580,16 +570,16 @@ static void core_alu_forward_data() {
         uint32_t val_b = 0xabcdef01;
         uint64_t val_u64;
         int64_t val_s64;
-        regs_res.write_gp(2, val_a);
-        regs_res.write_gp(3, val_b);
+        regs_res.write_gp(2, (int32_t)val_a);
+        regs_res.write_gp(3, (int32_t)val_b);
         val_s64 = (int64_t)(int32_t)val_a * (int32_t)val_b;
-        regs_res.write_gp(16, (uint32_t)(val_s64 & 0xffffffff));
-        regs_res.write_gp(17, (uint32_t)(val_s64 >> 32));
+        regs_res.write_gp(16, (int32_t)(val_s64 & 0xffffffff));
+        regs_res.write_gp(17, (int32_t)(val_s64 >> 32));
         val_u64 = (uint64_t)val_a * val_b;
-        regs_res.write_gp(18, (uint32_t)(val_u64 & 0xffffffff));
-        regs_res.write_gp(19, (uint32_t)(val_u64 >> 32));
-        regs_res.write_gp(20, (uint32_t)((int32_t)val_b / (int32_t)val_a));
-        regs_res.write_gp(21, (uint32_t)((int32_t)val_b % (int32_t)val_a));
+        regs_res.write_gp(18, (int32_t)(val_u64 & 0xffffffff));
+        regs_res.write_gp(19, (int32_t)(val_u64 >> 32));
+        regs_res.write_gp(20, (int32_t)((int32_t)val_b / (int32_t)val_a));
+        regs_res.write_gp(21, (int32_t)((int32_t)val_b % (int32_t)val_a));
         regs_res.write_gp(22, val_b / val_a);
         regs_res.write_gp(23, val_b % val_a);
         regs_res.write_pc(regs_init.read_pc() + 4 * code.length() - 4);
@@ -599,61 +589,59 @@ static void core_alu_forward_data() {
     // branches
     {
         QVector<uint32_t> code {
-            // start:
-            0x2001ffff, // addi    at,zero,-1
-            0x20020001, // addi    v0,zero,1
-            0x20030000, // addi    v1,zero,0
-            0x20040002, // addi    a0,zero,2
-            // test_branch:
-            0x20050001, // addi    a1,zero,1
-            0x04200004, // bltz    at,80020028 <test_branch+0x18>
-            0x00000000, // nop
-            0x20050000, // addi    a1,zero,0
-            0x20631000, // addi    v1,v1,4096
-            0x00611820, // add     v1,v1,at
-            0x20050001, // addi    a1,zero,1
-            0x18200004, // blez    at,80020040 <test_branch+0x30>
-            0x00000000, // nop
-            0x20050000, // addi    a1,zero,0
-            0x20630100, // addi    v1,v1,256
-            0x00611820, // add     v1,v1,at
-            0x20050001, // addi    a1,zero,1
-            0x04210004, // bgez    at,80020058 <test_branch+0x48>
-            0x00000000, // nop
-            0x20050000, // addi    a1,zero,0
-            0x20632000, // addi    v1,v1,8192
-            0x00611820, // add     v1,v1,at
-            0x20050001, // addi    a1,zero,1
-            0x1c200004, // bgtz    at,80020070 <test_branch+0x60>
-            0x00000000, // nop
-            0x20050000, // addi    a1,zero,0
-            0x20630200, // addi    v1,v1,512
-            0x00611820, // add     v1,v1,at
-            0x20050001, // addi    a1,zero,1
-            0x14220004, // bne     at,v0,80020088 <test_branch+0x78>
-            0x00000000, // nop
-            0x20050000, // addi    a1,zero,0
-            0x20634000, // addi    v1,v1,16384
-            0x00611820, // add     v1,v1,at
-            0x20050001, // addi    a1,zero,1
-            0x10220004, // beq     at,v0,800200a0 <test_branch+0x90>
-            0x00000000, // nop
-            0x20050000, // addi    a1,zero,0
-            0x20630400, // addi    v1,v1,1024
-            0x00611820, // add     v1,v1,at
-            0x20210001, // addi    at,at,1
-            0x1424ffda, // bne     at,a0,80020010 <test_branch>
-            0x00000000, // nop
-            // loop:
-            0x1000ffff, // b       800200ac <loop>
-            0x00000000, // nop
+            0xfff00093, // addi     x1,x0,-1
+            0x00100113, // addi     x2,x0,1
+            0x00000193, // addi     x3,x0,0
+            0x00200213, // addi     x4,x0,2
+            0x00100293, // addi     x5,x0,1
+            0x0000ca63, // blt      x1,x0,228 <test_branch+0x18>
+            0x00000013, // addi     x0,x0,0
+            0x00000293, // addi     x5,x0,0
+            0x10018193, // addi     x3,x3,256
+            0x001181b3, // add      x3,x3,x1
+            0x00100293, // addi     x5,x0,1
+            0x00105a63, // bge      x0,x1,240 <test_branch+0x30>
+            0x00000013, // addi     x0,x0,0
+            0x00000293, // addi     x5,x0,0
+            0x01018193, // addi     x3,x3,16
+            0x001181b3, // add      x3,x3,x1
+            0x00100293, // addi     x5,x0,1
+            0x0000da63, // bge      x1,x0,258 <test_branch+0x48>
+            0x00000013, // addi     x0,x0,0
+            0x00000293, // addi     x5,x0,0
+            0x20018193, // addi     x3,x3,512
+            0x001181b3, // add      x3,x3,x1
+            0x00100293, // addi     x5,x0,1
+            0x00104a63, // blt      x0,x1,270 <test_branch+0x60>
+            0x00000013, // addi     x0,x0,0
+            0x00000293, // addi     x5,x0,0
+            0x02018193, // addi     x3,x3,32
+            0x001181b3, // add      x3,x3,x1
+            0x00100293, // addi     x5,x0,1
+            0x00209a63, // bne      x1,x2,288 <test_branch+0x78>
+            0x00000013, // addi     x0,x0,0
+            0x00000293, // addi     x5,x0,0
+            0x40018193, // addi     x3,x3,1024
+            0x001181b3, // add      x3,x3,x1
+            0x00100293, // addi     x5,x0,1
+            0x00208a63, // beq      x1,x2,2a0 <test_branch+0x90>
+            0x00000013, // addi     x0,x0,0
+            0x00000293, // addi     x5,x0,0
+            0x04018193, // addi     x3,x3,64
+            0x001181b3, // add      x3,x3,x1
+            0x00108093, // addi     x1,x1,1
+            0xf64096e3, // bne      x1,x4,210 <test_branch>
+            0x00000013, // addi     x0,x0,0
+            0x00000013, // addi     x0,x0,0
+            0x00000013, // addi     x0,x0,0
+            0x00000063, // beq      x0,x0,2b4 <loop>
         };
         Registers regs_init;
-        regs_init.write_pc(0x80020000_addr);
+        regs_init.write_pc(0x200_addr);
         Registers regs_res(regs_init);
         regs_res.write_gp(1, 2);
         regs_res.write_gp(2, 1);
-        regs_res.write_gp(3, 0x8d00);
+        regs_res.write_gp(3, 0x8d0);
         regs_res.write_gp(4, 2);
         regs_res.write_gp(5, 1);
         regs_res.write_pc(regs_init.read_pc() + 4 * code.length());
@@ -662,17 +650,14 @@ static void core_alu_forward_data() {
 }
 
 void TestCore::singlecore_alu_forward_data() {
-    QSKIP("Switched ALU to RV.");
     core_alu_forward_data();
 }
 
 void TestCore::pipecore_alu_forward_data() {
-    QSKIP("Switched ALU to RV.");
     core_alu_forward_data();
 }
 
 void TestCore::pipecorestall_alu_forward_data() {
-    QSKIP("Switched ALU to RV.");
     core_alu_forward_data();
 }
 
@@ -683,7 +668,7 @@ static void run_code_fragment(
     Memory &mem_init,
     Memory &mem_res,
     QVector<uint32_t> &code) {
-    QSKIP("Switched RV.");
+
     uint64_t addr = reg_init.read_pc().get_raw();
 
     foreach (uint32_t i, code) {
@@ -710,52 +695,58 @@ static void run_code_fragment(
 }
 
 void TestCore::singlecore_alu_forward() {
-    QSKIP("Switched ALU to RV.");
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
-    Memory mem_init(BIG);
+    Memory mem_init(LITTLE);
     TrivialBus mem_init_frontend(&mem_init);
-    Memory mem_res(BIG);
+    Memory mem_res(LITTLE);
     TrivialBus mem_res_frontend(&mem_res);
-    //    CoreSingle core(&reg_init, &mem_init_frontend, &mem_init_frontend, true, nullptr,
-    //    Xlen::_32); run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
+
+    FalsePredictor predictor {};
+    Cop0State cop_0_state {};
+
+    CoreSingle core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &cop_0_state, Xlen::_32);
+    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
 void TestCore::pipecore_alu_forward() {
-    QSKIP("Switched ALU to RV.");
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
-    Memory mem_init(BIG);
+    Memory mem_init(LITTLE);
     TrivialBus mem_init_frontend(&mem_init);
-    Memory mem_res(BIG);
+    Memory mem_res(LITTLE);
     TrivialBus mem_res_frontend(&mem_res);
-    //    CorePipelined core(
-    //        &reg_init, &mem_init_frontend, &mem_init_frontend,
-    //        MachineConfig::HU_STALL_FORWARD, MachineConfig::HU_NONE, 0, nullptr, Xlen::_32);
-    //    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
+
+    FalsePredictor predictor {};
+    Cop0State cop_0_state {};
+
+    CorePipelined core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &cop_0_state,
+                       Xlen::_32, MachineConfig::HazardUnit::HU_STALL_FORWARD);
+    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
 void TestCore::pipecorestall_alu_forward() {
-    QSKIP("Switched ALU to RV.");
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
-    Memory mem_init(BIG);
+    Memory mem_init(LITTLE);
     TrivialBus mem_init_frontend(&mem_init);
-    Memory mem_res(BIG);
+    Memory mem_res(LITTLE);
     TrivialBus mem_res_frontend(&mem_res);
-    //    CorePipelined core(
-    //        &reg_init, &mem_init_frontend, &mem_init_frontend, MachineConfig::HU_STALL,
-    //        MachineConfig::HU_NONE, 0, nullptr, Xlen::_32);
-    //    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
+
+    FalsePredictor predictor {};
+    Cop0State cop_0_state {};
+
+    CorePipelined core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &cop_0_state,
+                       Xlen::_32, MachineConfig::HazardUnit::HU_STALL);
+    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
 /*======================================================================*/
 
 static void core_memory_tests_data() {
-    QSKIP("Switched RV.");
     QTest::addColumn<QVector<uint32_t>>("code");
     QTest::addColumn<Registers>("reg_init");
     QTest::addColumn<Registers>("reg_res");
@@ -765,81 +756,77 @@ static void core_memory_tests_data() {
     // Test
     {
         QVector<uint32_t> code {
-            // objdump -d to src: ^[^ \t]+[ \t]+([^ \t]+)[ \t]+([^ \t].*)$
+            // objdump --disassembler-options=no-aliases,numeric -d test-hazards
+            // sed -n -e 's/^[ \t]*[^ \t]\+:[ \t]\+\([0-9a-f]\+\)[ \t]\+\([^ \t].*\)$/0x\1, \/\/ \2/p'
 
             // _start:
-            0x20100000, // addi    s0,zero,0
-            0x2011003c, // addi    s1,zero,60
-            0x00109020, // add     s2,zero,s0
-            // main_loop:
-            0x1211001d, // beq     s0,s1,80020084 <main_loop_end>
-            0x00000000, // nop
-            0x3c140000, // lui     s4,0x0
-            0x0290a021, // addu    s4,s4,s0
-            0x8e941000, // lw      s4,4096(s4)
-            0x02009820, // add     s3,s0,zero
-            0x02009020, // add     s2,s0,zero
-            // inner_loop:
-            0x1251000b, // beq     s2,s1,80020058 <inner_loop_end>
-            0x00000000, // nop
-            0x3c150000, // lui     s5,0x0
-            0x02b2a821, // addu    s5,s5,s2
-            0x8eb51000, // lw      s5,4096(s5)
-            0x0295082a, // slt     at,s4,s5
-            0x14200003, // bnez    at,80020050 <not_a_min>
-            0x00000000, // nop
-            0x22530000, // addi    s3,s2,0
-            0x22b40000, // addi    s4,s5,0
-            // not_a_min:
-            0x0800800a, // j       80020028 <inner_loop>
-            0x22520004, // addi    s2,s2,4
-            // inner_loop_end:
-            0x3c150000, // lui     s5,0x0
-            0x02b0a821, // addu    s5,s5,s0
-            0x8eb51000, // lw      s5,4096(s5)
-            0x3c010000, // lui     at,0x0
-            0x00300821, // addu    at,at,s0
-            0xac341000, // sw      s4,4096(at)
-            0x3c010000, // lui     at,0x0
-            0x00330821, // addu    at,at,s3
-            0xac351000, // sw      s5,4096(at)
-            0x08008003, // j       8002000c <main_loop>
-            0x22100004, // addi    s0,s0,4
-            // main_loop_end:
-            0x20080000, // addi    t0,zero,0
-            0xbd090000, // cache   0x9,0(t0)
-            // end_loop:
-            0x08008023, // j       8002008c <end_loop>
-            0x00000000, // nop
+            0x40000513, // addi     x10,x0,1024
+            0x00000413, // addi     x8,x0,0
+            0x03c00493, // addi     x9,x0,60
+            0x00800933, // add      x18,x0,x8
+            // main_cycle:
+            0x04940a63, // beq      x8,x9,264 <main_cycle_end>
+            0x008502b3, // add      x5,x10,x8
+            0x0002aa03, // lw       x20,0(x5)
+            0x000409b3, // add      x19,x8,x0
+            0x00040933, // add      x18,x8,x0
+            // inner_cycle:
+            0x02990263, // beq      x18,x9,248 <inner_cycle_end>
+            0x012502b3, // add      x5,x10,x18
+            0x0002aa83, // lw       x21,0(x5)
+            0x015a22b3, // slt      x5,x20,x21
+            0x00029663, // bne      x5,x0,240 <not_minimum>
+            0x00090993, // addi     x19,x18,0
+            0x000a8a13, // addi     x20,x21,0
+            // not_minimum:
+            0x00490913, // addi     x18,x18,4
+            0xfe1ff06f, // jal      x0,224 <inner_cycle>
+            // inner_cycle_end:
+            0x008502b3, // add      x5,x10,x8
+            0x0002aa83, // lw       x21,0(x5)
+            0x0142a023, // sw       x20,0(x5)
+            0x013502b3, // add      x5,x10,x19
+            0x0152a023, // sw       x21,0(x5)
+            0x00440413, // addi     x8,x8,4
+            0xfb1ff06f, // jal      x0,210 <main_cycle>
+            // main_cycle_end:
+            0x0ff0000f, // fence    iorw,iorw
+            0x00000013, // addi     x0,x0,0  // the mai_cycle loop end has
+            0x00000013, // addi     x0,x0,0  // to be separated because else fetch
+            0x00000013, // addi     x0,x0,0  // reaches stop address prematurely
+            0x00000063, // beq      x0,x0,10080 <loop>
         };
         QVector<uint32_t> data_init { 5, 3, 4, 1, 15, 8, 9, 2, 10, 6, 11, 1, 6, 9, 12 };
         QVector<uint32_t> data_res { 1, 1, 2, 3, 4, 5, 6, 6, 8, 9, 9, 10, 11, 12, 15 };
         Registers regs_init;
-        regs_init.write_pc(0x80020000_addr);
+        regs_init.write_pc(0x200_addr);
         Registers regs_res(regs_init);
-        regs_res.write_gp(1, 0x38);
-        regs_res.write_gp(16, 0x3c);
-        regs_res.write_gp(17, 0x3c);
-        regs_res.write_gp(18, 0x3c);
-        regs_res.write_gp(19, 0x38);
-        regs_res.write_gp(20, 0xf);
-        regs_res.write_gp(21, 0xf);
+        regs_res.write_gp( 5, 0x438);
+        regs_res.write_gp( 8,  0x3c);
+        regs_res.write_gp( 9,  0x3c);
+        regs_res.write_gp(10, 0x400);
+        regs_res.write_gp(18,  0x3c);
+        regs_res.write_gp(19,  0x38);
+        regs_res.write_gp(20,   0xf);
+        regs_res.write_gp(21,   0xf);
         regs_res.write_pc(regs_init.read_pc() + 4 * code.length() - 4);
         uint32_t addr;
-        Memory mem_init(BIG);
-        addr = 0x1000;
+        Memory mem_init(LITTLE);
+        addr = 0x400;
         foreach (uint32_t i, data_init) {
             memory_write_u32(&mem_init, addr, i);
             addr += 4;
         }
-        Memory mem_res(BIG);
-        addr = 0x1000;
+        Memory mem_res(LITTLE);
+        addr = 0x400;
         foreach (uint32_t i, data_res) {
             memory_write_u32(&mem_res, addr, i);
             addr += 4;
         }
         QTest::newRow("cache_insert_sort") << code << regs_init << regs_res << mem_init << mem_res;
     }
+
+    return;
 
     // lwr, lwl, swr, swl
     {
@@ -946,32 +933,26 @@ static void core_memory_tests_data() {
 }
 
 void TestCore::singlecore_memory_tests_data() {
-    QSKIP("Switched ALU to RV.");
     core_memory_tests_data();
 }
 
 void TestCore::pipecore_nc_memory_tests_data() {
-    QSKIP("Switched ALU to RV.");
     core_memory_tests_data();
 }
 
 void TestCore::pipecore_wt_na_memory_tests_data() {
-    QSKIP("Switched ALU to RV.");
     core_memory_tests_data();
 }
 
 void TestCore::pipecore_wt_a_memory_tests_data() {
-    QSKIP("Switched ALU to RV.");
     core_memory_tests_data();
 }
 
 void TestCore::pipecore_wb_memory_tests_data() {
-    QSKIP("Switched ALU to RV.");
     core_memory_tests_data();
 }
 
 void TestCore::singlecore_memory_tests() {
-    QSKIP("Switched ALU to RV.");
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
@@ -979,12 +960,15 @@ void TestCore::singlecore_memory_tests() {
     QFETCH(Memory, mem_res);
     TrivialBus mem_init_frontend(&mem_init);
     TrivialBus mem_res_frontend(&mem_res);
-    //    CoreSingle core(&reg_init, &mem_init_frontend, &mem_init_frontend, true, nullptr,
-    //    Xlen::_32); run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
+
+    FalsePredictor predictor {};
+    Cop0State cop_0_state {};
+
+    CoreSingle core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &cop_0_state, Xlen::_32);
+    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
 void TestCore::pipecore_nc_memory_tests() {
-    QSKIP("Switched ALU to RV.");
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
@@ -992,14 +976,15 @@ void TestCore::pipecore_nc_memory_tests() {
     QFETCH(Memory, mem_res);
     TrivialBus mem_init_frontend(&mem_init);
     TrivialBus mem_res_frontend(&mem_res);
-    //    CorePipelined core(
-    //        &reg_init, &mem_init_frontend, &mem_init_frontend,
-    //        MachineConfig::HU_STALL_FORWARD, MachineConfig::HU_NONE, 0, nullptr, Xlen::_32);
-    //    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
+
+    FalsePredictor predictor {};
+    Cop0State cop_0_state {};
+
+    CorePipelined core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &cop_0_state, Xlen::_32);
+    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
 void TestCore::pipecore_wt_na_memory_tests() {
-    QSKIP("Switched ALU to RV.");
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
@@ -1017,14 +1002,15 @@ void TestCore::pipecore_wt_na_memory_tests() {
 
     Cache i_cache(&mem_init_frontend, &cache_conf);
     Cache d_cache(&mem_init_frontend, &cache_conf);
-    //    CorePipelined core(
-    //        &reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD,
-    //        MachineConfig::HU_NONE, 0, nullptr, Xlen::_32);
-    //    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
+
+    FalsePredictor predictor {};
+    Cop0State cop_0_state {};
+
+    CorePipelined core(&reg_init, &predictor, &i_cache, &d_cache, &cop_0_state, Xlen::_32);
+    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
 void TestCore::pipecore_wt_a_memory_tests() {
-    QSKIP("Switched ALU to RV.");
     QFETCH(QVector<uint32_t>, code);
     QFETCH(Registers, reg_init);
     QFETCH(Registers, reg_res);
@@ -1041,10 +1027,12 @@ void TestCore::pipecore_wt_a_memory_tests() {
     cache_conf.set_write_policy(CacheConfig::WP_THROUGH_ALLOC);
     Cache i_cache(&mem_init_frontend, &cache_conf);
     Cache d_cache(&mem_init_frontend, &cache_conf);
-    //    CorePipelined core(
-    //        &reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD,
-    //        MachineConfig::HU_NONE, 0, nullptr, Xlen::_32);
-    //    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
+
+    FalsePredictor predictor {};
+    Cop0State cop_0_state {};
+
+    CorePipelined core(&reg_init, &predictor, &i_cache, &d_cache, &cop_0_state, Xlen::_32);
+    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
 void TestCore::pipecore_wb_memory_tests() {
@@ -1065,10 +1053,12 @@ void TestCore::pipecore_wb_memory_tests() {
     cache_conf.set_write_policy(CacheConfig::WP_BACK);
     Cache i_cache(&mem_init_frontend, &cache_conf);
     Cache d_cache(&mem_init_frontend, &cache_conf);
-    //    CorePipelined core(
-    //        &reg_init, &i_cache, &d_cache, MachineConfig::HU_STALL_FORWARD,
-    //        MachineConfig::HU_NONE, 0, nullptr, Xlen::_32);
-    //    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
+
+    FalsePredictor predictor {};
+    Cop0State cop_0_state {};
+
+    CorePipelined core(&reg_init, &predictor, &i_cache, &d_cache, &cop_0_state, Xlen::_32);
+    run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
 void extension_m_data() {

@@ -183,6 +183,10 @@ if(NOT ${WASM})
 			memory/backend/backend_memory.h
 			memory/backend/memory.cpp
 			memory/backend/memory.h
+			memory/cache/cache.cpp
+			memory/cache/cache.h
+			memory/cache/cache_policy.cpp
+			memory/cache/cache_policy.h
 			memory/frontend_memory.cpp
 			memory/frontend_memory.h
 			memory/memory_bus.cpp
@@ -191,6 +195,7 @@ if(NOT ${WASM})
 			registers.h
 			simulator_exception.cpp
 			simulator_exception.h
+			machineconfig.cpp
 			)
 	target_link_libraries(core_test
 			PRIVATE ${QtLib}::Core ${QtLib}::Test libelf)
