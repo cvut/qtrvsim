@@ -1,15 +1,8 @@
-
 # QtRVSim
 
+**RISC-V CPU simulator for education purposes.**
+
 ![logo](data/icons/gui.svg)
-
-RISC-V CPU simulator for education purposes.
-
-## Ongoing Development
-
-* QtRVSim - [RISC-V](https://riscv.org/) architecture based edition ([https://github.com/cvut/qtrvsim](https://github.com/cvut/qtrvsim)), suggested for future contributions
-* QtMips development branch with little/endian support - [devel](https://github.com/cvut/QtMips/tree/devel)
-* Space for QtMips examples and students' contributions [https://github.com/cvut/QtMips-Playground](https://github.com/cvut/QtMips-Playground)
 
 Implemented to support following courses:
 
@@ -21,6 +14,7 @@ Implemented to support following courses:
 ## Table of contents
 
 <!-- TOC start -->
+
 - [Try it out! (WebAssembly)](#try-it-out-webassembly)
 - [Build and packages](#build-and-packages)
   - [Build Dependencies](#build-dependencies)
@@ -43,10 +37,11 @@ Implemented to support following courses:
 - [Special instructions support](#special-instructions-support)
 - [Limitations of the Implementation](#limitations-of-the-implementation)
   - [QtMips original limitations](#qtmips-original-limitations)
-- [List of Actually Supported Instructions](#list-of-actually-supported-instructions)
+  - [List of Actually Supported Instructions](#list-of-actually-supported-instructions)
 - [Links to Resources and Similar Projects](#links-to-resources-and-similar-projects)
 - [Copyright](#copyright)
 - [License](#license)
+
 <!-- TOC end -->
 
 ## Try it out! (WebAssembly)
@@ -59,9 +54,11 @@ Please, report any difficulties via [GitHub issues](https://github.com/cvut/qtrv
 
 ## Build and packages
 
+[![Packaging status](https://repology.org/badge/vertical-allrepos/qtrvsim.svg)](https://repology.org/project/qtrvsim/versions)
+
 ### Build Dependencies
 
-- Qt 5 (minimal tested version is 5.9.5)
+- Qt 5 (minimal tested version is 5.9.5), experimental support of Qt 6
 - elfutils (optional; libelf works too but there can be some problems)
 
 ### General Compilation
@@ -71,15 +68,19 @@ cmake -DCMAKE_BUILD_TYPE=Release /path/to/qtrvsim
 make
 ```
 
-Where `/path/to/qtrvsim` is path to this project root. The built binaries are to be found in the directory `target`
-in the build directory (the one, where cmake was called).
+Where `/path/to/qtrvsim` is path to this project root. The built binaries are to be found in the directory `target`in
+the build directory (the one, where cmake was called).
+
+`-DCMAKE_BUILD_TYPE=Debug` builds development version including sanitizers.
+
+If no build type is supplied, `Debug` is the default.
 
 ### Building from source on macOS
 
-Install the latest version of **Xcode** from the App Store. Then open a terminal and execute xcode-select --install to
+Install the latest version of **Xcode** from the App Store. Then open a terminal and execute `xcode-select --install` to
 install Command Line Tools. Then open Xcode, accept the license agreement and wait for it to install any additional
-components. After you finally see the "Welcome to Xcode" screen, from the top bar choose Xcode -> Preferences ->
-Locations -> Command Line Tools and select an SDK version.
+components. After you finally see the "Welcome to Xcode" screen, from the top bar
+choose `Xcode -> Preferences -> Locations -> Command Line Tools` and select an SDK version.
 
 Install [Homebrew](https://brew.sh/) and use it to install Qt and libelf. (__Installing libelf is optional. If libelf is
 not found in the system, local fallback is used.__)
@@ -99,6 +100,7 @@ Now build the project the same way as in general compilation (above).
     - Open Build Service binary packages
 - [https://launchpad.net/~qtrvsimteam/+archive/ubuntu/ppa](https://launchpad.net/~qtrvsimteam/+archive/ubuntu/ppa)
     - Ubuntu PPA archive
+
 ```bash
 sudo add-apt-repository ppa:qtrvsimteam/ppa
 sudo apt-get update
@@ -108,7 +110,7 @@ sudo apt-get install qtrvsim
 ### Nix package
 
 QtRVSim provides a Nix package as a part of the repository. You can build and install it by a command bellow. Updates
-have to be done manually by checking out the git. NIXPKGS package is planned.
+have to be done manually by checking out the git. NIXPKGS package is in PR phase.
 
 ```shell
 nix-env -if .
@@ -179,8 +181,8 @@ Multilib supporting 64-bit embedded toolchain can be used for to build executabl
 riscv64-unknown-elf-gcc -march=rv32i -mabi=ilp32 -nostdlib -o test test.c crt0local.S -lgcc
 ```
 
-The global pointer and stack has to be set to setup runtime C code conformant environment.
-When no other C library is used then next simple `crt0local.S` can be used.
+The global pointer and stack has to be set to setup runtime C code conformant environment. When no other C library is
+used then next simple `crt0local.S` can be used.
 
 ```asm
 /* minimal replacement of crt0.o which is else provided by C library */
@@ -240,6 +242,7 @@ even that is not an option then default directory when the emulator has been sta
 ## Advanced functionalities
 
 ### Peripherals
+
 <details>
   <summary>Emuated LCD, knobs, buttons, serial port...</summary>
 
@@ -273,8 +276,8 @@ offsets (`_o`) and individual fields masks (`_m`) follows
 ```
 
 The UART registers region is mirrored on the address 0xffff0000 to enable use of programs initially written
-for [SPIM](http://spimsimulator.sourceforge.net/)
-or [MARS](http://courses.missouristate.edu/KenVollmar/MARS/) emulators.
+for [SPIM](http://spimsimulator.sourceforge.net/) or [MARS](http://courses.missouristate.edu/KenVollmar/MARS/)
+emulators.
 
 The another peripheral allows to set three byte values concatenated to single word (read-only KNOBS_8BIT register)
 from user panel set by knobs and display one word in hexadecimal, decimal and binary format (`LED_LINE` register). There
@@ -294,9 +297,8 @@ are two other words writable which control color of RGB LED 1 and 2
 ```
 
 The simple 16-bit per pixel (RGB565) framebuffer and LCD are implemented. The framebuffer is mapped into range starting
-at `LCD_FB_START`
-address. The display size is 480 x 320 pixel. Pixel format RGB565 expect red component in bits 11..15, green component
-in bits 5..10 and blue component in bits 0..4.
+at `LCD_FB_START` address. The display size is 480 x 320 pixel. Pixel format RGB565 expect red component in bits 11..
+15, green component in bits 5..10 and blue component in bits 0..4.
 
 ```
 #define LCD_FB_START       0xffe00000
@@ -308,7 +310,7 @@ I/O memory content. It is possible to write into framebuffer memory when cached 
 is selected.
 
 </details>  
-  
+
 ### Interrupts and Control and Status Registers
 
 <details>
@@ -326,29 +328,29 @@ List of interrupt sources:
 
 Following coprocessor 0 registers are recognized
 
-| Number | Name       | Description |
-|-------:|:-----------|:------------|
-|  $4,2  | UserLocal  | Used as TLS base by operating system usually |
-|  $8,0  | BadVAddr   | Reports the address for the most recent address-related exception |
-|  $9,0  | Count      | Processor cycle count |
-| $11,0  | Compare    | Timer interrupt control |
-| $12,0  | Status     | Processor status and control |
-| $13,0  | Cause      | Cause of last exception |
-| $14,0  | EPC        | Program counter at last exception |
-| $15,1  | EBase      | Exception vector base register |
-| $16,0  | Config     | Configuration registers |
+| Number | Name       | Description                                                         |
+|-------:|:-----------|:--------------------------------------------------------------------|
+|  $4,2  | UserLocal  | Used as TLS base by operating system usually                        |
+|  $8,0  | BadVAddr   | Reports the address for the most recent address-related exception   |
+|  $9,0  | Count      | Processor cycle count                                               |
+| $11,0  | Compare    | Timer interrupt control                                             |
+| $12,0  | Status     | Processor status and control                                        |
+| $13,0  | Cause      | Cause of last exception                                             |
+| $14,0  | EPC        | Program counter at last exception                                   |
+| $15,1  | EBase      | Exception vector base register                                      |
+| $16,0  | Config     | Configuration registers                                             |
 
-`mtc0` and `mfc0` are used to copy value from/to general puropose registers to/from comprocessor 0 register.
+`mtc0` and `mfc0` are used to copy value from/to general purpose registers to/from coprocessor 0 register.
 
 Hardware/special registers implemented:
 
-| Number | Name       | Description |
-|-------:|:-----------|:------------|
-|  0     | CPUNum     | CPU number, fixed to 0  |
+| Number | Name       | Description                                              |
+|-------:|:-----------|:---------------------------------------------------------|
+|  0     | CPUNum     | CPU number, fixed to 0                                   |
 |  1     | SYNCI_Step | Increment required for instruction cache synchronization |
-|  2     | CC         | Cycle counter |
-|  3     | CCRes      | Cycle counter resolution, fixed on 1 |
-| 29     | UserLocal  | Read only value of Coprocessor 0 $4,2 register |
+|  2     | CC         | Cycle counter                                            |
+|  3     | CCRes      | Cycle counter resolution, fixed on 1                     |
+| 29     | UserLocal  | Read only value of Coprocessor 0 $4,2 register           |
 
 Sequence to enable serial port receive interrupt:
 
@@ -356,8 +358,7 @@ Decide location of interrupt service routine the first. The default address is 0
 changed (`EBase` register) and then PC is set to address EBase + 0x180. This is in accordance with MIPS release 1 and 2
 manuals.
 
-Enable bit 11 (interrupt mask) in the Status register. Ensure that bit 1 (`EXL`)
-is zero and bit 0 (`IE`) is set to one.
+Enable bit 11 (interrupt mask) in the Status register. Ensure that bit 1 (`EXL`) is zero and bit 0 (`IE`) is set to one.
 
 Enable interrupt in the receiver status register (bit 1 of `SERP_RX_ST_REG`).
 
@@ -377,7 +378,7 @@ Use next linker option to place section start at right address
 ```
  -Wl,--section-start=.irq_handler=0x80000180
 ```
-  
+
 </details>
 
 ### System Calls Support
@@ -385,26 +386,25 @@ Use next linker option to place section start at right address
 <details>
   <summary>Syscall table and documentation</summary>
 
-The emulator includes support for a few Linux kernel systemcalls. The RV32G ilp32 ABI is used.
+The emulator includes support for a few Linux kernel system calls. The RV32G ilp32 ABI is used.
 
-| Register                           | use on input          | use on output   | Calling Convention
-|:-----------------------------------|:----------------------|:----------------|:-------
-| zero (x0)                          | —                     | -               | Hard-wired zero
-| ra (x1)                            | —                     | -               | Return address
-| sp (x2)                            | —                     | (caller saved)  | Stack pointer
-| gp (x3)                            | —                     | (caller saved)  | Stack pointer
-| tp (x4)                            | —                     | (caller saved)  | Thread pointer
-| t0 .. t2 (x5 .. x7)                | —                     | -               | Temporaries
-| s0/fp (x8)                         | —                     | (caller saved)  | Saved register/frame pointer
-| s1 (x9)                            | —                     | (caller saved)  | Saved register
-| a0 (x10)                           | 1st syscall argument  | return value    | Function argument/return value
-| a1 (x11)                           | 2nd syscall argument  | -               | Function argument/return value
-| a2 .. a5 (x12 .. x15)              | syscall arguments     | -               | Function arguments
-| a6 (x16)                           | -                     | -               | Function arguments
-| a7 (x17)                           | syscall number        | -               | Function arguments
-| s2 .. s11 (x18 .. x27)             | —                     | (caller saved)  | Saved registers
-| t3 .. t6 (x28 .. x31)              | —                     | -               | Temporaries
-
+| Register                           | use on input          | use on output   | Calling Convention             |
+|:-----------------------------------|:----------------------|:----------------|:-------------------------------|
+| zero (x0)                          | —                     | -               | Hard-wired zero                |
+| ra (x1)                            | —                     | -               | Return address                 |
+| sp (x2)                            | —                     | (caller saved)  | Stack pointer                  |
+| gp (x3)                            | —                     | (caller saved)  | Stack pointer                  |
+| tp (x4)                            | —                     | (caller saved)  | Thread pointer                 |
+| t0 .. t2 (x5 .. x7)                | —                     | -               | Temporaries                    |
+| s0/fp (x8)                         | —                     | (caller saved)  | Saved register/frame pointer   |
+| s1 (x9)                            | —                     | (caller saved)  | Saved register                 |
+| a0 (x10)                           | 1st syscall argument  | return value    | Function argument/return value |
+| a1 (x11)                           | 2nd syscall argument  | -               | Function argument/return value |
+| a2 .. a5 (x12 .. x15)              | syscall arguments     | -               | Function arguments             |
+| a6 (x16)                           | -                     | -               | Function arguments             |
+| a7 (x17)                           | syscall number        | -               | Function arguments             |
+| s2 .. s11 (x18 .. x27)             | —                     | (caller saved)  | Saved registers                |
+| t3 .. t6 (x28 .. x31)              | —                     | -               | Temporaries                    |
 
 The all system call input arguments are passed in register.
 
@@ -458,17 +458,12 @@ base address, length pairs stored in memory at address pass in `iov`.
 
 The variant of `write` system call where data to write are defined by `iovcnt`
 pairs of base address, length pairs stored in memory at address pass in `iov`.
-  
+
 </details>
-
-## Special instructions support
-
-(TODO Max)
 
 ## Limitations of the Implementation
 
-This is initial implementation of the RISC-V edition. Everything is limited.
-
+- See list of actually supported instructions.
 - Coprocessor0 has to be ported to RISC-V status registers.
 
 ### QtMips original limitations
@@ -481,7 +476,7 @@ This is initial implementation of the RISC-V edition. Everything is limited.
 * Only limited support for interrupts and exceptions. When `syscall` or `break`
   instruction is recognized, emulation stops. Single step proceed after instruction.
 
-## List of Actually Supported Instructions
+### List of Actually Supported Instructions
 
 - **RV32G**:
   - **LOAD**: `lw, lh, lb, lwu, lhu, lbu`
@@ -506,29 +501,44 @@ For details about RISC-V, refer to the ISA specification:
 
 ## Links to Resources and Similar Projects
 
-- QtMips - MIPS predecessor of this simulator [https://github.com/cvut/QtMips/](https://github.com/cvut/QtMips/)
-- Jakub Dupak: [Graphical RISC-V Architecture Simulator - Memory Model and Project Management](https://dspace.cvut.cz/bitstream/handle/10467/94446/F3-BP-2021-Dupak-Jakub-thesis.pdf) documents QtMips and QtRvSim development
-- RARS - RISC-V Assembler and Runtime Simulator [https://github.com/TheThirdOne/rars](https://github.com/TheThirdOne/rars)
+### Resources and publications
+
+- [FEE CTU - B35APO - Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b35apo)
+  - Undergraduate computer architecture class materials (
+    Czech) ([English](https://cw.fel.cvut.cz/wiki/courses/b35apo/en/start))
+- [FEE CTU - B4M35PAP - Advanced Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b4m35pap/start)
+  - Graduate computer architecture class materials (Czech/English)
+- [Graphical RISC-V Architecture Simulator - Memory Model and Project Management](https://dspace.cvut.cz/bitstream/handle/10467/94446/F3-BP-2021-Dupak-Jakub-thesis.pdf)
+  - Jakub Dupak's thesis
+  - Documents 2020-2021 QtMips and QtRvSim development
+- [Graphical CPU Simulator with Cache Visualization](https://dspace.cvut.cz/bitstream/handle/10467/76764/F3-DP-2018-Koci-Karel-diploma.pdf)
+  - Karel Koci's thesis
+  - Documents initial QtMips development
+
+### Projects
+
+- **QtMips** - MIPS predecessor of this simulator [https://github.com/cvut/QtMips/](https://github.com/cvut/QtMips/)
+
+- **RARS** - RISC-V Assembler and Runtime
+  Simulator [https://github.com/TheThirdOne/rars](https://github.com/TheThirdOne/rars)
 
 ## Copyright
 
 - Copyright (c) 2017-2019 Karel Koci <cynerd@email.cz>
-- Copyright (c) 2019-2021 Pavel Pisa <pisa@cmp.felk.cvut.cz>
-- Copyright (c) 2020-2021 Jakub Dupak <dev@jakubdupak.com>
+- Copyright (c) 2019-2022 Pavel Pisa <pisa@cmp.felk.cvut.cz>
+- Copyright (c) 2020-2022 Jakub Dupak <dev@jakubdupak.com>
 - Copyright (c) 2020-2021 Max Hollmann <hollmmax@fel.cvut.cz>
 
 ## License
 
-This project is licensed under `GPL-3.0-or-later`. The full text of the license is in the [LICENSE](LICENSE) file. 
-The license applies to all files except for directories named `external` and files in them. Files in external 
-directories have a separate license compatible with the projects license.
+This project is licensed under `GPL-3.0-or-later`. The full text of the license is in the [LICENSE](LICENSE) file. The
+license applies to all files except for directories named `external` and files in them. Files in external directories
+have a separate license compatible with the projects license.
 
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public 
-License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later 
-version.
+> This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+>
+> This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+>
+> You should have received a copy of the GNU General Public License along with this program. If not, see [https://www.gnu.org/licenses/](https://www.gnu.org/licenses/).
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied 
-warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with this program. 
-If not, see [https://www.gnu.org/licenses/](https://www.gnu.org/licenses/).
+![Faculty of Electrical Engineering](./data/ctu/logo-fee.svg) ![Faculty of Information Technology](./data/ctu/logo-fit.svg) ![Czech Technical University](./data/ctu/logo-ctu.svg)
