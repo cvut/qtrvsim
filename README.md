@@ -184,6 +184,9 @@ riscv64-unknown-elf-gcc -march=rv32i -mabi=ilp32 -nostdlib -o test test.c crt0lo
 The global pointer and stack has to be set to setup runtime C code conformant environment. When no other C library is
 used then next simple `crt0local.S` can be used.
 
+<details>
+  <summary>example code</summary>
+
 ```asm
 /* minimal replacement of crt0.o which is else provided by C library */
 
@@ -221,6 +224,8 @@ __stack_end:
 
 .end _start
 ```
+
+</details>
 
 ## Integrated Assembler
 
