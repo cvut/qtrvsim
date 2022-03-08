@@ -46,41 +46,45 @@ protected:
  * probably QtMips bug if raised not program. Sanity: This is sanity check
  * exception
  */
-#define SIMULATOR_EXCEPTIONS                                                   \
-    EXCEPTION(Input, )                                                         \
-    EXCEPTION(Runtime, )                                                       \
-    EXCEPTION(UnsupportedInstruction, Runtime)                                 \
-    EXCEPTION(UnsupportedAluOperation, Runtime)                                \
-    EXCEPTION(Overflow, Runtime)                                               \
-    EXCEPTION(UnalignedJump, Runtime)                                          \
-    EXCEPTION(UnknownMemoryControl, Runtime)                                   \
-    EXCEPTION(OutOfMemoryAccess, Runtime)                                      \
-    EXCEPTION(Sanity, )                                                        \
+#define SIMULATOR_EXCEPTIONS                                                                       \
+    EXCEPTION(Input, )                                                                             \
+    EXCEPTION(Runtime, )                                                                           \
+    EXCEPTION(UnsupportedInstruction, Runtime)                                                     \
+    EXCEPTION(UnsupportedAluOperation, Runtime)                                                    \
+    EXCEPTION(Overflow, Runtime)                                                                   \
+    EXCEPTION(UnalignedJump, Runtime)                                                              \
+    EXCEPTION(UnknownMemoryControl, Runtime)                                                       \
+    EXCEPTION(OutOfMemoryAccess, Runtime)                                                          \
+    EXCEPTION(Sanity, )                                                                            \
     EXCEPTION(SyscallUnknown, Runtime)
 
-#define EXCEPTION(NAME, PARENT)                                                \
-    class SimulatorException##NAME : public SimulatorException##PARENT {       \
-    public:                                                                    \
-        SimulatorException##NAME(                                              \
-            QString reason,                                                    \
-            QString ext,                                                       \
-            QString file,                                                      \
-            int line);                                                         \
+#define EXCEPTION(NAME, PARENT)                                                                    \
+    class SimulatorException##NAME : public SimulatorException##PARENT {                           \
+    public:                                                                                        \
+        SimulatorException##NAME(QString reason, QString ext, QString file, int line);             \
     };
 SIMULATOR_EXCEPTIONS
 #undef EXCEPTION
 
 // This is helper macro for throwing QtMips exceptions
-#define SIMULATOR_EXCEPTION(TYPE, REASON, EXT)                                 \
-    (machine::SimulatorException##TYPE(                                        \
-        QString(REASON), QString(EXT), QString(__FILE__), __LINE__))
+#define SIMULATOR_EXCEPTION(TYPE, REASON, EXT)                                                     \
+    (machine::SimulatorException##TYPE(QString(REASON), QString(EXT), QString(__FILE__), __LINE__))
+
+#define SANITY_EXCEPTION(MSG)                                                                      \
+    SIMULATOR_EXCEPTION(                                                                           \
+        Sanity, "Internal error",                                                                  \
+        "An internal error occurred in the simulator. We are sorry for the inconvenience."         \
+        "To help get the simulator fixed ASAP, please report this incident to your "               \
+        "teacher and/or file an issue at\n\n"                                                      \
+        "https://github.com/cvut/qtrvsim/issues.\n\n"                                              \
+        "Please attach the program you were executing, used configuration of the "                 \
+        "simulator, description of steps you have taken and a copy of the following "              \
+        "message:\n\n" #MSG)
 
 // Sanity comparison potentially throwing SimulatorExceptionSanity
-#define SANITY_ASSERT(COND, MSG)                                               \
-    do {                                                                       \
-        if (!(COND))                                                           \
-            throw SIMULATOR_EXCEPTION(                                         \
-                Sanity, "Sanity check failed (" #COND ")", MSG);               \
+#define SANITY_ASSERT(COND, MSG)                                                                   \
+    do {                                                                                           \
+        if (!(COND)) throw SANITY_EXCEPTION("Sanity check failed (" #COND "):" #MSG);              \
     } while (false)
 
 } // namespace machine
