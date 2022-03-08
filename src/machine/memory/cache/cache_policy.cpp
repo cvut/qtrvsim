@@ -44,24 +44,26 @@ void CachePolicyLRU::update_stats(size_t way, size_t row, bool is_valid) {
     // original location of the inserted element is reached and the original
     // instance is moved to the temporary variable (`next_way`).
 
-    uint32_t next_way = way;
+    try {
+        // Statistics corresponding to single cache row
+        std::vector<uint32_t> &row_stats = stats.at(row);
+        uint32_t next_way = way;
 
-    if (is_valid) {
-        ssize_t i = associativity - 1;
-        do {
-            SANITY_ASSERT(
-                i >= 0, "LRU lost the way from priority queue - access");
-            std::swap(stats.at(row).at(i), next_way);
-            i--;
-        } while (next_way != way);
-    } else {
-        size_t i = 0;
-        do {
-            SANITY_ASSERT(
-                i < stats.at(row).size(), "LRU lost the way from priority queue - access");
-            std::swap(stats.at(row).at(i), next_way);
-            i++;
-        } while (next_way != way);
+        if (is_valid) {
+            ssize_t i = associativity - 1;
+            do {
+                std::swap(row_stats.at(i), next_way);
+                i--;
+            } while (next_way != way);
+        } else {
+            size_t i = 0;
+            do {
+                std::swap(row_stats.at(i), next_way);
+                i++;
+            } while (next_way != way);
+        }
+    } catch (std::out_of_range &e) {
+        throw SANITY_EXCEPTION("Out of range: LRU lost the way from priority queue.");
     }
 }
 
