@@ -58,8 +58,7 @@ void CachePolicyLRU::update_stats(size_t way, size_t row, bool is_valid) {
         size_t i = 0;
         do {
             SANITY_ASSERT(
-                i < stats.size(),
-                "LRU lost the way from priority queue - access");
+                i < stats.at(row).size(), "LRU lost the way from priority queue - access");
             std::swap(stats.at(row).at(i), next_way);
             i++;
         } while (next_way != way);
