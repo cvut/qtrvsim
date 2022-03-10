@@ -139,6 +139,8 @@ if("${WASM}")
 	message(STATUS "WASM build detected")
 
 	message(STATUS "Enabled WASM exception handling")
+	add_compile_options("-fexceptions")
+	add_link_options("-fexceptions")
 	add_link_options("SHELL:-s DISABLE_EXCEPTION_CATCHING=0")
 	# Extra options for WASM linking
 	add_link_options("SHELL:-s FETCH=1")
