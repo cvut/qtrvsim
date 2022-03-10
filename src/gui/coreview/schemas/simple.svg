@@ -1,474 +1,342 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="837px"
-     height="542px" viewBox="-0.5 -0.5 837 542" style="background-color: rgb(255, 255, 255);">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="778px"
+     height="541px" viewBox="-0.5 -0.5 778 541" style="background-color: rgb(255, 255, 255);">
     <defs/>
     <g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-227"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple forwarding pipeline&quot;/&gt;" data-label=""
-           data-tags="simple forwarding pipeline">
-            <rect x="0" y="0" width="836" height="540" rx="5.4" ry="5.4" fill="#ffffff" stroke="none"
-                  pointer-events="all"/>
-        </g>
-        <g id="cell-Zvq364hImIOJoiC3617Z-14">
-            <path d="M 354.5 460.5 L 585.64 460.75" fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"
+        <g id="cell-1xC1WIjRaXcGuhJV2cBO-5" content="&lt;UserObject label=&quot;&quot; tags=&quot;simple&quot;/&gt;"
+           data-label="" data-tags="simple">
+            <path d="M 240 197 L 240 203 L 258 203 L 258.01 247.7" fill="none" stroke="#3333ff" stroke-miterlimit="10"
                   pointer-events="stroke"/>
         </g>
-        <g id="cell-HRoSpS79B9qHWH9jaoA8-7"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
-           data-tags="forwarding simple pipeline">
-            <path d="M 460 322 L 460 367 L 572 367 L 572 336 L 585 336" fill="none" stroke="#000000" stroke-width="3"
+        <g id="cell-1xC1WIjRaXcGuhJV2cBO-3"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline&quot;/&gt;" data-label=""
+           data-tags="simple pipeline">
+            <path d="M 399 321 L 332.5 321 L 332.5 312.5 L 265.91 312.52" fill="none" stroke="#000000" stroke-width="2"
                   stroke-miterlimit="10" pointer-events="stroke"/>
         </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-10">
-            <path d="M 577.5 300 L 577.6 332.5 C 582.15 332.49 582.17 339.49 577.62 339.5 L 577.62 339.5 L 577.97 457.24 C 582.52 457.23 582.54 464.23 577.99 464.24 L 577.99 464.24 L 578 468.33 L 585.64 468.25"
-                  fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10" pointer-events="stroke"/>
+        <g id="cell-q-6THzIC0rTZull3DPy9-49"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 250 128 L 634.2 128 L 634.16 277.2" fill="none" stroke="#3333ff" stroke-miterlimit="10"
+                  pointer-events="stroke"/>
         </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-58"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 355.5 434 L 467 434 L 467 371 C 472.2 371 472.2 363 467 363 L 467 363 L 467 328 L 471.58 328"
-                  fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10" pointer-events="stroke"/>
-        </g>
-        <g id="cell-i2To6XwWsyNyerFe5G8K-15">
-            <path d="M 396.64 250.75 L 391 250.83 L 391 188 L 81 188 L 81 277.5 L 63 277.5" fill="none" stroke="#000000"
-                  stroke-width="3" stroke-miterlimit="10" pointer-events="stroke"/>
+        <g id="cell-q-6THzIC0rTZull3DPy9-39"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 250.68 191.32 L 240 191.3 L 240 176 L 465 176 L 465 273.2 L 470.53 273.16" fill="none"
+                  stroke="#3333ff" stroke-miterlimit="10" pointer-events="stroke"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-60"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 192 409.5 L 192 413 L 465 413 C 465 410.4 469 410.4 469 413 L 469 413 L 575.84 413 C 575.84 410.4 579.84 410.4 579.84 413 L 579.84 413 L 702 413 L 702 518 L 233 518"
-                  fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+            <path d="M 175 412 L 175 411 L 674 411 L 674 423 L 183 423 L 183 305.5 L 219 305.5" fill="none"
+                  stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        </g>
+        <g id="cell-dX68U42Ih_FQ-UEPESkK-9"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 560.25 380.5 L 690.64 380.75" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2"
+                  stroke-miterlimit="10" pointer-events="stroke"/>
+        </g>
+        <g id="cell-dX68U42Ih_FQ-UEPESkK-3"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding pipeline simple&quot;/&gt;" data-label=""
+           data-tags="forwarding pipeline simple">
+            <path d="M 136 384 L 385 384 L 391 384" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2"
+                  stroke-miterlimit="10" pointer-events="stroke"/>
+        </g>
+        <g id="cell-Zvq364hImIOJoiC3617Z-14"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 479 367.5 L 489 367.5 L 523.75 367.55" fill="none" stroke="#000000" stroke-width="2"
+                  stroke-miterlimit="10" pointer-events="stroke"/>
+        </g>
+        <g id="cell-HRoSpS79B9qHWH9jaoA8-7"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
+           data-tags="simple pipeline forwarding">
+            <path d="M 400 322 L 400 343 L 575 343 L 575 316 L 584 316" fill="none" stroke="rgb(0, 0, 0)"
+                  stroke-width="2" stroke-miterlimit="10" pointer-events="stroke"/>
         </g>
         <g id="cell-nrxDrlzc4rpCp8ehld49-7"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;pipeline forwarding simple&quot;/&gt;" data-label=""
-           data-tags="pipeline forwarding simple">
-            <path d="M 401.5 243.63 L 401.5 178 L 251 178" fill="none" stroke="#3333ff" stroke-miterlimit="10"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;pipeline simple forwarding&quot;/&gt;" data-label=""
+           data-tags="pipeline simple forwarding">
+            <path d="M 408.5 258.63 L 408.5 192 L 250 192" fill="none" stroke="#3333ff" stroke-miterlimit="10"
                   pointer-events="stroke"/>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-88"
-           content="&lt;UserObject label=&quot;NONE&quot; tags=&quot;simple forwarding pipeline&quot; component=&quot;multi-text-value&quot; source=&quot;fetch-exception&quot;/&gt;"
-           data-label="NONE" data-tags="simple forwarding pipeline" data-component="multi-text-value"
+           content="&lt;UserObject label=&quot;NONE&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;multi-text-value&quot; source=&quot;fetch-exception&quot;/&gt;"
+           data-label="NONE" data-tags="simple pipeline forwarding" data-component="multi-text-value"
            data-source="fetch-exception">
-            <rect x="13" y="36" width="135" height="26" rx="3.9" ry="3.9" fill="#cccccc" stroke="none"
+            <rect x="12" y="36" width="135" height="26" rx="3.9" ry="3.9" fill="#cccccc" stroke="none"
                   pointer-events="all"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                <text x="80" y="54">NONE</text>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="79" y="54">NONE</text>
             </g>
-        </g>
-        <g id="cell-uWEq7-W_z53UrtFael4O-41"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline&quot;/&gt;" data-label=""
-           data-tags="simple pipeline">
-            <path d="M 488.67 269.2 L 438 269.17 L 438 254.5 L 406.36 254.5" fill="none" stroke="#000000"
-                  stroke-width="3" stroke-miterlimit="10" pointer-events="stroke"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-28"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline&quot;/&gt;" data-label=""
-           data-tags="simple pipeline">
-            <path d="M 298.5 287.5 L 290 287.5" fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"
-                  pointer-events="stroke"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-29"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 298 268 L 291.06 267.6" fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"
-                  pointer-events="stroke"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-30"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 503 266.62 L 503 164 L 251 164 L 251 142.5" fill="none" stroke="#3333ff" stroke-miterlimit="10"
-                  pointer-events="stroke"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-34"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 577.5 293 L 577.5 268 L 678 269 L 678 279.83 L 691.64 279.75" fill="none" stroke="#000000"
-                  stroke-width="3" stroke-miterlimit="10" pointer-events="stroke"/>
+            <path d="M 465 266.62 L 465 277 L 473 277 L 473 168 L 250.1 168 L 250.08 170.83" fill="none"
+                  stroke="#3333ff" stroke-miterlimit="10" pointer-events="stroke"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-37"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 39 298 L 39 278 L 94 278 L 94 276" fill="none" stroke="#000000" stroke-width="3"
-                  stroke-miterlimit="10" pointer-events="none"/>
+            <path d="M 96 280 L 101.9 280" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2" stroke-miterlimit="10"
+                  pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-38"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 39 298 L 39 278 L 81 278 L 81 355" fill="none" stroke="#000000" stroke-width="3"
-                  stroke-miterlimit="10" pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-41"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 211 141.97 L 192 142" fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"
+            <path d="M 77.25 280 L 83 280" fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10"
                   pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-44"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 273 434 L 290 434" fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"
-                  pointer-events="none"/>
+            <path d="M 266 356 L 469 356 L 469 358.5" fill="none" stroke="#000000" stroke-width="2"
+                  stroke-miterlimit="10" pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-45"
            content="&lt;UserObject label=&quot;Immediate&amp;#10;decode&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
            data-label="Immediate&#10;decode" data-tags="simple pipeline forwarding">
-            <rect x="228" y="416" width="45" height="28" rx="2.24" ry="2.24" fill="#ffffff" stroke="#000000"
-                  pointer-events="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" pointer-events="none" text-anchor="middle"
-               font-size="6px">
-                <text x="250" y="428">Immediate</text>
-                <text x="250" y="435">decode</text>
+            <rect x="219" y="344" width="47" height="24" rx="1.92" ry="1.92" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)" pointer-events="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" pointer-events="none"
+               text-anchor="middle" font-size="6px">
+                <text x="242" y="354">Immediate</text>
+                <text x="242" y="361">decode</text>
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-46"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 645 296 L 679 296 L 679 287.33 L 691.64 287.25" fill="none" stroke="#000000" stroke-width="3"
+            <path d="M 644 296 L 677 296 L 677 373 L 690.6 373" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2"
                   stroke-miterlimit="10" pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-47"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 625.08 276.24 L 625.08 270.47 C 627.68 270.47 627.68 266.47 625.08 266.47 L 625.08 266.47 L 625.08 136.5 L 250.92 136.5"
-                  fill="none" stroke="#3333ff" stroke-miterlimit="10" pointer-events="none"/>
+            <path d="M 532 136 L 250 136 L 249.96 134.48" fill="none" stroke="#3333ff" stroke-miterlimit="10"
+                  pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-48"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 635.04 276.08 L 635.04 270.57 C 637.64 270.57 637.64 266.57 635.04 266.57 L 635.04 266.57 L 635 129.33 L 251.08 129.3"
-                  fill="none" stroke="#3333ff" stroke-miterlimit="10" pointer-events="none"/>
+            <path d="M 641.04 276.08 L 641 120 L 250 120" fill="none" stroke="#3333ff" stroke-miterlimit="10"
+                  pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-49"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 696.5 272.63 L 696 121.92 L 251.48 121.88" fill="none" stroke="#3333ff" stroke-miterlimit="10"
-                  pointer-events="none"/>
+            <path d="M 695.5 387.88 L 695.5 131 L 695 112 L 250 112 L 249.96 116.15" fill="none" stroke="#3333ff"
+                  stroke-miterlimit="10" pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-51"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 516 296 L 574 296.5" fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"
+            <path d="M 479.33 295 L 516 295" fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10"
                   pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-52"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 517.33 286.4 L 522 286.42 L 522 211 L 545.5 211" fill="none" stroke="#3333ff"
-                  stroke-miterlimit="10" pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-53"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 31 421.46 L 39 421.5 L 38 323" fill="none" stroke="#000000" stroke-width="3"
-                  stroke-miterlimit="10" pointer-events="none"/>
+            <path d="M 479.33 286.4 L 514 286.4 L 514 169 L 516 169" fill="none" stroke="#3333ff" stroke-miterlimit="10"
+                  pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-55"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 581 296.5 L 585 296.5" fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"
-                  pointer-events="none"/>
+            <path d="M 546 294.5 L 550 294.5 L 583.54 294.55" fill="none" stroke="#000000" stroke-width="2"
+                  stroke-miterlimit="10" pointer-events="none"/>
+        </g>
+        <g id="cell-MQ-_pNAwyqKnrvp0fqe7-3"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 517 296 L 517 360 L 523.8 360" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2"
+                  stroke-miterlimit="10" pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-56"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <ellipse cx="577.5" cy="296.5" rx="3.5000000000000004" ry="3.5000000000000004" fill="#000000"
-                     stroke="#000000" pointer-events="none"/>
+            <ellipse cx="517" cy="295" rx="1" ry="1" fill="#0" stroke="rgb(0, 0, 0)" stroke-width="2"
+                     pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-57"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 291 435 L 291 450 L 302.5 450" fill="none" stroke="#000000" stroke-width="3"
-                  stroke-miterlimit="10" pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-59"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <rect x="290" y="433" width="2" height="2" fill="#000000" stroke="#000000" pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-61"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <rect x="190" y="407" width="2" height="2" fill="#000000" stroke="#000000" pointer-events="none"/>
+            <path d="M 409 356 L 447 356 L 447 357" fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10"
+                  pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-62"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 192 430 L 228 430" fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"
+            <path d="M 176 356 L 187 356 L 219 356" fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10"
                   pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-63"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 191.08 430.03 L 191 409" fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"
-                  pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-64"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <rect x="190" y="429" width="2" height="2" fill="#000000" stroke="#000000" pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-65"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 191 289 L 191 407" fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"
+            <path d="M 175 292 L 175 355" fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10"
                   pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-66"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 192 288 L 230.94 288.32" fill="none" stroke="#000000" stroke-miterlimit="10"
-                  pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-67"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <rect x="190" y="287" width="2" height="2" fill="#000000" stroke="#000000" pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-68"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 191 276 L 190.99 269.09" fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"
-                  pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-69"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 191 278 L 191 287" fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"
+            <path d="M 176 291 L 219.6 291 L 219.56 279.29" fill="none" stroke="#000000" stroke-miterlimit="10"
                   pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-70"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 190 277 L 154.08 277 L 154.06 275.6" fill="none" stroke="#000000" stroke-width="3"
+            <path d="M 174 276 L 164 276 L 151.75 275.88" fill="none" stroke="#000000" stroke-width="2"
                   stroke-miterlimit="10" pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-71"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <rect x="190" y="276" width="2" height="2" fill="#000000" stroke="#000000" pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-72"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 192 268 L 231.18 268.48" fill="none" stroke="#000000" stroke-miterlimit="10"
+            <path d="M 176 276 L 218.9 276 L 218.91 262.76" fill="none" stroke="#000000" stroke-miterlimit="10"
                   pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-73"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 191 208 L 191 192 C 196.2 192 196.2 184 191 184 L 191 184 L 191 143" fill="none" stroke="#000000"
-                  stroke-width="3" stroke-miterlimit="10" pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-74"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <rect x="190" y="267" width="2" height="2" fill="#000000" stroke="#000000" pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-75"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <rect x="190" y="141" width="2" height="2" fill="#000000" stroke="#000000" pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-77"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 114.5 367.5 L 131 367.5 L 131 398 L 42.76 398 C 42.76 392.8 34.76 392.8 34.76 398 L 34.76 398 L 11 398 L 11 417.83 L 21.55 417.75"
-                  fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10" pointer-events="none"/>
+            <path d="M 134 384 L 55 384 L 55 284.1 L 66.75 284.05" fill="none" stroke="#000000" stroke-width="2"
+                  stroke-miterlimit="10" pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-78"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 81 357 L 81 394 C 86.2 394 86.2 402 81 402 L 81 402 L 81 473.17 L 341.5 473.2" fill="none"
-                  stroke="#000000" stroke-width="3" stroke-miterlimit="10" pointer-events="none"/>
-        </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-4">
-            <path d="M 82 356 L 102 356" fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"
-                  pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-79"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <rect x="80" y="355" width="2" height="2" fill="#000000" stroke="#000000" pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-87"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <rect x="302.5" y="443" width="18" height="14" rx="2.1" ry="2.1" fill="#ffffff" stroke="#000000"
-                  pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-89"
-           content="&lt;UserObject label=&quot;1&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label="1"
-           data-tags="simple pipeline forwarding">
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" pointer-events="none" text-anchor="middle"
-               font-size="6px">
-                <text x="312.5" y="451.5">1</text>
-            </g>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-90"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 309.84 448.5 L 307.96 450 L 309.84 451.5" fill="none" stroke="#000000" stroke-linejoin="round"
+            <path d="M 95 364 L 95 376 L 469 376" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2"
                   stroke-miterlimit="10" pointer-events="none"/>
         </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-91"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 308.44 448.5 L 306.56 450 L 308.44 451.5" fill="none" stroke="#000000" stroke-linejoin="round"
-                  stroke-miterlimit="10" pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-92"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 320.5 450 L 341.5 449.8" fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"
+        <g id="cell-nrxDrlzc4rpCp8ehld49-4"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 96 363 L 115.5 363" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2" stroke-miterlimit="10"
                   pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-95"
-           content="&lt;UserObject label=&quot;Rd&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
-           data-label="Rd" data-tags="simple pipeline forwarding">
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" pointer-events="none" text-anchor="middle"
-               font-size="6px">
-                <text x="320.5" y="405">Rd</text>
-            </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-101"
            content="&lt;UserObject label=&quot;00&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;reg-id-value&quot; source=&quot;rs1&quot;/&gt;"
            data-label="00" data-tags="simple pipeline forwarding" data-component="reg-id-value" data-source="rs1">
-            <rect x="199" y="264" width="14" height="8" rx="0.08" ry="0.08" fill="#ffffff" stroke="#000000"
-                  pointer-events="none"/>
-            <g fill="#000000" font-family="sans-serif" pointer-events="none" text-anchor="middle" font-size="6px">
-                <text x="205.5" y="269.5">00</text>
+            <rect x="199" y="272" width="14" height="8" rx="0.08" ry="0.08" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)" pointer-events="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" pointer-events="none" text-anchor="middle" font-size="6px">
+                <text x="205.5" y="277.5">00</text>
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-102"
            content="&lt;UserObject label=&quot;00&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;reg-id-value&quot; source=&quot;rs2&quot;/&gt;"
            data-label="00" data-tags="simple pipeline forwarding" data-component="reg-id-value" data-source="rs2">
-            <rect x="199" y="284" width="14" height="8" rx="0.08" ry="0.08" fill="#ffffff" stroke="#000000"
-                  pointer-events="none"/>
-            <g fill="#000000" font-family="sans-serif" pointer-events="none" text-anchor="middle" font-size="6px">
-                <text x="205.5" y="289.5">00</text>
+            <rect x="199" y="287" width="14" height="8" rx="0.08" ry="0.08" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)" pointer-events="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" pointer-events="none" text-anchor="middle" font-size="6px">
+                <text x="205.5" y="292.5">00</text>
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-103"
-           content="&lt;UserObject label=&quot;Rs1&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
-           data-label="Rs1" data-tags="simple pipeline forwarding">
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" pointer-events="none" text-anchor="middle"
-               font-size="6px">
-                <text x="219.5" y="264">Rs1</text>
-            </g>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-104"
-           content="&lt;UserObject label=&quot;Rs2&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
-           data-label="Rs2" data-tags="simple pipeline forwarding">
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" pointer-events="none" text-anchor="middle"
-               font-size="6px">
-                <text x="219.5" y="284">Rs2</text>
+           content="&lt;UserObject label=&quot;rs1&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="rs1" data-tags="simple pipeline forwarding">
+            <rect x="184" y="273" width="12" height="8" fill="rgb(255, 255, 255)" stroke="none" pointer-events="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" pointer-events="none"
+               text-anchor="middle" font-size="6px">
+                <text x="189.5" y="278">rs1</text>
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-106"
            content="&lt;UserObject label=&quot;00000000&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;reg-value&quot; source=&quot;mem-write-addr&quot;/&gt;"
            data-label="00000000" data-tags="simple pipeline forwarding" data-component="reg-value"
            data-source="mem-write-addr">
-            <rect x="532.5" y="274.5" width="64" height="7" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"
-                  transform="rotate(90,564.5,278)" pointer-events="none"/>
-            <g fill="#000000" font-family="sans-serif" pointer-events="none" text-anchor="middle" font-size="6px"
-               transform="rotate(-90,564.5,278)">
-                <text x="564" y="279.5">00000000</text>
+            <rect x="531.5" y="288.5" width="64" height="7" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)" transform="rotate(90,563.5,292)" pointer-events="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" pointer-events="none" text-anchor="middle" font-size="6px"
+               transform="rotate(-90,563.5,292)">
+                <text x="563" y="293.5">00000000</text>
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-109"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 481.36 324.5 L 489.01 324.33" fill="none" stroke="#000000" stroke-width="3"
+            <path d="M 424.36 324.5 L 451.01 324.33" fill="none" stroke="rgb(0, 0, 0)" stroke-width="3"
                   stroke-miterlimit="10" pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-111"
            content="&lt;UserObject label=&quot;00000000&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;reg-value&quot; source=&quot;mem-read-val&quot;/&gt;"
            data-label="00000000" data-tags="simple pipeline forwarding" data-component="reg-value"
            data-source="mem-read-val">
-            <rect x="622.5" y="304.5" width="64" height="7" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"
-                  transform="rotate(90,654.5,308)" pointer-events="none"/>
-            <g fill="#000000" font-family="sans-serif" pointer-events="none" text-anchor="middle" font-size="6px"
-               transform="rotate(-90,654.5,308)">
-                <text x="654" y="309.5">00000000</text>
+            <rect x="621.5" y="304.5" width="64" height="7" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)" transform="rotate(90,653.5,308)" pointer-events="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" pointer-events="none" text-anchor="middle" font-size="6px"
+               transform="rotate(-90,653.5,308)">
+                <text x="653" y="309.5">00000000</text>
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-112"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;mux2&quot; source=&quot;wb-mem-to-reg&quot;/&gt;"
-           data-label="" data-tags="simple pipeline forwarding" data-component="mux2" data-source="wb-mem-to-reg">
-            <path d="M 691.64 271 L 701.36 275.17 L 701.36 291.83 L 691.64 296 L 691.64 286.28 L 691.64 280.72 Z"
-                  fill="#ffffff" stroke="#000000" stroke-linejoin="bevel" stroke-miterlimit="10" pointer-events="none"/>
-            <path d="M 691.08 279.75 L 701.92 283.5 Z" fill="#ffffff" stroke="#000000" stroke-width="2.78"
-                  stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10" pointer-events="none"/>
-            <path d="M 691.08 287.25 L 701.92 283.5 Z" fill="#ffffff" stroke="#000000" stroke-width="2.78"
-                  stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10" pointer-events="none"/>
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;mux2&quot; source=&quot;wb-MemToReg&quot;/&gt;"
+           data-label="" data-tags="simple pipeline forwarding" data-component="mux2" data-source="wb-MemToReg">
+            <path d="M 690.64 364.5 L 700.36 368.67 L 700.36 385.33 L 690.64 389.5 L 690.64 379.78 L 690.64 374.22 Z"
+                  fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-linejoin="bevel" stroke-miterlimit="10"
+                  transform="translate(0,377)scale(1,-1)translate(0,-377)" pointer-events="none"/>
+            <path d="M 690.08 373.25 L 700.92 377 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-width="2.22"
+                  stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"
+                  transform="translate(0,377)scale(1,-1)translate(0,-377)" pointer-events="none"/>
+            <path d="M 690.08 380.75 L 700.92 377 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-width="2.22"
+                  stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"
+                  transform="translate(0,377)scale(1,-1)translate(0,-377)" pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-113"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; source=&quot;exec-alu-src&quot; component=&quot;mux2&quot;/&gt;"
-           data-label="" data-tags="simple pipeline forwarding" data-source="exec-alu-src" data-component="mux2">
-            <path d="M 471.64 312 L 481.36 316.17 L 481.36 332.83 L 471.64 337 L 471.64 327.28 L 471.64 321.72 Z"
-                  fill="#ffffff" stroke="#000000" stroke-linejoin="bevel" stroke-miterlimit="10" pointer-events="none"/>
-            <path d="M 471.08 320.75 L 481.92 324.5 Z" fill="#ffffff" stroke="#000000" stroke-width="2.78"
-                  stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10" pointer-events="none"/>
-            <path d="M 471.08 328.25 L 481.92 324.5 Z" fill="#ffffff" stroke="#000000" stroke-width="2.78"
-                  stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10" pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-115"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
-           data-tags="forwarding simple pipeline">
-            <path d="M 396.64 258.25 L 392 258.33 L 392 269 L 354 268" fill="none" stroke="#000000" stroke-width="3"
-                  stroke-miterlimit="10" pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-142"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 411 527 L 173 527 L 173 477.18 C 178.2 477.18 178.2 469.18 173 469.18 L 173 469.18 L 173 318 L 187 318 C 187 312.8 195 312.8 195 318 L 195 318 L 231 318"
-                  fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10" pointer-events="none"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-143"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <rect x="411" y="526" width="2" height="2" fill="#000000" stroke="#000000" pointer-events="none"/>
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; source=&quot;exec-AluSrc&quot; component=&quot;mux2&quot;/&gt;"
+           data-label="" data-tags="simple pipeline forwarding" data-source="exec-AluSrc" data-component="mux2">
+            <path d="M 414.64 312 L 424.36 316.17 L 424.36 332.83 L 414.64 337 L 414.64 327.28 L 414.64 321.72 Z"
+                  fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-linejoin="bevel" stroke-miterlimit="10"
+                  pointer-events="none"/>
+            <path d="M 414.08 320.75 L 424.92 324.5 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)"
+                  stroke-width="2.22" stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"
+                  pointer-events="none"/>
+            <path d="M 414.08 328.25 L 424.92 324.5 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)"
+                  stroke-width="2.22" stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"
+                  pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-149"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 413 527 L 712 527 L 712 283.5 L 701.36 283.5" fill="none" stroke="#000000" stroke-width="3"
-                  stroke-miterlimit="10" pointer-events="none"/>
+            <path d="M 219.09 316.5 L 199 316.5 L 199 436 L 710 436 L 710 377 L 700.36 377" fill="none"
+                  stroke="rgb(0, 0, 0)" stroke-width="2" stroke-miterlimit="10" pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-157"
            content="&lt;UserObject label=&quot;00000000&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;reg-value&quot; source=&quot;wb&quot;/&gt;"
            data-label="00000000" data-tags="simple pipeline forwarding" data-component="reg-value" data-source="wb">
-            <rect x="680.5" y="344.5" width="64" height="7" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"
-                  transform="rotate(90,712.5,348)" pointer-events="none"/>
-            <g fill="#000000" font-family="sans-serif" pointer-events="none" text-anchor="middle" font-size="6px"
-               transform="rotate(-90,712.5,348)">
-                <text x="712" y="349.5">00000000</text>
+            <rect x="641.5" y="432.5" width="64" height="7" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)" pointer-events="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" pointer-events="none" text-anchor="middle" font-size="6px">
+                <text x="673" y="437.5">00000000</text>
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-177"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <rect x="57" y="268" width="6" height="19" fill="#ffffff" stroke="#000000" pointer-events="none"/>
+            <rect x="83" y="270" width="6" height="20" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)"
+                  pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-178"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 57.75 268 L 62.25 270.5 L 57.75 273 Z" fill="#ffffff" stroke="#000000" stroke-miterlimit="10"
-                  transform="rotate(90,60,270.5)" pointer-events="none"/>
+            <path d="M 83.63 270.13 L 88.37 272.63 L 83.63 275.13 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)"
+                  stroke-miterlimit="10" transform="rotate(90,86,272.63)" pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-180"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 488.67 252 L 517.33 280.67 L 517.33 309.33 L 488.67 338 L 488.67 304.56 L 498.22 295 L 488.67 285.44 Z"
-                  fill="#ffffff" stroke="#000000" stroke-linejoin="bevel" stroke-miterlimit="10" pointer-events="none"/>
+            <path d="M 450.67 252 L 479.33 280.67 L 479.33 309.33 L 450.67 338 L 450.67 304.56 L 460.22 295 L 450.67 285.44 Z"
+                  fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-linejoin="bevel" stroke-miterlimit="10"
+                  pointer-events="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-181"
            content="&lt;UserObject label=&quot;ALU&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
            data-label="ALU" data-tags="simple pipeline forwarding">
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" pointer-events="none" text-anchor="middle"
-               font-size="8px">
-                <text x="507.5" y="297">ALU</text>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" pointer-events="none"
+               text-anchor="middle" font-size="8px">
+                <text x="469.5" y="297">ALU</text>
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-182"
@@ -476,402 +344,320 @@
            data-label="zero" data-tags="simple pipeline forwarding">
             <g fill="#0000CC" font-family="sans-serif" font-weight="bold" pointer-events="none" text-anchor="end"
                font-size="6px">
-                <text x="514.5" y="286.78">zero</text>
+                <text x="476.5" y="286.78">zero</text>
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-183"
            content="&lt;UserObject label=&quot;Peripherals&quot; tags=&quot;simple pipeline forwarding&quot; link=&quot;#peripherals&quot;/&gt;"
            data-label="Peripherals" data-tags="simple pipeline forwarding" data-link="#peripherals">
             <a xlink:href="#peripherals">
-                <rect x="595" y="359" width="45" height="16" rx="2.72" ry="2.72" fill="#ffffff" stroke="#000000"/>
-                <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                    <text x="617" y="368.5">Peripherals</text>
+                <rect x="584" y="238" width="45" height="16" rx="2.72" ry="2.72" fill="rgb(255, 255, 255)"
+                      stroke="rgb(0, 0, 0)"/>
+                <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                    <text x="606" y="247.5">Peripherals</text>
                 </g>
             </a>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-191"
            content="&lt;UserObject label=&quot;MemToReg&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
            data-label="MemToReg" data-tags="simple pipeline forwarding">
-            <rect x="286.5" y="114.5" width="40" height="8" fill="none" stroke="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                <text x="286" y="120">MemToReg</text>
+            <rect x="265" y="108" width="31.5" height="8" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="280.25" y="113.5">MemToReg</text>
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-192"
            content="&lt;UserObject label=&quot;MemWrite&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
            data-label="MemWrite" data-tags="simple pipeline forwarding">
-            <rect x="286.5" y="122.5" width="40" height="8" fill="none" stroke="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                <text x="286" y="128">MemWrite</text>
+            <rect x="265" y="116" width="28" height="8" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <text x="264.5" y="121.5">MemWrite</text>
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-193"
-           content="&lt;UserObject label=&quot;MemRead&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
-           data-label="MemRead" data-tags="simple pipeline forwarding">
-            <rect x="286.5" y="129.5" width="40" height="8" fill="none" stroke="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                <text x="286" y="135">MemRead</text>
+           content="&lt;UserObject label=&quot;BranchBxx&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="BranchBxx" data-tags="simple pipeline forwarding">
+            <rect x="265" y="132" width="31" height="8" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <text x="264.5" y="137.5">BranchBxx</text>
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-194"
-           content="&lt;UserObject label=&quot;AluOp&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
-           data-label="AluOp" data-tags="simple pipeline forwarding">
-            <rect x="286.5" y="156.5" width="40" height="8" fill="none" stroke="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                <text x="286" y="162">AluOp</text>
-            </g>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-195"
-           content="&lt;UserObject label=&quot;AluSrc&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
-           data-label="AluSrc" data-tags="simple pipeline forwarding">
-            <rect x="286.5" y="163.5" width="40" height="8" fill="none" stroke="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                <text x="286" y="169">AluSrc</text>
+           content="&lt;UserObject label=&quot;AluControl&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="AluControl" data-tags="simple pipeline forwarding">
+            <rect x="265" y="166" width="31" height="4" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <text x="264.5" y="169.5">AluControl</text>
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-210"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple forwarding pipeline&quot; link=&quot;#data_memory&quot;/&gt;"
-           data-label="" data-tags="simple forwarding pipeline" data-link="#data_memory">
-            <a xlink:href="#data_memory"/>
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; link=&quot;#data_memory&quot;/&gt;"
+           data-label="" data-tags="simple pipeline forwarding" data-link="#data_memory">
+            <a xlink:href="#data_memory">
+                <rect x="584" y="276" width="60" height="80" fill="none" stroke="none"/>
+            </a>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-211"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; link=&quot;#data_memory&quot;/&gt;"
            data-label="" data-tags="simple pipeline forwarding" data-link="#data_memory">
             <a xlink:href="#data_memory">
-                <rect x="585" y="276" width="60" height="80" rx="1.2" ry="1.2" fill="#ffffff" stroke="#000000"/>
+                <rect x="584" y="276" width="60" height="80" rx="1.2" ry="1.2" fill="rgb(255, 255, 255)"
+                      stroke="rgb(0, 0, 0)"/>
             </a>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-212"
            content="&lt;UserObject label=&quot;Data&amp;#10;Memory&quot; tags=&quot;simple pipeline forwarding&quot; link=&quot;#data_memory&quot;/&gt;"
            data-label="Data&#10;Memory" data-tags="simple pipeline forwarding" data-link="#data_memory">
             <a xlink:href="#data_memory">
-                <rect x="591" y="329" width="48" height="17" fill="none" stroke="none"/>
-                <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                    <text x="614.5" y="335">Data</text>
-                    <text x="614.5" y="342">Memory</text>
+                <rect x="590" y="329" width="48" height="17" fill="none" stroke="none"/>
+                <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                    <text x="613.5" y="335">Data</text>
+                    <text x="613.5" y="342">Memory</text>
                 </g>
             </a>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-37"
-           content="&lt;UserObject label=&quot;&quot; link=&quot;#cache_data&quot; component=&quot;cache&quot; tags=&quot;simple forwarding hazardunit pipeline&quot;/&gt;"
+           content="&lt;UserObject label=&quot;&quot; link=&quot;#cache_data&quot; component=&quot;cache&quot; tags=&quot;simple hazardunit pipeline forwarding&quot;/&gt;"
            data-label="" data-link="#cache_data" data-component="cache"
-           data-tags="simple forwarding hazardunit pipeline">
+           data-tags="simple hazardunit pipeline forwarding">
             <a xlink:href="#cache_data">
-                <rect x="585" y="276" width="60" height="50" rx="1" ry="1" fill="#ffffff" stroke="#000000"/>
+                <rect x="584" y="276" width="60" height="50" rx="1" ry="1" fill="rgb(255, 255, 255)"
+                      stroke="rgb(0, 0, 0)"/>
                 <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                    <text x="614.5" y="290.5">Cache</text>
+                    <text x="613.5" y="290.5">Cache</text>
                 </g>
                 <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                    <text x="589.5" y="305.5">Hit:</text>
+                    <text x="588.5" y="305.5">Hit:</text>
                 </g>
                 <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                    <text x="589.5" y="314.5">Miss:</text>
+                    <text x="588.5" y="314.5">Miss:</text>
                 </g>
                 <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                    <text x="604.5" y="305.5">0</text>
+                    <text x="603.5" y="305.5">0</text>
                 </g>
                 <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                    <text x="609.5" y="314.5">0</text>
+                    <text x="608.5" y="314.5">0</text>
                 </g>
             </a>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-213"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <rect x="102" y="331.5" width="29" height="39" fill="none" stroke="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-214"
            content="&lt;UserObject label=&quot;4&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label="4"
            data-tags="simple pipeline forwarding">
-            <rect x="89" y="376" width="8" height="8" fill="none" stroke="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                <text x="92.5" y="381">4</text>
+            <rect x="103" y="336" width="8" height="8" fill="none" stroke="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="106.5" y="341">4</text>
             </g>
         </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-216"
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-215"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <rect x="111" y="331.5" width="20" height="39" fill="none" stroke="none"/>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-217"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 101.94 380 L 97 380" fill="none" stroke="#000000" stroke-miterlimit="10"/>
+            <rect x="112" y="331.5" width="20" height="39" fill="none" stroke="none"/>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-218"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <rect x="112" y="331.5" width="20" height="39" fill="none" stroke="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-219"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 101.5 348 L 114.5 361 L 114.5 374 L 101.5 387 L 101.5 371.83 L 105.83 367.5 L 101.5 363.17 Z"
-                  fill="#ffffff" stroke="#000000" stroke-linejoin="bevel" stroke-miterlimit="10"/>
+            <path d="M 115.5 331.5 L 128.5 344.5 L 128.5 357.5 L 115.5 370.5 L 115.5 355.33 L 119.83 351 L 115.5 346.67 Z"
+                  fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-linejoin="bevel" stroke-miterlimit="10"
+                  transform="translate(0,351)scale(1,-1)translate(0,-351)"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-220"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 110 367.5 L 110 365.5 L 110 367.5 L 108 367.5 L 110 367.5 L 112 367.5 L 110 367.5 L 110 369.5 L 110 367.5"
-                  fill="#ffffff" stroke="#000000" stroke-linejoin="round" stroke-miterlimit="10"/>
+            <path d="M 124 351 L 124 349 L 124 351 L 122 351 L 124 351 L 126 351 L 124 351 L 124 353 L 124 351"
+                  fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-linejoin="round" stroke-miterlimit="10"/>
         </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-222"
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-216"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 341.5 442 L 354.5 455 L 354.5 468 L 341.5 481 L 341.5 465.83 L 345.83 461.5 L 341.5 457.17 Z"
-                  fill="#ffffff" stroke="#000000" stroke-linejoin="bevel" stroke-miterlimit="10"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-223"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 350 461.5 L 350 459.5 L 350 461.5 L 348 461.5 L 350 461.5 L 352 461.5 L 350 461.5 L 350 463.5 L 350 461.5"
-                  fill="#ffffff" stroke="#000000" stroke-linejoin="round" stroke-miterlimit="10"/>
-        </g>
-        <g id="cell-4UeL6ZtvB5kMY3OpyeXH-2" content="&lt;UserObject label=&quot;&quot; tags=&quot;simple&quot;/&gt;"
-           data-label="" data-tags="simple">
-            <path d="M 250 134 L 231 134 L 231 186 C 233.6 186 233.6 190 231 190 L 231 190 L 231 202 L 280 202 L 280 258"
-                  fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
+            <path d="M 115.5 339.3 L 111 339.3" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2"
+                  stroke-miterlimit="10"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-50"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;pipeline forwarding simple&quot;/&gt;" data-label=""
-           data-tags="pipeline forwarding simple">
-            <path d="M 476.5 313.63 L 476.5 271.19 C 479.1 271.19 479.1 267.19 476.5 267.19 L 476.5 267.19 L 476.5 171 L 247 171 L 251.4 170.17"
-                  fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;pipeline simple forwarding&quot;/&gt;" data-label=""
+           data-tags="pipeline simple forwarding">
+            <path d="M 419.5 313.63 L 419.5 184 L 250.1 184 L 250.08 180.24" fill="none" stroke="#3333ff"
+                  stroke-miterlimit="10"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-83"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 559.5 203.5 L 522 203.5 L 522 150 L 251 150" fill="none" stroke="#3333ff"
-                  stroke-miterlimit="10"/>
+            <path d="M 528 152 L 371 152 L 250 152" fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-196"
-           content="&lt;UserObject label=&quot;Branch&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
-           data-label="Branch" data-tags="simple pipeline forwarding">
-            <rect x="286.5" y="142.5" width="40" height="8" fill="none" stroke="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                <text x="286" y="148">Branch</text>
+           content="&lt;UserObject label=&quot;BranchJalr&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="BranchJalr" data-tags="simple pipeline forwarding">
+            <rect x="265" y="150" width="31" height="4" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <text x="264.5" y="153.5">BranchJalr</text>
             </g>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-208"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; link=&quot;#program_memory&quot;/&gt;"
-           data-label="" data-tags="simple pipeline forwarding" data-link="#program_memory">
-            <a xlink:href="#program_memory">
-                <rect x="94" y="256" width="60" height="80" rx="1.2" ry="1.2" fill="#ffffff" stroke="#000000"/>
-            </a>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-209"
-           content="&lt;UserObject label=&quot;Program&amp;#10;Memory&quot; tags=&quot;simple pipeline forwarding&quot; link=&quot;#program_memory&quot;/&gt;"
-           data-label="Program&#10;Memory" data-tags="simple pipeline forwarding" data-link="#program_memory">
-            <a xlink:href="#program_memory">
-                <rect x="100" y="312" width="48" height="18" fill="none" stroke="none"/>
-                <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                    <text x="123.5" y="318.5">Program</text>
-                    <text x="123.5" y="325.5">Memory</text>
-                </g>
-            </a>
         </g>
         <g id="cell-5soJhyaSc5fLxI4RMxeW-4"
-           content="&lt;UserObject label=&quot;RegWrite&quot; tags=&quot;simple&quot;/&gt;" data-label="RegWrite"
-           data-tags="simple">
-            <rect x="283" y="190" width="40" height="8" fill="none" stroke="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                <text x="282.5" y="195.5">RegWrite</text>
+           content="&lt;UserObject label=&quot;RegWrite&quot; tags=&quot;simple forwarding pipeline&quot;/&gt;"
+           data-label="RegWrite" data-tags="simple forwarding pipeline">
+            <rect x="246.5" y="220" width="24.5" height="8" fill="none" stroke="none"/>
+            <g fill="#0000FF" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <rect fill="rgb(255, 255, 255)" stroke="none" x="246" y="221" width="28" height="8" stroke-width="0"/>
+                <text x="246" y="225.5">RegWrite</text>
             </g>
         </g>
-        <g id="cell-uWEq7-W_z53UrtFael4O-36"
-           content="&lt;UserObject label=&quot;&quot; component=&quot;program-cache&quot; tags=&quot;simple forwarding pipeline&quot; link=&quot;#cache_program&quot;/&gt;"
-           data-label="" data-component="program-cache" data-tags="simple forwarding pipeline"
-           data-link="#cache_program">
-            <a xlink:href="#cache_program">
-                <rect x="94" y="255" width="60" height="50" rx="1" ry="1" fill="#ffffff" stroke="#000000"/>
-                <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                    <text x="123.5" y="269.5">Cache</text>
-                </g>
-                <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                    <text x="98.5" y="284.5">Hit:</text>
-                </g>
-                <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                    <text x="98.5" y="293.5">Miss:</text>
-                </g>
-                <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                    <text x="113.5" y="284.5">0</text>
-                </g>
-                <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                    <text x="118.5" y="293.5">0</text>
-                </g>
-            </a>
-        </g>
-        <g id="cell-uWEq7-W_z53UrtFael4O-38"
-           content="&lt;UserObject label=&quot;00000000&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;reg-value&quot; source=&quot;decode-imm&quot;/&gt;"
-           data-label="00000000" data-tags="simple pipeline forwarding" data-component="reg-value"
-           data-source="decode-imm">
-            <rect x="299.5" y="430" width="56" height="8" rx="0.08" ry="0.08" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="327" y="435.5">00000000</text>
-            </g>
-        </g>
-        <g id="cell-uWEq7-W_z53UrtFael4O-39">
-            <path d="M 292 434 L 299.5 434" fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"/>
-        </g>
-        <g id="cell-HRoSpS79B9qHWH9jaoA8-29">
-            <path d="M 298 268 L 290.67 268" fill="none" stroke="#000000" stroke-miterlimit="10"/>
-        </g>
-        <g id="cell-HRoSpS79B9qHWH9jaoA8-30">
-            <path d="M 298 268 L 278 268.08 L 290.7 268.08" fill="none" stroke="#000000" stroke-width="3"
+        <g id="cell-uWEq7-W_z53UrtFael4O-39"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 408 355 L 408 328.3 L 414.64 328.25" fill="none" stroke="#000000" stroke-width="2"
                   stroke-miterlimit="10"/>
         </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-39"
-           content="&lt;UserObject label=&quot;0x00000000&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;pc-value&quot; source=&quot;fetch-pc&quot; link=&quot;#&quot;/&gt;"
-           data-label="0x00000000" data-tags="simple pipeline forwarding" data-component="pc-value"
-           data-source="fetch-pc" data-link="#">
-            <a xlink:href="#">
-                <rect x="2" y="298" width="72" height="25" rx="0.25" ry="0.25" fill="#ffffff" stroke="#000000"/>
-                <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="8px">
-                    <text x="37.5" y="316">0x00000000</text>
-                </g>
-            </a>
+        <g id="cell-uWEq7-W_z53UrtFael4O-44"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 175 275 L 175 148 L 210 148" fill="none" stroke="#000000" stroke-width="2"
+                  stroke-miterlimit="10"/>
         </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-206"
-           content="&lt;UserObject label=&quot;PC&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
-           data-label="PC" data-tags="simple pipeline forwarding">
-            <rect x="31" y="300" width="14" height="8" fill="none" stroke="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                <text x="37.5" y="305.5">PC</text>
+        <g id="cell-uWEq7-W_z53UrtFael4O-45"
+           content="&lt;UserObject label=&quot;rd&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="rd" data-tags="simple pipeline forwarding">
+            <rect x="187" y="302" width="8" height="8" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="190.5" y="307">rd</text>
             </g>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-42"
            content="&lt;UserObject label=&quot;00000000&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;reg-value&quot; source=&quot;decode-inst-bus&quot;/&gt;"
            data-label="00000000" data-tags="simple pipeline forwarding" data-component="reg-value"
            data-source="decode-inst-bus">
-            <rect x="177" y="208" width="56" height="8" rx="0.08" ry="0.08" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="204.5" y="213.5">00000000</text>
+            <rect x="169" y="230" width="56" height="8" rx="0.08" ry="0.08" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="196.5" y="235.5">00000000</text>
             </g>
         </g>
-        <g id="cell-uWEq7-W_z53UrtFael4O-44">
-            <path d="M 191 267 L 191 216" fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"/>
+        <g id="cell-uWEq7-W_z53UrtFael4O-55"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;pipeline forwarding simple&quot; component=&quot;bool-value&quot; source=&quot;exec-AluZero&quot;/&gt;"
+           data-label="0" data-tags="pipeline forwarding simple" data-component="bool-value" data-source="exec-AluZero">
+            <rect x="493" y="282" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="496" y="287.5">0</text>
+            </g>
         </g>
-        <g id="cell-uWEq7-W_z53UrtFael4O-45"
-           content="&lt;UserObject label=&quot;Rd&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
-           data-label="Rd" data-tags="simple pipeline forwarding">
-            <rect x="317" y="506" width="8" height="8" fill="none" stroke="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                <text x="320.5" y="511">Rd</text>
+        <g id="cell-uWEq7-W_z53UrtFael4O-56"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;pipeline forwarding simple&quot; component=&quot;bool-value&quot; source=&quot;exec-AluSrc&quot;/&gt;"
+           data-label="0" data-tags="pipeline forwarding simple" data-component="bool-value" data-source="exec-AluSrc">
+            <rect x="416" y="300" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="419" y="305.5">0</text>
             </g>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-60"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-alu-src&quot;/&gt;"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-AluSrc&quot;/&gt;"
            data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
-           data-source="decode-alu-src">
-            <rect x="345.5" y="167" width="7" height="8" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="348.5" y="172.5">0</text>
+           data-source="decode-AluSrc">
+            <rect x="305" y="180" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="308.5" y="185.5">0</text>
             </g>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-67"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple&quot; component=&quot;bool-value&quot; source=&quot;decode-reg-write&quot;/&gt;"
-           data-label="0" data-tags="simple" data-component="bool-value" data-source="decode-reg-write">
-            <rect x="276" y="198" width="7" height="8" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="279" y="203.5">0</text>
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple forwarding pipeline&quot; component=&quot;bool-value&quot; source=&quot;decode-RegWrite&quot;/&gt;"
+           data-label="0" data-tags="simple forwarding pipeline" data-component="bool-value"
+           data-source="decode-RegWrite">
+            <rect x="254" y="233" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="257" y="238.5">0</text>
             </g>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-68"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-mem-to-reg&quot;/&gt;"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-MemToReg&quot;/&gt;"
            data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
-           data-source="decode-mem-to-reg">
-            <rect x="330" y="118" width="7" height="8" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="333" y="123.5">0</text>
+           data-source="decode-MemToReg">
+            <rect x="318" y="108" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="321" y="113.5">0</text>
             </g>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-69"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-mem-write&quot;/&gt;"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-MemWrite&quot;/&gt;"
            data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
-           data-source="decode-mem-write">
-            <rect x="345.25" y="125.5" width="7" height="8" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="348.25" y="131">0</text>
+           data-source="decode-MemWrite">
+            <rect x="305.25" y="116" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="308.25" y="121.5">0</text>
             </g>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-70"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-mem-read&quot;/&gt;"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-BranchJalr&quot;/&gt;"
            data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
-           data-source="decode-mem-read">
-            <rect x="330" y="132.5" width="7" height="8" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="333" y="138">0</text>
+           data-source="decode-BranchJalr">
+            <rect x="305" y="148" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="308.5" y="153.5">0</text>
             </g>
         </g>
-        <g id="cell-uWEq7-W_z53UrtFael4O-72"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-reg-write&quot;/&gt;"
-           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
-           data-source="decode-reg-write">
-            <rect x="345.25" y="109.5" width="7" height="8" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="348.25" y="115">0</text>
+        <g id="cell-uWEq7-W_z53UrtFael4O-75"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;pipeline forwarding simple&quot; component=&quot;bool-value&quot; source=&quot;mem-MemWrite&quot;/&gt;"
+           data-label="0" data-tags="pipeline forwarding simple" data-component="bool-value" data-source="mem-MemWrite">
+            <rect x="638" y="216" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="641.5" y="221.5">0</text>
             </g>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-80"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;forwarding simple pipeline&quot; component=&quot;bool-value&quot; source=&quot;exec-pc-to-alu&quot;/&gt;"
-           data-label="0" data-tags="forwarding simple pipeline" data-component="bool-value"
-           data-source="exec-pc-to-alu">
-            <rect x="398" y="230" width="7" height="8" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="401" y="235.5">0</text>
-            </g>
-        </g>
-        <g id="cell-uWEq7-W_z53UrtFael4O-81"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;debug-value&quot; source=&quot;exec-alu-op&quot;/&gt;"
-           data-label="0" data-tags="simple pipeline forwarding" data-component="debug-value" data-source="exec-alu-op">
-            <rect x="494.5" y="241" width="15.5" height="8" rx="0.08" ry="0.08" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="501.75" y="246.5">0</text>
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;exec-AuiPC&quot;/&gt;"
+           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value" data-source="exec-AuiPC">
+            <rect x="405" y="244" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="408" y="249.5">0</text>
             </g>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-83"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;debug-value&quot; source=&quot;decode-alu-op&quot;/&gt;"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;debug-value&quot; source=&quot;decode-AluControl&quot;/&gt;"
            data-label="0" data-tags="simple pipeline forwarding" data-component="debug-value"
-           data-source="decode-alu-op">
-            <rect x="325.75" y="160" width="15.5" height="8" rx="0.08" ry="0.08" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="333" y="165.5">0</text>
+           data-source="decode-AluControl">
+            <rect x="300.75" y="164" width="15.5" height="8" rx="0.08" ry="0.08" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="308" y="169.5">0</text>
             </g>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-90"
-           content="&lt;UserObject label=&quot;ADD $0, $1, $3&quot; tags=&quot;forwarding simple pipeline&quot; component=&quot;instruction-value&quot; source=&quot;fetch&quot;/&gt;"
-           data-label="ADD $0, $1, $3" data-tags="forwarding simple pipeline" data-component="instruction-value"
+           content="&lt;UserObject label=&quot;ADD $0, $1, $3&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;instruction-value&quot; source=&quot;fetch&quot;/&gt;"
+           data-label="ADD $0, $1, $3" data-tags="simple pipeline forwarding" data-component="instruction-value"
            data-source="fetch">
-            <rect x="13" y="14.5" width="135" height="26.5" rx="3.97" ry="3.97" fill="#ffadad" stroke="none"/>
+            <rect x="12" y="14.5" width="135" height="26.5" rx="3.97" ry="3.97" fill="#ffadad" stroke="none"/>
             <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="9px">
-                <text x="80" y="30.75">ADD $0, $1, $3</text>
-            </g>
-        </g>
-        <g id="cell-uWEq7-W_z53UrtFael4O-40"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline&quot;/&gt;" data-label=""
-           data-tags="simple pipeline">
-            <path d="M 471.64 320.75 L 403 320.83 L 403 288 L 354.5 288" fill="none" stroke="#000000" stroke-width="3"
-                  stroke-miterlimit="10"/>
-        </g>
-        <g id="cell-HRoSpS79B9qHWH9jaoA8-1"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
-           data-tags="forwarding simple pipeline">
-            <rect x="232" y="517.5" width="1" height="1" fill="#000000" stroke="none"/>
-        </g>
-        <g id="cell-HRoSpS79B9qHWH9jaoA8-2"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple forwarding pipeline&quot;/&gt;" data-label=""
-           data-tags="simple forwarding pipeline">
-            <path d="M 232 518 L 211 518 L 211 475.18 C 213.6 475.18 213.6 471.18 211 471.18 L 211 471.18 L 211 432 C 213.6 432 213.6 428 211 428 L 211 428 L 211 415 C 213.6 415 213.6 411 211 411 L 211 411 L 211 327 L 231 327"
-                  fill="none" stroke="#000000" stroke-miterlimit="10"/>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-93"
-           content="&lt;UserObject label=&quot;00&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;reg-id-value&quot; source=&quot;decode-rd&quot;/&gt;"
-           data-label="00" data-tags="simple pipeline forwarding" data-component="reg-id-value" data-source="decode-rd">
-            <rect x="314" y="408" width="14" height="8" rx="0.08" ry="0.08" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="320.5" y="413.5">00</text>
-            </g>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-96"
-           content="&lt;UserObject label=&quot;Write data&quot; tags=&quot;pipeline forwarding simple&quot;/&gt;"
-           data-label="Write data" data-tags="pipeline forwarding simple">
-            <rect x="491" y="357" width="47" height="8" fill="none" stroke="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                <text x="514" y="362">Write data</text>
+                <text x="79" y="30.75">ADD $0, $1, $3</text>
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-40"
            content="&lt;UserObject label=&quot;Registers&quot; tags=&quot;simple pipeline forwarding&quot; link=&quot;#registers&quot;/&gt;"
            data-label="Registers" data-tags="simple pipeline forwarding" data-link="#registers">
             <a xlink:href="#registers">
-                <rect x="231" y="258" width="60" height="80" rx="1.2" ry="1.2" fill="#ffffff" stroke="#000000"/>
-                <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                    <text x="260.5" y="299.5">Registers</text>
+                <rect x="219" y="247" width="47" height="78" rx="0.94" ry="0.94" fill="rgb(255, 255, 255)"
+                      stroke="rgb(0, 0, 0)"/>
+                <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                    <text x="242" y="287.5">Registers</text>
                 </g>
             </a>
         </g>
@@ -879,286 +665,865 @@
            content="&lt;UserObject label=&quot;00000000&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;reg-value&quot; source=&quot;decode-rs2&quot;/&gt;"
            data-label="00000000" data-tags="simple pipeline forwarding" data-component="reg-value"
            data-source="decode-rs2">
-            <rect x="298.5" y="283.5" width="56" height="8" rx="0.08" ry="0.08" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="326" y="289">00000000</text>
+            <rect x="271" y="309" width="56" height="8" rx="0.08" ry="0.08" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="298.5" y="314.5">00000000</text>
             </g>
-        </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-139"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 565 206 L 569 206 L 569 218 L 552 218 L 552 294.31 C 554.6 294.31 554.6 298.31 552 298.31 L 552 298.31 L 552 365 C 554.6 365 554.6 369 552 369 L 552 369 L 552 411 C 554.6 411 554.6 415 552 415 L 552 415 L 552 440"
-                  fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-154"
            content="&lt;UserObject label=&quot;00&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;reg-id-value&quot; source=&quot;wb-rd&quot;/&gt;"
            data-label="00" data-tags="simple pipeline forwarding" data-component="reg-id-value" data-source="wb-rd">
-            <rect x="314" y="514" width="14" height="8" rx="0.08" ry="0.08" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="320.5" y="519.5">00</text>
+            <rect x="199" y="301" width="14" height="8" rx="0.08" ry="0.08" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="205.5" y="306.5">00</text>
+            </g>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-200"
+           content="&lt;UserObject label=&quot;00000000&quot; tags=&quot;forwarding simple pipeline&quot; component=&quot;reg-value&quot; source=&quot;alu-src2&quot;/&gt;"
+           data-label="00000000" data-tags="forwarding simple pipeline" data-component="reg-value"
+           data-source="alu-src2">
+            <rect x="409.5" y="303.5" width="64" height="7" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)" transform="rotate(90,441.5,307)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px"
+               transform="rotate(-90,441.5,307)">
+                <text x="441" y="308.5">00000000</text>
             </g>
         </g>
         <g id="cell-HRoSpS79B9qHWH9jaoA8-25"
            content="&lt;UserObject label=&quot;Terminal&quot; link=&quot;#terminal&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
            data-label="Terminal" data-link="#terminal" data-tags="simple pipeline forwarding">
             <a xlink:href="#terminal">
-                <rect x="595" y="378" width="45" height="16" rx="2.72" ry="2.72" fill="#ffffff" stroke="#000000"/>
-                <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                    <text x="617" y="387.5">Terminal</text>
+                <rect x="584" y="257" width="45" height="16" rx="2.72" ry="2.72" fill="rgb(255, 255, 255)"
+                      stroke="rgb(0, 0, 0)"/>
+                <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                    <text x="606" y="266.5">Terminal</text>
                 </g>
             </a>
         </g>
+        <g id="cell-1xC1WIjRaXcGuhJV2cBO-2"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline&quot;/&gt;" data-label=""
+           data-tags="simple pipeline">
+            <path d="M 403.64 265.75 L 334.8 265.8 L 334.8 258 L 266 258" fill="none" stroke="#000000" stroke-width="2"
+                  stroke-miterlimit="10"/>
+        </g>
         <g id="cell-dQApTKY7MUPNvbngPjsP-5"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;mux2&quot; source=&quot;mem-branch-or-jump&quot;/&gt;"
-           data-label="" data-tags="simple pipeline forwarding" data-component="mux2" data-source="mem-branch-or-jump">
-            <path d="M 21.55 409 L 31.27 413.17 L 31.27 429.83 L 21.55 434 L 21.55 424.28 L 21.55 418.72 Z"
-                  fill="#ffffff" stroke="#000000" stroke-linejoin="bevel" stroke-miterlimit="10"/>
-            <path d="M 20.99 417.75 L 31.83 421.5 Z" fill="#ffffff" stroke="#000000" stroke-width="2.78"
-                  stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"/>
-            <path d="M 20.99 425.25 L 31.83 421.5 Z" fill="#ffffff" stroke="#000000" stroke-width="2.78"
-                  stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"/>
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;mux2&quot; source=&quot;mem-BranchOutcome&quot;/&gt;"
+           data-label="" data-tags="simple pipeline forwarding" data-component="mux2" data-source="mem-BranchOutcome">
+            <path d="M 66.75 266.5 L 77.25 271 L 77.25 289 L 66.75 293.5 L 66.75 283 L 66.75 277 Z"
+                  fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-linejoin="bevel" stroke-miterlimit="10"
+                  transform="translate(0,280)scale(1,-1)translate(0,-280)"/>
+            <path d="M 66.15 275.95 L 77.85 280 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-width="2.4"
+                  stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"
+                  transform="translate(0,280)scale(1,-1)translate(0,-280)"/>
+            <path d="M 66.15 284.05 L 77.85 280 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-width="2.4"
+                  stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"
+                  transform="translate(0,280)scale(1,-1)translate(0,-280)"/>
+        </g>
+        <g id="cell-i2To6XwWsyNyerFe5G8K-6"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <rect x="700" y="69" width="77" height="28" fill="none" stroke="none"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-187"
            content="&lt;UserObject label=&quot;Cycles:&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
            data-label="Cycles:" data-tags="simple pipeline forwarding">
-            <rect x="703" y="70" width="41" height="8" fill="none" stroke="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                <text x="723" y="75">Cycles:</text>
+            <rect x="702" y="70" width="41" height="8" fill="none" stroke="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="722" y="75">Cycles:</text>
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-188"
            content="&lt;UserObject label=&quot;Stalls:&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
            data-label="Stalls:" data-tags="simple pipeline forwarding">
-            <rect x="701" y="85" width="41" height="8" fill="none" stroke="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                <text x="721" y="90">Stalls:</text>
+            <rect x="700" y="85" width="41" height="8" fill="none" stroke="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="720" y="90">Stalls:</text>
             </g>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-78"
-           content="&lt;object label=&quot;0&quot; component=&quot;debug-value&quot; source=&quot;cycle-count&quot; tags=&quot;simple forwarding hazardunit pipeline&quot;/&gt;"
-           data-label="0" data-component="debug-value" data-source="cycle-count"
-           data-tags="simple forwarding hazardunit pipeline">
-            <rect x="738" y="69" width="40" height="10" fill="none" stroke="none"/>
+           content="&lt;object label=&quot;0&quot; component=&quot;debug-value&quot; source=&quot;CycleCount&quot; tags=&quot;simple hazardunit pipeline forwarding&quot;/&gt;"
+           data-label="0" data-component="debug-value" data-source="CycleCount"
+           data-tags="simple hazardunit pipeline forwarding">
+            <rect x="737" y="69" width="40" height="10" fill="none" stroke="none"/>
             <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="9px">
-                <text x="737.5" y="76.5">0</text>
+                <text x="736.5" y="76.5">0</text>
             </g>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-79"
-           content="&lt;object label=&quot;0&quot; component=&quot;debug-value&quot; source=&quot;stall-count&quot; tags=&quot;simple forwarding hazardunit pipeline&quot;/&gt;"
-           data-label="0" data-component="debug-value" data-source="stall-count"
-           data-tags="simple forwarding hazardunit pipeline">
-            <rect x="738" y="83" width="40" height="10" fill="none" stroke="none"/>
+           content="&lt;object label=&quot;0&quot; component=&quot;debug-value&quot; source=&quot;StallCount&quot; tags=&quot;simple hazardunit pipeline forwarding&quot;/&gt;"
+           data-label="0" data-component="debug-value" data-source="StallCount"
+           data-tags="simple hazardunit pipeline forwarding">
+            <rect x="737" y="83" width="40" height="10" fill="none" stroke="none"/>
             <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="9px">
-                <text x="737.5" y="90.5">0</text>
+                <text x="736.5" y="90.5">0</text>
             </g>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-118"
            content="&lt;UserObject label=&quot;00000000&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;reg-value&quot; source=&quot;decode-rs1&quot;/&gt;"
            data-label="00000000" data-tags="simple pipeline forwarding" data-component="reg-value"
            data-source="decode-rs1">
-            <rect x="298" y="264" width="56" height="8" rx="0.08" ry="0.08" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="325.5" y="269.5">00000000</text>
+            <rect x="271" y="254" width="56" height="8" rx="0.08" ry="0.08" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="298.5" y="259.5">00000000</text>
+            </g>
+        </g>
+        <g id="cell-nrxDrlzc4rpCp8ehld49-5"
+           content="&lt;UserObject label=&quot;AuiPC&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="AuiPC" data-tags="simple pipeline forwarding">
+            <rect x="265" y="190.5" width="18" height="4" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <text x="264.5" y="194">AuiPC</text>
+            </g>
+        </g>
+        <g id="cell-hCaf9_x39W0CY-DPdxUN-16"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding hazardunit pipeline simple&quot;/&gt;"
+           data-label="" data-tags="forwarding hazardunit pipeline simple">
+            <path d="M 413.36 269.5 L 450.7 269.5" fill="none" stroke="#000000" stroke-width="2"
+                  stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-i2To6XwWsyNyerFe5G8K-12"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; source=&quot;exec-AuiPC&quot; component=&quot;mux2&quot;/&gt;"
+           data-label="" data-tags="simple pipeline forwarding" data-source="exec-AuiPC" data-component="mux2">
+            <path d="M 403.64 257 L 413.36 261.17 L 413.36 277.83 L 403.64 282 L 403.64 272.28 L 403.64 266.72 Z"
+                  fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-linejoin="bevel" stroke-miterlimit="10"/>
+            <path d="M 403.08 265.75 L 413.92 269.5 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)"
+                  stroke-width="2.22" stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"/>
+            <path d="M 403.08 273.25 L 413.92 269.5 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)"
+                  stroke-width="2.22" stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-nrxDrlzc4rpCp8ehld49-12"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
+           data-tags="simple pipeline forwarding">
+            <path d="M 490 165 L 481 165 L 481 160 L 250.2 160 L 250.2 162.11" fill="none" stroke="#3333ff"
+                  stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-nrxDrlzc4rpCp8ehld49-18"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 496.22 165 L 516 165" fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-nrxDrlzc4rpCp8ehld49-16"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
+           data-tags="simple pipeline forwarding">
+            <path d="M 490 165 L 491.6 165" fill="rgb(255, 255, 255)" stroke="#3333ff" stroke-miterlimit="10"/>
+            <path d="M 496.72 165 L 498 165" fill="rgb(255, 255, 255)" stroke="#3333ff" stroke-miterlimit="10"/>
+            <path d="M 496.16 165 L 491.36 168 L 491.36 162 Z" fill="rgb(255, 255, 255)" stroke="#3333ff"
+                  stroke-miterlimit="10"/>
+            <ellipse cx="496.48" cy="165" rx="0.32" ry="0.4" fill="rgb(255, 255, 255)" stroke="#3333ff"/>
+        </g>
+        <g id="cell-nrxDrlzc4rpCp8ehld49-11"
+           content="&lt;UserObject label=&quot;BranchVal&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="BranchVal" data-tags="simple pipeline forwarding">
+            <rect x="265" y="158" width="29.5" height="4.5" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="279.25" y="161.75">BranchVal</text>
+            </g>
+        </g>
+        <g id="cell-uWEq7-W_z53UrtFael4O-77"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-BranchBxx&quot;/&gt;"
+           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
+           data-source="decode-BranchBxx">
+            <rect x="305" y="132" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="308.5" y="137.5">0</text>
+            </g>
+        </g>
+        <g id="cell-nrxDrlzc4rpCp8ehld49-31"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-AuiPC&quot;/&gt;"
+           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value" data-source="decode-AuiPC">
+            <rect x="318.25" y="188" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="321.75" y="193.5">0</text>
+            </g>
+        </g>
+        <g id="cell-nrxDrlzc4rpCp8ehld49-25"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
+           data-tags="simple pipeline forwarding">
+            <path d="M 538.88 144.26 L 263 144.3 L 250 144.3" fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-nrxDrlzc4rpCp8ehld49-29"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-BranchJal&quot;/&gt;"
+           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
+           data-source="decode-BranchJal">
+            <rect x="318.25" y="140" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="321.75" y="145.5">0</text>
+            </g>
+        </g>
+        <g id="cell-nrxDrlzc4rpCp8ehld49-34"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;debug-value&quot; source=&quot;exec-AluControl&quot;/&gt;"
+           data-label="0" data-tags="simple pipeline forwarding" data-component="debug-value"
+           data-source="exec-AluControl">
+            <rect x="469" y="245" width="15.5" height="8" rx="0.08" ry="0.08" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="476.25" y="250.5">0</text>
+            </g>
+        </g>
+        <g id="cell-jkDunDTEjqUDAv3C6Bv7-5"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 525 167 L 537 167 L 537 165.75" fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-nrxDrlzc4rpCp8ehld49-40"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
+           data-tags="simple pipeline forwarding">
+            <path d="M 523.2 167 L 525 167 M 516 165 L 518.07 165 M 516 169 L 518.07 169" fill="none" stroke="#3333ff"
+                  stroke-miterlimit="10"/>
+            <path d="M 516.9 163 C 517.86 165.48 517.86 168.52 516.9 171" fill="none" stroke="#3333ff"
+                  stroke-miterlimit="10"/>
+            <path d="M 519.6 163 C 521.17 163.07 522.58 164.63 523.2 167 C 522.58 169.37 521.17 170.93 519.6 171 L 517.35 171 C 518.31 168.52 518.31 165.48 517.35 163 Z"
+                  fill="rgb(255, 255, 255)" stroke="#3333ff" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-dX68U42Ih_FQ-UEPESkK-6"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;mux2&quot; source=&quot;mem-BranchJalx&quot;/&gt;"
+           data-label="" data-tags="simple pipeline forwarding" data-component="mux2" data-source="mem-BranchJalx">
+            <path d="M 549.75 367 L 560.25 371.5 L 560.25 389.5 L 549.75 394 L 549.75 383.5 L 549.75 377.5 Z"
+                  fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-linejoin="bevel" stroke-miterlimit="10"/>
+            <path d="M 549.15 376.45 L 560.85 380.5 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)"
+                  stroke-width="2.4" stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"/>
+            <path d="M 549.15 384.55 L 560.85 380.5 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)"
+                  stroke-width="2.4" stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-dX68U42Ih_FQ-UEPESkK-10"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <ellipse cx="95" cy="363" rx="1" ry="1" fill="#0" stroke="rgb(0, 0, 0)" stroke-width="2"/>
+        </g>
+        <g id="cell-dX68U42Ih_FQ-UEPESkK-12"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 135 383 L 135 351 L 128.5 351" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2"
+                  stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-dX68U42Ih_FQ-UEPESkK-11"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <ellipse cx="135" cy="384" rx="1" ry="1" fill="#0" stroke="rgb(0, 0, 0)" stroke-width="2"/>
+        </g>
+        <g id="cell-dX68U42Ih_FQ-UEPESkK-14"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 95 281 L 95 362" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-dX68U42Ih_FQ-UEPESkK-13"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <ellipse cx="95" cy="280" rx="1" ry="1" fill="#0" stroke="rgb(0, 0, 0)" stroke-width="2"/>
+        </g>
+        <g id="cell-dX68U42Ih_FQ-UEPESkK-15"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 89 280 L 94 280" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-hCaf9_x39W0CY-DPdxUN-0"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <ellipse cx="175" cy="276" rx="1" ry="1" fill="#0" stroke="rgb(0, 0, 0)" stroke-width="2"/>
+        </g>
+        <g id="cell-hCaf9_x39W0CY-DPdxUN-2"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 175 290 L 175 277" fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-hCaf9_x39W0CY-DPdxUN-1"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <ellipse cx="175" cy="291" rx="1" ry="1" fill="#0" stroke="rgb(0, 0, 0)" stroke-width="2"/>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-104"
+           content="&lt;UserObject label=&quot;rs2&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="rs2" data-tags="simple pipeline forwarding">
+            <rect x="184" y="287" width="12" height="8" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="189.5" y="292">rs2</text>
+            </g>
+        </g>
+        <g id="cell-hCaf9_x39W0CY-DPdxUN-3"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <ellipse cx="175" cy="411" rx="1" ry="1" fill="#0" stroke="rgb(0, 0, 0)" stroke-width="2"/>
+        </g>
+        <g id="cell-hCaf9_x39W0CY-DPdxUN-6"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 175 357 L 175 410" fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-hCaf9_x39W0CY-DPdxUN-5"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <ellipse cx="175" cy="356" rx="1" ry="1" fill="#0" stroke="rgb(0, 0, 0)" stroke-width="2"/>
+        </g>
+        <g id="cell-hCaf9_x39W0CY-DPdxUN-8"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <ellipse cx="408" cy="356" rx="1" ry="1" fill="#0" stroke="rgb(0, 0, 0)" stroke-width="2"/>
+        </g>
+        <g id="cell-uWEq7-W_z53UrtFael4O-38"
+           content="&lt;UserObject label=&quot;00000000&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;reg-value&quot; source=&quot;decode-imm&quot;/&gt;"
+           data-label="00000000" data-tags="simple pipeline forwarding" data-component="reg-value"
+           data-source="decode-imm">
+            <rect x="271" y="352" width="56" height="8" rx="0.08" ry="0.08" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="298.5" y="357.5">00000000</text>
+            </g>
+        </g>
+        <g id="cell-hCaf9_x39W0CY-DPdxUN-15"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 401 321 L 414.6 321" fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-hCaf9_x39W0CY-DPdxUN-13"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <ellipse cx="400" cy="321" rx="1" ry="1" fill="#0" stroke="rgb(0, 0, 0)" stroke-width="2"/>
+        </g>
+        <g id="cell-HRoSpS79B9qHWH9jaoA8-23"
+           content="&lt;UserObject label=&quot;00000000&quot; tags=&quot;forwarding pipeline simple&quot; component=&quot;reg-value&quot; source=&quot;alu-src1&quot;/&gt;"
+           data-label="00000000" data-tags="forwarding pipeline simple" data-component="reg-value"
+           data-source="alu-src1">
+            <rect x="399.5" y="283" width="64" height="7" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)" transform="rotate(90,431.5,286.5)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px"
+               transform="rotate(-90,431.5,286.5)">
+                <text x="431" y="288">00000000</text>
+            </g>
+        </g>
+        <g id="cell-nrxDrlzc4rpCp8ehld49-19"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-BranchVal&quot;/&gt;"
+           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
+           data-source="decode-BranchVal">
+            <rect x="318.25" y="156" width="7" height="7.86" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="321.75" y="161.43">0</text>
+            </g>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-221"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding pipeline simple&quot;/&gt;" data-label=""
+           data-tags="forwarding pipeline simple">
+            <rect x="381" y="351.5" width="20" height="28" fill="none" stroke="none"/>
+        </g>
+        <g id="cell-hCaf9_x39W0CY-DPdxUN-19"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <rect x="464" y="352.5" width="20" height="30" fill="none" stroke="none"/>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-222"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
+           data-tags="simple pipeline forwarding">
+            <path d="M 469 352.5 L 479 362.5 L 479 372.5 L 469 382.5 L 469 370.83 L 472.33 367.5 L 469 364.17 Z"
+                  fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-linejoin="bevel" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-223"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
+           data-tags="simple pipeline forwarding">
+            <path d="M 476 367.5 L 476 365.5 L 476 367.5 L 474 367.5 L 476 367.5 L 478 367.5 L 476 367.5 L 476 369.5 L 476 367.5"
+                  fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-linejoin="round" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-hCaf9_x39W0CY-DPdxUN-23"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding pipeline simple&quot;/&gt;" data-label=""
+           data-tags="forwarding pipeline simple">
+            <path d="M 392 375 L 392 272.3 L 403.64 272.25" fill="none" stroke="#000000" stroke-width="2"
+                  stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-8Br1XOdIxK8N6TFEatcO-2"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding pipeline simple&quot;/&gt;" data-label=""
+           data-tags="forwarding pipeline simple">
+            <path d="M 393 384 L 472 384 L 549.75 384.55" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2"
+                  stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-hCaf9_x39W0CY-DPdxUN-22"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <rect x="391" y="383" width="2" height="2" fill="#0" stroke="none"/>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-195"
+           content="&lt;UserObject label=&quot;AluSrc&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="AluSrc" data-tags="simple pipeline forwarding">
+            <rect x="265" y="182" width="19.5" height="4" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="274.25" y="185.5">AluSrc</text>
+            </g>
+        </g>
+        <g id="cell-nrxDrlzc4rpCp8ehld49-24"
+           content="&lt;UserObject label=&quot;BranchJal&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="BranchJal" data-tags="simple pipeline forwarding">
+            <rect x="265" y="141" width="29" height="5" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <text x="264.5" y="145">BranchJal</text>
+            </g>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-105"
+           content="&lt;UserObject label=&quot;00000000&quot; tags=&quot;pipeline forwarding simple&quot; component=&quot;reg-value&quot; source=&quot;alu-res&quot;/&gt;"
+           data-label="00000000" data-tags="pipeline forwarding simple" data-component="reg-value"
+           data-source="alu-res">
+            <rect x="454.5" y="291.5" width="64" height="7" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)" transform="rotate(90,486.5,295)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px"
+               transform="rotate(-90,486.5,295)">
+                <text x="486" y="296.5">00000000</text>
             </g>
         </g>
         <g id="cell-CJ-m8BARnU2k4Bpp9hul-5"
            content="&lt;UserObject label=&quot;00000000&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;reg-value&quot; source=&quot;mem-write-val&quot;/&gt;"
            data-label="00000000" data-tags="simple pipeline forwarding" data-component="reg-value"
            data-source="mem-write-val">
-            <rect x="532.5" y="365.5" width="64" height="7" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"
-                  transform="rotate(90,564.5,369)"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px"
-               transform="rotate(-90,564.5,369)">
-                <text x="564" y="370.5">00000000</text>
+            <rect x="543.5" y="327.5" width="64" height="7" rx="0.07" ry="0.07" fill="#ffffff" stroke="rgb(0, 0, 0)"
+                  transform="rotate(90,575.5,331)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px"
+               transform="rotate(-90,575.5,331)">
+                <text x="575" y="332.5">00000000</text>
             </g>
         </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-5"
-           content="&lt;UserObject label=&quot;PcToAlu&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
-           data-label="PcToAlu" data-tags="simple pipeline forwarding">
-            <rect x="286.5" y="170.5" width="40" height="8" fill="none" stroke="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                <text x="286" y="176">PcToAlu</text>
-            </g>
+        <g id="cell-nrxDrlzc4rpCp8ehld49-22"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;mux2&quot; source=&quot;mem-BranchJalr&quot;/&gt;"
+           data-label="" data-tags="simple pipeline forwarding" data-component="mux2" data-source="mem-BranchJalr">
+            <path d="M 523.75 350 L 534.25 354.5 L 534.25 372.5 L 523.75 377 L 523.75 366.5 L 523.75 360.5 Z"
+                  fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-linejoin="bevel" stroke-miterlimit="10"
+                  transform="translate(0,363.5)scale(1,-1)translate(0,-363.5)"/>
+            <path d="M 523.15 359.45 L 534.85 363.5 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)"
+                  stroke-width="2.4" stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"
+                  transform="translate(0,363.5)scale(1,-1)translate(0,-363.5)"/>
+            <path d="M 523.15 367.55 L 534.85 363.5 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)"
+                  stroke-width="2.4" stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"
+                  transform="translate(0,363.5)scale(1,-1)translate(0,-363.5)"/>
         </g>
-        <g id="cell-i2To6XwWsyNyerFe5G8K-12"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; source=&quot;exec-pc-to-alu&quot; component=&quot;mux2&quot;/&gt;"
-           data-label="" data-tags="simple pipeline forwarding" data-source="exec-pc-to-alu" data-component="mux2">
-            <path d="M 396.64 242 L 406.36 246.17 L 406.36 262.83 L 396.64 267 L 396.64 257.28 L 396.64 251.72 Z"
-                  fill="#ffffff" stroke="#000000" stroke-linejoin="bevel" stroke-miterlimit="10"/>
-            <path d="M 396.08 250.75 L 406.92 254.5 Z" fill="#ffffff" stroke="#000000" stroke-width="2.78"
-                  stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"/>
-            <path d="M 396.08 258.25 L 406.92 254.5 Z" fill="#ffffff" stroke="#000000" stroke-width="2.78"
-                  stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"/>
-        </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-12"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 514 207 L 512 207 L 512 157 L 251.17 157 L 251.2 163.73" fill="none" stroke="#3333ff"
-                  stroke-miterlimit="10"/>
-        </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-18">
-            <path d="M 522 207 L 542 207 L 525.5 207 L 545.5 207" fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
-        </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-16"
+        <g id="cell-8Br1XOdIxK8N6TFEatcO-1"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
            data-tags="forwarding simple pipeline">
-            <path d="M 514 207 L 515.6 207" fill="#ffffff" stroke="#3333ff" stroke-miterlimit="10"/>
-            <path d="M 520.72 207 L 522 207" fill="#ffffff" stroke="#3333ff" stroke-miterlimit="10"/>
-            <path d="M 520.16 207 L 515.36 209.5 L 515.36 204.5 Z" fill="#ffffff" stroke="#3333ff"
+            <path d="M 545 295.5 L 545 377 L 549.8 377" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2"
                   stroke-miterlimit="10"/>
-            <ellipse cx="520.48" cy="207" rx="0.32" ry="0.3333333333333333" fill="#ffffff" stroke="#3333ff"/>
         </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-84"
+        <g id="cell-kLYEyaSkJVZjgnE96DWi-3"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
            data-tags="simple pipeline forwarding">
-            <path d="M 559.5 201 Q 565 201 565 206 Q 565 211 559.5 211 Z" fill="#ffffff" stroke="#3333ff"
-                  stroke-miterlimit="10"/>
-        </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-21"
-           content="&lt;UserObject label=&quot;Branch&amp;#10;taken&quot; tags=&quot;pipeline forwarding simple&quot;/&gt;"
-           data-label="Branch&#10;taken" data-tags="pipeline forwarding simple">
-            <rect x="542" y="186" width="31" height="14" fill="none" stroke="none"/>
-            <g fill="#3333FF" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                <text x="557" y="190.5">Branch</text>
-                <text x="557" y="197.5">taken</text>
-            </g>
-        </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-23">
-            <path d="M 595.36 464.5 L 615 464.5 L 615 496 L 215 496 C 215 490.8 207 490.8 207 496 L 207 496 L 177 496 C 177 490.8 169 490.8 169 496 L 169 496 L 11 496 L 11 425.33 L 21.55 425.25"
-                  fill="none" stroke="#000000" stroke-width="3" stroke-miterlimit="10"/>
-        </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-24"
-           content="&lt;UserObject label=&quot;Jump&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
-           data-label="Jump" data-tags="simple pipeline forwarding">
-            <rect x="286.5" y="135.5" width="40" height="8" fill="none" stroke="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                <text x="286" y="141">Jump</text>
-            </g>
-        </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-11"
-           content="&lt;UserObject label=&quot;BranchVal&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
-           data-label="BranchVal" data-tags="simple pipeline forwarding">
-            <rect x="286.5" y="149.5" width="40" height="8" fill="none" stroke="none"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                <text x="286" y="155">BranchVal</text>
-            </g>
-        </g>
-        <g id="cell-uWEq7-W_z53UrtFael4O-77"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-branch&quot;/&gt;"
-           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
-           data-source="decode-branch">
-            <rect x="330" y="146.5" width="7" height="8" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="333" y="152">0</text>
-            </g>
+            <ellipse cx="545" cy="294.5" rx="1" ry="1" fill="#0" stroke="rgb(0, 0, 0)" stroke-width="2"/>
         </g>
         <g id="cell-Haz_8EwUBin59iLyk_8Q-85"
            content="&lt;UserObject label=&quot;Control&amp;#10;Unit&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
            data-label="Control&#10;Unit" data-tags="simple pipeline forwarding">
-            <rect x="211" y="105" width="40" height="75" rx="3.2" ry="3.2" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                <text x="230.5" y="140.5">Control</text>
-                <text x="230.5" y="147.5">Unit</text>
+            <rect x="210" y="99" width="40" height="98" rx="3.2" ry="3.2" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="229.5" y="146">Control</text>
+                <text x="229.5" y="153">Unit</text>
             </g>
         </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-31"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-pc-to-alu&quot;/&gt;"
-           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
-           data-source="decode-pc-to-alu">
-            <rect x="330" y="174" width="7" height="8" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="333" y="179.5">0</text>
-            </g>
+        <g id="cell-8Br1XOdIxK8N6TFEatcO-5"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;pipeline simple forwarding&quot;/&gt;" data-label=""
+           data-tags="pipeline simple forwarding">
+            <path d="M 549.2 148 L 551.78 148 M 538.88 144.25 L 541.84 144.25 M 538.88 151.75 L 541.84 151.75"
+                  fill="none" stroke="#3333ff" stroke-miterlimit="10" transform="rotate(360,545.33,148)"/>
+            <path d="M 544.04 140.5 C 546.29 140.64 548.31 143.57 549.2 148 C 548.31 152.44 546.29 155.37 544.04 155.5 L 540.81 155.5 C 542.2 150.86 542.2 145.15 540.81 140.5 Z"
+                  fill="rgb(255, 255, 255)" stroke="#3333ff" stroke-miterlimit="10" transform="rotate(360,545.33,148)"/>
         </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-22"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;mux2&quot; source=&quot;mem-jump&quot;/&gt;"
-           data-label="" data-tags="simple pipeline forwarding" data-component="mux2" data-source="mem-jump">
-            <path d="M 585.64 452 L 595.36 456.17 L 595.36 472.83 L 585.64 477 L 585.64 467.28 L 585.64 461.72 Z"
-                  fill="#ffffff" stroke="#000000" stroke-linejoin="bevel" stroke-miterlimit="10"/>
-            <path d="M 585.08 460.75 L 595.92 464.5 Z" fill="#ffffff" stroke="#000000" stroke-width="2.78"
-                  stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"/>
-            <path d="M 585.08 468.25 L 595.92 464.5 Z" fill="#ffffff" stroke="#000000" stroke-width="2.78"
-                  stroke-linejoin="bevel" stroke-linecap="round" stroke-miterlimit="10"/>
-        </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-25"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
-           data-tags="simple pipeline forwarding">
-            <path d="M 590.5 453.63 L 590.5 439 L 579.91 439 C 579.91 436.4 575.91 436.4 575.91 439 L 575.91 439 L 556 439 L 556 415 C 558.6 415 558.6 411 556 411 L 556 411 L 556 369 C 558.6 369 558.6 365 556 365 L 556 365 L 556 298.34 C 558.6 298.34 558.6 294.34 556 294.34 L 556 294.34 L 556 224 L 572 224 L 572 143 L 251 143"
-                  fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
-        </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-29"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-jump&quot;/&gt;"
-           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value" data-source="decode-jump">
-            <rect x="345" y="139.24" width="7" height="8" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="348" y="144.74">0</text>
-            </g>
-        </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-34"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;debug-value&quot; source=&quot;exec-alu-op&quot;/&gt;"
-           data-label="0" data-tags="simple pipeline forwarding" data-component="debug-value" data-source="exec-alu-op">
-            <rect x="494.5" y="241" width="15.5" height="8" rx="0.08" ry="0.08" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="501.75" y="246.5">0</text>
-            </g>
-        </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-35"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;mem-jump&quot;/&gt;"
-           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value" data-source="mem-jump">
-            <rect x="586.87" y="435" width="7.25" height="8" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="589.99" y="440.5">0</text>
-            </g>
-        </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-37">
-            <path d="M 556 440 L 556 439" fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
-        </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-36"
-           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding pipeline simple&quot;/&gt;" data-label=""
-           data-tags="forwarding pipeline simple">
-            <path d="M 556.4 444 L 558 444 M 550 442 L 551.84 442 M 550 446 L 551.84 446" fill="none" stroke="#3333ff"
-                  stroke-miterlimit="10" transform="rotate(90,554,444)"/>
-            <path d="M 553.2 440 C 554.6 440.07 555.84 441.63 556.4 444 C 555.84 446.37 554.6 447.93 553.2 448 L 551.2 448 C 552.06 445.52 552.06 442.48 551.2 440 Z"
-                  fill="#ffffff" stroke="#3333ff" stroke-miterlimit="10" transform="rotate(90,554,444)"/>
-        </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-38">
-            <path d="M 554 448 L 554 458.72 C 556.6 458.72 556.6 462.72 554 462.72 L 554 462.72 L 554 494 C 556.6 494 556.6 498 554 498 L 554 498 L 554 504 L 213 504 C 213 501.4 209 501.4 209 504 L 209 504 L 175 504 C 175 501.4 171 501.4 171 504 L 171 504 L 26.42 504 L 26.42 498 C 29.02 498 29.02 494 26.42 494 L 26.42 494 L 26.41 432.38"
-                  fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
-        </g>
-        <g id="cell-uWEq7-W_z53UrtFael4O-66"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;mem-branch-or-jump&quot;/&gt;"
-           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
-           data-source="mem-branch-or-jump">
-            <rect x="22.91" y="444" width="7" height="8" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="25.91" y="449.5">0</text>
-            </g>
-        </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-40"
+        <g id="cell-jkDunDTEjqUDAv3C6Bv7-9"
            content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
            data-tags="forwarding simple pipeline">
-            <path d="M 556.7 209 L 559.5 209 M 545.5 207 L 548.72 207 M 545.5 211 L 548.72 211" fill="none"
-                  stroke="#3333ff" stroke-miterlimit="10"/>
-            <path d="M 546.9 205 C 548.4 207.48 548.4 210.52 546.9 213" fill="none" stroke="#3333ff"
+            <path d="M 556 148 L 560 148 L 560 157.9 L 561.25 157.94" fill="none" stroke="#3333ff"
                   stroke-miterlimit="10"/>
-            <path d="M 551.1 205 C 553.55 205.07 555.73 206.63 556.7 209 C 555.73 211.37 553.55 212.93 551.1 213 L 547.6 213 C 549.1 210.52 549.1 207.48 547.6 205 Z"
-                  fill="#ffffff" stroke="#3333ff" stroke-miterlimit="10"/>
         </g>
-        <g id="cell-Haz_8EwUBin59iLyk_8Q-202"
-           content="&lt;UserObject label=&quot;IF/ID&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
-           data-label="IF/ID" data-tags="simple pipeline forwarding">
-            <rect x="143" y="76" width="42" height="7.98" fill="none" stroke="none"/>
+        <g id="cell-q-6THzIC0rTZull3DPy9-9"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 554 148 L 551.79 148.01" fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-10"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 555 149 L 555 368.75" fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-8Br1XOdIxK8N6TFEatcO-7"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
+           data-tags="simple pipeline forwarding">
+            <ellipse cx="555" cy="148" rx="1" ry="1" fill="#0000ff" stroke="#0000ff"/>
+        </g>
+        <g id="cell-jkDunDTEjqUDAv3C6Bv7-1"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 530 152 L 538.9 152" fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-84"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
+           data-tags="simple pipeline forwarding">
+            <path d="M 537 160.75 Q 542.5 160.75 542.5 165.75 Q 542.5 170.75 537 170.75 Z" fill="rgb(255, 255, 255)"
+                  stroke="#3333ff" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-jkDunDTEjqUDAv3C6Bv7-4"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 533 137 L 533 163.3 L 537 163.25" fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-jkDunDTEjqUDAv3C6Bv7-7"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 561.25 165.82 L 542.5 165.75" fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-7"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 529 153 L 529 164 L 529 351.75" fill="none" stroke="#3333ff" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-19"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 576.25 161.88 L 596 161.9 L 596 77 L 72 77 L 72 268.25" fill="none" stroke="#3333ff"
+                  stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-jkDunDTEjqUDAv3C6Bv7-8"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;pipeline simple forwarding&quot;/&gt;" data-label=""
+           data-tags="pipeline simple forwarding">
+            <path d="M 573.25 161.88 L 576.25 161.88 M 561.25 157.94 L 564.71 157.94 M 561.25 165.82 L 564.71 165.82"
+                  fill="none" stroke="#3333ff" stroke-miterlimit="10" transform="rotate(360,568.76,161.88)"/>
+            <path d="M 567.25 154 C 569.87 154.15 572.21 157.22 573.25 161.88 C 572.21 166.54 569.87 169.61 567.25 169.75 L 563.5 169.75 C 565.11 164.88 565.11 158.88 563.5 154 Z"
+                  fill="rgb(255, 255, 255)" stroke="#3333ff" stroke-miterlimit="10"
+                  transform="rotate(360,568.76,161.88)"/>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-0"
+           content="&lt;UserObject label=&quot; PC+4 &quot; tags=&quot;simple forwarding pipeline&quot;/&gt;"
+           data-label=" PC+4 " data-tags="simple forwarding pipeline">
+            <rect x="231" y="380" width="21" height="8" fill="none" stroke="none"/>
             <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                <text x="163.5" y="80.99">IF/ID</text>
+                <rect fill="rgb(255, 255, 255)" stroke="none" x="232" y="381" width="20" height="8" stroke-width="0"/>
+                <text x="241" y="385.5"> PC+4 </text>
             </g>
         </g>
-        <g id="cell-nrxDrlzc4rpCp8ehld49-19"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-bj-not&quot;/&gt;"
+        <g id="cell-q-6THzIC0rTZull3DPy9-2"
+           content="&lt;UserObject label=&quot; PC &quot; tags=&quot;simple forwarding pipeline&quot;/&gt;"
+           data-label=" PC " data-tags="simple forwarding pipeline">
+            <rect x="229" y="372" width="24.5" height="8" fill="none" stroke="none"/>
+            <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <rect fill="rgb(255, 255, 255)" stroke="none" x="235" y="373" width="14" height="8" stroke-width="0"/>
+                <text x="240.75" y="377.5"> PC </text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-5"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <path d="M 534.25 363.5 L 538 363.5 L 538 447 L 47 447 L 47 275.9 L 66.75 275.95" fill="none"
+                  stroke="#000000" stroke-width="2" stroke-miterlimit="10"/>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-93"
+           content="&lt;UserObject label=&quot;00&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;reg-id-value&quot; source=&quot;decode-rd&quot;/&gt;"
+           data-label="00" data-tags="simple pipeline forwarding" data-component="reg-id-value" data-source="decode-rd">
+            <rect x="258" y="408" width="14" height="8" rx="0.08" ry="0.08" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="264.5" y="413.5">00</text>
+            </g>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-95"
+           content="&lt;UserObject label=&quot;rd&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="rd" data-tags="simple pipeline forwarding">
+            <rect x="244" y="409" width="8" height="5" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="247.5" y="412.5">rd</text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-11"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
+           data-tags="simple pipeline forwarding">
+            <ellipse cx="533" cy="136" rx="1" ry="1" fill="#0000ff" stroke="none"/>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-96"
+           content="&lt;UserObject label=&quot; WriteData &quot; tags=&quot;pipeline simple forwarding&quot;/&gt;"
+           data-label=" WriteData " data-tags="pipeline simple forwarding">
+            <rect x="467" y="340" width="29" height="7" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="481" y="344.5"> WriteData </text>
+            </g>
+        </g>
+        <g id="cell-jkDunDTEjqUDAv3C6Bv7-0"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;" data-label=""
+           data-tags="simple pipeline forwarding">
+            <ellipse cx="529" cy="152" rx="1" ry="1" fill="#0000ff" stroke="#0000ff"/>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-12"
+           content="&lt;UserObject label=&quot;xor&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="xor" data-tags="simple pipeline forwarding">
+            <rect x="515" y="158" width="9" height="4" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <text x="514.5" y="161.5">xor</text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-17"
+           content="&lt;UserObject label=&quot;Branch&amp;#10;Jalx&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="Branch&#10;Jalx" data-tags="simple pipeline forwarding">
+            <rect x="544" y="176.5" width="21" height="11.5" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="554" y="180.25">Branch</text>
+                <text x="554" y="187.25">Jalx</text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-23"
+           content="&lt;UserObject label=&quot;BranchOutcome&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="BranchOutcome" data-tags="simple pipeline forwarding">
+            <rect x="540" y="71.25" width="49" height="11.5" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="564" y="78.5">BranchOutcome</text>
+            </g>
+        </g>
+        <g id="cell-uWEq7-W_z53UrtFael4O-66"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;mem-BranchOutcome&quot;/&gt;"
            data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
-           data-source="decode-bj-not">
-            <rect x="345" y="153" width="7" height="7.86" rx="0.07" ry="0.07" fill="#ffffff" stroke="#000000"/>
-            <g fill="#000000" font-family="sans-serif" text-anchor="middle" font-size="6px">
-                <text x="348" y="158.43">0</text>
+           data-source="mem-BranchOutcome">
+            <rect x="69" y="254" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="72.5" y="259.5">0</text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-24"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <rect x="102" y="250" width="50" height="78" fill="none" stroke="none"/>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-208"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;simple pipeline forwarding&quot; link=&quot;#program_memory&quot;/&gt;"
+           data-label="" data-tags="simple pipeline forwarding" data-link="#program_memory">
+            <a xlink:href="#program_memory">
+                <rect x="102" y="260" width="50" height="68" rx="1" ry="1" fill="rgb(255, 255, 255)"
+                      stroke="rgb(0, 0, 0)"/>
+            </a>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-209"
+           content="&lt;UserObject label=&quot;Program&amp;#10;Memory&quot; tags=&quot;simple pipeline forwarding&quot; link=&quot;#program_memory&quot;/&gt;"
+           data-label="Program&#10;Memory" data-tags="simple pipeline forwarding" data-link="#program_memory">
+            <a xlink:href="#program_memory">
+                <rect x="102" y="305" width="50" height="18" fill="none" stroke="none"/>
+                <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                    <text x="126.5" y="311.5">Program</text>
+                    <text x="126.5" y="318.5">Memory</text>
+                </g>
+            </a>
+        </g>
+        <g id="cell-uWEq7-W_z53UrtFael4O-36"
+           content="&lt;UserObject label=&quot;&quot; component=&quot;program-cache&quot; tags=&quot;simple pipeline forwarding&quot; link=&quot;#cache_program&quot;/&gt;"
+           data-label="" data-component="program-cache" data-tags="simple pipeline forwarding"
+           data-link="#cache_program">
+            <a xlink:href="#cache_program">
+                <rect x="102" y="259.17" width="50" height="41.67" rx="0.83" ry="0.83" fill="rgb(255, 255, 255)"
+                      stroke="rgb(0, 0, 0)"/>
+                <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="5px">
+                    <text x="126.5" y="271">Cache</text>
+                </g>
+                <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="5px">
+                    <text x="105.67" y="283.5">Hit:</text>
+                </g>
+                <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="5px">
+                    <text x="105.67" y="291">Miss:</text>
+                </g>
+                <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="5px">
+                    <text x="118.17" y="283.5">0</text>
+                </g>
+                <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="5px">
+                    <text x="122.33" y="291">0</text>
+                </g>
+            </a>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-25"
+           content="&lt;UserObject label=&quot; PC+4 &quot; tags=&quot;simple forwarding pipeline&quot;/&gt;"
+           data-label=" PC+4 " data-tags="simple forwarding pipeline">
+            <rect x="60.5" y="380" width="19.5" height="8" fill="none" stroke="none"/>
+            <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <rect fill="rgb(255, 255, 255)" stroke="none" x="60" y="381" width="20" height="8" stroke-width="0"/>
+                <text x="60" y="385.5"> PC+4 </text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-30"
+           content="&lt;UserObject label=&quot; BranchTarget &quot; tags=&quot;simple forwarding pipeline&quot;/&gt;"
+           data-label=" BranchTarget " data-tags="simple forwarding pipeline">
+            <rect x="52.5" y="443" width="38.5" height="8" fill="none" stroke="none"/>
+            <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <rect fill="rgb(255, 255, 255)" stroke="none" x="52" y="444" width="44" height="8" stroke-width="0"/>
+                <text x="52" y="448.5"> BranchTarget </text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-31"
+           content="&lt;UserObject label=&quot;Instruction&quot; tags=&quot;simple forwarding pipeline&quot;/&gt;"
+           data-label="Instruction" data-tags="simple forwarding pipeline">
+            <rect x="170" y="219" width="34" height="7" fill="none" stroke="none"/>
+            <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <rect fill="rgb(255, 255, 255)" stroke="none" x="170" y="220" width="33" height="8" stroke-width="0"/>
+                <text x="169.5" y="224">Instruction</text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-34"
+           content="&lt;UserObject label=&quot; RegWriteData &quot; tags=&quot;simple forwarding pipeline&quot;/&gt;"
+           data-label=" RegWriteData " data-tags="simple forwarding pipeline">
+            <rect x="203" y="432" width="39" height="8" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <rect fill="rgb(255, 255, 255)" stroke="none" x="203" y="433" width="45" height="8" stroke-width="0"/>
+                <text x="202.5" y="437.5"> RegWriteData </text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-36"
+           content="&lt;UserObject label=&quot; PC+4 &quot; tags=&quot;simple forwarding pipeline&quot;/&gt;"
+           data-label=" PC+4 " data-tags="simple forwarding pipeline">
+            <rect x="426" y="380" width="21" height="8" fill="none" stroke="none"/>
+            <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <rect fill="rgb(255, 255, 255)" stroke="none" x="427" y="381" width="20" height="8" stroke-width="0"/>
+                <text x="436" y="385.5"> PC+4 </text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-37"
+           content="&lt;UserObject label=&quot; PC &quot; tags=&quot;simple forwarding pipeline&quot;/&gt;"
+           data-label=" PC " data-tags="simple forwarding pipeline">
+            <rect x="424" y="372" width="24.5" height="8" fill="none" stroke="none"/>
+            <g fill="#000000" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <rect fill="rgb(255, 255, 255)" stroke="none" x="430" y="373" width="14" height="8" stroke-width="0"/>
+                <text x="435.75" y="377.5"> PC </text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-40"
+           content="&lt;UserObject label=&quot;AluMul&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="AluMul" data-tags="simple pipeline forwarding">
+            <rect x="265" y="174" width="20" height="4" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <text x="264.5" y="177.5">AluMul</text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-41"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-AluMul&quot;/&gt;"
+           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
+           data-source="decode-AluMul">
+            <rect x="318.25" y="173" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="321.75" y="178.5">0</text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-42"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;exec-AluMul&quot;/&gt;"
+           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value" data-source="exec-AluMul">
+            <rect x="462" y="245" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="465" y="250.5">0</text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-44"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;mem-BranchOutcome&quot;/&gt;"
+           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
+           data-source="mem-BranchOutcome">
+            <rect x="592" y="149" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="595" y="154.5">0</text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-45"
+           content="&lt;UserObject label=&quot; AluOut&quot; tags=&quot;simple forwarding pipeline&quot;/&gt;"
+           data-label=" AluOut" data-tags="simple forwarding pipeline">
+            <rect x="520" y="290.5" width="22" height="8" fill="none" stroke="none"/>
+            <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <rect fill="rgb(255, 255, 255)" stroke="none" x="520" y="292" width="24" height="8" stroke-width="0"/>
+                <text x="519.5" y="296"> AluOut</text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-47"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding simple pipeline&quot;/&gt;" data-label=""
+           data-tags="forwarding simple pipeline">
+            <ellipse cx="392" cy="376" rx="1" ry="1" fill="#0" stroke="rgb(0, 0, 0)" stroke-width="2"/>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-50"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;pipeline forwarding simple&quot; component=&quot;bool-value&quot; source=&quot;mem-MemRead&quot;/&gt;"
+           data-label="0" data-tags="pipeline forwarding simple" data-component="bool-value" data-source="mem-MemRead">
+            <rect x="631" y="216" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="634.5" y="221.5">0</text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-51"
+           content="&lt;UserObject label=&quot;MemRead&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="MemRead" data-tags="simple pipeline forwarding">
+            <rect x="265" y="124" width="28" height="8" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <text x="264.5" y="129.5">MemRead</text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-52"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;decode-MemRead&quot;/&gt;"
+           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
+           data-source="decode-MemRead">
+            <rect x="318.25" y="124" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="321.25" y="129.5">0</text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-54"
+           content="&lt;UserObject label=&quot;MemWrite&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="MemWrite" data-tags="simple pipeline forwarding">
+            <rect x="604" y="116" width="28" height="8" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <text x="603.5" y="121.5">MemWrite</text>
+            </g>
+        </g>
+        <g id="cell-q-6THzIC0rTZull3DPy9-55"
+           content="&lt;UserObject label=&quot;MemRead&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="MemRead" data-tags="simple pipeline forwarding">
+            <rect x="604" y="124" width="28" height="8" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" font-size="6px">
+                <text x="603.5" y="129.5">MemRead</text>
+            </g>
+        </g>
+        <g id="cell-1xC1WIjRaXcGuhJV2cBO-9"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;mem-BranchJalr&quot;/&gt;"
+           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
+           data-source="mem-BranchJalr">
+            <rect x="526" y="329" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="529.5" y="334.5">0</text>
+            </g>
+        </g>
+        <g id="cell-1xC1WIjRaXcGuhJV2cBO-10"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;bool-value&quot; source=&quot;mem-BranchJalx&quot;/&gt;"
+           data-label="0" data-tags="simple pipeline forwarding" data-component="bool-value"
+           data-source="mem-BranchJalx">
+            <rect x="552" y="355" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
+                  stroke="rgb(0, 0, 0)"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
+                <text x="555.5" y="360.5">0</text>
+            </g>
+        </g>
+        <g id="cell-1xC1WIjRaXcGuhJV2cBO-11"
+           content="&lt;UserObject label=&quot;Branch&amp;#10;Jalr&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="Branch&#10;Jalr" data-tags="simple pipeline forwarding">
+            <rect x="519" y="176.5" width="21" height="11.5" fill="rgb(255, 255, 255)" stroke="none"/>
+            <g fill="#0000FA" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="529" y="180.25">Branch</text>
+                <text x="529" y="187.25">Jalr</text>
+            </g>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-39"
+           content="&lt;UserObject label=&quot;0x00000000&quot; tags=&quot;simple pipeline forwarding&quot; component=&quot;pc-value&quot; source=&quot;fetch-pc&quot; link=&quot;#&quot;/&gt;"
+           data-label="0x00000000" data-tags="simple pipeline forwarding" data-component="pc-value"
+           data-source="fetch-pc" data-link="#">
+            <a xlink:href="#">
+                <rect x="80" y="225" width="72" height="25" rx="0.25" ry="0.25" fill="rgb(255, 255, 255)"
+                      stroke="rgb(0, 0, 0)"/>
+                <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="8px">
+                    <text x="115.5" y="243">0x00000000</text>
+                </g>
+            </a>
+        </g>
+        <g id="cell-Haz_8EwUBin59iLyk_8Q-206"
+           content="&lt;UserObject label=&quot;PC&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="PC" data-tags="simple pipeline forwarding">
+            <rect x="109" y="227" width="14" height="8" fill="none" stroke="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="115.5" y="232.5">PC</text>
             </g>
         </g>
     </g>

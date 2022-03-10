@@ -125,6 +125,7 @@ struct DecodeInternalState {
     unsigned alu_op_num = 0;
     unsigned excause_num = 0;
     RegisterValue inst_bus = 0;
+    bool alu_mul = false;
 };
 
 struct DecodeState {
@@ -195,6 +196,7 @@ struct ExecuteInternalState {
     unsigned forward_from_rs2_num = 0;
     unsigned excause_num = 0;
     bool alu_src = false;
+    bool alu_mul = false;
     bool branch = false;
     bool alu_pc = false; // PC is input to ALU
 };
@@ -244,6 +246,8 @@ struct MemoryInternalState {
     bool branch = false;
     bool jump = false;
     bool branch_or_jump = false;
+    bool branch_jalx = false;
+    bool branch_jalr = false;
 };
 
 struct MemoryState {
