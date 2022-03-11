@@ -1484,8 +1484,9 @@
            data-tags="simple pipeline forwarding">
             <ellipse cx="545" cy="294.5" rx="1" ry="1" fill="#0" stroke="rgb(0, 0, 0)" stroke-width="2"/>
         </g>
-        <g id="cell-kLYEyaSkJVZjgnE96DWi-4" content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding&quot;/&gt;"
-           data-label="" data-tags="forwarding">
+        <g id="cell-kLYEyaSkJVZjgnE96DWi-4"
+           content="&lt;UserObject label=&quot;&quot; tags=&quot;forwarding pipeline simple&quot;/&gt;" data-label=""
+           data-tags="forwarding pipeline simple">
             <path d="M 518 295 L 521 295 L 543.91 294.84" fill="none" stroke="#000000" stroke-width="2"
                   stroke-miterlimit="10"/>
         </g>
@@ -1689,9 +1690,9 @@
         <g id="cell-Haz_8EwUBin59iLyk_8Q-96"
            content="&lt;UserObject label=&quot; WriteData &quot; tags=&quot;pipeline simple forwarding&quot;/&gt;"
            data-label=" WriteData " data-tags="pipeline simple forwarding">
-            <rect x="467" y="340" width="29" height="7" fill="rgb(255, 255, 255)" stroke="none"/>
+            <rect x="463" y="340" width="33" height="7" fill="rgb(255, 255, 255)" stroke="none"/>
             <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
-                <text x="481" y="344.5"> WriteData </text>
+                <text x="479" y="344.5"> WriteData </text>
             </g>
         </g>
         <g id="cell-jkDunDTEjqUDAv3C6Bv7-0"
@@ -1946,10 +1947,10 @@
         <g id="cell-q-6THzIC0rTZull3DPy9-45"
            content="&lt;UserObject label=&quot; AluOut&quot; tags=&quot;simple forwarding pipeline&quot;/&gt;"
            data-label=" AluOut" data-tags="simple forwarding pipeline">
-            <rect x="530.83" y="285" width="23.17" height="8" fill="none" stroke="none"/>
+            <rect x="530.83" y="284" width="23.17" height="6" fill="none" stroke="none"/>
             <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                <rect fill="rgb(255, 255, 255)" stroke="none" x="530" y="286" width="24" height="8" stroke-width="0"/>
-                <text x="530.33" y="290.5"> AluOut</text>
+                <rect fill="rgb(255, 255, 255)" stroke="none" x="530" y="284" width="24" height="8" stroke-width="0"/>
+                <text x="530.33" y="288.5"> AluOut</text>
             </g>
         </g>
         <g id="cell-q-6THzIC0rTZull3DPy9-47"
