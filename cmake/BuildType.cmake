@@ -1,7 +1,7 @@
 # Source (BSD-3) https://github.com/openchemistry/tomviz/blob/master/cmake/BuildType.cmake
 
 # Set a default build type if none was specified
-set(default_build_type "Debug")
+set(default_build_type "Release")
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 	message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
