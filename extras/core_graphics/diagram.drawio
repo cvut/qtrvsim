@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-03-11T14:36:40.024Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4884.0 Safari/537.36 Edg/100.0.1181.0" etag="EfcqcWojRoAYilH-2xDO" compressed="false" version="17.1.0" type="device">
+<mxfile host="app.diagrams.net" modified="2022-03-11T15:29:45.423Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4884.0 Safari/537.36 Edg/100.0.1181.0" etag="L3zD2iLbtbcfyT7aHDIo" compressed="false" version="17.1.0" type="device">
   <diagram id="6v_UKsHeDzqBDUNiW_st" name="RISC-V">
     <mxGraphModel dx="458" dy="279" grid="1" gridSize="1" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="700" pageHeight="540" background="#ffffff" math="0" shadow="0">
       <root>
@@ -615,7 +615,7 @@
             <mxGeometry x="6" y="53" width="48" height="17" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="" link="#cache_data" component="cache" tags="simple hazardunit pipeline forwarding" id="uWEq7-W_z53UrtFael4O-37">
+        <UserObject label="" link="#cache_data" component="data-cache" tags="simple hazardunit pipeline forwarding" id="uWEq7-W_z53UrtFael4O-37">
           <mxCell style="shape=stencil(rVTRbsMgDPwaHidRWPteZZv20o9gxDSolFTA1GRfP4LJOliXqVqlSInPOd8ZWxDe+E6cgDBqxREIfyKMSSG7iLAIdoisKYZnDDc5FP4EMiCm9AAtwj64/gBn3YZM17YDp8OU5c+EbuM/08ObNyEPe9e/27ZIzOmUcZMEowOWyspjEVW2KtPCSa8/cm8MMcJeKisR+cUNb1TvYMGm0sZgz1cqX2rYkGzE8/lys7nupuCE0SRSeifW6m+WEkdtxhjnj8TzwvoHHyehlgsEGAKOEXnNZR/yFHg5htV80kbvbd4hsAHcbTqvcUX4thBaFzpz+E3HgAq3qey098sy/PEOMrQQqPb2Lo1UCv/oIW3/jyVPKN4OCfgE);" parent="Haz_8EwUBin59iLyk_8Q-210" vertex="1">
             <mxGeometry width="60" height="50" as="geometry" />
           </mxCell>

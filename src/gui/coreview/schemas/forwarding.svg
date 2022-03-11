@@ -500,8 +500,8 @@
             </a>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-37"
-           content="&lt;UserObject label=&quot;&quot; link=&quot;#cache_data&quot; component=&quot;cache&quot; tags=&quot;simple hazardunit pipeline forwarding&quot;/&gt;"
-           data-label="" data-link="#cache_data" data-component="cache"
+           content="&lt;UserObject label=&quot;&quot; link=&quot;#cache_data&quot; component=&quot;data-cache&quot; tags=&quot;simple hazardunit pipeline forwarding&quot;/&gt;"
+           data-label="" data-link="#cache_data" data-component="data-cache"
            data-tags="simple hazardunit pipeline forwarding">
             <a xlink:href="#cache_data">
                 <rect x="584" y="276" width="60" height="50" rx="1" ry="1" fill="rgb(255, 255, 255)"
