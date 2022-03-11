@@ -1423,10 +1423,10 @@
         <g id="cell-q-6THzIC0rTZull3DPy9-45"
            content="&lt;UserObject label=&quot; AluOut&quot; tags=&quot;simple forwarding pipeline&quot;/&gt;"
            data-label=" AluOut" data-tags="simple forwarding pipeline">
-            <rect x="520" y="290.5" width="22" height="8" fill="none" stroke="none"/>
+            <rect x="530.83" y="285" width="23.17" height="8" fill="none" stroke="none"/>
             <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                <rect fill="rgb(255, 255, 255)" stroke="none" x="520" y="292" width="24" height="8" stroke-width="0"/>
-                <text x="519.5" y="296"> AluOut</text>
+                <rect fill="rgb(255, 255, 255)" stroke="none" x="530" y="286" width="24" height="8" stroke-width="0"/>
+                <text x="530.33" y="290.5"> AluOut</text>
             </g>
         </g>
         <g id="cell-q-6THzIC0rTZull3DPy9-47"

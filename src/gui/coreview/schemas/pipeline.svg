@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="808px"
-     height="541px" viewBox="-0.5 -0.5 808 541" style="background-color: rgb(255, 255, 255);">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="812px"
+     height="541px" viewBox="-0.5 -0.5 812 541" style="background-color: rgb(255, 255, 255);">
     <defs/>
     <g>
         <g id="cell-1xC1WIjRaXcGuhJV2cBO-3"
@@ -759,6 +759,22 @@
                   stroke="rgb(0, 0, 0)"/>
             <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">
                 <text x="308" y="169.5">0</text>
+            </g>
+        </g>
+        <g id="cell-uWEq7-W_z53UrtFael4O-84"
+           content="&lt;UserObject label=&quot;Hazard Unit:&quot; tags=&quot;hazardunit&quot;/&gt;"
+           data-label="Hazard Unit:" data-tags="hazardunit">
+            <rect x="706" y="105" width="41" height="15" fill="none" stroke="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="end" font-size="6px">
+                <text x="746.5" y="114">Hazard Unit:</text>
+            </g>
+        </g>
+        <g id="cell-uWEq7-W_z53UrtFael4O-89"
+           content="&lt;UserObject label=&quot;NORMAL&quot; tags=&quot;hazardunit&quot; component=&quot;multi-text-value&quot; source=&quot;hazard&quot;/&gt;"
+           data-label="NORMAL" data-tags="hazardunit" data-component="multi-text-value" data-source="hazard">
+            <rect x="709" y="120" width="102" height="15" rx="2.25" ry="2.25" fill="#cccccc" stroke="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="759.5" y="129">NORMAL</text>
             </g>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-90"
@@ -1785,10 +1801,10 @@
         <g id="cell-q-6THzIC0rTZull3DPy9-45"
            content="&lt;UserObject label=&quot; AluOut&quot; tags=&quot;simple forwarding pipeline&quot;/&gt;"
            data-label=" AluOut" data-tags="simple forwarding pipeline">
-            <rect x="520" y="290.5" width="22" height="8" fill="none" stroke="none"/>
+            <rect x="530.83" y="285" width="23.17" height="8" fill="none" stroke="none"/>
             <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="6px">
-                <rect fill="rgb(255, 255, 255)" stroke="none" x="520" y="292" width="24" height="8" stroke-width="0"/>
-                <text x="519.5" y="296"> AluOut</text>
+                <rect fill="rgb(255, 255, 255)" stroke="none" x="530" y="286" width="24" height="8" stroke-width="0"/>
+                <text x="530.33" y="290.5"> AluOut</text>
             </g>
         </g>
         <g id="cell-q-6THzIC0rTZull3DPy9-47"
