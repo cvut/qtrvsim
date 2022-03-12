@@ -1,3 +1,18 @@
+qtrvsim (0.9.2-1) unstable; urgency=medium
+
+  * Debian package updated to version 0.9.2.
+  * GUI: rework of coreview graphics to correspond to Mr. Stepanovsky slides
+  * CI: downgrade runner os to win2019 to prevent failing builds
+  * WASM: fix exception support
+  * LRU cache policy fix (check was incoorect only for flush, i.e. fence instruction)
+  * Machine: basic RV32M support (no specific GUI provided, considered as part of ALU)
+  * README.md update, document RV32M support
+  * Machine: RISC-V ABI places stack pointer into x2 register.
+  * Machine: rewrite all core_alu_forward and complex memory tests for RISC-V.
+  * Machine: RISC-V is by default little endian, even when ELF file is not loaded
+
+ -- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Tue, 12 Mar 2022 20:45:12 +0200
+
 qtrvsim (0.9.1-1) unstable; urgency=medium
 
   * Debian package updated to version 0.9.1.
