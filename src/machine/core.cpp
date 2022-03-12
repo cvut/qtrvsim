@@ -4,6 +4,8 @@
 #include "execute/alu.h"
 #include "utils.h"
 
+#include <cinttypes>
+
 LOG_CATEGORY("machine.core");
 
 using namespace machine;
@@ -626,8 +628,8 @@ bool StopExceptionHandler::handle_exception(
     Address mem_ref_addr) {
     Q_UNUSED(core)
     DEBUG(
-        "Exception cause %d instruction PC 0x%08lx next PC 0x%08lx jump branch PC 0x%08lx "
-        "registers PC 0x%08lx mem ref 0x%08lx",
+        "Exception cause %d instruction PC 0x%08" PRIx64 " next PC 0x%08" PRIx64 " jump branch PC 0x%08" PRIx64
+        "registers PC 0x%08" PRIx64 " mem ref 0x%08" PRIx64,
         excause, inst_addr.get_raw(), next_addr.get_raw(), jump_branch_pc.get_raw(),
         regs->read_pc().get_raw(), mem_ref_addr.get_raw());
     return true;

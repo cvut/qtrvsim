@@ -9,6 +9,8 @@
 
 #include <tests/utils/integer_decomposition.h>
 
+#include <cinttypes>
+
 using namespace machine;
 using std::array;
 using std::pair;
@@ -158,8 +160,8 @@ void TestCache::cache_correctness_data() {
                         auto result_value
                             = (endian == BIG) ? (value << (stride * 8)) : (value >> (stride * 8));
                         QTest::addRow(
-                            "endian=%s, address=0x%lx, stride=%ld, "
-                            "value=0x%lx, cache_config={ %d, "
+                            "endian=%s, address=0x%" PRIx64 ", stride=%ld, "
+                            "value=0x%" PRIx64 ", cache_config={ %d, "
                             "r=%d, wr=%d, s=%d, b=%d, a=%d }",
                             to_string(endian), address, stride, value, cache_config.enabled(),
                             cache_config.replacement_policy(), cache_config.write_policy(),

@@ -7,6 +7,8 @@
 #include "machine/memory/memory_utils.h"
 #include "tests/utils/integer_decomposition.h"
 
+#include <cinttypes>
+
 using namespace machine;
 
 // Default memory testing data. Some tests may use other values, where it
@@ -85,7 +87,7 @@ constexpr void prepare_data(
                     auto result_value
                         = (endian == BIG) ? (value << (stride * 8)) : (value >> (stride * 8));
                     QTest::addRow(
-                        "endian=%s, address=0x%lx, stride=%ld, value=0x%lx", to_string(endian),
+                        "endian=%s, address=0x%lx, stride=%ld, value=0x%" PRIx64, to_string(endian),
                         address, stride, value)
                         << endian << address << stride << IntegerDecomposition(value, endian)
                         << IntegerDecomposition(result_value, endian);

@@ -570,12 +570,12 @@ bool OsSyscallExceptionHandler::handle_exception(
 
 #if 1
     printf(
-        "Exception cause %d instruction PC 0x%08lx next PC 0x%08lx jump branch "
-        "PC 0x%08lx "
-        "registers PC 0x%08lx mem ref 0x%08lx\n",
-        excause, (unsigned long)inst_addr.get_raw(), (unsigned long)next_addr.get_raw(),
-        (unsigned long)jump_branch_pc.get_raw(), (unsigned long)regs->read_pc().get_raw(),
-        (unsigned long)mem_ref_addr.get_raw());
+        "Exception cause %d instruction PC 0x%08" PRIx64 " next PC 0x%08" PRIx64 " jump branch "
+        "PC 0x%08" PRIx64
+        "registers PC 0x%08" PRIx64 " mem ref 0x%08" PRIx64 "\n",
+        excause, inst_addr.get_raw(), next_addr.get_raw(),
+        jump_branch_pc.get_raw(), regs->read_pc().get_raw(),
+        mem_ref_addr.get_raw());
 #else
     (void)excause;
     (void)inst_addr;
@@ -607,7 +607,7 @@ bool OsSyscallExceptionHandler::handle_exception(
 
 #if 1
     printf(
-        "Syscall %s number %ld/0x%lx a1=%" PRIu64 " a2=%" PRIu64 " a3=%" PRIu64 " a4=%" PRIu64 "\n",
+        "Syscall %s number %" PRId64 "/0x%" PRIx64 " a1=%" PRIu64 " a2=%" PRIu64 " a3=%" PRIu64 " a4=%" PRIu64 "\n",
         sdesc->name, syscall_num, syscall_num, a1.as_u64(), a2.as_u64(), a3.as_u64(), a4.as_u64());
 
 #endif
@@ -787,7 +787,8 @@ int OsSyscallExceptionHandler::syscall_default_handler(
     const rv_syscall_desc_t *sdesc = &rv_syscall_args[syscall_num];
 #if 1
     printf(
-        "Unimplemented syscall %s number %ld/0x%lx a1 %ld a2 %ld a3 %ld a4 %ld\n", sdesc->name,
+        "Unimplemented syscall %s number %" PRId64 "/0x%" PRIx64 " a1 %" PRId64
+        " a2 %" PRId64 " a3 %" PRId64 " a4 %" PRId64 "\n", sdesc->name,
         syscall_num, syscall_num, a1, a2, a3, a4);
 
 #endif
@@ -1052,7 +1053,7 @@ int OsSyscallExceptionHandler::do_sys_openat(
 
     result = 0;
     if (int64_t(a1) != TARGET_AT_FDCWD) {
-        printf("Unimplemented openat argument a1 %ld", a1);
+        printf("Unimplemented openat argument a1 %" PRId64, a1);
         if (unknown_syscall_stop) { emit core->stop_on_exception_reached(); }
         return TARGET_ENOSYS;
     }
