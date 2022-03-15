@@ -86,17 +86,24 @@ void CachePolicyLFU::update_stats(size_t way, size_t row, bool is_valid) {
 }
 
 size_t CachePolicyLFU::select_way_to_evict(size_t row) const {
-    size_t lowest = stats.at(row).at(0);
     size_t index = 0;
-    for (size_t i = 0; i < stats.size(); i++) {
-        if (stats.at(row).at(i) == 0) {
-            // Only invalid blocks have zero stat
-            return i;
+    try {
+        // Statistics corresponding to single cache row
+        auto &row_stats = stats.at(row);
+        size_t lowest = row_stats.at(0);
+        for (size_t i = 0; i < row_stats.size(); i++) {
+            if (row_stats.at(i) == 0) {
+                // Only invalid blocks have zero stat
+                index = i;
+                break;
+            }
+            if (lowest > row_stats.at(i)) {
+                lowest = row_stats.at(i);
+                index = i;
+            }
         }
-        if (lowest > stats.at(row).at(i)) {
-            lowest = stats.at(row).at(i);
-            index = i;
-        }
+    } catch (std::out_of_range &e) {
+        throw SANITY_EXCEPTION("Out of range: LRU lost the way from priority queue.");
     }
     return index;
 }
