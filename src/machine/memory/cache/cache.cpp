@@ -185,6 +185,11 @@ bool Cache::access(
     const CacheLocation loc = compute_location(address);
     size_t way = find_block_index(loc);
 
+    // check for zero because else last_affected_col can became
+    // ULONG_MAX / BLOCK_ITEM_SIZE and update can take forever
+    if (size == 0)
+        return false;
+
     // search failed - cache miss
     if (way >= cache_config.associativity()) {
         // if write through we do not need to allocate cache line does not
@@ -274,8 +279,8 @@ bool Cache::access(
         }
     }
     const auto last_affected_col
-        = (loc.col * BLOCK_ITEM_SIZE + size_within_block) / BLOCK_ITEM_SIZE;
-    for (auto col = loc.col; col < last_affected_col; col++) {
+        = (loc.col * BLOCK_ITEM_SIZE + loc.byte + size_within_block - 1) / BLOCK_ITEM_SIZE;
+    for (auto col = loc.col; col <= last_affected_col; col++) {
         emit cache_update(
             way, loc.row, col, cd.valid, cd.dirty, cd.tag, cd.data.data(),
             access_type);
