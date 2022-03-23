@@ -196,8 +196,8 @@ bool FmeExpression::parse(const QString &expression, QString &error) {
                 if (word.at(0).isDigit()) {
                     new_node = new FmeNodeConstant(word.toLongLong(&ok, 0));
                     if (!ok) {
-                        error = QString("cannot convert \"%1\" to number")
-                                    .arg(word);
+                        error = QString("cannot convert \"%1\" to number").arg(word);
+                        delete new_node;
                         break;
                     }
                 } else {
