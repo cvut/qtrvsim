@@ -49,16 +49,6 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         machine_config.memory_access_time_write(),
         machine_config.memory_access_time_burst());
 
-    unsigned int min_cache_row_size = 16;
-    if (machine_config.cache_data().enabled()) {
-        min_cache_row_size = machine_config.cache_data().block_size() * 4;
-    }
-
-    if (machine_config.cache_program().enabled()
-        && machine_config.cache_program().block_size() < min_cache_row_size) {
-        min_cache_row_size = machine_config.cache_program().block_size() * 4;
-    }
-
     cop0st = new Cop0State();
     predictor = new FalsePredictor();
 
