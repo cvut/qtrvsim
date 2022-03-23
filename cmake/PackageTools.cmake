@@ -19,20 +19,19 @@ set(FILE2_SHA256 "\@FILE2_SHA256\@")
 # Make sure that destination path exists as it wont be created automatically.
 file(MAKE_DIRECTORY ${PACKAGE_OUTPUT_PATH})
 
-find_package(Git REQUIRED)
-# Register xz command for usage with git. (TODO: better cross platform or configurable)
-execute_process(COMMAND ${GIT_EXECUTABLE} config --replace-all tar.tar.xz.command "xz -c"
-                WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+find_program(BASH bash REQUIRED)
+find_program(GIT git REQUIRED)
+find_program(XZ xz REQUIRED)
+find_program(TAR tar REQUIRED)
 
 # Command to build source archive from git HEAD.
-# TODO: should uncommited files be included (https://unix.stackexchange.com/questions/124495/git-archive-including-uncommitted-modified-files)
 add_custom_command(OUTPUT ${PACKAGE_SOURCE_ARCHIVE_FILE}
-                   COMMAND ${GIT_EXECUTABLE} archive --format=tar.xz
-                   --prefix=${PACKAGE_TOPLEVEL_DIR}/ HEAD
-                   -o ${PACKAGE_SOURCE_ARCHIVE_PATH}
-                   WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+		COMMAND ${BASH} ${CMAKE_SOURCE_DIR}/extras/packaging/_tools/git-archive-submodules.sh
+		${CMAKE_SOURCE_DIR} ${PACKAGE_OUTPUT_PATH} ${PACKAGE_SOURCE_ARCHIVE_FILE}
+		${PACKAGE_NAME} ${PACKAGE_VERSION} ${GIT} ${TAR} ${XZ}
+		WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 add_custom_target(source_archive
-                  DEPENDS ${PACKAGE_SOURCE_ARCHIVE_FILE})
+		DEPENDS ${PACKAGE_SOURCE_ARCHIVE_FILE})
 
 # Procedure adding support for individual OS distributions.
 #
@@ -47,13 +46,13 @@ macro(package_config_file target_name config_file_name template)
 	# The @ONLY option disable replacement of ${} which may be used by shell as well.
 	configure_file(${template} ${config_file_name}.in @ONLY)
 	add_custom_command(OUTPUT ${config_file_name}
-	                   COMMAND ${CMAKE_COMMAND} -DFILE="${PACKAGE_SOURCE_ARCHIVE_PATH}"
-	                   -DTEMPLATE="${CMAKE_BINARY_DIR}/${config_file_name}.in"
-	                   -DOUTPUT=${PACKAGE_OUTPUT_PATH}/${config_file_name}
-	                   -P "${CMAKE_SOURCE_DIR}/cmake/AddFileHashes.cmake"
-	                   DEPENDS source_archive)
+			COMMAND ${CMAKE_COMMAND} -DFILE="${PACKAGE_SOURCE_ARCHIVE_PATH}"
+			-DTEMPLATE="${CMAKE_BINARY_DIR}/${config_file_name}.in"
+			-DOUTPUT=${PACKAGE_OUTPUT_PATH}/${config_file_name}
+			-P "${CMAKE_SOURCE_DIR}/cmake/AddFileHashes.cmake"
+			DEPENDS source_archive)
 	add_custom_target(${target_name}
-	                  DEPENDS ${config_file_name})
+			DEPENDS ${config_file_name})
 endmacro()
 
 macro(package_debian_quilt target_name config_file_name template debian_dir output_archive)
@@ -61,27 +60,27 @@ macro(package_debian_quilt target_name config_file_name template debian_dir outp
 	# The @ONLY option disable replacement of ${} which may be used by shell as well.
 	configure_file(${debian_dir}/control.in ${CMAKE_BINARY_DIR}/debian/control @ONLY)
 	file(COPY ${CMAKE_BINARY_DIR}/debian/control DESTINATION ${CMAKE_BINARY_DIR}/debian
-	     FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+			FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 	file(COPY ${debian_dir}/compat
-	     DESTINATION ${CMAKE_BINARY_DIR}/debian
-	     FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+			DESTINATION ${CMAKE_BINARY_DIR}/debian
+			FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 	file(COPY ${debian_dir}/rules
-	     DESTINATION ${CMAKE_BINARY_DIR}/debian
-	     FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE GROUP_EXECUTE)
+			DESTINATION ${CMAKE_BINARY_DIR}/debian
+			FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE GROUP_EXECUTE)
 	file(COPY ${debian_dir}/docs
-	     DESTINATION ${CMAKE_BINARY_DIR}/debian
-	     FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+			DESTINATION ${CMAKE_BINARY_DIR}/debian
+			FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 	file(COPY ${debian_dir}/changelog
-	     DESTINATION ${CMAKE_BINARY_DIR}/debian
-	     FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+			DESTINATION ${CMAKE_BINARY_DIR}/debian
+			FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 	file(COPY ${debian_dir}/source/format
-	     DESTINATION ${CMAKE_BINARY_DIR}/debian/source
-	     FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+			DESTINATION ${CMAKE_BINARY_DIR}/debian/source
+			FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 	file(ARCHIVE_CREATE
-	     OUTPUT ${PACKAGE_OUTPUT_PATH}/${output_archive}
-	     PATHS ${CMAKE_BINARY_DIR}/debian
-	     FORMAT gnutar
-	     COMPRESSION XZ)
+			OUTPUT ${PACKAGE_OUTPUT_PATH}/${output_archive}
+			PATHS ${CMAKE_BINARY_DIR}/debian
+			FORMAT gnutar
+			COMPRESSION XZ)
 	set(DEBIAN_ARCHIVE_FILE ${output_archive})
 	file(MD5 ${PACKAGE_OUTPUT_PATH}/${output_archive} DEBIAN_MD5)
 	file(SHA1 ${PACKAGE_OUTPUT_PATH}/${output_archive} DEBIAN_SHA1)
@@ -89,13 +88,13 @@ macro(package_debian_quilt target_name config_file_name template debian_dir outp
 	file(SIZE ${PACKAGE_OUTPUT_PATH}/${output_archive} DEBIAN_SIZE)
 	configure_file(${template} ${config_file_name}.in @ONLY)
 	add_custom_command(OUTPUT ${config_file_name}
-	                   COMMAND ${CMAKE_COMMAND} -DFILE="${PACKAGE_SOURCE_ARCHIVE_PATH}"
-	                   -DTEMPLATE="${CMAKE_BINARY_DIR}/${config_file_name}.in"
-	                   -DOUTPUT=${PACKAGE_OUTPUT_PATH}/${config_file_name}
-	                   -P "${CMAKE_SOURCE_DIR}/cmake/AddFileHashes.cmake"
-	                   DEPENDS source_archive)
+			COMMAND ${CMAKE_COMMAND} -DFILE="${PACKAGE_SOURCE_ARCHIVE_PATH}"
+			-DTEMPLATE="${CMAKE_BINARY_DIR}/${config_file_name}.in"
+			-DOUTPUT=${PACKAGE_OUTPUT_PATH}/${config_file_name}
+			-P "${CMAKE_SOURCE_DIR}/cmake/AddFileHashes.cmake"
+			DEPENDS source_archive)
 	add_custom_target(${target_name}
-	                  DEPENDS ${config_file_name})
+			DEPENDS ${config_file_name})
 
 	message(STATUS "Debian archive created")
 endmacro()
