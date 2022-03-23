@@ -62,12 +62,12 @@ void CacheDock::setup(const machine::Cache *cache) {
             &CacheDock::statistics_update);
     }
     top_form->setVisible(cache != nullptr);
-    no_cache->setVisible(!cache->get_config().enabled());
+    no_cache->setVisible(cache == nullptr || !cache->get_config().enabled());
 
     delete cachescene;
     cachescene = new CacheViewScene(cache);
     graphicsview->setScene(cachescene);
-    graphicsview->setVisible(cache->get_config().enabled());
+    graphicsview->setVisible(cache != nullptr && cache->get_config().enabled());
 }
 
 void CacheDock::hit_update(unsigned val) {
