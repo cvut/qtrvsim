@@ -111,7 +111,7 @@ signals:
 
 private:
     const CacheConfig cache_config;
-    FrontendMemory *const mem = nullptr;
+    FrontendMemory *const mem;
     const Address uncached_start;
     const Address uncached_last;
     const uint32_t access_pen_r, access_pen_w, access_pen_b;
