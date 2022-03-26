@@ -539,14 +539,17 @@ static int parse_reg_from_string(const QString &str, uint *chars_taken = nullptr
         }
     } else {
         auto data = str.toLocal8Bit();
+        int regnum = -1;
         for (size_t i = 0; i < Rv_regnames.size(); i++) {
             size_t len = std::strlen(Rv_regnames[i]);
-            if (std::strncmp(data.data(), Rv_regnames[i], std::min(size_t(str.size()), len)) == 0) {
+            if (size_t(data.size()) < len)
+                continue;
+            if (std::strncmp(data.data(), Rv_regnames[i], len) == 0) {
                 *chars_taken = len;
-                return (int)i;
+                regnum = (int)i;
             }
         }
-        return -1;
+        return regnum;
     }
 }
 
