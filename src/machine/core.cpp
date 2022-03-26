@@ -15,7 +15,7 @@ Core::Core(
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
-    Cop0State *cop0state,
+    ControlState *control_state,
     Xlen xlen)
     : pc_if(state.pipeline.pc.final)
     , if_id(state.pipeline.fetch.final)
@@ -24,13 +24,13 @@ Core::Core(
     , mem_wb(state.pipeline.memory.final)
     , xlen(xlen)
     , regs(regs)
-    , cop0state(cop0state)
+    , control_state(control_state)
     , predictor(predictor)
     , mem_data(mem_data)
     , mem_program(mem_program)
     , ex_handlers()
     , ex_default_handler(new StopExceptionHandler()) {
-    if (cop0state != nullptr) { cop0state->setup_core(this); }
+    if (control_state != nullptr) { control_state->setup_core(this); }
     stop_on_exception.fill(true);
     step_over_exception.fill(true);
     step_over_exception[EXCAUSE_INT] = false;
@@ -60,8 +60,8 @@ Registers *Core::get_regs() const {
     return regs;
 }
 
-Cop0State *Core::get_cop0state() const {
-    return cop0state;
+ControlState *Core::get_control_state() const {
+    return control_state;
 }
 
 FrontendMemory *Core::get_mem_data() const {
@@ -138,12 +138,12 @@ bool Core::handle_exception(
 
     if (excause == EXCAUSE_HWBREAK) { regs->write_pc(inst_addr); }
 
-    if (cop0state != nullptr) {
-        cop0state->write_cop0reg(Cop0State::EPC, inst_addr.get_raw());
-        cop0state->update_execption_cause(excause);
-        if (cop0state->read_cop0reg(Cop0State::EBase) != 0 && !get_step_over_exception(excause)) {
-            cop0state->set_status_exl(true);
-            regs->write_pc(cop0state->exception_pc_address());
+    if (control_state != nullptr) {
+        control_state->write_csr(ControlState::mepc, inst_addr.get_raw());
+        control_state->update_execption_cause(excause);
+        if (control_state->read_csr(ControlState::mtvec) != 0 && !get_step_over_exception(excause)) {
+            control_state->set_status_exl(true);
+            regs->write_pc(control_state->exception_pc_address());
         }
     }
 
@@ -157,14 +157,6 @@ bool Core::handle_exception(
     if (get_stop_on_exception(excause)) { emit stop_on_exception_reached(); }
 
     return ret;
-}
-
-void Core::set_c0_userlocal(uint32_t address) {
-    if (cop0state != nullptr) {
-        if (address != cop0state->read_cop0reg(Cop0State::UserLocal)) {
-            cop0state->write_cop0reg(Cop0State::UserLocal, address);
-        }
-    }
 }
 
 enum ExceptionCause Core::memory_special(
@@ -206,8 +198,8 @@ FetchState Core::fetch(PCInterstage pc, bool skip_break) {
 
     if (!skip_break && hw_breaks.contains(inst_addr)) { excause = EXCAUSE_HWBREAK; }
 
-    if (cop0state != nullptr && excause == EXCAUSE_NONE) {
-        if (cop0state->core_interrupt_request()) { excause = EXCAUSE_INT; }
+    if (control_state != nullptr && excause == EXCAUSE_NONE) {
+        if (control_state->core_interrupt_request()) { excause = EXCAUSE_INT; }
     }
 
     return { FetchInternalState { .fetched_value = inst.data() },
@@ -442,9 +434,9 @@ CoreSingle::CoreSingle(
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
-    Cop0State *cop0state,
+    ControlState *control_state,
     Xlen xlen)
-    : Core(regs, predictor, mem_program, mem_data, cop0state, xlen) {
+    : Core(regs, predictor, mem_program, mem_data, control_state, xlen) {
     reset();
 }
 
@@ -478,10 +470,10 @@ CorePipelined::CorePipelined(
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
-    Cop0State *cop0state,
+    ControlState *control_state,
     Xlen xlen,
     MachineConfig::HazardUnit hazard_unit)
-    : Core(regs, predictor, mem_program, mem_data, cop0state, xlen) {
+    : Core(regs, predictor, mem_program, mem_data, control_state, xlen) {
     this->hazard_unit = hazard_unit;
     reset();
 }

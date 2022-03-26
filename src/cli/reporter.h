@@ -59,7 +59,7 @@ private:
     void report_regs() const;
     void report_caches() const;
     void report_range(const DumpRange &range) const;
-    void report_cop0reg(machine::Cop0State::Cop0Registers reg, bool last) const;
+    void report_csr_reg(machine::ControlState::CsrRegisters reg, bool last) const;
     void report_gp_reg(unsigned int i, bool last) const;
     static void report_cache(const char *cache_name, const machine::Cache &cache);
 };

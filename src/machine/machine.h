@@ -33,7 +33,7 @@ public:
     void set_speed(unsigned int ips, unsigned int time_chunk = 0);
 
     const Registers *registers();
-    const Cop0State *cop0state();
+    const ControlState *control_state();
     const Memory *memory();
     Memory *memory_rw();
     const Cache *cache_program();
@@ -121,7 +121,7 @@ private:
     LcdDisplay *perip_lcd_display = nullptr;
     Cache *cch_program = nullptr;
     Cache *cch_data = nullptr;
-    Cop0State *cop0st = nullptr;
+    ControlState *controlst = nullptr;
     Predictor *predictor = nullptr;
     Core *cr = nullptr;
 

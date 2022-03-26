@@ -49,19 +49,19 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         machine_config.memory_access_time_write(),
         machine_config.memory_access_time_burst());
 
-    cop0st = new Cop0State();
+    controlst = new ControlState();
     predictor = new FalsePredictor();
 
     if (machine_config.pipelined()) {
         cr = new CorePipelined(
-            regs, predictor, cch_program, cch_data, cop0st, Xlen::_32,
+            regs, predictor, cch_program, cch_data, controlst, Xlen::_32,
             machine_config.hazard_unit());
     } else {
-        cr = new CoreSingle(regs, predictor, cch_program, cch_data, cop0st, Xlen::_32);
+        cr = new CoreSingle(regs, predictor, cch_program, cch_data, controlst, Xlen::_32);
     }
     connect(
-        this, &Machine::set_interrupt_signal, cop0st,
-        &Cop0State::set_interrupt_signal);
+        this, &Machine::set_interrupt_signal, controlst,
+        &ControlState::set_interrupt_signal);
 
     run_t = new QTimer(this);
     set_speed(0); // In default run as fast as possible
@@ -103,8 +103,8 @@ Machine::~Machine() {
     run_t = nullptr;
     delete cr;
     cr = nullptr;
-    delete cop0st;
-    cop0st = nullptr;
+    delete controlst;
+    controlst = nullptr;
     delete regs;
     regs = nullptr;
     delete mem;
@@ -136,8 +136,8 @@ const Registers *Machine::registers() {
     return regs;
 }
 
-const Cop0State *Machine::cop0state() {
-    return cop0st;
+const ControlState *Machine::control_state() {
+    return controlst;
 }
 
 const Memory *Machine::memory() {
@@ -383,10 +383,10 @@ bool Machine::get_step_over_exception(enum ExceptionCause excause) const {
 
 enum ExceptionCause Machine::get_exception_cause() const {
     uint32_t val;
-    if (cop0st == nullptr) {
+    if (controlst == nullptr) {
         return EXCAUSE_NONE;
     }
-    val = (cop0st->read_cop0reg(Cop0State::Cause) >> 2) & 0x3f;
+    val = (controlst->read_csr(ControlState::mcause) >> 2) & 0x3f;
     if (val == 0) {
         return EXCAUSE_INT;
     } else {

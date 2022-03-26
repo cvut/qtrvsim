@@ -32,7 +32,7 @@ public:
         Predictor *predictor,
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
-        Cop0State *cop0state,
+        ControlState *control_state,
         Xlen xlen);
 
     void step(bool skip_break = false);
@@ -42,7 +42,7 @@ public:
     unsigned get_stall_count() const;
 
     Registers *get_regs() const;
-    Cop0State *get_cop0state() const;
+    ControlState *get_control_state() const;
     Predictor *get_predictor() const;
     FrontendMemory *get_mem_data() const;
     FrontendMemory *get_mem_program() const;
@@ -57,8 +57,6 @@ public:
     bool get_stop_on_exception(enum ExceptionCause excause) const;
     void set_step_over_exception(enum ExceptionCause excause, bool value);
     bool get_step_over_exception(enum ExceptionCause excause) const;
-
-    void set_c0_userlocal(uint32_t address);
 
 protected:
     CoreState state {};
@@ -109,7 +107,7 @@ protected:
 
     const Xlen xlen;
     BORROWED Registers *const regs;
-    BORROWED Cop0State *const cop0state;
+    BORROWED ControlState *const control_state;
     BORROWED Predictor *const predictor;
     BORROWED FrontendMemory *const mem_data, *const mem_program;
 
@@ -148,7 +146,7 @@ public:
         Predictor *predictor,
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
-        Cop0State *cop0state,
+        ControlState *control_state,
         Xlen xlen);
 
 protected:
@@ -166,7 +164,7 @@ public:
         Predictor *predictor,
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
-        Cop0State *cop0state,
+        ControlState *control_state,
         Xlen xlen,
         // Default value is used to keep same interface as core single.
         // Forward was chosen as the most conservative variant (regarding correctness).

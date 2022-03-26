@@ -20,24 +20,23 @@ public:
     void setup(machine::Machine *machine);
 
 private slots:
-    void
-    cop0reg_changed(enum machine::Cop0State::Cop0Registers reg, uint32_t val);
-    void cop0reg_read(enum machine::Cop0State::Cop0Registers reg, uint32_t val);
+    void csr_changed(enum machine::ControlState::CsrRegisters reg, uint64_t val);
+    void csr_read(enum machine::ControlState::CsrRegisters reg, uint64_t val);
     void clear_highlights();
 
 private:
     StaticTable *widg;
     QScrollArea *scrollarea;
 
-    QLabel *cop0reg[machine::Cop0State::COP0REGS_CNT] {};
-    bool cop0reg_highlighted[machine::Cop0State::COP0REGS_CNT] {};
-    bool cop0reg_highlighted_any;
+    QLabel *csr_view[machine::ControlState::CSR_REGS_CNT] {};
+    bool csr_highlighted[machine::ControlState::CSR_REGS_CNT] {};
+    bool csr_highlighted_any;
 
     QPalette pal_normal;
     QPalette pal_updated;
     QPalette pal_read;
 
-    void labelVal(QLabel *label, uint32_t val);
+    void labelVal(QLabel *label, uint64_t val);
 };
 
 #endif // COP0DOCK_H

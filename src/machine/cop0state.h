@@ -13,24 +13,38 @@ namespace machine {
 
 class Core;
 
-class Cop0State : public QObject {
+class ControlState : public QObject {
     Q_OBJECT
     friend class Core;
 
 public:
-    enum Cop0Registers {
+    enum CsrRegisters {
         Unsupported = 0,
-        UserLocal,
-        BadVAddr, // Reports the address for the most recent address-related
-                  // exception
-        Count,    // Processor cycle count
+
+        // Machine Information Registers
+        //mvendorid,  // Vendor ID.
+        //marchid,    // Architecture ID.
+        //mimpid,     // Implementation ID.
+        //mhartid,    // Hardware thread ID.
+
+        // Machine Trap Setup
+        mstatus,   // Machine status register.
+        // misa,      // ISA and extensions
+        // mie,       // Machine interrupt-enable register.
+        mtvec,     // Machine trap-handler base address.
+
+        // Machine Trap Handling
+        // mscratch,  // Scratch register for machine trap handlers.
+        mepc,     // Machine exception program counter.
+        mcause,   // Machine trap cause.
+        mtval,    // Machine bad address or instruction.
+        //mip,       // Machine interrupt pending.
+        //mtinst     // Machine trap instruction (transformed).
+        //mtval2     // Machine bad guest physical address.
+
+        mcycle,   // Machine cycle counter.
         Compare,  // Timer interrupt control
-        Status,   // Processor status and control
-        Cause,    // Cause of last exception
-        EPC,      // Program counter at last exception
-        EBase,    // Exception vector base register
-        Config,   // Configuration registers
-        COP0REGS_CNT,
+        CSR_REGS_CNT,
     };
 
     enum StatusReg {
@@ -41,21 +55,21 @@ public:
         Status_Int0 = 0x00000100,
     };
 
-    Cop0State(Core *core = nullptr);
-    Cop0State(const Cop0State &);
+    ControlState(Core *core = nullptr);
+    ControlState(const ControlState &);
 
-    uint32_t read_cop0reg(enum Cop0Registers reg) const;
-    uint32_t read_cop0reg(uint8_t rd, uint8_t sel) const; // Read coprocessor 0
+    uint64_t read_csr(enum CsrRegisters reg) const;
+    uint64_t read_csr(uint32_t rd, uint8_t sel) const; // Read coprocessor 0
                                                           // register
-    void write_cop0reg(enum Cop0Registers reg, RegisterValue value);
-    void write_cop0reg(
-        uint8_t reg,
+    void write_csr(enum CsrRegisters reg, RegisterValue value);
+    void write_csr(
+        uint32_t reg,
         uint8_t sel,
         RegisterValue value); // Write coprocessor 0 register
-    static QString cop0reg_name(enum Cop0Registers reg);
+    static QString csr_name(enum CsrRegisters reg);
 
-    bool operator==(const Cop0State &c) const;
-    bool operator!=(const Cop0State &c) const;
+    bool operator==(const ControlState &c) const;
+    bool operator!=(const ControlState &c) const;
 
     void reset(); // Reset all values to zero
 
@@ -63,8 +77,8 @@ public:
     Address exception_pc_address();
 
 signals:
-    void cop0reg_update(enum Cop0Registers reg, uint32_t val);
-    void cop0reg_read(enum Cop0Registers reg, uint32_t val) const;
+    void csr_update(enum CsrRegisters reg, uint64_t val);
+    void csr_read(enum CsrRegisters reg, uint64_t val) const;
 
 public slots:
     void set_interrupt_signal(uint irq_num, bool active);
@@ -76,33 +90,32 @@ protected:
     void update_count_and_compare_irq();
 
 private:
-    typedef uint32_t (Cop0State::*reg_read_t)(enum Cop0Registers reg) const;
+    typedef uint64_t (ControlState::*reg_read_t)(enum CsrRegisters reg) const;
 
     typedef void (
-        Cop0State::*reg_write_t)(enum Cop0Registers reg, uint32_t value);
+        ControlState::*reg_write_t)(enum CsrRegisters reg, uint64_t value);
 
-    struct cop0reg_desc_t {
+    struct csrRegDesc_t {
         const char *name;
-        uint32_t write_mask;
-        uint32_t init_value;
+        uint64_t write_mask;
+        uint64_t init_value;
         reg_read_t reg_read;
         reg_write_t reg_write;
     };
 
-    static const cop0reg_desc_t cop0reg_desc[COP0REGS_CNT];
+    static const csrRegDesc_t csrRegDesc[CSR_REGS_CNT];
 
-    uint32_t read_cop0reg_default(enum Cop0Registers reg) const;
-    void write_cop0reg_default(enum Cop0Registers reg, uint32_t value);
-    void write_cop0reg_count_compare(enum Cop0Registers reg, uint32_t value);
-    void write_cop0reg_user_local(enum Cop0Registers reg, uint32_t value);
+    uint64_t read_csr_default(enum CsrRegisters reg) const;
+    void write_csr_default(enum CsrRegisters reg, uint64_t value);
+    void write_csr_count_compare(enum CsrRegisters reg, uint64_t value);
     Core *core;
-    uint32_t cop0reg[COP0REGS_CNT] {}; // coprocessor 0 registers
-    uint32_t last_core_cycles {};
+    uint64_t csr_data[CSR_REGS_CNT] {}; // coprocessor 0 registers
+    uint64_t last_core_cycles {};
 };
 
 } // namespace machine
 
-Q_DECLARE_METATYPE(machine::Cop0State)
-Q_DECLARE_METATYPE(machine::Cop0State::Cop0Registers)
+Q_DECLARE_METATYPE(machine::ControlState)
+Q_DECLARE_METATYPE(machine::ControlState::CsrRegisters)
 
 #endif // COP0STATE_H
