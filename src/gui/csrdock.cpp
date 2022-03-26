@@ -1,4 +1,4 @@
-#include "cop0dock.h"
+#include "csrdock.h"
 
 Cop0Dock::Cop0Dock(QWidget *parent) : QDockWidget(parent) {
     scrollarea = new QScrollArea(this);

@@ -2,7 +2,7 @@
 #define CORE_H
 
 #include "common/memory_ownership.h"
-#include "cop0state.h"
+#include "controlstate.h"
 #include "core/core_state.h"
 #include "instruction.h"
 #include "machineconfig.h"

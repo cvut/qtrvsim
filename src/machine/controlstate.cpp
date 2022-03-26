@@ -1,4 +1,4 @@
-#include "cop0state.h"
+#include "controlstate.h"
 
 #include "core.h"
 #include "machinedefs.h"

@@ -3,7 +3,7 @@
 
 #include "assembler/simpleasm.h"
 #include "cachedock.h"
-#include "cop0dock.h"
+#include "csrdock.h"
 #include "extprocess.h"
 #include "gui/srceditor.h"
 #include "lcddisplaydock.h"

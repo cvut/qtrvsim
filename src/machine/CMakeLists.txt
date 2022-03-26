@@ -5,7 +5,7 @@ set(CMAKE_AUTOMOC ON)
 
 set(machine_SOURCES
 		execute/alu.cpp
-		cop0state.cpp
+		controlstate.cpp
 		core.cpp
 		instruction.cpp
 		machine.cpp
@@ -27,7 +27,7 @@ set(machine_SOURCES
 
 set(machine_HEADERS
 		execute/alu.h
-		cop0state.h
+		controlstate.h
 		core.h
 		core/core_state.h
 		instruction.h
@@ -170,8 +170,8 @@ if(NOT ${WASM})
 
 
 	add_executable(core_test
-			cop0state.cpp
-			cop0state.h
+			controlstate.cpp
+			controlstate.h
 			core.cpp
 			core.h
 			core.test.cpp

@@ -11,7 +11,7 @@ set(gui_SOURCES
     aboutdialog.cpp
     cachedock.cpp
     cacheview.cpp
-    cop0dock.cpp
+    csrdock.cpp
     #        coreview/deprecated/connection.cpp
     #        coreview/deprecated/instructionview.cpp
     #        coreview/deprecated/logicblock.cpp
@@ -60,7 +60,7 @@ set(gui_HEADERS
     aboutdialog.h
     cachedock.h
     cacheview.h
-    cop0dock.h
+    csrdock.h
     #        coreview/deprecated/connection.h
     #        coreview/deprecated/coreview_colors.h
     #        coreview/deprecated/instructionview.h
