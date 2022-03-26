@@ -1,6 +1,6 @@
 #include "csrdock.h"
 
-Cop0Dock::Cop0Dock(QWidget *parent) : QDockWidget(parent) {
+CsrDock::CsrDock(QWidget *parent) : QDockWidget(parent) {
     scrollarea = new QScrollArea(this);
     scrollarea->setWidgetResizable(true);
     widg = new StaticTable(scrollarea);
@@ -35,7 +35,7 @@ Cop0Dock::Cop0Dock(QWidget *parent) : QDockWidget(parent) {
     csr_highlighted_any = false;
 }
 
-Cop0Dock::~Cop0Dock() {
+CsrDock::~CsrDock() {
     for (int i = 1; i < machine::ControlState::CSR_REGS_CNT; i++) {
         delete csr_view[i];
     }
@@ -43,7 +43,7 @@ Cop0Dock::~Cop0Dock() {
     delete scrollarea;
 }
 
-void Cop0Dock::setup(machine::Machine *machine) {
+void CsrDock::setup(machine::Machine *machine) {
     if (machine == nullptr) {
         // Reset data
         for (int i = 1; i < machine::ControlState::CSR_REGS_CNT; i++) {
@@ -52,29 +52,29 @@ void Cop0Dock::setup(machine::Machine *machine) {
         return;
     }
 
-    const machine::ControlState *cop0state = machine->control_state();
+    const machine::ControlState *controlst = machine->control_state();
 
     for (int i = 1; i < machine::ControlState::CSR_REGS_CNT; i++) {
         labelVal(
             csr_view[i],
-            cop0state->read_csr((machine::ControlState::CsrRegisters)i));
+            controlst->read_csr((machine::ControlState::CsrRegisters)i));
     }
 
     connect(
-        cop0state, &machine::ControlState::csr_update, this,
-        &Cop0Dock::csr_changed);
+        controlst, &machine::ControlState::csr_update, this,
+        &CsrDock::csr_changed);
     connect(
-        cop0state, &machine::ControlState::csr_read, this,
-        &Cop0Dock::csr_read);
+        controlst, &machine::ControlState::csr_read, this,
+        &CsrDock::csr_read);
     connect(
-        machine, &machine::Machine::tick, this, &Cop0Dock::clear_highlights);
+        machine, &machine::Machine::tick, this, &CsrDock::clear_highlights);
 }
 
-void Cop0Dock::csr_changed(enum machine::ControlState::CsrRegisters reg,
+void CsrDock::csr_changed(enum machine::ControlState::CsrRegisters reg,
     uint64_t val) {
     SANITY_ASSERT(
         (uint)reg < machine::ControlState::CSR_REGS_CNT && (uint)reg,
-        QString("Cop0Dock received signal with invalid cop0 register: ")
+        QString("CsrDock received signal with invalid CSR register: ")
             + QString::number((uint)reg));
     labelVal(csr_view[(uint)reg], val);
     csr_view[reg]->setPalette(pal_updated);
@@ -82,13 +82,13 @@ void Cop0Dock::csr_changed(enum machine::ControlState::CsrRegisters reg,
     csr_highlighted_any = true;
 }
 
-void Cop0Dock::csr_read(
+void CsrDock::csr_read(
     enum machine::ControlState::CsrRegisters reg,
     uint64_t val) {
     (void)val;
     SANITY_ASSERT(
         (uint)reg < machine::ControlState::CSR_REGS_CNT && (uint)reg,
-        QString("Cop0Dock received signal with invalid cop0 register: ")
+        QString("CsrDock received signal with invalid CSR register: ")
             + QString::number((uint)reg));
     if (!csr_highlighted[reg]) {
         csr_view[reg]->setPalette(pal_read);
@@ -97,7 +97,7 @@ void Cop0Dock::csr_read(
     csr_highlighted_any = true;
 }
 
-void Cop0Dock::clear_highlights() {
+void CsrDock::clear_highlights() {
     if (!csr_highlighted_any) {
         return;
     }
@@ -110,7 +110,7 @@ void Cop0Dock::clear_highlights() {
     csr_highlighted_any = false;
 }
 
-void Cop0Dock::labelVal(QLabel *label, uint64_t value) {
+void CsrDock::labelVal(QLabel *label, uint64_t value) {
     QString t = QString("0x") + QString::number(value, 16);
     label->setText(t);
 }

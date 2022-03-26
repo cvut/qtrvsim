@@ -65,8 +65,8 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     terminal->hide();
     lcd_display = new LcdDisplayDock(this, settings);
     lcd_display->hide();
-    cop0dock = new Cop0Dock(this);
-    cop0dock->hide();
+    csrdock = new CsrDock(this);
+    csrdock->hide();
     messages = new MessagesDock(this, settings);
     messages->hide();
 
@@ -104,7 +104,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(ui->actionPeripherals, &QAction::triggered, this, &MainWindow::show_peripherals);
     connect(ui->actionTerminal, &QAction::triggered, this, &MainWindow::show_terminal);
     connect(ui->actionLcdDisplay, &QAction::triggered, this, &MainWindow::show_lcd_display);
-    connect(ui->actionCop0State, &QAction::triggered, this, &MainWindow::show_cop0dock);
+    connect(ui->actionCsrShow, &QAction::triggered, this, &MainWindow::show_csrdock);
     connect(ui->actionCore_View_show, &QAction::triggered, this, &MainWindow::show_hide_coreview);
     connect(ui->actionMessages, &QAction::triggered, this, &MainWindow::show_messages);
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about_program);
@@ -266,7 +266,7 @@ void MainWindow::create_core(
     terminal->setup(machine->serial_port());
     peripherals->setup(machine->peripheral_spi_led());
     lcd_display->setup(machine->peripheral_lcd_display());
-    cop0dock->setup(machine);
+    csrdock->setup(machine);
 
     connect(
         machine->core(), &machine::Core::step_done, program, &ProgramDock::update_pipeline_addrs);
@@ -367,7 +367,7 @@ SHOW_HANDLER(cache_data, Qt::RightDockWidgetArea)
 SHOW_HANDLER(peripherals, Qt::RightDockWidgetArea)
 SHOW_HANDLER(terminal, Qt::RightDockWidgetArea)
 SHOW_HANDLER(lcd_display, Qt::RightDockWidgetArea)
-SHOW_HANDLER(cop0dock, Qt::TopDockWidgetArea)
+SHOW_HANDLER(csrdock, Qt::TopDockWidgetArea)
 SHOW_HANDLER(messages, Qt::BottomDockWidgetArea)
 #undef SHOW_HANDLER
 

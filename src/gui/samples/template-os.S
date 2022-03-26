@@ -12,7 +12,7 @@
 // Directives to make interesting windows visible
 #pragma qtrvsim show terminal
 #pragma qtrvsim show registers
-#pragma qtrvsim show cop0dock
+#pragma qtrvsim show csrdock
 #pragma qtrvsim show memory
 
 .globl _start

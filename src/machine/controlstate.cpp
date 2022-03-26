@@ -106,7 +106,7 @@ uint64_t ControlState::read_csr(uint32_t rd, uint8_t sel) const {
                      + QString::number(sel));
     enum CsrRegisters reg = csrRegMap[rd][sel];
     SANITY_ASSERT(
-        reg != 0, QString("Cop0 register ") + QString::number(rd) + ',' + QString::number(sel)
+        reg != 0, QString("CSR register ") + QString::number(rd) + ',' + QString::number(sel)
                       + "unsupported");
     return read_csr(reg);
 }
@@ -120,7 +120,7 @@ void ControlState::write_csr(uint32_t rd, uint8_t sel, RegisterValue value) {
                      + QString::number(sel));
     enum CsrRegisters reg = csrRegMap[rd][sel];
     SANITY_ASSERT(
-        reg != 0, QString("Cop0 register ") + QString::number(rd) + ',' + QString::number(sel)
+        reg != 0, QString("CSR register ") + QString::number(rd) + ',' + QString::number(sel)
                       + "unsupported");
     write_csr(reg, value);
 }

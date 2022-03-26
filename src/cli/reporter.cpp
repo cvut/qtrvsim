@@ -102,7 +102,7 @@ void Reporter::report_gp_reg(unsigned int i, bool last) const {
 
 void Reporter::report_csr_reg(ControlState::CsrRegisters reg, bool last) const {
     printf(
-        "%s: 0x%08" PRIx32 "%s", ControlState::csr_name(reg).toLocal8Bit().data(),
+        "%s: 0x%08" PRIx64 "%s", ControlState::csr_name(reg).toLocal8Bit().data(),
         machine->control_state()->read_csr(reg), (last) ? "\n" : " ");
 }
 

@@ -344,8 +344,8 @@ uint16_t Instruction::funct() const {
     return uint16_t(MASK(7, 25) << 3 | MASK(3, 12));
 }
 
-uint8_t Instruction::cop0sel() const {
-    return (uint8_t)MASK(3, 0);
+uint32_t Instruction::csrsel() const {
+    return (uint8_t)MASK(12, 20);
 }
 
 int32_t Instruction::immediate() const {

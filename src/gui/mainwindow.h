@@ -78,7 +78,7 @@ public slots:
     void show_peripherals();
     void show_terminal();
     void show_lcd_display();
-    void show_cop0dock();
+    void show_csrdock();
     void show_hide_coreview(bool show);
     void show_symbol_dialog();
     void show_messages();
@@ -127,7 +127,7 @@ private:
     PeripheralsDock *peripherals {};
     TerminalDock *terminal {};
     LcdDisplayDock *lcd_display {};
-    Cop0Dock *cop0dock {};
+    CsrDock *csrdock {};
     MessagesDock *messages {};
     bool coreview_shown;
     SrcEditor *current_srceditor;

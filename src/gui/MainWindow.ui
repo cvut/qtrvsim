@@ -91,7 +91,7 @@
     <addaction name="actionPeripherals"/>
     <addaction name="actionTerminal"/>
     <addaction name="actionLcdDisplay"/>
-    <addaction name="actionCop0State"/>
+    <addaction name="actionCsrShow"/>
     <addaction name="actionCore_View_show"/>
     <addaction name="actionMessages"/>
    </widget>
@@ -441,7 +441,7 @@
     <string>Ctrl+D</string>
    </property>
   </action>
-  <action name="actionCop0State">
+  <action name="actionCsrShow">
    <property name="text">
     <string>Control and Status Registers</string>
    </property>

@@ -167,7 +167,7 @@ public:
     uint8_t rd() const;
     uint8_t shamt() const;
     uint16_t funct() const;
-    uint8_t cop0sel() const;
+    uint32_t csrsel() const;
     int32_t immediate() const;
     Address address() const;
     uint32_t data() const;

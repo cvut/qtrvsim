@@ -1,5 +1,5 @@
-#ifndef COP0DOCK_H
-#define COP0DOCK_H
+#ifndef CSRDOCK_H
+#define CSRDOCK_H
 
 #include "machine/machine.h"
 #include "statictable.h"
@@ -11,11 +11,11 @@
 #include <QPropertyAnimation>
 #include <QScrollArea>
 
-class Cop0Dock : public QDockWidget {
+class CsrDock : public QDockWidget {
     Q_OBJECT
 public:
-    Cop0Dock(QWidget *parent);
-    ~Cop0Dock() override;
+    CsrDock(QWidget *parent);
+    ~CsrDock() override;
 
     void setup(machine::Machine *machine);
 
@@ -39,4 +39,4 @@ private:
     void labelVal(QLabel *label, uint64_t val);
 };
 
-#endif // COP0DOCK_H
+#endif // CSRDOCK_H

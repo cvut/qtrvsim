@@ -1,5 +1,5 @@
-#ifndef COP0STATE_H
-#define COP0STATE_H
+#ifndef CONSTOLSTATE_H
+#define CONSTOLSTATE_H
 
 #include "machinedefs.h"
 #include "memory/address.h"
@@ -59,13 +59,12 @@ public:
     ControlState(const ControlState &);
 
     uint64_t read_csr(enum CsrRegisters reg) const;
-    uint64_t read_csr(uint32_t rd, uint8_t sel) const; // Read coprocessor 0
-                                                          // register
+    uint64_t read_csr(uint32_t rd, uint8_t sel) const; // Read CSR register
     void write_csr(enum CsrRegisters reg, RegisterValue value);
     void write_csr(
         uint32_t reg,
         uint8_t sel,
-        RegisterValue value); // Write coprocessor 0 register
+        RegisterValue value); // Write coprocessor CSR register
     static QString csr_name(enum CsrRegisters reg);
 
     bool operator==(const ControlState &c) const;
@@ -109,7 +108,7 @@ private:
     void write_csr_default(enum CsrRegisters reg, uint64_t value);
     void write_csr_count_compare(enum CsrRegisters reg, uint64_t value);
     Core *core;
-    uint64_t csr_data[CSR_REGS_CNT] {}; // coprocessor 0 registers
+    uint64_t csr_data[CSR_REGS_CNT] {}; // CSR registers
     uint64_t last_core_cycles {};
 };
 
@@ -118,4 +117,4 @@ private:
 Q_DECLARE_METATYPE(machine::ControlState)
 Q_DECLARE_METATYPE(machine::ControlState::CsrRegisters)
 
-#endif // COP0STATE_H
+#endif // CONSTOLSTATE_H
