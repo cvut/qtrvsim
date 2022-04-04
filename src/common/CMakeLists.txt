@@ -4,6 +4,9 @@ project(common
 add_subdirectory(polyfills)
 
 set(common_HEADERS
+		containers/constexpr/carray.h
+		containers/constexpr/cvector.h
+		containers/constexpr/cstring.h
 		endian.h
 		logging.h
 		logging_format_colors.h
