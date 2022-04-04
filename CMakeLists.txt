@@ -278,6 +278,7 @@ if("${DEV_MODE}")
 	package_config_file(appimage appimage.yml extras/packaging/appimage/appimage.yml.in)
 	package_config_file(archlinux PKGBUILD extras/packaging/arch/PKGBUILD.in)
 	package_config_file(rpm ${PACKAGE_NAME}.spec extras/packaging/rpm/spec.in)
+	package_config_file(snap snapcraft.yaml extras/packaging/snap/snapcraft.yaml.in)
 	# Debian uses whole directory which has to be saved to archive and shipped.
 	package_debian_quilt(deb
 			${PACKAGE_NAME}_${PACKAGE_VERSION}-${PACKAGE_RELEASE}.dsc
