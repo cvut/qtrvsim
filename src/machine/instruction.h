@@ -1,3 +1,16 @@
+/**
+ * @file
+ *
+ * NOTE ON TERMINOLOGY:
+ *
+ * - Argument   variable argument of instruction in assembly or during execution.
+ *              (Generally, when we think about instructions more line functions.)
+ * - Field      same value as argument but in context of encoding.
+ * - Subfield   continuous part of encoded instruction, encoding some bit range of the field.
+ *
+ * This terminology is based on the RISC-V Instruction Set Manual: Volume I.
+ */
+
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
