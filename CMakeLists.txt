@@ -46,6 +46,7 @@ set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/target"
 set(PACKAGE_OUTPUT_PATH "${EXECUTABLE_OUTPUT_PATH}/pkg"
         CACHE STRING "Absolute path to place generated package files.")
 set(FORCE_COLORED_OUTPUT false CACHE BOOL "Always produce ANSI-colored output (GNU/Clang only).")
+set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker. Leave empty for system default; alternatives are 'gold', 'lld', 'bfd', 'mold'")
 
 # =============================================================================
 # Generated variables
@@ -58,6 +59,23 @@ else ()
 endif ()
 set(CXX_TEST_PATH ${EXECUTABLE_OUTPUT_PATH})
 set(C_TEST_PATH ${EXECUTABLE_OUTPUT_PATH})
+
+
+macro(set_alternate_linker linker)
+	find_program(LINKER_EXECUTABLE ld.${USE_ALTERNATE_LINKER} ${USE_ALTERNATE_LINKER})
+	if(LINKER_EXECUTABLE)
+		if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 12.0.0)
+			add_link_options("-ld-path=${USE_ALTERNATE_LINKER}")
+		else()
+			add_link_options("-fuse-ld=${USE_ALTERNATE_LINKER}")
+		endif()
+	else()
+		set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker" FORCE)
+	endif()
+endmacro()
+if(NOT "${USE_ALTERNATE_LINKER}" STREQUAL "")
+	set_alternate_linker(${USE_ALTERNATE_LINKER})
+endif()
 
 # I don't want to relly on the assumption, that this file is invoked as root
 # project. Therefore I propagate the information to all subprojects
