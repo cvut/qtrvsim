@@ -8,7 +8,7 @@
 /** Constructs lookup table from list at compile time. */
 template<typename Key, typename Val>
 class LookUpTable {
-    carray<const Val *, std::numeric_limits<Key>::digits> table;
+    carray<const Val *, 1 << std::numeric_limits<Key>::digits> table;
 
 public:
     /**
