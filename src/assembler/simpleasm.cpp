@@ -61,8 +61,9 @@ SimpleAsm::~SimpleAsm() {
 void SimpleAsm::clear() {
     symtab = nullptr;
     mem = nullptr;
-    while (!reloc.isEmpty()) {
-        delete reloc.takeFirst();
+    while (!reloc.empty()) {
+        delete reloc.back();
+        reloc.pop_back();
     }
     error_occured = false;
     fatal_occured = false;
@@ -79,7 +80,7 @@ void SimpleAsm::setup(
     this->symtab->setSymbol("XLEN", static_cast<uint64_t>(xlen), sizeof(uint64_t));
 }
 
-static const auto wordArg = machine::BitArg({ { 32, 0 } }, 0);
+static const auto wordArg = machine::InstructionField({ { 32, 0 } }, 0);
 
 bool SimpleAsm::process_line(
     const QString &line,
@@ -254,7 +255,7 @@ bool SimpleAsm::process_line(
         include_stack.removeLast();
         return res;
     }
-    if ((op == ".text") || (op == ".data")  || (op == ".bss") || (op == ".globl") || (op == ".end")
+    if ((op == ".text") || (op == ".data") || (op == ".bss") || (op == ".globl") || (op == ".end")
         || (op == ".ent") || (op == ".option")) {
         return true;
     }
@@ -498,7 +499,7 @@ bool SimpleAsm::process_line(
             val = string_to_uint64(s, 0, &chars_taken);
             if (chars_taken != s.size()) {
                 val = 0;
-                reloc.append(new machine::RelocExpression(
+                reloc.push_back(new machine::RelocationDesc(
                     address, s, 0, -0xffffffff, 0xffffffff, &wordArg, filename, line_number));
             }
             if (!fatal_occured) { mem->write_u32(address, val, ae::INTERNAL); }
@@ -552,7 +553,7 @@ bool SimpleAsm::process_file(const QString &filename, QString *error_ptr) {
 
 bool SimpleAsm::finish(QString *error_ptr) {
     bool error_reported = false;
-    for (machine::RelocExpression *r : reloc) {
+    for (machine::RelocationDesc *r : reloc) {
         QString error;
         fixmatheval::FmeExpression expression;
         if (!expression.parse(r->expression, error)) {
@@ -579,7 +580,7 @@ bool SimpleAsm::finish(QString *error_ptr) {
                         expression.dump() + " -> " + QString::number(value), "");
                 }
                 machine::Instruction inst(mem->read_u32(r->location, ae::INTERNAL));
-                if (!inst.update(value, r)) {
+                if (!inst.update_value_with_dynamic_relocation(value, r)) {
                     error = tr("instruction update error %1 at line %2, "
                                "expression %3 -> value %4.")
                                 .arg(
@@ -597,8 +598,10 @@ bool SimpleAsm::finish(QString *error_ptr) {
             }
         }
     }
-    while (!reloc.isEmpty()) {
-        delete reloc.takeFirst();
+
+    while (!reloc.empty()) {
+        delete reloc.back();
+        reloc.pop_back();
     }
 
     emit mem->external_change_notify(mem, Address::null(), Address(0xffffffff), ae::INTERNAL);

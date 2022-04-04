@@ -28,7 +28,7 @@ HighlighterAsm::HighlighterAsm(QTextDocument *parent)
     }
 
     QStringList inst_list;
-    machine::Instruction::append_recognized_instructions(inst_list);
+    machine::Instruction::get_recognized_instruction_names(inst_list);
     foreach (const QString &str, inst_list) {
         rule.pattern = QRegularExpression("\\b" + str + "\\b");
         rule.format = keywordFormat;
@@ -47,7 +47,7 @@ HighlighterAsm::HighlighterAsm(QTextDocument *parent)
     registerFormat.setFontWeight(QFont::Bold);
     registerFormat.setForeground(Qt::darkMagenta);
     QStringList reg_list;
-    machine::Instruction::append_recognized_registers(reg_list);
+    machine::Instruction::get_recognized_registers(reg_list);
     foreach (const QString &str, reg_list) {
         rule.pattern = QRegularExpression("\\b" + str + "\\b");
         rule.format = registerFormat;

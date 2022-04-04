@@ -23,6 +23,9 @@ set(machine_SOURCES
 		registers.cpp
 		simulator_exception.cpp
 		symboltable.cpp
+		instruction/bit_arg.h
+		instruction/riscv/register_names.h
+		instruction/instruction_flags.h
 		)
 
 set(machine_HEADERS
@@ -57,6 +60,7 @@ set(machine_HEADERS
 		utils.h
 		execute/alu_op.h
 		execute/mul_op.h
+		instruction/argument_desc.h
 		)
 
 # Object library is preferred, because the library archive is never really

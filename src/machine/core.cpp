@@ -3,6 +3,7 @@
 #include "common/logging.h"
 #include "execute/alu.h"
 #include "utils.h"
+#include "instruction/instruction_flags.h"
 
 #include <cinttypes>
 
@@ -214,12 +215,12 @@ FetchState Core::fetch(PCInterstage pc, bool skip_break) {
 }
 
 DecodeState Core::decode(const FetchInterstage &dt) {
-    InstructionFlags flags;
-    AluCombinedOp alu_op {};
-    AccessControl mem_ctl;
+    InstructionSemantics instruction(dt.inst);
     ExceptionCause excause = dt.excause;
 
-    dt.inst.flags_alu_op_mem_ctl(flags, alu_op, mem_ctl);
+    InstructionFlags flags = instruction.flags();
+    AluCombinedOp alu_op = instruction.alu_op();
+    AccessControl mem_ctl = instruction.mem_ctl();
 
     if (!(flags & IMF_SUPPORTED)) { excause = EXCAUSE_UNKNOWN; }
 

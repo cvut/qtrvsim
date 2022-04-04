@@ -1,6 +1,7 @@
 #include "registersdock.h"
 
 #include "machine/instruction.h"
+#include "machine/instruction/riscv/register_names.h"
 
 RegistersDock::RegistersDock(QWidget *parent, machine::Xlen xlen)
     : QDockWidget(parent)
@@ -14,7 +15,8 @@ RegistersDock::RegistersDock(QWidget *parent, machine::Xlen xlen)
     gp_highlighted.reset();
 
     for (size_t i = 0; i < gp.size(); i++) {
-        gp[i] = addRegisterLabel(QString("x%1/%2").arg(i).arg(machine::Rv_regnames[i]));
+        gp[i] = addRegisterLabel(QString("x%1/%2").arg(i).arg(
+            QLatin1String(machine::register_names[i].data(), machine::register_names[i].size())));
     }
     pc = addRegisterLabel("pc");
 

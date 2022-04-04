@@ -14,88 +14,278 @@
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
+#include "common/containers/constexpr/cstring.h"
 #include "execute/alu.h"
+#include "execute/alu_op.h"
+#include "instruction/bit_arg.h"
+#include "instruction/instruction_flags.h"
 #include "machinedefs.h"
+#include "memory/address.h"
 
-#include <QObject>
 #include <QString>
 #include <QStringList>
-#include <QVector>
-#include <utility>
-#include <array>
 
 namespace machine {
 
-static constexpr std::array<const char *const, 32> Rv_regnames = {
-    "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
-    "a1",   "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
-    "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
-};
+struct TokenizedInstruction;
+struct RelocationDesc;
+using RelocExpressionList = std::vector<RelocationDesc *>;
+class InstructionSemantics;
+struct InstructionMap;
 
-enum InstructionFlags {
-    IMF_SUPPORTED = 1L << 0, /**< Instruction is supported */
-    IMF_MEMWRITE = 1L << 1,  /**< Write to the memory when memory stage is reached */
-    IMF_MEMREAD = 1L << 2,   /**< Read from the memory when memory stage is reached */
-    IMF_ALUSRC = 1L << 3,    /**< The second ALU source is immediate operand */
-    IMF_REGWRITE = 1L << 5,  /**< Instruction result (ALU or memory) is written to register file */
-    IMF_MEM = 1L << 11,      /**< Instruction is memory access instruction */
-    IMF_ALU_REQ_RS = 1L << 12, /**< Execution phase/ALU requires RS value */
-    IMF_ALU_REQ_RT = 1L << 13, /**< Execution phase/ALU/mem requires RT value */
-    IMF_BRANCH = 1L << 17, /**< Operation is conditional or unconditional branch or branch and link
-                              when PC_TO_R31 is set */
-    IMF_JUMP = 1L << 18,   /**< Jump operation - JAL, JALR */
-    IMF_BJ_NOT = 1L << 19, /**< Negate condition for branch instruction */
-    IMF_BRANCH_JALR = 1L << 20, /**< Use ALU output as branch/jump target. Used by JALR. */
-    IMF_EXCEPTION = 1L << 22,   /**< Instruction causes synchronous exception */
-    IMF_ALU_MOD = 1L << 24,     /**< ADD and right-shift modifier */
-    IMF_PC_TO_ALU = 1L << 25,   /**< PC is loaded instead of RS to ALU */
-    IMF_ECALL = 1L << 26,       // seems easiest to encode ecall and ebreak as flags, but they might
-    IMF_EBREAK = 1L << 27,      // be moved elsewhere in case we run out of InstructionFlag space.
+/**
+ * Raw instruction representation.
+ *
+ * Provides "syntactic"/encoding-level manipulation of instructions (with no memory overhead).
+ * This includes encoding, decoding and field access.
+ * To get information about instruction behaviour a lookup to instruction map has to be performed.
+ * `InstructionSemantics` provides access to instruction map data without repeated lookup.
+ */
+class Instruction {
+public:
+    /** Instruction type as in ISA specification */
+    enum class Type { R, I, S, B, U, J, UNKNOWN };
 
-    // Extensions:
-    // =============================================================================================
-    // RV64/32M
-    IMF_MUL = 1L << 28, /**< Enables multiplication component of ALU. */
-    // TODO do we want to add those signals to the visualization?
-};
-
-struct BitArg {
-    struct Field {
-        const uint8_t count;
-        const uint8_t offset;
-        template<typename T>
-        T decode(T val) const {
-            return (val >> offset) & ((1L << count) - 1);
-        }
-        template<typename T>
-        T encode(T val) const {
-            return ((val & ((1L << count) - 1)) << offset);
-        }
+    /** Modified encoding to enable pseudoinstructions. */
+    enum class Modifier {
+        /** Normal processing. All fields are checked for value max and min. */
+        NONE,
+        /**
+         * Encodes upper part of immediate from a pseudoinstruction.
+         *
+         * `imm = symbol[31:12] + symbol[11]`
+         * NOTE: `symbol[11]` compensates for sign extension from addition of the lower part.
+         */
+        COMPOSED_IMM_UPPER,
+        /**
+         * Encodes lower part of immediate from a pseudoinstruction.
+         *
+         * `imm = symbol[11:0]`
+         * Upper bits of immediate may are discarded.
+         */
+        COMPOSED_IMM_LOWER,
     };
-    const std::vector<Field> fields;
-    const size_t shift;
 
-    BitArg(const std::vector<Field> fields, size_t shift = 0) : fields(fields), shift(shift) {}
-    std::vector<Field>::const_iterator begin() const { return fields.begin(); }
-    std::vector<Field>::const_iterator end() const { return fields.end(); }
-    uint32_t decode(uint32_t ins) const {
-        uint32_t ret = 0;
-        size_t offset = 0;
-        for (Field field : *this) {
-            ret |= field.decode(ins) << offset;
-            offset += field.count;
-        }
-        return ret << shift;
-    }
-    uint32_t encode(uint32_t imm) const {
-        uint32_t ret = 0;
-        imm >>= shift;
-        for (Field field : *this) {
-            ret |= field.encode(imm);
-            imm >>= field.count;
-        }
-        return ret;
-    }
+    /** Exception which is raised when unable to parse assembly. */
+    struct ParseError;
+
+    /** Type used to store code of an instruction. */
+    using data_type = uint32_t;
+    /** Type of an immediate value. */
+    using imm_type = int32_t;
+
+    constexpr Instruction() : dt(0) {};
+    explicit constexpr Instruction(data_type code) : dt(code) {};
+
+    constexpr Instruction(const Instruction &) = default;
+    constexpr Instruction &operator=(const Instruction &) = default;
+
+    /** Type R */
+    constexpr static Instruction create_type_r(
+        uint8_t opcode,
+        uint8_t rs,
+        uint8_t rt,
+        uint8_t rd,
+        uint8_t shamt,
+        uint8_t funct3,
+        uint8_t funct7);
+    /** Type I */
+    constexpr static Instruction
+    crate_type_i(uint8_t opcode, uint8_t rs, uint8_t rt, uint16_t immediate);
+    /** Type J */
+    constexpr static Instruction create_type_j(uint8_t opcode, Address address);
+
+    /** Returns size of instruction in bytes */
+    uint8_t size() const;
+    uint8_t opcode() const;
+    uint8_t rs() const;
+    uint8_t rt() const;
+    uint8_t rd() const;
+    uint8_t shamt() const;
+    uint16_t funct() const;
+    imm_type immediate() const;
+    uint32_t data() const;
+    bool imm_sign() const;
+    enum Type type() const;
+
+    bool operator==(const Instruction &c) const;
+    bool operator!=(const Instruction &c) const;
+
+    /**
+     * Disassemble instruction
+     *
+     * @param inst_addr   instruction address - used to disassemble pc relative instructions
+     */
+    QString to_str(Address inst_addr) const;
+
+    /**
+     * Parses instruction from string containing one assembler line.
+     *
+     * @param code_output     buffer, where parsed instructions are saved
+     * @param buffer_size     available space in buffer (in multiples of uint32_t)
+     * @param input           string of one instruction in assembly
+     * @param inst_addr       address of the instruction in memory
+     * @param reloc           list of dynamic relocations, null if dynamic relocation should be
+     *                        disabled
+     * @param filename        filename of the source file, if compiled from file, "" otherwise
+     * @param line            line in source file, if compiled from file, 0 otherwise
+     * @param pseudoinst_enabled  switch for pseudoinstruction support, currently only used
+     *                            internally
+     * @throws Instruction::ParseError if unable to parse
+     * @return size of buffer used (same units as buffer_size)
+     */
+    static size_t code_from_string(
+        uint32_t *code_output,
+        size_t buffer_size,
+        QString input,
+        Address inst_addr,
+        RelocExpressionList *reloc = nullptr,
+        const QString &filename = "",
+        unsigned line = 0,
+        bool pseudoinst_enabled = true);
+
+    /**
+     * Parses instruction from prepare tokenized form.
+     *
+     * @param code_output     buffer, where parsed instructions are saved
+     * @param buffer_size     available space in buffer (in multiples of uint32_t)
+     * @param input           tokens of one instruction in assembly + helper info
+     * @param reloc           list of dynamic relocations, null if dynamic relocations should be
+     *                        disabled
+     * @param pseudoinst_enabled  switch for pseudoinstruction support, currently only used
+     *                            internally
+     * @throws Instruction::ParseError if unable to parse
+     * @return size of buffer used (same units as buffer_size)
+     */
+    static size_t code_from_tokens(
+        uint32_t *code,
+        size_t buffer_size,
+        TokenizedInstruction &input,
+        RelocExpressionList *reloc = nullptr,
+        bool pseudoinst_enabled = true);
+
+    /**
+     * Updates one field in the instruction with value from dynamic relocation
+     *
+     * @param new_val       new value for the field, old value will be deleted
+     * @param reloc_desc    information about this relocation
+     * @return success of value
+     */
+    bool update_value_with_dynamic_relocation(int64_t new_val, RelocationDesc *reloc_desc);
+
+    /**
+     * Appends all recognized instruction names into the supplied list.
+     *
+     * This is used for syntax highlighting.
+     */
+    static void get_recognized_instruction_names(QStringList &list);
+
+    /**
+     * Appends all recognized register names into the supplied list.
+     *
+     * This is used for syntax highlighting.
+     */
+    static void get_recognized_registers(QStringList &list);
+
+    /**
+     * Controls usage of register names other than x<n> (x0,x1...).
+     */
+    static void set_symbolic_registers(bool enable);
+
+    static const Instruction NOP;
+    static const Instruction UNKNOWN_INST;
+
+private:
+    uint32_t dt;
+
+    static bool symbolic_registers_enabled;
+
+    static Instruction base_from_tokens(
+        const TokenizedInstruction &input,
+        RelocExpressionList *reloc,
+        Modifier pseudo_mod = Modifier::NONE,
+        uint64_t initial_immediate_value = 0);
+    static uint32_t parse_field(
+        QString &field_token,
+        const cstring &arg,
+        Address inst_addr,
+        RelocExpressionList *reloc,
+        const QString &filename,
+        unsigned int line,
+        Modifier pseudo_mod,
+        uint64_t initial_immediate_value);
+    static size_t partially_apply(
+        const char *base,
+        int argument_count,
+        int position,
+        const char *value,
+        uint32_t *code,
+        size_t buffsize,
+        TokenizedInstruction &inst,
+        RelocExpressionList *reloc);
+    static size_t pseudo_from_tokens(
+        uint32_t *code,
+        size_t buffsize,
+        TokenizedInstruction &inst,
+        RelocExpressionList *reloc);
+    static constexpr uint64_t modify_pseudoinst_imm(Modifier mod, uint64_t value);
+};
+
+struct Instruction::ParseError : public std::exception {
+    QString message;
+
+    explicit ParseError(QString message);
+
+    const char *what() const noexcept override { return message.toUtf8().data(); }
+};
+
+/**
+ * Interface to properties regarding instruction behavior.
+ *
+ * This struct exists to cache lookups to instruction map. */
+class InstructionSemantics {
+public:
+    explicit InstructionSemantics(const Instruction &instruction);
+
+    InstructionFlags flags() const;
+    AluCombinedOp alu_op() const;
+    AccessControl mem_ctl() const;
+
+private:
+    const Instruction instruction;
+    const InstructionMap &instruction_map;
+};
+
+struct RelocationDesc {
+    inline RelocationDesc(
+        Address location,
+        QString expression,
+        int64_t offset,
+        int64_t min,
+        int64_t max,
+        const InstructionField *arg,
+        QString filename,
+        int line,
+        Instruction::Modifier pseudo_mod = Instruction::Modifier::NONE)
+        : location(location)
+        , expression(std::move(expression))
+        , offset(offset)
+        , min(min)
+        , max(max)
+        , arg(arg)
+        , filename(std::move(filename))
+        , line(line)
+        , pseudo_mod(pseudo_mod) {}
+
+    Address location;
+    QString expression;
+    int64_t offset;
+    int64_t min;
+    int64_t max;
+    const InstructionField *arg;
+    QString filename;
+    int line;
+    Instruction::Modifier pseudo_mod;
 };
 
 /**
@@ -123,195 +313,6 @@ public:
     from_line(QString line_str, Address inst_addr, const QString &filename, unsigned line);
 };
 
-struct RelocExpression;
-typedef QVector<RelocExpression *> RelocExpressionList;
-
-class Instruction {
-public:
-    Instruction();
-    explicit Instruction(uint32_t inst);
-    // Instruction(
-    //     uint8_t opcode,
-    //     uint8_t rs,
-    //     uint8_t rt,
-    //     uint8_t rd,
-    //     uint8_t shamt,
-    //     uint8_t funct); // Type R
-    // Instruction(
-    //     uint8_t opcode,
-    //     uint8_t rs,
-    //     uint8_t rt,
-    //     uint16_t immediate);                      // Type I
-    // Instruction(uint8_t opcode, Address address); // Type J
-    Instruction(const Instruction &);
-
-    static const Instruction NOP;
-    static const Instruction UNKNOWN_INST;
-
-    enum Type { R, I, S, B, U, J, UNKNOWN };
-
-    /** Modified encoding to enable pseudoinstructions. */
-    enum class Modifier {
-        /** Normal processing. All fields are checked for value max and min. */
-        NONE,
-        /**
-         * Encodes upper part of immediate from a pseudoinstruction.
-         *
-         * `imm = symbol[31:12] + symbol[11]`
-         * NOTE: `symbol[11]` compensates for sign extension from addition of the lower part.
-         */
-        COMPOSED_IMM_UPPER,
-        /**
-         * Encodes lower part of immediate from a pseudoinstruction.
-         *
-         * `imm = symbol[11:0]`
-         * Upper bits of immediate may are discarded.
-         */
-        COMPOSED_IMM_LOWER,
-    };
-
-    struct ParseError;
-
-    /** Returns size of instruction in bytes */
-    uint8_t size() const;
-    uint8_t opcode() const;
-    uint8_t rs() const;
-    uint8_t rt() const;
-    uint8_t rd() const;
-    uint8_t shamt() const;
-    uint16_t funct() const;
-    uint32_t csrsel() const;
-    int32_t immediate() const;
-    Address address() const;
-    uint32_t data() const;
-    bool imm_sign() const;
-    enum Type type() const;
-    enum InstructionFlags flags() const;
-    AluCombinedOp alu_op() const;
-    enum AccessControl mem_ctl() const;
-
-    void flags_alu_op_mem_ctl(
-        enum InstructionFlags &flags,
-        AluCombinedOp &alu_op,
-        enum AccessControl &mem_ctl) const;
-
-    bool operator==(const Instruction &c) const;
-    bool operator!=(const Instruction &c) const;
-    Instruction &operator=(const Instruction &c);
-
-    QString to_str(Address inst_addr = Address::null()) const;
-
-    /**
-     * Parses instruction from string containing one assembler line.
-     *
-     * @throws Instruction::ParseError if unable to parse
-     */
-    static size_t code_from_string(
-        uint32_t *code,
-        size_t buffsize,
-        QString str,
-        Address inst_addr,
-        RelocExpressionList *reloc = nullptr,
-        const QString &filename = "",
-        unsigned line = 0,
-        bool pseudoinst_enabled = true);
-
-    /**
-     * Parses instruction from prepare tokenized form.
-     *
-     * @throws Instruction::ParseError if unable to parse
-     */
-    static size_t code_from_tokens(
-        uint32_t *code,
-        size_t buffsize,
-        TokenizedInstruction &inst,
-        RelocExpressionList *reloc = nullptr,
-        bool pseudoinst_enabled = true);
-
-    bool update(int64_t val, RelocExpression *relocexp);
-
-    static void append_recognized_instructions(QStringList &list);
-    static void set_symbolic_registers(bool enable);
-    static void append_recognized_registers(QStringList &list);
-    static constexpr uint64_t modify_pseudoinst_imm(Modifier mod, uint64_t value);
-
-private:
-    uint32_t dt;
-    static bool symbolic_registers_enabled;
-
-    static Instruction base_from_tokens(
-        const TokenizedInstruction &inst,
-        RelocExpressionList *reloc,
-        Modifier pseudo_mod = Modifier::NONE,
-        uint64_t initial_immediate_value = 0);
-    inline int32_t extend(uint32_t value, uint32_t used_bits) const;
-    static uint32_t parse_field(
-        QString &field_token,
-        const QString &arg,
-        Address inst_addr,
-        RelocExpressionList *reloc,
-        const QString &filename,
-        unsigned int line,
-        Modifier pseudo_mod,
-        uint64_t initial_immediate_value);
-    static size_t partially_apply(
-        const char *base,
-        int argument_count,
-        int position,
-        const char *value,
-        uint32_t *code,
-        size_t buffsize,
-        TokenizedInstruction &inst,
-        RelocExpressionList *reloc);
-    static size_t pseudo_from_tokens(
-        uint32_t *code,
-        size_t buffsize,
-        TokenizedInstruction &inst,
-        RelocExpressionList *reloc);
-};
-
-struct Instruction::ParseError : public std::exception {
-    QString message;
-
-    explicit ParseError(QString message);
-
-    const char *what() const noexcept override { return message.toUtf8().data(); }
-};
-
-struct RelocExpression {
-    inline RelocExpression(
-        Address location,
-        QString expression,
-        int64_t offset,
-        int64_t min,
-        int64_t max,
-        const BitArg *arg,
-        QString filename,
-        int line,
-        Instruction::Modifier pseudo_mod = Instruction::Modifier::NONE) {
-        this->location = location;
-        this->expression = std::move(expression);
-        this->offset = offset;
-        this->min = min;
-        this->max = max;
-        this->arg = arg;
-        this->filename = std::move(filename);
-        this->line = line;
-        this->pseudo_mod = pseudo_mod;
-    }
-    Address location;
-    QString expression;
-    int64_t offset;
-    int64_t min;
-    int64_t max;
-    const BitArg *arg;
-    QString filename;
-    int line;
-    Instruction::Modifier pseudo_mod;
-};
-
 } // namespace machine
-
-Q_DECLARE_METATYPE(machine::Instruction)
 
 #endif // INSTRUCTION_H

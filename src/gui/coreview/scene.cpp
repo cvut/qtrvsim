@@ -218,7 +218,7 @@ template<typename T>
 void CoreViewScene::update_value_list(std::vector<T> &value_list) {
     DEBUG("Calling full update of %s...", typeid(T).name());
     for (auto &value_handler : value_list) {
-        value_handler.update();
+        value_handler.update_value_with_dynamic_relocation();
     }
 }
 

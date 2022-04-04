@@ -1,58 +1,34 @@
 #include "instruction.h"
 
+#include "common/containers/constexpr/cstring.h"
+#include "common/containers/lookuptable.h"
 #include "common/logging.h"
 #include "common/math/bit_ops.h"
-#include "simulator_exception.h"
-#include "utils.h"
+#include "execute/alu.h"
+#include "instruction/argument_desc.h"
+#include "instruction/instruction_flags.h"
+#include "instruction/riscv/register_names.h"
+#include "register_value.h"
 
 #include <QChar>
 #include <QMultiMap>
-#include <QStringList>
 #include <cctype>
 #include <cstring>
-#include <initializer_list>
-#include <set>
-#include <utility>
 
 LOG_CATEGORY("instruction");
 
-using namespace machine;
+namespace machine {
 
-struct ArgumentDesc {
-    char name;
-    /**
-     * Possible values:
-     *  @val g: gp register id
-     *  @val n: numeric immediate
-     *  @val a: pc relative address offset
-     *  @val b: pc relative address offset
-     *  @val o: offset immediate
-     */
-    char kind;
-    int64_t min;
-    int64_t max;
-    BitArg arg;
-    inline ArgumentDesc(char name, char kind, int64_t min, int64_t max, BitArg arg)
-        : name(name)
-        , kind(kind)
-        , min(min)
-        , max(max)
-        , arg(std::move(arg)) {}
+using std::array;
 
-    /** Check whether given value fits into this instruction field. */
-    constexpr bool is_value_in_field_range(RegisterValue val) const {
-        if (min < 0) {
-            return val.as_i64() <= max && val.as_i64() >= min;
-        } else {
-            return val.as_u64() <= static_cast<uint64_t>(max)
-                   && val.as_u64() >= static_cast<uint64_t>(min);
-        }
-    }
+namespace non_arg_fields {
+    static constexpr InstructionField OPCODE = { { { 7, 0 } }, 0 };
+    static constexpr InstructionField FUNCT7 = { { { 7, 25 } }, 0 };
+    static constexpr InstructionField FUNCT3 = { { { 3, 12 } }, 0 };
+    static constexpr InstructionField FUNCT { { { 7, 25 }, { 3, 12 } }, 0 };
+} // namespace non_arg_fields
 
-    constexpr bool is_imm() const { return kind != 'g'; }
-};
-
-static const ArgumentDesc arg_desc_list[] = {
+static constexpr carray<ArgumentDesc, 10> arg_desc_list = {
     // Destination register (rd)
     ArgumentDesc('d', 'g', 0, 0x1f, { { { 5, 7 } }, 0 }),
     // Source register 1 (rs1/rs)
@@ -61,9 +37,9 @@ static const ArgumentDesc arg_desc_list[] = {
     ArgumentDesc('t', 'g', 0, 0x1f, { { { 5, 20 } }, 0 }),
     // I-type immediate for arithmetic instructions (12bits)
     ArgumentDesc('j', 'n', -0x800, 0x7ff, { { { 12, 20 } }, 0 }),
-    // Shaft for bit shift instructions (5bits)
+    // Shamt for bit shift instructions (5bits)
     ArgumentDesc('>', 'n', 0, 0x1f, { { { 5, 20 } }, 0 }),
-    // Address offset immediate (20bits), encoded in multiples of 2 bytes
+    // J-type address offset immediate (20bits), encoded in multiples of 2 bytes
     ArgumentDesc('a', 'a', -0x80000, 0x7ffff, { { { 10, 21 }, { 1, 20 }, { 8, 12 }, { 1, 31 } }, 1 }),
     // U-type immediate for LUI and AUIPC (20bits)
     ArgumentDesc('u', 'n', 0, 0xfffff000, { { { 20, 12 } }, 0 }),
@@ -75,24 +51,17 @@ static const ArgumentDesc arg_desc_list[] = {
     ArgumentDesc('q', 'o', -0x800, 0x7ff, { { { 5, 7 }, { 7, 25 } }, 0 }),
 };
 
-static const ArgumentDesc *arg_desc_by_code[(int)('z' + 1)];
+LookUpTable<char, ArgumentDesc> arg_desc_by_code { arg_desc_list, &ArgumentDesc::name };
 
-static bool fill_argdesbycode() {
-    for (const auto &desc : arg_desc_list) {
-        arg_desc_by_code[(uint)(unsigned char)desc.name] = &desc;
-    }
-    return true;
-}
-
-bool argdesbycode_filled = fill_argdesbycode();
-
-#define FLAGS_ALU_I (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_ALU_REQ_RS)
+#define FLAGS_ALU_I InstructionFlags(IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_ALU_REQ_RS)
 #define FLAGS_ALU_I_LOAD                                                                           \
-    (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM | IMF_ALU_REQ_RS)
+    InstructionFlags(                                                                              \
+        IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM | IMF_ALU_REQ_RS)
 #define FLAGS_ALU_I_STORE                                                                          \
-    (IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | IMF_MEM | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
-#define FLAGS_ALU_T_R_D (IMF_SUPPORTED | IMF_REGWRITE)
-#define FLAGS_ALU_T_R_STD (FLAGS_ALU_T_R_D | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
+    InstructionFlags(                                                                              \
+        IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | IMF_MEM | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
+#define FLAGS_ALU_T_R_D InstructionFlags(IMF_SUPPORTED | IMF_REGWRITE)
+#define FLAGS_ALU_T_R_STD InstructionFlags(FLAGS_ALU_T_R_D | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
 
 #define NOALU                                                                                      \
     { .alu_op = AluOp::ADD }
@@ -102,7 +71,9 @@ bool argdesbycode_filled = fill_argdesbycode();
 //  using zero initialization.
 #define IM_UNKNOWN                                                                                 \
     {                                                                                              \
-        "unknown", Instruction::UNKNOWN, NOALU, NOMEM, nullptr, {}, 0, 0, { 0 }                    \
+        "unknown", Instruction::Type::UNKNOWN, NOALU, NOMEM, nullptr, {}, 0, 0, {                  \
+            .flags = InstructionFlags(0)                                                           \
+        }                                                                                          \
     }
 
 struct InstructionMap {
@@ -112,26 +83,26 @@ struct InstructionMap {
     AccessControl mem_ctl;
     const struct InstructionMap *subclass; // when subclass is used then flags
                                            // has special meaning
-    const QList<QString> args;
+    const cvector<cstring, 3> args;
     uint32_t code;
     uint32_t mask;
     union {
-        unsigned int flags;
-        BitArg::Field subfield;
+        unsigned flags;
+        InstructionField::Subfield subfield;
     };
 };
 
-#define IT_R Instruction::R
-#define IT_I Instruction::I
-#define IT_S Instruction::S
-#define IT_B Instruction::B
-#define IT_U Instruction::U
-#define IT_J Instruction::J
-#define IT_UNKNOWN Instruction::UNKNOWN
+#define IT_R Instruction::Type::R
+#define IT_I Instruction::Type::I
+#define IT_S Instruction::Type::S
+#define IT_B Instruction::Type::B
+#define IT_U Instruction::Type::U
+#define IT_J Instruction::Type::J
+#define IT_UNKNOWN Instruction::Type::UNKNOWN
 
 // clang-format off
 
-static const struct InstructionMap LOAD_map[] = {
+static constexpr struct InstructionMap LOAD_map[] = {
     {"lb",  IT_I, { .alu_op=AluOp::ADD }, AC_I8,  nullptr, {"d", "o(s)"}, 0x00000003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }}, // LB
     {"lh",  IT_I, { .alu_op=AluOp::ADD }, AC_I16, nullptr, {"d", "o(s)"}, 0x00001003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }}, // LH
     {"lw",  IT_I, { .alu_op=AluOp::ADD }, AC_I32, nullptr, {"d", "o(s)"}, 0x00002003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }}, // LW
@@ -142,12 +113,12 @@ static const struct InstructionMap LOAD_map[] = {
     IM_UNKNOWN,
 };
 
-static const struct InstructionMap SRI_map[] = {
+static constexpr struct InstructionMap SRI_map[] = {
     {"srli", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x00005013,0xfe00707f, { .flags = FLAGS_ALU_I }}, // SRLI
-    {"srai", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x40005013,0xfe00707f, { .flags = FLAGS_ALU_I | IMF_ALU_MOD }}, // SRAI
+    {"srai", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x40005013,0xfe00707f, { .flags = InstructionFlags(FLAGS_ALU_I | IMF_ALU_MOD) }}, // SRAI
 };
 
-static const struct InstructionMap OP_IMM_map[] = {
+static constexpr struct InstructionMap OP_IMM_map[] = {
     {"addi",  IT_I, { .alu_op=AluOp::ADD },  NOMEM, nullptr, {"d", "s", "j"}, 0x00000013,0x0000707f, { .flags = FLAGS_ALU_I }}, // ADDI
     {"slli",  IT_I, { .alu_op=AluOp::SLL },  NOMEM, nullptr, {"d", "s", ">"}, 0x00001013,0xfe00707f, { .flags = FLAGS_ALU_I }}, // SLLI
     {"slti",  IT_I, { .alu_op=AluOp::SLT },  NOMEM, nullptr, {"d", "s", "j"}, 0x00002013,0x0000707f, { .flags = FLAGS_ALU_I }}, // SLTI
@@ -158,7 +129,7 @@ static const struct InstructionMap OP_IMM_map[] = {
     {"andi",  IT_I, { .alu_op=AluOp::AND },  NOMEM, nullptr, {"d", "s", "j"}, 0x00007013,0x0000707f, { .flags = FLAGS_ALU_I }}, // ANDI
 };
 
-static const struct InstructionMap STORE_map[] = {
+static constexpr struct InstructionMap STORE_map[] = {
     {"sb", IT_S, { .alu_op=AluOp::ADD }, AC_U8,  nullptr, {"t", "q(s)"}, 0x00000023, 0x0000707f, { .flags = FLAGS_ALU_I_STORE }}, // SB
     {"sh", IT_S, { .alu_op=AluOp::ADD }, AC_U16, nullptr, {"t", "q(s)"}, 0x00001023, 0x0000707f, { .flags = FLAGS_ALU_I_STORE }}, // SH
     {"sw", IT_S, { .alu_op=AluOp::ADD }, AC_U32, nullptr, {"t", "q(s)"}, 0x00002023, 0x0000707f, { .flags = FLAGS_ALU_I_STORE }}, // SW
@@ -169,17 +140,17 @@ static const struct InstructionMap STORE_map[] = {
     IM_UNKNOWN,
 };
 
-static const struct InstructionMap ADD_map[] = {
+static constexpr struct InstructionMap ADD_map[] = {
     {"add", IT_R, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "s", "t"}, 0x00000033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }},
     {"sub", IT_R, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "s", "t"}, 0x40000033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_MOD }},
 };
 
-static const struct InstructionMap SR_map[] = {
+static constexpr struct InstructionMap SR_map[] = {
     {"srl", IT_R, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", "t"}, 0x00005033,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }}, // SRL
     {"sra", IT_R, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", "t"}, 0x40005033,0xfe00707f,  { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_MOD }}, // SRA
 };
 
-static const struct InstructionMap OP_ALU_map[] = {
+static constexpr struct InstructionMap OP_ALU_map[] = {
     {"add/sub", IT_R, NOALU,    NOMEM, ADD_map,              {}, 0x00000033, 0xbe00707f, { .subfield = {1, 30} }},
     {"sll",  IT_R, { .alu_op=AluOp::SLL },  NOMEM, nullptr, {"d", "s", "t"}, 0x00001033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }}, // SLL
     {"slt",  IT_R, { .alu_op=AluOp::SLT },  NOMEM, nullptr, {"d", "s", "t"}, 0x00002033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }}, // SLT
@@ -210,7 +181,7 @@ static const struct InstructionMap OP_map[] = {
     {"mul", IT_R, NOALU, NOMEM, OP_MUL_map, {}, 0x02000033, 0xfc00707f, { .subfield = {3, 12} }},
 };
 
-static const struct InstructionMap BRANCH_map[] = {
+static constexpr struct InstructionMap BRANCH_map[] = {
     {"beq",  IT_B, { .alu_op=AluOp::ADD }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00000063,0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_ALU_MOD }}, // BEQ
     {"bne",  IT_B, { .alu_op=AluOp::ADD }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00001063, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_ALU_MOD | IMF_BJ_NOT }}, // BNE
     IM_UNKNOWN,
@@ -221,7 +192,7 @@ static const struct InstructionMap BRANCH_map[] = {
     {"bgeu", IT_B, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"s", "t", "p"}, 0x00007063,0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT }}, // BGEU
 };
 
-static const struct InstructionMap SYSTEM_map[] = {
+static constexpr struct InstructionMap SYSTEM_map[] = {
     {"ecall", IT_I, NOALU, NOMEM, nullptr, {}, 0x00000073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_EXCEPTION | IMF_ECALL }},
     {"ebreak", IT_I, NOALU, NOMEM, nullptr, {}, 0x00100073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_EXCEPTION | IMF_EBREAK }},
 };
@@ -237,7 +208,7 @@ static const struct InstructionMap MISC_MEM_map[] = {
     IM_UNKNOWN,
 };
 
-static const struct InstructionMap I_inst_map[] = {
+static constexpr struct InstructionMap I_inst_map[] = {
     {"load", IT_I, NOALU, NOMEM, LOAD_map, {}, 0x03, 0x7f, { .subfield = {3, 12} }}, // LOAD
     IM_UNKNOWN, // LOAD-FP
     IM_UNKNOWN, // custom-0
@@ -275,7 +246,7 @@ IMF_REGWRITE | IMF_JUMP | IMF_PC_TO_ALU | IMF_ALUSRC }}, // JAL
     IM_UNKNOWN, // >= 80b
 };
 
-static const struct InstructionMap C_inst_map[] = {
+static constexpr struct InstructionMap C_inst_map[] = {
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
@@ -284,15 +255,17 @@ static const struct InstructionMap C_inst_map[] = {
 
 // clang-format on
 
-const BitArg::Field instruction_map_opcode_field = { 2, 0 };
+constexpr InstructionField::Subfield instruction_map_opcode_field = { 2, 0 };
 
-static inline const struct InstructionMap &InstructionMapFind(uint32_t code) {
-    const struct InstructionMap *im = &C_inst_map[instruction_map_opcode_field.decode(code)];
+constexpr const InstructionMap &InstructionMapFind(uint32_t code) {
+    const InstructionMap *im = &C_inst_map[instruction_map_opcode_field.decode(code)];
     while (im->subclass != nullptr) {
         im = &im->subclass[im->subfield.decode(code)];
     }
     return *im;
 }
+
+constexpr const InstructionMap &nop = InstructionMapFind(0x13);
 
 const std::array<const QString, 34> RECOGNIZED_PSEUDOINSTRUCTIONS {
     "nop",    "la",     "li",     "mv",     "not",  "neg",  "negw", "sext.b", "sext.h",
@@ -305,108 +278,69 @@ bool Instruction::symbolic_registers_enabled = false;
 const Instruction Instruction::NOP = Instruction(0x00000013);
 const Instruction Instruction::UNKNOWN_INST = Instruction(0x0);
 
-Instruction::Instruction() {
-    this->dt = 0;
+uint8_t Instruction::size() const { // NOLINT(readability-convert-member-functions-to-static)
+    return 4;
 }
-
-Instruction::Instruction(uint32_t inst) {
-    this->dt = inst;
-}
-
-Instruction::Instruction(const Instruction &i) {
-    this->dt = i.data();
-}
-
-#define MASK(LEN, OFF) ((this->dt >> (OFF)) & ((1 << (LEN)) - 1))
 
 uint8_t Instruction::opcode() const {
-    return (uint8_t)MASK(7, 0); // Does include the 2 bits marking it's not a
-                                // 16b instruction
+    // Includes the 2 bits marking it's not a 16b instruction.
+    return non_arg_fields::OPCODE.decode(dt);
 }
 
 uint8_t Instruction::rs() const {
-    return (uint8_t)MASK(5, 15);
+    return arg_desc_by_code['s']->arg.decode(dt);
 }
 
 uint8_t Instruction::rt() const {
-    return (uint8_t)MASK(5, 20);
+    return arg_desc_by_code['t']->arg.decode(dt);
 }
 
 uint8_t Instruction::rd() const {
-    return (uint8_t)MASK(5, 7);
+    return arg_desc_by_code['d']->arg.decode(dt);
 }
 
 uint8_t Instruction::shamt() const {
-    return this->rt();
+    return arg_desc_by_code['<']->arg.decode(dt);
 }
 
 uint16_t Instruction::funct() const {
-    return uint16_t(MASK(7, 25) << 3 | MASK(3, 12));
+    return non_arg_fields::FUNCT.decode(dt);
 }
 
-uint32_t Instruction::csrsel() const {
-    return (uint8_t)MASK(12, 20);
+constexpr Instruction::imm_type immediate_by_arg_code(Instruction::data_type data, char arg_code) {
+    const auto &arg = arg_desc_by_code[arg_code]->arg;
+    return (Instruction::imm_type)sign_extend(arg.decode(data), arg.bits_used);
 }
 
-int32_t Instruction::immediate() const {
-    int32_t ret = 0;
+Instruction::imm_type Instruction::immediate() const {
     switch (this->type()) {
-    case R: break;
-    case I: ret = extend(MASK(12, 20), 12); break;
-    case S: ret = extend(MASK(7, 25) << 5 | MASK(5, 7), 12); break;
-    case B:
-        ret = extend(MASK(4, 8) << 1 | MASK(6, 25) << 5 | MASK(1, 7) << 11 | MASK(1, 31) << 12, 12);
-        break;
-    case U: ret = this->dt & ~((1 << 12) - 1); break;
-    case J:
-        ret = extend(
-            MASK(10, 21) << 1 | MASK(1, 20) << 11 | MASK(8, 12) << 12 | MASK(1, 31) << 20, 21);
-        break;
-    case UNKNOWN: break;
+    case Type::I: return immediate_by_arg_code(dt, 'j');
+    case Type::S: return immediate_by_arg_code(dt, 'q');
+    case Type::B: return immediate_by_arg_code(dt, 'p');
+    case Type::U: return immediate_by_arg_code(dt, 'u');
+    case Type::J: return immediate_by_arg_code(dt, 'a');
+    case Type::R: {
+        WARN("Requested immediate of R-type instruction.");
+        return 0;
     }
-    return ret;
+    case Type::UNKNOWN: {
+        WARN("Requested immediate of UNKNOWN instruction.");
+        return 0;
+    }
+    }
 }
 
-Address Instruction::address() const {
-    return Address(MASK(26, 0));
-}
-
-uint32_t Instruction::data() const {
-    return this->dt;
+Instruction::data_type Instruction::data() const {
+    return dt;
 }
 
 bool Instruction::imm_sign() const {
-    return this->dt >> 31;
+    return dt >> (std::numeric_limits<typeof(dt)>::digits - 1);
 }
 
 enum Instruction::Type Instruction::type() const {
     const struct InstructionMap &im = InstructionMapFind(dt);
     return im.type;
-}
-
-enum InstructionFlags Instruction::flags() const {
-    const struct InstructionMap &im = InstructionMapFind(dt);
-    return (enum InstructionFlags)im.flags;
-}
-AluCombinedOp Instruction::alu_op() const {
-    const struct InstructionMap &im = InstructionMapFind(dt);
-    return im.alu;
-}
-
-enum AccessControl Instruction::mem_ctl() const {
-    const struct InstructionMap &im = InstructionMapFind(dt);
-    return im.mem_ctl;
-}
-
-void Instruction::flags_alu_op_mem_ctl(
-    InstructionFlags &flags,
-    AluCombinedOp &alu_op,
-    AccessControl &mem_ctl) const {
-    const struct InstructionMap &im = InstructionMapFind(dt);
-    flags = (enum InstructionFlags)im.flags;
-    alu_op = im.alu;
-    mem_ctl = im.mem_ctl;
-    if ((dt ^ im.code) & (im.mask)) { flags = (enum InstructionFlags)(flags & ~IMF_SUPPORTED); }
 }
 
 bool Instruction::operator==(const Instruction &c) const {
@@ -417,46 +351,32 @@ bool Instruction::operator!=(const Instruction &c) const {
     return !this->operator==(c);
 }
 
-Instruction &Instruction::operator=(const Instruction &c) {
-    if (this != &c) { this->dt = c.data(); }
-    return *this;
-}
-
 QString Instruction::to_str(Address inst_addr) const {
     const InstructionMap &im = InstructionMapFind(dt);
     // TODO there are exception where some fields are zero and such so we should
     // not print them in such case
-    SANITY_ASSERT(argdesbycode_filled, QString("argdesbycode_filled not initialized"));
     QString res;
     QString next_delim = " ";
-    if (im.type == UNKNOWN) { return { "unknown" }; }
+    if (im.type == Type::UNKNOWN) { return { "unknown" }; }
     if (this->dt == NOP.dt) { return { "nop" }; }
 
     res += im.name;
-    for (const QString &arg_string : im.args) {
+    for (const auto &arg_string : im.args) {
         res += next_delim;
         next_delim = ", ";
-        for (int pos = 0; pos < arg_string.size(); pos += 1) {
-            char arg_letter = arg_string[pos].toLatin1();
-            const ArgumentDesc *arg_desc = arg_desc_by_code[(unsigned char)arg_letter];
+        for (size_t pos = 0; pos < arg_string.size(); pos += 1) {
+            char arg_letter = arg_string[pos];
+            const ArgumentDesc *arg_desc = arg_desc_by_code[arg_letter];
             if (arg_desc == nullptr) {
                 res += arg_letter;
                 continue;
             }
             auto field = (int32_t)arg_desc->arg.decode(this->dt);
-            if (arg_desc->min < 0) {
-                field = extend(field, [&]() {
-                    int sum = (int)arg_desc->arg.shift;
-                    for (auto chunk : arg_desc->arg) {
-                        sum += chunk.count;
-                    }
-                    return sum;
-                }());
-            }
+            if (arg_desc->min < 0) { field = sign_extend(field, arg_desc->arg.bits_used); }
             switch (arg_desc->kind) {
             case 'g': {
                 if (symbolic_registers_enabled) {
-                    res += QString(Rv_regnames[field]);
+                    res += QString(register_names[field].data());
                 } else {
                     res += "x" + QString::number(field);
                 }
@@ -487,7 +407,7 @@ QMultiMap<QString, uint32_t> str_to_instruction_code_map;
 
 void instruction_from_string_build_base(
     const InstructionMap *im,
-    BitArg::Field field,
+    InstructionField::Subfield field,
     uint32_t base_code) {
     uint32_t code;
     uint8_t bits = field.count;
@@ -540,11 +460,10 @@ static int parse_reg_from_string(const QString &str, uint *chars_taken = nullptr
     } else {
         auto data = str.toLocal8Bit();
         int regnum = -1;
-        for (size_t i = 0; i < Rv_regnames.size(); i++) {
-            size_t len = std::strlen(Rv_regnames[i]);
-            if (size_t(data.size()) < len)
-                continue;
-            if (std::strncmp(data.data(), Rv_regnames[i], len) == 0) {
+        for (size_t i = 0; i < register_names.size(); i++) {
+            size_t len = register_names[i].size();
+            if (size_t(data.size()) < len) continue;
+            if (std::strncmp(data.data(), register_names[i].data(), len) == 0) {
                 *chars_taken = len;
                 regnum = (int)i;
             }
@@ -578,7 +497,7 @@ static void reloc_append(
         }
     }
 
-    reloc->append(new RelocExpression(
+    reloc->emplace_back(new RelocationDesc(
         inst_addr, expression, offset, adesc->min, adesc->max, &adesc->arg, filename, line,
         pseudo_mod));
     if (chars_taken != nullptr) { *chars_taken = i; }
@@ -586,15 +505,15 @@ static void reloc_append(
 
 size_t Instruction::code_from_tokens(
     uint32_t *code,
-    size_t buffsize,
-    TokenizedInstruction &inst,
+    size_t buffer_size,
+    TokenizedInstruction &input,
     RelocExpressionList *reloc,
     bool pseudoinst_enabled) {
     if (str_to_instruction_code_map.isEmpty()) { instruction_from_string_build_base(); }
 
-    Instruction result = base_from_tokens(inst, reloc);
+    Instruction result = base_from_tokens(input, reloc);
     if (result.data() != 0) {
-        if (result.size() > buffsize) {
+        if (result.size() > buffer_size) {
             // NOTE: this is bug, not user error.
             throw ParseError("insufficient buffer size to write parsed instruction");
         }
@@ -603,7 +522,7 @@ size_t Instruction::code_from_tokens(
     }
 
     if (pseudoinst_enabled) {
-        size_t pseudo_result = pseudo_from_tokens(code, buffsize, inst, reloc);
+        size_t pseudo_result = pseudo_from_tokens(code, buffer_size, input, reloc);
         if (pseudo_result != 0) { return pseudo_result; }
     }
     throw ParseError("unknown instruction");
@@ -808,7 +727,7 @@ size_t Instruction::pseudo_from_tokens(
         }
     }
     if (inst.base == QLatin1String("ret")) {
-        if (inst.fields.size() != 0) { throw ParseError("number of arguments does not match"); }
+        if (!inst.fields.empty()) { throw ParseError("number of arguments does not match"); }
         inst.base = "jalr";
         inst.fields.append("x0");
         inst.fields.append("0x0(x1)");
@@ -866,13 +785,13 @@ size_t Instruction::partially_apply(
     return code_from_tokens(code, buffsize, inst, reloc, false);
 }
 Instruction Instruction::base_from_tokens(
-    const TokenizedInstruction &inst,
+    const TokenizedInstruction &input,
     RelocExpressionList *reloc,
     Modifier pseudo_mod,
     uint64_t initial_immediate_value) {
-    auto iter_range = str_to_instruction_code_map.equal_range(inst.base);
+    auto iter_range = str_to_instruction_code_map.equal_range(input.base);
     if (iter_range.first == iter_range.second) {
-        DEBUG("Base instruction of the name %s not found.", qPrintable(inst.base));
+        DEBUG("Base instruction of the name %s not found.", qPrintable(input.base));
         return Instruction::UNKNOWN_INST;
     }
     // Process all codes associated with given instruction name and try matching the supplied
@@ -883,13 +802,13 @@ Instruction Instruction::base_from_tokens(
         uint32_t inst_code = iter_range.first.value();
         const InstructionMap &imap = InstructionMapFind(inst_code);
 
-        if (inst.fields.count() != imap.args.count()) { continue; }
+        if ((size_t)input.fields.count() != imap.args.size()) { continue; }
 
-        for (int field_index = 0; field_index < imap.args.count(); field_index += 1) {
-            const QString &arg = imap.args[field_index];
-            QString field_token = inst.fields[field_index];
+        for (size_t field_index = 0; field_index < imap.args.size(); field_index += 1) {
+            const auto &arg = imap.args[field_index];
+            QString field_token = input.fields[field_index];
             inst_code |= parse_field(
-                field_token, arg, inst.address, reloc, inst.filename, inst.line, pseudo_mod,
+                field_token, arg, input.address, reloc, input.filename, input.line, pseudo_mod,
                 initial_immediate_value);
         }
         return Instruction(inst_code);
@@ -897,7 +816,7 @@ Instruction Instruction::base_from_tokens(
 
     DEBUG(
         "Base instruction of the name %s not matched to any known base format.",
-        qPrintable(inst.base));
+        qPrintable(input.base));
     // Another instruction format for this base may be found in pseudoinstructions.
     return Instruction::UNKNOWN_INST;
 }
@@ -916,7 +835,7 @@ void parse_immediate_value(
 
 uint32_t Instruction::parse_field(
     QString &field_token,
-    const QString &arg,
+    const cstring &arg,
     Address inst_addr,
     RelocExpressionList *reloc,
     const QString &filename,
@@ -924,15 +843,15 @@ uint32_t Instruction::parse_field(
     Modifier pseudo_mod,
     uint64_t initial_immediate_value) {
     uint32_t inst_code = 0;
-    for (QChar ao : arg) {
+    for (size_t i = 0; i < arg.size(); i += 1) {
         bool need_reloc = false;
-        uint a = ao.toLatin1();
+        uint a = arg[i];
         if (!a) { continue; }
         field_token = field_token.trimmed();
         const ArgumentDesc *adesc = arg_desc_by_code[a];
         if (adesc == nullptr) {
             if (!field_token.count()) { throw ParseError("empty argument encountered"); }
-            if (field_token.at(0) != ao) {
+            if (field_token.at(0) != a) {
                 throw ParseError("argument does not match instruction template");
             }
             field_token = field_token.mid(1);
@@ -1023,31 +942,31 @@ void parse_immediate_value(
     }
 }
 
-bool Instruction::update(int64_t val, RelocExpression *relocexp) {
+bool Instruction::update_value_with_dynamic_relocation(int64_t new_val, RelocationDesc *reloc_desc) {
     // Clear all bit of the updated argument.
-    dt &= ~relocexp->arg->encode(~0);
-    val += relocexp->offset;
+    dt &= ~reloc_desc->arg->encode(~0);
+    new_val += reloc_desc->offset;
 
-    if (relocexp->pseudo_mod != Modifier::NONE) {
-        val = (int64_t)modify_pseudoinst_imm(relocexp->pseudo_mod, val);
+    if (reloc_desc->pseudo_mod != Modifier::NONE) {
+        new_val = (int64_t)modify_pseudoinst_imm(reloc_desc->pseudo_mod, new_val);
     } else {
-        if ((val & ((1 << relocexp->arg->shift) - 1))) { return false; }
-        if (relocexp->min < 0) {
-            if (((int64_t)val < relocexp->min) || ((int64_t)val > relocexp->max)) {
-                if (((int64_t)val - 0x100000000 < relocexp->min)
-                    || ((int64_t)val - 0x100000000 > relocexp->max)) {
+        if ((new_val & ((1 << reloc_desc->arg->shift) - 1))) { return false; }
+        if (reloc_desc->min < 0) {
+            if (((int64_t)new_val < reloc_desc->min) || ((int64_t)new_val > reloc_desc->max)) {
+                if (((int64_t)new_val - 0x100000000 < reloc_desc->min)
+                    || ((int64_t)new_val - 0x100000000 > reloc_desc->max)) {
                     return false;
                 }
             }
         } else {
-            if (((uint64_t)val < (uint64_t)relocexp->min)
-                || ((uint64_t)val > (uint64_t)relocexp->max)) {
+            if (((uint64_t)new_val < (uint64_t)reloc_desc->min)
+                || ((uint64_t)new_val > (uint64_t)reloc_desc->max)) {
                 return false;
             }
         }
     }
 
-    dt |= relocexp->arg->encode(val);
+    dt |= reloc_desc->arg->encode(new_val);
     return true;
 }
 
@@ -1062,7 +981,7 @@ constexpr uint64_t Instruction::modify_pseudoinst_imm(Instruction::Modifier mod,
 }
 
 // highlighter
-void Instruction::append_recognized_instructions(QStringList &list) {
+void Instruction::get_recognized_instruction_names(QStringList &list) {
     if (str_to_instruction_code_map.isEmpty()) { instruction_from_string_build_base(); }
 
     for (auto iter = str_to_instruction_code_map.keyBegin();
@@ -1074,33 +993,63 @@ void Instruction::append_recognized_instructions(QStringList &list) {
     }
 }
 
+void Instruction::get_recognized_registers(QStringList &list) {
+    for (auto name : register_names) {
+        list.append(QLatin1String(name.data(), name.size()));
+    }
+}
+
 void Instruction::set_symbolic_registers(bool enable) {
     symbolic_registers_enabled = enable;
 }
 
-inline int32_t Instruction::extend(uint32_t value, uint32_t used_bits) const {
-    return value | ~((value & (1 << (used_bits - 1))) - 1);
-}
-
-void Instruction::append_recognized_registers(QStringList &list) {
-    for (auto name : Rv_regnames) {
-        list.append(name);
-    }
-}
-uint8_t Instruction::size() const {
-    return 4;
-}
 size_t Instruction::code_from_string(
-    uint32_t *code,
-    size_t buffsize,
-    QString str,
+    uint32_t *code_output,
+    size_t buffer_size,
+    QString input,
     Address inst_addr,
     RelocExpressionList *reloc,
     const QString &filename,
     unsigned line,
     bool pseudoinst_enabled) {
-    auto inst = TokenizedInstruction::from_line(std::move(str), inst_addr, filename, line);
-    return Instruction::code_from_tokens(code, buffsize, inst, reloc, pseudoinst_enabled);
+    auto inst = TokenizedInstruction::from_line(std::move(input), inst_addr, filename, line);
+    return Instruction::code_from_tokens(code_output, buffer_size, inst, reloc, pseudoinst_enabled);
+}
+
+constexpr Instruction Instruction::create_type_r(
+    uint8_t opcode,
+    uint8_t rs,
+    uint8_t rt,
+    uint8_t rd,
+    uint8_t shamt,
+    uint8_t funct3,
+    uint8_t funct7) {
+    Instruction::data_type dt = 0;
+    dt |= non_arg_fields::OPCODE.encode(opcode);
+    dt |= arg_desc_by_code['d']->arg.encode(rd);
+    dt |= arg_desc_by_code['s']->arg.encode(rs);
+    dt |= arg_desc_by_code['t']->arg.encode(rt);
+    dt |= arg_desc_by_code['<']->arg.encode(shamt);
+    dt |= non_arg_fields::FUNCT3.encode(funct3);
+    dt |= non_arg_fields::FUNCT7.encode(funct7);
+    return Instruction(dt);
+}
+
+constexpr Instruction
+Instruction::crate_type_i(uint8_t opcode, uint8_t rs, uint8_t rt, uint16_t immediate) {
+    Instruction::data_type dt = 0;
+    dt |= non_arg_fields::OPCODE.encode(opcode);
+    dt |= arg_desc_by_code['s']->arg.encode(rs);
+    dt |= arg_desc_by_code['t']->arg.encode(rt);
+    dt |= arg_desc_by_code['j']->arg.encode(immediate);
+    return Instruction(dt);
+}
+
+constexpr Instruction Instruction::create_type_j(uint8_t opcode, Address address) {
+    Instruction::data_type dt = 0;
+    dt |= non_arg_fields::OPCODE.encode(opcode);
+    dt |= arg_desc_by_code['a']->arg.encode(address.get_raw());
+    return Instruction(dt);
 }
 
 Instruction::ParseError::ParseError(QString message) : message(std::move(message)) {}
@@ -1141,3 +1090,23 @@ TokenizedInstruction::TokenizedInstruction(
     , address(address)
     , filename(std::move(filename))
     , line(line) {}
+
+InstructionSemantics::InstructionSemantics(const Instruction &instruction)
+    : instruction(instruction)
+    , instruction_map(InstructionMapFind(instruction.data())) {}
+
+InstructionFlags InstructionSemantics::flags() const {
+    return static_cast<InstructionFlags>(
+        ((instruction.data() ^ instruction_map.code) & (instruction_map.mask))
+            ? (instruction_map.flags & ~IMF_SUPPORTED)
+            : instruction_map.flags);
+}
+
+AluCombinedOp InstructionSemantics::alu_op() const {
+    return instruction_map.alu;
+}
+
+AccessControl InstructionSemantics::mem_ctl() const {
+    return instruction_map.mem_ctl;
+}
+} // namespace machine

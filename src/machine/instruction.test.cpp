@@ -4,6 +4,8 @@
 
 using namespace machine;
 
+Q_DECLARE_METATYPE(machine::Instruction)
+
 // Test that we are correctly encoding instructions in constructor
 void TestInstruction::instruction() {
     QCOMPARE(Instruction(0x0), Instruction());
@@ -24,7 +26,6 @@ void TestInstruction::instruction_access() {
     QCOMPARE(i.shamt(), (uint8_t)0x1f);
     QCOMPARE(i.funct(), (uint16_t)0x3f);
     QCOMPARE(i.immediate(), (int32_t)0xffff);
-    QCOMPARE(i.address().get_raw(), (uint64_t)0x3ffffff);
 }
 
 // TODO test to_str

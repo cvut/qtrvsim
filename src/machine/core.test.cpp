@@ -12,7 +12,8 @@ using std::vector;
 
 using namespace machine;
 
-Q_DECLARE_METATYPE(Xlen) // NOLINT(performance-no-int-to-ptr)
+Q_DECLARE_METATYPE(Xlen)        // NOLINT(performance-no-int-to-ptr)
+Q_DECLARE_METATYPE(Instruction) // NOLINT(performance-no-int-to-ptr)
 
 /**
  * Compiles program with no relocations into memory
