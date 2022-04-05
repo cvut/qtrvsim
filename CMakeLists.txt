@@ -224,6 +224,9 @@ endif()
 configure_file(data/gui.desktop.in
 		"${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop")
 
+configure_file("data/${MAIN_PROJECT_NAME_LOWER}.metainfo.xml.in"
+        "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.metainfo.xml")
+
 install(FILES "data/icons/gui.svg"
 		DESTINATION "share/icons/hicolor/scalable/apps"
 		RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.svg")
@@ -232,6 +235,9 @@ install(FILES "data/icons/48x48/gui.png"
 		RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.png")
 install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop"
 		DESTINATION share/applications)
+
+install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.metainfo.xml"
+		DESTINATION share/metainfo)
 
 # =============================================================================
 # Packages
