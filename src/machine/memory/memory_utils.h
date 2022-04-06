@@ -112,7 +112,7 @@ inline void partial_access_parameters(
         size_t size) {
     data_offset = ptr % sizeof(STORAGE_TYPE);
     partial_size = sizeof(STORAGE_TYPE);
-    partial_size = size - data_offset;
+    partial_size -= data_offset;
     if (partial_size > size)
         partial_size = size;
 }
