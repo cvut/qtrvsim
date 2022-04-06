@@ -105,9 +105,16 @@ struct WriteResult {
  * @return                  size to be used from aligned access
  */
 template<typename STORAGE_TYPE>
-inline size_t partial_access_size(uintptr_t ptr) {
-    size_t size = ptr % sizeof(STORAGE_TYPE);
-    return (size == 0) ? sizeof(STORAGE_TYPE) : size;
+inline void partial_access_parameters(
+        size_t &data_offset,
+        size_t &partial_size,
+        uintptr_t ptr,
+        size_t size) {
+    data_offset = ptr % sizeof(STORAGE_TYPE);
+    partial_size = sizeof(STORAGE_TYPE);
+    partial_size = size - data_offset;
+    if (partial_size > size)
+        partial_size = size;
 }
 
 /**
@@ -127,11 +134,13 @@ read_by_u32(void *dst, size_t src, size_t size, FUNC data_getter) {
     size_t remaining_size = size;
 
     do {
-        size_t partial_size = partial_access_size<uint32_t>(current_src);
+        size_t partial_size;
+        size_t data_offset;
+        partial_access_parameters<uint32_t>(data_offset, partial_size,
+                                            current_src, remaining_size);
 
         uint32_t data = data_getter(current_src & ~3u);
 
-        size_t data_offset = sizeof(uint32_t) - partial_size;
         memcpy(current_dst, (byte *)&data + data_offset, partial_size);
 
         remaining_size -= partial_size;
@@ -168,11 +177,14 @@ inline WriteResult write_by_u32(
     bool changed = false;
 
     do {
-        size_t aligned_size = partial_access_size<uint32_t>(current_dst);
-        size_t partial_size = std::min(remaining_size, aligned_size);
+        size_t partial_size;
+        size_t data_offset;
+        partial_access_parameters<uint32_t>(data_offset, partial_size,
+                                            current_dst, remaining_size);
+
         uint32_t data = data_getter(current_dst & ~3u);
-        size_t data_left_offset = sizeof(uint32_t) - aligned_size;
-        memcpy((byte *)&data + data_left_offset, current_src, partial_size);
+
+        memcpy((byte *)&data + data_offset, current_src, partial_size);
 
         changed |= data_setter(current_dst & ~3u, data);
 
