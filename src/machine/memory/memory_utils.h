@@ -57,9 +57,7 @@ struct ReadResult {
         };
     }
 
-    inline void operator+=(const ReadResult &other) {
-        this->n_bytes += other.n_bytes;
-    }
+    inline void operator+=(const ReadResult &other) { this->n_bytes += other.n_bytes; }
 };
 
 struct WriteResult {
@@ -91,9 +89,10 @@ struct WriteResult {
 };
 
 /**
+ * Perform n-byte read into periphery that only supports u32 access.
+ *
  * When converting n-byte memory access into aligned series of discrete
- *  accesses each by the STORAGE_TYPE, this function returns size of useful
- *  data in next access.
+ *  accesses each by u32.
  *
  * Example:
  * Periphery supports write by uint32_t. Access of size 4 targets in the middle
@@ -127,17 +126,15 @@ inline void partial_access_parameters(
  * @param data_getter       function object which return u32 data for given
  */
 template<typename FUNC>
-inline ReadResult
-read_by_u32(void *dst, size_t src, size_t size, FUNC data_getter) {
+inline ReadResult read_by_u32(void *dst, size_t src, size_t size, FUNC data_getter) {
     size_t current_src = src;
     byte *current_dst = static_cast<byte *>(dst);
     size_t remaining_size = size;
 
     do {
-        size_t partial_size;
-        size_t data_offset;
-        partial_access_parameters<uint32_t>(data_offset, partial_size,
-                                            current_src, remaining_size);
+        // For simplicity, this is duplicated in write_by_u32.
+        size_t data_offset = current_src % sizeof(uint32_t);
+        size_t partial_size = std::min(sizeof(uint32_t) - data_offset, remaining_size);
 
         uint32_t data = data_getter(current_src & ~3u);
 
@@ -154,6 +151,8 @@ read_by_u32(void *dst, size_t src, size_t size, FUNC data_getter) {
 /**
  * Perform n-byte write into periphery that only supports u32 access.
  *
+ * @see read_by_u32
+ *
  * @tparam FUNC1            function :: size_t -> uint32_t
  * @tparam FUNC2            function :: size_t, uint32_t -> bool
  * @param src               data source
@@ -164,23 +163,19 @@ read_by_u32(void *dst, size_t src, size_t size, FUNC data_getter) {
  * @param data_setter       function object which writes an u32 to givem offset
  * @return                  true if write caused a change
  */
+
 template<typename FUNC1, typename FUNC2>
-inline WriteResult write_by_u32(
-    size_t dst,
-    const void *src,
-    size_t size,
-    FUNC1 data_getter,
-    FUNC2 data_setter) {
+inline WriteResult
+write_by_u32(size_t dst, const void *src, size_t size, FUNC1 data_getter, FUNC2 data_setter) {
     const byte *current_src = static_cast<const byte *>(src);
     size_t current_dst = dst;
     size_t remaining_size = size;
     bool changed = false;
 
     do {
-        size_t partial_size;
-        size_t data_offset;
-        partial_access_parameters<uint32_t>(data_offset, partial_size,
-                                            current_dst, remaining_size);
+        // For simplicity, this is duplicated in read_by_u32.
+        size_t data_offset = current_dst % sizeof(uint32_t);
+        size_t partial_size = std::min(sizeof(uint32_t) - data_offset, remaining_size);
 
         uint32_t data = data_getter(current_dst & ~3u);
 
@@ -214,12 +209,7 @@ inline WriteResult write_by_u32(
  * @param function      lambda to perform individual accesses
  * @return number of bytes obtained, == size if fully successful
  */
-template<
-    typename RESULT_TYPE,
-    typename FUNC,
-    typename SRC_TYPE,
-    typename DST_TYPE,
-    typename OPTIONS_TYPE>
+template<typename RESULT_TYPE, typename FUNC, typename SRC_TYPE, typename DST_TYPE, typename OPTIONS_TYPE>
 inline RESULT_TYPE repeat_access_until_completed(
     DST_TYPE dst,
     SRC_TYPE src,
@@ -231,14 +221,12 @@ inline RESULT_TYPE repeat_access_until_completed(
     auto current_dst = (uint64_t)(dst);
     RESULT_TYPE total_result {};
 
-    // do-while is preferred, because this loop is most likely to be executed
-    // only once. Empty access is not common and need not to be optimized.
+    // do-while is preferred, because this loop is most likely to be executed only once. Empty
+    // access is not common and does not need to be optimized.
     do {
-        RESULT_TYPE result = function(
-            (DST_TYPE)(current_dst), (SRC_TYPE)(current_src), remaining_size,
-            options);
-        if (result.n_bytes == 0)
-            break;
+        RESULT_TYPE result
+            = function((DST_TYPE)(current_dst), (SRC_TYPE)(current_src), remaining_size, options);
+        if (result.n_bytes == 0) break;
         total_result += result;
         current_src += result.n_bytes;
         current_dst += result.n_bytes;
@@ -287,8 +275,7 @@ uint64_t memory_read_u64(MEM_T *mem, ADDR_T address) {
  */
 template<typename T, typename MEM_T, typename ADDR_T>
 void memory_write(MEM_T *mem, ADDR_T address, T value) {
-    const T swapped_value
-        = byteswap_if(value, mem->simulated_machine_endian != NATIVE_ENDIAN);
+    const T swapped_value = byteswap_if(value, mem->simulated_machine_endian != NATIVE_ENDIAN);
     mem->write(address, &swapped_value, sizeof(T), {});
 }
 
