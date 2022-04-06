@@ -8,7 +8,6 @@
     ],
     "command" : "qtrvsim_gui",
     "rename-desktop-file" : "qtrvsim.desktop",
-    "rename-appdata-file" : "qtrvsim.metainfo.xml",
     "rename-icon" : "qtrvsim_gui",
     "finish-args" : [
         "--device=dri",
