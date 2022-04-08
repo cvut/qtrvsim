@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2022 David Heidelberg -->
 <component type="desktop-application">
-  <id>@MAIN_PROJECT_NAME_LOWER@</id>
+  <id>@MAIN_PROJECT_APPID@</id>
   <name>@GENERIC_NAME@</name>
   <summary>RISC-V CPU simulator for education purposes</summary>
   <metadata_license>CC0-1.0</metadata_license>

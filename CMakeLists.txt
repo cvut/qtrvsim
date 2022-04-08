@@ -65,6 +65,7 @@ set(C_TEST_PATH ${EXECUTABLE_OUTPUT_PATH})
 # C defines, respectively.
 set(MAIN_PROJECT_NAME "${PROJECT_NAME}")
 set(MAIN_PROJECT_VERSION "${PROJECT_VERSION}")
+set(MAIN_PROJECT_APPID "cz.cvut.edu.comparch.qtrvsim")
 set(MAIN_PROJECT_ORGANIZATION "FEE CTU")
 set(MAIN_PROJECT_HOMEPAGE_URL "${PROJECT_HOMEPAGE_URL}")
 string(TOLOWER "${PROJECT_NAME}" MAIN_PROJECT_NAME_LOWER)
@@ -224,8 +225,8 @@ endif()
 configure_file(data/gui.desktop.in
 		"${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop")
 
-configure_file("data/${MAIN_PROJECT_NAME_LOWER}.metainfo.xml.in"
-        "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.metainfo.xml")
+configure_file("data/${MAIN_PROJECT_APPID}.metainfo.xml.in"
+		"${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_APPID}.metainfo.xml")
 
 install(FILES "data/icons/gui.svg"
 		DESTINATION "share/icons/hicolor/scalable/apps"
@@ -236,7 +237,7 @@ install(FILES "data/icons/48x48/gui.png"
 install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop"
 		DESTINATION share/applications)
 
-install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.metainfo.xml"
+install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_APPID}.metainfo.xml"
 		DESTINATION share/metainfo)
 
 # =============================================================================
