@@ -491,7 +491,7 @@ pairs of base address, length pairs stored in memory at address pass in `iov`.
   - **OP-IMM**: `addi, sll, slti, sltiu, xori, srli, srai, ori, andi, auipc, lui`
   - **BRANCH**: `beq, bne, btl, bge, bltu, bgtu`
   - **JUMP**: `jal, jalr`
-  - **SYSTEM**: `ecall, break`
+  - **SYSTEM**: `ecall, ebreak`
 - **Pseudoinstructions**
   - **BASIC**: `nop`
   - **LOAD**: `la, li`,
