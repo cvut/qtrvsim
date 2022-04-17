@@ -410,6 +410,7 @@ uint32_t Cache::get_write_count() const {
 uint32_t Cache::get_stall_count() const {
     uint32_t st_cycles
         = mem_reads * (access_pen_r - 1) + mem_writes * (access_pen_w - 1);
+    st_cycles += (miss_read + miss_write) * cache_config.block_size();
     if (access_pen_b != 0) {
         st_cycles -= burst_reads * (access_pen_r - access_pen_b)
                      + burst_writes * (access_pen_w - access_pen_b);
