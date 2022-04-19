@@ -148,6 +148,29 @@ inline ReadResult read_by_u32(void *dst, size_t src, size_t size, FUNC data_gett
     return { .n_bytes = size };
 }
 
+template<typename FUNC>
+inline ReadResult read_by_u16(void *dst, size_t src, size_t size, FUNC data_getter) {
+    size_t current_src = src;
+    byte *current_dst = static_cast<byte *>(dst);
+    size_t remaining_size = size;
+
+    do {
+        // For simplicity, this is duplicated in write_by_u16.
+        size_t data_offset = current_src % sizeof(uint16_t);
+        size_t partial_size = std::min(sizeof(uint16_t) - data_offset, remaining_size);
+
+        uint16_t data = data_getter(current_src & ~1u);
+
+        memcpy(current_dst, (byte *)&data + data_offset, partial_size);
+
+        remaining_size -= partial_size;
+        current_src += partial_size;
+        current_dst += partial_size;
+    } while (remaining_size > 0);
+
+    return { .n_bytes = size };
+}
+
 /**
  * Perform n-byte write into periphery that only supports u32 access.
  *
@@ -176,12 +199,43 @@ write_by_u32(size_t dst, const void *src, size_t size, FUNC1 data_getter, FUNC2 
         // For simplicity, this is duplicated in read_by_u32.
         size_t data_offset = current_dst % sizeof(uint32_t);
         size_t partial_size = std::min(sizeof(uint32_t) - data_offset, remaining_size);
+        uint32_t data = 0;
 
-        uint32_t data = data_getter(current_dst & ~3u);
+        if (partial_size < sizeof(data))
+            data = data_getter(current_dst & ~3u);
 
         memcpy((byte *)&data + data_offset, current_src, partial_size);
 
         changed |= data_setter(current_dst & ~3u, data);
+
+        remaining_size -= partial_size;
+        current_src += partial_size;
+        current_dst += partial_size;
+    } while (remaining_size > 0);
+
+    return { .n_bytes = size, .changed = changed };
+}
+
+template<typename FUNC1, typename FUNC2>
+inline WriteResult
+write_by_u16(size_t dst, const void *src, size_t size, FUNC1 data_getter, FUNC2 data_setter) {
+    const byte *current_src = static_cast<const byte *>(src);
+    size_t current_dst = dst;
+    size_t remaining_size = size;
+    bool changed = false;
+
+    do {
+        // For simplicity, this is duplicated in read_by_u16.
+        size_t data_offset = current_dst % sizeof(uint16_t);
+        size_t partial_size = std::min(sizeof(uint16_t) - data_offset, remaining_size);
+        uint16_t data = 0;
+
+        if (partial_size < sizeof(data))
+            data = data_getter(current_dst & ~1u);
+
+        memcpy((byte *)&data + data_offset, current_src, partial_size);
+
+        changed |= data_setter(current_dst & ~1u, data);
 
         remaining_size -= partial_size;
         current_src += partial_size;
