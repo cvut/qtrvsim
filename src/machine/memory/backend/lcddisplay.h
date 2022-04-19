@@ -54,13 +54,13 @@ public:
 
 private:
     /** Endian internal registers of the periphery (framebuffer) use. */
-    static constexpr Endian internal_endian = BIG;
+    static constexpr Endian internal_endian = NATIVE_ENDIAN;
 
     /** Read HW register - allows only 32bit aligned access. */
-    uint32_t read_reg(Offset source) const;
+    uint16_t read_raw_pixel(Offset source) const;
 
     /** Write HW register - allows only 32bit aligned access */
-    bool write_reg(Offset destination, uint32_t value);
+    bool write_raw_pixel(Offset destination, uint16_t value);
 
     size_t get_fb_line_size() const;
     size_t get_fb_size_bytes() const;
