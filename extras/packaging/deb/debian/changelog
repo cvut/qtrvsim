@@ -1,3 +1,19 @@
+qtrvsim (0.9.3-1) unstable; urgency=medium
+
+  * Debian package updated to version 0.9.3.
+  * Machine: fix LCD display endianness.
+  * Machine: correct memory stall cycles computation.
+  * Machine: correct unaligned and partial (lb, sb, lh, sh) to peripheral registers.
+  * Packaging: flatpak support kindly provided by David Heidelberg <david@ixit.cz>
+  * Machine and GUI: switch to RISC-V CSR names and remove references to MIPS COP0.
+  * Machine: correct parsing of registers s10 and s11 names.
+  * Machine: fix null pointer usage in cache
+  * GUI: fix null pointer usage in cache
+  * Machine: correct cache graphics visualization for byte accesses.
+  * Machine: LFU cache policy incorrect use of sets count instead of degree of associativity.
+
+ -- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Thu, 21 Apr 2022 09:40:37 +0200
+
 qtrvsim (0.9.2-1) unstable; urgency=medium
 
   * Debian package updated to version 0.9.2.
