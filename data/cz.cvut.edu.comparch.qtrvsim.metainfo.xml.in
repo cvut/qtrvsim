@@ -21,6 +21,11 @@
 	<p>Initial Flatpak release.</p>
       </description>
     </release>
+    <release version="@MAIN_PROJECT_VERSION@" date="2022-04-21">
+      <description>
+        <p>Current project release.</p>
+      </description>
+    </release>
   </releases>
 
   <screenshots>
