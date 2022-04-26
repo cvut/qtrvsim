@@ -8,8 +8,7 @@ static void set_default_log_pattern() {
                        "%{if-debug}\033[37m[DEBUG] %{endif}"
                        "%{if-warning}\033[33m[WARN]  %{endif}"
                        "%{if-critical}\033[31m[ERROR] %{endif}"
-                       "%{if-fatal}\033[31m[FATAL ERROR] %{backtrace "
-                       "depth=3}%{endif}"
+                       "%{if-fatal}\033[31m[FATAL ERROR] %{endif}"
                        "%{if-category}%{category}:%{endif}"
                        "\033[0m\t%{message}");
 }
