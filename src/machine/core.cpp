@@ -372,6 +372,7 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
     }
 
     const bool branch_taken = dt.branch && (!dt.bj_not ^ !dt.alu_zero);
+    const bool branch_jalx = dt.branch_jalr || dt.jump;
 
     return { MemoryInternalState {
                  .mem_read_val = towrite_val,
@@ -382,8 +383,8 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
                  .memread = memread,
                  .branch = dt.branch,
                  .jump = dt.jump,
-                 .branch_or_jump = branch_taken || dt.jump,
-                 .branch_jalx = dt.jump || dt.branch_jalr,
+                 .branch_or_jump = branch_taken || branch_jalx,
+                 .branch_jalx = branch_jalx,
                  .branch_jalr = dt.branch_jalr,
              },
              MemoryInterstage {
