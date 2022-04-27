@@ -102,9 +102,9 @@ struct DecodeInterstage {
     bool regwrite = true;     // If output should be written back to register
     bool alu_req_rs = false;  // requires rs value for ALU
     bool alu_req_rt = false;  // requires rt value for ALU or SW
-    bool branch = false;      // branch instruction
-    bool jump = false;        // jump
-    bool bj_not = false;      // negate branch condition
+    bool branch_bxx = false;  // branch instruction
+    bool branch_jal = false;  // jump
+    bool branch_val = false;  // negate branch condition
     bool branch_jalr = false; // JALR: write PC+4 to register and jump to ALU result
     bool stall = false;
     bool is_valid = false;
@@ -160,9 +160,9 @@ struct ExecuteInterstage {
     bool memwrite = false;
     bool regwrite = true;
     bool is_valid = false;
-    bool branch = false;
-    bool jump = false;
-    bool bj_not = false;
+    bool branch_bxx = false;
+    bool branch_jal = false;
+    bool branch_val = false;
     bool branch_jalr = false; //> @copydoc DecodeInterstage::branch_jalr
     bool alu_zero = false;
 
@@ -197,7 +197,7 @@ struct ExecuteInternalState {
     unsigned excause_num = 0;
     bool alu_src = false;
     bool alu_mul = false;
-    bool branch = false;
+    bool branch_bxx = false;
     bool alu_pc = false; // PC is input to ALU
 };
 
@@ -243,9 +243,9 @@ struct MemoryInternalState {
     unsigned excause_num = 0;
     bool memwrite = false;
     bool memread = false;
-    bool branch = false;
-    bool jump = false;
-    bool branch_or_jump = false;
+    bool branch_bxx = false;
+    bool branch_jal = false;
+    bool branch_outcome = false;
     bool branch_jalx = false;
     bool branch_jalr = false;
 };

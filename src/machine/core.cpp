@@ -272,9 +272,9 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .regwrite = regwrite,
                                 .alu_req_rs = bool(flags & IMF_ALU_REQ_RS),
                                 .alu_req_rt = bool(flags & IMF_ALU_REQ_RT),
-                                .branch = bool(flags & IMF_BRANCH),
-                                .jump = bool(flags & IMF_JUMP),
-                                .bj_not = bool(flags & IMF_BJ_NOT),
+                                .branch_bxx = bool(flags & IMF_BRANCH),
+                                .branch_jal = bool(flags & IMF_JUMP),
+                                .branch_val = bool(flags & IMF_BJ_NOT),
                                 .branch_jalr = bool(flags & IMF_BRANCH_JALR),
                                 .stall = false,
                                 .is_valid = dt.is_valid,
@@ -293,7 +293,7 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
         alu_val
             = alu_combined_operate(dt.aluop, dt.alu_component, true, dt.alu_mod, alu_fst, alu_sec);
     }
-    Address branch_jal_target = dt.inst_addr + dt.immediate_val.as_i64();
+    const Address branch_jal_target = dt.inst_addr + dt.immediate_val.as_i64();
 
     const unsigned stall_status = [&]() {
         if (dt.stall) {
@@ -318,7 +318,7 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
                  .excause_num = static_cast<unsigned>(dt.excause),
                  .alu_src = dt.alusrc,
                  .alu_mul = dt.alu_component == AluComponent::MUL,
-                 .branch = dt.branch,
+                 .branch_bxx = dt.branch_bxx,
                  .alu_pc = dt.alu_pc,
              },
              ExecuteInterstage {
@@ -336,9 +336,9 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
                  .memwrite = dt.memwrite,
                  .regwrite = dt.regwrite,
                  .is_valid = dt.is_valid,
-                 .branch = dt.branch,
-                 .jump = dt.jump,
-                 .bj_not = dt.bj_not,
+                 .branch_bxx = dt.branch_bxx,
+                 .branch_jal = dt.branch_jal,
+                 .branch_val = dt.branch_val,
                  .branch_jalr = dt.branch_jalr,
                  .alu_zero = alu_val == 0,
              } };
@@ -371,8 +371,10 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
         regwrite = false;
     }
 
-    const bool branch_taken = dt.branch && (!dt.bj_not ^ !dt.alu_zero);
-    const bool branch_jalx = dt.branch_jalr || dt.jump;
+    // Conditional branch (BXX = BEQ | BNE...) is executed and should be taken.
+    const bool branch_bxx_taken = dt.branch_bxx && (!dt.branch_val ^ !dt.alu_zero);
+    // Unconditional jump should be taken (JALX = JAL | JALR).
+    const bool branch_jalx = dt.branch_jalr || dt.branch_jal;
 
     return { MemoryInternalState {
                  .mem_read_val = towrite_val,
@@ -381,9 +383,10 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
                  .excause_num = static_cast<unsigned>(excause),
                  .memwrite = memwrite,
                  .memread = memread,
-                 .branch = dt.branch,
-                 .jump = dt.jump,
-                 .branch_or_jump = branch_taken || branch_jalx,
+                 .branch_bxx = dt.branch_bxx,
+                 .branch_jal = dt.branch_jal,
+                 // PC should be modified by branch/jump instruction.
+                 .branch_outcome = branch_bxx_taken || branch_jalx,
                  .branch_jalx = branch_jalx,
                  .branch_jalr = dt.branch_jalr,
              },
@@ -392,10 +395,10 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
                  .inst_addr = dt.inst_addr,
                  .next_inst_addr = dt.next_inst_addr,
                  .predicted_next_inst_addr = dt.predicted_next_inst_addr,
-                 .computed_next_inst_addr = compute_next_inst_addr(dt, branch_taken),
+                 .computed_next_inst_addr = compute_next_inst_addr(dt, branch_bxx_taken),
                  .mem_addr = mem_addr,
                  .towrite_val
-                 = (dt.branch_jalr || dt.jump) ? dt.next_inst_addr.get_raw() : towrite_val,
+                 = (dt.branch_jalr || dt.branch_jal) ? dt.next_inst_addr.get_raw() : towrite_val,
                  .excause = dt.excause,
                  .num_rd = dt.num_rd,
                  .memtoreg = memread,
@@ -418,7 +421,7 @@ WritebackState Core::writeback(const MemoryInterstage &dt) {
 }
 
 Address Core::compute_next_inst_addr(const ExecuteInterstage &exec, bool branch_taken) const {
-    if (branch_taken || exec.jump) { return exec.branch_jal_target; }
+    if (branch_taken || exec.branch_jal) { return exec.branch_jal_target; }
     if (exec.branch_jalr) { return Address(get_xlen_from_reg(exec.alu_val)); }
     return exec.next_inst_addr;
 }
