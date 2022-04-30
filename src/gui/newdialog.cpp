@@ -1,5 +1,6 @@
 #include "newdialog.h"
 
+#include "helper/async_modal.h"
 #include "machine/simulator_exception.h"
 #include "mainwindow.h"
 
@@ -147,19 +148,14 @@ void NewDialog::cancel() {
 }
 
 void NewDialog::create() {
-    MainWindow *prnt = (MainWindow *)parent();
+    auto *p_window = (MainWindow *)parent();
 
     try {
-        prnt->create_core(*config, true, false);
+        p_window->create_core(*config, true, false);
     } catch (const machine::SimulatorExceptionInput &e) {
-        QMessageBox msg(this);
-        msg.setText(e.msg(false));
-        msg.setIcon(QMessageBox::Critical);
-        msg.setToolTip("Please check that ELF executable really exists and is "
-                       "in correct format.");
-        msg.setDetailedText(e.msg(true));
-        msg.setWindowTitle("Error while initializing new machine");
-        msg.exec();
+        showAsyncCriticalBox(
+            this, "Error while initializing new machine", e.msg(false), e.msg(true),
+            "Please check that ELF executable really exists and is in correct format.");
         return;
     }
 
@@ -183,19 +179,18 @@ void NewDialog::browse_elf() {
         ui->elf_file->setText(path);
         config->set_elf(path);
     }
-    // Elf shouldn't have any other effect so we skip config_gui here
+    // Elf shouldn't have any other effect, so we skip config_gui here
 #else
-    QHtml5File::load(
-        "*", [&](const QByteArray &content, const QString &fileName) {
-            QFileInfo fi(fileName);
-            QString elf_name = fi.fileName();
-            QFile file(elf_name);
-            file.open(QIODevice::WriteOnly | QIODevice::Truncate);
-            file.write(content);
-            file.close();
-            ui->elf_file->setText(elf_name);
-            config->set_elf(elf_name);
-        });
+    QHtml5File::load("*", [&](const QByteArray &content, const QString &fileName) {
+        QFileInfo fi(fileName);
+        QString elf_name = fi.fileName();
+        QFile file(elf_name);
+        file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        file.write(content);
+        file.close();
+        ui->elf_file->setText(elf_name);
+        config->set_elf(elf_name);
+    });
 #endif
 }
 
@@ -285,14 +280,18 @@ void NewDialog::osemu_exception_stop_change(bool v) {
 }
 
 void NewDialog::browse_osemu_fs_root() {
-    QFileDialog osemu_fs_root_dialog(this);
-    osemu_fs_root_dialog.setFileMode(QFileDialog::Directory);
-    osemu_fs_root_dialog.setOption(QFileDialog::ShowDirsOnly, true);
-    if (osemu_fs_root_dialog.exec()) {
-        QString path = osemu_fs_root_dialog.selectedFiles()[0];
-        ui->osemu_fs_root->setText(path);
-        config->set_osemu_fs_root(path);
-    }
+    auto osemu_fs_root_dialog = new QFileDialog(this);
+    osemu_fs_root_dialog->setFileMode(QFileDialog::Directory);
+    osemu_fs_root_dialog->setOption(QFileDialog::ShowDirsOnly, true);
+    QFileDialog::connect(osemu_fs_root_dialog, &QFileDialog::finished, [=](int result) {
+        if (result > 0) {
+            QString path = osemu_fs_root_dialog->selectedFiles()[0];
+            ui->osemu_fs_root->setText(path);
+            config->set_osemu_fs_root(path);
+            delete osemu_fs_root_dialog;
+        }
+    });
+    osemu_fs_root_dialog->open();
 }
 
 void NewDialog::osemu_fs_root_change(QString val) {

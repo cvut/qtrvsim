@@ -9,6 +9,7 @@
 #include "assembler/simpleasm.h"
 #include "extprocess.h"
 #include "gotosymboldialog.h"
+#include "helper/async_modal.h"
 #include "mainwindow.h"
 #include "os_emulation/ossyscall.h"
 #include "savechangeddialog.h"
@@ -292,12 +293,8 @@ void MainWindow::machine_reload(bool force_memory_reset, bool force_elf_load) {
     try {
         create_core(cnf, load_executable, !load_executable && !force_memory_reset);
     } catch (const machine::SimulatorExceptionInput &e) {
-        QMessageBox msg(this);
-        msg.setText(e.msg(false));
-        msg.setIcon(QMessageBox::Critical);
-        msg.setDetailedText(e.msg(true));
-        msg.setWindowTitle("Error while initializing new machine");
-        msg.exec();
+        showAsyncCriticalBox(
+            this, "Error while initializing new machine", e.msg(false), e.msg(true));
     }
 }
 
@@ -343,16 +340,13 @@ void MainWindow::print_action() {
         painter.end();
     }
 #else
-    QMessageBox msgBox;
-    msgBox.setText("Printing is not supported.");
-    msgBox.setInformativeText("The simulator was compiled without printing support.\n"
-                              "If you compiled the simulator yourself, make sure that the Qt "
-                              "print support library is present.\n"
-                              "Otherwise report this to the executable provider (probably your "
-                              "teacher).");
-    msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.setDefaultButton(QMessageBox::Ok);
-    msgBox.exec();
+    showAsyncMessageBox(
+        this, QMessageBox::Information, "Printing is not supported.",
+        "The simulator was compiled without printing support.\n"
+        "If you compiled the simulator yourself, make sure that the Qt "
+        "print support library is present.\n"
+        "Otherwise report this to the executable provider (probably your "
+        "teacher).");
 #endif // WITH_PRINTING
 }
 
@@ -524,13 +518,7 @@ void MainWindow::machine_exit() {
 
 void MainWindow::machine_trap(machine::SimulatorException &e) {
     machine_exit();
-
-    QMessageBox msg(this);
-    msg.setText(e.msg(false));
-    msg.setIcon(QMessageBox::Critical);
-    msg.setDetailedText(e.msg(true));
-    msg.setWindowTitle("Machine trapped");
-    msg.exec();
+    showAsyncCriticalBox(this, "Machine trapped", e.msg(false), e.msg(true));
 }
 
 void MainWindow::setCurrentSrcEditor(SrcEditor *srceditor) {
@@ -656,7 +644,7 @@ void MainWindow::open_source() {
         if (editor->loadFile(file_name)) {
             add_src_editor_to_tabs(editor);
         } else {
-            QMessageBox::critical(
+            showAsyncCriticalBox(
                 this, "Simulator Error", tr("Cannot open file '%1' for reading.").arg(file_name));
             delete (editor);
         }
@@ -680,7 +668,7 @@ void MainWindow::save_source_as() {
     if (fileDialog.exec() != QDialog::Accepted) { return; }
     const QString fn = fileDialog.selectedFiles().first();
     if (!current_srceditor->saveFile(fn)) {
-        QMessageBox::critical(this, "Simulator Error", tr("Cannot save file '%1'.").arg(fn));
+        showAsyncCriticalBox(this, "Simulator Error", tr("Cannot save file '%1'.").arg(fn));
         return;
     }
     int idx = central_window->indexOf(current_srceditor);
@@ -716,7 +704,7 @@ void MainWindow::save_source() {
     if (current_srceditor->saveAsRequired()) { return save_source_as(); }
 #ifndef __EMSCRIPTEN__
     if (!current_srceditor->saveFile()) {
-        QMessageBox::critical(
+        showAsyncCriticalBox(
             this, "Simulator Error",
             tr("Cannot save file '%1'.").arg(current_srceditor->filename()));
     }
@@ -780,7 +768,7 @@ void MainWindow::example_source(const QString &source_file) {
         add_src_editor_to_tabs(editor);
         update_open_file_list();
     } else {
-        QMessageBox::critical(
+        showAsyncCriticalBox(
             this, "Simulator Error",
             tr("Cannot open example file '%1' for reading.").arg(source_file));
         delete (editor);
@@ -904,13 +892,13 @@ void MainWindow::compile_source() {
         if (machine->config().reset_at_compile()) { machine_reload(true); }
     }
     if (machine == nullptr) {
-        QMessageBox::critical(this, "Simulator Error", tr("No machine to store program."));
+        showAsyncCriticalBox(this, "Simulator Error", tr("No machine to store program."));
         return;
     }
     SymbolTableDb symtab(machine->symbol_table_rw(true));
     machine::FrontendMemory *mem = machine->memory_data_bus_rw();
     if (mem == nullptr) {
-        QMessageBox::critical(
+        showAsyncCriticalBox(
             this, "Simulator Error", tr("No physical addresspace to store program."));
         return;
     }
