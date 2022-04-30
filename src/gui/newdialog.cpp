@@ -137,7 +137,7 @@ void NewDialog::switch2custom() {
 void NewDialog::closeEvent(QCloseEvent *) {
     load_settings(); // Reset from settings
     // Close main window if not already configured
-    MainWindow *prnt = (MainWindow *)parent();
+    auto *prnt = (MainWindow *)parent();
     if (!prnt->configured()) {
         prnt->close();
     }
@@ -164,8 +164,8 @@ void NewDialog::create() {
 }
 
 void NewDialog::create_empty() {
-    MainWindow *prnt = (MainWindow *)parent();
-    prnt->create_core(*config, false, true);
+    auto *p_window = (MainWindow *)parent();
+    p_window->create_core(*config, false, true);
     store_settings(); // Save to settings
     this->close();
 }
@@ -309,27 +309,23 @@ void NewDialog::config_gui() {
     // Core
     ui->pipelined->setChecked(config->pipelined());
     ui->delay_slot->setChecked(config->delay_slot());
-    ui->hazard_unit->setChecked(
-        config->hazard_unit() != machine::MachineConfig::HU_NONE);
-    ui->hazard_stall->setChecked(
-        config->hazard_unit() == machine::MachineConfig::HU_STALL);
+    ui->hazard_unit->setChecked(config->hazard_unit() != machine::MachineConfig::HU_NONE);
+    ui->hazard_stall->setChecked(config->hazard_unit() == machine::MachineConfig::HU_STALL);
     ui->hazard_stall_forward->setChecked(
         config->hazard_unit() == machine::MachineConfig::HU_STALL_FORWARD);
     // Memory
     ui->mem_protec_exec->setChecked(config->memory_execute_protection());
     ui->mem_protec_write->setChecked(config->memory_write_protection());
-    ui->mem_time_read->setValue(config->memory_access_time_read());
-    ui->mem_time_write->setValue(config->memory_access_time_write());
-    ui->mem_time_burst->setValue(config->memory_access_time_burst());
+    ui->mem_time_read->setValue((int)config->memory_access_time_read());
+    ui->mem_time_write->setValue((int)config->memory_access_time_write());
+    ui->mem_time_burst->setValue((int)config->memory_access_time_burst());
     // Cache
     cache_handler_d->config_gui();
     cache_handler_p->config_gui();
     // Operating system and exceptions
     ui->osemu_enable->setChecked(config->osemu_enable());
-    ui->osemu_known_syscall_stop->setChecked(
-        config->osemu_known_syscall_stop());
-    ui->osemu_unknown_syscall_stop->setChecked(
-        config->osemu_unknown_syscall_stop());
+    ui->osemu_known_syscall_stop->setChecked(config->osemu_known_syscall_stop());
+    ui->osemu_unknown_syscall_stop->setChecked(config->osemu_unknown_syscall_stop());
     ui->osemu_interrupt_stop->setChecked(config->osemu_interrupt_stop());
     ui->osemu_exception_stop->setChecked(config->osemu_exception_stop());
     ui->osemu_fs_root->setText(config->osemu_fs_root());
@@ -389,7 +385,7 @@ void NewDialog::load_settings() {
 void NewDialog::store_settings() {
     config->store(settings);
 
-    // Presets are not stored in settings so we have to store them explicitly
+    // Presets are not stored in settings, so we have to store them explicitly
     if (ui->preset_custom->isChecked()) {
         settings->setValue("Preset", 0);
     } else {
@@ -423,15 +419,15 @@ NewDialogCacheHandler::NewDialogCacheHandler(
         &NewDialogCacheHandler::writeback);
 }
 
-void NewDialogCacheHandler::set_config(machine::CacheConfig *config) {
-    this->config = config;
+void NewDialogCacheHandler::set_config(machine::CacheConfig *cache_config) {
+    this->config = cache_config;
 }
 
 void NewDialogCacheHandler::config_gui() {
     ui->enabled->setChecked(config->enabled());
-    ui->number_of_sets->setValue(config->set_count());
-    ui->block_size->setValue(config->block_size());
-    ui->degree_of_associativity->setValue(config->associativity());
+    ui->number_of_sets->setValue((int)config->set_count());
+    ui->block_size->setValue((int)config->block_size());
+    ui->degree_of_associativity->setValue((int)config->associativity());
     ui->replacement_policy->setCurrentIndex((int)config->replacement_policy());
     ui->writeback_policy->setCurrentIndex((int)config->write_policy());
 }
