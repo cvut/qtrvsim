@@ -141,17 +141,38 @@ if("${WASM}")
 
 	message(STATUS "Enabled WASM exception handling")
 	add_compile_options("-fexceptions")
-	add_link_options("-fexceptions")
-	add_link_options("SHELL:-s DISABLE_EXCEPTION_CATCHING=0")
 	# Extra options for WASM linking
-	add_link_options("SHELL:-s FETCH=1")
-	add_link_options("SHELL:-s WASM=1")
-	add_link_options("SHELL:-s FULL_ES2=1")
-	add_link_options("SHELL:-s FULL_ES3=1")
-	add_link_options("SHELL:-s USE_WEBGL2=1")
-	add_link_options("SHELL:-s ALLOW_MEMORY_GROWTH=1")
-	add_link_options("SHELL:-s EXTRA_EXPORTED_RUNTIME_METHODS=[\"UTF16ToString\",\"stringToUTF16\"]")
+	add_link_options("-fexceptions")
+	add_link_options("-flto")
+	# Activate Embind C/C++ bindings
+	# https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html
 	add_link_options("--bind")
+	# Enable C++ exception catching
+	# https://emscripten.org/docs/optimizing/Optimizing-Code.html#c-exceptions
+	add_link_options("-s DISABLE_EXCEPTION_CATCHING=0")
+	# Enable Fetch API
+	# https://emscripten.org/docs/api_reference/fetch.html
+	add_link_options("-s FETCH=1")
+	add_link_options("-s WASM=1")
+	# Emulate missing OpenGL ES2/ES3 features
+	# https://emscripten.org/docs/porting/multimedia_and_graphics/OpenGL-support.html#opengl-es-2-0-3-0-emulation
+	add_link_options("-s FULL_ES2=1")
+	add_link_options("-s FULL_ES3=1")
+	# Activate WebGL 2 (in addition to WebGL 1)
+	# https://emscripten.org/docs/porting/multimedia_and_graphics/OpenGL-support.html#webgl-friendly-subset-of-opengl-es-2-0-3-0
+	add_link_options("-s USE_WEBGL2=1")
+	# Run static dtors at teardown
+	# https://emscripten.org/docs/getting_started/FAQ.html#what-does-exiting-the-runtime-mean-why-don-t-atexit-s-run
+	add_link_options("-s ALLOW_MEMORY_GROWTH=1")
+	# Export UTF16ToString,stringToUTF16
+	# Required by https://codereview.qt-project.org/c/qt/qtbase/+/286997 (since Qt 5.14)
+	add_link_options("-s EXTRA_EXPORTED_RUNTIME_METHODS=[\"UTF16ToString\",\"stringToUTF16\"]")
+	# Enable demangling of C++ stack traces
+	# https://emscripten.org/docs/porting/Debugging.html
+	add_link_options("-s DEMANGLE_SUPPORT=1")
+	# Run static dtors at teardown
+	# https://emscripten.org/docs/getting_started/FAQ.html#what-does-exiting-the-runtime-mean-why-don-t-atexit-s-run
+	add_link_options("-s EXIT_RUNTIME=1")
 
 	add_definitions(-DQT_NO_DEBUG_OUTPUT=1)
 	message(STATUS "Debug output disabled")
@@ -182,7 +203,7 @@ endif()
 # Cannot use version-less approach due to Qt 5.9.5 support constraint.
 find_package(OpenGL)
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
+find_package(QT NAMES Qt5 Qt6 COMPONENTS Core REQUIRED)
 # Normally, we would use variable Qt5 or Qt6 to reference the Qt library. Here we do that through
 # this variable based on detected version major of Qt.
 set(QtLib "Qt${QT_VERSION_MAJOR}")
