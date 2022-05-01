@@ -10,11 +10,9 @@
 #include <QCommandLineParser>
 #include <QCoreApplication>
 #include <QFile>
-#include <QTextStream>
 #include <cctype>
 #include <fstream>
 #include <iostream>
-#include <utility>
 
 using namespace machine;
 using namespace std;
@@ -87,11 +85,11 @@ void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const 
     if (pieces.size() < 3) {
         fprintf(
             stderr, "Parameters %s cache incorrect (correct lru,4,2,2,wb).\n", qPrintable(which));
-        exit(1);
+        QCoreApplication::exit(1);
     }
     if (pieces.at(0).size() < 1) {
         fprintf(stderr, "Policy for %s cache is incorrect.\n", qPrintable(which));
-        exit(1);
+        QCoreApplication::exit(1);
     }
     if (!pieces.at(0).at(0).isDigit()) {
         if (pieces.at(0).toLower() == "random") {
@@ -102,7 +100,7 @@ void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const 
             cacheconf.set_replacement_policy(CacheConfig::RP_LFU);
         } else {
             fprintf(stderr, "Policy for %s cache is incorrect.\n", qPrintable(which));
-            exit(1);
+            QCoreApplication::exit(1);
         }
         pieces.removeFirst();
     }
@@ -110,7 +108,7 @@ void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const 
         fprintf(
             stderr, "Parameters for  %s  cache incorrect (correct lru,4,2,2,wb). \n",
             qPrintable(which));
-        exit(1);
+        QCoreApplication::exit(1);
     }
     cacheconf.set_set_count(pieces.at(0).toLong());
     cacheconf.set_block_size(pieces.at(1).toLong());
@@ -119,7 +117,7 @@ void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const 
         || cacheconf.associativity() == 0) {
         fprintf(
             stderr, "Parameters for  %s  cache cannot have zero component. \n", qPrintable(which));
-        exit(1);
+        QCoreApplication::exit(1);
     }
     if (pieces.size() > 3) {
         if (pieces.at(3).toLower() == "wb") {
@@ -132,41 +130,58 @@ void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const 
             fprintf(
                 stderr, "Write policy for  %s  cache is incorrect (correct wb/wt/wtna/wta). \n",
                 qPrintable(which));
-            exit(1);
+            QCoreApplication::exit(1);
         }
     }
 }
 
-void configure_machine(QCommandLineParser &p, MachineConfig &cc) {
-    QStringList pa = p.positionalArguments();
-    int siz;
-    if (pa.size() != 1) {
-        fprintf(stderr, "Single ELF file has to be specified\n");
-        exit(1);
+void parse_u32_option(
+    QCommandLineParser &parser,
+    const QString &option_name,
+    MachineConfig &config,
+    void (MachineConfig::*setter)(uint32_t value)) {
+    auto values = parser.values(option_name);
+    if (!values.empty()) {
+        bool ok = true;
+        // Try to parse supplied value.
+        uint32_t value = values.last().toUInt(&ok);
+        if (ok) {
+            // Set the value if successfully parsed.
+            (config.*setter)(value);
+        } else {
+            fprintf(
+                stderr, "Value of option %s is not a valid unsigned integer.",
+                qPrintable(option_name));
+            QCoreApplication::exit(1);
+        }
     }
-    cc.set_elf(pa[0]);
+}
 
-    cc.set_delay_slot(!p.isSet("no-delay-slot"));
-    cc.set_pipelined(p.isSet("pipelined"));
+void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
+    QStringList arguments = parser.positionalArguments();
+    if (arguments.size() != 1) {
+        fprintf(stderr, "Single ELF file has to be specified\n");
+        parser.showHelp();
+    }
+    config.set_elf(arguments[0]);
 
-    siz = p.values("hazard-unit").size();
-    if (siz >= 1) {
-        QString hukind = p.values("hazard-unit").at(siz - 1).toLower();
-        if (!cc.set_hazard_unit(hukind)) {
+    config.set_delay_slot(!parser.isSet("no-delay-slot"));
+    config.set_pipelined(parser.isSet("pipelined"));
+
+    auto hazard_unit_values = parser.values("hazard-unit");
+    if (!hazard_unit_values.empty()) {
+        if (!config.set_hazard_unit(hazard_unit_values.last().toLower())) {
             fprintf(stderr, "Unknown kind of hazard unit specified\n");
-            exit(1);
+            QCoreApplication::exit(1);
         }
     }
 
-    siz = p.values("read-time").size();
-    if (siz >= 1) { cc.set_memory_access_time_read(p.values("read-time").at(siz - 1).toLong()); }
-    siz = p.values("write-time").size();
-    if (siz >= 1) { cc.set_memory_access_time_write(p.values("write-time").at(siz - 1).toLong()); }
-    siz = p.values("burst-time").size();
-    if (siz >= 1) { cc.set_memory_access_time_burst(p.values("burst-time").at(siz - 1).toLong()); }
+    parse_u32_option(parser, "read-time", config, &MachineConfig::set_memory_access_time_read);
+    parse_u32_option(parser, "write-time", config, &MachineConfig::set_memory_access_time_write);
+    parse_u32_option(parser, "burst-time", config, &MachineConfig::set_memory_access_time_burst);
 
-    configure_cache(*cc.access_cache_data(), p.values("d-cache"), "data");
-    configure_cache(*cc.access_cache_program(), p.values("i-cache"), "instruction");
+    configure_cache(*config.access_cache_data(), parser.values("d-cache"), "data");
+    configure_cache(*config.access_cache_program(), parser.values("i-cache"), "instruction");
 }
 
 void configure_tracer(QCommandLineParser &p, Tracer &tr) {
@@ -192,7 +207,7 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
             } else {
                 fprintf(
                     stderr, "Unknown register number given for trace-gp: %s\n", qPrintable(gps[i]));
-                exit(1);
+                QCoreApplication::exit(1);
             }
         }
     }
@@ -213,7 +228,7 @@ void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *s
             case 'i': reason = Reporter::FR_UNSUPPORTED_INSTR; break;
             default:
                 fprintf(stderr, "Unknown fail condition: %c\n", qPrintable(fail[i])[y]);
-                exit(1);
+                QCoreApplication::exit(1);
             }
             r.expect_fail(reason);
         }
@@ -228,12 +243,12 @@ void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *s
         int comma1 = range_arg.indexOf(",");
         if (comma1 < 0) {
             fprintf(stderr, "Range start missing\n");
-            exit(1);
+            QCoreApplication::exit(1);
         }
         int comma2 = range_arg.indexOf(",", comma1 + 1);
         if (comma2 < 0) {
             fprintf(stderr, "Range length/name missing\n");
-            exit(1);
+            QCoreApplication::exit(1);
         }
         str = range_arg.mid(0, comma1);
         Address start;
@@ -252,7 +267,7 @@ void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *s
         }
         if (!ok1 || !ok2) {
             fprintf(stderr, "Range start/length specification error.\n");
-            exit(1);
+            QCoreApplication::exit(1);
         }
         r.add_dump_range(start, len, range_arg.mid(comma2 + 1));
     }
@@ -281,7 +296,7 @@ void configure_serial_port(QCommandLineParser &p, SerialPort *ser_port) {
         }
         if (!ser_in->open(mode)) {
             fprintf(stderr, "Serial port input file cannot be open for read.\n");
-            exit(1);
+            QCoreApplication::exit(1);
         }
     }
 
@@ -292,7 +307,7 @@ void configure_serial_port(QCommandLineParser &p, SerialPort *ser_port) {
             ser_out = new CharIOHandler(qf, ser_port);
             if (!ser_out->open(QFile::WriteOnly)) {
                 fprintf(stderr, "Serial port output file cannot be open for write.\n");
-                exit(1);
+                QCoreApplication::exit(1);
             }
         }
     }
@@ -311,13 +326,13 @@ void configure_serial_port(QCommandLineParser &p, SerialPort *ser_port) {
 }
 
 void load_ranges(Machine &machine, const QStringList &ranges) {
-    foreach (QString range_arg, ranges) {
+    for (const QString &range_arg : ranges) {
         bool ok = true;
         QString str;
         int comma1 = range_arg.indexOf(",");
         if (comma1 < 0) {
             fprintf(stderr, "Range start missing\n");
-            exit(1);
+            QCoreApplication::exit(1);
         }
         str = range_arg.mid(0, comma1);
         Address start;
@@ -330,22 +345,26 @@ void load_ranges(Machine &machine, const QStringList &ranges) {
         }
         if (!ok) {
             fprintf(stderr, "Range start/length specification error.\n");
-            exit(1);
+            QCoreApplication::exit(1);
         }
         ifstream in;
         in.open(range_arg.mid(comma1 + 1).toLocal8Bit().data(), ios::in);
         Address addr = start;
         for (std::string line; getline(in, line);) {
-            size_t endpos = line.find_last_not_of(" \t\n");
-            size_t startpos = line.find_first_not_of(" \t\n");
+            size_t end_pos = line.find_last_not_of(" \t\n");
+            if (std::string::npos == end_pos) {
+                continue;
+            }
+
+            size_t start_pos = line.find_first_not_of(" \t\n");
+            line = line.substr(0, end_pos + 1);
+            line = line.substr(start_pos);
+
             size_t idx;
-            if (std::string::npos == endpos) { continue; }
-            line = line.substr(0, endpos + 1);
-            line = line.substr(startpos);
             uint32_t val = stoul(line, &idx, 0);
             if (idx != line.size()) {
                 fprintf(stderr, "cannot parse load range data.\n");
-                exit(1);
+                QCoreApplication::exit(1);
             }
             machine.memory_data_bus_rw()->write_u32(addr, val, ae::INTERNAL);
             addr += 4;
@@ -355,19 +374,21 @@ void load_ranges(Machine &machine, const QStringList &ranges) {
 }
 
 bool assemble(Machine &machine, MsgReport &msgrep, const QString &filename) {
-    SymbolTableDb symtab(machine.symbol_table_rw(true));
+    SymbolTableDb symbol_table_db(machine.symbol_table_rw(true));
     machine::FrontendMemory *mem = machine.memory_data_bus_rw();
     if (mem == nullptr) { return false; }
     machine.cache_sync();
-    SimpleAsm sasm;
+    SimpleAsm assembler;
 
-    SimpleAsm::connect(&sasm, &SimpleAsm::report_message, &msgrep, &MsgReport::report_message);
+    SimpleAsm::connect(&assembler, &SimpleAsm::report_message, &msgrep, &MsgReport::report_message);
 
-    sasm.setup(mem, &symtab, 0x00000200_addr, machine.core()->get_xlen());
+    assembler.setup(mem, &symbol_table_db, 0x00000200_addr, machine.core()->get_xlen());
 
-    if (!sasm.process_file(filename)) { return false; }
+    if (!assembler.process_file(filename)) {
+        return false;
+    }
 
-    return sasm.finish();
+    return assembler.finish();
 }
 
 int main(int argc, char *argv[]) {
@@ -380,11 +401,11 @@ int main(int argc, char *argv[]) {
     create_parser(p);
     p.process(app);
 
-    bool asm_source = p.isSet("asm");
+    MachineConfig config;
+    configure_machine(p, config);
 
-    MachineConfig cc;
-    configure_machine(p, cc);
-    Machine machine(cc, !asm_source, !asm_source);
+    bool asm_source = p.isSet("asm");
+    Machine machine(config, !asm_source, !asm_source);
 
     Tracer tr(&machine);
     configure_tracer(p, tr);
@@ -395,8 +416,10 @@ int main(int argc, char *argv[]) {
     configure_serial_port(p, machine.serial_port());
 
     if (asm_source) {
-        MsgReport msgrep(&app);
-        if (!assemble(machine, msgrep, p.positionalArguments()[0])) { exit(1); }
+        MsgReport msg_report(&app);
+        if (!assemble(machine, msg_report, p.positionalArguments()[0])) {
+            QCoreApplication::exit(1);
+        }
     }
 
     load_ranges(machine, p.values("load-range"));
