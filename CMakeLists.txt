@@ -222,23 +222,24 @@ endif()
 # there the target was created. Therefore executable installation is to be found
 # in corresponding CMakeLists.txt.
 
-configure_file(data/gui.desktop.in
-		"${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop")
+if(NOT "${WASM}")
+	configure_file(data/gui.desktop.in
+			"${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop")
+	configure_file("data/${MAIN_PROJECT_APPID}.metainfo.xml.in"
+			"${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_APPID}.metainfo.xml")
 
-configure_file("data/${MAIN_PROJECT_APPID}.metainfo.xml.in"
-		"${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_APPID}.metainfo.xml")
+	install(FILES "data/icons/gui.svg"
+			DESTINATION "share/icons/hicolor/scalable/apps"
+			RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.svg")
+	install(FILES "data/icons/48x48/gui.png"
+			DESTINATION "share/icons/hicolor/48x48/apps"
+			RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.png")
+	install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop"
+			DESTINATION share/applications)
 
-install(FILES "data/icons/gui.svg"
-		DESTINATION "share/icons/hicolor/scalable/apps"
-		RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.svg")
-install(FILES "data/icons/48x48/gui.png"
-		DESTINATION "share/icons/hicolor/48x48/apps"
-		RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.png")
-install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop"
-		DESTINATION share/applications)
-
-install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_APPID}.metainfo.xml"
-		DESTINATION share/metainfo)
+	install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_APPID}.metainfo.xml"
+			DESTINATION share/metainfo)
+endif()
 
 # =============================================================================
 # Packages
