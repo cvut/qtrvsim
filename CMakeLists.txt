@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.10)
 cmake_policy(VERSION 3.10)
 
 project(QtRVSim
-		LANGUAGES C CXX
-		VERSION 0.9.3
-		DESCRIPTION "RISC-V CPU simulator for education purposes")
+        LANGUAGES C CXX
+        VERSION 0.9.3
+        DESCRIPTION "RISC-V CPU simulator for education purposes")
 
 set(KAREL_KOCI "Karel Koci <cynerd@email.cz>")
 set(PAVEL_PISA "Pavel Pisa <pisa@cmp.felk.cvut.cz>")
@@ -15,17 +15,17 @@ set(PROJECT_HOMEPAGE_URL "https://github.com/cvut/qtrvsim")
 set(GENERIC_NAME "RISC-V CPU simulator")
 set(LICENCE "GPL-3.0-or-later")
 set(LONG_DESCRIPTION
-		"RISC-V CPU simulator for education purposes with pipeline and cache visualization.")
+        "RISC-V CPU simulator for education purposes with pipeline and cache visualization.")
 string(TIMESTAMP YEAR "%Y")
 
 include(cmake/CopyrightTools.cmake)
 
 
 copyright(
-		"Copyright (c) 2017-2019 ${KAREL_KOCI}"
-		"Copyright (c) 2019-${YEAR} ${PAVEL_PISA}"
-		"Copyright (c) 2020-${YEAR} ${JAKUB_DUPAK}"
-		"Copyright (c) 2020-2021 ${MAX_HOLLMANN}")
+        "Copyright (c) 2017-2019 ${KAREL_KOCI}"
+        "Copyright (c) 2019-${YEAR} ${PAVEL_PISA}"
+        "Copyright (c) 2020-${YEAR} ${JAKUB_DUPAK}"
+        "Copyright (c) 2020-2021 ${MAX_HOLLMANN}")
 
 include(cmake/GPL-3.0-or-later.cmake)
 
@@ -36,26 +36,26 @@ include(cmake/GPL-3.0-or-later.cmake)
 set(DEV_MODE false CACHE BOOL "Enable developer options in this CMake, like packaging.\
     They should be ignored, when user just wants to build this project.")
 set(FORCE_ELFLIB_STATIC false CACHE BOOL
-		"Use included statically linked libelf even if system one is available.")
+        "Use included statically linked libelf even if system one is available.")
 set(SANITIZERS "address,undefined" CACHE STRING
-		"Runtime sanitizers to use in debug builds.
+        "Runtime sanitizers to use in debug builds.
     Column separated subset of {address, memory, undefined, thread} or none.
     Memory and address cannot be used at the same time.")
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/target"
-		CACHE STRING "Absolute path to place executables to.")
+        CACHE STRING "Absolute path to place executables to.")
 set(PACKAGE_OUTPUT_PATH "${EXECUTABLE_OUTPUT_PATH}/pkg"
-		CACHE STRING "Absolute path to place generated package files.")
+        CACHE STRING "Absolute path to place generated package files.")
 set(FORCE_COLORED_OUTPUT false CACHE BOOL "Always produce ANSI-colored output (GNU/Clang only).")
 
 # =============================================================================
 # Generated variables
 # =============================================================================
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
-	set(WASM true)
-else()
-	set(WASM false)
-endif()
+if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+    set(WASM true)
+else ()
+    set(WASM false)
+endif ()
 set(CXX_TEST_PATH ${EXECUTABLE_OUTPUT_PATH})
 set(C_TEST_PATH ${EXECUTABLE_OUTPUT_PATH})
 
@@ -77,9 +77,9 @@ string(TOUPPER "${PROJECT_NAME}" MAIN_PROJECT_NAME_UPPER)
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
-if(CMAKE_VERSION VERSION_LESS "3.7.0")
-	set(CMAKE_INCLUDE_CURRENT_DIR ON)
-endif()
+if (CMAKE_VERSION VERSION_LESS "3.7.0")
+    set(CMAKE_INCLUDE_CURRENT_DIR ON)
+endif ()
 
 include(cmake/BuildType.cmake)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -92,106 +92,131 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(NOT "${SANITIZERS}" MATCHES "none" AND NOT "${WASM}" AND NOT "${MINGW}")
-	set(CMAKE_C_FLAGS_DEBUG
-			"${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS} -g -g3 -ggdb")
-	set(CMAKE_CXX_FLAGS_DEBUG
-			"${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS} -g -g3 -ggdb")
-	set(CMAKE_LINKER_FLAGS_DEBUG
-			"${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS}")
-endif()
+if (NOT "${SANITIZERS}" MATCHES "none" AND NOT "${WASM}" AND NOT "${MINGW}")
+    set(CMAKE_C_FLAGS_DEBUG
+            "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS} -g -g3 -ggdb")
+    set(CMAKE_CXX_FLAGS_DEBUG
+            "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS} -g -g3 -ggdb")
+    set(CMAKE_LINKER_FLAGS_DEBUG
+            "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS}")
+endif ()
 
 
-if("${BUILD_RELEASE}")
-	message(STATUS "Debug prints globally suppressed.")
-	add_definitions(-DQT_NO_DEBUG_OUTPUT=1)
-endif()
+if ("${BUILD_RELEASE}")
+    message(STATUS "Debug prints globally suppressed.")
+    add_definitions(-DQT_NO_DEBUG_OUTPUT=1)
+endif ()
 
 include_directories("src" "src/machine")
 
 
-if(${FORCE_COLORED_OUTPUT})
-	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-		add_compile_options(-fdiagnostics-color=always)
-	elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-		add_compile_options(-fcolor-diagnostics)
-	endif()
-endif()
+if (${FORCE_COLORED_OUTPUT})
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        add_compile_options(-fdiagnostics-color=always)
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        add_compile_options(-fcolor-diagnostics)
+    endif ()
+endif ()
 
 ## ============================================================================
 ## Warning level
 ## ============================================================================
 
-if(MSVC)
-	add_compile_options(/W4 /WX)
-else()
-	add_compile_options(-Wall -Wextra)
-	if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-		# This is currently a wont-fix and it will be OK in cpp20.
-		add_compile_options(-Wno-c99-designator)
-	endif()
-endif()
+if (MSVC)
+    add_compile_options(/W4 /WX)
+else ()
+    add_compile_options(-Wall -Wextra)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        # This is currently a wont-fix and it will be OK in cpp20.
+        add_compile_options(-Wno-c99-designator)
+    endif ()
+endif ()
 
 # =============================================================================
 # Dependencies
 # =============================================================================
 
-if("${WASM}")
-	message(STATUS "WASM build detected")
+if ("${WASM}")
+    message(STATUS "WASM build detected")
 
-	message(STATUS "Enabled WASM exception handling")
-	add_compile_options("-fexceptions")
-	add_link_options("-fexceptions")
-	add_link_options("SHELL:-s DISABLE_EXCEPTION_CATCHING=0")
-	# Extra options for WASM linking
-	add_link_options("SHELL:-s FETCH=1")
-	add_link_options("SHELL:-s WASM=1")
-	add_link_options("SHELL:-s FULL_ES2=1")
-	add_link_options("SHELL:-s FULL_ES3=1")
-	add_link_options("SHELL:-s USE_WEBGL2=1")
-	add_link_options("SHELL:-s ALLOW_MEMORY_GROWTH=1")
-	add_link_options("SHELL:-s EXTRA_EXPORTED_RUNTIME_METHODS=[\"UTF16ToString\",\"stringToUTF16\"]")
-	add_link_options("--bind")
+    message(STATUS "Enabled WASM exception handling")
+    add_compile_options("-fexceptions")
+    # Extra options for WASM linking
+    add_link_options("-fexceptions")
+    add_link_options("-flto")
+    # Activate Embind C/C++ bindings
+    # https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html
+    add_link_options("--bind")
+    # Enable C++ exception catching
+    # https://emscripten.org/docs/optimizing/Optimizing-Code.html#c-exceptions
+    add_link_options("-s DISABLE_EXCEPTION_CATCHING=0")
+    # Enable Fetch API
+    # https://emscripten.org/docs/api_reference/fetch.html
+    add_link_options("-s FETCH=1")
+    add_link_options("-s WASM=1")
+    # Emulate missing OpenGL ES2/ES3 features
+    # https://emscripten.org/docs/porting/multimedia_and_graphics/OpenGL-support.html#opengl-es-2-0-3-0-emulation
+    add_link_options("-s FULL_ES2=1")
+    add_link_options("-s FULL_ES3=1")
+    # Activate WebGL 2 (in addition to WebGL 1)
+    # https://emscripten.org/docs/porting/multimedia_and_graphics/OpenGL-support.html#webgl-friendly-subset-of-opengl-es-2-0-3-0
+    add_link_options("-s USE_WEBGL2=1")
+    # Run static dtors at teardown
+    # https://emscripten.org/docs/getting_started/FAQ.html#what-does-exiting-the-runtime-mean-why-don-t-atexit-s-run
+    add_link_options("-s ALLOW_MEMORY_GROWTH=1")
+    # Export UTF16ToString,stringToUTF16
+    # Required by https://codereview.qt-project.org/c/qt/qtbase/+/286997 (since Qt 5.14)
+    add_link_options("-s EXTRA_EXPORTED_RUNTIME_METHODS=[\"UTF16ToString\",\"stringToUTF16\"]")
+    # Enable demangling of C++ stack traces
+    # https://emscripten.org/docs/porting/Debugging.html
+    add_link_options("-s DEMANGLE_SUPPORT=1")
+    # Run static dtors at teardown
+    # https://emscripten.org/docs/getting_started/FAQ.html#what-does-exiting-the-runtime-mean-why-don-t-atexit-s-run
+    add_link_options("-s EXIT_RUNTIME=1")
 
-	add_definitions(-DQT_NO_DEBUG_OUTPUT=1)
-	message(STATUS "Debug output disabled")
+    add_definitions(-DQT_NO_DEBUG_OUTPUT=1)
+    message(STATUS "Debug output disabled")
+else ()
+    # Not available for WASM
+    enable_testing()
 
-else()
-	# Not available for WASM
-	enable_testing()
+    if (NOT "${FORCE_ELFLIB_STATIC}")
+        find_package(LibElf)
+        if ("${LibElf_FOUND}")
+            # Turn non-cmake library into a cmake target
+            add_library(libelf INTERFACE)
+            target_link_libraries(libelf INTERFACE ${LIBELF_LIBRARY})
+            target_include_directories(libelf INTERFACE ${LIBELF_INCLUDE})
+            message(STATUS "Using system libelf")
+        endif ()
+    endif ()
+endif ()
 
-	if(NOT "${FORCE_ELFLIB_STATIC}")
-		find_package(LibElf)
-		if("${LibElf_FOUND}")
-			# Turn non-cmake library into a cmake target
-			add_library(libelf INTERFACE)
-			target_link_libraries(libelf INTERFACE ${LIBELF_LIBRARY})
-			target_include_directories(libelf INTERFACE ${LIBELF_INCLUDE})
-			message(STATUS "Using system libelf")
-		endif()
-	endif()
-endif()
-
-if("${WASM}" OR "${FORCE_ELFLIB_STATIC}" OR NOT "${LibElf_FOUND}")
-	message(STATUS "Using local libelf fallback.")
-	add_subdirectory("external/libelf")
-endif()
+if ("${WASM}" OR "${FORCE_ELFLIB_STATIC}" OR NOT "${LibElf_FOUND}")
+    message(STATUS "Using local libelf fallback.")
+    add_subdirectory("external/libelf")
+endif ()
 
 # Detect Qt used qt version
 # Based on article https://www.steinzone.de/wordpress/how-to-support-both-qt5-and-qt6-using-cmake/
 # Cannot use version-less approach due to Qt 5.9.5 support constraint.
 find_package(OpenGL)
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
+find_package(QT NAMES Qt5 Qt6 COMPONENTS Core REQUIRED)
 # Normally, we would use variable Qt5 or Qt6 to reference the Qt library. Here we do that through
 # this variable based on detected version major of Qt.
 set(QtLib "Qt${QT_VERSION_MAJOR}")
 find_package(${QtLib}
-		REQUIRED COMPONENTS Core Widgets Gui Test
-		OPTIONAL_COMPONENTS PrintSupport)
+        REQUIRED COMPONENTS Core Widgets Gui Test
+        OPTIONAL_COMPONENTS PrintSupport)
 
 message(STATUS "${QtLib} version: ${${QtLib}Core_VERSION}")
 message(STATUS "${QtLib} print support: ${${QtLib}PrintSupport_FOUND}")
+
+if ("${WASM}")
+    configure_file("${${QtLib}Core_DIR}/../../../plugins/platforms/qtloader.js"
+            "${CMAKE_CURRENT_BINARY_DIR}/target/qtloader.js" COPYONLY)
+endif ()
 
 
 # Qt 5.9.5 is the oldest supported
@@ -208,11 +233,11 @@ add_subdirectory("src/machine")
 add_subdirectory("src/assembler")
 add_subdirectory("src/os_emulation")
 add_subdirectory("src/gui")
-if(NOT "${WASM}")
-	add_subdirectory("src/cli")
-	add_custom_target(all_unit_tests
-			DEPENDS common_unit_tests machine_unit_tests)
-endif()
+if (NOT "${WASM}")
+    add_subdirectory("src/cli")
+    add_custom_target(all_unit_tests
+            DEPENDS common_unit_tests machine_unit_tests)
+endif ()
 
 # =============================================================================
 # Installation
@@ -222,64 +247,65 @@ endif()
 # there the target was created. Therefore executable installation is to be found
 # in corresponding CMakeLists.txt.
 
-configure_file(data/gui.desktop.in
-		"${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop")
+if (NOT "${WASM}")
+    configure_file(data/gui.desktop.in
+            "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop")
+    configure_file("data/${MAIN_PROJECT_APPID}.metainfo.xml.in"
+            "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_APPID}.metainfo.xml")
 
-configure_file("data/${MAIN_PROJECT_APPID}.metainfo.xml.in"
-		"${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_APPID}.metainfo.xml")
+    install(FILES "data/icons/gui.svg"
+            DESTINATION "share/icons/hicolor/scalable/apps"
+            RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.svg")
+    install(FILES "data/icons/48x48/gui.png"
+            DESTINATION "share/icons/hicolor/48x48/apps"
+            RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.png")
+    install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop"
+            DESTINATION share/applications)
 
-install(FILES "data/icons/gui.svg"
-		DESTINATION "share/icons/hicolor/scalable/apps"
-		RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.svg")
-install(FILES "data/icons/48x48/gui.png"
-		DESTINATION "share/icons/hicolor/48x48/apps"
-		RENAME "${MAIN_PROJECT_NAME_LOWER}_gui.png")
-install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_NAME_LOWER}.desktop"
-		DESTINATION share/applications)
-
-install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_APPID}.metainfo.xml"
-		DESTINATION share/metainfo)
+    install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_APPID}.metainfo.xml"
+            DESTINATION share/metainfo)
+endif ()
 
 # =============================================================================
 # Packages
 # =============================================================================
 
-if("${DEV_MODE}")
-	# The condition prevents execution of this section during regular user installation.
-	# It created files useless to normal users and requires additional tools (git, xz).
-	message(STATUS "Packaging tools enabled.")
+if ("${DEV_MODE}")
+    # The condition prevents execution of this section during regular user installation.
+    # It created files useless to normal users and requires additional tools (git, xz).
+    message(STATUS "Packaging tools enabled.")
 
-	set(PACKAGE_NAME "${MAIN_PROJECT_NAME_LOWER}")
-	set(PACKAGE_VERSION "${PROJECT_VERSION}")
-	set(PACKAGE_RELEASE "1")
-	set(PACKAGE_SOURCE_ARCHIVE_FILE "${PACKAGE_NAME}_${PACKAGE_VERSION}.orig.tar.xz")
-	set(PACKAGE_SOURCE_ARCHIVE_PATH "${PACKAGE_OUTPUT_PATH}/${PACKAGE_SOURCE_ARCHIVE_FILE}")
-	set(PACKAGE_TOPLEVEL_DIR "${PACKAGE_NAME}-${PACKAGE_VERSION}")
-	set(PACKAGE_DESCRIPTION "${PROJECT_DESCRIPTION}")
-	set(PACKAGE_LONG_DESCRIPTION "${LONG_DESCRIPTION}")
-	set(PACKAGE_MAINTAINER "${JAKUB_DUPAK}")
-	set(PACKAGE_URL "${PROJECT_HOMEPAGE_URL}")
-	set(PACKAGE_GIT "github.com:cvut/qtrvsim.git")
-	set(PACKAGE_LICENCE "${LICENCE} ")
+    set(PACKAGE_NAME "${MAIN_PROJECT_NAME_LOWER}")
+    set(PACKAGE_VERSION "${PROJECT_VERSION}")
+    set(PACKAGE_RELEASE "1")
+    set(PACKAGE_SOURCE_ARCHIVE_FILE "${PACKAGE_NAME}_${PACKAGE_VERSION}.orig.tar.xz")
+    set(PACKAGE_SOURCE_ARCHIVE_PATH "${PACKAGE_OUTPUT_PATH}/${PACKAGE_SOURCE_ARCHIVE_FILE}")
+    set(PACKAGE_TOPLEVEL_DIR "${PACKAGE_NAME}-${PACKAGE_VERSION}")
+    set(PACKAGE_DESCRIPTION "${PROJECT_DESCRIPTION}")
+    set(PACKAGE_LONG_DESCRIPTION "${LONG_DESCRIPTION}")
+    set(PACKAGE_MAINTAINER "${JAKUB_DUPAK}")
+    set(PACKAGE_URL "${PROJECT_HOMEPAGE_URL}")
+    set(PACKAGE_GIT "github.com:cvut/qtrvsim.git")
+    set(PACKAGE_LICENCE "${LICENCE} ")
 
-	include(cmake/PackageTools.cmake)
+    include(cmake/PackageTools.cmake)
 
-	# Inject up-to-date information into package config files.
-	package_config_file(appimage appimage.yml extras/packaging/appimage/appimage.yml.in)
-	package_config_file(archlinux PKGBUILD extras/packaging/arch/PKGBUILD.in)
-	package_config_file(rpm ${PACKAGE_NAME}.spec extras/packaging/rpm/spec.in)
-	# Debian uses whole directory which has to be saved to archive and shipped.
-	package_debian_quilt(deb
-			${PACKAGE_NAME}_${PACKAGE_VERSION}-${PACKAGE_RELEASE}.dsc
-			extras/packaging/deb/dsc.in
-			extras/packaging/deb/debian
-			${PACKAGE_NAME}_${PACKAGE_VERSION}-${PACKAGE_RELEASE}.debian.tar.xz)
-	# Creates bunch of files in ${CMAKE_BINARY_DIR}/target/pkg that you can just pass to
-	# Open Build Service and it will build all packaging.
-	# TODO: Currently changelog is not handled automatically.
-	add_custom_target(open_build_service_bundle
-			DEPENDS ${PACKAGE_SOURCE_ARCHIVE_FILE} appimage archlinux deb rpm
-			WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/pkg)
-endif()
+    # Inject up-to-date information into package config files.
+    package_config_file(appimage appimage.yml extras/packaging/appimage/appimage.yml.in)
+    package_config_file(archlinux PKGBUILD extras/packaging/arch/PKGBUILD.in)
+    package_config_file(rpm ${PACKAGE_NAME}.spec extras/packaging/rpm/spec.in)
+    # Debian uses whole directory which has to be saved to archive and shipped.
+    package_debian_quilt(deb
+            ${PACKAGE_NAME}_${PACKAGE_VERSION}-${PACKAGE_RELEASE}.dsc
+            extras/packaging/deb/dsc.in
+            extras/packaging/deb/debian
+            ${PACKAGE_NAME}_${PACKAGE_VERSION}-${PACKAGE_RELEASE}.debian.tar.xz)
+    # Creates bunch of files in ${CMAKE_BINARY_DIR}/target/pkg that you can just pass to
+    # Open Build Service and it will build all packaging.
+    # TODO: Currently changelog is not handled automatically.
+    add_custom_target(open_build_service_bundle
+            DEPENDS ${PACKAGE_SOURCE_ARCHIVE_FILE} appimage archlinux deb rpm
+            WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/pkg)
+endif ()
 
 configure_file(src/project_info.h.in ${CMAKE_CURRENT_LIST_DIR}/src/project_info.h @ONLY)

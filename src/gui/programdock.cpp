@@ -1,12 +1,12 @@
 #include "programdock.h"
 
+#include "helper/async_modal.h"
 #include "hexlineedit.h"
 #include "programmodel.h"
 #include "programtableview.h"
 
 #include <QComboBox>
 #include <QHeaderView>
-#include <QMessageBox>
 #include <QPushButton>
 #include <QTableView>
 #include <QVBoxLayout>
@@ -138,5 +138,5 @@ void ProgramDock::update_follow_position() {
 }
 
 void ProgramDock::report_error(const QString &error) {
-    QMessageBox::critical(this, "Simulator Error", error);
+    showAsyncMessageBox(this, QMessageBox::Critical, "Simulator Error", error);
 }

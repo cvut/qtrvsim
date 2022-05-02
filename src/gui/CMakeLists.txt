@@ -94,18 +94,19 @@ set(gui_HEADERS
     peripheralsdock.h
     peripheralsview.h
     programdock.h
-    programmodel.h
-    programtableview.h
-    registersdock.h
-    savechangeddialog.h
-    srceditor.h
-    statictable.h
-    terminaldock.h
-    textsignalaction.h
-    coreview/components/value_handlers.h
-    coreview/data.h
-    coreview/components/cache.h
-    )
+		programmodel.h
+		programtableview.h
+		registersdock.h
+		savechangeddialog.h
+		srceditor.h
+		statictable.h
+		terminaldock.h
+		textsignalaction.h
+		coreview/components/value_handlers.h
+		coreview/data.h
+		coreview/components/cache.h
+		helper/async_modal.h
+		)
 set(gui_UI
     gotosymboldialog.ui
     NewDialog.ui
@@ -152,7 +153,7 @@ target_compile_definitions(gui
 set_target_properties(gui PROPERTIES
                       OUTPUT_NAME "${MAIN_PROJECT_NAME_LOWER}_${PROJECT_NAME}")
 
-if(${${QtLib}PrintSupport_FOUND})
+if(${${QtLib}PrintSupport_FOUND} AND NOT ${WASM})
 	target_link_libraries(gui PRIVATE ${QtLib}::PrintSupport)
 	target_compile_definitions(gui PRIVATE WITH_PRINTING=1)
 endif()

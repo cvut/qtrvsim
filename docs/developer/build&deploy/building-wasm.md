@@ -6,6 +6,22 @@ WASM release is automatically build by the GitHub actions. Resulting files are a
 /`<detail of build you want to use>`, section `Artifacts`, file `target-wasm-Linux-qtx.xx.x`. Download the files and
 skip to deploy. Details on the build process can be found in `.github/workflows/cmake.yml`.
 
+## Jump start 2
+
+Install `emsdk` and `aqt` (details below).
+
+Use prepared helper make in the root of the project.
+
+```shell
+make wasm # build
+make wasm-clean # clean wasm build
+make wasm-clean-deap # also clean cached external libraries - when changing compile settings, of when it just does not work ;)
+make wasm-install-qt # install appropriate qt for wasm using aqt
+```
+
+Behavior of this commands is customized to local system in `.dev-config.local.mk`. The file is provided as a template
+and further changes are ignored.
+
 ## Dependencies
 
 - WASM compiler (Emscripten/EMSDK)

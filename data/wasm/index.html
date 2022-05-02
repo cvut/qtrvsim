@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- BASED ON: qt/5.15.2/wasm_32/plugins/platforms/wasm_shell.html -->
 <html lang="en-us">
 <head>
     <meta charset="utf-8">
@@ -24,17 +25,17 @@
 
         /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
         canvas {
-            border: 0px none;
+            border: 0 none;
             background-color: white;
             height: 100%;
             width: 100%;
         }
 
-        /* The contenteditable property is set to true for the canvas in order to support
+        /* The content editable property is set to true for the canvas in order to support
            clipboard events. Hide the resulting focus frame and set the cursor back to
            the default cursor. */
         canvas {
-            outline: 0px solid transparent;
+            outline: 0 solid transparent;
             caret-color: transparent;
             cursor: default
         }

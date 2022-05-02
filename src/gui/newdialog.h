@@ -66,7 +66,7 @@ class NewDialogCacheHandler : public QObject {
 public:
     NewDialogCacheHandler(NewDialog *nd, Ui::NewDialogCache *ui);
 
-    void set_config(machine::CacheConfig *config);
+    void set_config(machine::CacheConfig *cache_config);
 
     void config_gui();
 
