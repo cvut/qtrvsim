@@ -78,6 +78,7 @@ desktop-file-validate %{buildroot}share/applications/@PACKAGE_NAME@.desktop
 /usr/share/icons/hicolor/scalable/apps/qtrvsim_gui.svg
 /usr/share/icons/hicolor/48x48/apps/qtrvsim_gui.png
 /usr/share/applications/qtrvsim.desktop
+/usr/share/metainfo/cz.cvut.edu.comparch.qtrvsim.metainfo.xml
 
 %license LICENSE
 %doc README.md
