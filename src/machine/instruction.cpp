@@ -224,9 +224,24 @@ static const struct InstructionMap BRANCH_map[] = {
     {"bgeu", IT_B, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"s", "t", "p"}, 0x00007063,0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT }}, // BGEU
 };
 
-static const struct InstructionMap SYSTEM_map[] = {
+// Spec vol. 1: 2.8
+static const struct InstructionMap ENVIRONMENT_AND_BREAKPOINTS_map[] = {
     {"ecall", IT_I, NOALU, NOMEM, nullptr, {}, 0x00000073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_EXCEPTION | IMF_ECALL }},
     {"ebreak", IT_I, NOALU, NOMEM, nullptr, {}, 0x00100073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_EXCEPTION | IMF_EBREAK }},
+};
+
+#define CSR_MAP_ITEM(NAME, SOURCE, CODE) \
+    { NAME, IT_I, { .alu_op=AluOp::ADD }, NOMEM, nullptr,  {"d", "j", SOURCE}, 0x00000073 | (CODE), 0xffffffff, { .flags = IMF_SUPPORTED } }
+
+static const struct InstructionMap SYSTEM_map[] = {
+    {"environment_and_breakpoints", IT_I, NOALU, NOMEM, ENVIRONMENT_AND_BREAKPOINTS_map, {}, 0x00000073, 0xffffffff, { .subfield = {1, 20} }},
+    CSR_MAP_ITEM("csrrw", "s", 0x1000), // CSRRW
+    CSR_MAP_ITEM("csrrs", "s", 0x2000), // CSRRS
+    CSR_MAP_ITEM("csrrc", "s", 0x3000), // CSRRC
+    IM_UNKNOWN,
+    CSR_MAP_ITEM("csrrwi", "K", 0x5000), // CSRRWI
+    CSR_MAP_ITEM("csrrsi", "K", 0x6000), // CSRRSI
+    CSR_MAP_ITEM("csrrci", "K", 0x7000), // CSRRCI
 };
 
 static const struct InstructionMap MISC_MEM_map[] = {
