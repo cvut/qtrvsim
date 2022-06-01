@@ -61,7 +61,7 @@ static const ArgumentDesc arg_desc_list[] = {
     ArgumentDesc('t', 'g', 0, 0x1f, { { { 5, 20 } }, 0 }),
     // I-type immediate for arithmetic instructions (12bits)
     ArgumentDesc('j', 'n', -0x800, 0x7ff, { { { 12, 20 } }, 0 }),
-    // Shaft for bit shift instructions (5bits)
+    // Shift for bit shift instructions (5bits)
     ArgumentDesc('>', 'n', 0, 0x1f, { { { 5, 20 } }, 0 }),
     // Address offset immediate (20bits), encoded in multiples of 2 bytes
     ArgumentDesc('a', 'a', -0x80000, 0x7ffff, { { { 10, 21 }, { 1, 20 }, { 8, 12 }, { 1, 31 } }, 1 }),
