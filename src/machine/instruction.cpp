@@ -272,7 +272,7 @@ IMF_SUPPORTED | IMF_REGWRITE | IMF_BRANCH_JALR | IMF_ALUSRC | IMF_ALU_REQ_RS }},
     {"jal", IT_J, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "a"}, 0x6f, 0x7f, { .flags =
 IMF_SUPPORTED |
 IMF_REGWRITE | IMF_JUMP | IMF_PC_TO_ALU | IMF_ALUSRC }}, // JAL
-    {"system", IT_I, NOALU, NOMEM, SYSTEM_map, {}, 0x73, 0x7f, { .subfield = {1, 20} }}, // SYSTEM
+    {"system", IT_I, NOALU, NOMEM, SYSTEM_map, {}, 0x73, 0x7f, { .subfield = {3, 12} }}, // SYSTEM
     IM_UNKNOWN, // reserved
     IM_UNKNOWN, // custom-3/rv128
     IM_UNKNOWN, // >= 80b
@@ -504,7 +504,7 @@ void instruction_from_string_build_base(
         }
         if (!(im->flags & IMF_SUPPORTED)) { continue; }
         if (im->code != code) {
-            DEBUG("code mismatch %s computed 0x%08x found 0x%08x", im->name, code, im->code);
+            ERROR("code mismatch %s computed 0x%08x found 0x%08x", im->name, code, im->code);
             continue;
         }
         str_to_instruction_code_map.insert(im->name, code);
