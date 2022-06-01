@@ -14,7 +14,7 @@
 #include <set>
 #include <utility>
 
-LOG_CATEGORY("instruction");
+LOG_CATEGORY("machine.instruction");
 
 using namespace machine;
 
