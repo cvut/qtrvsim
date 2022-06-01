@@ -73,6 +73,9 @@ static const ArgumentDesc arg_desc_list[] = {
     ArgumentDesc('o', 'o', -0x800, 0x7ff, { { { 12, 20 } }, 0 }),
     // Offset immediate for store instructions (12 bits)
     ArgumentDesc('q', 'o', -0x800, 0x7ff, { { { 5, 7 }, { 7, 25 } }, 0 }),
+    // 5-bit CSR value immediate
+    // (https://github.com/gcc-mirror/gcc/blob/master/gcc/config/riscv/constraints.md#l47)
+    ArgumentDesc('K', 'n', 0, 0x1f, { { { 5, 20 } }, 0 }),
 };
 
 static const ArgumentDesc *arg_desc_by_code[(int)('z' + 1)];
