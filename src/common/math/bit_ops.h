@@ -7,7 +7,10 @@
 #ifndef QTRVSIM_BIT_OPS_H
 #define QTRVSIM_BIT_OPS_H
 
-#include <cstdio>
+#include <cstdint>
+#include <limits>
+
+using std::size_t;
 
 /**
  * Get value of single bit as lowest bit
