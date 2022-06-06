@@ -15,7 +15,7 @@ Core::Core(
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
-    ControlState *control_state,
+    CSR::ControlState *control_state,
     Xlen xlen)
     : pc_if(state.pipeline.pc.final)
     , if_id(state.pipeline.fetch.final)
@@ -30,7 +30,6 @@ Core::Core(
     , mem_program(mem_program)
     , ex_handlers()
     , ex_default_handler(new StopExceptionHandler()) {
-    if (control_state != nullptr) { control_state->setup_core(this); }
     stop_on_exception.fill(true);
     step_over_exception.fill(true);
     step_over_exception[EXCAUSE_INT] = false;
@@ -60,7 +59,7 @@ Registers *Core::get_regs() const {
     return regs;
 }
 
-ControlState *Core::get_control_state() const {
+CSR::ControlState *Core::get_control_state() const {
     return control_state;
 }
 
@@ -139,9 +138,10 @@ bool Core::handle_exception(
     if (excause == EXCAUSE_HWBREAK) { regs->write_pc(inst_addr); }
 
     if (control_state != nullptr) {
-        control_state->write_csr(ControlState::mepc, inst_addr.get_raw());
-        control_state->update_execption_cause(excause);
-        if (control_state->read_csr(ControlState::mtvec) != 0 && !get_step_over_exception(excause)) {
+        control_state->write_swap_internal(CSR::Id::MEPC, inst_addr.get_raw());
+        control_state->update_exception_cause(excause);
+        if (control_state->read_internal(CSR::Id::MTVEC) != 0
+            && !get_step_over_exception(excause)) {
             control_state->set_status_exl(true);
             regs->write_pc(control_state->exception_pc_address());
         }
@@ -197,6 +197,8 @@ FetchState Core::fetch(PCInterstage pc, bool skip_break) {
     ExceptionCause excause = EXCAUSE_NONE;
 
     if (!skip_break && hw_breaks.contains(inst_addr)) { excause = EXCAUSE_HWBREAK; }
+
+    if (control_state != nullptr) { control_state->increment_internal(CSR::Id::MCYCLE, 1); }
 
     if (control_state != nullptr && excause == EXCAUSE_NONE) {
         if (control_state->core_interrupt_request()) { excause = EXCAUSE_INT; }
@@ -371,6 +373,10 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
         regwrite = false;
     }
 
+    if (dt.excause == EXCAUSE_NONE && dt.is_valid) {
+        if (control_state != nullptr) { control_state->increment_internal(CSR::Id::MINSTRET, 1); }
+    }
+
     // Conditional branch (BXX = BEQ | BNE...) is executed and should be taken.
     const bool branch_bxx_taken = dt.branch_bxx && (!dt.branch_val ^ !dt.alu_zero);
     // Unconditional jump should be taken (JALX = JAL | JALR).
@@ -438,7 +444,7 @@ CoreSingle::CoreSingle(
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
-    ControlState *control_state,
+    CSR::ControlState *control_state,
     Xlen xlen)
     : Core(regs, predictor, mem_program, mem_data, control_state, xlen) {
     reset();
@@ -474,7 +480,7 @@ CorePipelined::CorePipelined(
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
-    ControlState *control_state,
+    CSR::ControlState *control_state,
     Xlen xlen,
     MachineConfig::HazardUnit hazard_unit)
     : Core(regs, predictor, mem_program, mem_data, control_state, xlen) {
@@ -624,8 +630,8 @@ bool StopExceptionHandler::handle_exception(
     Address mem_ref_addr) {
     Q_UNUSED(core)
     DEBUG(
-        "Exception cause %d instruction PC 0x%08" PRIx64 " next PC 0x%08" PRIx64 " jump branch PC 0x%08" PRIx64
-        "registers PC 0x%08" PRIx64 " mem ref 0x%08" PRIx64,
+        "Exception cause %d instruction PC 0x%08" PRIx64 " next PC 0x%08" PRIx64
+        " jump branch PC 0x%08" PRIx64 "registers PC 0x%08" PRIx64 " mem ref 0x%08" PRIx64,
         excause, inst_addr.get_raw(), next_addr.get_raw(), jump_branch_pc.get_raw(),
         regs->read_pc().get_raw(), mem_ref_addr.get_raw());
     return true;

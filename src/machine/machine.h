@@ -23,17 +23,14 @@ namespace machine {
 class Machine : public QObject {
     Q_OBJECT
 public:
-    explicit Machine(
-        MachineConfig config,
-        bool load_symtab = false,
-        bool load_executable = true);
+    explicit Machine(MachineConfig config, bool load_symtab = false, bool load_executable = true);
     ~Machine() override;
 
     const MachineConfig &config();
     void set_speed(unsigned int ips, unsigned int time_chunk = 0);
 
     const Registers *registers();
-    const ControlState *control_state();
+    const CSR::ControlState *control_state();
     const Memory *memory();
     Memory *memory_rw();
     const Cache *cache_program();
@@ -68,9 +65,7 @@ public:
     enum Status status();
     bool exited();
 
-    void register_exception_handler(
-        ExceptionCause excause,
-        ExceptionHandler *exhandler);
+    void register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler);
     bool memory_bus_insert_range(
         BackendMemory *mem_acces,
         Address start_addr,
@@ -121,7 +116,7 @@ private:
     LcdDisplay *perip_lcd_display = nullptr;
     Cache *cch_program = nullptr;
     Cache *cch_data = nullptr;
-    ControlState *controlst = nullptr;
+    CSR::ControlState *controlst = nullptr;
     Predictor *predictor = nullptr;
     Core *cr = nullptr;
 

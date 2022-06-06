@@ -1,6 +1,7 @@
 #ifndef CSRDOCK_H
 #define CSRDOCK_H
 
+#include "machine/csr/register_desc.h"
 #include "machine/machine.h"
 #include "statictable.h"
 
@@ -20,16 +21,16 @@ public:
     void setup(machine::Machine *machine);
 
 private slots:
-    void csr_changed(enum machine::ControlState::CsrRegisters reg, uint64_t val);
-    void csr_read(enum machine::ControlState::CsrRegisters reg, uint64_t val);
+    void csr_changed(size_t internal_reg_id, machine::RegisterValue val);
+    void csr_read(size_t internal_reg_id, machine::RegisterValue val);
     void clear_highlights();
 
 private:
     StaticTable *widg;
     QScrollArea *scrollarea;
 
-    QLabel *csr_view[machine::ControlState::CSR_REGS_CNT] {};
-    bool csr_highlighted[machine::ControlState::CSR_REGS_CNT] {};
+    QLabel *csr_view[machine::CSR::REGISTERS.size()] {};
+    bool csr_highlighted[machine::CSR::REGISTERS.size()] {};
     bool csr_highlighted_any;
 
     QPalette pal_normal;

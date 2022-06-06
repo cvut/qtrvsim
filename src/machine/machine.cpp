@@ -49,7 +49,7 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         machine_config.memory_access_time_write(),
         machine_config.memory_access_time_burst());
 
-    controlst = new ControlState();
+    controlst = new CSR::ControlState();
     predictor = new FalsePredictor();
 
     if (machine_config.pipelined()) {
@@ -60,8 +60,7 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         cr = new CoreSingle(regs, predictor, cch_program, cch_data, controlst, Xlen::_32);
     }
     connect(
-        this, &Machine::set_interrupt_signal, controlst,
-        &ControlState::set_interrupt_signal);
+        this, &Machine::set_interrupt_signal, controlst, &CSR::ControlState::set_interrupt_signal);
 
     run_t = new QTimer(this);
     set_speed(0); // In default run as fast as possible
@@ -136,7 +135,7 @@ const Registers *Machine::registers() {
     return regs;
 }
 
-const ControlState *Machine::control_state() {
+const CSR::ControlState *Machine::control_state() {
     return controlst;
 }
 
@@ -386,7 +385,7 @@ enum ExceptionCause Machine::get_exception_cause() const {
     if (controlst == nullptr) {
         return EXCAUSE_NONE;
     }
-    val = (controlst->read_csr(ControlState::mcause) >> 2) & 0x3f;
+    val = (controlst->read_internal(CSR::Id::MCAUSE).as_u64() >> 2) & 0x3f;
     if (val == 0) {
         return EXCAUSE_INT;
     } else {
