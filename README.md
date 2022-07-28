@@ -47,7 +47,7 @@ Implemented to support following courses:
 ## Try it out! (WebAssembly)
 
 QtRVSim is experimentally available for [WebAssembly](https://webassembly.org/) and it can be run in most browsers
-without installation. **[QtRVSim online](http://dev.jakubdupak.com/qtrvsim)**
+without installation. **[QtRVSim online](https://comparch.edu.cvut.cz/qtrvsim/app)**
 
 **Note, that WebAssembly version is experimental.**
 Please, report any difficulties via [GitHub issues](https://github.com/cvut/qtrvsim/issues/new).
@@ -506,7 +506,11 @@ For details about RISC-V, refer to the ISA specification:
 
 ## Links to Resources and Similar Projects
 
-### Resources and publications
+### Resources and Publications
+
+- Dupak, J.; Pisa, P.; Stepanovsky, M.; Koci, K. [QtRVSim – RISC-V Simulator for Computer Architectures Classes](https://comparch.edu.cvut.cz/publications/ewC2022-Dupak-Pisa-Stepanovsky-QtRvSim.pdf) In: [embedded world Conference 2022](https://events.weka-fachmedien.de/embedded-world-conference). Haar: WEKA FACHMEDIEN GmbH, 2022. p. 775-778. ISBN 978-3-645-50194-1. ([Slides](https://comparch.edu.cvut.cz/slides/ewc22-qtrvsim.pdf))
+
+Please reference above article, if you use QtRvSim in education or research related materials and publications.
 
 - [FEE CTU - B35APO - Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b35apo)
   - Undergraduate computer architecture class materials (
