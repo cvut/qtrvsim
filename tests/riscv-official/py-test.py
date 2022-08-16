@@ -3,13 +3,13 @@ import subprocess
 import sys
 
 # Constants
-isa_path = "isa/elf/"
-filename = "py-test.py"
+ISA_PATH = "isa"
+ELF_PATH = "isa/elf/"
+FILENAME = "py-test.py"
 
 
 # Placeholders
-bin_path = "../qtrvsim-bin/qtrvsim_cli"
-curr_dir = ""
+CURR_DIR = ""
 
 def max_str_list(list):
     max = 0
@@ -20,13 +20,20 @@ def max_str_list(list):
 
 
 def load_filenames():
-    global curr_dir
-    curr_dir = os.path.realpath(__file__).replace(filename, "")
-    isa_dir = os.listdir(curr_dir + isa_path)
+    global CURR_DIR
+    CURR_DIR = os.path.realpath(__file__).replace(FILENAME, "")
+    isa_dir = os.listdir(CURR_DIR + ELF_PATH)
     if (len(isa_dir) != 0):
         return isa_dir, True
     else:
-        return [], False
+        try:
+            print("No tests found. Trying to build tests.")
+            tests_built = subprocess.run(["cd {0} && make clean && make".format(CURR_DIR + ISA_PATH)], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return load_filenames()
+        except subprocess.CalledProcessError as err:
+            print("Failed to build tests.")
+            print(err)
+            return [], False
 
 
 def parse_args(args):
@@ -45,19 +52,27 @@ def parse_args(args):
 
 
 def check_reg_dump(reg_dump):
-    nice = False
-    if (str(reg_dump.stdout).__contains__("R11:0x00000069")):
-        nice = True
-    if (str(reg_dump.stdout).__contains__("R11:0x00000096")):
-        nice = False
-    return nice
+    res = False
+    if (str(reg_dump.stdout).__contains__("R11:0x0600d000")):
+        res = True
+    if (str(reg_dump.stdout).__contains__("R11:0x0bad0000")):
+        res = False
+    return res, reg_dump
+
+
+def order_tests(tests):
+    tests32 = list(filter(lambda t: str(t).__contains__("32"), tests))
+    tests64 = list(filter(lambda t: str(t).__contains__("64"), tests))
+    tests32.sort()
+    tests64.sort()
+    return tests32, tests64
 
 
 def run_tests(sim_bin, tests):
     succ = 0
     max_width = max_str_list(tests)
     for i in range(0, len(tests)):
-        test_path = (curr_dir + isa_path + tests[i])
+        test_path = (CURR_DIR + ELF_PATH + tests[i])
         try:
             reg_dump = subprocess.run([
             sim_bin, test_path, "--d-regs"],
@@ -65,22 +80,29 @@ def run_tests(sim_bin, tests):
         except subprocess.CalledProcessError as err:
             print(err)
             exit(1)
-        test = tests[i].ljust(max_width+2)
-        if (check_reg_dump(reg_dump)):
+        test = "    " + tests[i].ljust(max_width+2)
+        test_res, test_reg_dump = check_reg_dump(reg_dump)
+        if (test_res):
             print(test + ": PASS")
             succ += 1
         else:
             print(test + ": FAIL")
+            print(str(test_reg_dump.stderr) + "\n" + str(test_reg_dump.stdout) + "\n")
     print(str(succ) + "/" + str(len(tests)) + " tests succesfull.")
 
 
 sim_bin, chk_res = parse_args(sys.argv)
 if (chk_res == False):
-    print("Wrong argument!")
+    print("Error! Please use qtrvsim command line binary.")
     exit(1)
 else:
     tests, lf_res = load_filenames()
     if (not lf_res):
         print("No test found!")
         exit(1)
-    run_tests(sim_bin, tests)
+    tests32, tests64 = order_tests(tests)
+    print("--- 32-tests ---")
+    run_tests(sim_bin, tests32)
+    print("--- 64-tests ---")
+    run_tests(sim_bin, tests64)
+

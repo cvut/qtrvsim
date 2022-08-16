@@ -1,6 +1,6 @@
 #define _ENV_PHYSICAL_SINGLE_CORE_H
 
-#include "../encoding.h"
+#include "../../riscv-tests/env/encoding.h"
 
 //-----------------------------------------------------------------------
 // Begin Macro
@@ -77,7 +77,10 @@ _start:                                                                 \
         fence;                                                          \
         li TESTNUM, 1;                                                  \
         li a7, 93;                                                      \
-        li a1, 0x69;                                              \
+        li a1, 0x60;                                                    \
+        slli a1, a1, 8;                                                 \
+        addi a1, a1, 0xd;                                               \
+        slli a1, a1, 12;                                                \
         ecall
 
 #define TESTNUM gp
@@ -89,7 +92,10 @@ _start:                                                                 \
         or TESTNUM, TESTNUM, 1;                                         \
         li a7, 93;                                                      \
         addi a0, TESTNUM, 0;                                            \
-        li a1, 0x96;                                              \
+        addi a1,a1,0xBA;                                                \
+        slli a1,a1,4;                                                   \
+        addi a1, a1, 0xD;                                               \
+        slli a1, a1, 16;                                                \
         ecall
 
 //-----------------------------------------------------------------------

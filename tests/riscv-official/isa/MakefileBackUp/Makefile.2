@@ -9,9 +9,9 @@ src_dir := .
 isa_dir := ../riscv-tests/isa
 
 ifeq ($(XLEN),64)
-include $(isa_dir)/rv64ui/Makefrag
+include $(src_dir)/rv64ui/Makefrag
 endif
-include $(isa_dir)/rv32ui/Makefrag
+include $(src_dir)/rv32ui/Makefrag
 
 default: all
 
@@ -25,7 +25,7 @@ RISCV_GCC_OPTS ?= -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostart
 RISCV_OBJDUMP ?= $(RISCV_PREFIX)objdump --disassemble-all --disassemble-zeroes --section=.text --section=.text.startup --section=.text.init --section=.data
 RISCV_SIM ?= spike
 
-vpath %.S $(isa_dir)
+vpath %.S $(src_dir)
 
 #------------------------------------------------------------
 # Build assembly tests
@@ -42,7 +42,7 @@ vpath %.S $(isa_dir)
 define compile_template
 
 $$($(1)_p_tests): $(1)-p-%: $(1)/%.S
-	$$(RISCV_GCC) $(2) $$(RISCV_GCC_OPTS) -I$(src_dir)/../env/p -I$(isa_dir)/macros/scalar -T$(src_dir)/../env/p/link.ld $$< -o elf/$$@
+	$$(RISCV_GCC) $(2) $$(RISCV_GCC_OPTS) -I$(src_dir)/../env/p -I$(src_dir)/macros/scalar -T$(src_dir)/../env/p/link.ld $$< -o elf/$$@
 $(1)_tests += $$($(1)_p_tests)
 
 $(1)_tests_dump = $$(addsuffix .dump, $$($(1)_tests))
