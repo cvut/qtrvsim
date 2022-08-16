@@ -23,7 +23,7 @@ def load_filenames():
     global CURR_DIR
     CURR_DIR = os.path.realpath(__file__).replace(FILENAME, "")
     isa_dir = os.listdir(CURR_DIR + ELF_PATH)
-    if (len(isa_dir) != 0):
+    if (len(isa_dir) > 5):
         return isa_dir, True
     else:
         try:
