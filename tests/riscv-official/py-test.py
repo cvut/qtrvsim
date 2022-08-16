@@ -18,6 +18,13 @@ def max_str_list(list):
             max = len(list[i])
     return max
 
+# Decorative method, if output of the qtrvsim-cli is changed this will probably break!!!
+def print_formated_output(reg_dump):
+    stdout = reg_dump.stdout.decode("utf-8")
+    stderr = reg_dump.stderr.decode("utf-8")
+    print(stderr)
+    print(stdout)
+
 
 def load_filenames():
     global CURR_DIR
@@ -80,15 +87,15 @@ def run_tests(sim_bin, tests):
         except subprocess.CalledProcessError as err:
             print(err)
             exit(1)
-        test = "    " + tests[i].ljust(max_width+2)
+        test = tests[i].ljust(max_width+2)
         test_res, test_reg_dump = check_reg_dump(reg_dump)
         if (test_res):
-            print(test + ": PASS")
+            print(test + ": " +'\033[92m' + "PASS" + '\033[0m')
             succ += 1
         else:
-            print(test + ": FAIL")
-            print(str(test_reg_dump.stderr) + "\n" + str(test_reg_dump.stdout) + "\n")
-    print(str(succ) + "/" + str(len(tests)) + " tests succesfull.")
+            print(test + ": " +'\033[91m' + "FAIL" + '\033[0m')
+            print_formated_output(test_reg_dump)
+    print(str(succ) + "/" + str(len(tests)) + " tests succesfull.\n")
 
 
 sim_bin, chk_res = parse_args(sys.argv)
@@ -101,8 +108,8 @@ else:
         print("No test found!")
         exit(1)
     tests32, tests64 = order_tests(tests)
-    print("--- 32-tests ---")
+    print("--- 32 bit register tests ---")
     run_tests(sim_bin, tests32)
-    print("--- 64-tests ---")
+    print("--- 64 bit register tests ---")
     run_tests(sim_bin, tests64)
 

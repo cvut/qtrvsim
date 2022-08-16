@@ -59,7 +59,6 @@
         .globl _start;                                                  \
 _start:                                                                 \
     INIT_XREG;                                                          \
-    li TESTNUM, 0;                                                      \
     CHECK_XLEN;                                                         \
     .align 2;
 
@@ -74,9 +73,6 @@ _start:                                                                 \
 //-----------------------------------------------------------------------
 
 #define RVTEST_PASS                                                     \
-        fence;                                                          \
-        li TESTNUM, 1;                                                  \
-        li a7, 93;                                                      \
         li a1, 0x60;                                                    \
         slli a1, a1, 8;                                                 \
         addi a1, a1, 0xd;                                               \
@@ -86,12 +82,6 @@ _start:                                                                 \
 #define TESTNUM gp
 
 #define RVTEST_FAIL                                                     \
-        fence;                                                          \
-1:      beqz TESTNUM, 1b;                                               \
-        sll TESTNUM, TESTNUM, 1;                                        \
-        or TESTNUM, TESTNUM, 1;                                         \
-        li a7, 93;                                                      \
-        addi a0, TESTNUM, 0;                                            \
         addi a1,a1,0xBA;                                                \
         slli a1,a1,4;                                                   \
         addi a1, a1, 0xD;                                               \
@@ -103,13 +93,5 @@ _start:                                                                 \
 //-----------------------------------------------------------------------
 
 #define EXTRA_DATA
-
-#define RVTEST_DATA_BEGIN                                               \
-//        EXTRA_DATA                                                    \
-        .pushsection .tohost,"aw",@progbits;                            \
-        .align 6; .global tohost; tohost: .dword 0;                     \
-        .align 6; .global fromhost; fromhost: .dword 0;                 \
-        .popsection;                                                    \
-        .align 4; .global begin_signature; begin_signature:
-
-#define RVTEST_DATA_END //.align 4; .global end_signature; end_signature:
+#define RVTEST_DATA_BEGIN
+#define RVTEST_DATA_END
