@@ -35,9 +35,9 @@ def test_sim_bin(sim_bin):
     try:
         sim_test = subprocess.run(
             [sim_bin], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except subprocess.CalledProcessError as err:
-        print(err)
-        exit(1)
+    except:
+        parser.print_help()
+        sys.exit(1)
     if (sim_test.returncode == 0):
         return sim_bin, True
     return "", False
@@ -107,10 +107,10 @@ def load_filenames(rebuild):
             tests_built = subprocess.run(["cd {0} && make clean && make".format(
                 CURR_DIR + ISA_PATH)], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             return load_filenames(False)
-        except subprocess.CalledProcessError as err:
+        except:
             print("Failed to build tests.")
-            print(err)
-            return [], False
+            parser.print_help()
+            sys.exit(1)
 
 
 def run_official_tests(sim_bin, tests_32_64, params):
