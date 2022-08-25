@@ -10,8 +10,16 @@ isa_dir := ../riscv-tests/isa
 
 ifeq ($(XLEN),64)
 include $(isa_dir)/rv64ui/Makefrag
+include $(isa_dir)/rv64ua/Makefrag
+include $(isa_dir)/rv64si/Makefrag
+include $(isa_dir)/rv64mi/Makefrag
+include $(isa_dir)/rv64um/Makefrag
 endif
 include $(isa_dir)/rv32ui/Makefrag
+include $(isa_dir)/rv32ua/Makefrag
+include $(isa_dir)/rv32si/Makefrag
+include $(isa_dir)/rv32mi/Makefrag
+include $(isa_dir)/rv32um/Makefrag
 
 default: all
 
@@ -41,6 +49,8 @@ vpath %.S $(isa_dir)
 
 define compile_template
 
+
+
 $$($(1)_p_tests): $(1)-p-%: $(1)/%.S
 	$$(RISCV_GCC) $(2) $$(RISCV_GCC_OPTS) -I$(src_dir)/../env/p -I$(isa_dir)/macros/scalar -T$(src_dir)/../env/p/link.ld $$< -o elf/$$@
 $(1)_tests += $$($(1)_p_tests)
@@ -58,10 +68,17 @@ tests += $$($(1)_tests)
 endif
 
 endef
-
 $(eval $(call compile_template,rv32ui,-march=rv32g -mabi=ilp32))
+$(eval $(call compile_template,rv32um,-march=rv32g -mabi=ilp32))
+$(eval $(call compile_template,rv32ua,-march=rv32g -mabi=ilp32))
+$(eval $(call compile_template,rv32si,-march=rv32g -mabi=ilp32))
+$(eval $(call compile_template,rv32mi,-march=rv32g -mabi=ilp32))
 ifeq ($(XLEN),64)
 $(eval $(call compile_template,rv64ui,-march=rv64g -mabi=lp64))
+$(eval $(call compile_template,rv64um,-march=rv64g -mabi=lp64))
+$(eval $(call compile_template,rv64ua,-march=rv64g -mabi=lp64))
+$(eval $(call compile_template,rv64si,-march=rv64g -mabi=lp64))
+$(eval $(call compile_template,rv64mi,-march=rv64g -mabi=lp64))
 endif
 
 tests_dump = $(addsuffix .dump, $(tests))

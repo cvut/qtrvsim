@@ -14,6 +14,26 @@
   .macro init;                                                          \
   .endm
 
+#define RVTEST_RV64M                                                    \
+  .macro init;                                                          \
+  RVTEST_ENABLE_MACHINE;                                                \
+  .endm
+
+#define RVTEST_RV32M                                                    \
+  .macro init;                                                          \
+  RVTEST_ENABLE_MACHINE;                                                \
+  .endm
+
+#define RVTEST_RV64S                                                    \
+  .macro init;                                                          \
+  RVTEST_ENABLE_SUPERVISOR;                                             \
+  .endm
+
+#define RVTEST_RV32S                                                    \
+  .macro init;                                                          \
+  RVTEST_ENABLE_SUPERVISOR;                                             \
+  .endm
+
 #if __riscv_xlen == 64
 # define CHECK_XLEN li a0, 1; slli a0, a0, 31; bgez a0, 1f; RVTEST_PASS; 1:
 #else

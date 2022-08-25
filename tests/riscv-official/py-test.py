@@ -1,22 +1,19 @@
 import os
-import subprocess
 import sys
+import pathlib
+import argparse
+import subprocess
 
 # Constants
 ISA_PATH = "isa"
 ELF_PATH = "isa/elf/"
 FILENAME = "py-test.py"
+LINE_DESIGN = "+-+-+-+-+-+-+-+-+-+-+-+-+-+"
 
 
 # Placeholders
 CURR_DIR = ""
 
-def max_str_list(list):
-    max = 0
-    for i in range(len(list)):
-        if (max < len(list[i])):
-            max = len(list[i])
-    return max
 
 # Decorative method, if output of the qtrvsim-cli is changed this will probably break!!!
 def print_formated_output(reg_dump):
@@ -26,33 +23,21 @@ def print_formated_output(reg_dump):
     print(stdout)
 
 
-def load_filenames():
-    global CURR_DIR
-    CURR_DIR = os.path.realpath(__file__).replace(FILENAME, "")
-    isa_dir = os.listdir(CURR_DIR + ELF_PATH)
-    if (len(isa_dir) > 5):
-        return isa_dir, True
-    else:
-        try:
-            print("No tests found. Trying to build tests.")
-            tests_built = subprocess.run(["cd {0} && make clean && make".format(CURR_DIR + ISA_PATH)], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            return load_filenames()
-        except subprocess.CalledProcessError as err:
-            print("Failed to build tests.")
-            print(err)
-            return [], False
+def max_str_list(list):
+    max = 0
+    for i in range(len(list)):
+        if (max < len(list[i])):
+            max = len(list[i])
+    return max
 
 
-def parse_args(args):
-    argv = len(args)
-    if (argv == 2):  # .py + sim_bin
-        sim_bin = os.path.realpath(args[1])
-        try:
-            sim_test = subprocess.run(
-                [sim_bin], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        except subprocess.CalledProcessError as err:
-            print(err)
-            exit(1)
+def test_sim_bin(sim_bin):
+    try:
+        sim_test = subprocess.run(
+            [sim_bin], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError as err:
+        print(err)
+        exit(1)
     if (sim_test.returncode == 0):
         return sim_bin, True
     return "", False
@@ -67,49 +52,207 @@ def check_reg_dump(reg_dump):
     return res, reg_dump
 
 
-def order_tests(tests):
-    tests32 = list(filter(lambda t: str(t).__contains__("32"), tests))
-    tests64 = list(filter(lambda t: str(t).__contains__("64"), tests))
-    tests32.sort()
-    tests64.sort()
-    return tests32, tests64
+def get_RVUI(tests):
+    tests32ui = list(filter(lambda t: str(t).__contains__("32ui"), tests))
+    tests64ui = list(filter(lambda t: str(t).__contains__("64ui"), tests))
+    tests32ui.sort()
+    tests64ui.sort()
+    return tests32ui, tests64ui
 
 
-def run_tests(sim_bin, tests):
+def get_RVUM(tests):
+    tests32um = list(filter(lambda t: str(t).__contains__("32um"), tests))
+    tests64um = list(filter(lambda t: str(t).__contains__("64um"), tests))
+    tests32um.sort()
+    tests64um.sort()
+    return tests32um, tests64um
+
+
+def get_RVUA(tests):
+    tests32ua = list(filter(lambda t: str(t).__contains__("32ua"), tests))
+    tests64ua = list(filter(lambda t: str(t).__contains__("64ua"), tests))
+    tests32ua.sort()
+    tests64ua.sort()
+    return tests32ua, tests64ua
+
+
+def get_RVSI(tests):
+    tests32si = list(filter(lambda t: str(t).__contains__("32si"), tests))
+    tests64si = list(filter(lambda t: str(t).__contains__("64si"), tests))
+    tests32si.sort()
+    tests64si.sort()
+    return tests32si, tests64si
+
+
+def get_RVMI(tests):
+    tests32mi = list(filter(lambda t: str(t).__contains__("32mi"), tests))
+    tests64mi = list(filter(lambda t: str(t).__contains__("64mi"), tests))
+    tests32mi.sort()
+    tests64mi.sort()
+    return tests32mi, tests64mi
+
+
+def load_filenames(rebuild):
+    global CURR_DIR
+    CURR_DIR = os.path.realpath(__file__).replace(FILENAME, "")
+    isa_dir = os.listdir(CURR_DIR + ELF_PATH)
+    if (len(isa_dir) > 5 and not rebuild):
+        return isa_dir, True
+    else:
+        try:
+            if (rebuild):
+                print("Rebuilding tests.")
+            else:
+                print("No tests found. Trying to build tests.")
+            tests_built = subprocess.run(["cd {0} && make clean && make".format(
+                CURR_DIR + ISA_PATH)], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return load_filenames(False)
+        except subprocess.CalledProcessError as err:
+            print("Failed to build tests.")
+            print(err)
+            return [], False
+
+
+def run_official_tests(sim_bin, tests_32_64, params):
+    for j in [0, 1]:
+        if (not j):
+            print("--- 32 bit register tests ---")
+        else:
+            print("--- 64 bit register tests ---")
+        succ = 0
+        max_width = max_str_list(tests_32_64[j])
+        for i in range(0, len(tests_32_64[j])):
+            test_path = (CURR_DIR + ELF_PATH + tests_32_64[j][i])
+            try:
+                param_bin = [sim_bin, test_path, "--d-regs"]
+                if (params.pipeline):
+                    param_bin.append("--pipelined")
+                if (params.cache):
+                    param_bin.append("--d-cache")
+                    param_bin.append("lru,2,2,2,wb")
+                    param_bin.append("--i-cache")
+                    param_bin.append("lru,2,2,2")
+                reg_dump = subprocess.run(param_bin, capture_output=True)
+            except subprocess.CalledProcessError as err:
+                print(err)
+                exit(1)
+            test = tests_32_64[j][i].ljust(max_width+2)
+            test_res, test_reg_dump = check_reg_dump(reg_dump)
+            if (test_res):
+                if (not params.nopass):
+                    print(test + ": " + '\033[92m' + "PASS" + '\033[0m')
+                succ += 1
+            else:
+                print(test + ": " + '\033[91m' + "FAIL" + '\033[0m')
+                if (not params.nodump):
+                    print_formated_output(test_reg_dump)
+        print(str(succ) + "/" +
+              str(len(tests_32_64[j])) + " tests succesfull.\n")
+
+
+def run_external_tests(dir_path, tests, params):
     succ = 0
     max_width = max_str_list(tests)
     for i in range(0, len(tests)):
-        test_path = (CURR_DIR + ELF_PATH + tests[i])
+        test_path = (dir_path + tests[i])
         try:
-            reg_dump = subprocess.run([
-            sim_bin, test_path, "--d-regs"],
-            capture_output=True)
+            param_bin = [sim_bin, test_path, "--d-regs"]
+            if (params.pipeline):
+                param_bin.append("--pipelined")
+            if (params.cache):
+                param_bin.append("--d-cache")
+                param_bin.append("lru,2,2,2,wb")
+                param_bin.append("--i-cache")
+                param_bin.append("lru,2,2,2")
+            reg_dump = subprocess.run(param_bin, capture_output=True)
         except subprocess.CalledProcessError as err:
             print(err)
             exit(1)
         test = tests[i].ljust(max_width+2)
         test_res, test_reg_dump = check_reg_dump(reg_dump)
         if (test_res):
-            print(test + ": " +'\033[92m' + "PASS" + '\033[0m')
+            if (not params.nopass):
+                print(test + ": " + '\033[92m' + "PASS" + '\033[0m')
             succ += 1
         else:
-            print(test + ": " +'\033[91m' + "FAIL" + '\033[0m')
-            print_formated_output(test_reg_dump)
+            print(test + ": " + '\033[91m' + "FAIL" + '\033[0m')
+            if (not params.nodump):
+                print_formated_output(test_reg_dump)
     print(str(succ) + "/" + str(len(tests)) + " tests succesfull.\n")
 
 
-sim_bin, chk_res = parse_args(sys.argv)
-if (chk_res == False):
-    print("Error! Please use qtrvsim command line binary.")
-    exit(1)
-else:
-    tests, lf_res = load_filenames()
-    if (not lf_res):
-        print("No test found!")
-        exit(1)
-    tests32, tests64 = order_tests(tests)
-    print("--- 32 bit register tests ---")
-    run_tests(sim_bin, tests32)
-    print("--- 64 bit register tests ---")
-    run_tests(sim_bin, tests64)
+def test_selector(sim_bin, params, tests):
+    if (params.pipeline):
+        print("Simulator runs in pipelined mode.")
+    if (params.cache):
+        print("Simulator runs in cache mode.")
+    print(LINE_DESIGN+" RVxxUI "+LINE_DESIGN)
+    run_official_tests(sim_bin, get_RVUI(tests), params)
+    if (params.multiply):
+        print(LINE_DESIGN+" RVxxUM "+LINE_DESIGN)
+        run_official_tests(sim_bin, get_RVUM(tests), params)
+    if (params.atomic):
+        print(LINE_DESIGN+" RVxxUA "+LINE_DESIGN)
+        run_official_tests(sim_bin, get_RVUA(tests), params)
+    if (params.CSR):
+        print(LINE_DESIGN+" RVxxSI "+LINE_DESIGN)
+        run_official_tests(sim_bin, get_RVSI(tests), params)
+        print(LINE_DESIGN+" RVxxMI "+LINE_DESIGN)
+        run_official_tests(sim_bin, get_RVMI(tests), params)
+    if (len(params.external) > 0):
+        print(LINE_DESIGN+" External Tests "+LINE_DESIGN)
+        dir_path = params.external[0]
+        test_files = os.listdir(dir_path)
+        test_files = list(
+            filter(lambda x: not str(x).startswith("."), test_files))
+        run_external_tests(dir_path, test_files, params)
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument('qtrvsim_cli',
+                    default='',
+                    help="Qtrvsim_cli to run tests. (RVxxUI is default)")
+parser.add_argument("-E", "--external",
+                    nargs=1,
+                    action="store",
+                    default="",
+                    help="Path to additional tests. Required to adhere to PASS,FAIL behavior of edited test enviroment.")
+parser.add_argument("-M", "--multiply",
+                    action="count",
+                    default=0,
+                    help="Additional set of tests for multiplication.")
+parser.add_argument("-A", "--atomic",
+                    action="count",
+                    default=0,
+                    help="Additional set of tests for atomic instructions.")
+parser.add_argument("--CSR",
+                    action="count",
+                    default=0,
+                    help="Additional set of tests for control and status registers.")
+parser.add_argument("--pipeline",
+                    action="count",
+                    default=0,
+                    help="Simulator runs in pipelined configuration.")
+parser.add_argument("--cache",
+                    action="count",
+                    default=0,
+                    help="Simulator runs with d-cache and i-cache implemented. (d lru,2,2,2,wb ; i lru,2,2,2)")
+parser.add_argument("-R", "--rebuild",
+                    action="count",
+                    default=0,
+                    help="Deletes tests and buidls them anew.")
+parser.add_argument("--no-pass",
+                    action="count",
+                    default=0,
+                    dest="nopass",
+                    help="Prints only failed tests for readability.")
+parser.add_argument("--no-dump",
+                    action="count",
+                    default=0,
+                    dest="nodump",
+                    help="Omits printing of registers in failed test.")
+args = parser.parse_args()
+
+sim_bin, bin_check = test_sim_bin(args.qtrvsim_cli)
+test_files, file_check = load_filenames(bool(args.rebuild))
+test_selector(sim_bin, args, test_files)
