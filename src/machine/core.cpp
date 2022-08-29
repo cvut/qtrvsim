@@ -217,6 +217,7 @@ FetchState Core::fetch(PCInterstage pc, bool skip_break) {
 
 DecodeState Core::decode(const FetchInterstage &dt) {
     InstructionFlags flags;
+    bool w_operation = this->xlen != Xlen::_64;
     AluCombinedOp alu_op {};
     AccessControl mem_ctl;
     ExceptionCause excause = dt.excause;
@@ -288,6 +289,7 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .branch_jalr = bool(flags & IMF_BRANCH_JALR),
                                 .stall = false,
                                 .is_valid = dt.is_valid,
+                                .w_operation = w_operation,
                                 .alu_mod = bool(flags & IMF_ALU_MOD),
                                 .alu_pc = bool(flags & IMF_PC_TO_ALU),
                                 .csr = bool(flags & IMF_CSR),
@@ -310,7 +312,7 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
     }();
     const RegisterValue alu_val = [=] {
         if (excause != EXCAUSE_NONE) return RegisterValue(0);
-        return alu_combined_operate(dt.aluop, dt.alu_component, true, dt.alu_mod, alu_fst, alu_sec);
+        return alu_combined_operate(dt.aluop, dt.alu_component, dt.w_operation, dt.alu_mod, alu_fst, alu_sec);
     }();
     const Address branch_jal_target = dt.inst_addr + dt.immediate_val.as_i64();
 
