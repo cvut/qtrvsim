@@ -14,4 +14,8 @@ Addaptation of official RISC-V tests for qtrvsim.
         git clone https://github.com/veznitom/qtrvsim-testing
         cd qtrvsim-testing
         git submodule update --init --recursive
-        python py-test.py /path/to/qtrvsim-cli
+        python qtrvsim_tester.py /path/to/qtrvsim-cli
+
+- For more information use:
+
+        python qtrvsim_tester.py -h
