@@ -21,7 +21,7 @@ include $(isa_dir)/rv32si/Makefrag
 include $(isa_dir)/rv32mi/Makefrag
 include $(isa_dir)/rv32um/Makefrag
 
-default: all
+default: clean all
 
 #--------------------------------------------------------------------
 # Build rules
@@ -33,7 +33,7 @@ RISCV_GCC_OPTS ?= -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostart
 RISCV_OBJDUMP ?= $(RISCV_PREFIX)objdump --disassemble-all --disassemble-zeroes --section=.text --section=.text.startup --section=.text.init --section=.data
 RISCV_SIM ?= spike
 
-vpath %.S $(isa_dir)
+vpath %.S $(isa_dir) $(self_test)
 
 #------------------------------------------------------------
 # Build assembly tests
@@ -91,12 +91,8 @@ run: $(tests_out) $(tests32_out)
 junk += $(tests) $(tests_dump) $(tests_hex) $(tests_out) $(tests32_out)
 
 #------------------------------------------------------------
-# Default
-
-def: $(tests)
 
 all: $(tests_dump)
-	#mv -f *.dump dump/
 
 #------------------------------------------------------------
 # Clean up
@@ -105,3 +101,4 @@ clean:
 	rm -rf $(junk)
 	rm -fr elf/*
 	rm -fr dump/*
+	rm -fr $(self_test)/elf/*
