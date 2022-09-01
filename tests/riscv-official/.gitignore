@@ -1,0 +1,4 @@
+./isa/elf
+./isa/dump
+./isa/selftests/elf
+./code/__pychache__

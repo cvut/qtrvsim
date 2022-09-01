@@ -1,9 +1,7 @@
 def max_str_list(list):
-    max = 0
-    for i in range(len(list)):
-        if (max < len(list[i])):
-            max = len(list[i])
-    return max
+    if (len(list) > 0):
+        return len(max(list, key=lambda x: len(x)))
+    return 0
 
 
 # Decorative method, if output of the qtrvsim-cli is changed this will probably break!!!
@@ -23,7 +21,7 @@ def res_translate(res):
         return "ERROR"
 
 
-def res_print(test, test_res, params):
+def res_print(test, test_res, test_reg_dump, params):
     if (test_res == 1):
         if (not params.nopass):
             if (not params.fileprt):

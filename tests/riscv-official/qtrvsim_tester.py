@@ -20,6 +20,10 @@ if(params.clean):
         
 sim_bin, bin_check = ts.test_sim_bin(params.qtrvsim_cli)
 
+if(not bin_check):
+    print("Problem with qtrvsim_cli binary!")
+    sys.exit(1)
+
 self_files, s_file_check = ts.load_filenames(
     SRC_DIR + cn.SELF_PATH, bool(params.rebuild))
 test_files, t_file_check = ts.load_filenames(

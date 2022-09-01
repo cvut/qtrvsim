@@ -10,7 +10,7 @@ import constants as cn
 def test_sim_bin(sim_bin):
     try:
         sim_test = subprocess.run(
-            [sim_bin], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            [sim_bin, "-h"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except:
         parser.print_help()
         sys.exit(1)
@@ -54,10 +54,10 @@ def check_reg_dump(reg_dump):
     return res, reg_dump
 
 
-def get_RVxx(tests, set):
-    set = str(set).lower()
-    tests32 = list(filter(lambda t: str(t).__contains__("32"+set), tests))
-    tests64 = list(filter(lambda t: str(t).__contains__("64"+set), tests))
+def get_RVxx(tests, isa):
+    isa = str(isa).lower()
+    tests32 = list(filter(lambda t: str(t).__contains__("32"+isa), tests))
+    tests64 = list(filter(lambda t: str(t).__contains__("64"+isa), tests))
     tests32.sort()
     tests64.sort()
     return tests32, tests64
@@ -86,7 +86,7 @@ def run_tests(sim_bin, params, dir_path, tests):
         reg_dump = run_test(sim_bin, params, dir_path, tests[i])
         test = tests[i].ljust(max_width)
         test_res, test_reg_dump = check_reg_dump(reg_dump)
-        succ += hp.res_print(test, test_res, params)
+        succ += hp.res_print(test, test_res, test_reg_dump, params)
     if (not params.fileprt):
         print(str(succ) + "/" + str(len(tests)) + " tests succesfull.\n")
 
@@ -153,12 +153,12 @@ def test_selector(sim_bin, params, src_path, tests):
 
 def delete_elf(src_path):
     try:
-        subprocess.run( ["make", "-C", src_path + cn.ISA_PATH, "clean"],
-                        stdout = subprocess.DEVNULL,
-                        stderr = subprocess.DEVNULL)
+        subprocess.run(["make", "-C", src_path + cn.ISA_PATH, "clean"],
+                       stdout=subprocess.DEVNULL,
+                       stderr=subprocess.DEVNULL)
         subprocess.run(["make", "-C", src_path + cn.SELF_PATH, "clean"],
-                        stdout = subprocess.DEVNULL,
-                        stderr = subprocess.DEVNULL)
+                       stdout=subprocess.DEVNULL,
+                       stderr=subprocess.DEVNULL)
     except subprocess.CalledProcessError as err:
         print("Unable to delete elf files.")
         print(err)
