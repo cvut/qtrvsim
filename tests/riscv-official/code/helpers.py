@@ -47,3 +47,12 @@ def res_print(test, test_res, test_reg_dump, params):
         if (not params.nodump or params.dregs):
             print_formated_output(test_reg_dump)
         return 0
+
+
+def get_RVxx(tests, isa):
+    isa = str(isa).lower()
+    tests32 = list(filter(lambda t: str(t).__contains__("32"+isa), tests))
+    tests64 = list(filter(lambda t: str(t).__contains__("64"+isa), tests))
+    tests32.sort()
+    tests64.sort()
+    return tests32, tests64

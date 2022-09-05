@@ -54,15 +54,6 @@ def check_reg_dump(reg_dump):
     return res, reg_dump
 
 
-def get_RVxx(tests, isa):
-    isa = str(isa).lower()
-    tests32 = list(filter(lambda t: str(t).__contains__("32"+isa), tests))
-    tests64 = list(filter(lambda t: str(t).__contains__("64"+isa), tests))
-    tests32.sort()
-    tests64.sort()
-    return tests32, tests64
-
-
 def run_test(sim_bin, params, dir_path, filename):
     test_path = dir_path + filename
     try:
@@ -74,7 +65,7 @@ def run_test(sim_bin, params, dir_path, filename):
         return subprocess.run(param_bin, capture_output=True)
     except subprocess.CalledProcessError as err:
         print(err)
-        exit(1)
+        sys.exit(1)
 
 
 def run_tests(sim_bin, params, dir_path, tests):
@@ -82,9 +73,9 @@ def run_tests(sim_bin, params, dir_path, tests):
     max_width = 0
     if (not params.fileprt):
         max_width = hp.max_str_list(tests)
-    for i in range(0, len(tests)):
-        reg_dump = run_test(sim_bin, params, dir_path, tests[i])
-        test = tests[i].ljust(max_width)
+    for test in tests:
+        reg_dump = run_test(sim_bin, params, dir_path, test)
+        test = test.ljust(max_width)
         test_res, test_reg_dump = check_reg_dump(reg_dump)
         succ += hp.res_print(test, test_res, test_reg_dump, params)
     if (not params.fileprt):
@@ -102,20 +93,6 @@ def run_official_tests(sim_bin, params, src_path, tests):
         run_tests(sim_bin, params, src_path + cn.ELF_PATH, tests[1])
 
 
-def self_test(sim_bin, params, src_path, tests):
-    wrong = []
-    for i in range(0, len(tests)):
-        test_res, test_reg_dump = check_reg_dump(
-            run_test(sim_bin, params, src_path + cn.SELF_ELF_PATH+"/", tests[i]))
-        if ((test_res == 1 and str(tests[i]).__contains__("fail")) or
-            (test_res == 0 and str(tests[i]).__contains__("pass")) or
-                test_res == 2):
-            wrong.append(tests[i])
-            # if (not params.nodump or params.dregs):
-            #    hp.print_formated_output(test_reg_dump)
-    print("Undesired behaviour:{0}".format(wrong))
-
-
 def test_selector(sim_bin, params, src_path, tests):
     if (params.pipeline):
         print("Simulator runs in pipelined mode.")
@@ -126,21 +103,21 @@ def test_selector(sim_bin, params, src_path, tests):
     else:
         line = "-+-+-+-+-+-+-+-+-"
     print(line+"RVxxUI"+line)
-    run_official_tests(sim_bin, params, src_path, get_RVxx(tests, "ui"))
+    run_official_tests(sim_bin, params, src_path, hp.get_RVxx(tests, "ui"))
 
     if (params.multiply):
         print(line+"RVxxUM"+line)
-        run_official_tests(sim_bin, params, src_path, get_RVxx(tests, "um"))
+        run_official_tests(sim_bin, params, src_path, hp.get_RVxx(tests, "um"))
 
     if (params.atomic):
         print(line+"RVxxUA"+line)
-        run_official_tests(sim_bin, params, src_path, get_RVxx(tests, "ua"))
+        run_official_tests(sim_bin, params, src_path, hp.get_RVxx(tests, "ua"))
 
     if (params.CSR):
         print(line+"RVxxSI"+line)
-        run_official_tests(sim_bin, params, src_path, get_RVxx(tests, "si"))
+        run_official_tests(sim_bin, params, src_path, hp.get_RVxx(tests, "si"))
         print(line+"RVxxMI"+line)
-        run_official_tests(sim_bin, params, src_path, get_RVxx(tests, "mi"))
+        run_official_tests(sim_bin, params, src_path, hp.get_RVxx(tests, "mi"))
 
     if (len(params.external) > 0):
         print(line+"External Tests"+line)
@@ -148,7 +125,7 @@ def test_selector(sim_bin, params, src_path, tests):
         test_files = os.listdir(dir_path)
         test_files = list(
             filter(lambda x: not str(x).startswith("."), test_files))
-        run_tests(dir_path, test_files, params)
+        run_tests(sim_bin, params, dir_path, test_files)
 
 
 def delete_elf(src_path):
@@ -162,4 +139,3 @@ def delete_elf(src_path):
     except subprocess.CalledProcessError as err:
         print("Unable to delete elf files.")
         print(err)
-    sys.exit(0)
