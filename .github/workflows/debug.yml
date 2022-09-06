@@ -18,8 +18,9 @@ jobs:
             build_type: "Debug",
             cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
             qt_version: "native",
-            qt_install_command: "sudo apt-get update && sudo apt-get install qt5-default"
-              # Apt is significantly faster that aqt.
+            qt_install_command: "sudo apt-get update && sudo apt-get install qt5-default",
+            # Apt is significantly faster that aqt.
+            official_tests: true
           }
           - {
             name: "Ubuntu Latest GCC + Qt6",
@@ -56,6 +57,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
+      - run: git submodule update --recursive --init
 
       - name: Cache Qt
         # Cache only when not installed by os package manager
@@ -100,6 +103,24 @@ jobs:
         working-directory: ${{ github.workspace }}/build
         shell: bash
         run: ctest --output-on-failure --verbose
+
+      - name: Toolchain for official RISC-V tests
+        if: matrix.config.official_tests == true
+        working-directory: ${{ github.workspace }}/tests/riscv-official
+        run: |
+          echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-14 main" | sudo tee -a /etc/apt/sources.list &&
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add - &&
+          sudo apt-get update &&
+          sudo apt-get install clang-14 lldb-14 lld-14
+
+      - name: Official RISC-V tests
+        if: matrix.config.official_tests == true
+        working-directory: ${{ github.workspace }}/tests/riscv-official
+        env:
+          RISCV_COMPILER: clang-14
+          USE_CLANG_OPTS: true
+          RISCV_OBJDUMP_CMD: llvm-objdump-14
+        run: python qtrvsim_tester.py --no-64  ${{ github.workspace }}/build/target/qtrvsim_cli
 
       - name: Store created artifacts
         uses: actions/upload-artifact@v2
