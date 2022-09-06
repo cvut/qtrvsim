@@ -1,0 +1,18 @@
+RISCV_PREFIX ?= riscv$(XLEN)-unknown-elf-
+RISCV_COMPILER ?= $(RISCV_PREFIX)gcc
+RISCV_COMPILER_OPTS ?= -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles
+RISCV_OBJDUMP_CMD ?= $(RISCV_PREFIX)objdump
+RISCV_OBJDUMP ?= $(RISCV_OBJDUMP_CMD) --disassemble-all --disassemble-zeroes --section=.text --section=.text.startup
+--section=.text.init --section=.data
+RISCV_SIM ?= spike
+
+# Clang used different options regarding march
+USE_CLANG_OPTS ?= false
+
+ifeq ($(USE_CLANG_OPTS), true)
+MARCH_OPTS_32 = -march=rv64g --target=riscv32 -mno-relax -fuse-ld=lld
+MARCH_OPTS_64 = -march=rv64g --target=riscv64 -mno-relax -fuse-ld=lld
+else
+MARCH_OPTS_32 = -march=rv32g -mabi=ilp32
+MARCH_OPTS_64 = -march=rv64g -mabi=ilp64
+endif

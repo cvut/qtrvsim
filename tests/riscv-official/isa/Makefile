@@ -27,11 +27,7 @@ default: clean all
 # Build rules
 #--------------------------------------------------------------------
 
-RISCV_PREFIX ?= riscv$(XLEN)-unknown-elf-
-RISCV_GCC ?= $(RISCV_PREFIX)gcc
-RISCV_GCC_OPTS ?= -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles
-RISCV_OBJDUMP ?= $(RISCV_PREFIX)objdump --disassemble-all --disassemble-zeroes --section=.text --section=.text.startup --section=.text.init --section=.data
-RISCV_SIM ?= spike
+include toolchain_setup
 
 vpath %.S $(isa_dir) $(self_test)
 
@@ -52,7 +48,7 @@ define compile_template
 
 
 $$($(1)_p_tests): $(1)-p-%: $(1)/%.S
-	$$(RISCV_GCC) $(2) $$(RISCV_GCC_OPTS) -I$(src_dir)/../env/p -I$(isa_dir)/macros/scalar -T$(src_dir)/../env/p/link.ld $$< -o elf/$$@
+	$$(RISCV_COMPILER) $(2) $$(RISCV_COMPILER_OPTS) -I$(src_dir)/../env/p -I$(isa_dir)/macros/scalar -T$(src_dir)/../env/p/link.ld $$< -o elf/$$@
 $(1)_tests += $$($(1)_p_tests)
 
 $(1)_tests_dump = $$(addsuffix .dump, $$($(1)_tests))
@@ -61,24 +57,24 @@ $(1): $$($(1)_tests_dump)
 
 .PHONY: $(1)
 
-COMPILER_SUPPORTS_$(1) := $$(shell $$(RISCV_GCC) $(2) -c -x c /dev/null -o /dev/null 2> /dev/null; echo $$$$?)
+COMPILER_SUPPORTS_$(1) := $$(shell $$(RISCV_COMPILER) $(2) -c -x c /dev/null -o /dev/null 2> /dev/null; echo $$$$?)
 
 ifeq ($$(COMPILER_SUPPORTS_$(1)),0)
 tests += $$($(1)_tests)
 endif
 
 endef
-$(eval $(call compile_template,rv32ui,-march=rv32g -mabi=ilp32))
-$(eval $(call compile_template,rv32um,-march=rv32g -mabi=ilp32))
-$(eval $(call compile_template,rv32ua,-march=rv32g -mabi=ilp32))
-$(eval $(call compile_template,rv32si,-march=rv32g -mabi=ilp32))
-$(eval $(call compile_template,rv32mi,-march=rv32g -mabi=ilp32))
+$(eval $(call compile_template,rv32ui, $(MARCH_OPTS_32)))
+$(eval $(call compile_template,rv32um, $(MARCH_OPTS_32)))
+$(eval $(call compile_template,rv32ua, $(MARCH_OPTS_32)))
+$(eval $(call compile_template,rv32si, $(MARCH_OPTS_32)))
+$(eval $(call compile_template,rv32mi, $(MARCH_OPTS_32)))
 ifeq ($(XLEN),64)
-$(eval $(call compile_template,rv64ui,-march=rv64g -mabi=lp64))
-$(eval $(call compile_template,rv64um,-march=rv64g -mabi=lp64))
-$(eval $(call compile_template,rv64ua,-march=rv64g -mabi=lp64))
-$(eval $(call compile_template,rv64si,-march=rv64g -mabi=lp64))
-$(eval $(call compile_template,rv64mi,-march=rv64g -mabi=lp64))
+$(eval $(call compile_template,rv64ui, $(MARCH_OPTS_64)))
+$(eval $(call compile_template,rv64um, $(MARCH_OPTS_64)))
+$(eval $(call compile_template,rv64ua, $(MARCH_OPTS_64)))
+$(eval $(call compile_template,rv64si, $(MARCH_OPTS_64)))
+$(eval $(call compile_template,rv64mi, $(MARCH_OPTS_64)))
 endif
 
 tests_dump = $(addsuffix .dump, $(tests))
@@ -92,7 +88,10 @@ junk += $(tests) $(tests_dump) $(tests_hex) $(tests_out) $(tests32_out)
 
 #------------------------------------------------------------
 
-all: $(tests_dump)
+self-tests:
+	cd selftests && make
+
+all: $(tests_dump) self-tests
 
 #------------------------------------------------------------
 # Clean up
