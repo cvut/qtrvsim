@@ -112,10 +112,10 @@ jobs:
         run: ctest --output-on-failure --verbose
 
       - name: Get official RISC-V tests
-        uses: actions/download-artifact@master
+        if: ${{ steps.cache-tests.outputs.cache-hit != 'true' }}
+        uses: alehechka/download-tartifact@v1
         with:
           name: riscv-official-tests
-          path: ${{ github.workspace }}/tests/riscv-official/isa
 
       - name: Official RISC-V tests
         if: matrix.config.os != 'ubuntu-18.04' # The testing python script does not support Ubuntu 18
@@ -244,7 +244,7 @@ jobs:
         run: make
 
       - name: Store created artifacts
-        uses: actions/upload-artifact@v2
+        uses: alehechka/upload-tartifact@v1
         with:
           name: riscv-official-tests
-          path: ${{ github.workspace }}/tests/riscv-official/isa
+          path: tests/riscv-official/isa
