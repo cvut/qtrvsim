@@ -1,23 +1,30 @@
 # qtrvsim-testing
-Addaptation of official RISC-V tests for qtrvsim.
 
-## Requirements
-- [qtrvsim-cli](https://github.com/cvut/qtrvsim)
-- riscv64-unknown-elf-gcc
-- riscv64-unknown-elf-binutils
-- Python3 (>= 3.4)
-- Cmake
-- Git
+Adaptation of official RISC-V tests for QtRvSim.
 
-## Instructions
-1. Setup qtrvsim
-2. Run
+## Dependencies
 
-        git clone https://github.com/veznitom/qtrvsim-testing
-        cd qtrvsim-testing
-        git submodule update --init --recursive
-        python qtrvsim_tester.py /path/to/qtrvsim-cli
+- qtrvsim-cli
+- riscv64-unknown-elf-gcc OR clang
+- riscv64-unknown-elf-binutils OR llvm
+- python (>= 3.4)
 
-- For more information use:
+Note: with gcc make sure it supports all the used march options.
 
-        python qtrvsim_tester.py -h
+## Usage
+
+```shell
+python qtrvsim_tester.py /path/to/qtrvsim-cli
+```
+
+- For more information use: `python qtrvsim_tester.py -h`
+
+## Clang
+
+To use clang instead of gcc set those environment variables:
+
+```shell
+export RISCV_COMPILER=clang
+export USE_CLANG_OPTS=true
+export RISCV_OBJDUMP_CMD=llvm-objdump
+```
