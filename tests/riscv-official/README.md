@@ -5,7 +5,7 @@ Addaptation of official RISC-V tests for qtrvsim.
 - [qtrvsim-cli](https://github.com/cvut/qtrvsim)
 - riscv64-unknown-elf-gcc
 - riscv64-unknown-elf-binutils
-- Python3
+- Python3 (>= 3.4)
 - Cmake
 - Git
 
