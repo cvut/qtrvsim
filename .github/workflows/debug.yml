@@ -6,6 +6,7 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
+    needs: [ build-riscv-tests ]
     # Avoid duplicate builds on PR from the same repository
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     strategy:
@@ -20,7 +21,6 @@ jobs:
             qt_version: "native",
             qt_install_command: "sudo apt-get update && sudo apt-get install qt5-default",
             # Apt is significantly faster that aqt.
-            official_tests: true
           }
           - {
             name: "Ubuntu Latest GCC + Qt6",
@@ -111,22 +111,15 @@ jobs:
         shell: bash
         run: ctest --output-on-failure --verbose
 
-      - name: Toolchain for official RISC-V tests
-        if: matrix.config.official_tests == true
-        working-directory: ${{ github.workspace }}/tests/riscv-official
-        run: |
-          echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-14 main" | sudo tee -a /etc/apt/sources.list &&
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add - &&
-          sudo apt-get update &&
-          sudo apt-get install clang-14 lldb-14 lld-14
+      - name: Get official RISC-V tests
+        uses: actions/download-artifact@master
+        with:
+          name: riscv-official-tests
+          path: ${{ github.workspace }}/tests/riscv-official/isa
 
       - name: Official RISC-V tests
-        if: matrix.config.official_tests == true
+        if: matrix.config.os != 'ubuntu-18.04' # The testing python script does not support Ubuntu 18
         working-directory: ${{ github.workspace }}/tests/riscv-official
-        env:
-          RISCV_COMPILER: clang-14
-          USE_CLANG_OPTS: true
-          RISCV_OBJDUMP_CMD: llvm-objdump-14
         run: python qtrvsim_tester.py --no-64  ${{ github.workspace }}/build/target/qtrvsim_cli
 
       - name: Store created artifacts
@@ -210,3 +203,40 @@ jobs:
         with:
           name: target-wasm-${{ runner.os }}-qt${{ matrix.config.qt_version }}
           path: ${{ github.workspace }}/build/target
+
+  build-riscv-tests:
+    name: Build official RISC-V tests
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: git submodule update --recursive --init
+
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            riscv-tests-subtree:
+              - 'tests/riscv-official/**'
+
+      - name: Toolchain for official RISC-V tests
+        working-directory: ${{ github.workspace }}/tests/riscv-official
+        run: |
+          ### Ubuntu 22 already provides those
+          # echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-14 main" | sudo tee -a /etc/apt/sources.list &&
+          # wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add - &&
+          sudo apt-get update &&
+          sudo apt-get install clang-14 lldb-14 lld-14
+
+      - name: Build official RISC-V tests
+        working-directory: ${{ github.workspace }}/tests/riscv-official/isa
+        env:
+          RISCV_COMPILER: clang-14
+          USE_CLANG_OPTS: true
+          RISCV_OBJDUMP_CMD: llvm-objdump-14
+        run: make
+
+      - name: Store created artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: riscv-official-tests
+          path: ${{ github.workspace }}/tests/riscv-official/isa
