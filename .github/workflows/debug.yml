@@ -5,10 +5,10 @@ on: [ push, workflow_dispatch, pull_request ]
 jobs:
   build:
     name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
     needs: [ build-riscv-tests ]
     # Avoid duplicate builds on PR from the same repository
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -57,7 +57,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
       - run: git submodule update --recursive --init
 
       - name: Ccache
@@ -118,7 +117,8 @@ jobs:
           name: riscv-official-tests
 
       - name: Official RISC-V tests
-        if: matrix.config.os != 'ubuntu-18.04' # The testing python script does not support Ubuntu 18
+        # The testing python script does not support Ubuntu 18
+        if: matrix.config.os != 'ubuntu-18.04'
         working-directory: ${{ github.workspace }}/tests/riscv-official
         run: python qtrvsim_tester.py --no-64  ${{ github.workspace }}/build/target/qtrvsim_cli
 
@@ -130,8 +130,9 @@ jobs:
 
   build-emscripten:
     name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
+    # Avoid duplicate builds on PR from the same repository
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -206,6 +207,8 @@ jobs:
 
   build-riscv-tests:
     name: Build official RISC-V tests
+    # Avoid duplicate builds on PR from the same repository
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
@@ -227,6 +230,7 @@ jobs:
       - name: Toolchain for official RISC-V tests
         if: ${{ steps.cache-tests.outputs.cache-hit != 'true' }}
         working-directory: ${{ github.workspace }}/tests/riscv-official
+        # Version 14 is needed to correctly process newer parts of RV
         run: |
           ### Ubuntu 22 already provides those
           # echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-14 main" | sudo tee -a /etc/apt/sources.list &&
@@ -244,6 +248,7 @@ jobs:
         run: make
 
       - name: Store created artifacts
+        # Use of tar significantly improves performance as artifact upload has significant per file penalty
         uses: alehechka/upload-tartifact@v1
         with:
           name: riscv-official-tests
