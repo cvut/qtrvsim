@@ -5,9 +5,10 @@ on: [ push, workflow_dispatch, pull_request ]
 jobs:
   build:
     name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
+    needs: [ build-riscv-tests ]
     # Avoid duplicate builds on PR from the same repository
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -18,8 +19,8 @@ jobs:
             build_type: "Debug",
             cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
             qt_version: "native",
-            qt_install_command: "sudo apt-get update && sudo apt-get install qt5-default"
-              # Apt is significantly faster that aqt.
+            qt_install_command: "sudo apt-get update && sudo apt-get install qt5-default",
+            # Apt is significantly faster that aqt.
           }
           - {
             name: "Ubuntu Latest GCC + Qt6",
@@ -56,6 +57,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - run: git submodule update --recursive --init
+
+      - name: Ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.ref_name }}-${{ matrix.config.name }}
 
       - name: Cache Qt
         # Cache only when not installed by os package manager
@@ -89,6 +96,8 @@ jobs:
                     -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
                     -DCMAKE_C_COMPILER=${{ matrix.config.cc }}
                     -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }}
+                    -DCMAKE_C_COMPILER_LAUNCHER=ccache
+                    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
                     -DFORCE_COLORED_OUTPUT=true
                     -G \"${{ matrix.config.build_system }}\""
 
@@ -101,6 +110,18 @@ jobs:
         shell: bash
         run: ctest --output-on-failure --verbose
 
+      - name: Get official RISC-V tests
+        if: ${{ steps.cache-tests.outputs.cache-hit != 'true' }}
+        uses: alehechka/download-tartifact@v1
+        with:
+          name: riscv-official-tests
+
+      - name: Official RISC-V tests
+        # The testing python script does not support Ubuntu 18
+        if: matrix.config.os != 'ubuntu-18.04'
+        working-directory: ${{ github.workspace }}/tests/riscv-official
+        run: python qtrvsim_tester.py --no-64  ${{ github.workspace }}/build/target/qtrvsim_cli
+
       - name: Store created artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -109,8 +130,9 @@ jobs:
 
   build-emscripten:
     name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
+    # Avoid duplicate builds on PR from the same repository
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -125,6 +147,11 @@ jobs:
           }
     steps:
       - uses: actions/checkout@v2
+
+      - name: Ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.ref_name }}-${{ matrix.config.name }}
 
       - name: Cache Qt
         id: cache-qt
@@ -163,6 +190,8 @@ jobs:
                     -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
                     -DCMAKE_PREFIX_PATH=$Qt5_DIR
                     -DCMAKE_FIND_ROOT_PATH=$Qt5_DIR
+                    -DCMAKE_C_COMPILER_LAUNCHER=ccache
+                    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
                     -DFORCE_COLORED_OUTPUT=true
                     -Wno-dev"
 
@@ -175,3 +204,52 @@ jobs:
         with:
           name: target-wasm-${{ runner.os }}-qt${{ matrix.config.qt_version }}
           path: ${{ github.workspace }}/build/target
+
+  build-riscv-tests:
+    name: Build official RISC-V tests
+    # Avoid duplicate builds on PR from the same repository
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: git submodule update --recursive --init
+
+      - name: Get cache key
+        uses: mathiasvr/command-output@v1
+        id: subtree-hash
+        with:
+          run: git rev-parse HEAD:tests/riscv-official/
+
+      - name: Cache
+        id: cache-tests
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/tests/riscv-official/isa
+          key: riscv-tests-${{ steps.subtree-hash.outputs.stdout }}
+
+      - name: Toolchain for official RISC-V tests
+        if: ${{ steps.cache-tests.outputs.cache-hit != 'true' }}
+        working-directory: ${{ github.workspace }}/tests/riscv-official
+        # Version 14 is needed to correctly process newer parts of RV
+        run: |
+          ### Ubuntu 22 already provides those
+          # echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-14 main" | sudo tee -a /etc/apt/sources.list &&
+          # wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add - &&
+          sudo apt-get update &&
+          sudo apt-get install clang-14 lldb-14 lld-14
+
+      - name: Build official RISC-V tests
+        if: ${{ steps.cache-tests.outputs.cache-hit != 'true' }}
+        working-directory: ${{ github.workspace }}/tests/riscv-official/isa
+        env:
+          RISCV_COMPILER: clang-14
+          USE_CLANG_OPTS: true
+          RISCV_OBJDUMP_CMD: llvm-objdump-14
+        run: make
+
+      - name: Store created artifacts
+        # Use of tar significantly improves performance as artifact upload has significant per file penalty
+        uses: alehechka/upload-tartifact@v1
+        with:
+          name: riscv-official-tests
+          path: tests/riscv-official/isa
