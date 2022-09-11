@@ -10,9 +10,9 @@ RISCV_SIM ?= spike
 USE_CLANG_OPTS ?= false
 
 ifeq ($(USE_CLANG_OPTS), true)
-MARCH_OPTS_32 = -march=rv64g --target=riscv32 -mno-relax -fuse-ld=lld
-MARCH_OPTS_64 = -march=rv64g --target=riscv64 -mno-relax -fuse-ld=lld
+MARCH_OPTS_32 = -march=rv32g -mabi=ilp32 --target=riscv32 -mno-relax -fuse-ld=lld
+MARCH_OPTS_64 = -march=rv64g -mabi=lp64 --target=riscv64 -mno-relax -fuse-ld=lld
 else
 MARCH_OPTS_32 = -march=rv32g -mabi=ilp32
-MARCH_OPTS_64 = -march=rv64g -mabi=ilp64
+MARCH_OPTS_64 = -march=rv64g -mabi=lp64
 endif
