@@ -8,6 +8,7 @@ LOG_CATEGORY("machine.csr.control_state");
 
 namespace machine { namespace CSR {
 
+    // TODO this is mips
     enum StatusReg {
         Status_IE = 0x00000001,
         Status_EXL = 0x00000002,
@@ -15,8 +16,6 @@ namespace machine { namespace CSR {
         Status_IntMask = 0x0000ff00,
         Status_Int0 = 0x00000100,
     };
-
-#define COUNTER_IRQ_LEVEL 7
 
     std::map<const Address, size_t> ControlState::address_to_register_map {};
 
@@ -40,30 +39,43 @@ namespace machine { namespace CSR {
 
     size_t ControlState::get_register_internal_id(Address address) {
         if (address.get_privilege_level() != PrivilegeLevel::MACHINE) {
-            WARN("Accessed unsupported CSR privilege level %d.", address.get_privilege_level());
-            throw IllegalInstruction();
+            throw SIMULATOR_EXCEPTION(
+                UnsupportedInstruction,
+                QString("Only machine level CSR registers are currently implemented. Accessed "
+                        "level %1.")
+                    .arg(static_cast<unsigned>(address.get_privilege_level())),
+                "");
         }
 
         try {
             return address_to_register_map.at(address);
         } catch (std::out_of_range &e) {
-            WARN("Accessed nonexistent CSR register at address %d.", address.data);
-            throw IllegalInstruction();
+            throw SIMULATOR_EXCEPTION(
+                UnsupportedInstruction,
+                QString("Accessed nonexistent CSR register %1").arg(address.data), "");
         }
     }
 
     RegisterValue ControlState::read(Address address) const {
         // Only machine level privilege is supported so no checking is needed.
         size_t reg_id = get_register_internal_id(address);
-        RegisterValue val = register_data[reg_id];
-        emit read_signal(reg_id, val);
-        return val;
+        RegisterValue value = register_data[reg_id];
+        DEBUG("Read CSR[%u] == %lu", address.data, value.as_u64());
+        emit read_signal(reg_id, value);
+        return value;
     }
 
-    RegisterValue ControlState::write_swap(Address address, RegisterValue value) {
+    void ControlState::write(Address address, RegisterValue value) {
+        DEBUG(
+            "Write CSR[%u/%lu] <== %lu", address.data, get_register_internal_id(address),
+            value.as_u64());
         // Attempts to write a read-only register also raise illegal instruction exceptions.
-        if (!address.is_writable()) { throw IllegalInstruction(); }
-        return write_swap_internal(get_register_internal_id(address), value);
+        if (!address.is_writable()) {
+            throw SIMULATOR_EXCEPTION(
+                UnsupportedInstruction,
+                QString("CSR address %1 is not writable.").arg(address.data), "");
+        }
+        write_internal(get_register_internal_id(address), value);
     }
 
     bool ControlState::operator==(const ControlState &other) const {
@@ -84,6 +96,7 @@ namespace machine { namespace CSR {
         emit write_signal(Id::MCAUSE, value);
     }
 
+    // TODO this is mips
     void ControlState::set_interrupt_signal(uint irq_num, bool active) {
         if (irq_num >= 8) { return; }
         uint64_t mask = Status_Int0 << irq_num;
@@ -97,6 +110,7 @@ namespace machine { namespace CSR {
         emit write_signal(reg_id, value);
     }
 
+    // TODO this is mips
     bool ControlState::core_interrupt_request() {
         RegisterValue mstatus = register_data[Id::MSTATUS];
         RegisterValue mcause = register_data[Id::MCAUSE];
@@ -107,6 +121,7 @@ namespace machine { namespace CSR {
                && !(mstatus.as_u64() & Status_ERL);
     }
 
+    // TODO this is mips
     void ControlState::set_status_exl(bool value) {
         size_t reg_id = Id::MSTATUS;
         RegisterValue &reg = register_data[reg_id];
@@ -122,24 +137,17 @@ namespace machine { namespace CSR {
         return machine::Address(register_data[Id::MTVEC].as_u64());
     }
 
-    void ControlState::write_csr_count_compare(Address address, RegisterValue value) {
-        set_interrupt_signal(COUNTER_IRQ_LEVEL, false);
-        write_swap(address, value);
-    }
-
     RegisterValue ControlState::read_internal(size_t internal_id) const {
         return register_data[internal_id];
     }
 
-    RegisterValue ControlState::write_swap_internal(size_t internal_id, RegisterValue value) {
-        RegisterValue old_val = register_data[internal_id];
+    void ControlState::write_internal(size_t internal_id, RegisterValue value) {
         RegisterDesc desc = REGISTERS[internal_id];
         (*desc.write_handler)(desc, register_data[internal_id], value);
         write_signal(internal_id, value);
-        return old_val;
     }
     void ControlState::increment_internal(size_t internal_id, uint64_t amount) {
         auto value = register_data[internal_id];
-        write_swap_internal(internal_id, value.as_u64() + amount);
+        write_internal(internal_id, value.as_u64() + amount);
     }
 }} // namespace machine::CSR

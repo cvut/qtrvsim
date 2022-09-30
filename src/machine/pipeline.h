@@ -87,6 +87,8 @@ struct DecodeInterstage {
     RegisterValue val_rt_orig = 0;   // Value from register rs1 without forwarding
     RegisterValue immediate_val = 0; // Sign-extended immediate value
                                      // rd according to regd)
+    RegisterValue csr_read_val = 0;  // Value read from csr
+    CSR::Address csr_address = CSR::Address(0);
     ExceptionCause excause = EXCAUSE_NONE;
     ForwardFrom ff_rs = FORWARD_NONE;
     ForwardFrom ff_rt = FORWARD_NONE;
@@ -110,6 +112,10 @@ struct DecodeInterstage {
     bool is_valid = false;
     bool alu_mod = false; // alternative versions of ADD and right-shift
     bool alu_pc = false;  // PC is input to ALU
+    bool csr = false;     // Zicsr, implies csr read and csr write
+    bool csr_to_alu = false;
+    bool csr_write = false;
+    bool enter_only_empty_pipeline = false;
 
 public:
     /** Reset to value corresponding to NOP. */
@@ -153,6 +159,9 @@ struct ExecuteInterstage {
     Address branch_jal_target = 0_addr; //> Potential branch target (inst_addr + 4 + imm).
     RegisterValue val_rt = 0;
     RegisterValue alu_val = 0; // Result of ALU execution
+    RegisterValue immediate_val = 0;
+    RegisterValue csr_read_val = 0;
+    CSR::Address csr_address = CSR::Address(0);
     ExceptionCause excause = EXCAUSE_NONE;
     AccessControl memctl = AC_NONE;
     RegisterId num_rd = 0;
@@ -165,6 +174,8 @@ struct ExecuteInterstage {
     bool branch_val = false;
     bool branch_jalr = false; //> @copydoc DecodeInterstage::branch_jalr
     bool alu_zero = false;
+    bool csr = false;
+    bool csr_write = false;
 
 public:
     /** Reset to value corresponding to NOP. */
@@ -230,6 +241,7 @@ struct MemoryInterstage {
     bool memtoreg = false;
     bool regwrite = true;
     bool is_valid = false;
+    bool csr_written = false;
 
 public:
     /** Reset to value corresponding to NOP. */

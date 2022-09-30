@@ -1,6 +1,7 @@
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
+#include "csr/address.h"
 #include "execute/alu.h"
 #include "machinedefs.h"
 
@@ -8,8 +9,8 @@
 #include <QString>
 #include <QStringList>
 #include <QVector>
-#include <utility>
 #include <array>
+#include <utility>
 
 namespace machine {
 
@@ -19,30 +20,34 @@ static constexpr std::array<const char *const, 32> Rv_regnames = {
     "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
 };
 
-enum InstructionFlags {
-    IMF_SUPPORTED = 1L << 0, /**< Instruction is supported */
-    IMF_MEMWRITE = 1L << 1,  /**< Write to the memory when memory stage is reached */
-    IMF_MEMREAD = 1L << 2,   /**< Read from the memory when memory stage is reached */
-    IMF_ALUSRC = 1L << 3,    /**< The second ALU source is immediate operand */
-    IMF_REGWRITE = 1L << 5,  /**< Instruction result (ALU or memory) is written to register file */
-    IMF_MEM = 1L << 11,      /**< Instruction is memory access instruction */
-    IMF_ALU_REQ_RS = 1L << 12, /**< Execution phase/ALU requires RS value */
-    IMF_ALU_REQ_RT = 1L << 13, /**< Execution phase/ALU/mem requires RT value */
-    IMF_BRANCH = 1L << 17, /**< Operation is conditional or unconditional branch or branch and link
-                              when PC_TO_R31 is set */
-    IMF_JUMP = 1L << 18,   /**< Jump operation - JAL, JALR */
-    IMF_BJ_NOT = 1L << 19, /**< Negate condition for branch instruction */
-    IMF_BRANCH_JALR = 1L << 20, /**< Use ALU output as branch/jump target. Used by JALR. */
-    IMF_EXCEPTION = 1L << 22,   /**< Instruction causes synchronous exception */
-    IMF_ALU_MOD = 1L << 24,     /**< ADD and right-shift modifier */
-    IMF_PC_TO_ALU = 1L << 25,   /**< PC is loaded instead of RS to ALU */
-    IMF_ECALL = 1L << 26,       // seems easiest to encode ecall and ebreak as flags, but they might
-    IMF_EBREAK = 1L << 27,      // be moved elsewhere in case we run out of InstructionFlag space.
+enum InstructionFlags : unsigned {
+    IMF_SUPPORTED = 1L << 0,  /**< Instruction is supported */
+    IMF_MEMWRITE = 1L << 1,   /**< Write to the memory when memory stage is reached */
+    IMF_MEMREAD = 1L << 2,    /**< Read from the memory when memory stage is reached */
+    IMF_ALUSRC = 1L << 3,     /**< The second ALU source is immediate operand */
+    IMF_REGWRITE = 1L << 4,   /**< Instruction result (ALU or memory) is written to register file */
+    IMF_MEM = 1L << 5,        /**< Instruction is memory access instruction */
+    IMF_ALU_REQ_RS = 1L << 6, /**< Execution phase/ALU requires RS value */
+    IMF_ALU_REQ_RT = 1L << 7, /**< Execution phase/ALU/mem requires RT value */
+    IMF_BRANCH = 1L << 8,  /**< Operation is conditional or unconditional branch or branch and link
+                               when PC_TO_R31 is set */
+    IMF_JUMP = 1L << 9,    /**< Jump operation - JAL, JALR */
+    IMF_BJ_NOT = 1L << 10, /**< Negate condition for branch instruction */
+    IMF_BRANCH_JALR = 1L << 11, /**< Use ALU output as branch/jump target. Used by JALR. */
+    IMF_EXCEPTION = 1L << 12,   /**< Instruction causes synchronous exception */
+    IMF_ALU_MOD = 1L << 13,     /**< ADD and right-shift modifier */
+    IMF_PC_TO_ALU = 1L << 14,   /**< PC is loaded instead of RS to ALU */
+    IMF_ECALL = 1L << 15,       // seems easiest to encode ecall and ebreak as flags, but they might
+    IMF_EBREAK = 1L << 16,      // be moved elsewhere in case we run out of InstructionFlag space.
 
     // Extensions:
     // =============================================================================================
     // RV64/32M
-    IMF_MUL = 1L << 28, /**< Enables multiplication component of ALU. */
+    IMF_MUL = 1L << 17, /**< Enables multiplication component of ALU. */
+    // Zicsr
+    IMF_CSR = 1L << 18,        /**< Implies csr read and write */
+    IMF_CSR_TO_ALU = 1L << 19, /**< Instruction modifies the current value */
+    IMF_ALU_RS_ID = 1L << 20,
     // TODO do we want to add those signals to the visualization?
 };
 
@@ -135,7 +140,7 @@ public:
     static const Instruction NOP;
     static const Instruction UNKNOWN_INST;
 
-    enum Type { R, I, S, B, U, J, UNKNOWN };
+    enum Type { R, I, S, B, U, J, ZICSR, UNKNOWN };
 
     /** Modified encoding to enable pseudoinstructions. */
     enum class Modifier {
@@ -167,7 +172,7 @@ public:
     uint8_t rd() const;
     uint8_t shamt() const;
     uint16_t funct() const;
-    uint32_t csrsel() const;
+    machine::CSR::Address csr_address() const;
     int32_t immediate() const;
     Address address() const;
     uint32_t data() const;

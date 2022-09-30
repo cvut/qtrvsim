@@ -71,8 +71,9 @@ void CsrDock::setup(machine::Machine *machine) {
 }
 
 void CsrDock::csr_changed(size_t internal_reg_id, machine::RegisterValue val) {
+    // FIXME assert takes literal
     SANITY_ASSERT(
-        (uint)internal_reg_id < machine::CSR::REGISTERS.size() && (uint)internal_reg_id,
+        (uint)internal_reg_id < machine::CSR::REGISTERS.size(),
         QString("CsrDock received signal with invalid CSR register: ")
             + QString::number((uint)internal_reg_id));
     labelVal(csr_view[(uint)internal_reg_id], val.as_u64());
@@ -83,8 +84,9 @@ void CsrDock::csr_changed(size_t internal_reg_id, machine::RegisterValue val) {
 
 void CsrDock::csr_read(size_t internal_reg_id, machine::RegisterValue val) {
     (void)val;
+    // FIXME assert takes literal
     SANITY_ASSERT(
-        (uint)internal_reg_id < machine::CSR::REGISTERS.size() && (uint)internal_reg_id,
+        (uint)internal_reg_id < machine::CSR::REGISTERS.size(),
         QString("CsrDock received signal with invalid CSR register: ")
             + QString::number((uint)internal_reg_id));
     if (!csr_highlighted[internal_reg_id]) { csr_view[internal_reg_id]->setPalette(pal_read); }

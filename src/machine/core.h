@@ -179,6 +179,12 @@ private:
 
     bool handle_data_hazards();
     bool detect_mispredicted_jump() const;
+
+    /** Some special instruction require that all issued instructions are committed before this
+     * instruction is fetched and issued as it may rely on side-effects of uncommitted instructions.
+     * Typical examples are csr modifying instructions. */
+    bool is_empty_pipeline_needed() const;
+
     void handle_stall(const FetchInterstage &saved_if_id);
     /**
      * Typically, problem in execution is discovered in memory stage. This function flushed all

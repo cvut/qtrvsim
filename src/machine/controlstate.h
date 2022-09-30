@@ -27,7 +27,7 @@ namespace machine { namespace CSR {
         ControlState(const ControlState &);
 
         /** Read CSR register with ISA specified address. */
-        RegisterValue read(Address address) const;
+        [[nodiscard]] RegisterValue read(Address address) const;
 
         /**
          * Read CSR register with an internal id.
@@ -35,17 +35,17 @@ namespace machine { namespace CSR {
          * Internal id can be obtained from enum Id and works as an index to compacted table
          * of existing CSR registers.
          */
-        RegisterValue read_internal(size_t internal_id) const;
+        [[nodiscard]] RegisterValue read_internal(size_t internal_id) const;
 
         /** Write value to CSR register by ISA specified address and receive the previous value. */
-        RegisterValue write_swap(Address address, RegisterValue value);
+        void write(Address address, RegisterValue value);
 
-        RegisterValue write_swap_internal(size_t internal_id, RegisterValue value);
+        /** Used for writes occurring as a side-effect (instruction count update...) and
+         * internally by the write method. */
+        void write_internal(size_t internal_id, RegisterValue value);
 
-        /**
-         * Shorthand for counter incrementing. Counters like time might have different increment
-         * amount.
-         */
+        /** Shorthand for counter incrementing. Counters like time might have different increment
+         * amount. */
         void increment_internal(size_t internal_id, uint64_t amount);
 
         /** Reset data to initial values */
@@ -66,9 +66,6 @@ namespace machine { namespace CSR {
     public slots:
         void set_interrupt_signal(uint irq_num, bool active);
         void set_status_exl(bool value);
-
-    protected:
-        void write_csr_count_compare(Address address, RegisterValue value);
 
     private:
         static size_t get_register_internal_id(Address address);

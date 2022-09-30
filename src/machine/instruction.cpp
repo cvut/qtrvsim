@@ -41,7 +41,7 @@ struct ArgumentDesc {
         , arg(std::move(arg)) {}
 
     /** Check whether given value fits into this instruction field. */
-    constexpr bool is_value_in_field_range(RegisterValue val) const {
+    [[nodiscard]] constexpr bool is_value_in_field_range(RegisterValue val) const {
         if (min < 0) {
             return val.as_i64() <= max && val.as_i64() >= min;
         } else {
@@ -50,7 +50,7 @@ struct ArgumentDesc {
         }
     }
 
-    constexpr bool is_imm() const { return kind != 'g'; }
+    [[nodiscard]] constexpr bool is_imm() const { return kind != 'g'; }
 };
 
 static const ArgumentDesc arg_desc_list[] = {
@@ -75,8 +75,11 @@ static const ArgumentDesc arg_desc_list[] = {
     // Offset immediate for store instructions (12 bits)
     ArgumentDesc('q', 'o', -0x800, 0x7ff, { { { 5, 7 }, { 7, 25 } }, 0 }),
     // 5-bit CSR value immediate
-    // (https://github.com/gcc-mirror/gcc/blob/master/gcc/config/riscv/constraints.md#l47)
-    ArgumentDesc('K', 'n', 0, 0x1f, { { { 5, 20 } }, 0 }),
+    // (https://sourceware.org/git/?p=binutils-gdb.git;a=blob;f=opcodes/riscv-opc.c;h=7e95f645c5c5fe0a7c93c64c2f1719efaec67972;hb=HEAD#l928)
+    ArgumentDesc('Z', 'n', 0, 0x1f, { { { 5, 15 } }, 0 }),
+    // 12-bit CSR address
+    // (https://sourceware.org/git/?p=binutils-gdb.git;a=blob;f=opcodes/riscv-opc.c;h=7e95f645c5c5fe0a7c93c64c2f1719efaec67972;hb=HEAD#l928)
+    ArgumentDesc('E', 'o', 0, 0xfff, { { { 12, 20 } }, 0 }),
 };
 
 static const ArgumentDesc *arg_desc_by_code[(int)('z' + 1)];
@@ -231,19 +234,21 @@ static const struct InstructionMap ENVIRONMENT_AND_BREAKPOINTS_map[] = {
     {"ebreak", IT_I, NOALU, NOMEM, nullptr, {}, 0x00100073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_EXCEPTION | IMF_EBREAK }},
 };
 
-#define CSR_MAP_ITEM(NAME, SOURCE, CODE) \
-    { NAME, IT_I, { .alu_op=AluOp::ADD }, NOMEM, nullptr,  {"d", "j", SOURCE}, 0x00000073 | (CODE), 0xffffffff, { .flags = IMF_SUPPORTED } }
+#define CSR_MAP_ITEM(NAME, SOURCE, CODE, ALU_OP,  EXTRA_FLAGS) \
+    { NAME, Instruction::ZICSR, { .alu_op=AluOp::ALU_OP }, NOMEM, nullptr,  {"d", SOURCE, "E"}, 0x00000073 | (CODE), 0x0000003f, { .flags = IMF_SUPPORTED | IMF_CSR | IMF_REGWRITE | IMF_ALU_REQ_RS | (EXTRA_FLAGS) } }
 
 static const struct InstructionMap SYSTEM_map[] = {
     {"environment_and_breakpoints", IT_I, NOALU, NOMEM, ENVIRONMENT_AND_BREAKPOINTS_map, {}, 0x00000073, 0xffffffff, { .subfield = {1, 20} }},
-    CSR_MAP_ITEM("csrrw", "s", 0x1000), // CSRRW
-    CSR_MAP_ITEM("csrrs", "s", 0x2000), // CSRRS
-    CSR_MAP_ITEM("csrrc", "s", 0x3000), // CSRRC
+    CSR_MAP_ITEM("csrrw", "s", 0x1000, ADD, 0),
+    CSR_MAP_ITEM("csrrs", "s", 0x2000, OR, IMF_CSR_TO_ALU),
+    CSR_MAP_ITEM("csrrc", "s", 0x3000, AND, IMF_CSR_TO_ALU | IMF_ALU_MOD),
     IM_UNKNOWN,
-    CSR_MAP_ITEM("csrrwi", "K", 0x5000), // CSRRWI
-    CSR_MAP_ITEM("csrrsi", "K", 0x6000), // CSRRSI
-    CSR_MAP_ITEM("csrrci", "K", 0x7000), // CSRRCI
+    CSR_MAP_ITEM("csrrwi", "Z", 0x5000, ADD, IMF_ALU_RS_ID),
+    CSR_MAP_ITEM("csrrsi", "Z", 0x6000, OR, IMF_ALU_RS_ID | IMF_CSR_TO_ALU),
+    CSR_MAP_ITEM("csrrci", "Z", 0x7000, AND, IMF_ALU_RS_ID | IMF_CSR_TO_ALU | IMF_ALU_MOD),
 };
+
+#undef CSR_MAP_ITEM
 
 static const struct InstructionMap MISC_MEM_map[] = {
     {"fence", IT_I, NOALU, AC_CACHE_OP, nullptr, {}, 0x0000000f, 0x0000703f, { .flags = IMF_SUPPORTED | IMF_MEM }},
@@ -363,8 +368,8 @@ uint16_t Instruction::funct() const {
     return uint16_t(MASK(7, 25) << 3 | MASK(3, 12));
 }
 
-uint32_t Instruction::csrsel() const {
-    return (uint8_t)MASK(12, 20);
+CSR::Address Instruction::csr_address() const {
+    return CSR::Address(MASK(12, 20));
 }
 
 int32_t Instruction::immediate() const {
@@ -376,11 +381,12 @@ int32_t Instruction::immediate() const {
     case B:
         ret = extend(MASK(4, 8) << 1 | MASK(6, 25) << 5 | MASK(1, 7) << 11 | MASK(1, 31) << 12, 12);
         break;
-    case U: ret = this->dt & ~((1 << 12) - 1); break;
+    case U: ret = extend(MASK(20, 12) << 12, 32); break;
     case J:
         ret = extend(
             MASK(10, 21) << 1 | MASK(1, 20) << 11 | MASK(8, 12) << 12 | MASK(1, 31) << 20, 21);
         break;
+    case ZICSR:
     case UNKNOWN: break;
     }
     return ret;
@@ -561,8 +567,7 @@ static int parse_reg_from_string(const QString &str, uint *chars_taken = nullptr
         int regnum = -1;
         for (size_t i = 0; i < Rv_regnames.size(); i++) {
             size_t len = std::strlen(Rv_regnames[i]);
-            if (size_t(data.size()) < len)
-                continue;
+            if (size_t(data.size()) < len) continue;
             if (std::strncmp(data.data(), Rv_regnames[i], len) == 0) {
                 *chars_taken = len;
                 regnum = (int)i;

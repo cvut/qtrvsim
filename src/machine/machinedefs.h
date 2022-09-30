@@ -66,9 +66,6 @@ enum LocationStatus {
 const Address STAGEADDR_NONE = 0xffffffff_addr;
 } // namespace machine
 
-/** Should be caught in core and transformed into CPU exception. */
-class IllegalInstruction : public std::exception {};
-
 Q_DECLARE_METATYPE(machine::AccessControl)
 
 #endif // MACHINEDEFS_H

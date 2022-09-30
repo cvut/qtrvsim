@@ -5,6 +5,7 @@
 #include "simulator_exception.h"
 
 #include <cstdint>
+
 namespace machine { namespace CSR {
     /**
      * Spec vol. 2: Table 2.1
@@ -18,10 +19,15 @@ namespace machine { namespace CSR {
 
     struct Address {
         constexpr explicit Address(uint16_t address) : data(address) {
-            SANITY_ASSERT(address < 1 << 12, "Out of ISA specified range (12bits)");
+            SANITY_ASSERT(
+                address < (1 << 12), "CSR register address is out of the ISA "
+                                     "specified range (12bits)");
         }
 
-        const uint16_t data;
+        constexpr Address(const Address &other) = default;
+        constexpr Address &operator=(const Address &other) = default;
+
+        uint16_t data;
 
         /*
          * By convention, the upper 4 bits of the CSR address (csr[11:8]) are used to encode the
@@ -32,13 +38,13 @@ namespace machine { namespace CSR {
         /** The top two bits (csr[11:10]) indicate whether the register is read/write
          * (00, 01, or 10) or read-only (11).
          */
-        constexpr bool is_writable() const { return get_bits(data, 10, 2) != 0b11; }
+        [[nodiscard]] constexpr bool is_writable() const { return get_bits(data, 10, 2) != 0b11; }
 
         /**
          * The next two bits (csr[9:8]) encode the lowest privilege level that can access the CSR.
          */
-        constexpr PrivilegeLevel get_privilege_level() const {
-            return static_cast<PrivilegeLevel>(get_bits(data, 8, 2));
+        [[nodiscard]] constexpr PrivilegeLevel get_privilege_level() const {
+            return static_cast<PrivilegeLevel>(get_bits(data, 8, 10));
         }
 
         bool operator<(const Address &rhs) const { return data < rhs.data; }
