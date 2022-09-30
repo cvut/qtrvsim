@@ -10,13 +10,14 @@
 #include <QStringList>
 #include <cctype>
 #include <cstring>
-#include <initializer_list>
 #include <set>
+#include <type_traits>
 #include <utility>
 
 LOG_CATEGORY("machine.instruction");
 
 using namespace machine;
+using std::underlying_type;
 
 struct ArgumentDesc {
     char name;
@@ -119,7 +120,7 @@ struct InstructionMap {
     uint32_t code;
     uint32_t mask;
     union {
-        unsigned int flags;
+        decltype(underlying_type<InstructionFlags>::type()) flags;
         BitArg::Field subfield;
     };
 };
@@ -147,7 +148,7 @@ static const struct InstructionMap LOAD_map[] = {
 
 static const struct InstructionMap SRI_map[] = {
     {"srli", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x00005013,0xfe00707f, { .flags = FLAGS_ALU_I }}, // SRLI
-    {"srai", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x40005013,0xfe00707f, { .flags = FLAGS_ALU_I | IMF_ALU_MOD }}, // SRAI
+    {"srai", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x40005013,0xfe00707f, { .flags = (FLAGS_ALU_I | IMF_ALU_MOD) }}, // SRAI
 };
 
 static const struct InstructionMap OP_IMM_map[] = {
