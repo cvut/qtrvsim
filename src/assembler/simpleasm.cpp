@@ -1,5 +1,6 @@
 #include "simpleasm.h"
 
+#include "machine/csr/register_desc.h"
 #include "machine/memory/address.h"
 #include "machine/memory/memory_utils.h"
 
@@ -77,6 +78,9 @@ void SimpleAsm::setup(
     this->symtab = symtab;
     this->address = address;
     this->symtab->setSymbol("XLEN", static_cast<uint64_t>(xlen), sizeof(uint64_t));
+    for (auto &reg : machine::CSR::REGISTERS) {
+        symtab->setSymbol(reg.name, reg.address.data, sizeof(reg.address.data));
+    }
 }
 
 static const auto wordArg = machine::BitArg({ { 32, 0 } }, 0);
@@ -254,7 +258,7 @@ bool SimpleAsm::process_line(
         include_stack.removeLast();
         return res;
     }
-    if ((op == ".text") || (op == ".data")  || (op == ".bss") || (op == ".globl") || (op == ".end")
+    if ((op == ".text") || (op == ".data") || (op == ".bss") || (op == ".globl") || (op == ".end")
         || (op == ".ent") || (op == ".option")) {
         return true;
     }
