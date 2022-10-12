@@ -235,7 +235,7 @@ static const struct InstructionMap ENVIRONMENT_AND_BREAKPOINTS_map[] = {
 };
 
 #define CSR_MAP_ITEM(NAME, SOURCE, CODE, ALU_OP,  EXTRA_FLAGS) \
-    { NAME, Instruction::ZICSR, { .alu_op=AluOp::ALU_OP }, NOMEM, nullptr,  {"d", SOURCE, "E"}, 0x00000073 | (CODE), 0x0000003f, { .flags = IMF_SUPPORTED | IMF_CSR | IMF_REGWRITE | IMF_ALU_REQ_RS | (EXTRA_FLAGS) } }
+    { NAME, Instruction::ZICSR, { .alu_op=AluOp::ALU_OP }, NOMEM, nullptr,  {"d", "E", SOURCE}, 0x00000073 | (CODE), 0x0000003f, { .flags = IMF_SUPPORTED | IMF_CSR | IMF_REGWRITE | IMF_ALU_REQ_RS | (EXTRA_FLAGS) } }
 
 static const struct InstructionMap SYSTEM_map[] = {
     {"environment_and_breakpoints", IT_I, NOALU, NOMEM, ENVIRONMENT_AND_BREAKPOINTS_map, {}, 0x00000073, 0xffffffff, { .subfield = {1, 20} }},
