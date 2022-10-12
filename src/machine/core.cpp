@@ -230,7 +230,8 @@ DecodeState Core::decode(const FetchInterstage &dt) {
     RegisterId num_rd = (flags & IMF_REGWRITE) ? dt.inst.rd() : 0;
     // When instruction does not specify register, it is set to x0 as operations on x0 have no
     // side effects (not even visualization).
-    RegisterValue val_rs = (flags & IMF_ALU_RS_ID) ? size_t(num_rs) : regs->read_gp(num_rs);
+    RegisterValue val_rs
+        = (flags & IMF_ALU_RS_ID) ? uint64_t(size_t(num_rs)) : regs->read_gp(num_rs);
     RegisterValue val_rt = regs->read_gp(num_rt);
     RegisterValue immediate_val = dt.inst.immediate();
     const bool regwrite = flags & IMF_REGWRITE;
