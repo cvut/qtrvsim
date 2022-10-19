@@ -183,7 +183,7 @@ private:
     /** Some special instruction require that all issued instructions are committed before this
      * instruction is fetched and issued as it may rely on side-effects of uncommitted instructions.
      * Typical examples are csr modifying instructions. */
-    bool is_empty_pipeline_needed() const;
+    bool is_stall_requested() const;
 
     void handle_stall(const FetchInterstage &saved_if_id);
     /**

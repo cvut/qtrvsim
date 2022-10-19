@@ -293,7 +293,7 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .csr = bool(flags & IMF_CSR),
                                 .csr_to_alu = bool(flags & IMF_CSR_TO_ALU),
                                 .csr_write = csr_write,
-                                .enter_only_empty_pipeline = bool(flags & IMF_CSR) } };
+                                .insert_stall_before = bool(flags & IMF_CSR) } };
 }
 
 ExecuteState Core::execute(const DecodeInterstage &dt) {
@@ -557,12 +557,7 @@ void CorePipelined::do_step(bool skip_break) {
          * To make the visualization cleaner we stop fetching (and PC update) until the exception
          * is handled. */
         pc_if.stop_if = true;
-    } else if (is_empty_pipeline_needed()) {
-        /* Stall and retry fetch oof the currently decoded instruction as core state might have
-         * changed. */
-        regs->write_pc(id_ex.inst_addr);
-        handle_stall({});
-    } else if (stall) {
+    } else if (stall || is_stall_requested()) {
         /* Fetch from the same PC is repeated due to stall in the pipeline. */
         handle_stall(saved_if_id);
     } else {
@@ -598,8 +593,8 @@ bool CorePipelined::detect_mispredicted_jump() const {
     return mem_wb.computed_next_inst_addr != mem_wb.predicted_next_inst_addr;
 }
 
-bool CorePipelined::is_empty_pipeline_needed() const {
-    return id_ex.enter_only_empty_pipeline && ex_mem.is_valid;
+bool CorePipelined::is_stall_requested() const {
+    return id_ex.insert_stall_before && ex_mem.is_valid;
 }
 
 template<typename InterstageReg>

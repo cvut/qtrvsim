@@ -115,7 +115,7 @@ struct DecodeInterstage {
     bool csr = false;     // Zicsr, implies csr read and csr write
     bool csr_to_alu = false;
     bool csr_write = false;
-    bool enter_only_empty_pipeline = false;
+    bool insert_stall_before = false;
 
 public:
     /** Reset to value corresponding to NOP. */
