@@ -38,13 +38,13 @@ namespace machine { namespace CSR {
         /** The top two bits (csr[11:10]) indicate whether the register is read/write
          * (00, 01, or 10) or read-only (11).
          */
-        [[nodiscard]] constexpr bool is_writable() const { return get_bits(data, 10, 2) != 0b11; }
+        [[nodiscard]] constexpr bool is_writable() const { return get_bits(data, 11, 10) != 0b11; }
 
         /**
          * The next two bits (csr[9:8]) encode the lowest privilege level that can access the CSR.
          */
         [[nodiscard]] constexpr PrivilegeLevel get_privilege_level() const {
-            return static_cast<PrivilegeLevel>(get_bits(data, 8, 10));
+            return static_cast<PrivilegeLevel>(get_bits(data, 9, 8));
         }
 
         bool operator<(const Address &rhs) const { return data < rhs.data; }
