@@ -3,6 +3,7 @@
 #include "highlighterasm.h"
 
 #include "QStringList"
+#include "machine/csr/register_desc.h"
 #include "machine/instruction.h"
 
 HighlighterAsm::HighlighterAsm(QTextDocument *parent)
@@ -56,6 +57,23 @@ HighlighterAsm::HighlighterAsm(QTextDocument *parent)
     rule.pattern = QRegularExpression("\\bx[0-9]+\\b");
     rule.format = registerFormat;
     highlightingRules.append(rule);
+
+    {
+        QTextCharFormat namedValueFormat;
+        namedValueFormat.setFontWeight(QFont::Bold);
+        namedValueFormat.setForeground(Qt::darkMagenta);
+
+        QString pattern = "\\b";
+        for (const auto &reg : machine::CSR::REGISTERS) {
+            pattern.append(reg.name).append('|');
+        }
+        pattern = pattern.left(pattern.size() - 1);
+        pattern.append("\\b");
+        rule.pattern = QRegularExpression(pattern);
+        rule.pattern.optimize();
+        rule.format = namedValueFormat;
+        highlightingRules.append(rule);
+    }
 
     singleLineCommentFormat.setForeground(Qt::red);
     rule.pattern = QRegularExpression(QStringLiteral(";[^\n]*"));
