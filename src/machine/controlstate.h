@@ -72,9 +72,6 @@ namespace machine { namespace CSR {
 
         Xlen xlen = Xlen::_32; // TODO
 
-        /** Maps ISA specified address to compacted internal id. */
-        static std::map<const Address, size_t> address_to_register_map;
-
         /**
          * Compacted table of existing CSR registers data. Each item is described by table
          * REGISTERS at corresponding indexes.

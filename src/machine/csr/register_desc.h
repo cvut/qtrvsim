@@ -78,6 +78,27 @@ namespace machine { namespace CSR {
         [Id::MCYCLE] = { "mcycle", 0xB00_csr, "Machine cycle counter." },
         [Id::MINSTRET] = { "minstret", 0xB02_csr, "Machine instructions-retired counter." },
     } };
+
+    class RegisterMap {
+        bool initialized = false;
+        std::map<Address, size_t> map;
+
+        void init() {
+            for (size_t i = 0; i < REGISTERS.size(); i++) {
+                map.emplace(REGISTERS[i].address, i);
+            }
+            initialized = true;
+        }
+
+    public:
+        size_t at(Address address) {
+            if (!initialized) init();
+            return map.at(address);
+        }
+    };
+
+    static RegisterMap REGISTER_MAP;
+
 }} // namespace machine::CSR
 
 #endif // QTRVSIM_REGISTER_DESC_H

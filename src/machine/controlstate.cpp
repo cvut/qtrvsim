@@ -17,15 +17,7 @@ namespace machine { namespace CSR {
         Status_Int0 = 0x00000100,
     };
 
-    std::map<const Address, size_t> ControlState::address_to_register_map {};
-
     ControlState::ControlState() {
-        // TODO make this constexpr map with frozen
-        if (address_to_register_map.empty()) {
-            for (size_t i = 0; i < REGISTERS.size(); i++) {
-                address_to_register_map.emplace(REGISTERS[i].address, i);
-            }
-        }
         reset();
     }
 
@@ -48,7 +40,7 @@ namespace machine { namespace CSR {
         }
 
         try {
-            return address_to_register_map.at(address);
+            return CSR::REGISTER_MAP.at(address);
         } catch (std::out_of_range &e) {
             throw SIMULATOR_EXCEPTION(
                 UnsupportedInstruction,
