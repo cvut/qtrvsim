@@ -94,18 +94,11 @@ HighlighterAsm::HighlighterAsm(QTextDocument *parent)
 }
 
 void HighlighterAsm::highlightBlock(const QString &text) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 7, 0)
-    foreach (const HighlightingRule &rule, highlightingRules)
-#else
-    for (const HighlightingRule &rule : qAsConst(highlightingRules))
-#endif
-    {
-        QRegularExpressionMatchIterator matchIterator
-            = rule.pattern.globalMatch(text);
+    for (const HighlightingRule &rule : qAsConst(highlightingRules)) {
+        auto matchIterator = rule.pattern.globalMatch(text);
         while (matchIterator.hasNext()) {
             QRegularExpressionMatch match = matchIterator.next();
-            setFormat(
-                match.capturedStart(), match.capturedLength(), rule.format);
+            setFormat(match.capturedStart(), match.capturedLength(), rule.format);
         }
     }
     setCurrentBlockState(0);
