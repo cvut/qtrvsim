@@ -78,9 +78,6 @@ void SimpleAsm::setup(
     this->symtab = symtab;
     this->address = address;
     this->symtab->setSymbol("XLEN", static_cast<uint64_t>(xlen), sizeof(uint64_t));
-    for (auto &reg : machine::CSR::REGISTERS) {
-        symtab->setSymbol(reg.name, reg.address.data, sizeof(reg.address.data));
-    }
 }
 
 static const auto wordArg = machine::BitArg({ { 32, 0 } }, 0);

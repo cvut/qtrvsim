@@ -2,6 +2,7 @@
 
 #include "common/logging.h"
 #include "common/math/bit_ops.h"
+#include "csr/register_desc.h"
 #include "simulator_exception.h"
 #include "utils.h"
 
@@ -79,7 +80,7 @@ static const ArgumentDesc arg_desc_list[] = {
     ArgumentDesc('Z', 'n', 0, 0x1f, { { { 5, 15 } }, 0 }),
     // 12-bit CSR address
     // (https://sourceware.org/git/?p=binutils-gdb.git;a=blob;f=opcodes/riscv-opc.c;h=7e95f645c5c5fe0a7c93c64c2f1719efaec67972;hb=HEAD#l928)
-    ArgumentDesc('E', 'o', 0, 0xfff, { { { 12, 20 } }, 0 }),
+    ArgumentDesc('E', 'E', 0, 0xfff, { { { 12, 20 } }, 0 }),
 };
 
 static const ArgumentDesc *arg_desc_by_code[(int)('z' + 1)];
@@ -500,6 +501,10 @@ QString Instruction::to_str(Address inst_addr) const {
                 } else {
                     res += "0x" + QString::number(uint32_t(field), 16);
                 }
+                break;
+            }
+            case 'E': {
+                res += CSR::REGISTERS[CSR::REGISTER_MAP.at(CSR::Address(field))].name;
                 break;
             }
             }
@@ -926,6 +931,8 @@ Instruction Instruction::base_from_tokens(
     return Instruction::UNKNOWN_INST;
 }
 
+uint16_t parse_csr_address(const QString &field_token, uint &chars_taken);
+
 void parse_immediate_value(
     const QString &field_token,
     Address &inst_addr,
@@ -981,6 +988,7 @@ uint32_t Instruction::parse_field(
                 val, chars_taken);
             break;
         }
+        case 'E': val = parse_csr_address(field_token, chars_taken); break;
         }
         if (chars_taken <= 0) { throw ParseError("argument parse error"); }
 
@@ -996,6 +1004,8 @@ uint32_t Instruction::parse_field(
     if (field_token.trimmed() != "") { throw ParseError("excessive characters in argument"); }
     return inst_code;
 }
+
+uint16_t parse_csr_address(const QString &field_token, uint &chars_taken);
 
 void parse_immediate_value(
     const QString &field_token,
@@ -1044,6 +1054,27 @@ void parse_immediate_value(
         reloc_append(
             reloc, field_token, inst_addr, val, adesc, &chars_taken, filename, line, effective_mod);
         val = 0;
+    }
+}
+
+uint16_t parse_csr_address(const QString &field_token, uint &chars_taken) {
+    if (field_token.at(0).isLetter()) {
+        // TODO maybe optimize
+        for (auto &reg : CSR::REGISTERS) {
+            if (field_token.startsWith(reg.name, Qt::CaseInsensitive)) {
+                chars_taken = strlen(reg.name);
+                return reg.address.data;
+            }
+        }
+        chars_taken = 0;
+        return 0;
+    } else {
+        char *r;
+        uint64_t val;
+        const char *str = field_token.toLocal8Bit().constData();
+        val = strtoul(str, &r, 0);
+        chars_taken = r - str;
+        return val;
     }
 }
 
