@@ -92,15 +92,6 @@ HighlighterAsm::HighlighterAsm(QTextDocument *parent)
     rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
     rule.format = quotationFormat;
     highlightingRules.append(rule);
-
-    // functionFormat.setFontItalic(true);
-    // functionFormat.setForeground(Qt::blue);
-    // rule.pattern =
-    // QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
-    // rule.format = functionFormat; highlightingRules.append(rule);
-
-    // commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
-    // commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
 }
 
 void HighlighterAsm::highlightBlock(const QString &text) {
