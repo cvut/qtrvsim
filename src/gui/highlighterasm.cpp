@@ -12,15 +12,14 @@ HighlighterAsm::HighlighterAsm(QTextDocument *parent)
 
     keywordFormat.setForeground(Qt::darkBlue);
     keywordFormat.setFontWeight(QFont::Bold);
-    const QString keywordPatterns[]
-        = { QStringLiteral("\\.org\\b"),   QStringLiteral("\\.word\\b"),
-            QStringLiteral("\\.text\\b"),  QStringLiteral("\\.data\\b"),
-            QStringLiteral("\\.bss\\b"),   QStringLiteral("\\.option\\b"),
-            QStringLiteral("\\.globl\\b"), QStringLiteral("\\.set\\b"),
-            QStringLiteral("\\.equ\\b"),   QStringLiteral("\\.end\\b"),
-            QStringLiteral("\\.ent\\b"),   QStringLiteral("\\.ascii\\b"),
-            QStringLiteral("\\.asciz\\b"), QStringLiteral("\\.byte\\b"),
-            QStringLiteral("\\.skip\\b"),  QStringLiteral("\\.space\\b") };
+    const QString keywordPatterns[] = {
+        QStringLiteral("\\.org\\b"),   QStringLiteral("\\.word\\b"), QStringLiteral("\\.text\\b"),
+        QStringLiteral("\\.data\\b"),  QStringLiteral("\\.bss\\b"),  QStringLiteral("\\.option\\b"),
+        QStringLiteral("\\.globl\\b"), QStringLiteral("\\.set\\b"),  QStringLiteral("\\.equ\\b"),
+        QStringLiteral("\\.end\\b"),   QStringLiteral("\\.ent\\b"),  QStringLiteral("\\.ascii\\b"),
+        QStringLiteral("\\.asciz\\b"), QStringLiteral("\\.byte\\b"), QStringLiteral("\\.skip\\b"),
+        QStringLiteral("\\.space\\b")
+    };
 
     for (const QString &pattern : keywordPatterns) {
         rule.pattern = QRegularExpression(pattern);
