@@ -2,6 +2,7 @@
 
 #include "common/logging.h"
 #include "common/math/bit_ops.h"
+#include "common/string_utils.h"
 #include "csr/register_desc.h"
 #include "simulator_exception.h"
 #include "utils.h"
@@ -491,7 +492,7 @@ QString Instruction::to_str(Address inst_addr) const {
             case 'p':
             case 'a': {
                 field += (int32_t)inst_addr.get_raw();
-                res += "0x" + QString::number(uint32_t(field), 16);
+                res.append(str::asHex(uint32_t(field)));
                 break;
             }
             case 'o':
@@ -499,7 +500,7 @@ QString Instruction::to_str(Address inst_addr) const {
                 if (arg_desc->min < 0) {
                     res += QString::number((int32_t)field, 10);
                 } else {
-                    res += "0x" + QString::number(uint32_t(field), 16);
+                    res.append(str::asHex(uint32_t(field)));
                 }
                 break;
             }
@@ -507,7 +508,7 @@ QString Instruction::to_str(Address inst_addr) const {
                 if (symbolic_registers_enabled) {
                     res += CSR::REGISTERS[CSR::REGISTER_MAP.at(CSR::Address(field))].name;
                 } else {
-                    res += "0x" + QString::number(field, 16);
+                    res.append(str::asHex(field));
                 }
                 break;
             }

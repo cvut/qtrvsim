@@ -5,6 +5,7 @@ add_subdirectory(polyfills)
 
 set(common_HEADERS
 		endian.h
+		string_utils.h
 		logging.h
 		logging_format_colors.h
 		math/bit_ops.h
