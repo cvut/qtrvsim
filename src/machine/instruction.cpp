@@ -504,7 +504,11 @@ QString Instruction::to_str(Address inst_addr) const {
                 break;
             }
             case 'E': {
-                res += CSR::REGISTERS[CSR::REGISTER_MAP.at(CSR::Address(field))].name;
+                if (symbolic_registers_enabled) {
+                    res += CSR::REGISTERS[CSR::REGISTER_MAP.at(CSR::Address(field))].name;
+                } else {
+                    res += "0x" + QString::number(field, 16);
+                }
                 break;
             }
             }
