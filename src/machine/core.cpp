@@ -249,6 +249,8 @@ DecodeState Core::decode(const FetchInterstage &dt) {
             excause = EXCAUSE_SYSCALL;
         }
     }
+    if (flags & IMF_FORCE_W_OP)
+        w_operation = true;
 
     return { DecodeInternalState {
                  .alu_op_num = static_cast<unsigned>(alu_op.alu_op),

@@ -37,17 +37,18 @@ enum InstructionFlags : unsigned {
     IMF_EXCEPTION = 1L << 12,   /**< Instruction causes synchronous exception */
     IMF_ALU_MOD = 1L << 13,     /**< ADD and right-shift modifier */
     IMF_PC_TO_ALU = 1L << 14,   /**< PC is loaded instead of RS to ALU */
-    IMF_ECALL = 1L << 15,       // seems easiest to encode ecall and ebreak as flags, but they might
-    IMF_EBREAK = 1L << 16,      // be moved elsewhere in case we run out of InstructionFlag space.
+    IMF_FORCE_W_OP = 1L << 15,  /**< Force word (32-bit) operation even for XLEN=64  */
+    IMF_ECALL = 1L << 16,       // seems easiest to encode ecall and ebreak as flags, but they might
+    IMF_EBREAK = 1L << 17,      // be moved elsewhere in case we run out of InstructionFlag space.
 
     // Extensions:
     // =============================================================================================
     // RV64/32M
-    IMF_MUL = 1L << 17, /**< Enables multiplication component of ALU. */
+    IMF_MUL = 1L << 18, /**< Enables multiplication component of ALU. */
     // Zicsr
-    IMF_CSR = 1L << 18,        /**< Implies csr read and write */
-    IMF_CSR_TO_ALU = 1L << 19, /**< Instruction modifies the current value */
-    IMF_ALU_RS_ID = 1L << 20,
+    IMF_CSR = 1L << 19,        /**< Implies csr read and write */
+    IMF_CSR_TO_ALU = 1L << 20, /**< Instruction modifies the current value */
+    IMF_ALU_RS_ID = 1L << 21,
     // TODO do we want to add those signals to the visualization?
 };
 
