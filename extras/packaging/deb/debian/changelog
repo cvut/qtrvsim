@@ -1,3 +1,21 @@
+qtrvsim (0.9.4-1) unstable; urgency=medium
+
+  * GUI: Async modal library to overcome WebAssembly/Emscripten limitations
+  * Wasm: support and build improved
+  * os_emulation: correct open flags O_xxx values to match RISC-V Linux ABI.
+  * packaging: fix Fedora build according to Jan Grulich advice.
+  * README.md: add reference to Embedded World Conference 2022 article.
+  * qtrvsim_tester: Tomas Veznik implemented testing against official RISC/V ISA tests.
+  * CI: speedup by using common build of official tests
+  * Machine: initial support for CSR instructions by Jakub Dupak
+  * GUI: CSR: syntax highlight CSR reg names
+  * Machine: CSR: disassemble CSR register based on the mnemonic register settings
+  * GUI: save mnemonic registers settings
+  * Machine: add support for 64-bit RV64IM target and related 32-bit/word limited instructions
+  * README.md: update information about basic 64-bit support.
+
+ -- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Mon, 24 Oct 2022 23:07:19 +0200
+
 qtrvsim (0.9.3-1) unstable; urgency=medium
 
   * Debian package updated to version 0.9.3.

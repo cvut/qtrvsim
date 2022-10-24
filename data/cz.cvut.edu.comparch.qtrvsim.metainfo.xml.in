@@ -21,6 +21,11 @@
         <p>Current project release.</p>
       </description>
     </release>
+    <release version="0.9.3" date="2022-04-22">
+      <description>
+        <p>Corrected peripherals, LCD endianness and memory stalls.</p>
+      </description>
+    </release>
     <release version="0.9.2" date="2022-03-14">
       <description>
         <p>Initial Flatpak release.</p>
