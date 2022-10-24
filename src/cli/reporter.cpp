@@ -1,7 +1,6 @@
 #include "reporter.h"
 
 #include <cinttypes>
-#include <utility>
 
 using namespace machine;
 using namespace std;
@@ -47,7 +46,7 @@ constexpr const char *get_exception_name(ExceptionCause exception_cause) {
     case EXCAUSE_OVERFLOW: return "OVERFLOW";
     case EXCAUSE_TRAP: return "TRAP";
     case EXCAUSE_HWBREAK: return "HWBREAK";
-    default: UNREACHABLE;
+    default: UNREACHABLE
     }
 }
 
@@ -89,21 +88,20 @@ void Reporter::report_regs() const {
     for (unsigned i = 0; i < REGISTER_COUNT; i++) {
         report_gp_reg(i, (i == REGISTER_COUNT - 1));
     }
-    for (int i = 1; i < ControlState::CSR_REGS_CNT; i++) {
-        report_csr_reg(
-            static_cast<ControlState::CsrRegisters>(i), (i == ControlState::CSR_REGS_CNT - 1));
+    for (size_t i = 0; i < CSR::REGISTERS.size(); i++) {
+        report_csr_reg(i, (i == CSR::REGISTERS.size() - 1));
     }
 }
 
 void Reporter::report_gp_reg(unsigned int i, bool last) const {
     printf(
         "R%u:0x%08" PRIx64 "%s", i, machine->registers()->read_gp(i).as_u64(), (last) ? "\n" : " ");
-};
+}
 
-void Reporter::report_csr_reg(ControlState::CsrRegisters reg, bool last) const {
+void Reporter::report_csr_reg(size_t internal_id, bool last) const {
     printf(
-        "%s: 0x%08" PRIx64 "%s", ControlState::csr_name(reg).toLocal8Bit().data(),
-        machine->control_state()->read_csr(reg), (last) ? "\n" : " ");
+        "%s: 0x%08" PRIx64 "%s", CSR::REGISTERS[internal_id].name,
+        machine->control_state()->read_internal(internal_id).as_u64(), (last) ? "\n" : " ");
 }
 
 void Reporter::report_caches() const {

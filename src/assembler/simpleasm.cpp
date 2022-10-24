@@ -1,5 +1,6 @@
 #include "simpleasm.h"
 
+#include "machine/csr/register_desc.h"
 #include "machine/memory/address.h"
 #include "machine/memory/memory_utils.h"
 
@@ -254,7 +255,7 @@ bool SimpleAsm::process_line(
         include_stack.removeLast();
         return res;
     }
-    if ((op == ".text") || (op == ".data")  || (op == ".bss") || (op == ".globl") || (op == ".end")
+    if ((op == ".text") || (op == ".data") || (op == ".bss") || (op == ".globl") || (op == ".end")
         || (op == ".ent") || (op == ".option")) {
         return true;
     }

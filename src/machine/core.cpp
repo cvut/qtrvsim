@@ -15,7 +15,7 @@ Core::Core(
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
-    ControlState *control_state,
+    CSR::ControlState *control_state,
     Xlen xlen)
     : pc_if(state.pipeline.pc.final)
     , if_id(state.pipeline.fetch.final)
@@ -30,7 +30,6 @@ Core::Core(
     , mem_program(mem_program)
     , ex_handlers()
     , ex_default_handler(new StopExceptionHandler()) {
-    if (control_state != nullptr) { control_state->setup_core(this); }
     stop_on_exception.fill(true);
     step_over_exception.fill(true);
     step_over_exception[EXCAUSE_INT] = false;
@@ -60,7 +59,7 @@ Registers *Core::get_regs() const {
     return regs;
 }
 
-ControlState *Core::get_control_state() const {
+CSR::ControlState *Core::get_control_state() const {
     return control_state;
 }
 
@@ -139,9 +138,10 @@ bool Core::handle_exception(
     if (excause == EXCAUSE_HWBREAK) { regs->write_pc(inst_addr); }
 
     if (control_state != nullptr) {
-        control_state->write_csr(ControlState::mepc, inst_addr.get_raw());
-        control_state->update_execption_cause(excause);
-        if (control_state->read_csr(ControlState::mtvec) != 0 && !get_step_over_exception(excause)) {
+        control_state->write_internal(CSR::Id::MEPC, inst_addr.get_raw());
+        control_state->update_exception_cause(excause);
+        if (control_state->read_internal(CSR::Id::MTVEC) != 0
+            && !get_step_over_exception(excause)) {
             control_state->set_status_exl(true);
             regs->write_pc(control_state->exception_pc_address());
         }
@@ -198,6 +198,8 @@ FetchState Core::fetch(PCInterstage pc, bool skip_break) {
 
     if (!skip_break && hw_breaks.contains(inst_addr)) { excause = EXCAUSE_HWBREAK; }
 
+    if (control_state != nullptr) { control_state->increment_internal(CSR::Id::MCYCLE, 1); }
+
     if (control_state != nullptr && excause == EXCAUSE_NONE) {
         if (control_state->core_interrupt_request()) { excause = EXCAUSE_INT; }
     }
@@ -223,15 +225,21 @@ DecodeState Core::decode(const FetchInterstage &dt) {
 
     if (!(flags & IMF_SUPPORTED)) { excause = EXCAUSE_UNKNOWN; }
 
-    RegisterId num_rs = (flags & IMF_ALU_REQ_RS) ? dt.inst.rs() : 0;
+    RegisterId num_rs = (flags & (IMF_ALU_REQ_RS | IMF_ALU_RS_ID)) ? dt.inst.rs() : 0;
     RegisterId num_rt = (flags & IMF_ALU_REQ_RT) ? dt.inst.rt() : 0;
     RegisterId num_rd = (flags & IMF_REGWRITE) ? dt.inst.rd() : 0;
     // When instruction does not specify register, it is set to x0 as operations on x0 have no
     // side effects (not even visualization).
-    RegisterValue val_rs = regs->read_gp(num_rs);
+    RegisterValue val_rs
+        = (flags & IMF_ALU_RS_ID) ? uint64_t(size_t(num_rs)) : regs->read_gp(num_rs);
     RegisterValue val_rt = regs->read_gp(num_rt);
-    int32_t immediate_val = dt.inst.immediate();
+    RegisterValue immediate_val = dt.inst.immediate();
     const bool regwrite = flags & IMF_REGWRITE;
+
+    CSR::Address csr_address = (flags & IMF_CSR) ? dt.inst.csr_address() : CSR::Address(0);
+    RegisterValue csr_read_val
+        = ((control_state != nullptr && (flags & IMF_CSR))) ? control_state->read(csr_address) : 0;
+    bool csr_write = (flags & IMF_CSR) && (flags & IMF_ALU_REQ_RS) && (num_rs != 0);
 
     if ((flags & IMF_EXCEPTION) && (excause == EXCAUSE_NONE)) {
         if (flags & IMF_EBREAK) {
@@ -256,6 +264,8 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .val_rt = val_rt,
                                 .val_rt_orig = val_rt,
                                 .immediate_val = immediate_val,
+                                .csr_read_val = csr_read_val,
+                                .csr_address = csr_address,
                                 .excause = excause,
                                 .ff_rs = FORWARD_NONE,
                                 .ff_rt = FORWARD_NONE,
@@ -279,30 +289,35 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .stall = false,
                                 .is_valid = dt.is_valid,
                                 .alu_mod = bool(flags & IMF_ALU_MOD),
-                                .alu_pc = bool(flags & IMF_PC_TO_ALU) } };
+                                .alu_pc = bool(flags & IMF_PC_TO_ALU),
+                                .csr = bool(flags & IMF_CSR),
+                                .csr_to_alu = bool(flags & IMF_CSR_TO_ALU),
+                                .csr_write = csr_write,
+                                .insert_stall_before = bool(flags & IMF_CSR) } };
 }
 
 ExecuteState Core::execute(const DecodeInterstage &dt) {
     enum ExceptionCause excause = dt.excause;
-    RegisterValue alu_fst
-        = dt.alu_pc ? RegisterValue(dt.inst_addr.get_raw()) : (dt.alu_req_rs ? dt.val_rs : 0);
-    RegisterValue alu_sec = dt.alusrc ? dt.immediate_val : dt.val_rt;
-
-    RegisterValue alu_val = 0;
-    if (excause == EXCAUSE_NONE) {
-        alu_val
-            = alu_combined_operate(dt.aluop, dt.alu_component, true, dt.alu_mod, alu_fst, alu_sec);
-    }
+    // TODO refactor to produce multiplexor index and multiplex function
+    const RegisterValue alu_fst = [=] {
+        if (dt.alu_pc) return RegisterValue(dt.inst_addr.get_raw());
+        return dt.val_rs;
+    }();
+    const RegisterValue alu_sec = [=] {
+        if (dt.csr_to_alu) return dt.csr_read_val;
+        if (dt.alusrc) return dt.immediate_val;
+        return dt.val_rt;
+    }();
+    const RegisterValue alu_val = [=] {
+        if (excause != EXCAUSE_NONE) return RegisterValue(0);
+        return alu_combined_operate(dt.aluop, dt.alu_component, true, dt.alu_mod, alu_fst, alu_sec);
+    }();
     const Address branch_jal_target = dt.inst_addr + dt.immediate_val.as_i64();
 
-    const unsigned stall_status = [&]() {
-        if (dt.stall) {
-            return 1;
-        } else if (dt.ff_rs != FORWARD_NONE || dt.ff_rt != FORWARD_NONE) {
-            return 2;
-        } else {
-            return 0;
-        }
+    const unsigned stall_status = [=] {
+        if (dt.stall) return 1;
+        if (dt.ff_rs != FORWARD_NONE || dt.ff_rt != FORWARD_NONE) return 2;
+        return 0;
     }();
 
     return { ExecuteInternalState {
@@ -329,6 +344,9 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
                  .branch_jal_target = branch_jal_target,
                  .val_rt = dt.val_rt,
                  .alu_val = alu_val,
+                 .immediate_val = dt.immediate_val,
+                 .csr_read_val = dt.csr_read_val,
+                 .csr_address = dt.csr_address,
                  .excause = excause,
                  .memctl = dt.memctl,
                  .num_rd = dt.num_rd,
@@ -341,6 +359,8 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
                  .branch_val = dt.branch_val,
                  .branch_jalr = dt.branch_jalr,
                  .alu_zero = alu_val == 0,
+                 .csr = dt.csr,
+                 .csr_write = dt.csr_write,
              } };
 }
 
@@ -371,6 +391,15 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
         regwrite = false;
     }
 
+    bool csr_written = false;
+    if (control_state != nullptr && dt.is_valid && dt.excause == EXCAUSE_NONE) {
+        control_state->increment_internal(CSR::Id::MINSTRET, 1);
+        if (dt.csr_write && dt.num_rd != 0) {
+            control_state->write(dt.csr_address, dt.alu_val);
+            csr_written = true;
+        }
+    }
+
     // Conditional branch (BXX = BEQ | BNE...) is executed and should be taken.
     const bool branch_bxx_taken = dt.branch_bxx && (!dt.branch_val ^ !dt.alu_zero);
     // Unconditional jump should be taken (JALX = JAL | JALR).
@@ -397,13 +426,17 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
                  .predicted_next_inst_addr = dt.predicted_next_inst_addr,
                  .computed_next_inst_addr = compute_next_inst_addr(dt, branch_bxx_taken),
                  .mem_addr = mem_addr,
-                 .towrite_val
-                 = (dt.branch_jalr || dt.branch_jal) ? dt.next_inst_addr.get_raw() : towrite_val,
+                 .towrite_val = [=]() -> RegisterValue {
+                     if (dt.csr) return dt.csr_read_val;
+                     if (dt.branch_jalr || dt.branch_jal) return dt.next_inst_addr.get_raw();
+                     return towrite_val;
+                 }(),
                  .excause = dt.excause,
                  .num_rd = dt.num_rd,
                  .memtoreg = memread,
                  .regwrite = regwrite,
                  .is_valid = dt.is_valid,
+                 .csr_written = csr_written,
              } };
 }
 
@@ -438,7 +471,7 @@ CoreSingle::CoreSingle(
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
-    ControlState *control_state,
+    CSR::ControlState *control_state,
     Xlen xlen)
     : Core(regs, predictor, mem_program, mem_data, control_state, xlen) {
     reset();
@@ -474,7 +507,7 @@ CorePipelined::CorePipelined(
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
-    ControlState *control_state,
+    CSR::ControlState *control_state,
     Xlen xlen,
     MachineConfig::HazardUnit hazard_unit)
     : Core(regs, predictor, mem_program, mem_data, control_state, xlen) {
@@ -514,8 +547,9 @@ void CorePipelined::do_step(bool skip_break) {
         handle_exception(
             mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, mem_wb.computed_next_inst_addr,
             jump_branch_pc, mem_wb.mem_addr);
-    } else if (detect_mispredicted_jump()) {
-        /* If the jump was predicted incorrectly, we need to flush the pipeline. */
+    } else if (detect_mispredicted_jump() || mem_wb.csr_written) {
+        /* If the jump was predicted incorrectly or csr register was written, we need to flush the
+         * pipeline. */
         flush_and_continue_from_address(mem_wb.computed_next_inst_addr);
     } else if (exception_in_progress) {
         /* An exception is in progress which caused the pipeline before the exception to be flushed.
@@ -523,7 +557,7 @@ void CorePipelined::do_step(bool skip_break) {
          * To make the visualization cleaner we stop fetching (and PC update) until the exception
          * is handled. */
         pc_if.stop_if = true;
-    } else if (stall) {
+    } else if (stall || is_stall_requested()) {
         /* Fetch from the same PC is repeated due to stall in the pipeline. */
         handle_stall(saved_if_id);
     } else {
@@ -557,6 +591,10 @@ void CorePipelined::handle_stall(const FetchInterstage &saved_if_id) {
 
 bool CorePipelined::detect_mispredicted_jump() const {
     return mem_wb.computed_next_inst_addr != mem_wb.predicted_next_inst_addr;
+}
+
+bool CorePipelined::is_stall_requested() const {
+    return id_ex.insert_stall_before && ex_mem.is_valid;
 }
 
 template<typename InterstageReg>
@@ -624,8 +662,8 @@ bool StopExceptionHandler::handle_exception(
     Address mem_ref_addr) {
     Q_UNUSED(core)
     DEBUG(
-        "Exception cause %d instruction PC 0x%08" PRIx64 " next PC 0x%08" PRIx64 " jump branch PC 0x%08" PRIx64
-        "registers PC 0x%08" PRIx64 " mem ref 0x%08" PRIx64,
+        "Exception cause %d instruction PC 0x%08" PRIx64 " next PC 0x%08" PRIx64
+        " jump branch PC 0x%08" PRIx64 "registers PC 0x%08" PRIx64 " mem ref 0x%08" PRIx64,
         excause, inst_addr.get_raw(), next_addr.get_raw(), jump_branch_pc.get_raw(),
         regs->read_pc().get_raw(), mem_ref_addr.get_raw());
     return true;

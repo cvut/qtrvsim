@@ -47,7 +47,7 @@ void test_program_with_single_result() {
     Memory memory_backend(BIG);
     TrivialBus memory(&memory_backend);
     FalsePredictor predictor {};
-    ControlState controlst {};
+    CSR::ControlState controlst {};
     Core core(&registers, &predictor, &memory, &memory, &controlst, Xlen::_32);
 
     size_t instruction_count = compile_simple_program(memory, 0x200_addr, instructions);
@@ -704,7 +704,7 @@ void TestCore::singlecore_alu_forward() {
     TrivialBus mem_res_frontend(&mem_res);
 
     FalsePredictor predictor {};
-    ControlState controlst {};
+    CSR::ControlState controlst {};
 
     CoreSingle core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst, Xlen::_32);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
@@ -720,7 +720,7 @@ void TestCore::pipecore_alu_forward() {
     TrivialBus mem_res_frontend(&mem_res);
 
     FalsePredictor predictor {};
-    ControlState controlst {};
+    CSR::ControlState controlst {};
 
     CorePipelined core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst,
                        Xlen::_32, MachineConfig::HazardUnit::HU_STALL_FORWARD);
@@ -737,7 +737,7 @@ void TestCore::pipecorestall_alu_forward() {
     TrivialBus mem_res_frontend(&mem_res);
 
     FalsePredictor predictor {};
-    ControlState controlst {};
+    CSR::ControlState controlst {};
 
     CorePipelined core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst,
                        Xlen::_32, MachineConfig::HazardUnit::HU_STALL);
@@ -945,7 +945,7 @@ void TestCore::singlecore_memory_tests() {
     TrivialBus mem_res_frontend(&mem_res);
 
     FalsePredictor predictor {};
-    ControlState controlst {};
+    CSR::ControlState controlst {};
 
     CoreSingle core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst, Xlen::_32);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
@@ -961,7 +961,7 @@ void TestCore::pipecore_nc_memory_tests() {
     TrivialBus mem_res_frontend(&mem_res);
 
     FalsePredictor predictor {};
-    ControlState controlst {};
+    CSR::ControlState controlst {};
 
     CorePipelined core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst, Xlen::_32);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
@@ -987,7 +987,7 @@ void TestCore::pipecore_wt_na_memory_tests() {
     Cache d_cache(&mem_init_frontend, &cache_conf);
 
     FalsePredictor predictor {};
-    ControlState controlst {};
+    CSR::ControlState controlst {};
 
     CorePipelined core(&reg_init, &predictor, &i_cache, &d_cache, &controlst, Xlen::_32);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
@@ -1012,7 +1012,7 @@ void TestCore::pipecore_wt_a_memory_tests() {
     Cache d_cache(&mem_init_frontend, &cache_conf);
 
     FalsePredictor predictor {};
-    ControlState controlst {};
+    CSR::ControlState controlst {};
 
     CorePipelined core(&reg_init, &predictor, &i_cache, &d_cache, &controlst, Xlen::_32);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
@@ -1037,7 +1037,7 @@ void TestCore::pipecore_wb_memory_tests() {
     Cache d_cache(&mem_init_frontend, &cache_conf);
 
     FalsePredictor predictor {};
-    ControlState controlst {};
+    CSR::ControlState controlst {};
 
     CorePipelined core(&reg_init, &predictor, &i_cache, &d_cache, &controlst, Xlen::_32);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);

@@ -1,252 +1,145 @@
 #include "controlstate.h"
 
-#include "core.h"
+#include "common/logging.h"
 #include "machinedefs.h"
 #include "simulator_exception.h"
 
-using namespace machine;
+LOG_CATEGORY("machine.csr.control_state");
 
-#define COUNTER_IRQ_LEVEL 7
+namespace machine { namespace CSR {
 
-// sorry, unimplemented: non-trivial designated initializers not supported
+    // TODO this is mips
+    enum StatusReg {
+        Status_IE = 0x00000001,
+        Status_EXL = 0x00000002,
+        Status_ERL = 0x00000004,
+        Status_IntMask = 0x0000ff00,
+        Status_Int0 = 0x00000100,
+    };
 
-static enum ControlState::CsrRegisters csrRegMap[32][8] = {
-    /*0*/ {},
-    /*1*/ {},
-    /*2*/ {},
-    /*3*/ {},
-    /*4*/ { ControlState::Unsupported, ControlState::Unsupported},
-    /*5*/ {},
-    /*6*/ {},
-    /*7*/ {},
-    /*8*/ { ControlState::mtval },
-    /*9*/ { ControlState::mcycle },
-    /*10*/ {},
-    /*11*/ { ControlState::Compare },
-    /*12*/ { ControlState::mstatus },
-    /*13*/ { ControlState::mcause },
-    /*14*/ { ControlState::mepc },
-    /*15*/ { ControlState::Unsupported, ControlState::mtvec },
-    /*17*/ {},
-    /*18*/ {},
-    /*19*/ {},
-    /*20*/ {},
-    /*21*/ {},
-    /*22*/ {},
-    /*23*/ {},
-    /*24*/ {},
-    /*25*/ {},
-    /*26*/ {},
-    /*27*/ {},
-    /*28*/ {},
-    /*29*/ {},
-    /*30*/ {},
-    /*31*/ {},
-};
-
-// sorry, unimplemented: non-trivial designated initializers not supported
-
-const ControlState::csrRegDesc_t ControlState::csrRegDesc[ControlState::CSR_REGS_CNT] = {
-    [ControlState::Unsupported] = {
-        "Unsupported", 0x00000000, 0x00000000,
-        &ControlState::read_csr_default,
-        &ControlState::write_csr_default },
-    [ControlState::mstatus] = {
-        "mstatus", Status_IE | Status_IntMask,
-        0x00000000, &ControlState::read_csr_default,
-        &ControlState::write_csr_default },
-    [ControlState::mtvec] = {
-        "mtvec", 0xfffffffffffffffc, 0x00000100,
-        &ControlState::read_csr_default,
-        &ControlState::write_csr_default },
-    [ControlState::mepc] = {
-        "mepc", 0xffffffffffffffff, 0x00000000,
-        &ControlState::read_csr_default,
-        &ControlState::write_csr_default },
-    [ControlState::mcause] = {
-        "mcause", 0x00000000, 0x00000000,
-        &ControlState::read_csr_default,
-        &ControlState::write_csr_default },
-    [ControlState::mtval] = {
-        "mtval", 0x00000000, 0x00000000,
-        &ControlState::read_csr_default,
-        &ControlState::write_csr_default },
-    [ControlState::mcycle] = {
-        "mcycle", 0xffffffff, 0x00000000,
-        &ControlState::read_csr_default,
-        &ControlState::write_csr_count_compare },
-    [ControlState::Compare] = {
-        "Compare", 0xffffffff, 0x00000000,
-        &ControlState::read_csr_default,
-        &ControlState::write_csr_count_compare },
-};
-
-ControlState::ControlState(Core *core) : QObject() {
-    this->core = core;
-    reset();
-}
-
-ControlState::ControlState(const ControlState &orig) : QObject() {
-    this->core = orig.core;
-    for (int i = 0; i < CSR_REGS_CNT; i++) {
-        this->csr_data[i] = orig.read_csr((enum CsrRegisters)i);
+    ControlState::ControlState() {
+        reset();
     }
-}
 
-void ControlState::setup_core(Core *core) {
-    this->core = core;
-}
+    ControlState::ControlState(const ControlState &other) : register_data(other.register_data) {}
 
-uint64_t ControlState::read_csr(uint32_t rd, uint8_t sel) const {
-    SANITY_ASSERT(
-        rd < 32, QString("Trying to read from CSR register ") + QString::number(rd) + ','
-                     + QString::number(sel));
-    SANITY_ASSERT(
-        sel < 8, QString("Trying to read from CSR register ") + QString::number(rd) + ','
-                     + QString::number(sel));
-    enum CsrRegisters reg = csrRegMap[rd][sel];
-    SANITY_ASSERT(
-        reg != 0, QString("CSR register ") + QString::number(rd) + ',' + QString::number(sel)
-                      + "unsupported");
-    return read_csr(reg);
-}
+    void ControlState::reset() {
+        std::transform(
+            REGISTERS.begin(), REGISTERS.end(), register_data.begin(),
+            [](const RegisterDesc &desc) { return desc.initial_value; });
+    }
 
-void ControlState::write_csr(uint32_t rd, uint8_t sel, RegisterValue value) {
-    SANITY_ASSERT(
-        rd < 32, QString("Trying to write to CSR register ") + QString::number(rd) + ','
-                     + QString::number(sel));
-    SANITY_ASSERT(
-        sel < 8, QString("Trying to write to CSR register ") + QString::number(rd) + ','
-                     + QString::number(sel));
-    enum CsrRegisters reg = csrRegMap[rd][sel];
-    SANITY_ASSERT(
-        reg != 0, QString("CSR register ") + QString::number(rd) + ',' + QString::number(sel)
-                      + "unsupported");
-    write_csr(reg, value);
-}
+    size_t ControlState::get_register_internal_id(Address address) {
+        if (address.get_privilege_level() != PrivilegeLevel::MACHINE) {
+            throw SIMULATOR_EXCEPTION(
+                UnsupportedInstruction,
+                QString("Only machine level CSR registers are currently implemented. Accessed "
+                        "level %1.")
+                    .arg(static_cast<unsigned>(address.get_privilege_level())),
+                "");
+        }
 
-uint64_t ControlState::read_csr(enum CsrRegisters reg) const {
-    SANITY_ASSERT(
-        reg != Unsupported && reg < CSR_REGS_CNT,
-        QString("Trying to read from CSR register ") + QString::number(reg));
-    return (this->*csrRegDesc[reg].reg_read)(reg);
-}
-
-void ControlState::write_csr(enum CsrRegisters reg, RegisterValue value) {
-    SANITY_ASSERT(
-        reg != Unsupported && reg < CSR_REGS_CNT,
-        QString("Trying to write to CSR register ") + QString::number(reg));
-    (this->*csrRegDesc[reg].reg_write)(reg, value.as_u32());
-}
-
-QString ControlState::csr_name(enum CsrRegisters reg) {
-    return QString(csrRegDesc[(int)reg].name);
-}
-
-uint64_t ControlState::read_csr_default(enum CsrRegisters reg) const {
-    uint64_t val;
-    val = csr_data[(int)reg];
-    emit csr_read(reg, val);
-    return val;
-}
-
-void ControlState::write_csr_default(enum CsrRegisters reg, uint64_t value) {
-    uint64_t mask = csrRegDesc[(int)reg].write_mask;
-    csr_data[(int)reg] = (value & mask) | (csr_data[(int)reg] & ~mask);
-    emit csr_update(reg, csr_data[(int)reg]);
-}
-
-bool ControlState::operator==(const ControlState &c) const {
-    for (int i = 0; i < CSR_REGS_CNT; i++) {
-        if (read_csr((enum CsrRegisters)i)
-            != c.read_csr((enum CsrRegisters)i)) {
-            return false;
+        try {
+            return CSR::REGISTER_MAP.at(address);
+        } catch (std::out_of_range &e) {
+            throw SIMULATOR_EXCEPTION(
+                UnsupportedInstruction,
+                QString("Accessed nonexistent CSR register %1").arg(address.data), "");
         }
     }
-    return true;
-}
 
-bool ControlState::operator!=(const ControlState &c) const {
-    return !this->operator==(c);
-}
-
-void ControlState::reset() {
-    for (int i = 1; i < CSR_REGS_CNT; i++) {
-        this->csr_data[i] = csrRegDesc[i].init_value;
-        emit csr_update((enum CsrRegisters)i, csr_data[i]);
+    RegisterValue ControlState::read(Address address) const {
+        // Only machine level privilege is supported so no checking is needed.
+        size_t reg_id = get_register_internal_id(address);
+        RegisterValue value = register_data[reg_id];
+        DEBUG("Read CSR[%u] == %lu", address.data, value.as_u64());
+        emit read_signal(reg_id, value);
+        return value;
     }
-    last_core_cycles = 0;
-}
 
-void ControlState::update_execption_cause(enum ExceptionCause excause) {
-    csr_data[(int)mcause] &= ~0x80000000;
-    csr_data[(int)mcause] &= ~0x0000007f;
-    if (excause != EXCAUSE_INT) { csr_data[(int)mcause] |= (int)excause << 2; }
-    emit csr_update(mcause, csr_data[(int)mcause]);
-}
-
-void ControlState::set_interrupt_signal(uint irq_num, bool active) {
-    uint64_t mask;
-    if (irq_num >= 8) {
-        return;
+    void ControlState::write(Address address, RegisterValue value) {
+        DEBUG(
+            "Write CSR[%u/%lu] <== %lu", address.data, get_register_internal_id(address),
+            value.as_u64());
+        // Attempts to write a read-only register also raise illegal instruction exceptions.
+        if (!address.is_writable()) {
+            throw SIMULATOR_EXCEPTION(
+                UnsupportedInstruction,
+                QString("CSR address %1 is not writable.").arg(address.data), "");
+        }
+        write_internal(get_register_internal_id(address), value);
     }
-    mask = Status_Int0 << irq_num;
-    if (active) {
-        csr_data[(int)mcause] |= mask;
-    } else {
-        csr_data[(int)mcause] &= ~mask;
+
+    bool ControlState::operator==(const ControlState &other) const {
+        return register_data == other.register_data;
     }
-    emit csr_update(mcause, csr_data[(int)mcause]);
-}
 
-bool ControlState::core_interrupt_request() {
-    uint64_t irqs;
-
-    update_count_and_compare_irq();
-
-    irqs = csr_data[(int)mstatus];
-    irqs &= csr_data[(int)mcause];
-    irqs &= Status_IntMask;
-
-    return irqs && csr_data[(int)mstatus] & Status_IntMask
-           && !(csr_data[(int)mstatus] & Status_EXL)
-           && !(csr_data[(int)mstatus] & Status_ERL);
-}
-
-void ControlState::set_status_exl(bool value) {
-    if (value) {
-        csr_data[(int)mstatus] |= Status_EXL;
-    } else {
-        csr_data[(int)mstatus] &= ~Status_EXL;
+    bool ControlState::operator!=(const ControlState &c) const {
+        return !this->operator==(c);
     }
-    emit csr_update(mstatus, csr_data[(int)mstatus]);
-}
 
-Address ControlState::exception_pc_address() {
-    return Address(csr_data[(int)mtvec]);
-}
-
-void ControlState::write_csr_count_compare(
-    enum CsrRegisters reg,
-    uint64_t value) {
-    set_interrupt_signal(COUNTER_IRQ_LEVEL, false);
-    write_csr_default(reg, value);
-}
-
-void ControlState::update_count_and_compare_irq() {
-    uint64_t core_cycles;
-    uint64_t count_orig;
-    if (core == nullptr) {
-        return;
+    void ControlState::update_exception_cause(enum ExceptionCause excause) {
+        RegisterValue &value = register_data[Id::MCAUSE];
+        value = value.as_u32() & ~0x80000000 & ~0x0000007f;
+        if (excause != EXCAUSE_INT) {
+            value = value.as_u32() | static_cast<unsigned>(excause) << 2;
+        }
+        // TODO: this is known ahead of time
+        emit write_signal(Id::MCAUSE, value);
     }
-    count_orig = csr_data[(int)mcycle];
-    core_cycles = core->get_cycle_count();
-    csr_data[(int)mcycle] += core_cycles - last_core_cycles;
-    last_core_cycles = core_cycles;
-    emit csr_update(mcycle, csr_data[(int)mcycle]);
 
-    if ((int32_t)(csr_data[(int)Compare] - count_orig) > 0
-        && (int32_t)(csr_data[(int)Compare] - csr_data[(int)mcycle]) <= 0) {
-        set_interrupt_signal(COUNTER_IRQ_LEVEL, true);
+    // TODO this is mips
+    void ControlState::set_interrupt_signal(uint irq_num, bool active) {
+        if (irq_num >= 8) { return; }
+        uint64_t mask = Status_Int0 << irq_num;
+        size_t reg_id = Id::MCAUSE;
+        RegisterValue value = register_data[reg_id];
+        if (active) {
+            value = value.as_xlen(xlen) | mask;
+        } else {
+            value = value.as_xlen(xlen) & ~mask;
+        }
+        emit write_signal(reg_id, value);
     }
-}
+
+    // TODO this is mips
+    bool ControlState::core_interrupt_request() {
+        RegisterValue mstatus = register_data[Id::MSTATUS];
+        RegisterValue mcause = register_data[Id::MCAUSE];
+
+        uint64_t irqs = mstatus.as_u64() & mcause.as_u64() & Status_IntMask;
+
+        return irqs && mstatus.as_u64() & Status_IntMask && !(mstatus.as_u64() & Status_EXL)
+               && !(mstatus.as_u64() & Status_ERL);
+    }
+
+    // TODO this is mips
+    void ControlState::set_status_exl(bool value) {
+        size_t reg_id = Id::MSTATUS;
+        RegisterValue &reg = register_data[reg_id];
+        if (value) {
+            reg = reg.as_xlen(xlen) & Status_EXL;
+        } else {
+            reg = reg.as_xlen(xlen) & ~Status_EXL;
+        }
+        emit write_signal(reg_id, reg);
+    }
+
+    machine::Address ControlState::exception_pc_address() {
+        return machine::Address(register_data[Id::MTVEC].as_u64());
+    }
+
+    RegisterValue ControlState::read_internal(size_t internal_id) const {
+        return register_data[internal_id];
+    }
+
+    void ControlState::write_internal(size_t internal_id, RegisterValue value) {
+        RegisterDesc desc = REGISTERS[internal_id];
+        (*desc.write_handler)(desc, register_data[internal_id], value);
+        write_signal(internal_id, value);
+    }
+    void ControlState::increment_internal(size_t internal_id, uint64_t amount) {
+        auto value = register_data[internal_id];
+        write_internal(internal_id, value.as_u64() + amount);
+    }
+}} // namespace machine::CSR

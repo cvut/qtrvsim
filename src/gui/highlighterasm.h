@@ -11,12 +11,11 @@ QT_BEGIN_NAMESPACE
 class QTextDocument;
 QT_END_NAMESPACE
 
-//! [0]
 class HighlighterAsm : public QSyntaxHighlighter {
     Q_OBJECT
 
 public:
-    HighlighterAsm(QTextDocument *parent = nullptr);
+    explicit HighlighterAsm(QTextDocument *parent = nullptr);
 
 protected:
     void highlightBlock(const QString &text) override;
@@ -27,17 +26,6 @@ private:
         QTextCharFormat format;
     };
     QVector<HighlightingRule> highlightingRules;
-
-    QRegularExpression commentStartExpression;
-    QRegularExpression commentEndExpression;
-
-    QTextCharFormat keywordFormat;
-    QTextCharFormat registerFormat;
-    QTextCharFormat singleLineCommentFormat;
-    QTextCharFormat multiLineCommentFormat;
-    QTextCharFormat quotationFormat;
-    QTextCharFormat functionFormat;
 };
-//! [0]
 
 #endif // HIGHLIGHTERASM_H

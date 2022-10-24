@@ -3,101 +3,90 @@
 #include "highlighterasm.h"
 
 #include "QStringList"
+#include "machine/csr/register_desc.h"
 #include "machine/instruction.h"
 
-HighlighterAsm::HighlighterAsm(QTextDocument *parent)
-    : QSyntaxHighlighter(parent) {
+HighlighterAsm::HighlighterAsm(QTextDocument *parent) : QSyntaxHighlighter(parent) {
     HighlightingRule rule;
 
+    QTextCharFormat keywordFormat, registerFormat, singleLineCommentFormat, multiLineCommentFormat,
+        quotationFormat;
     keywordFormat.setForeground(Qt::darkBlue);
     keywordFormat.setFontWeight(QFont::Bold);
-    const QString keywordPatterns[]
-        = { QStringLiteral("\\.org\\b"),   QStringLiteral("\\.word\\b"),
-            QStringLiteral("\\.text\\b"),  QStringLiteral("\\.data\\b"),
-            QStringLiteral("\\.bss\\b"),   QStringLiteral("\\.option\\b"),
-            QStringLiteral("\\.globl\\b"), QStringLiteral("\\.set\\b"),
-            QStringLiteral("\\.equ\\b"),   QStringLiteral("\\.end\\b"),
-            QStringLiteral("\\.ent\\b"),   QStringLiteral("\\.ascii\\b"),
-            QStringLiteral("\\.asciz\\b"), QStringLiteral("\\.byte\\b"),
-            QStringLiteral("\\.skip\\b"),  QStringLiteral("\\.space\\b") };
-
-    for (const QString &pattern : keywordPatterns) {
-        rule.pattern = QRegularExpression(pattern);
-        rule.format = keywordFormat;
-        highlightingRules.append(rule);
-    }
-
-    QStringList inst_list;
-    machine::Instruction::append_recognized_instructions(inst_list);
-    foreach (const QString &str, inst_list) {
-        rule.pattern = QRegularExpression("\\b" + str + "\\b");
-        rule.format = keywordFormat;
-        highlightingRules.append(rule);
-        rule.pattern = QRegularExpression("\\b" + str.toUpper() + "\\b");
-        rule.format = keywordFormat;
-        highlightingRules.append(rule);
-    }
-    rule.pattern = QRegularExpression("\\bnop\\b");
-    rule.format = keywordFormat;
-    highlightingRules.append(rule);
-    rule.pattern = QRegularExpression("\\bNOP\\b");
-    rule.format = keywordFormat;
-    highlightingRules.append(rule);
-
     registerFormat.setFontWeight(QFont::Bold);
     registerFormat.setForeground(Qt::darkMagenta);
-    QStringList reg_list;
-    machine::Instruction::append_recognized_registers(reg_list);
-    foreach (const QString &str, reg_list) {
-        rule.pattern = QRegularExpression("\\b" + str + "\\b");
+    singleLineCommentFormat.setForeground(Qt::darkGray);
+    multiLineCommentFormat.setForeground(Qt::darkGray);
+    quotationFormat.setForeground(Qt::darkGreen);
+
+    {
+        const QStringList keywordPatterns
+            = { QStringLiteral("\\.org"),   QStringLiteral("\\.word"), QStringLiteral("\\.text"),
+                QStringLiteral("\\.data"),  QStringLiteral("\\.bss"),  QStringLiteral("\\.option"),
+                QStringLiteral("\\.globl"), QStringLiteral("\\.set"),  QStringLiteral("\\.equ"),
+                QStringLiteral("\\.end"),   QStringLiteral("\\.ent"),  QStringLiteral("\\.ascii"),
+                QStringLiteral("\\.asciz"), QStringLiteral("\\.byte"), QStringLiteral("\\.skip"),
+                QStringLiteral("\\.space") };
+
+        rule.pattern = QRegularExpression("(" + keywordPatterns.join('|') + ")\\b");
+        rule.format = keywordFormat;
+        highlightingRules.append(rule);
+    }
+
+    {
+        QStringList inst_list;
+        machine::Instruction::append_recognized_instructions(inst_list);
+        inst_list.append("nop");
+        rule.pattern = QRegularExpression(
+            QString("\\b(" + inst_list.join('|') + ")\\b"),
+            QRegularExpression::CaseInsensitiveOption);
+        rule.format = keywordFormat;
+        highlightingRules.append(rule);
+    }
+
+    {
+        QStringList reg_list;
+        machine::Instruction::append_recognized_registers(reg_list);
+        rule.pattern = QRegularExpression("\\b(" + reg_list.join('|') + "|x[0-9]+)\\b");
         rule.format = registerFormat;
         highlightingRules.append(rule);
     }
-    rule.pattern = QRegularExpression("\\bx[0-9]+\\b");
-    rule.format = registerFormat;
-    highlightingRules.append(rule);
 
-    singleLineCommentFormat.setForeground(Qt::red);
-    rule.pattern = QRegularExpression(QStringLiteral(";[^\n]*"));
+    {
+        QTextCharFormat namedValueFormat;
+        namedValueFormat.setFontWeight(QFont::Bold);
+        namedValueFormat.setForeground(Qt::darkMagenta);
+
+        QString pattern = "\\b(";
+        for (const auto &reg : machine::CSR::REGISTERS) {
+            pattern.append(reg.name).append('|');
+        }
+        pattern = pattern.left(pattern.size() - 1);
+        pattern.append(")\\b");
+        rule.pattern = QRegularExpression(pattern);
+        rule.format = namedValueFormat;
+        highlightingRules.append(rule);
+    }
+
+    rule.pattern = QRegularExpression(QStringLiteral("(;[^\n]*)|(#[^\n]*)|(//[^\n]*)"));
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
-    rule.pattern = QRegularExpression(QStringLiteral("#[^\n]*"));
-    rule.format = singleLineCommentFormat;
-    highlightingRules.append(rule);
-    rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
-    rule.format = singleLineCommentFormat;
-    highlightingRules.append(rule);
 
-    multiLineCommentFormat.setForeground(Qt::red);
-
-    quotationFormat.setForeground(Qt::darkGreen);
     rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
     rule.format = quotationFormat;
     highlightingRules.append(rule);
 
-    // functionFormat.setFontItalic(true);
-    // functionFormat.setForeground(Qt::blue);
-    // rule.pattern =
-    // QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
-    // rule.format = functionFormat; highlightingRules.append(rule);
-
-    // commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
-    // commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
+    for (auto &rule : highlightingRules) {
+        rule.pattern.optimize();
+    }
 }
 
 void HighlighterAsm::highlightBlock(const QString &text) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 7, 0)
-    foreach (const HighlightingRule &rule, highlightingRules)
-#else
-    for (const HighlightingRule &rule : qAsConst(highlightingRules))
-#endif
-    {
-        QRegularExpressionMatchIterator matchIterator
-            = rule.pattern.globalMatch(text);
+    for (const HighlightingRule &rule : qAsConst(highlightingRules)) {
+        auto matchIterator = rule.pattern.globalMatch(text);
         while (matchIterator.hasNext()) {
             QRegularExpressionMatch match = matchIterator.next();
-            setFormat(
-                match.capturedStart(), match.capturedLength(), rule.format);
+            setFormat(match.capturedStart(), match.capturedLength(), rule.format);
         }
     }
     setCurrentBlockState(0);

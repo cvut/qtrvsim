@@ -2,6 +2,8 @@
 
 #include "common/logging.h"
 #include "common/math/bit_ops.h"
+#include "common/string_utils.h"
+#include "csr/register_desc.h"
 #include "simulator_exception.h"
 #include "utils.h"
 
@@ -10,13 +12,14 @@
 #include <QStringList>
 #include <cctype>
 #include <cstring>
-#include <initializer_list>
 #include <set>
+#include <type_traits>
 #include <utility>
 
-LOG_CATEGORY("instruction");
+LOG_CATEGORY("machine.instruction");
 
 using namespace machine;
+using std::underlying_type;
 
 struct ArgumentDesc {
     char name;
@@ -40,7 +43,7 @@ struct ArgumentDesc {
         , arg(std::move(arg)) {}
 
     /** Check whether given value fits into this instruction field. */
-    constexpr bool is_value_in_field_range(RegisterValue val) const {
+    [[nodiscard]] constexpr bool is_value_in_field_range(RegisterValue val) const {
         if (min < 0) {
             return val.as_i64() <= max && val.as_i64() >= min;
         } else {
@@ -49,7 +52,7 @@ struct ArgumentDesc {
         }
     }
 
-    constexpr bool is_imm() const { return kind != 'g'; }
+    [[nodiscard]] constexpr bool is_imm() const { return kind != 'g'; }
 };
 
 static const ArgumentDesc arg_desc_list[] = {
@@ -61,7 +64,7 @@ static const ArgumentDesc arg_desc_list[] = {
     ArgumentDesc('t', 'g', 0, 0x1f, { { { 5, 20 } }, 0 }),
     // I-type immediate for arithmetic instructions (12bits)
     ArgumentDesc('j', 'n', -0x800, 0x7ff, { { { 12, 20 } }, 0 }),
-    // Shaft for bit shift instructions (5bits)
+    // Shift for bit shift instructions (5bits)
     ArgumentDesc('>', 'n', 0, 0x1f, { { { 5, 20 } }, 0 }),
     // Address offset immediate (20bits), encoded in multiples of 2 bytes
     ArgumentDesc('a', 'a', -0x80000, 0x7ffff, { { { 10, 21 }, { 1, 20 }, { 8, 12 }, { 1, 31 } }, 1 }),
@@ -73,6 +76,12 @@ static const ArgumentDesc arg_desc_list[] = {
     ArgumentDesc('o', 'o', -0x800, 0x7ff, { { { 12, 20 } }, 0 }),
     // Offset immediate for store instructions (12 bits)
     ArgumentDesc('q', 'o', -0x800, 0x7ff, { { { 5, 7 }, { 7, 25 } }, 0 }),
+    // 5-bit CSR value immediate
+    // (https://sourceware.org/git/?p=binutils-gdb.git;a=blob;f=opcodes/riscv-opc.c;h=7e95f645c5c5fe0a7c93c64c2f1719efaec67972;hb=HEAD#l928)
+    ArgumentDesc('Z', 'n', 0, 0x1f, { { { 5, 15 } }, 0 }),
+    // 12-bit CSR address
+    // (https://sourceware.org/git/?p=binutils-gdb.git;a=blob;f=opcodes/riscv-opc.c;h=7e95f645c5c5fe0a7c93c64c2f1719efaec67972;hb=HEAD#l928)
+    ArgumentDesc('E', 'E', 0, 0xfff, { { { 12, 20 } }, 0 }),
 };
 
 static const ArgumentDesc *arg_desc_by_code[(int)('z' + 1)];
@@ -116,7 +125,7 @@ struct InstructionMap {
     uint32_t code;
     uint32_t mask;
     union {
-        unsigned int flags;
+        decltype(underlying_type<InstructionFlags>::type()) flags;
         BitArg::Field subfield;
     };
 };
@@ -144,7 +153,7 @@ static const struct InstructionMap LOAD_map[] = {
 
 static const struct InstructionMap SRI_map[] = {
     {"srli", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x00005013,0xfe00707f, { .flags = FLAGS_ALU_I }}, // SRLI
-    {"srai", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x40005013,0xfe00707f, { .flags = FLAGS_ALU_I | IMF_ALU_MOD }}, // SRAI
+    {"srai", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x40005013,0xfe00707f, { .flags = (FLAGS_ALU_I | IMF_ALU_MOD) }}, // SRAI
 };
 
 static const struct InstructionMap OP_IMM_map[] = {
@@ -221,10 +230,27 @@ static const struct InstructionMap BRANCH_map[] = {
     {"bgeu", IT_B, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"s", "t", "p"}, 0x00007063,0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT }}, // BGEU
 };
 
-static const struct InstructionMap SYSTEM_map[] = {
+// Spec vol. 1: 2.8
+static const struct InstructionMap ENVIRONMENT_AND_BREAKPOINTS_map[] = {
     {"ecall", IT_I, NOALU, NOMEM, nullptr, {}, 0x00000073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_EXCEPTION | IMF_ECALL }},
     {"ebreak", IT_I, NOALU, NOMEM, nullptr, {}, 0x00100073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_EXCEPTION | IMF_EBREAK }},
 };
+
+#define CSR_MAP_ITEM(NAME, SOURCE, CODE, ALU_OP,  EXTRA_FLAGS) \
+    { NAME, Instruction::ZICSR, { .alu_op=AluOp::ALU_OP }, NOMEM, nullptr,  {"d", "E", SOURCE}, 0x00000073 | (CODE), 0x0000003f, { .flags = IMF_SUPPORTED | IMF_CSR | IMF_REGWRITE | IMF_ALU_REQ_RS | (EXTRA_FLAGS) } }
+
+static const struct InstructionMap SYSTEM_map[] = {
+    {"environment_and_breakpoints", IT_I, NOALU, NOMEM, ENVIRONMENT_AND_BREAKPOINTS_map, {}, 0x00000073, 0xffffffff, { .subfield = {1, 20} }},
+    CSR_MAP_ITEM("csrrw", "s", 0x1000, ADD, 0),
+    CSR_MAP_ITEM("csrrs", "s", 0x2000, OR, IMF_CSR_TO_ALU),
+    CSR_MAP_ITEM("csrrc", "s", 0x3000, AND, IMF_CSR_TO_ALU | IMF_ALU_MOD),
+    IM_UNKNOWN,
+    CSR_MAP_ITEM("csrrwi", "Z", 0x5000, ADD, IMF_ALU_RS_ID),
+    CSR_MAP_ITEM("csrrsi", "Z", 0x6000, OR, IMF_ALU_RS_ID | IMF_CSR_TO_ALU),
+    CSR_MAP_ITEM("csrrci", "Z", 0x7000, AND, IMF_ALU_RS_ID | IMF_CSR_TO_ALU | IMF_ALU_MOD),
+};
+
+#undef CSR_MAP_ITEM
 
 static const struct InstructionMap MISC_MEM_map[] = {
     {"fence", IT_I, NOALU, AC_CACHE_OP, nullptr, {}, 0x0000000f, 0x0000703f, { .flags = IMF_SUPPORTED | IMF_MEM }},
@@ -269,7 +295,7 @@ IMF_SUPPORTED | IMF_REGWRITE | IMF_BRANCH_JALR | IMF_ALUSRC | IMF_ALU_REQ_RS }},
     {"jal", IT_J, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "a"}, 0x6f, 0x7f, { .flags =
 IMF_SUPPORTED |
 IMF_REGWRITE | IMF_JUMP | IMF_PC_TO_ALU | IMF_ALUSRC }}, // JAL
-    {"system", IT_I, NOALU, NOMEM, SYSTEM_map, {}, 0x73, 0x7f, { .subfield = {1, 20} }}, // SYSTEM
+    {"system", IT_I, NOALU, NOMEM, SYSTEM_map, {}, 0x73, 0x7f, { .subfield = {3, 12} }}, // SYSTEM
     IM_UNKNOWN, // reserved
     IM_UNKNOWN, // custom-3/rv128
     IM_UNKNOWN, // >= 80b
@@ -344,8 +370,8 @@ uint16_t Instruction::funct() const {
     return uint16_t(MASK(7, 25) << 3 | MASK(3, 12));
 }
 
-uint32_t Instruction::csrsel() const {
-    return (uint8_t)MASK(12, 20);
+CSR::Address Instruction::csr_address() const {
+    return CSR::Address(MASK(12, 20));
 }
 
 int32_t Instruction::immediate() const {
@@ -357,11 +383,12 @@ int32_t Instruction::immediate() const {
     case B:
         ret = extend(MASK(4, 8) << 1 | MASK(6, 25) << 5 | MASK(1, 7) << 11 | MASK(1, 31) << 12, 12);
         break;
-    case U: ret = this->dt & ~((1 << 12) - 1); break;
+    case U: ret = extend(MASK(20, 12) << 12, 32); break;
     case J:
         ret = extend(
             MASK(10, 21) << 1 | MASK(1, 20) << 11 | MASK(8, 12) << 12 | MASK(1, 31) << 20, 21);
         break;
+    case ZICSR:
     case UNKNOWN: break;
     }
     return ret;
@@ -465,7 +492,7 @@ QString Instruction::to_str(Address inst_addr) const {
             case 'p':
             case 'a': {
                 field += (int32_t)inst_addr.get_raw();
-                res += "0x" + QString::number(uint32_t(field), 16);
+                res.append(str::asHex(uint32_t(field)));
                 break;
             }
             case 'o':
@@ -473,7 +500,15 @@ QString Instruction::to_str(Address inst_addr) const {
                 if (arg_desc->min < 0) {
                     res += QString::number((int32_t)field, 10);
                 } else {
-                    res += "0x" + QString::number(uint32_t(field), 16);
+                    res.append(str::asHex(uint32_t(field)));
+                }
+                break;
+            }
+            case 'E': {
+                if (symbolic_registers_enabled) {
+                    res += CSR::REGISTERS[CSR::REGISTER_MAP.at(CSR::Address(field))].name;
+                } else {
+                    res.append(str::asHex(field));
                 }
                 break;
             }
@@ -501,7 +536,7 @@ void instruction_from_string_build_base(
         }
         if (!(im->flags & IMF_SUPPORTED)) { continue; }
         if (im->code != code) {
-            DEBUG("code mismatch %s computed 0x%08x found 0x%08x", im->name, code, im->code);
+            ERROR("code mismatch %s computed 0x%08x found 0x%08x", im->name, code, im->code);
             continue;
         }
         str_to_instruction_code_map.insert(im->name, code);
@@ -542,8 +577,7 @@ static int parse_reg_from_string(const QString &str, uint *chars_taken = nullptr
         int regnum = -1;
         for (size_t i = 0; i < Rv_regnames.size(); i++) {
             size_t len = std::strlen(Rv_regnames[i]);
-            if (size_t(data.size()) < len)
-                continue;
+            if (size_t(data.size()) < len) continue;
             if (std::strncmp(data.data(), Rv_regnames[i], len) == 0) {
                 *chars_taken = len;
                 regnum = (int)i;
@@ -902,6 +936,8 @@ Instruction Instruction::base_from_tokens(
     return Instruction::UNKNOWN_INST;
 }
 
+uint16_t parse_csr_address(const QString &field_token, uint &chars_taken);
+
 void parse_immediate_value(
     const QString &field_token,
     Address &inst_addr,
@@ -957,6 +993,7 @@ uint32_t Instruction::parse_field(
                 val, chars_taken);
             break;
         }
+        case 'E': val = parse_csr_address(field_token, chars_taken); break;
         }
         if (chars_taken <= 0) { throw ParseError("argument parse error"); }
 
@@ -972,6 +1009,8 @@ uint32_t Instruction::parse_field(
     if (field_token.trimmed() != "") { throw ParseError("excessive characters in argument"); }
     return inst_code;
 }
+
+uint16_t parse_csr_address(const QString &field_token, uint &chars_taken);
 
 void parse_immediate_value(
     const QString &field_token,
@@ -1020,6 +1059,27 @@ void parse_immediate_value(
         reloc_append(
             reloc, field_token, inst_addr, val, adesc, &chars_taken, filename, line, effective_mod);
         val = 0;
+    }
+}
+
+uint16_t parse_csr_address(const QString &field_token, uint &chars_taken) {
+    if (field_token.at(0).isLetter()) {
+        // TODO maybe optimize
+        for (auto &reg : CSR::REGISTERS) {
+            if (field_token.startsWith(reg.name, Qt::CaseInsensitive)) {
+                chars_taken = strlen(reg.name);
+                return reg.address.data;
+            }
+        }
+        chars_taken = 0;
+        return 0;
+    } else {
+        char *r;
+        uint64_t val;
+        const char *str = field_token.toLocal8Bit().constData();
+        val = strtoul(str, &r, 0);
+        chars_taken = r - str;
+        return val;
     }
 }
 

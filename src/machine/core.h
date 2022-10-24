@@ -32,7 +32,7 @@ public:
         Predictor *predictor,
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
-        ControlState *control_state,
+        CSR::ControlState *control_state,
         Xlen xlen);
 
     void step(bool skip_break = false);
@@ -42,7 +42,7 @@ public:
     unsigned get_stall_count() const;
 
     Registers *get_regs() const;
-    ControlState *get_control_state() const;
+    CSR::ControlState *get_control_state() const;
     Predictor *get_predictor() const;
     FrontendMemory *get_mem_data() const;
     FrontendMemory *get_mem_program() const;
@@ -107,7 +107,7 @@ protected:
 
     const Xlen xlen;
     BORROWED Registers *const regs;
-    BORROWED ControlState *const control_state;
+    BORROWED CSR::ControlState *const control_state;
     BORROWED Predictor *const predictor;
     BORROWED FrontendMemory *const mem_data, *const mem_program;
 
@@ -146,7 +146,7 @@ public:
         Predictor *predictor,
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
-        ControlState *control_state,
+        CSR::ControlState *control_state,
         Xlen xlen);
 
 protected:
@@ -164,7 +164,7 @@ public:
         Predictor *predictor,
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
-        ControlState *control_state,
+        CSR::ControlState *control_state,
         Xlen xlen,
         // Default value is used to keep same interface as core single.
         // Forward was chosen as the most conservative variant (regarding correctness).
@@ -179,6 +179,12 @@ private:
 
     bool handle_data_hazards();
     bool detect_mispredicted_jump() const;
+
+    /** Some special instruction require that all issued instructions are committed before this
+     * instruction is fetched and issued as it may rely on side-effects of uncommitted instructions.
+     * Typical examples are csr modifying instructions. */
+    bool is_stall_requested() const;
+
     void handle_stall(const FetchInterstage &saved_if_id);
     /**
      * Typically, problem in execution is discovered in memory stage. This function flushed all

@@ -41,9 +41,12 @@ int64_t alu64_operate(AluOp op, bool modified, RegisterValue a, RegisterValue b)
     case AluOp::XOR:
         return _a ^ _b;
         // Most compilers should calculate SRA correctly, but it is UB.
-    case AluOp::SR: return (modified) ? (a.as_i64() >> (_b & SHIFT_MASK64)) : (_a >> (_b & SHIFT_MASK64));
+    case AluOp::SR:
+        return (modified) ? (a.as_i64() >> (_b & SHIFT_MASK64)) : (_a >> (_b & SHIFT_MASK64));
     case AluOp::OR: return _a | _b;
-    case AluOp::AND: return _a & _b;
+    case AluOp::AND:
+        return ((modified) ? ~_a : _a) & _b; // Modified: clear bits of b using mask
+                                             // in a
     default: qDebug("ERROR, unknown alu operation: %hhx", uint8_t(op)); return 0;
     }
 }
@@ -63,7 +66,8 @@ int32_t alu32_operate(AluOp op, bool modified, RegisterValue a, RegisterValue b)
     case AluOp::SR:
         return (modified) ? (a.as_i32() >> (_b & SHIFT_MASK32)) : (_a >> (_b & SHIFT_MASK32));
     case AluOp::OR: return _a | _b;
-    case AluOp::AND: return _a & _b;
+    case AluOp::AND:
+        return ((modified) ? ~_a : _a) & _b; // Modified: clear bits of b using mask in a
     default: qDebug("ERROR, unknown alu operation: %hhx", uint8_t(op)); return 0;
     }
 }

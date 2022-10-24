@@ -7,7 +7,11 @@
 #ifndef QTRVSIM_BIT_OPS_H
 #define QTRVSIM_BIT_OPS_H
 
-#include <cstdio>
+#include <cassert>
+#include <cstdint>
+#include <limits>
+
+using std::size_t;
 
 /**
  * Get value of single bit as lowest bit
@@ -43,6 +47,7 @@ constexpr inline T mask_bits(T val, size_t start, size_t end) {
  */
 template<typename T>
 constexpr inline T get_bits(T val, size_t start, size_t end) {
+    assert(start >= end);
     return mask_bits(val >> end, start - end, 0);
 }
 

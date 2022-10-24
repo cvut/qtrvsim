@@ -124,6 +124,9 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     // Restore application state from settings
     restoreState(settings->value("windowState").toByteArray());
     restoreGeometry(settings->value("windowGeometry").toByteArray());
+    if (settings->value("viewMnemonicRegisters").toBool()) {
+        ui->actionMnemonicRegisters->trigger();
+    }
 
     // Source editor related actions
     connect(central_window, &QTabWidget::currentChanged, this, &MainWindow::central_tab_changed);
@@ -414,6 +417,7 @@ void MainWindow::set_speed() {
 
 void MainWindow::view_mnemonics_registers(bool enable) {
     machine::Instruction::set_symbolic_registers(enable);
+    settings->setValue("viewMnemonicRegisters", enable);
     if (program == nullptr) { return; }
     program->request_update_all();
 }
