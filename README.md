@@ -141,10 +141,11 @@ theses are released (**TODO**)
 
 ## Accepted Binary Formats
 
-The simulator accepts ELF statically linked executables compiled for RISC-V target (`--march=rv64g`). The simulator will
-automatically select endianness based on the ELF header. Simulation will execute as XLEN=32.
+The simulator accepts ELF statically linked executables compiled for RISC-V target (`--march=rv64g`).
+The simulator will automatically select endianness based on the ELF file header.
+Simulation will execute as XLEN=32 or XLEN=32 according to the ELF file header.
 
-- 64bit simulation is not yet supported.
+- 64-bit RISC-V ISA RV64IM and 32-bit RV32IM ELF executables are supported.
 - Compressed instructions are not yet supported.
 
 You can use compile the code for simulation using specialized RISC-V GCC/Binutils toolchain (`riscv32-elf`) or using
@@ -491,7 +492,11 @@ pairs of base address, length pairs stored in memory at address pass in `iov`.
   - **OP-IMM**: `addi, sll, slti, sltiu, xori, srli, srai, ori, andi, auipc, lui`
   - **BRANCH**: `beq, bne, btl, bge, bltu, bgtu`
   - **JUMP**: `jal, jalr`
-  - **SYSTEM**: `ecall, ebreak`
+  - **SYSTEM**: `ecall, ebreak, csrrw, csrrs, csrrc, csrrwi, csrrsi, csrrci`
+- **RV64G**:
+  - **LOAD/STORE**: `lwu, ld, sd`
+  - **OP-32**: `addw, subw, sllw, srlw, sraw, or, and`
+  - **OP-IMM-32**: `addiw, sllw, srliw, sraiw`
 - **Pseudoinstructions**
   - **BASIC**: `nop`
   - **LOAD**: `la, li`,
@@ -499,7 +504,8 @@ pairs of base address, length pairs stored in memory at address pass in `iov`.
   - **BRANCH**: `beqz, bnez, blez, bgez, bltz, bgtz, bgt, ble, bgtu, bleu`
   - **JUMP**: `j, jal, jr, jalr, ret, call, tail`
 - **Extensions**
-  - **RV32M**: `mul, mulh, mulhsu, div, divu, rem, remu`
+  - **RV32M/RV64M**: `mul, mulh, mulhsu, div, divu, rem, remu`
+  - **RV64M**: `mulw, divw, divuw, remw, remuw`
 
 For details about RISC-V, refer to the ISA specification:
 [https://riscv.org/technical/specifications/](https://riscv.org/technical/specifications/).
@@ -507,6 +513,8 @@ For details about RISC-V, refer to the ISA specification:
 ## Links to Resources and Similar Projects
 
 ### Resources and Publications
+
+- Computer architectures pages at Czech Technical University in Prague [https://comparch.edu.cvut.cz/](https://comparch.edu.cvut.cz/)
 
 - Dupak, J.; Pisa, P.; Stepanovsky, M.; Koci, K. [QtRVSim – RISC-V Simulator for Computer Architectures Classes](https://comparch.edu.cvut.cz/publications/ewC2022-Dupak-Pisa-Stepanovsky-QtRvSim.pdf) In: [embedded world Conference 2022](https://events.weka-fachmedien.de/embedded-world-conference). Haar: WEKA FACHMEDIEN GmbH, 2022. p. 775-778. ISBN 978-3-645-50194-1. ([Slides](https://comparch.edu.cvut.cz/slides/ewc22-qtrvsim.pdf))
 
