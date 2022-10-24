@@ -355,6 +355,10 @@ void MachineConfig::set_simulated_endian(Endian endian) {
     MachineConfig::simulated_endian = endian;
 }
 
+void MachineConfig::set_simulated_xlen(Xlen xlen) {
+    simulated_xlen = xlen;
+}
+
 bool MachineConfig::pipelined() const {
     return pipeline;
 }
@@ -435,6 +439,10 @@ CacheConfig *MachineConfig::access_cache_data() {
 
 Endian MachineConfig::get_simulated_endian() const {
     return simulated_endian;
+}
+
+Xlen MachineConfig::get_simulated_xlen() const {
+    return simulated_xlen;
 }
 
 bool MachineConfig::operator==(const MachineConfig &c) const {

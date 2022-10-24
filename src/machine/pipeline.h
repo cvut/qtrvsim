@@ -110,6 +110,7 @@ struct DecodeInterstage {
     bool branch_jalr = false; // JALR: write PC+4 to register and jump to ALU result
     bool stall = false;
     bool is_valid = false;
+    bool w_operation = true; // ALU or other operation is limited to word size (32-bits)
     bool alu_mod = false; // alternative versions of ADD and right-shift
     bool alu_pc = false;  // PC is input to ALU
     bool csr = false;     // Zicsr, implies csr read and csr write

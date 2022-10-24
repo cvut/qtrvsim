@@ -18,9 +18,15 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         mem_program_only = new Memory(machine_config.get_simulated_endian());
         program.to_memory(mem_program_only);
 
+        if (program.get_architecture_type() == ARCH64)
+            this->machine_config.set_simulated_xlen(Xlen::_64);
+        else
+            this->machine_config.set_simulated_xlen(Xlen::_32);
+
         if (load_symtab) {
             symtab = program.get_symbol_table();
         }
+
         program_end = program.end();
         if (program.get_executable_entry() != 0x0_addr) {
             regs->write_pc(program.get_executable_entry());
@@ -54,10 +60,11 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
 
     if (machine_config.pipelined()) {
         cr = new CorePipelined(
-            regs, predictor, cch_program, cch_data, controlst, Xlen::_32,
-            machine_config.hazard_unit());
+                    regs, predictor, cch_program, cch_data, controlst,
+                    machine_config.get_simulated_xlen(), machine_config.hazard_unit());
     } else {
-        cr = new CoreSingle(regs, predictor, cch_program, cch_data, controlst, Xlen::_32);
+        cr = new CoreSingle(regs, predictor, cch_program, cch_data, controlst,
+                            machine_config.get_simulated_xlen());
     }
     connect(
         this, &Machine::set_interrupt_signal, controlst, &CSR::ControlState::set_interrupt_signal);
