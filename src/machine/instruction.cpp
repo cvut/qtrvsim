@@ -151,14 +151,14 @@ static const struct InstructionMap LOAD_map[] = {
     IM_UNKNOWN,
 };
 
-static const struct InstructionMap SRI_map[] = {
-    {"srli", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x00005013,0xfe00707f, { .flags = FLAGS_ALU_I }}, // SRLI
-    {"srai", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x40005013,0xfe00707f, { .flags = (FLAGS_ALU_I | IMF_ALU_MOD) }}, // SRAI
+static const struct InstructionMap SRI_map[] = { // 0xfe00707f mask changed to 0xfc00707f to support RV64I
+    {"srli", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x00005013,0xfc00707f, { .flags = FLAGS_ALU_I }}, // SRLI
+    {"srai", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x40005013,0xfc00707f, { .flags = (FLAGS_ALU_I | IMF_ALU_MOD) }}, // SRAI
 };
 
 static const struct InstructionMap OP_IMM_map[] = {
     {"addi",  IT_I, { .alu_op=AluOp::ADD },  NOMEM, nullptr, {"d", "s", "j"}, 0x00000013,0x0000707f, { .flags = FLAGS_ALU_I }}, // ADDI
-    {"slli",  IT_I, { .alu_op=AluOp::SLL },  NOMEM, nullptr, {"d", "s", ">"}, 0x00001013,0xfe00707f, { .flags = FLAGS_ALU_I }}, // SLLI
+    {"slli",  IT_I, { .alu_op=AluOp::SLL },  NOMEM, nullptr, {"d", "s", ">"}, 0x00001013,0xfc00707f, { .flags = FLAGS_ALU_I }}, // SLLI
     {"slti",  IT_I, { .alu_op=AluOp::SLT },  NOMEM, nullptr, {"d", "s", "j"}, 0x00002013,0x0000707f, { .flags = FLAGS_ALU_I }}, // SLTI
     {"sltiu", IT_I, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"d", "s", "j"}, 0x00003013,0x0000707f, { .flags = FLAGS_ALU_I }}, // SLTIU
     {"xori",  IT_I, { .alu_op=AluOp::XOR },  NOMEM, nullptr, {"d", "s", "j"}, 0x00004013,0x0000707f, { .flags = FLAGS_ALU_I }}, // XORI
