@@ -120,7 +120,7 @@ if (NOT "${SANITIZERS}" MATCHES "none" AND NOT "${WASM}" AND NOT "${MINGW}")
 endif ()
 
 
-if ("${BUILD_RELEASE}")
+if (NOT "${BUILD_DEBUG}")
     message(STATUS "Debug prints globally suppressed.")
     add_definitions(-DQT_NO_DEBUG_OUTPUT=1)
 endif ()
