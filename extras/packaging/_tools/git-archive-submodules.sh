@@ -23,7 +23,7 @@ mkdir -p ${TMPDIR}
 pushd ${SOURCE} || exit
 
 # create module archive
-${GIT} archive --prefix=${TARPREFIX}/ -o ${TMPDIR}${TARPREFIX}.tar v${TARVERSION}
+${GIT} archive --prefix=${TARPREFIX}/ -o ${TMPDIR}${TARPREFIX}.tar HEAD
 if [[ ! -f "${TMPDIR}${TARPREFIX}.tar" ]]; then
   echo "ERROR: base sourcecode archive was not created. check git output in log above."
   exit 1
