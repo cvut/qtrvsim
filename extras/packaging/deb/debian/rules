@@ -10,4 +10,4 @@ export QT_SELECT := qt5
 #  --parallel
 
 %:
-	dh $@
+	dh $@ --buildsystem=cmake
