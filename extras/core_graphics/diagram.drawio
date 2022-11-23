@@ -776,7 +776,7 @@
             <mxGeometry x="347" y="100" width="7" height="8" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="0" tags="simple forwarding pipeline" component="bool-value" source="decode-RegWrite" id="uWEq7-W_z53UrtFael4O-67">
+        <UserObject label="0" tags="simple forwarding pipeline" component="bool-value" source="wb-RegWrite" id="uWEq7-W_z53UrtFael4O-67">
           <mxCell style="rounded=1;fontFamily=sans-serif;fontSize=6;arcSize=1;align=center;spacing=0;comic=0;allowArrows=0;connectable=0;recursiveResize=0;editable=0;expand=0;resizable=0;rotatable=0;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
             <mxGeometry x="255" y="233" width="7" height="8" as="geometry" />
           </mxCell>

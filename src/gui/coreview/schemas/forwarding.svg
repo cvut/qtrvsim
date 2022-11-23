@@ -722,9 +722,9 @@
             </g>
         </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-67"
-           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple forwarding pipeline&quot; component=&quot;bool-value&quot; source=&quot;decode-RegWrite&quot;/&gt;"
+           content="&lt;UserObject label=&quot;0&quot; tags=&quot;simple forwarding pipeline&quot; component=&quot;bool-value&quot; source=&quot;wb-RegWrite&quot;/&gt;"
            data-label="0" data-tags="simple forwarding pipeline" data-component="bool-value"
-           data-source="decode-RegWrite">
+           data-source="wb-RegWrite">
             <rect x="254" y="233" width="7" height="8" rx="0.07" ry="0.07" fill="rgb(255, 255, 255)"
                   stroke="rgb(0, 0, 0)"/>
             <g fill="rgb(0, 0, 0)" font-family="sans-serif" text-anchor="middle" font-size="6px">

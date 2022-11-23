@@ -74,7 +74,7 @@ using MultiTextData = pair<const unsigned &, const std::unordered_map<unsigned, 
 const struct {
     const unordered_map<QStringView, Lens<CoreState, bool>> BOOL {
         { QStringLiteral("decode-RegWrite"), LENS(CoreState, pipeline.decode.result.regwrite) },
-        { QStringLiteral("decode-MemToReg"), LENS(CoreState, pipeline.decode.result.regwrite) },
+        { QStringLiteral("decode-MemToReg"), LENS(CoreState, pipeline.decode.result.memread) },
         { QStringLiteral("decode-MemWrite"), LENS(CoreState, pipeline.decode.result.memwrite) },
         { QStringLiteral("decode-MemRead"), LENS(CoreState, pipeline.decode.result.memread) },
         { QStringLiteral("decode-BranchBxx"), LENS(CoreState, pipeline.decode.result.branch_bxx) },

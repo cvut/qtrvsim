@@ -101,7 +101,7 @@ struct DecodeInterstage {
     bool memread = false;                           // If memory should be read
     bool memwrite = false;                          // If memory should write input
     bool alusrc = false;      // If second value to alu is immediate value (rt used otherwise)
-    bool regwrite = true;     // If output should be written back to register
+    bool regwrite = false;    // If output should be written back to register
     bool alu_req_rs = false;  // requires rs value for ALU
     bool alu_req_rt = false;  // requires rt value for ALU or SW
     bool branch_bxx = false;  // branch instruction
@@ -110,10 +110,10 @@ struct DecodeInterstage {
     bool branch_jalr = false; // JALR: write PC+4 to register and jump to ALU result
     bool stall = false;
     bool is_valid = false;
-    bool w_operation = true; // ALU or other operation is limited to word size (32-bits)
-    bool alu_mod = false; // alternative versions of ADD and right-shift
-    bool alu_pc = false;  // PC is input to ALU
-    bool csr = false;     // Zicsr, implies csr read and csr write
+    bool w_operation = false; // ALU or other operation is limited to word size (32-bits)
+    bool alu_mod = false;     // alternative versions of ADD and right-shift
+    bool alu_pc = false;      // PC is input to ALU
+    bool csr = false;         // Zicsr, implies csr read and csr write
     bool csr_to_alu = false;
     bool csr_write = false;
     bool insert_stall_before = false;
@@ -168,7 +168,7 @@ struct ExecuteInterstage {
     RegisterId num_rd = 0;
     bool memread = false;
     bool memwrite = false;
-    bool regwrite = true;
+    bool regwrite = false;
     bool is_valid = false;
     bool branch_bxx = false;
     bool branch_jal = false;
@@ -240,7 +240,7 @@ struct MemoryInterstage {
     ExceptionCause excause = EXCAUSE_NONE;
     RegisterId num_rd = 0;
     bool memtoreg = false;
-    bool regwrite = true;
+    bool regwrite = false;
     bool is_valid = false;
     bool csr_written = false;
 
@@ -285,7 +285,7 @@ struct WritebackInternalState {
     Address inst_addr = STAGEADDR_NONE;
     RegisterValue value = 0;
     RegisterId num_rd = 0;
-    bool regwrite = true;
+    bool regwrite = false;
     bool memtoreg = false;
 };
 
