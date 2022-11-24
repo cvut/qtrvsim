@@ -330,4 +330,43 @@ void TestMemory::memory_read_ctl() {
     }
 }
 
+void TestMemory::memory_memtest_data() {
+    QTest::addColumn<Endian>("endian");
+    QTest::addColumn<Offset>("address");
+
+    for (auto endian : default_endians) {
+        for (auto address : default_addresses) {
+            QTest::addRow("endian=%s, address=0x%lx", to_string(endian), address)
+                << endian << address;
+        }
+    }
+}
+
+void TestMemory::memory_memtest() {
+    QFETCH(Endian, endian);
+    QFETCH(Offset, address);
+    Address frontend_address(address);
+    Memory mem(endian);
+    TrivialBus bus(&mem);
+
+    uint64_t range_to_test = 128 * 1024;
+
+    if (frontend_address.get_raw() < 0x100000000 &&
+        0x100000000 - range_to_test < frontend_address.get_raw())
+        range_to_test = uint64_t(Address(0x100000000) - frontend_address);
+
+    for (uint64_t o = 0; o < range_to_test; o += 4) {
+        bus.write_u32(frontend_address + o, uint32_t(o));
+    }
+
+    for (uint64_t o = 0; o < range_to_test; o += 4) {
+        QCOMPARE(bus.read_u32(frontend_address + o), uint32_t(o));
+        bus.write_u32(frontend_address + o, uint32_t(o) ^ 0xaabbccdd);
+    }
+
+    for (uint64_t o = 0; o < range_to_test; o += 4) {
+        QCOMPARE(bus.read_u32(frontend_address + o), uint32_t(o) ^ 0xaabbccdd);
+    }
+}
+
 QTEST_APPLESS_MAIN(TestMemory)

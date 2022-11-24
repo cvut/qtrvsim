@@ -9,7 +9,7 @@ class TestMemory : public QObject {
 private:
     static void integer_decomposition();
 
-public slots:
+private slots:
     static void memory();
     static void memory_data();
     static void memory_section();
@@ -20,6 +20,8 @@ public slots:
     static void memory_write_ctl();
     static void memory_read_ctl_data();
     static void memory_read_ctl();
+    static void memory_memtest_data();
+    static void memory_memtest();
 };
 
 #endif // MEMORY_TEST_H
