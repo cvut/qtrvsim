@@ -3,6 +3,7 @@
 #include "common/logging.h"
 #include "common/logging_format_colors.h"
 #include "machine/machineconfig.h"
+#include "os_emulation/ossyscall.h"
 #include "msgreport.h"
 #include "reporter.h"
 #include "tracer.h"
@@ -48,8 +49,6 @@ void create_parser(QCommandLineParser &p) {
                   "Print general purpose register changes. You can use * for "
                   "all registers.",
                   "REG" });
-    p.addOption({ { "trace-lo", "tr-lo" }, "Print LO register changes." });
-    p.addOption({ { "trace-hi", "tr-hi" }, "Print HI register changes." });
     p.addOption({ { "dump-registers", "d-regs" }, "Dump registers state at program exit." });
     p.addOption({ "dump-cache-stats", "Dump cache statistics at program exit." });
     p.addOption({ "dump-cycles", "Dump number of CPU cycles till program end." });
@@ -76,6 +75,9 @@ void create_parser(QCommandLineParser &p) {
     p.addOption({ { "serial-in", "serin" }, "File connected to the serial port input.", "FNAME" });
     p.addOption(
         { { "serial-out", "serout" }, "File connected to the serial port output.", "FNAME" });
+    p.addOption({ { "os-emulation", "osemu" }, "Operating system emulation." });
+    p.addOption({ { "std-out", "stdout" }, "File connected to the syscall standard output.", "FNAME" });
+    p.addOption({ { "os-fs-root", "osfsroot" }, "Emulated system root/prefix for opened files", "DIR" });
 }
 
 void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const QString &which) {
@@ -182,6 +184,16 @@ void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
 
     configure_cache(*config.access_cache_data(), parser.values("d-cache"), "data");
     configure_cache(*config.access_cache_program(), parser.values("i-cache"), "instruction");
+
+    config.set_osemu_enable(parser.isSet("os-emulation"));
+    config.set_osemu_known_syscall_stop(false);
+
+    int siz = parser.values("os-fs-root").size();
+    if (siz >= 1) {
+        QString osemu_fs_root = parser.values("os-fs-root").at(siz - 1);
+        if (osemu_fs_root.length() > 0)
+            config.set_osemu_fs_root(osemu_fs_root);
+    }
 }
 
 void configure_tracer(QCommandLineParser &p, Tracer &tr) {
@@ -276,9 +288,9 @@ void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *s
 }
 
 void configure_serial_port(QCommandLineParser &p, SerialPort *ser_port) {
-    int siz;
     CharIOHandler *ser_in = nullptr;
     CharIOHandler *ser_out = nullptr;
+    int siz;
 
     if (!ser_port) { return; }
 
@@ -322,6 +334,41 @@ void configure_serial_port(QCommandLineParser &p, SerialPort *ser_port) {
         QObject::connect(
             ser_port, &SerialPort::tx_byte, ser_out,
             QOverload<unsigned>::of(&CharIOHandler::writeByte));
+    }
+}
+
+void configure_osemu(QCommandLineParser &p, MachineConfig &config, Machine *machine) {
+    CharIOHandler *std_out = nullptr;
+    int siz;
+
+    siz = p.values("std-out").size();
+    if (siz >= 1) {
+        auto *qf = new QFile(p.values("std-out").at(siz - 1));
+        std_out = new CharIOHandler(qf, machine);
+        if (!std_out->open(QFile::WriteOnly)) {
+            fprintf(stderr, "Emulated system standard output file cannot be open for write.\n");
+            QCoreApplication::exit(1);
+        }
+    }
+
+    if (config.osemu_enable()) {
+        auto *osemu_handler = new osemu::OsSyscallExceptionHandler(
+            config.osemu_known_syscall_stop(), config.osemu_unknown_syscall_stop(),
+            config.osemu_fs_root());
+        machine->register_exception_handler(machine::EXCAUSE_SYSCALL, osemu_handler);
+        if (std_out) {
+            machine->connect(
+                osemu_handler, &osemu::OsSyscallExceptionHandler::char_written,
+                std_out, QOverload<int, unsigned>::of(&CharIOHandler::writeByte));
+        }
+        /*connect(
+            osemu_handler, &osemu::OsSyscallExceptionHandler::rx_byte_pool, terminal,
+            &TerminalDock::rx_byte_pool);*/
+        machine->set_step_over_exception(machine::EXCAUSE_SYSCALL, true);
+        machine->set_stop_on_exception(machine::EXCAUSE_SYSCALL, false);
+    } else {
+        machine->set_step_over_exception(machine::EXCAUSE_SYSCALL, false);
+        machine->set_stop_on_exception(machine::EXCAUSE_SYSCALL, config.osemu_exception_stop());
     }
 }
 
@@ -414,6 +461,8 @@ int main(int argc, char *argv[]) {
     configure_reporter(p, r, machine.symbol_table());
 
     configure_serial_port(p, machine.serial_port());
+
+    configure_osemu(p, config, &machine);
 
     if (asm_source) {
         MsgReport msg_report(&app);
