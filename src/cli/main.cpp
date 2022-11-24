@@ -205,7 +205,8 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
         if (p.isSet("trace-writeback")) { tr.trace_writeback = true; }
     }
 
-    if (p.isSet("trace-pc")) { tr.trace_regs_gp = true; }
+    if (p.isSet("trace-pc")) { tr.trace_pc = true; }
+    if (p.isSet("trace-gp")) { tr.trace_regs_gp = true; }
 
     QStringList gps = p.values("trace-gp");
     for (int i = 0; i < gps.size(); i++) {
