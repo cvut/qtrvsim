@@ -25,7 +25,8 @@ private:
 public:
     std::array<bool, machine::REGISTER_COUNT> regs_to_trace = {};
     bool trace_fetch = false, trace_decode = false, trace_execute = false, trace_memory = false,
-         trace_writeback = false, trace_pc = false, trace_regs_gp = false;
+         trace_writeback = false, trace_pc = false, trace_wrmem = false,  trace_rdmem = false,
+         trace_regs_gp = false;
 };
 
 #endif // TRACER_H

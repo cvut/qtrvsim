@@ -45,6 +45,8 @@ void create_parser(QCommandLineParser &p) {
     p.addOption({ { "trace-writeback", "tr-writeback" },
                   "Trace instruction in write back stage. (only for pipelined core)" });
     p.addOption({ { "trace-pc", "tr-pc" }, "Print program counter register changes." });
+    p.addOption({ { "trace-wrmem", "tr-wr" }, "Trace writes into memory." });
+    p.addOption({ { "trace-rdmem", "tr-rd" }, "Trace reads from memory." });
     p.addOption({ { "trace-gp", "tr-gp" },
                   "Print general purpose register changes. You can use * for "
                   "all registers.",
@@ -224,6 +226,9 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
             }
         }
     }
+
+    if (p.isSet("trace-rdmem")) { tr.trace_rdmem = true; }
+    if (p.isSet("trace-wrmem")) { tr.trace_wrmem = true; }
 
     // TODO
 }

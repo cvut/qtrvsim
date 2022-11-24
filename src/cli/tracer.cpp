@@ -22,6 +22,7 @@ void Tracer::step_output() {
     const auto &if_id = core_state.pipeline.fetch.final;
     const auto &id_ex = core_state.pipeline.decode.final;
     const auto &ex_mem = core_state.pipeline.execute.final;
+    const auto &mem = core_state.pipeline.memory.internal;
     const auto &mem_wb = core_state.pipeline.memory.final;
     const auto &wb = core_state.pipeline.writeback.internal;
     if (trace_fetch) { trace_instruction_in_stage("Fetch", if_id, wb); }
@@ -35,5 +36,13 @@ void Tracer::step_output() {
     if (trace_pc) { printf("PC: %" PRIx64 "\n", if_id.inst_addr.get_raw()); }
     if (trace_regs_gp && wb.regwrite && regs_to_trace.at(wb.num_rd)) {
         printf("GP %zu: %" PRIx64 "\n", size_t(wb.num_rd), wb.value.as_u64());
+    }
+    if (trace_rdmem && mem_wb.memtoreg) {
+        printf("MEM[%" PRIx64 "]:  RD %" PRIx64 "\n", mem_wb.mem_addr.get_raw(),
+               mem_wb.towrite_val.as_u64());
+    }
+    if (trace_wrmem && mem.memwrite) {
+        printf("MEM[%" PRIx64 "]:  WR %" PRIx64 "\n", mem_wb.mem_addr.get_raw(),
+               mem.mem_write_val.as_u64());
     }
 }
