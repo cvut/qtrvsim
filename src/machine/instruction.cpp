@@ -71,7 +71,7 @@ static const ArgumentDesc arg_desc_list[] = {
     // U-type immediate for LUI and AUIPC (20bits)
     ArgumentDesc('u', 'n', 0, 0xfffff000, { { { 20, 12 } }, 0 }),
     // B-type immediate for branches (12 bits)
-    ArgumentDesc('p', 'p', -0x800, 0x7ff, { { { 4, 8 }, { 6, 25 }, { 1, 7 }, { 1, 31 } }, 1 }),
+    ArgumentDesc('p', 'p', -0x1000, 0x0fff, { { { 4, 8 }, { 6, 25 }, { 1, 7 }, { 1, 31 } }, 1 }),
     // Offset immediate for load instructions (12 bits)
     ArgumentDesc('o', 'o', -0x800, 0x7ff, { { { 12, 20 } }, 0 }),
     // Offset immediate for store instructions (12 bits)
@@ -442,7 +442,7 @@ int32_t Instruction::immediate() const {
     case I: ret = extend(MASK(12, 20), 12); break;
     case S: ret = extend(MASK(7, 25) << 5 | MASK(5, 7), 12); break;
     case B:
-        ret = extend(MASK(4, 8) << 1 | MASK(6, 25) << 5 | MASK(1, 7) << 11 | MASK(1, 31) << 12, 12);
+        ret = extend(MASK(4, 8) << 1 | MASK(6, 25) << 5 | MASK(1, 7) << 11 | MASK(1, 31) << 12, 13);
         break;
     case U: ret = extend(MASK(20, 12) << 12, 32); break;
     case J:
