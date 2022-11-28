@@ -14,7 +14,6 @@ namespace machine { namespace CSR {
         Status_EXL = 0x00000002,
         Status_ERL = 0x00000004,
         Status_IntMask = 0x0000ff00,
-        Status_Int0 = 0x00000100,
     };
 
     ControlState::ControlState() {
@@ -91,8 +90,8 @@ namespace machine { namespace CSR {
     // TODO this is mips
     void ControlState::set_interrupt_signal(uint irq_num, bool active) {
         if (irq_num >= 8) { return; }
-        uint64_t mask = Status_Int0 << irq_num;
-        size_t reg_id = Id::MCAUSE;
+        uint64_t mask = 1 << irq_num;
+        size_t reg_id = Id::MIP;
         RegisterValue value = register_data[reg_id];
         if (active) {
             value = value.as_xlen(xlen) | mask;
