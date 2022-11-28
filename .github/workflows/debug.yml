@@ -116,12 +116,33 @@ jobs:
         with:
           name: riscv-official-tests
 
-      - name: Official RISC-V tests
+      - name: Official RISC-V tests (single cycle)
         # The testing python script does not support Ubuntu 18
         if: matrix.config.os != 'ubuntu-18.04'
         working-directory: ${{ github.workspace }}/tests/riscv-official
         #run: python qtrvsim_tester.py --no-64  ${{ github.workspace }}/build/target/qtrvsim_cli
         run: python qtrvsim_tester.py -M ${{ github.workspace }}/build/target/qtrvsim_cli
+
+      - name: Official RISC-V tests (pipelined)
+        # The testing python script does not support Ubuntu 18
+        if: matrix.config.os != 'ubuntu-18.04'
+        working-directory: ${{ github.workspace }}/tests/riscv-official
+        #run: python qtrvsim_tester.py --no-64  ${{ github.workspace }}/build/target/qtrvsim_cli
+        run: python qtrvsim_tester.py -M --pipeline ${{ github.workspace }}/build/target/qtrvsim_cli
+
+      - name: Official RISC-V tests (single cycle, cached)
+        # The testing python script does not support Ubuntu 18
+        if: matrix.config.os != 'ubuntu-18.04'
+        working-directory: ${{ github.workspace }}/tests/riscv-official
+        #run: python qtrvsim_tester.py --no-64  ${{ github.workspace }}/build/target/qtrvsim_cli
+        run: python qtrvsim_tester.py -M --cache ${{ github.workspace }}/build/target/qtrvsim_cli
+
+      - name: Official RISC-V tests (pipelined, cached)
+        # The testing python script does not support Ubuntu 18
+        if: matrix.config.os != 'ubuntu-18.04'
+        working-directory: ${{ github.workspace }}/tests/riscv-official
+        #run: python qtrvsim_tester.py --no-64  ${{ github.workspace }}/build/target/qtrvsim_cli
+        run: python qtrvsim_tester.py -M --pipeline --cache ${{ github.workspace }}/build/target/qtrvsim_cli
 
       - name: Store created artifacts
         uses: actions/upload-artifact@v2
