@@ -51,6 +51,8 @@ namespace machine { namespace CSR {
         bool operator>(const Address &rhs) const { return rhs < *this; }
         bool operator<=(const Address &rhs) const { return !(rhs < *this); }
         bool operator>=(const Address &rhs) const { return !(*this < rhs); }
+        bool operator==(const Address &rhs) const { return data == rhs.data; }
+        bool operator!=(const Address &rhs) const { return data != rhs.data; }
     };
 
     constexpr Address operator"" _csr(unsigned long long literal) {

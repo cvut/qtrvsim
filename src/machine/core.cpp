@@ -240,7 +240,7 @@ DecodeState Core::decode(const FetchInterstage &dt) {
     CSR::Address csr_address = (flags & IMF_CSR) ? dt.inst.csr_address() : CSR::Address(0);
     RegisterValue csr_read_val
         = ((control_state != nullptr && (flags & IMF_CSR))) ? control_state->read(csr_address) : 0;
-    bool csr_write = (flags & IMF_CSR) && (flags & IMF_ALU_REQ_RS) && (num_rs != 0);
+    bool csr_write = (flags & IMF_CSR) && (!(flags & IMF_CSR_TO_ALU) || (num_rs != 0));
 
     if ((flags & IMF_EXCEPTION) && (excause == EXCAUSE_NONE)) {
         if (flags & IMF_EBREAK) {
@@ -398,7 +398,7 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
     bool csr_written = false;
     if (control_state != nullptr && dt.is_valid && dt.excause == EXCAUSE_NONE) {
         control_state->increment_internal(CSR::Id::MINSTRET, 1);
-        if (dt.csr_write && dt.num_rd != 0) {
+        if (dt.csr_write) {
             control_state->write(dt.csr_address, dt.alu_val);
             csr_written = true;
         }
