@@ -10,6 +10,7 @@
 #include <QObject>
 #include <QString>
 #include <cstdint>
+#include <unordered_map>
 
 namespace machine { namespace CSR {
     /** CSR register names mapping the registers to continuous locations in internal buffer */
@@ -159,7 +160,7 @@ namespace machine { namespace CSR {
      * memory) */
     class RegisterMap {
         bool initialized = false;
-        std::map<Address, size_t> map;
+        std::unordered_map<Address, size_t> map;
 
         void init() {
             for (size_t i = 0; i < REGISTERS.size(); i++) {
