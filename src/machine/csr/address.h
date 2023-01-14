@@ -60,4 +60,11 @@ namespace machine { namespace CSR {
     }
 }} // namespace machine::CSR
 
+template<>
+struct std::hash<machine::CSR::Address> {
+    std::size_t operator()(machine::CSR::Address const &addr) const noexcept {
+        return std::hash<decltype(addr.data)> {}(addr.data);
+    }
+};
+
 #endif // QTRVSIM_CSR_ADDRESS_H
