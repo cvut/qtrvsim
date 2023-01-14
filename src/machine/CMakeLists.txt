@@ -31,7 +31,6 @@ set(machine_HEADERS
 		core.h
 		core/core_state.h
 		csr/address.h
-		csr/register_desc.h
 		instruction.h
 		machine.h
 		machineconfig.h

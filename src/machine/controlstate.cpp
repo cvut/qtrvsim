@@ -134,7 +134,7 @@ namespace machine { namespace CSR {
 
     void ControlState::write_internal(size_t internal_id, RegisterValue value) {
         RegisterDesc desc = REGISTERS[internal_id];
-        (*desc.write_handler)(desc, register_data[internal_id], value);
+        (this->*desc.write_handler)(desc, register_data[internal_id], value);
         write_signal(internal_id, value);
     }
     void ControlState::increment_internal(size_t internal_id, uint64_t amount) {
