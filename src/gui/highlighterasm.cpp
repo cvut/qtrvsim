@@ -3,7 +3,7 @@
 #include "highlighterasm.h"
 
 #include "QStringList"
-#include "machine/controlstate.h"
+#include "machine/csr/controlstate.h"
 #include "machine/instruction.h"
 
 HighlighterAsm::HighlighterAsm(QTextDocument *parent) : QSyntaxHighlighter(parent) {
