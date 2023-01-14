@@ -110,14 +110,14 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (NOT "${SANITIZERS}" MATCHES "none" AND NOT "${WASM}" AND NOT "${MINGW}")
+if(NOT "${SANITIZERS}" MATCHES "none" AND NOT "${WASM}" AND NOT "${MINGW}" AND NOT "${MSVC}")
     set(CMAKE_C_FLAGS_DEBUG
             "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS} -g -g3 -ggdb")
     set(CMAKE_CXX_FLAGS_DEBUG
             "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS} -g -g3 -ggdb")
     set(CMAKE_LINKER_FLAGS_DEBUG
             "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS}")
-endif ()
+endif()
 
 
 if (NOT "${BUILD_DEBUG}")

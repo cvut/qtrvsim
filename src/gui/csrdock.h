@@ -1,7 +1,7 @@
 #ifndef CSRDOCK_H
 #define CSRDOCK_H
 
-#include "machine/csr/register_desc.h"
+#include "machine/controlstate.h"
 #include "machine/machine.h"
 #include "statictable.h"
 

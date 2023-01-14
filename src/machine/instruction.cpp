@@ -3,7 +3,7 @@
 #include "common/logging.h"
 #include "common/math/bit_ops.h"
 #include "common/string_utils.h"
-#include "csr/register_desc.h"
+#include "controlstate.h"
 #include "simulator_exception.h"
 #include "utils.h"
 

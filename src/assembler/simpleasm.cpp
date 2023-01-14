@@ -1,6 +1,5 @@
 #include "simpleasm.h"
 
-#include "machine/csr/register_desc.h"
 #include "machine/memory/address.h"
 #include "machine/memory/memory_utils.h"
 
@@ -9,7 +8,6 @@
 #include <QFileInfo>
 #include <QObject>
 #include <QString>
-#include <utility>
 
 using namespace fixmatheval;
 using machine::Address;
