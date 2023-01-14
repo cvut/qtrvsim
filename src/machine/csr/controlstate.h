@@ -2,8 +2,8 @@
 #define CONTROLSTATE_H
 
 #include "common/math/bit_ops.h"
+#include "csr/address.h"
 #include "machinedefs.h"
-#include "memory/address.h"
 #include "register_value.h"
 #include "simulator_exception.h"
 

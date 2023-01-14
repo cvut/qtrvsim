@@ -2,8 +2,8 @@
 #define CORE_H
 
 #include "common/memory_ownership.h"
-#include "controlstate.h"
 #include "core/core_state.h"
+#include "csr/controlstate.h"
 #include "instruction.h"
 #include "machineconfig.h"
 #include "memory/address.h"

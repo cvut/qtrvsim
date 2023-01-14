@@ -1,6 +1,6 @@
 #include "csrdock.h"
 
-#include "controlstate.h"
+#include "csr/controlstate.h"
 
 CsrDock::CsrDock(QWidget *parent) : QDockWidget(parent) {
     scrollarea = new QScrollArea(this);
