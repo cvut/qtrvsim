@@ -9,7 +9,6 @@
 
 #include <QChar>
 #include <QMultiMap>
-#include <QStringList>
 #include <cctype>
 #include <cstring>
 #include <set>
@@ -121,7 +120,7 @@ struct InstructionMap {
     AccessControl mem_ctl;
     const struct InstructionMap *subclass; // when subclass is used then flags
                                            // has special meaning
-    const QList<QString> args;
+    const cvector<QString, 3> args;
     uint32_t code;
     uint32_t mask;
     union {
@@ -978,9 +977,9 @@ Instruction Instruction::base_from_tokens(
         uint32_t inst_code = iter_range.first.value();
         const InstructionMap &imap = InstructionMapFind(inst_code);
 
-        if (inst.fields.count() != imap.args.count()) { continue; }
+        if (inst.fields.count() != (int)imap.args.size()) { continue; }
 
-        for (int field_index = 0; field_index < imap.args.count(); field_index += 1) {
+        for (int field_index = 0; field_index < (int)imap.args.size(); field_index += 1) {
             const QString &arg = imap.args[field_index];
             QString field_token = inst.fields[field_index];
             inst_code |= parse_field(
