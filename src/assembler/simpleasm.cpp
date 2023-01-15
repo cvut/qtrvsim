@@ -78,7 +78,7 @@ void SimpleAsm::setup(
     this->symtab->setSymbol("XLEN", static_cast<uint64_t>(xlen), sizeof(uint64_t));
 }
 
-static const auto wordArg = machine::BitArg({ { 32, 0 } }, 0);
+static const machine::BitArg wordArg = { { { 32, 0 } }, 0 };
 
 bool SimpleAsm::process_line(
     const QString &line,
