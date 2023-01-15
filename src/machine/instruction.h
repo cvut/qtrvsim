@@ -1,6 +1,7 @@
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
+#include "common/containers/cvector.h"
 #include "csr/address.h"
 #include "execute/alu.h"
 #include "machinedefs.h"
@@ -18,6 +19,51 @@ static constexpr std::array<const char *const, 32> Rv_regnames = {
     "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
     "a1",   "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
     "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
+};
+
+struct BitArg {
+    struct Field {
+        uint8_t count;
+        uint8_t offset;
+        template<typename T>
+        [[nodiscard]] T decode(T val) const {
+            return (val >> offset) & ((1L << count) - 1);
+        }
+        template<typename T>
+        [[nodiscard]] T encode(T val) const {
+            return ((val & ((1L << count) - 1)) << offset);
+        }
+    };
+
+    const cvector<Field, 4> fields;
+    const size_t shift;
+
+    BitArg(                             // NOLINT(google-explicit-constructor)
+        const decltype(fields) &fields, // NOLINT(modernize-pass-by-value)
+        size_t shift = 0)
+        : fields(fields)
+        , shift(shift) {}
+
+    [[nodiscard]] decltype(fields)::const_iterator begin() const { return fields.cbegin(); }
+    [[nodiscard]] decltype(fields)::const_iterator end() const { return fields.cend(); }
+    [[nodiscard]] uint32_t decode(uint32_t ins) const {
+        uint32_t ret = 0;
+        size_t offset = 0;
+        for (Field field : *this) {
+            ret |= field.decode(ins) << offset;
+            offset += field.count;
+        }
+        return ret << shift;
+    }
+    [[nodiscard]] uint32_t encode(uint32_t imm) const {
+        uint32_t ret = 0;
+        imm >>= shift;
+        for (Field field : *this) {
+            ret |= field.encode(imm);
+            imm >>= field.count;
+        }
+        return ret;
+    }
 };
 
 enum InstructionFlags : unsigned {
@@ -50,45 +96,6 @@ enum InstructionFlags : unsigned {
     IMF_CSR_TO_ALU = 1L << 20, /**< Instruction modifies the current value */
     IMF_ALU_RS_ID = 1L << 21,
     // TODO do we want to add those signals to the visualization?
-};
-
-struct BitArg {
-    struct Field {
-        const uint8_t count;
-        const uint8_t offset;
-        template<typename T>
-        T decode(T val) const {
-            return (val >> offset) & ((1L << count) - 1);
-        }
-        template<typename T>
-        T encode(T val) const {
-            return ((val & ((1L << count) - 1)) << offset);
-        }
-    };
-    const std::vector<Field> fields;
-    const size_t shift;
-
-    BitArg(const std::vector<Field> fields, size_t shift = 0) : fields(fields), shift(shift) {}
-    std::vector<Field>::const_iterator begin() const { return fields.begin(); }
-    std::vector<Field>::const_iterator end() const { return fields.end(); }
-    uint32_t decode(uint32_t ins) const {
-        uint32_t ret = 0;
-        size_t offset = 0;
-        for (Field field : *this) {
-            ret |= field.decode(ins) << offset;
-            offset += field.count;
-        }
-        return ret << shift;
-    }
-    uint32_t encode(uint32_t imm) const {
-        uint32_t ret = 0;
-        imm >>= shift;
-        for (Field field : *this) {
-            ret |= field.encode(imm);
-            imm >>= field.count;
-        }
-        return ret;
-    }
 };
 
 /**
