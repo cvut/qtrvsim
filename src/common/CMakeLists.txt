@@ -8,6 +8,7 @@ set(common_HEADERS
 		string_utils.h
 		logging.h
 		logging_format_colors.h
+		containers/cvector.h
 		math/bit_ops.h
 		memory_ownership.h
 		type_utils/lens.h
