@@ -20,6 +20,9 @@ LOG_CATEGORY("machine.instruction");
 using namespace machine;
 using std::underlying_type;
 
+namespace machine {
+}
+
 struct ArgumentDesc {
     char name;
     /**
@@ -110,7 +113,9 @@ bool argdesbycode_filled = fill_argdesbycode();
 //  using zero initialization.
 #define IM_UNKNOWN                                                                                 \
     {                                                                                              \
-        "unknown", Instruction::UNKNOWN, NOALU, NOMEM, nullptr, {}, 0, 0, { 0 }                    \
+        "unknown", Instruction::UNKNOWN, NOALU, NOMEM, nullptr, {}, 0, 0, {                        \
+            0                                                                                      \
+        }                                                                                          \
     }
 
 struct InstructionMap {
@@ -125,7 +130,7 @@ struct InstructionMap {
     uint32_t mask;
     union {
         decltype(underlying_type<InstructionFlags>::type()) flags;
-        BitArg::Field subfield;
+        BitField subfield;
     };
 };
 
@@ -370,7 +375,7 @@ static const struct InstructionMap C_inst_map[] = {
 
 // clang-format on
 
-const BitArg::Field instruction_map_opcode_field = { 2, 0 };
+const BitField instruction_map_opcode_field = { 2, 0 };
 
 static inline const struct InstructionMap &InstructionMapFind(uint32_t code) {
     const struct InstructionMap *im = &C_inst_map[instruction_map_opcode_field.decode(code)];
@@ -582,7 +587,7 @@ QMultiMap<QString, uint32_t> str_to_instruction_code_map;
 
 void instruction_from_string_build_base(
     const InstructionMap *im,
-    BitArg::Field field,
+    BitField field,
     uint32_t base_code) {
     uint32_t code;
     uint8_t bits = field.count;
