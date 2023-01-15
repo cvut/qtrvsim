@@ -9,7 +9,7 @@ Implemented to support following courses:
 - [B35APO - Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b35apo)
 - [B4M35PAP - Advanced Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b4m35pap/start)
 
-[Faculty of Electrical Engineering](http://www.fel.cvut.cz) [Czech Technical University](http://www.cvut.cz/)
+[Computer Architectures Education](http://comparch.edu.cvut.cz) [Czech Technical University](http://www.cvut.cz/)
 
 ## Table of contents
 
@@ -34,7 +34,6 @@ Implemented to support following courses:
   - [Peripherals](#peripherals)
   - [Interrupts and Control and Status Registers](#interrupts-and-control-and-status-registers)
   - [System Calls Support](#system-calls-support)
-- [Special instructions support](#special-instructions-support)
 - [Limitations of the Implementation](#limitations-of-the-implementation)
   - [QtMips original limitations](#qtmips-original-limitations)
   - [List of Actually Supported Instructions](#list-of-actually-supported-instructions)
@@ -131,13 +130,7 @@ ctest
 Main documentation is provided in this README and in subdirectories [`docs/user`](docs/user)
 and [`docs/developer`](docs/developer).
 
-The project has started as diploma thesis work of Karel Kočí. The complete text of the
-thesis [Graphical CPU Simulator with Cache Visualization](https://dspace.cvut.cz/bitstream/handle/10467/76764/F3-DP-2018-Koci-Karel-diploma.pdf)
-is available from the online archive of the [Czech Technical University in Prague](https://www.cvut.cz/). The document
-provides analysis of available alternative simulators, overview of the project architecture and basic usage information.
-
-The project was extended as bachelor's theses of Jakub Dupak and Max Hollmann. Links will be provided as soon as the
-theses are released (**TODO**)
+The project was developed and extended as theses of Karel Kočí, Jakub Dupak and Max Hollmann. See section [Resources and Publications](#resources-and-publications) for links and references.
 
 ## Accepted Binary Formats
 
@@ -155,7 +148,7 @@ additional tools. Clang can be used on Linux, Windows, macOS and others...
 ### LLVM toolchain usage
 
 ```shell
-clang --target=riscv32 -march=rv64g -nostdlib -static -fuse-ld=lld test.S -o test
+clang --target=riscv32 -march=rv32g -nostdlib -static -fuse-ld=lld test.S -o test
 llvm-objdump -S test
 ```
 
@@ -506,6 +499,7 @@ pairs of base address, length pairs stored in memory at address pass in `iov`.
 - **Extensions**
   - **RV32M/RV64M**: `mul, mulh, mulhsu, div, divu, rem, remu`
   - **RV64M**: `mulw, divw, divuw, remw, remuw`
+  - **Zicsr**: `csrrw, csrrs, csrrc, csrrwi, csrrsi, csrrci`
 
 For details about RISC-V, refer to the ISA specification:
 [https://riscv.org/technical/specifications/](https://riscv.org/technical/specifications/).
