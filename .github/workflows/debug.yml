@@ -19,7 +19,7 @@ jobs:
             build_type: "Debug",
             cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
             qt_version: "native",
-            qt_install_command: "sudo apt-get update && sudo apt-get install qt5-default",
+            qt_install_command: "sudo apt-get update && sudo apt-get install qtbase5-dev",
             # Apt is significantly faster that aqt.
           }
           - {
