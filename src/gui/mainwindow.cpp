@@ -764,6 +764,18 @@ void MainWindow::close_source() {
     update_open_file_list();
 }
 
+void MainWindow::close_source_by_name(QString &filename, bool ask) {
+    SrcEditor *editor = source_editor_for_file(filename, false);
+    if (editor == nullptr)
+        return;
+    setCurrentSrcEditor(editor);
+    if (ask) {
+        close_source_check();
+    } else {
+        close_source();
+    }
+}
+
 void MainWindow::example_source(const QString &source_file) {
     auto *editor = new SrcEditor();
 

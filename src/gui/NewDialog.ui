@@ -427,6 +427,13 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="pushButton_example">
+       <property name="text">
+        <string>Example</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="pushButton_start_empty">
        <property name="text">
         <string>Start empty</string>

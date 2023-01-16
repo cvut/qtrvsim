@@ -28,6 +28,9 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     ui_cache_d->setupUi(ui->tab_cache_data);
 
     connect(
+        ui->pushButton_example, &QAbstractButton::clicked, this,
+        &NewDialog::create_example);
+    connect(
         ui->pushButton_start_empty, &QAbstractButton::clicked, this,
         &NewDialog::create_empty);
     connect(
@@ -167,6 +170,18 @@ void NewDialog::create_empty() {
     auto *p_window = (MainWindow *)parent();
     p_window->create_core(*config, false, true);
     store_settings(); // Save to settings
+    this->close();
+}
+
+void NewDialog::create_example() {
+    auto *p_window = (MainWindow *)parent();
+    QString example(":/samples/template.S");
+    p_window->create_core(*config, false, true);
+    store_settings(); // Save to settings
+    p_window->close_source_by_name(example, false);
+    p_window->example_source(example);
+    p_window->show_program();
+    p_window->compile_source();
     this->close();
 }
 
@@ -331,7 +346,7 @@ void NewDialog::config_gui() {
     ui->osemu_fs_root->setText(config->osemu_fs_root());
 
     // Disable various sections according to configuration
-    ui->delay_slot->setEnabled(!config->pipelined());
+    ui->delay_slot->setEnabled(false);
     ui->hazard_unit->setEnabled(config->pipelined());
 }
 

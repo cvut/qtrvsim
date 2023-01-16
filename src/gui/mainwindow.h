@@ -65,6 +65,7 @@ public slots:
     void close_source();
     void close_source_check();
     void close_source_decided(int result);
+    void close_source_by_name(QString &filename, bool ask = false);
     void example_source(const QString &source_file);
     void compile_source();
     void build_execute();
