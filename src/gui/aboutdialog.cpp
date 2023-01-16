@@ -56,7 +56,9 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
                   "at <a href=\"https://www.cvut.cz/\">Czech Technical "
                   "University in Prague</a>"
                   " <a href=\"https://www.fel.cvut.cz/\">Faculty of Electrical "
-                  "Engineering</a><br/>";
+                  "Engineering</a><br/>"
+                  "QtRvSim on-line version and links to course materials at<br/>"
+                  "<a href=\"https://comparch.edu.cvut.cz/\">https://comparch.edu.cvut.cz/</a><br/>";
 
     QTextBrowser *supportBrowser = new QTextBrowser;
     supportBrowser->setOpenExternalLinks(true);
@@ -79,7 +81,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
     hlBtn->addStretch();
     hlBtn->addWidget(okButton);
 
-    setMinimumSize(450, 500);
+    setMinimumSize(480, 500);
 
     prevTab = 0; // first Tab is selected by default
 }
