@@ -1,3 +1,18 @@
+qtrvsim (0.9.5-1) unstable; urgency=medium
+
+  * Machine: use cvector in instruction args to spedup decoding
+  * Machine: move controlstate to csr and prepare BitArg to be usd there
+  * Machine: use method for CSR writes to enable mutual register dependencies
+  * Machine: CSR: define mie register.
+  * Machine: CSR: fix conditions for register write and add mie to the list.
+  * Machine: fix range for branch instructions B-encoding
+  * CLI: add simple tracer for memory reads and writes.
+  * CLI: initial support to enable OS emulation even for CLI version
+  * GUI: update coreview graphics by Michal Stepanosvky
+  * GUI: fix wrong svg label connection and reset all to zero
+
+ -- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Mon, 16 Jan 2023 11:22:08 +0200
+
 qtrvsim (0.9.4-1) unstable; urgency=medium
 
   * GUI: Async modal library to overcome WebAssembly/Emscripten limitations

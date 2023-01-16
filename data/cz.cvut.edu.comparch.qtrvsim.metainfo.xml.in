@@ -16,9 +16,14 @@
   </description>
 
   <releases>
-    <release version="@MAIN_PROJECT_VERSION@" date="2022-05-04">
+    <release version="@MAIN_PROJECT_VERSION@" date="2023-01-16">
       <description>
         <p>Current project release.</p>
+      </description>
+    </release>
+    <release version="0.9.4" date="2022-10-26">
+      <description>
+        <p>Support for 64-bit RV64IM target and official tests in CI</p>
       </description>
     </release>
     <release version="0.9.3" date="2022-04-22">
