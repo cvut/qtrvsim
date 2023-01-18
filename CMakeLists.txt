@@ -230,10 +230,13 @@ find_package(${QtLib}
 message(STATUS "${QtLib} version: ${${QtLib}Core_VERSION}")
 message(STATUS "${QtLib} print support: ${${QtLib}PrintSupport_FOUND}")
 
-if ("${WASM}")
-    configure_file("${${QtLib}Core_DIR}/../../../plugins/platforms/qtloader.js"
-            "${CMAKE_CURRENT_BINARY_DIR}/target/qtloader.js" COPYONLY)
-endif ()
+if("${WASM}")
+	string(TIMESTAMP DATE "%Y%m%d")
+	file(READ "${${QtLib}Core_DIR}/../../../plugins/platforms/qtloader.js" QTLOADER)
+	string(REPLACE "applicationName + \".js\"" "applicationName + \".js?v=${DATE}\"" QTLOADER "${QTLOADER}")
+	string(REPLACE "applicationName + \".wasm\"" "applicationName + \".wasm?v=${DATE}\"" QTLOADER "${QTLOADER}")
+	file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/target/qtloader.js" "${QTLOADER}")
+endif()
 
 
 # Qt 5.9.5 is the oldest supported
