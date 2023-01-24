@@ -466,7 +466,7 @@
     <string>&#38;Print</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+P</string>
+    <string>Ctrl+Alt+P</string>
    </property>
   </action>
   <action name="actionProgram_Cache">
