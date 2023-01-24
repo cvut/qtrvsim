@@ -60,11 +60,11 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&#38;File</string>
     </property>
     <widget class="QMenu" name="menuExamples">
      <property name="title">
-      <string>Examples</string>
+      <string>&#38;Examples</string>
      </property>
     </widget>
     <addaction name="actionNewMachine"/>
@@ -81,7 +81,7 @@
    </widget>
    <widget class="QMenu" name="menuWindows">
     <property name="title">
-     <string>Windows</string>
+     <string>&#38;Windows</string>
     </property>
     <addaction name="actionRegisters"/>
     <addaction name="actionProgram_memory"/>
@@ -97,7 +97,7 @@
    </widget>
    <widget class="QMenu" name="menuMachine">
     <property name="title">
-     <string>Machine</string>
+     <string>M&#38;achine</string>
     </property>
     <addaction name="actionRun"/>
     <addaction name="actionPause"/>
@@ -118,7 +118,7 @@
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Help</string>
+     <string>&#38;Help</string>
     </property>
     <addaction name="actionAbout"/>
     <addaction name="actionAboutQt"/>
@@ -171,7 +171,7 @@
      <normaloff>:/icons/document-import.png</normaloff>:/icons/document-import.png</iconset>
    </property>
    <property name="text">
-    <string>New simulation...</string>
+    <string>&#38;New simulation...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -179,7 +179,7 @@
   </action>
   <action name="actionRestart">
    <property name="text">
-    <string>Restart</string>
+    <string>R&#38;estart</string>
    </property>
   </action>
   <action name="actionNew">
@@ -188,7 +188,7 @@
      <normaloff>:/icons/new.png</normaloff>:/icons/new.png</iconset>
    </property>
    <property name="text">
-    <string>New source</string>
+    <string>Ne&#38;w source</string>
    </property>
    <property name="toolTip">
     <string>New source</string>
@@ -203,7 +203,7 @@
      <normaloff>:/icons/open.png</normaloff>:/icons/open.png</iconset>
    </property>
    <property name="text">
-    <string>Open source</string>
+    <string>&#38;Open source</string>
    </property>
    <property name="toolTip">
     <string>Open source</string>
@@ -221,7 +221,7 @@
      <normaloff>:/icons/save.png</normaloff>:/icons/save.png</iconset>
    </property>
    <property name="text">
-    <string>Save source</string>
+    <string>&#38;Save source</string>
    </property>
    <property name="toolTip">
     <string>Save source</string>
@@ -235,7 +235,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Save source as</string>
+    <string>Save source &#38;as</string>
    </property>
    <property name="toolTip">
     <string>Save source as</string>
@@ -250,7 +250,7 @@
      <normaloff>:/icons/closetab.png</normaloff>:/icons/closetab.png</iconset>
    </property>
    <property name="text">
-    <string>Close source</string>
+    <string>&#38;Close source</string>
    </property>
    <property name="toolTip">
     <string>Close source</string>
@@ -268,7 +268,7 @@
      <normaloff>:/icons/compfile-256.png</normaloff>:/icons/compfile-256.png</iconset>
    </property>
    <property name="text">
-    <string>Compile Source</string>
+    <string>&#38;Compile Source</string>
    </property>
    <property name="toolTip">
     <string>Compile source and update memory</string>
@@ -286,7 +286,7 @@
      <normaloff>:/icons/build-256.png</normaloff>:/icons/build-256.png</iconset>
    </property>
    <property name="text">
-    <string>Build Executable</string>
+    <string>&#38;Build Executable</string>
    </property>
    <property name="toolTip">
     <string>Build executable by external make</string>
@@ -301,7 +301,7 @@
      <normaloff>:/icons/application-exit.png</normaloff>:/icons/application-exit.png</iconset>
    </property>
    <property name="text">
-    <string>Exit</string>
+    <string>E&#38;xit</string>
    </property>
    <property name="toolTip">
     <string>Exit program</string>
@@ -316,7 +316,7 @@
      <normaloff>:/icons/play.png</normaloff>:/icons/play.png</iconset>
    </property>
    <property name="text">
-    <string>Run</string>
+    <string>&#38;Run</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
@@ -328,7 +328,7 @@
      <normaloff>:/icons/next.png</normaloff>:/icons/next.png</iconset>
    </property>
    <property name="text">
-    <string>Step</string>
+    <string>&#38;Step</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+T</string>
@@ -340,7 +340,7 @@
      <normaloff>:/icons/pause.png</normaloff>:/icons/pause.png</iconset>
    </property>
    <property name="text">
-    <string>Pause</string>
+    <string>&#38;Pause</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+P</string>
@@ -351,7 +351,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>1 instruction per second</string>
+    <string>&#38;1 instruction per second</string>
    </property>
    <property name="iconText">
     <string>1x</string>
@@ -368,7 +368,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>5 instructions per second</string>
+    <string>&#38;5 instructions per second</string>
    </property>
    <property name="iconText">
     <string>5x</string>
@@ -385,7 +385,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>10 instructions per second</string>
+    <string>1&#38;0 instructions per second</string>
    </property>
    <property name="iconText">
     <string>10x</string>
@@ -402,7 +402,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Unlimited</string>
+    <string>&#38;Unlimited</string>
    </property>
    <property name="toolTip">
     <string>Run CPU without any clock constrains</string>
@@ -413,7 +413,7 @@
   </action>
   <action name="actionMemory">
    <property name="text">
-    <string>Memory</string>
+    <string>&#38;Memory</string>
    </property>
    <property name="toolTip">
     <string>Data memory view</string>
@@ -424,7 +424,7 @@
   </action>
   <action name="actionProgram_memory">
    <property name="text">
-    <string>Program</string>
+    <string>&#38;Program</string>
    </property>
    <property name="toolTip">
     <string>Program memory view</string>
@@ -435,7 +435,7 @@
   </action>
   <action name="actionRegisters">
    <property name="text">
-    <string>Registers</string>
+    <string>&#38;Registers</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
@@ -443,7 +443,7 @@
   </action>
   <action name="actionCsrShow">
    <property name="text">
-    <string>Control and Status Registers</string>
+    <string>C&#38;ontrol and Status Registers</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+I</string>
@@ -455,7 +455,7 @@
      <normaloff>:/icons/reload.png</normaloff>:/icons/reload.png</iconset>
    </property>
    <property name="text">
-    <string>Reload simulation</string>
+    <string>&#38;Reload simulation</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+R</string>
@@ -463,7 +463,7 @@
   </action>
   <action name="actionPrint">
    <property name="text">
-    <string>Print</string>
+    <string>&#38;Print</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+P</string>
@@ -471,7 +471,7 @@
   </action>
   <action name="actionProgram_Cache">
    <property name="text">
-    <string>Program Cache</string>
+    <string>Pro&#38;gram Cache</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+P</string>
@@ -479,7 +479,7 @@
   </action>
   <action name="actionData_Cache">
    <property name="text">
-    <string>Data Cache</string>
+    <string>&#38;Data Cache</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+M</string>
@@ -490,7 +490,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>2 instructions per second</string>
+    <string>&#38;2 instructions per second</string>
    </property>
    <property name="iconText">
     <string>2x</string>
@@ -504,7 +504,7 @@
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>About QtRVSim</string>
+    <string>About Qt&#38;RVSim</string>
    </property>
   </action>
   <action name="ipsMax">
@@ -512,7 +512,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Max</string>
+    <string>&#38;Max</string>
    </property>
    <property name="toolTip">
     <string>Run at maximal speed, skip visualization for 100 msec</string>
@@ -523,27 +523,27 @@
   </action>
   <action name="actionAboutQt">
    <property name="text">
-    <string>About Qt</string>
+    <string>About &#38;Qt</string>
    </property>
   </action>
   <action name="actionPeripherals">
    <property name="text">
-    <string>Peripherals</string>
+    <string>P&#38;eripherals</string>
    </property>
   </action>
   <action name="actionTerminal">
    <property name="text">
-    <string>Terminal</string>
+    <string>&#38;Terminal</string>
    </property>
   </action>
   <action name="actionLcdDisplay">
    <property name="text">
-    <string>LCD display</string>
+    <string>&#38;LCD display</string>
    </property>
   </action>
   <action name="actionShow_Symbol">
    <property name="text">
-    <string>Show Symbol</string>
+    <string>Sh&#38;ow Symbol</string>
    </property>
    <property name="toolTip">
     <string>Show Symbol</string>
@@ -557,12 +557,12 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Core View</string>
+    <string>&#38;Core View</string>
    </property>
   </action>
   <action name="actionMessages">
    <property name="text">
-    <string>Messages</string>
+    <string>Me&#38;ssages</string>
    </property>
    <property name="toolTip">
     <string>Show compile/build messages</string>
@@ -576,7 +576,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Mnemonics Registers</string>
+    <string>M&#38;nemonics Registers</string>
    </property>
   </action>
  </widget>
