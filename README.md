@@ -1,13 +1,9 @@
 # QtRvSim–RISC-V CPU simulator for education
 
+Developed by [Computer Architectures Education](http://comparch.edu.cvut.cz)
+at [Czech Technical University](http://www.cvut.cz/)
+
 ![QtRvSim screenshot](data/screenshots/intro.webp)
-
-Implemented to support following courses:
-
-- [B35APO - Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b35apo)
-- [B4M35PAP - Advanced Computer Architectures](https://cw.fel.cvut.cz/wiki/courses/b4m35pap/start)
-
-[Computer Architectures Education](http://comparch.edu.cvut.cz) [Czech Technical University](http://www.cvut.cz/)
 
 ## Table of contents
 
