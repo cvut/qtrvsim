@@ -1,8 +1,8 @@
-# QtRVSim
+# QtRvSim
 
 **RISC-V CPU simulator for education purposes.**
 
-![logo](data/icons/gui.svg)
+![QtRvSim screenshot](data/screenshots/intro.webp)
 
 Implemented to support following courses:
 
