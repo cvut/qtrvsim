@@ -132,12 +132,17 @@ set(ICON_NAME gui)
 set(ICON_PATH ${CMAKE_SOURCE_DIR}/data/icons/macos/${ICON_NAME}.icns)
 # END MACOS
 
+# WINDOWS
+set(WINDOWS_ICON "${CMAKE_SOURCE_DIR}/data/icons/windows/icon.rc")
+# END WINDOWS
+
 add_executable(gui
-               ${ICON_PATH}
-               ${gui_SOURCES}
-               ${gui_HEADERS}
-               ${gui_UI}
-               ${gui_RESOURCES})
+		${ICON_PATH}
+		${gui_SOURCES}
+		${gui_HEADERS}
+		${gui_UI}
+		${gui_RESOURCES}
+		${WINDOWS_ICON})
 target_include_directories(gui PUBLIC . coreview)
 target_link_libraries(gui
 		PRIVATE ${QtLib}::Core ${QtLib}::Widgets ${QtLib}::Gui
