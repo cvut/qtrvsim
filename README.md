@@ -1,9 +1,9 @@
 # QtRvSim–RISC-V CPU simulator for education
 
-Developed by [Computer Architectures Education](http://comparch.edu.cvut.cz)
-at [Czech Technical University](http://www.cvut.cz/)
-
 ![QtRvSim screenshot](data/screenshots/intro.webp)
+
+Developed by the [Computer Architectures Education](http://comparch.edu.cvut.cz) project
+at [Czech Technical University](http://www.cvut.cz/).
 
 ## Table of contents
 
