@@ -30,7 +30,7 @@ at [Czech Technical University](http://www.cvut.cz/).
   - [System Calls Support](#system-calls-support)
 - [Limitations of the Implementation](#limitations-of-the-implementation)
   - [QtMips original limitations](#qtmips-original-limitations)
-  - [List of Actually Supported Instructions](#list-of-actually-supported-instructions)
+  - [List of Currently Supported Instructions](#list-of-currently-supported-instructions)
 - [Links to Resources and Similar Projects](#links-to-resources-and-similar-projects)
 - [Copyright](#copyright)
 - [License](#license)
@@ -456,7 +456,7 @@ pairs of base address, length pairs stored in memory at address pass in `iov`.
 
 ## Limitations of the Implementation
 
-- See list of actually supported instructions.
+- See list of currently supported instructions.
 - Coprocessor0 has to be ported to RISC-V status registers.
 
 ### QtMips original limitations
@@ -469,7 +469,7 @@ pairs of base address, length pairs stored in memory at address pass in `iov`.
 * Only limited support for interrupts and exceptions. When `syscall` or `break`
   instruction is recognized, emulation stops. Single step proceed after instruction.
 
-### List of Actually Supported Instructions
+### List of Currently Supported Instructions
 
 - **RV32G**:
   - **LOAD**: `lw, lh, lb, lwu, lhu, lbu`
