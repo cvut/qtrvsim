@@ -26,7 +26,7 @@ loop:
 	sw     x2, 0x404(x0)
 
 	// stop execution wait for debugger/user
-	// break
+	// ebreak
 	// ensure that continuation does not
 	// interpret random data
 	beq    x0, x0, loop
