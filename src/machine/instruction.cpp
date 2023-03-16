@@ -861,7 +861,7 @@ size_t Instruction::pseudo_from_tokens(
         }
         if (inst.base == QLatin1String("ble")) {
             if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
-            inst.base = "bgt";
+            inst.base = "bge";
             std::swap(inst.fields[0], inst.fields[1]);
             return code_from_tokens(code, buffsize, inst, reloc, false);
         }
