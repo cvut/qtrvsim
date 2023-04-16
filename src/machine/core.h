@@ -58,6 +58,12 @@ public:
     void set_step_over_exception(enum ExceptionCause excause, bool value);
     bool get_step_over_exception(enum ExceptionCause excause) const;
 
+    /**
+     * Abstracts XLEN from code flow. XLEN core will obtain XLEN value from register value.
+     * The value will be zero extended to u64.
+     */
+    uint64_t get_xlen_from_reg(RegisterValue reg) const;
+
 protected:
     CoreState state {};
 
@@ -98,12 +104,6 @@ protected:
         Address next_addr,
         Address jump_branch_pc,
         Address mem_ref_addr);
-
-    /**
-     * Abstracts XLEN from code flow. XLEN core will obtain XLEN value from register value.
-     * The value will be zero extended to u64.
-     */
-    uint64_t get_xlen_from_reg(RegisterValue reg) const;
 
     const Xlen xlen;
     BORROWED Registers *const regs;

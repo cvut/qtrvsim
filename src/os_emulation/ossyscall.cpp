@@ -856,7 +856,7 @@ int OsSyscallExceptionHandler::do_sys_writev(
 
     result = 0;
     int fd = a1;
-    Address iov = Address(a2);
+    Address iov = Address(core->get_xlen_from_reg(a2));
     int iovcnt = a3;
     FrontendMemory *mem = core->get_mem_data();
     int32_t count;
@@ -910,8 +910,8 @@ int OsSyscallExceptionHandler::do_sys_write(
 
     result = 0;
     int fd = a1;
-    Address buf = Address(a2);
-    int size = a3;
+    Address buf = Address(core->get_xlen_from_reg(a2));
+    int size = core->get_xlen_from_reg(a3);
     FrontendMemory *mem = core->get_mem_data();
     int32_t count;
     QVector<uint8_t> data;
@@ -954,7 +954,7 @@ int OsSyscallExceptionHandler::do_sys_readv(
 
     result = 0;
     int fd = a1;
-    Address iov = Address(a2);
+    Address iov = Address(core->get_xlen_from_reg(a2));
     int iovcnt = a3;
     FrontendMemory *mem = core->get_mem_data();
     int32_t count;
@@ -1008,8 +1008,8 @@ int OsSyscallExceptionHandler::do_sys_read(
 
     result = 0;
     int fd = a1;
-    Address buf = Address(a2);
-    int size = a3;
+    Address buf = Address(core->get_xlen_from_reg(a2));
+    int size = core->get_xlen_from_reg(a3);
     FrontendMemory *mem = core->get_mem_data();
     int32_t count;
     QVector<uint8_t> data;
@@ -1057,7 +1057,7 @@ int OsSyscallExceptionHandler::do_sys_openat(
         if (unknown_syscall_stop) { emit core->stop_on_exception_reached(); }
         return TARGET_ENOSYS;
     }
-    Address pathname_ptr = Address(a2);
+    Address pathname_ptr = Address(core->get_xlen_from_reg(a2));
     int flags = a3;
     int mode = a4;
     uint32_t ch;
