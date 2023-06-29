@@ -30,15 +30,6 @@ jobs:
             qt_version: "6.2.1"
           }
           - {
-            name: "Ubuntu 18 GCC",
-            os: ubuntu-18.04,
-            build_type: "Debug",
-            cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
-            qt_version: "native",
-            qt_install_command: "sudo apt-get update && sudo apt-get install qt5-default"
-              # Apt is significantly faster that aqt.
-          }
-          - {
             name: "macOS Latest Clang",
             os: macos-latest,
             build_type: "Debug",
