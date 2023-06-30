@@ -55,21 +55,13 @@ jobs:
         with:
           key: ${{ github.ref_name }}-${{ matrix.config.name }}
 
-      - name: Cache Qt
-        # Cache only when not installed by os package manager
-        if: matrix.config.qt_version != 'native'
-        id: cache-qt
-        uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/Qt
-          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-Qt
-
       - name: Install specified Qt version
         if: matrix.config.qt_version != 'native'
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ matrix.config.qt_version }}
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-${{ matrix.config.qt_version }}-Qt
           arch: ${{ matrix.config.qt_arch }}
           dir: ${{ github.workspace }}/Qt
 
@@ -166,13 +158,6 @@ jobs:
         with:
           key: ${{ github.ref_name }}-${{ matrix.config.name }}
 
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/Qt
-          key: ${{ runner.os }}-${{ matrix.config.qt_version }}-wasm-Qt
-
       - name: Setup EMSDK cache
         id: cache-system-libraries
         uses: actions/cache@v3
@@ -190,7 +175,8 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: ${{ matrix.config.qt_version }}
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          cache: true
+          cache-key-prefix: 'wasm-qt'
           arch: ${{ matrix.config.qt_arch }}
           dir: ${{ github.workspace }}/Qt
 
