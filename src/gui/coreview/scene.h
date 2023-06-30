@@ -22,6 +22,9 @@ public:
     CoreViewScene(machine::Machine *machine, const QString &core_svg_scheme_name);
     ~CoreViewScene() override;
 
+    /** Hyperlink handler which automatically uses current PC value via this object */
+    void request_jump_to_program_counter_wrapper();
+
 signals:
     /* Hyperlink handlers propagated to main window. */
     void request_registers();
@@ -97,6 +100,9 @@ protected:
 
     Box<Cache> program_cache;
     Box<Cache> data_cache;
+
+    /** Reference to current PC value to be used to focus PC in program memory on lick */
+    const machine::Address& program_counter_value;
 };
 
 class CoreViewSceneSimple : public CoreViewScene {
