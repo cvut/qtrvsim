@@ -59,14 +59,14 @@ jobs:
         # Cache only when not installed by os package manager
         if: matrix.config.qt_version != 'native'
         id: cache-qt
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/Qt
           key: ${{ runner.os }}-${{ matrix.config.qt_version }}-Qt
 
       - name: Install specified Qt version
         if: matrix.config.qt_version != 'native'
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3
         with:
           version: ${{ matrix.config.qt_version }}
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
@@ -168,26 +168,26 @@ jobs:
 
       - name: Cache Qt
         id: cache-qt
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/Qt
           key: ${{ runner.os }}-${{ matrix.config.qt_version }}-wasm-Qt
 
       - name: Setup EMSDK cache
         id: cache-system-libraries
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: 'emsdk-cache'
           key: ${{ runner.os }}-${{ matrix.config.emsdk_version }}-${{ matrix.config.qt_version }}-emsdk
 
       - name: Setup emsdk
-        uses: mymindstorm/setup-emsdk@v10
+        uses: mymindstorm/setup-emsdk@v12
         with:
           version: ${{ matrix.config.emsdk_version }}
           actions-cache-folder: 'emsdk-cache'
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3
         with:
           version: ${{ matrix.config.qt_version }}
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
@@ -213,7 +213,7 @@ jobs:
         run: cmake --build . -j3
 
       - name: Store created artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: target-wasm-${{ runner.os }}-qt${{ matrix.config.qt_version }}
           path: ${{ github.workspace }}/build/target
@@ -228,14 +228,14 @@ jobs:
       - run: git submodule update --recursive --init
 
       - name: Get cache key
-        uses: mathiasvr/command-output@v1
+        uses: mathiasvr/command-output@v2.0.0
         id: subtree-hash
         with:
           run: git rev-parse HEAD:tests/riscv-official/
 
       - name: Cache
         id: cache-tests
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/tests/riscv-official/isa
           key: riscv-tests-${{ steps.subtree-hash.outputs.stdout }}
@@ -262,7 +262,7 @@ jobs:
 
       - name: Store created artifacts
         # Use of tar significantly improves performance as artifact upload has significant per file penalty
-        uses: alehechka/upload-tartifact@v1
+        uses: alehechka/upload-tartifact@v2
         with:
           name: riscv-official-tests
           path: tests/riscv-official/isa
