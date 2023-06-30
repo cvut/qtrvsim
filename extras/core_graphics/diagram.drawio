@@ -1,6 +1,6 @@
-<mxfile host="www.draw.io" modified="2022-11-23T15:31:51.432Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.0.0" etag="OApTjjFHofPpklPOZ5Uh" compressed="false" version="20.6.0" type="device">
+<mxfile host="app.diagrams.net" modified="2023-06-29T14:37:58.075Z" agent="Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/114.0" etag="lMzkTVf1HWM6wJNUWKv4" compressed="false" version="21.5.2" type="device">
   <diagram id="6v_UKsHeDzqBDUNiW_st" name="RISC-V">
-    <mxGraphModel dx="813" dy="528" grid="1" gridSize="1" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="700" pageHeight="540" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="864" dy="511" grid="1" gridSize="1" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="700" pageHeight="540" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0jYIva3T7vnUbckOAgtF-0" />
         <mxCell id="0jYIva3T7vnUbckOAgtF-1" style="locked=1;" parent="0jYIva3T7vnUbckOAgtF-0" />
@@ -999,7 +999,7 @@
           </mxCell>
         </UserObject>
         <UserObject label="" tags="simple pipeline forwarding" id="nrxDrlzc4rpCp8ehld49-12">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=none;jumpSize=4;orthogonalLoop=1;jettySize=auto;shadow=0;endArrow=none;endFill=0;strokeWidth=1;fontFamily=sans-serif;fontSize=6;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;strokeColor=#3333FF;entryX=1.005;entryY=0.644;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="nrxDrlzc4rpCp8ehld49-16" target="Haz_8EwUBin59iLyk_8Q-85" edge="1">
+          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;sketch=0;jumpStyle=none;jumpSize=4;orthogonalLoop=1;jettySize=auto;shadow=0;endArrow=none;endFill=0;strokeWidth=1;fontFamily=sans-serif;fontSize=6;verticalAlign=middle;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;html=1;strokeColor=#3333FF;entryX=1.005;entryY=0.644;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.25;exitDx=0;exitDy=0;exitPerimeter=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="nrxDrlzc4rpCp8ehld49-40" target="Haz_8EwUBin59iLyk_8Q-85" edge="1">
             <mxGeometry relative="1" as="geometry">
               <Array as="points">
                 <mxPoint x="442" y="165" />
@@ -1007,22 +1007,9 @@
                 <mxPoint x="216" y="160" />
                 <mxPoint x="216" y="162" />
               </Array>
-              <mxPoint x="494" y="160" as="sourcePoint" />
+              <mxPoint x="444" y="165" as="sourcePoint" />
               <mxPoint x="224" y="159" as="targetPoint" />
             </mxGeometry>
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="forwarding simple pipeline" id="nrxDrlzc4rpCp8ehld49-18">
-          <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=none;jumpSize=4;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3333FF;endArrow=none;endFill=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.778;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" parent="Haz_8EwUBin59iLyk_8Q-26" source="nrxDrlzc4rpCp8ehld49-16" target="nrxDrlzc4rpCp8ehld49-40" edge="1">
-            <mxGeometry relative="1" as="geometry">
-              <mxPoint x="502" y="206" as="targetPoint" />
-              <Array as="points" />
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
-        <UserObject label="" tags="simple pipeline forwarding" id="nrxDrlzc4rpCp8ehld49-16">
-          <mxCell style="verticalLabelPosition=bottom;shadow=0;dashed=0;align=center;html=1;verticalAlign=top;shape=mxgraph.electrical.logic_gates.inverter_2;strokeColor=#3333FF;strokeWidth=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
-            <mxGeometry x="444" y="162" width="8" height="6" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="0" tags="pipeline forwarding" component="bool-value" source="exec-BranchVal" id="nrxDrlzc4rpCp8ehld49-20">
@@ -1583,7 +1570,7 @@
             <mxGeometry x="498" y="176.5" width="21" height="11.5" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="" tags="forwarding pipeline" id="q-6THzIC0rTZull3DPy9-22">
+        <UserObject label="" tags="forwarding pipeline simple" id="q-6THzIC0rTZull3DPy9-22">
           <mxCell style="group" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1" connectable="0">
             <mxGeometry x="444" y="84" width="42" height="320" as="geometry" />
           </mxCell>
@@ -1778,7 +1765,7 @@
             <mxGeometry x="473" y="176.5" width="21" height="11.5" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="0x00000000" tags="simple pipeline forwarding" component="pc-value" source="fetch-pc" link="#" id="Haz_8EwUBin59iLyk_8Q-39">
+        <UserObject label="0x00000000" tags="simple pipeline forwarding" component="pc-value" source="fetch-pc" link="#focus_pc" id="Haz_8EwUBin59iLyk_8Q-39">
           <mxCell style="rounded=1;gradientColor=none;perimeterSpacing=0;arcSize=1;fontSize=8;fontStyle=0;verticalAlign=middle;spacing=0;fontFamily=sans-serif;align=center;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingTop=6;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;connectable=1;" parent="Haz_8EwUBin59iLyk_8Q-26" vertex="1">
             <mxGeometry x="70" y="225" width="72" height="25" as="geometry" />
           </mxCell>
