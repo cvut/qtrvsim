@@ -181,7 +181,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.config.emsdk_version }}-${{ matrix.config.qt_version }}-emsdk
 
       - name: Setup emsdk
-        uses: mymindstorm/setup-emsdk@v12
+        uses: mymindstorm/setup-emsdk@v11
         with:
           version: ${{ matrix.config.emsdk_version }}
           actions-cache-folder: 'emsdk-cache'
