@@ -62,20 +62,20 @@ set(C_TEST_PATH ${EXECUTABLE_OUTPUT_PATH})
 
 
 macro(set_alternate_linker linker)
-	find_program(LINKER_EXECUTABLE ld.${USE_ALTERNATE_LINKER} ${USE_ALTERNATE_LINKER})
-	if(LINKER_EXECUTABLE)
-		if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 12.0.0)
-			add_link_options("-ld-path=${USE_ALTERNATE_LINKER}")
-		else()
-			add_link_options("-fuse-ld=${USE_ALTERNATE_LINKER}")
-		endif()
-	else()
-		set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker" FORCE)
-	endif()
+    find_program(LINKER_EXECUTABLE ld.${USE_ALTERNATE_LINKER} ${USE_ALTERNATE_LINKER})
+    if (LINKER_EXECUTABLE)
+        if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 12.0.0)
+            add_link_options("-ld-path=${USE_ALTERNATE_LINKER}")
+        else ()
+            add_link_options("-fuse-ld=${USE_ALTERNATE_LINKER}")
+        endif ()
+    else ()
+        set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker" FORCE)
+    endif ()
 endmacro()
-if(NOT "${USE_ALTERNATE_LINKER}" STREQUAL "")
-	set_alternate_linker(${USE_ALTERNATE_LINKER})
-endif()
+if (NOT "${USE_ALTERNATE_LINKER}" STREQUAL "")
+    set_alternate_linker(${USE_ALTERNATE_LINKER})
+endif ()
 
 # I don't want to relly on the assumption, that this file is invoked as root
 # project. Therefore I propagate the information to all subprojects
@@ -107,17 +107,17 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # - common to all subdirs
 # =============================================================================
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(NOT "${SANITIZERS}" MATCHES "none" AND NOT "${WASM}" AND NOT "${MINGW}" AND NOT "${MSVC}")
+if (NOT "${SANITIZERS}" MATCHES "none" AND NOT "${WASM}" AND NOT "${MINGW}" AND NOT "${MSVC}")
     set(CMAKE_C_FLAGS_DEBUG
             "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS} -g -g3 -ggdb")
     set(CMAKE_CXX_FLAGS_DEBUG
             "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS} -g -g3 -ggdb")
     set(CMAKE_LINKER_FLAGS_DEBUG
             "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS}")
-endif()
+endif ()
 
 
 if (NOT "${BUILD_DEBUG}")
@@ -230,13 +230,13 @@ find_package(${QtLib}
 message(STATUS "${QtLib} version: ${${QtLib}Core_VERSION}")
 message(STATUS "${QtLib} print support: ${${QtLib}PrintSupport_FOUND}")
 
-if("${WASM}")
-	string(TIMESTAMP DATE "%Y%m%d")
-	file(READ "${${QtLib}Core_DIR}/../../../plugins/platforms/qtloader.js" QTLOADER)
-	string(REPLACE "applicationName + \".js\"" "applicationName + \".js?v=${DATE}\"" QTLOADER "${QTLOADER}")
-	string(REPLACE "applicationName + \".wasm\"" "applicationName + \".wasm?v=${DATE}\"" QTLOADER "${QTLOADER}")
-	file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/target/qtloader.js" "${QTLOADER}")
-endif()
+if ("${WASM}")
+    string(TIMESTAMP DATE "%Y%m%d")
+    file(READ "${${QtLib}Core_DIR}/../../../plugins/platforms/qtloader.js" QTLOADER)
+    string(REPLACE "applicationName + \".js\"" "applicationName + \".js?v=${DATE}\"" QTLOADER "${QTLOADER}")
+    string(REPLACE "applicationName + \".wasm\"" "applicationName + \".wasm?v=${DATE}\"" QTLOADER "${QTLOADER}")
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/target/qtloader.js" "${QTLOADER}")
+endif ()
 
 
 # Qt 5.9.5 is the oldest supported
