@@ -20,7 +20,9 @@ using svgscene::SvgDomTree;
 LOG_CATEGORY("gui.coreview");
 
 CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &core_svg_scheme_name)
-    : SvgGraphicsScene() {
+    : SvgGraphicsScene()
+    , program_counter_value((VALUE_SOURCE_NAME_MAPS.PC.at(QStringLiteral("fetch-pc")))(
+          machine->core()->get_state())) {
     SvgDocument document
         = svgscene::parseFromFileName(this, QString(":/core/%1.svg").arg(core_svg_scheme_name));
 
@@ -232,6 +234,10 @@ void CoreViewScene::update_values() {
     update_value_list(values.instruction_values);
     update_value_list(values.mux2_values);
     update_value_list(values.mux3_values);
+}
+
+void CoreViewScene::request_jump_to_program_counter_wrapper() {
+    emit request_jump_to_program_counter(program_counter_value);
 }
 
 CoreViewSceneSimple::CoreViewSceneSimple(machine::Machine *machine)

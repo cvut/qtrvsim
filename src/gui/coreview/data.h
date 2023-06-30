@@ -55,6 +55,7 @@ static const std::unordered_map<unsigned, QString> STALL_TEXT_TABLE = {
  * ```
  */
 static const unordered_map<QString, void (::CoreViewScene::*)()> HYPERLINK_TARGETS {
+    { "#focus_pc", &CoreViewScene::request_jump_to_program_counter_wrapper },
     { "#registers", &CoreViewScene::request_registers },
     { "#cache_data", &CoreViewScene::request_cache_data },
     { "#cache_program", &CoreViewScene::request_cache_program },
