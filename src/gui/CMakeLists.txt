@@ -94,8 +94,8 @@ set(gui_UI
         dialogs/new/NewDialogCache.ui
         )
 set(gui_RESOURCES
-        icons.qrc
-        samples.qrc
+        resources/icons/icons.qrc
+        resources/samples/samples.qrc
         windows/coreview/schemas/schemas.qrc
         )
 
