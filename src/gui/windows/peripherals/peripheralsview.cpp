@@ -72,9 +72,7 @@ void PeripheralsView::setup(const machine::PeripSpiLed *perip_spi_led) {
 
     ui->checkRed->setChecked(false);
     ui->checkGreen->setChecked(false);
-    ;
     ui->checkBlue->setChecked(false);
-    ;
 
     ui->labelRgb1->setAutoFillBackground(true);
     ui->labelRgb2->setAutoFillBackground(true);

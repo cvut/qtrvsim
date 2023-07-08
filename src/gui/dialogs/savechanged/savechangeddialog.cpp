@@ -20,7 +20,7 @@ SaveChnagedDialog::SaveChnagedDialog(QStringList &changedlist, QWidget *parent)
 
     for (const auto &fname : changedlist) {
         int row = model->rowCount();
-        QStandardItem *item = new QStandardItem();
+        auto *item = new QStandardItem();
         item->setData(fname, Qt::UserRole);
         if (!fname.isEmpty()) {
             item->setText(fname);
@@ -35,19 +35,19 @@ SaveChnagedDialog::SaveChnagedDialog(QStringList &changedlist, QWidget *parent)
         model->setItem(row, 0, item);
     }
 
-    QVBoxLayout *all = new QVBoxLayout(this);
+    auto *all = new QVBoxLayout(this);
 
-    QListView *listview = new QListView(this);
+    auto *listview = new QListView(this);
     listview->setModel(model);
     listview->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     all->addWidget(listview);
 
-    QWidget *hbBtn = new QWidget();
-    QHBoxLayout *hlBtn = new QHBoxLayout(hbBtn);
+    auto *hbBtn = new QWidget();
+    auto *hlBtn = new QHBoxLayout(hbBtn);
 
-    QPushButton *cancelButton = new QPushButton(tr("&Cancel"), parent);
-    QPushButton *ignoreButton = new QPushButton(tr("&Ignore"), parent);
-    QPushButton *saveButton = new QPushButton(tr("&Save"), parent);
+    auto *cancelButton = new QPushButton(tr("&Cancel"), parent);
+    auto *ignoreButton = new QPushButton(tr("&Ignore"), parent);
+    auto *saveButton = new QPushButton(tr("&Save"), parent);
     saveButton->setFocus();
     connect(
         cancelButton, &QAbstractButton::clicked, this,

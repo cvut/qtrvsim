@@ -6,8 +6,6 @@
 
 #include <QComboBox>
 #include <QHeaderView>
-#include <QPushButton>
-#include <QTableView>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -15,32 +13,32 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     setObjectName("Memory");
     setWindowTitle("Memory");
 
-    QWidget *content = new QWidget();
+    auto *content = new QWidget();
 
-    QComboBox *cell_size = new QComboBox();
+    auto *cell_size = new QComboBox();
     cell_size->addItem("Byte", MemoryModel::CELLSIZE_BYTE);
     cell_size->addItem("Half-word", MemoryModel::CELLSIZE_HWORD);
     cell_size->addItem("Word", MemoryModel::CELLSIZE_WORD);
     cell_size->setCurrentIndex(MemoryModel::CELLSIZE_WORD);
 
-    QComboBox *cached_access = new QComboBox();
+    auto *cached_access = new QComboBox();
     cached_access->addItem("Direct", 0);
     cached_access->addItem("Cached", 1);
 
-    MemoryTableView *memory_content = new MemoryTableView(nullptr, settings);
+    auto *memory_content = new MemoryTableView(nullptr, settings);
     // memory_content->setSizePolicy();
-    MemoryModel *memory_model = new MemoryModel(this);
+    auto *memory_model = new MemoryModel(this);
     memory_content->setModel(memory_model);
     memory_content->verticalHeader()->hide();
     // memory_content->setHorizontalHeader(memory_model->);
 
-    HexLineEdit *go_edit = new HexLineEdit(nullptr, 8, 16, "0x");
+    auto *go_edit = new HexLineEdit(nullptr, 8, 16, "0x");
 
-    QHBoxLayout *layout_top = new QHBoxLayout;
+    auto *layout_top = new QHBoxLayout;
     layout_top->addWidget(cell_size);
     layout_top->addWidget(cached_access);
 
-    QVBoxLayout *layout = new QVBoxLayout;
+    auto *layout = new QVBoxLayout;
     layout->addLayout(layout_top);
     layout->addWidget(memory_content);
     layout->addWidget(go_edit);

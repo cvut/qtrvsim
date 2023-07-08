@@ -12,7 +12,7 @@ class GraphicsView : public QGraphicsView {
     using Super = QGraphicsView;
 
 public:
-    GraphicsView(QWidget *parent);
+    explicit GraphicsView(QWidget *parent);
     void setScene(QGraphicsScene *scene);
 
 protected:

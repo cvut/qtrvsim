@@ -12,8 +12,8 @@ class SrcEditor : public QTextEdit {
     using Super = QTextEdit;
 
 public:
-    SrcEditor(const QString &text, QWidget *parent = nullptr);
-    SrcEditor(QWidget *parent = nullptr);
+    explicit SrcEditor(const QString &text, QWidget *parent = nullptr);
+    explicit SrcEditor(QWidget *parent = nullptr);
     ~SrcEditor() override;
     QString filename();
     QString title();
@@ -22,10 +22,10 @@ public:
     bool loadByteArray(const QByteArray &content, const QString &filename = "");
     void setCursorToLine(int ln);
     void setFileName(const QString &filename);
-    bool isModified() const;
+    [[nodiscard]] bool isModified() const;
     void setModified(bool val);
     void setSaveAsRequired(bool val);
-    bool saveAsRequired() const;
+    [[nodiscard]] bool saveAsRequired() const;
 
 private:
     QSyntaxHighlighter *highlighter {};

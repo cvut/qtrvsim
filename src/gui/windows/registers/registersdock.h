@@ -48,7 +48,7 @@ private:
 private:
     void setRegisterValueToLabel(QLabel *label, machine::RegisterValue value);
     BORROWED QLabel *addRegisterLabel(const QString &title);
-    QPalette createPalette(const QColor &color) const;
+    [[nodiscard]] QPalette createPalette(const QColor &color) const;
 };
 
 #endif // REGISTERSDOCK_H

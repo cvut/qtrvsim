@@ -8,15 +8,14 @@
 
 /*
  * This implements new layout and widget in the same time.
- * Basic idea is that we need some table view that can also fill in horizontal
- * space. This widget paints simple table under neath the widgets and lays them
- * out in to them. It shows more than one column when there is enought
- * horizontal space.
+ * The Basic idea is that we need some table view that can also fill in horizontal space. This
+ * widget paints simple table underneath the widgets and lays them out in to them. It shows more
+ * than one column when there is enough horizontal space.
  */
 
 class StaticTableLayout : public QLayout {
 public:
-    StaticTableLayout(
+    explicit StaticTableLayout(
         QWidget *parent,
         int margin = 4,
         int horizontal_big_spacing = 4,
@@ -34,22 +33,17 @@ public:
     void addItem(QLayoutItem *item) override;
     QLayoutItem *itemAt(int index) const override;
     QLayoutItem *takeAt(int index) override;
-    int count() const override; // This returns number of item blocks
+    int count() const override;                      // This returns number of item blocks
 
-    void addRow(const QList<QWidget *> &);           // This adds row of widgets
-    void insertRow(const QList<QWidget *> &, int i); // Insert row to given
-                                                     // position while shifting
-                                                     // all other up
-    void removeRow(int i); // Remove row
-    void clearRows();      // Clear all rows from table
+    void addRow(const QList<QWidget *> &);           // This adds a row of widgets
+    void insertRow(const QList<QWidget *> &, int i); // Insert row to given position while shifting
+                                                     // all others up
+    void removeRow(int i);                           // Remove row
+    void clearRows();                                // Clear all rows from table
 
-    void itemRect(QRect &rect, QVector<int> &separators, int i); // This returns
-                                                                 // single item
-                                                                 // rectable (if
-                                                                 // expad_margin
-                                                                 // and it's on
-                                                                 // edge also
-                                                                 // count in
+    void itemRect(QRect &rect, QVector<int> &separators, int i); // This returns a single item
+                                                                 // rectangle (if expand_margin, and
+                                                                 // it's on edge also count in
                                                                  // margin)
     int columns();
     int real_row_height() const;
@@ -63,15 +57,11 @@ protected:
 
     int layout_count_approx(const QRect &rect) const;
     int layout_size(int &row_h, QList<QList<int>> &row_w, int count) const;
-    void layout_parms(
-        QRect &rect,
-        int &row_h,
-        QList<QList<int>> &row_w,
-        int &count) const;
+    void layout_parms(QRect &rect, int &row_h, QList<QList<int>> &row_w, int &count) const;
     void do_layout(const QRect &rect);
     int layout_height(int width) const;
 
-    QVector<QLayoutItem *> list2vec(QList<QWidget *>);
+    QVector<QLayoutItem *> list2vec(const QList<QWidget *> &);
 
     struct {
         QSize size;
@@ -89,7 +79,7 @@ protected:
 
 class StaticTable : public QWidget {
 public:
-    StaticTable(QWidget *parent = nullptr);
+    explicit StaticTable(QWidget *parent = nullptr);
 
     int count();
     void addRow(const QList<QWidget *> &);

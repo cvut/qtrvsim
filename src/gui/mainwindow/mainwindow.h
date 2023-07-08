@@ -30,7 +30,7 @@ class MainWindow : public QMainWindow {
     friend class SimpleAsmWithEditorCheck;
 
 public:
-    MainWindow(OWNED QSettings *settings, QWidget *parent = nullptr);
+    explicit MainWindow(OWNED QSettings *settings, QWidget *parent = nullptr);
     ~MainWindow() override;
 
     void start();
@@ -83,7 +83,7 @@ public slots:
     void show_hide_coreview(bool show);
     void show_symbol_dialog();
     void show_messages();
-    // Actions - help menu
+    // Actions - help
     void about_program();
     void about_qt();
     // Actions - execution speed
@@ -155,7 +155,7 @@ class SimpleAsmWithEditorCheck : public SimpleAsm {
     using Super = SimpleAsm;
 
 public:
-    SimpleAsmWithEditorCheck(MainWindow *a_mainwindow, QObject *parent = nullptr)
+    explicit SimpleAsmWithEditorCheck(MainWindow *a_mainwindow, QObject *parent = nullptr)
         : Super(parent)
         , mainwindow(a_mainwindow) {}
     bool process_file(const QString &filename, QString *error_ptr = nullptr)

@@ -10,7 +10,7 @@ class HexLineEdit : public QLineEdit {
     using Super = QLineEdit;
 
 public:
-    HexLineEdit(
+    explicit HexLineEdit(
         QWidget *parent = nullptr,
         int digits = 8,
         int base = 0,

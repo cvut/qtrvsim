@@ -1,10 +1,8 @@
 #include "programmodel.h"
 
-#include <QBrush>
 #include <QtGui/qbrush.h>
 
-using ae = machine::AccessEffects; // For enum values, type is obvious from
-                                   // context.
+using ae = machine::AccessEffects; // For enum values, the type is obvious from context.
 
 ProgramModel::ProgramModel(QObject *parent) : Super(parent), data_font("Monospace") {
     index0_offset = machine::Address::null();
@@ -90,7 +88,7 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
     }
     if (role == Qt::BackgroundRole) {
         machine::Address address;
-        if (!get_row_address(address, index.row()) || machine == nullptr) { return QVariant(); }
+        if (!get_row_address(address, index.row()) || machine == nullptr) { return {}; }
         if (index.column() == 2 && machine->cache_program() != nullptr) {
             machine::LocationStatus loc_stat;
             loc_stat = machine->cache_program()->location_status(address);
@@ -119,10 +117,10 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
                 return bgd;
             }
         }
-        return QVariant();
+        return {};
     }
     if (role == Qt::FontRole) { return data_font; }
-    return QVariant();
+    return {};
 }
 
 void ProgramModel::setup(machine::Machine *machine) {

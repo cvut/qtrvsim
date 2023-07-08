@@ -43,8 +43,8 @@ CsrDock::CsrDock(QWidget *parent) : QDockWidget(parent) {
 }
 
 CsrDock::~CsrDock() {
-    for (size_t i = 0; i < machine::CSR::REGISTERS.size(); i++) {
-        delete csr_view[i];
+    for (auto & i : csr_view) {
+        delete i;
     }
     delete widg;
     delete scrollarea;
@@ -53,8 +53,8 @@ CsrDock::~CsrDock() {
 void CsrDock::setup(machine::Machine *machine) {
     if (machine == nullptr) {
         // Reset data
-        for (size_t i = 0; i < machine::CSR::REGISTERS.size(); i++) {
-            csr_view[i]->setText("");
+        for (auto & i : csr_view) {
+            i->setText("");
         }
         return;
     }

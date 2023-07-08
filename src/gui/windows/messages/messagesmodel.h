@@ -15,13 +15,13 @@ class MessagesModel : public QAbstractListModel {
     using Super = QAbstractListModel;
 
 public:
-    MessagesModel(QObject *parent);
+    explicit MessagesModel(QObject *parent);
     ~MessagesModel() override;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role)
+    [[nodiscard]] int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    [[nodiscard]] int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role)
         const override;
-    QVariant
+    [[nodiscard]] QVariant
     data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 public slots:

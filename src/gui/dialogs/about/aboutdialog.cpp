@@ -3,7 +3,6 @@
 #include "project_info.h"
 
 #include <QApplication>
-#include <QDebug>
 #include <QLabel>
 #include <QObject>
 #include <QPlainTextEdit>
@@ -22,15 +21,14 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
 
     all = new QVBoxLayout(this);
 
-    QWidget *hbox = new QWidget();
-    QHBoxLayout *hl = new QHBoxLayout(hbox);
+    auto *hbox = new QWidget();
+    auto *hl = new QHBoxLayout(hbox);
     hl->setContentsMargins(0, 0, 0, 0);
 
     all->addWidget(hbox);
 
-    QWidget *vbox = new QWidget();
-    QVBoxLayout *vl = new QVBoxLayout(vbox);
-    // vl->setContentsMargins(0,0,0,0);
+    auto *vbox = new QWidget();
+    auto *vl = new QVBoxLayout(vbox);
     hl->addWidget(vbox);
 
     QString versionText;
@@ -52,7 +50,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
                   "href=\"https://cw.fel.cvut.cz/wiki/courses/b35apo/"
                   "start\">Computer Architectures</a> and <a "
                   "href=\"https://cw.fel.cvut.cz/wiki/courses/b4m35pap/"
-                  "start\">Advanced Computer Achitectures</a> courses "
+                  "start\">Advanced Computer Architectures</a> courses "
                   "at <a href=\"https://www.cvut.cz/\">Czech Technical "
                   "University in Prague</a>"
                   " <a href=\"https://www.fel.cvut.cz/\">Faculty of Electrical "
@@ -60,22 +58,22 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
                   "QtRvSim on-line version and links to course materials at<br/>"
                   "<a href=\"https://comparch.edu.cvut.cz/\">https://comparch.edu.cvut.cz/</a><br/>";
 
-    QTextBrowser *supportBrowser = new QTextBrowser;
+    auto *supportBrowser = new QTextBrowser;
     supportBrowser->setOpenExternalLinks(true);
     supportBrowser->setHtml(supportText);
     vl->addWidget(supportBrowser);
 
-    QTextBrowser *licenseBrowser = new QTextBrowser;
+    auto *licenseBrowser = new QTextBrowser;
     licenseBrowser->setOpenExternalLinks(true);
     licenseBrowser->setHtml(LICENCE_HTML);
     vl->addWidget(licenseBrowser);
 
-    QWidget *hbBtn = new QWidget();
-    QHBoxLayout *hlBtn = new QHBoxLayout(hbBtn);
+    auto *hbBtn = new QWidget();
+    auto *hlBtn = new QHBoxLayout(hbBtn);
     hlBtn->setContentsMargins(0, 0, 0, 0);
     vl->addWidget(hbBtn);
 
-    QPushButton *okButton = new QPushButton(tr("&OK"), parent);
+    auto *okButton = new QPushButton(tr("&OK"), parent);
     okButton->setFocus();
     connect(okButton, &QAbstractButton::clicked, this, &QWidget::close);
     hlBtn->addStretch();
@@ -83,5 +81,5 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
 
     setMinimumSize(480, 500);
 
-    prevTab = 0; // first Tab is selected by default
+    // the first Tab is selected by default
 }

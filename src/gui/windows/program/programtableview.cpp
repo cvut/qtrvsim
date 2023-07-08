@@ -90,7 +90,7 @@ void ProgramTableView::adjust_scroll_pos_process() {
     if (m == nullptr) { return; }
 
     QModelIndex prev_index = currentIndex();
-    machine::Address row_bytes = machine::Address(m->cellSizeBytes());
+    auto row_bytes = machine::Address(m->cellSizeBytes());
     machine::Address index0_offset = m->getIndex0Offset();
 
     do {

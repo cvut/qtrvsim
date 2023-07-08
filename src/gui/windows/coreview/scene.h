@@ -26,7 +26,7 @@ public:
     void request_jump_to_program_counter_wrapper();
 
 signals:
-    /* Hyperlink handlers propagated to main window. */
+    /* Hyperlink handlers propagated to the main window. */
     void request_registers();
     void request_data_memory();
     void request_program_memory();

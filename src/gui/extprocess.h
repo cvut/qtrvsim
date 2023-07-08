@@ -12,7 +12,7 @@ class ExtProcess : public QProcess {
     using Super = QProcess;
 
 public:
-    ExtProcess(QObject *parent = nullptr);
+    explicit ExtProcess(QObject *parent = nullptr);
 
 signals:
     void report_message(

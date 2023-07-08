@@ -15,7 +15,6 @@
 #include "os_emulation/ossyscall.h"
 #include "textsignalaction.h"
 
-#include <QFile>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QMetaObject>
@@ -186,7 +185,7 @@ void MainWindow::show_hide_coreview(bool show) {
         if (coreview != nullptr) { coreview->setScene(corescene); }
         return;
     }
-    if (show && (corescene != nullptr)) { return; }
+    if (corescene != nullptr) { return; }
 
     if (machine->config().pipelined()) {
         corescene = new CoreViewScenePipelined(machine);
@@ -290,9 +289,8 @@ void MainWindow::new_machine() {
 void MainWindow::machine_reload(bool force_memory_reset, bool force_elf_load) {
     if (machine == nullptr) { return new_machine(); }
     bool load_executable = force_elf_load || machine->executable_loaded();
-    machine::MachineConfig cnf(&machine->config()); // We have to make local
-                                                    // copy as create_core will
-                                                    // delete current machine
+    machine::MachineConfig cnf(&machine->config()); // We have to make local copy as create_core
+                                                    // will delete the current machine
     try {
         create_core(cnf, load_executable, !load_executable && !force_memory_reset);
     } catch (const machine::SimulatorExceptionInput &e) {
@@ -354,7 +352,9 @@ void MainWindow::print_action() {
 }
 
 #define SHOW_HANDLER(NAME, DEFAULT_AREA)                                                           \
-    void MainWindow::show_##NAME() { show_dockwidget(NAME, DEFAULT_AREA); }
+    void MainWindow::show_##NAME() {                                                               \
+        show_dockwidget(NAME, DEFAULT_AREA);                                                       \
+    }
 
 SHOW_HANDLER(registers, Qt::TopDockWidgetArea)
 SHOW_HANDLER(program, Qt::LeftDockWidgetArea)
@@ -502,11 +502,11 @@ void MainWindow::machine_status(enum machine::Machine::Status st) {
         // Busy is not interesting (in such case we should just be running
         return;
     case machine::Machine::ST_EXIT:
-        // machine_exit is called so we disable controls in that
+        // machine_exit is called, so we disable controls in that
         status = "Exited";
         break;
     case machine::Machine::ST_TRAPPED:
-        // machine_trap is called so we disable controls in that
+        // machine_trap is called, so we disable controls in that
         status = "Trapped";
         break;
     default: status = "Unknown"; break;
@@ -572,7 +572,6 @@ void MainWindow::update_open_file_list() {
 bool MainWindow::modified_file_list(QStringList &list, bool report_unnamed) {
     bool ret = false;
     list.clear();
-    QStringList open_src_files;
     if (central_window == nullptr) { return false; }
     for (int i = 0; i < central_window->count(); i++) {
         QWidget *w = central_window->widget(i);
@@ -632,9 +631,7 @@ void MainWindow::new_source() {
 
 void MainWindow::open_source() {
 #ifndef __EMSCRIPTEN__
-    QString file_name = "";
-
-    file_name = QFileDialog::getOpenFileName(
+    QString file_name = QFileDialog::getOpenFileName(
         this, tr("Open File"), "", "Source Files (*.asm *.S *.s *.c Makefile)");
 
     if (!file_name.isEmpty()) {
@@ -766,8 +763,7 @@ void MainWindow::close_source() {
 
 void MainWindow::close_source_by_name(QString &filename, bool ask) {
     SrcEditor *editor = source_editor_for_file(filename, false);
-    if (editor == nullptr)
-        return;
+    if (editor == nullptr) return;
     setCurrentSrcEditor(editor);
     if (ask) {
         close_source_check();

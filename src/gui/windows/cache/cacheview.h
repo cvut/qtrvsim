@@ -14,7 +14,7 @@ class CacheAddressBlock : public QGraphicsObject {
 public:
     CacheAddressBlock(const machine::Cache *cache, unsigned width);
 
-    QRectF boundingRect() const override;
+    [[nodiscard]] QRectF boundingRect() const override;
 
     void paint(
         QPainter *painter,
@@ -45,7 +45,7 @@ public:
     CacheViewBlock(const machine::Cache *cache, unsigned block, bool last);
     ~CacheViewBlock() override;
 
-    QRectF boundingRect() const override;
+    [[nodiscard]] QRectF boundingRect() const override;
 
     void paint(
         QPainter *painter,
@@ -78,7 +78,7 @@ private:
 class CacheViewScene : public QGraphicsScene {
     Q_OBJECT
 public:
-    CacheViewScene(const machine::Cache *cache);
+    explicit CacheViewScene(const machine::Cache *cache);
     ~CacheViewScene() override;
 
 private:

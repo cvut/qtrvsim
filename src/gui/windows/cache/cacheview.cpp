@@ -24,7 +24,7 @@ CacheAddressBlock::CacheAddressBlock(const machine::Cache *cache, unsigned width
     s_row = cache->get_config().set_count() > 1 ? sqrt(cache->get_config().set_count()) : 0;
     this->width = width;
     s_col = cache->get_config().block_size() > 1 ? sqrt(cache->get_config().block_size()) : 0;
-    s_tag = 30 - s_row - s_col; // 32 bits - 2 unused  and then every bit used
+    s_tag = 30 - s_row - s_col; // 32 bits - 2 unused and then every bit used
                                 // for different index
     this->width = width;
 
@@ -57,7 +57,7 @@ void CacheAddressBlock::paint(
     painter->drawRect(rect);
     painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(tag, wid, 16, QChar('0')));
     wpos += wid * LETTERW + 2;
-    // Part used for set
+    // Part used for the set
     unsigned row_center = wpos;
     if (s_row > 0) {
         wid = s_row == 0 ? 0 : ((s_row / 4) + 1);
@@ -186,24 +186,24 @@ CacheViewBlock::CacheViewBlock(const machine::Cache *cache, unsigned block, bool
     }
 
     unsigned wd = 1;
-    QGraphicsSimpleTextItem *l_validity = new QGraphicsSimpleTextItem("V", this);
+    auto *l_validity = new QGraphicsSimpleTextItem("V", this);
     l_validity->setFont(font);
     QRectF box = l_validity->boundingRect();
     l_validity->setPos(wd + (VD_WIDTH - box.width()) / 2, -1 - box.height());
     wd += VD_WIDTH;
     if (cache->get_config().write_policy() == machine::CacheConfig::WP_BACK) {
-        QGraphicsSimpleTextItem *l_dirty = new QGraphicsSimpleTextItem("D", this);
+        auto *l_dirty = new QGraphicsSimpleTextItem("D", this);
         l_dirty->setFont(font);
         box = l_dirty->boundingRect();
         l_dirty->setPos(wd + (VD_WIDTH - box.width()) / 2, -1 - box.height());
         wd += VD_WIDTH;
     }
-    QGraphicsSimpleTextItem *l_tag = new QGraphicsSimpleTextItem("Tag", this);
+    auto *l_tag = new QGraphicsSimpleTextItem("Tag", this);
     l_tag->setFont(font);
     box = l_tag->boundingRect();
     l_tag->setPos(wd + (DATA_WIDTH - box.width()) / 2, -1 - box.height());
     wd += DATA_WIDTH;
-    QGraphicsSimpleTextItem *l_data = new QGraphicsSimpleTextItem("Data", this);
+    auto *l_data = new QGraphicsSimpleTextItem("Data", this);
     l_data->setFont(font);
     box = l_data->boundingRect();
     l_data->setPos(wd + (columns * DATA_WIDTH - box.width()) / 2, -1 - box.height());
@@ -281,7 +281,7 @@ void CacheViewBlock::paint(
     // Connection from valid to and
     painter->drawLine(VD_WIDTH / 2, bottom, VD_WIDTH / 2, bottom + 32);
     painter->drawLine(VD_WIDTH / 2, bottom + 32, tag_center + 10, bottom + 32);
-    // Connection  from tag compare to and
+    // Connection from tag comparison to and
     painter->drawLine(tag_center, bottom + 20, tag_center, bottom + 28);
     painter->drawLine(tag_center, bottom + 28, tag_center + 10, bottom + 28);
 
@@ -342,7 +342,7 @@ void CacheViewBlock::cache_update(
     if (associat != block) {
         if (last_highlighted) { this->data[last_set][last_col]->setBrush(QBrush(QColor(0, 0, 0))); }
         last_highlighted = false;
-        return; // Ignore blocks that are not us
+        return; // Ignore blocks that are not used
     }
     validity[set]->setText(valid ? "1" : "0");
     if (this->dirty) { this->dirty[set]->setText(valid ? (dirty ? "1" : "0") : ""); }

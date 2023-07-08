@@ -9,7 +9,7 @@ LcdDisplayDock::LcdDisplayDock(QWidget *parent, QSettings *settings)
     : Super(parent) {
     (void)settings;
     lcd_display_widget = new LcdDisplayView(this);
-    QWidget *fill_widget = new QWidget(this);
+    auto *fill_widget = new QWidget(this);
 
     layout = new QBoxLayout(QBoxLayout::LeftToRight, fill_widget);
     // add spacer, then your widget, then spacer
@@ -33,7 +33,7 @@ void LcdDisplayDock::setup(machine::LcdDisplay *lcd_display) {
 }
 
 void LcdDisplayDock::update_layout(int w, int h) {
-    // Keeping aspect ratio based on
+    // Keeping the aspect ratio based on
     // https://stackoverflow.com/questions/30005540/keeping-the-aspect-ratio-of-a-sub-classed-qwidget-during-resize
 
     float thisAspectRatio = (float)w / h;
@@ -60,7 +60,7 @@ void LcdDisplayDock::update_layout(int w, int h) {
 }
 
 void LcdDisplayDock::resizeEvent(QResizeEvent *event) {
-    // Keeping aspect ratio based on
+    // Keeping the aspect ratio based on
     // https://stackoverflow.com/questions/30005540/keeping-the-aspect-ratio-of-a-sub-classed-qwidget-during-resize
 
     update_layout(event->size().width(), event->size().height());

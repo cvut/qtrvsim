@@ -8,7 +8,6 @@
 #include <QComboBox>
 #include <QHeaderView>
 #include <QPushButton>
-#include <QTableView>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -24,9 +23,9 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
         i = machine::Address::null();
     }
 
-    QWidget *content = new QWidget();
+    auto *content = new QWidget();
 
-    QComboBox *follow_inst = new QComboBox();
+    auto *follow_inst = new QComboBox();
     follow_inst->addItem("Follow none");
     follow_inst->addItem("Follow fetch");
     follow_inst->addItem("Follow decode");
@@ -35,16 +34,16 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
     follow_inst->addItem("Follow writeback");
     follow_inst->setCurrentIndex((int)follow_source);
 
-    ProgramTableView *program_content = new ProgramTableView(nullptr, settings);
+    auto *program_content = new ProgramTableView(nullptr, settings);
     // program_content->setSizePolicy();
-    ProgramModel *program_model = new ProgramModel(this);
+    auto *program_model = new ProgramModel(this);
     program_content->setModel(program_model);
     program_content->verticalHeader()->hide();
     // program_content->setHorizontalHeader(program_model->);
 
-    HexLineEdit *go_edit = new HexLineEdit(nullptr, 8, 16, "0x");
+    auto *go_edit = new HexLineEdit(nullptr, 8, 16, "0x");
 
-    QVBoxLayout *layout = new QVBoxLayout;
+    auto *layout = new QVBoxLayout;
     layout->addWidget(follow_inst);
     layout->addWidget(program_content);
     layout->addWidget(go_edit);

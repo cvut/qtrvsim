@@ -15,7 +15,7 @@
 class CsrDock : public QDockWidget {
     Q_OBJECT
 public:
-    CsrDock(QWidget *parent);
+    explicit CsrDock(QWidget *parent);
     ~CsrDock() override;
 
     void setup(machine::Machine *machine);
@@ -37,7 +37,7 @@ private:
     QPalette pal_updated;
     QPalette pal_read;
 
-    void labelVal(QLabel *label, uint64_t val);
+    static void labelVal(QLabel *label, uint64_t val);
 };
 
 #endif // CSRDOCK_H

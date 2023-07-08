@@ -63,7 +63,7 @@ QVariant MessagesModel::headerData(
 
 QVariant MessagesModel::data(const QModelIndex &index, int role) const {
     if (index.row() >= rowCount()) {
-        return QVariant();
+        return {};
     }
 
     if (role == Qt::DisplayRole || role == Qt::EditRole) {
@@ -86,10 +86,10 @@ QVariant MessagesModel::data(const QModelIndex &index, int role) const {
         switch (ent->type) {
         case messagetype::MSG_ERROR: return QBrush(QColor(255, 230, 230));
         case messagetype::MSG_WARNING: return QBrush(QColor(255, 255, 220));
-        default: return QVariant();
+        default: return {};
         }
     }
-    return QVariant();
+    return {};
 }
 
 void MessagesModel::insert_line(

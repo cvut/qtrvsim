@@ -128,7 +128,7 @@ NewDialog::~NewDialog() {
     delete ui_cache_d;
     delete ui_cache_p;
     delete ui;
-    // Settings is freed by parent
+    // Settings are freed by parent
     delete config;
 }
 
@@ -139,7 +139,7 @@ void NewDialog::switch2custom() {
 
 void NewDialog::closeEvent(QCloseEvent *) {
     load_settings(); // Reset from settings
-    // Close main window if not already configured
+    // Close the main window if not already configured
     auto *prnt = (MainWindow *)parent();
     if (!prnt->configured()) {
         prnt->close();

@@ -118,7 +118,7 @@ void MemoryTableView::adjust_scroll_pos_process() {
     if (m == nullptr) { return; }
 
     QModelIndex prev_index = currentIndex();
-    machine::Address row_bytes = machine::Address(m->cellSizeBytes() * m->cellsPerRow());
+    auto row_bytes = machine::Address(m->cellSizeBytes() * m->cellsPerRow());
     machine::Address index0_offset = m->getIndex0Offset();
 
     do {

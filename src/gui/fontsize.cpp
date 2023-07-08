@@ -1,9 +1,11 @@
 #include "fontsize.h"
 
 #include <QApplication>
-#include <QDebug>
 #include <QFont>
 #include <QFontMetrics>
+#include "common/logging.h"
+
+LOG_CATEGORY("gui.font");
 
 int FontSize::SIZE5 = 5;
 int FontSize::SIZE6 = 6;
@@ -12,7 +14,7 @@ int FontSize::SIZE8 = 8;
 
 void FontSize::init() {
     int h = QFontMetrics(QApplication::font()).height();
-    qDebug() << "Font size:" << h;
+    LOG() << "Font size:" << h;
     h /= 3;
     int d = h / 4 + 1;
     FontSize::SIZE5 = h - 2 * d;

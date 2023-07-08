@@ -21,8 +21,8 @@ int main(int argc, char *argv[]) {
 
     /*
      * If environment variable specified in define ENV_CONFIG_FILE_NAME is
-     * present, the app should behave in portable manner and use ini file on the
-     * specified location. Otherwise Qt defaults are used.
+     * present, the app should behave in a portable manner and use ini file on the
+     * specified location. Otherwise, Qt defaults are used.
      */
     auto env = QProcessEnvironment::systemEnvironment();
     QSettings *settings;

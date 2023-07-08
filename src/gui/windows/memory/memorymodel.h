@@ -18,14 +18,14 @@ public:
         CELLSIZE_WORD,
     };
 
-    MemoryModel(QObject *parent);
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role)
+    explicit MemoryModel(QObject *parent);
+    [[nodiscard]] int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    [[nodiscard]] int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role)
         const override;
-    QVariant
+    [[nodiscard]] QVariant
     data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    [[nodiscard]] Qt::ItemFlags flags(const QModelIndex &index) const override;
     bool
     setData(const QModelIndex &index, const QVariant &value, int role) override;
     bool adjustRowAndOffset(int &row, machine::Address address);
@@ -33,19 +33,19 @@ public:
 
     void setCellsPerRow(unsigned int cells);
 
-    inline unsigned int cellsPerRow() const {
+    [[nodiscard]] inline unsigned int cellsPerRow() const {
         return cells_per_row;
     }
 
-    inline const QFont *getFont() const {
+    [[nodiscard]] inline const QFont *getFont() const {
         return &data_font;
     }
 
-    inline machine::Address getIndex0Offset() const {
+    [[nodiscard]] inline machine::Address getIndex0Offset() const {
         return index0_offset;
     }
 
-    inline unsigned int cellSizeBytes() const {
+    [[nodiscard]] inline unsigned int cellSizeBytes() const {
         switch (cell_size) {
         case CELLSIZE_BYTE: return 1;
         case CELLSIZE_HWORD: return 2;
@@ -81,8 +81,8 @@ signals:
     void setup_done();
 
 private:
-    const machine::FrontendMemory *mem_access() const;
-    machine::FrontendMemory *mem_access_rw() const;
+    [[nodiscard]] const machine::FrontendMemory *mem_access() const;
+    [[nodiscard]] machine::FrontendMemory *mem_access_rw() const;
     enum MemoryCellSize cell_size;
     unsigned int cells_per_row;
     machine::Address index0_offset;
