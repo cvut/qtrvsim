@@ -1,3 +1,0 @@
-# Instructions
-
-**TODO: MAX**
