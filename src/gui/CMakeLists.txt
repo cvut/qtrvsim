@@ -8,124 +8,103 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(gui_SOURCES
-    aboutdialog.cpp
-    cachedock.cpp
-    cacheview.cpp
-    csrdock.cpp
-    #        coreview/deprecated/connection.cpp
-    #        coreview/deprecated/instructionview.cpp
-    #        coreview/deprecated/logicblock.cpp
-    #        coreview/deprecated/memory.cpp
-    #        coreview/deprecated/minimux.cpp
-    #        coreview/deprecated/multiplexer.cpp
-    #        coreview/deprecated/multitext.cpp
-    #        coreview/deprecated/programcounter.cpp
-    #        coreview/deprecated/registers.cpp
-    #        coreview/deprecated/value.cpp
-    coreview/scene.cpp
-    extprocess.cpp
-    fontsize.cpp
-    gotosymboldialog.cpp
-    graphicsview.cpp
-    memorydock.cpp
-    memorymodel.cpp
-    memorytableview.cpp
-    messagesdock.cpp
-    messagesmodel.cpp
-    messagesview.cpp
-    newdialog.cpp
-    hexlineedit.cpp
-    highlighterasm.cpp
-    highlighterc.cpp
-    hinttabledelegate.cpp
-    lcddisplaydock.cpp
-    lcddisplayview.cpp
-    main.cpp
-    mainwindow.cpp
-    peripheralsdock.cpp
-    peripheralsview.cpp
-    programdock.cpp
-    programmodel.cpp
-    programtableview.cpp
-    registersdock.cpp
-    savechangeddialog.cpp
-    srceditor.cpp
-    statictable.cpp
-    terminaldock.cpp
-    textsignalaction.cpp
-    coreview/components/value_handlers.cpp
-    coreview/components/cache.cpp
-    )
+        dialogs/about/aboutdialog.cpp
+        windows/cache/cachedock.cpp
+        windows/cache/cacheview.cpp
+        windows/csr/csrdock.cpp
+        windows/coreview/scene.cpp
+        extprocess.cpp
+        fontsize.cpp
+        dialogs/gotosymbol/gotosymboldialog.cpp
+        graphicsview.cpp
+        windows/memory/memorydock.cpp
+        windows/memory/memorymodel.cpp
+        windows/memory/memorytableview.cpp
+        windows/messages/messagesdock.cpp
+        windows/messages/messagesmodel.cpp
+        windows/messages/messagesview.cpp
+        dialogs/new/newdialog.cpp
+        ui/hexlineedit.cpp
+        windows/editor/highlighterasm.cpp
+        windows/editor/highlighterc.cpp
+        hinttabledelegate.cpp
+        windows/lcd/lcddisplaydock.cpp
+        windows/lcd/lcddisplayview.cpp
+        main.cpp
+        mainwindow/mainwindow.cpp
+        windows/peripherals/peripheralsdock.cpp
+        windows/peripherals/peripheralsview.cpp
+        windows/program/programdock.cpp
+        windows/program/programmodel.cpp
+        windows/program/programtableview.cpp
+        windows/registers/registersdock.cpp
+        dialogs/savechanged/savechangeddialog.cpp
+        windows/editor/srceditor.cpp
+        statictable.cpp
+        windows/terminal/terminaldock.cpp
+        textsignalaction.cpp
+        windows/coreview/components/value_handlers.cpp
+        windows/coreview/components/cache.cpp
+        )
 set(gui_HEADERS
-    aboutdialog.h
-    cachedock.h
-    cacheview.h
-    csrdock.h
-    #        coreview/deprecated/connection.h
-    #        coreview/deprecated/coreview_colors.h
-    #        coreview/deprecated/instructionview.h
-    #        coreview/deprecated/logicblock.h
-    #        coreview/deprecated/memory.h
-    #        coreview/deprecated/minimux.h
-    #        coreview/deprecated/multiplexer.h
-    #        coreview/deprecated/multitext.h
-    #        coreview/deprecated/programcounter.h
-    #        coreview/deprecated/registers.h
-    #        coreview/deprecated/value.h
-    coreview/scene.h
-    extprocess.h
-    fontsize.h
-    gotosymboldialog.h
-    graphicsview.h
-    memorydock.h
-    memorymodel.h
-    memorytableview.h
-    messagesdock.h
-    messagesmodel.h
-    messagesview.h
-    newdialog.h
-    hexlineedit.h
-    highlighterasm.h
-    highlighterc.h
-    hinttabledelegate.h
-    lcddisplaydock.h
-    lcddisplayview.h
-    mainwindow.h
-    peripheralsdock.h
-    peripheralsview.h
-    programdock.h
-		programmodel.h
-		programtableview.h
-		registersdock.h
-		savechangeddialog.h
-		srceditor.h
-		statictable.h
-		terminaldock.h
-		textsignalaction.h
-		coreview/components/value_handlers.h
-		coreview/data.h
-		coreview/components/cache.h
-		helper/async_modal.h
-		)
+        dialogs/about/aboutdialog.h
+        windows/cache/cachedock.h
+        windows/cache/cacheview.h
+        windows/csr/csrdock.h
+        windows/coreview/scene.h
+        extprocess.h
+        fontsize.h
+        dialogs/gotosymbol/gotosymboldialog.h
+        graphicsview.h
+        windows/memory/memorydock.h
+        windows/memory/memorymodel.h
+        windows/memory/memorytableview.h
+        windows/messages/messagesdock.h
+        windows/messages/messagesmodel.h
+        windows/messages/messagesview.h
+        dialogs/new/newdialog.h
+        ui/hexlineedit.h
+        windows/editor/highlighterasm.h
+        windows/editor/highlighterc.h
+        hinttabledelegate.h
+        windows/lcd/lcddisplaydock.h
+        windows/lcd/lcddisplayview.h
+        mainwindow/mainwindow.h
+        windows/peripherals/peripheralsdock.h
+        windows/peripherals/peripheralsview.h
+        windows/program/programdock.h
+        windows/program/programmodel.h
+        windows/program/programtableview.h
+        windows/registers/registersdock.h
+        dialogs/savechanged/savechangeddialog.h
+        windows/editor/srceditor.h
+        statictable.h
+        windows/terminal/terminaldock.h
+        textsignalaction.h
+        windows/coreview/components/value_handlers.h
+        windows/coreview/data.h
+        windows/coreview/components/cache.h
+        helper/async_modal.h
+        )
 set(gui_UI
-    gotosymboldialog.ui
-    NewDialog.ui
-    peripheralsview.ui
-    MainWindow.ui
-    NewDialogCache.ui
-    )
+        dialogs/gotosymbol/gotosymboldialog.ui
+        dialogs/new/NewDialog.ui
+        windows/peripherals/peripheralsview.ui
+        mainwindow/MainWindow.ui
+        dialogs/new/NewDialogCache.ui
+        )
 set(gui_RESOURCES
-    icons.qrc
-    samples.qrc
-    coreview/schemas/schemas.qrc
-    )
+        resources/icons/icons.qrc
+        resources/samples/samples.qrc
+        windows/coreview/schemas/schemas.qrc
+        )
 
 
-if("${WASM}")
-	message(STATUS "gui :: Including WASM only files.")
-	list(APPEND gui_SOURCES qhtml5file_html5.cpp)
-	list(APPEND gui_HEADERS qhtml5file.h)
-endif()
+if ("${WASM}")
+    message(STATUS "gui :: Including WASM only files.")
+    list(APPEND gui_SOURCES qhtml5file_html5.cpp)
+    list(APPEND gui_HEADERS qhtml5file.h)
+endif ()
 
 # MACOS
 set(ICON_NAME gui)
@@ -133,42 +112,42 @@ set(ICON_PATH ${CMAKE_SOURCE_DIR}/data/icons/macos/${ICON_NAME}.icns)
 # END MACOS
 
 add_executable(gui
-               ${ICON_PATH}
-               ${gui_SOURCES}
-               ${gui_HEADERS}
-               ${gui_UI}
-               ${gui_RESOURCES})
-target_include_directories(gui PUBLIC . coreview)
+        ${ICON_PATH}
+        ${gui_SOURCES}
+        ${gui_HEADERS}
+        ${gui_UI}
+        ${gui_RESOURCES})
+target_include_directories(gui PUBLIC . windows/coreview)
 target_link_libraries(gui
-		PRIVATE ${QtLib}::Core ${QtLib}::Widgets ${QtLib}::Gui
-		PRIVATE machine os_emulation assembler svgscene)
+        PRIVATE ${QtLib}::Core ${QtLib}::Widgets ${QtLib}::Gui
+        PRIVATE machine os_emulation assembler svgscene)
 target_compile_definitions(gui
-                           PRIVATE
-                           APP_ORGANIZATION=\"${MAIN_PROJECT_ORGANIZATION}\"
-                           APP_ORGANIZATION_DOMAIN=\"${MAIN_PROJECT_HOMEPAGE_URL}\"
-                           APP_GIT=\"${MAIN_PROJECT_HOMEPAGE_URL}\"
-                           APP_NAME=\"${MAIN_PROJECT_NAME}\"
-                           APP_VERSION=\"${MAIN_PROJECT_VERSION}\"
-                           ENV_CONFIG_FILE_NAME=\"${MAIN_PROJECT_NAME_UPPER}_CONFIG_FILE\")
+        PRIVATE
+        APP_ORGANIZATION=\"${MAIN_PROJECT_ORGANIZATION}\"
+        APP_ORGANIZATION_DOMAIN=\"${MAIN_PROJECT_HOMEPAGE_URL}\"
+        APP_GIT=\"${MAIN_PROJECT_HOMEPAGE_URL}\"
+        APP_NAME=\"${MAIN_PROJECT_NAME}\"
+        APP_VERSION=\"${MAIN_PROJECT_VERSION}\"
+        ENV_CONFIG_FILE_NAME=\"${MAIN_PROJECT_NAME_UPPER}_CONFIG_FILE\")
 set_target_properties(gui PROPERTIES
-                      OUTPUT_NAME "${MAIN_PROJECT_NAME_LOWER}_${PROJECT_NAME}")
+        OUTPUT_NAME "${MAIN_PROJECT_NAME_LOWER}_${PROJECT_NAME}")
 
-if(${${QtLib}PrintSupport_FOUND} AND NOT ${WASM})
-	target_link_libraries(gui PRIVATE ${QtLib}::PrintSupport)
-	target_compile_definitions(gui PRIVATE WITH_PRINTING=1)
-endif()
+if (${${QtLib}PrintSupport_FOUND} AND NOT ${WASM})
+    target_link_libraries(gui PRIVATE ${QtLib}::PrintSupport)
+    target_compile_definitions(gui PRIVATE WITH_PRINTING=1)
+endif ()
 
 # MACOS
 set_property(SOURCE ${ICON_PATH}
-             PROPERTY MACOSX_PACKAGE_LOCATION Resources)
+        PROPERTY MACOSX_PACKAGE_LOCATION Resources)
 set_target_properties(gui PROPERTIES
-                      MACOSX_BUNDLE true
-                      MACOSX_BUNDLE_GUI_IDENTIFIER cz.cvut.fel.${MAIN_PROJECT_ORGANIZATION}.gui
-                      MACOSX_BUNDLE_BUNDLE_NAME ${MAIN_PROJECT_NAME}
-                      MACOSX_BUNDLE_BUNDLE_VERSION "${MAIN_PROJECT_VERSION}"
-                      MACOSX_BUNDLE_SHORT_VERSION_STRING "${MAIN_PROJECT_VERSION}"
-                      MACOSX_BUNDLE_ICONFILE ${ICON_NAME}
-                      )
+        MACOSX_BUNDLE true
+        MACOSX_BUNDLE_GUI_IDENTIFIER cz.cvut.fel.${MAIN_PROJECT_ORGANIZATION}.gui
+        MACOSX_BUNDLE_BUNDLE_NAME ${MAIN_PROJECT_NAME}
+        MACOSX_BUNDLE_BUNDLE_VERSION "${MAIN_PROJECT_VERSION}"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${MAIN_PROJECT_VERSION}"
+        MACOSX_BUNDLE_ICONFILE ${ICON_NAME}
+        )
 # END MACOS
 
 # =============================================================================

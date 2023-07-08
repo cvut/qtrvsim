@@ -10,8 +10,8 @@ class TextSignalAction : public QAction {
     using Super = QAction;
 
 public:
-    TextSignalAction(QObject *parent = nullptr);
-    TextSignalAction(const QString &text, QObject *parent = nullptr);
+    explicit TextSignalAction(QObject *parent = nullptr);
+    explicit TextSignalAction(const QString &text, QObject *parent = nullptr);
     TextSignalAction(
         const QString &text,
         QString signal_text,

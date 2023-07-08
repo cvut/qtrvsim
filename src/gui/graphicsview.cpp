@@ -23,7 +23,7 @@ void GraphicsView::update_scale() {
         return; // Skip if we have no scene
     }
 
-    // Note: there is somehow three pixels error when viewing so we have to
+    // Note: there is somehow a three-pixel error when viewing, so we have to
     // always compensate
     const int w = scene()->width() + 3;
     const int h = scene()->height() + 3;

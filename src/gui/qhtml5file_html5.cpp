@@ -44,7 +44,7 @@
 #include <qdebug.h>
 
 //
-// This file implements file load via HTML file input element and file save via
+// This file implements file loading via the HTML file input element and file save via
 // browser download.
 //
 

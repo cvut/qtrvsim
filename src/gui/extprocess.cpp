@@ -2,10 +2,6 @@
 
 #include <QDir>
 #include <QFileInfo>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <typeinfo>
 
 using namespace std;
 

@@ -10,9 +10,9 @@ class HintTableDelegate : public QStyledItemDelegate {
     using Super = QStyledItemDelegate;
 
 public:
-    HintTableDelegate(QWidget *parent = nullptr) : Super(parent) {}
+    explicit HintTableDelegate(QWidget *parent = nullptr) : Super(parent) {}
 
-    QSize sizeHintForText(
+    [[nodiscard]] QSize sizeHintForText(
         const QStyleOptionViewItem &option,
         const QModelIndex &index,
         const QString &str) const;

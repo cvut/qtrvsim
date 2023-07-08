@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>samples/simple-lw-sw-ia.S</file>
-        <file>samples/template.S</file>
-        <file>samples/template-os.S</file>
-    </qresource>
-</RCC>
