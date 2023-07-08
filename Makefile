@@ -3,6 +3,16 @@ include .dev-config.mk
 .dev-config.mk:
 	[ ! -f .dev-config.mk ] && cp .dev-config.mk.default .dev-config.mk
 
+release:
+	mkdir -p build/Release
+	cd build/Release && cmake -DCMAKE_BUILD_TYPE=Release ../..
+	cd build/Release && cmake --build .
+
+debug:
+	mkdir -p build/Debug
+	cd build/Debug && cmake -DCMAKE_BUILD_TYPE=Debug ../..
+	cd build/Debug && cmake --build .
+
 ########################################################################################################################
 # WASM
 ########################################################################################################################
@@ -25,3 +35,5 @@ wasm-serve:
 
 wasm-install-qt:
 	python -m aqt install $(QT_WASM_VERSION) linux desktop wasm_32 --outputdir $(QT_INSTALL_DIR)
+
+.PHONY: release debug wasm wasm-clean wasm-clean-deep wasm-serve wasm-install-qt
