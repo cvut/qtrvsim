@@ -20,10 +20,6 @@ GoToSymbolDialog::GoToSymbolDialog(
     ui->listSymbols->addItems(symbol_names);
 }
 
-GoToSymbolDialog::~GoToSymbolDialog() {
-    delete ui;
-}
-
 void GoToSymbolDialog::show_prog() {
     uint64_t address = 0;
     emit obtain_value_for_name(address, ui->listSymbols->currentItem()->text());

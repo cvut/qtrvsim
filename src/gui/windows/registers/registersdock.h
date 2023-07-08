@@ -20,7 +20,6 @@ class RegistersDock final : public QDockWidget {
     Q_OBJECT
 public:
     explicit RegistersDock(QWidget *parent, machine::Xlen xlen);
-    ~RegistersDock() override = default;
 
     void connectToMachine(machine::Machine *machine);
 

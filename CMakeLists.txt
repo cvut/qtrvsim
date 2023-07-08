@@ -192,6 +192,14 @@ if ("${WASM}")
     # https://emscripten.org/docs/getting_started/FAQ.html#what-does-exiting-the-runtime-mean-why-don-t-atexit-s-run
     add_link_options("SHELL:-s EXIT_RUNTIME=1")
 
+    # Debug build
+    if ("${BUILD_DEBUG}")
+        message(STATUS "Enabled WASM debug")
+        add_link_options("SHELL:-s ERROR_ON_WASM_CHANGES_AFTER_LINK")
+        add_link_options("SHELL:-s WASM_BIGINT")
+        add_link_options("-O1")
+    endif ()
+
     add_definitions(-DQT_NO_DEBUG_OUTPUT=1)
     message(STATUS "Debug output disabled")
 else ()

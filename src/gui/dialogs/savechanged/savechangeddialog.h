@@ -13,7 +13,6 @@ public:
     explicit SaveChnagedDialog(
         QStringList &changedlist,
         QWidget *parent = nullptr);
-    ~SaveChnagedDialog() override;
 signals:
     void user_decision(bool cancel, QStringList tosavelist);
 private slots:

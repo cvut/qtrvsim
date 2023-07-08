@@ -16,15 +16,15 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     setWindowTitle("New machine");
 
     this->settings = settings;
-    config = nullptr;
+    config.reset();
 
-    ui = new Ui::NewDialog();
+    ui.reset(new Ui::NewDialog());
     ui->setupUi(this);
-    ui_cache_p = new Ui::NewDialogCache();
+    ui_cache_p.reset(new Ui::NewDialogCache());
     ui_cache_p->setupUi(ui->tab_cache_program);
     ui_cache_p->writeback_policy->hide();
     ui_cache_p->label_writeback->hide();
-    ui_cache_d = new Ui::NewDialogCache();
+    ui_cache_d.reset(new Ui::NewDialogCache());
     ui_cache_d->setupUi(ui->tab_cache_data);
 
     connect(
@@ -110,26 +110,16 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     connect(
         ui->osemu_fs_root_browse, &QAbstractButton::clicked, this,
         &NewDialog::browse_osemu_fs_root);
-    connect(
-        ui->osemu_fs_root, &QLineEdit::textChanged, this,
-        &NewDialog::osemu_fs_root_change);
+    connect(ui->osemu_fs_root, &QLineEdit::textChanged, this, &NewDialog::osemu_fs_root_change);
 
-    cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d);
-    cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p);
+    cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d.data());
+    cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p.data());
 
     // TODO remove this block when protections are implemented
     ui->mem_protec_exec->setVisible(false);
     ui->mem_protec_write->setVisible(false);
 
     load_settings(); // Also configures gui
-}
-
-NewDialog::~NewDialog() {
-    delete ui_cache_d;
-    delete ui_cache_p;
-    delete ui;
-    // Settings are freed by parent
-    delete config;
 }
 
 void NewDialog::switch2custom() {
@@ -366,10 +356,8 @@ unsigned NewDialog::preset_number() {
 }
 
 void NewDialog::load_settings() {
-    delete config;
-
     // Load config
-    config = new machine::MachineConfig(settings);
+    config.reset(new machine::MachineConfig(settings));
     cache_handler_d->set_config(config->access_cache_data());
     cache_handler_p->set_config(config->access_cache_program());
 

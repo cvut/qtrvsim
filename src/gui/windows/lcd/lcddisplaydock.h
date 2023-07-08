@@ -14,7 +14,6 @@ class LcdDisplayDock : public QDockWidget {
 
 public:
     LcdDisplayDock(QWidget *parent, QSettings *settings);
-    ~LcdDisplayDock() override;
     void resizeEvent(QResizeEvent *event) override;
 
     void setup(machine::LcdDisplay *lcd_display);
@@ -24,8 +23,8 @@ public:
 private:
     void update_layout(int w, int h);
 
-    QBoxLayout *layout;
-    LcdDisplayView *lcd_display_widget;
+    QT_OWNED QBoxLayout *layout;
+    Box<LcdDisplayView> lcd_display_widget;
 };
 
 #endif // LCDDISPLAYDOCK_H

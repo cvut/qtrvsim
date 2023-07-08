@@ -16,7 +16,7 @@ TerminalDock::TerminalDock(QWidget *parent, QSettings *settings)
     terminal_text = new QTextEdit(top_widget);
     terminal_text->setMinimumSize(30, 30);
     layout_box->addWidget(terminal_text);
-    append_cursor = new QTextCursor(terminal_text->document());
+    append_cursor.reset(new QTextCursor(terminal_text->document()));
     layout_bottom_box = new QHBoxLayout();
     layout_bottom_box->addWidget(new QLabel("Input:"));
     input_edit = new QLineEdit();
@@ -25,10 +25,6 @@ TerminalDock::TerminalDock(QWidget *parent, QSettings *settings)
 
     setObjectName("Terminal");
     setWindowTitle("Terminal");
-}
-
-TerminalDock::~TerminalDock() {
-    delete append_cursor;
 }
 
 void TerminalDock::setup(machine::SerialPort *ser_port) {

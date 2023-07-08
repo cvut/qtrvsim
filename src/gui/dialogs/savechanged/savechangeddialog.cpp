@@ -69,8 +69,6 @@ SaveChnagedDialog::SaveChnagedDialog(QStringList &changedlist, QWidget *parent)
     setMinimumSize(400, 300);
 }
 
-SaveChnagedDialog::~SaveChnagedDialog() = default;
-
 void SaveChnagedDialog::cancel_clicked() {
     QStringList list;
     emit user_decision(true, list);

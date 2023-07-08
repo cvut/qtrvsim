@@ -16,20 +16,19 @@ class CsrDock : public QDockWidget {
     Q_OBJECT
 public:
     explicit CsrDock(QWidget *parent);
-    ~CsrDock() override;
 
     void setup(machine::Machine *machine);
 
 private slots:
-    void csr_changed(size_t internal_reg_id, machine::RegisterValue val);
-    void csr_read(size_t internal_reg_id, machine::RegisterValue val);
+    void csr_changed(std::size_t internal_reg_id, machine::RegisterValue val);
+    void csr_read(std::size_t internal_reg_id, machine::RegisterValue val);
     void clear_highlights();
 
 private:
-    StaticTable *widg;
-    QScrollArea *scrollarea;
+    Box<StaticTable> widg;
+    Box<QScrollArea> scrollarea;
 
-    QLabel *csr_view[machine::CSR::REGISTERS.size()] {};
+    std::array<Box<QLabel>, machine::CSR::REGISTERS.size()> csr_view;
     bool csr_highlighted[machine::CSR::REGISTERS.size()] {};
     bool csr_highlighted_any;
 

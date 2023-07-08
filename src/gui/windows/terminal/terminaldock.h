@@ -14,7 +14,6 @@ class TerminalDock : public QDockWidget {
     Q_OBJECT
 public:
     TerminalDock(QWidget *parent, QSettings *settings);
-    ~TerminalDock() override;
 
     void setup(machine::SerialPort *ser_port);
 
@@ -29,7 +28,7 @@ private:
     QWidget *top_widget, *top_form {};
     QFormLayout *layout_top_form {};
     QTextEdit *terminal_text;
-    QTextCursor *append_cursor;
+    Box<QTextCursor> append_cursor;
     QLineEdit *input_edit;
 };
 

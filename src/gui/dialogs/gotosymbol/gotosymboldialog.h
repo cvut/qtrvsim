@@ -1,22 +1,19 @@
 #ifndef GOTOSYMBOLDIALOG_H
 #define GOTOSYMBOLDIALOG_H
 
+#include "common/memory_ownership.h"
 #include "machine/memory/address.h"
+#include "ui_gotosymboldialog.h"
 
 #include <QDialog>
 #include <QList>
 #include <QStringList>
-
-namespace Ui {
-class GoToSymbolDialog;
-}
 
 class GoToSymbolDialog : public QDialog {
     Q_OBJECT
 
 public:
     GoToSymbolDialog(QWidget *parent, const QStringList &symbol_names);
-    ~GoToSymbolDialog() override;
 signals:
     void program_focus_addr(machine::Address);
     void memory_focus_addr(machine::Address);
@@ -26,7 +23,7 @@ public slots:
     void show_mem();
 
 private:
-    Ui::GoToSymbolDialog *ui {};
+    Box<Ui::GoToSymbolDialog> ui {};
 };
 
 #endif // GOTOSYMBOLDIALOG_H

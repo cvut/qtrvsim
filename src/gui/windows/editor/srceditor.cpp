@@ -17,7 +17,7 @@ void SrcEditor::setup_common() {
     font.setPointSize(10);
     setFont(font);
     tname = "Unknown";
-    highlighter = new HighlighterAsm(document());
+    highlighter.reset(new HighlighterAsm(document()));
 
     QPalette p = palette();
     p.setColor(QPalette::Active, QPalette::Base, Qt::white);
@@ -37,10 +37,6 @@ SrcEditor::SrcEditor(const QString &text, QWidget *parent)
     setup_common();
 }
 
-SrcEditor::~SrcEditor() {
-    delete highlighter;
-}
-
 QString SrcEditor::filename() {
     return fname;
 }
@@ -55,13 +51,11 @@ void SrcEditor::setFileName(const QString &filename) {
 
     fname = filename;
     tname = fi.fileName();
-    delete highlighter;
-    highlighter = nullptr;
     if ((fi.suffix() == "c") || (fi.suffix() == "C") || (fi.suffix() == "cpp")
         || ((fi.suffix() == "c++"))) {
-        highlighter = new HighlighterC(document());
+        highlighter.reset(new HighlighterC(document()));
     } else {
-        highlighter = new HighlighterAsm(document());
+        highlighter.reset(new HighlighterAsm(document()));
     }
 }
 

@@ -1,5 +1,6 @@
 #include <QProcessEnvironment>
 #include <QtWidgets>
+#include <qwidget.h>
 #ifdef WITH_PRINTING
     #include <QPrintDialog>
     #include <QPrinter>
@@ -30,40 +31,40 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     : QMainWindow(parent)
     , settings(settings) {
     ignore_unsaved = false;
-    machine = nullptr;
-    corescene = nullptr;
+    machine.reset();
+    corescene.reset();
     current_srceditor = nullptr;
     coreview_shown = true;
 
-    ui = new Ui::MainWindow();
+    ui.reset(new Ui::MainWindow());
     ui->setupUi(this);
     setWindowTitle(APP_NAME);
     setDockNestingEnabled(true);
 
-    central_window = new QTabWidget(this);
-    this->setCentralWidget(central_window);
+    central_window.reset(new QTabWidget(this));
+    this->setCentralWidget(central_window.data());
 
     // Prepare empty core view
-    coreview = new GraphicsView(this);
-    central_window->addTab(coreview, "Core");
+    coreview.reset(new GraphicsView(this));
+    central_window->addTab(coreview.data(), "Core");
     // Create/prepare other widgets
-    ndialog = new NewDialog(this, settings);
-    registers = new RegistersDock(this, machine::Xlen::_32);
+    ndialog.reset(new NewDialog(this, settings));
+    registers.reset(new RegistersDock(this, machine::Xlen::_32));
     registers->hide();
-    program = new ProgramDock(this, settings);
-    addDockWidget(Qt::LeftDockWidgetArea, program);
+    program.reset(new ProgramDock(this, settings));
+    addDockWidget(Qt::LeftDockWidgetArea, program.data());
     program->show();
-    memory = new MemoryDock(this, settings);
+    memory.reset(new MemoryDock(this, settings));
     memory->hide();
-    cache_program = new CacheDock(this, "Program");
+    cache_program.reset(new CacheDock(this, "Program"));
     cache_program->hide();
-    cache_data = new CacheDock(this, "Data");
+    cache_data.reset(new CacheDock(this, "Data"));
     cache_data->hide();
-    peripherals = new PeripheralsDock(this, settings);
+    peripherals.reset(new PeripheralsDock(this, settings));
     peripherals->hide();
-    terminal = new TerminalDock(this, settings);
+    terminal.reset(new TerminalDock(this, settings));
     terminal->hide();
-    lcd_display = new LcdDisplayDock(this, settings);
+    lcd_display.reset(new LcdDisplayDock(this, settings));
     lcd_display->hide();
     csrdock = new CsrDock(this);
     csrdock->hide();
@@ -128,7 +129,8 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     }
 
     // Source editor related actions
-    connect(central_window, &QTabWidget::currentChanged, this, &MainWindow::central_tab_changed);
+    connect(
+        central_window.data(), &QTabWidget::currentChanged, this, &MainWindow::central_tab_changed);
 
     foreach (QString file_name, settings->value("openSrcFiles").toStringList()) {
         if (file_name.isEmpty()) { continue; }
@@ -153,22 +155,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
 }
 
 MainWindow::~MainWindow() {
-    delete corescene;
-    delete coreview;
-    delete central_window;
-    delete ndialog;
-    delete registers;
-    delete program;
-    delete memory;
-    delete cache_program;
-    delete cache_data;
-    delete peripherals;
-    delete terminal;
-    delete lcd_display;
-    delete ui;
-    delete machine;
     settings->sync();
-    delete settings;
 }
 
 void MainWindow::start() {
@@ -180,31 +167,34 @@ void MainWindow::show_hide_coreview(bool show) {
     coreview_shown = show;
     if (!show && (corescene == nullptr)) { return; }
     if ((machine == nullptr) || !show) {
-        delete corescene;
-        corescene = nullptr;
-        if (coreview != nullptr) { coreview->setScene(corescene); }
+        corescene.reset();
+        if (coreview != nullptr) { coreview->setScene(corescene.data()); }
         return;
     }
     if (corescene != nullptr) { return; }
 
     if (machine->config().pipelined()) {
-        corescene = new CoreViewScenePipelined(machine);
+        corescene.reset(new CoreViewScenePipelined(machine.data()));
     } else {
-        corescene = new CoreViewSceneSimple(machine);
+        corescene.reset(new CoreViewSceneSimple(machine.data()));
     }
     // Connect scene signals to actions
-    connect(corescene, &CoreViewScene::request_registers, this, &MainWindow::show_registers);
-    connect(corescene, &CoreViewScene::request_program_memory, this, &MainWindow::show_program);
-    connect(corescene, &CoreViewScene::request_data_memory, this, &MainWindow::show_memory);
+    connect(corescene.data(), &CoreViewScene::request_registers, this, &MainWindow::show_registers);
     connect(
-        corescene, &CoreViewScene::request_jump_to_program_counter, program,
+        corescene.data(), &CoreViewScene::request_program_memory, this, &MainWindow::show_program);
+    connect(corescene.data(), &CoreViewScene::request_data_memory, this, &MainWindow::show_memory);
+    connect(
+        corescene.data(), &CoreViewScene::request_jump_to_program_counter, program.data(),
         &ProgramDock::jump_to_pc);
     connect(
-        corescene, &CoreViewScene::request_cache_program, this, &MainWindow::show_cache_program);
-    connect(corescene, &CoreViewScene::request_cache_data, this, &MainWindow::show_cache_data);
-    connect(corescene, &CoreViewScene::request_peripherals, this, &MainWindow::show_peripherals);
-    connect(corescene, &CoreViewScene::request_terminal, this, &MainWindow::show_terminal);
-    coreview->setScene(corescene);
+        corescene.data(), &CoreViewScene::request_cache_program, this,
+        &MainWindow::show_cache_program);
+    connect(
+        corescene.data(), &CoreViewScene::request_cache_data, this, &MainWindow::show_cache_data);
+    connect(
+        corescene.data(), &CoreViewScene::request_peripherals, this, &MainWindow::show_peripherals);
+    connect(corescene.data(), &CoreViewScene::request_terminal, this, &MainWindow::show_terminal);
+    coreview->setScene(corescene.data());
 }
 
 void MainWindow::create_core(
@@ -219,12 +209,10 @@ void MainWindow::create_core(
     }
 
     // Remove old machine
-    delete machine;
-    machine = new_machine;
+    machine.reset(new_machine);
 
     // Create machine view
-    delete corescene;
-    corescene = nullptr;
+    corescene.reset();
     show_hide_coreview(coreview_shown);
 
     set_speed(); // Update machine speed to current settings
@@ -235,10 +223,10 @@ void MainWindow::create_core(
             config.osemu_fs_root());
         machine->register_exception_handler(machine::EXCAUSE_SYSCALL, osemu_handler);
         connect(
-            osemu_handler, &osemu::OsSyscallExceptionHandler::char_written, terminal,
+            osemu_handler, &osemu::OsSyscallExceptionHandler::char_written, terminal.data(),
             QOverload<int, unsigned int>::of(&TerminalDock::tx_byte));
         connect(
-            osemu_handler, &osemu::OsSyscallExceptionHandler::rx_byte_pool, terminal,
+            osemu_handler, &osemu::OsSyscallExceptionHandler::rx_byte_pool, terminal.data(),
             &TerminalDock::rx_byte_pool);
         machine->set_step_over_exception(machine::EXCAUSE_SYSCALL, true);
         machine->set_stop_on_exception(machine::EXCAUSE_SYSCALL, false);
@@ -248,31 +236,32 @@ void MainWindow::create_core(
     }
 
     // Connect machine signals and slots
-    connect(ui->actionRun, &QAction::triggered, machine, &machine::Machine::play);
-    connect(ui->actionPause, &QAction::triggered, machine, &machine::Machine::pause);
-    connect(ui->actionStep, &QAction::triggered, machine, &machine::Machine::step);
-    connect(ui->actionRestart, &QAction::triggered, machine, &machine::Machine::restart);
-    connect(machine, &machine::Machine::status_change, this, &MainWindow::machine_status);
-    connect(machine, &machine::Machine::program_exit, this, &MainWindow::machine_exit);
-    connect(machine, &machine::Machine::program_trap, this, &MainWindow::machine_trap);
+    connect(ui->actionRun, &QAction::triggered, machine.data(), &machine::Machine::play);
+    connect(ui->actionPause, &QAction::triggered, machine.data(), &machine::Machine::pause);
+    connect(ui->actionStep, &QAction::triggered, machine.data(), &machine::Machine::step);
+    connect(ui->actionRestart, &QAction::triggered, machine.data(), &machine::Machine::restart);
+    connect(machine.data(), &machine::Machine::status_change, this, &MainWindow::machine_status);
+    connect(machine.data(), &machine::Machine::program_exit, this, &MainWindow::machine_exit);
+    connect(machine.data(), &machine::Machine::program_trap, this, &MainWindow::machine_trap);
     // Connect signal from break to machine pause
     connect(
-        machine->core(), &machine::Core::stop_on_exception_reached, machine,
+        machine->core(), &machine::Core::stop_on_exception_reached, machine.data(),
         &machine::Machine::pause);
 
     // Setup docks
-    registers->connectToMachine(machine);
-    program->setup(machine);
-    memory->setup(machine);
+    registers->connectToMachine(machine.data());
+    program->setup(machine.data());
+    memory->setup(machine.data());
     cache_program->setup(machine->cache_program());
     cache_data->setup(machine->cache_data());
     terminal->setup(machine->serial_port());
     peripherals->setup(machine->peripheral_spi_led());
     lcd_display->setup(machine->peripheral_lcd_display());
-    csrdock->setup(machine);
+    csrdock->setup(machine.data());
 
     connect(
-        machine->core(), &machine::Core::step_done, program, &ProgramDock::update_pipeline_addrs);
+        machine->core(), &machine::Core::step_done, program.data(),
+        &ProgramDock::update_pipeline_addrs);
 
     // Set status to ready
     machine_status(machine::Machine::ST_READY);
@@ -353,7 +342,7 @@ void MainWindow::print_action() {
 
 #define SHOW_HANDLER(NAME, DEFAULT_AREA)                                                           \
     void MainWindow::show_##NAME() {                                                               \
-        show_dockwidget(NAME, DEFAULT_AREA);                                                       \
+        show_dockwidget(&*NAME, DEFAULT_AREA);                                                     \
     }
 
 SHOW_HANDLER(registers, Qt::TopDockWidgetArea)
@@ -373,11 +362,13 @@ void MainWindow::show_symbol_dialog() {
     QStringList symbol_names = machine->symbol_table()->names();
     auto *gotosyboldialog = new GoToSymbolDialog(this, symbol_names);
     connect(
-        gotosyboldialog, &GoToSymbolDialog::program_focus_addr, program,
+        gotosyboldialog, &GoToSymbolDialog::program_focus_addr, program.data(),
         &ProgramDock::focus_addr_with_save);
     connect(
         gotosyboldialog, &GoToSymbolDialog::program_focus_addr, this, &MainWindow::show_program);
-    connect(gotosyboldialog, &GoToSymbolDialog::memory_focus_addr, memory, &MemoryDock::focus_addr);
+    connect(
+        gotosyboldialog, &GoToSymbolDialog::memory_focus_addr, memory.data(),
+        &MemoryDock::focus_addr);
     connect(gotosyboldialog, &GoToSymbolDialog::memory_focus_addr, this, &MainWindow::show_memory);
     connect(
         gotosyboldialog, &GoToSymbolDialog::obtain_value_for_name, machine->symbol_table(),
@@ -853,7 +844,7 @@ bool SimpleAsmWithEditorCheck::process_pragma(
         if ((operands.count() < 3) || error_occured) { return true; }
         if (!QString::compare(operands.at(2), "core", Qt::CaseInsensitive)
             && (mainwindow->central_window != nullptr) && (mainwindow->coreview != nullptr)) {
-            mainwindow->central_window->setCurrentWidget(mainwindow->coreview);
+            mainwindow->central_window->setCurrentWidget(mainwindow->coreview.data());
         }
         return true;
     }

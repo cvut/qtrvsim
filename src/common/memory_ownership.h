@@ -18,6 +18,11 @@
 #define STATIC
 
 /**
+ * Pointer is owned and managed by Qt.
+ */
+#define QT_OWNED
+
+/**
  * Owned pointer deallocated by automatic destructor.
  */
 template<typename T>

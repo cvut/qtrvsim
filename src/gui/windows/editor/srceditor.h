@@ -1,6 +1,7 @@
 #ifndef SRCEDITOR_H
 #define SRCEDITOR_H
 
+#include "common/memory_ownership.h"
 #include "machine/machine.h"
 
 #include <QString>
@@ -14,7 +15,6 @@ class SrcEditor : public QTextEdit {
 public:
     explicit SrcEditor(const QString &text, QWidget *parent = nullptr);
     explicit SrcEditor(QWidget *parent = nullptr);
-    ~SrcEditor() override;
     QString filename();
     QString title();
     bool loadFile(const QString &filename);
@@ -28,7 +28,7 @@ public:
     [[nodiscard]] bool saveAsRequired() const;
 
 private:
-    QSyntaxHighlighter *highlighter {};
+    ::Box<QSyntaxHighlighter> highlighter {};
     void setup_common();
     QString fname;
     QString tname;

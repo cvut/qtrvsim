@@ -8,23 +8,19 @@
 LcdDisplayDock::LcdDisplayDock(QWidget *parent, QSettings *settings)
     : Super(parent) {
     (void)settings;
-    lcd_display_widget = new LcdDisplayView(this);
+    lcd_display_widget.reset(new LcdDisplayView(this));
     auto *fill_widget = new QWidget(this);
 
     layout = new QBoxLayout(QBoxLayout::LeftToRight, fill_widget);
     // add spacer, then your widget, then spacer
     layout->addItem(new QSpacerItem(0, 0));
-    layout->addWidget(lcd_display_widget);
+    layout->addWidget(lcd_display_widget.data());
     layout->addItem(new QSpacerItem(0, 0));
     fill_widget->setLayout(layout);
     setWidget(fill_widget);
 
     setObjectName("LCD Display");
     setWindowTitle("LCD Display");
-}
-
-LcdDisplayDock::~LcdDisplayDock() {
-    delete lcd_display_widget;
 }
 
 void LcdDisplayDock::setup(machine::LcdDisplay *lcd_display) {

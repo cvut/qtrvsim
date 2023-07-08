@@ -3,33 +3,26 @@
 #include "csr/controlstate.h"
 
 CsrDock::CsrDock(QWidget *parent) : QDockWidget(parent) {
-    scrollarea = new QScrollArea(this);
+    scrollarea.reset(new QScrollArea(this));
     scrollarea->setWidgetResizable(true);
-    widg = new StaticTable(scrollarea);
+    widg.reset(new StaticTable(scrollarea.data()));
 
-#define INIT(X, LABEL, TOOLTIP)                                                                    \
-    do {                                                                                           \
-        (X) = new QLabel("0x00000000", widg);                                                      \
-        (X)->setFixedSize((X)->sizeHint());                                                        \
-        (X)->setText("");                                                                          \
-        (X)->setTextInteractionFlags(Qt::TextSelectableByMouse);                                   \
-        auto desc_label = new QLabel(LABEL, widg);                                                 \
-        desc_label->setToolTip((TOOLTIP));                                                         \
-        widg->addRow({ desc_label, X });                                                           \
-    } while (false)
-
-    csr_view[0] = nullptr;
+    csr_view[0].reset();
     for (size_t i = 0; i < machine::CSR::REGISTERS.size(); i++) {
         auto &desc = machine::CSR::REGISTERS.at(i);
-        INIT(
-            csr_view[i], QString(desc.name),
-            QString("%0 (0x%1)").arg(desc.description).arg(desc.address.data, 0, 16));
+        csr_view[i].reset(new QLabel("0x00000000", widg.data()));
+        csr_view[i]->setFixedSize(csr_view[i]->sizeHint());
+        csr_view[i]->setText("");
+        csr_view[i]->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        auto desc_label = new QLabel(QString(desc.name), widg.data());
+        desc_label->setToolTip(
+            (QString("%0 (0x%1)").arg(desc.description).arg(desc.address.data, 0, 16)));
+        widg->addRow({ desc_label, csr_view[i].data() });
         csr_highlighted[i] = false;
     }
-#undef INIT
-    scrollarea->setWidget(widg);
+    scrollarea->setWidget(widg.data());
 
-    setWidget(scrollarea);
+    setWidget(scrollarea.data());
     setObjectName("Control and Status Registers");
     setWindowTitle("Control and Status Registers");
 
@@ -42,18 +35,10 @@ CsrDock::CsrDock(QWidget *parent) : QDockWidget(parent) {
     csr_highlighted_any = false;
 }
 
-CsrDock::~CsrDock() {
-    for (auto & i : csr_view) {
-        delete i;
-    }
-    delete widg;
-    delete scrollarea;
-}
-
 void CsrDock::setup(machine::Machine *machine) {
     if (machine == nullptr) {
         // Reset data
-        for (auto & i : csr_view) {
+        for (auto &i : csr_view) {
             i->setText("");
         }
         return;
@@ -62,7 +47,7 @@ void CsrDock::setup(machine::Machine *machine) {
     const machine::CSR::ControlState *controlst = machine->control_state();
 
     for (size_t i = 0; i < machine::CSR::REGISTERS.size(); i++) {
-        labelVal(csr_view[i], controlst->read_internal(i).as_u64());
+        labelVal(csr_view[i].data(), controlst->read_internal(i).as_u64());
     }
 
     connect(controlst, &machine::CSR::ControlState::write_signal, this, &CsrDock::csr_changed);
@@ -76,7 +61,7 @@ void CsrDock::csr_changed(size_t internal_reg_id, machine::RegisterValue val) {
         (uint)internal_reg_id < machine::CSR::REGISTERS.size(),
         QString("CsrDock received signal with invalid CSR register: ")
             + QString::number((uint)internal_reg_id));
-    labelVal(csr_view[(uint)internal_reg_id], val.as_u64());
+    labelVal(csr_view[(uint)internal_reg_id].data(), val.as_u64());
     csr_view[internal_reg_id]->setPalette(pal_updated);
     csr_highlighted[internal_reg_id] = true;
     csr_highlighted_any = true;

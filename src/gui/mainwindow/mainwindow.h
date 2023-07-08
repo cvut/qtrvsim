@@ -113,21 +113,21 @@ protected slots:
     void build_execute_finished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
-    Ui::MainWindow *ui {};
+    Box<Ui::MainWindow> ui {};
 
-    NewDialog *ndialog {};
-    QTabWidget *central_window {};
+    Box<NewDialog> ndialog {};
+    Box<QTabWidget> central_window {};
 
-    GraphicsView *coreview {};
-    CoreViewScene *corescene;
+    Box<GraphicsView> coreview {};
+    Box<CoreViewScene> corescene;
 
-    RegistersDock *registers {};
-    ProgramDock *program {};
-    MemoryDock *memory {};
-    CacheDock *cache_program {}, *cache_data {};
-    PeripheralsDock *peripherals {};
-    TerminalDock *terminal {};
-    LcdDisplayDock *lcd_display {};
+    Box<RegistersDock> registers {};
+    Box<ProgramDock> program {};
+    Box<MemoryDock> memory {};
+    Box<CacheDock> cache_program {}, cache_data {};
+    Box<PeripheralsDock> peripherals {};
+    Box<TerminalDock> terminal {};
+    Box<LcdDisplayDock> lcd_display {};
     CsrDock *csrdock {};
     MessagesDock *messages {};
     bool coreview_shown;
@@ -135,13 +135,11 @@ private:
 
     QActionGroup *speed_group {};
 
-    OWNED QSettings *settings;
+    Box<QSettings> settings;
 
-    machine::Machine *machine; // Current simulated machine
+    Box<machine::Machine> machine; // Current simulated machine
 
-    void show_dockwidget(
-        QDockWidget *w,
-        Qt::DockWidgetArea area = Qt::RightDockWidgetArea);
+    void show_dockwidget(QDockWidget *w, Qt::DockWidgetArea area = Qt::RightDockWidgetArea);
     void add_src_editor_to_tabs(SrcEditor *editor);
     void update_open_file_list();
     bool modified_file_list(QStringList &list, bool report_unnamed = false);

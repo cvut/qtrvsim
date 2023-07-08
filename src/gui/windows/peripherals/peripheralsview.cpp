@@ -31,10 +31,6 @@ PeripheralsView::PeripheralsView(QWidget *parent)
         &QAbstractSlider::setValue);
 }
 
-PeripheralsView::~PeripheralsView() {
-    delete ui;
-}
-
 void PeripheralsView::setup(const machine::PeripSpiLed *perip_spi_led) {
     int val;
 

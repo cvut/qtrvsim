@@ -1,6 +1,7 @@
 #ifndef NEWDIALOG_H
 #define NEWDIALOG_H
 
+#include "common/memory_ownership.h"
 #include "machine/machineconfig.h"
 #include "ui_NewDialog.h"
 #include "ui_NewDialogCache.h"
@@ -16,7 +17,6 @@ class NewDialog : public QDialog {
     Q_OBJECT
 public:
     NewDialog(QWidget *parent, QSettings *settings);
-    ~NewDialog() override;
 
     void switch2custom();
 
@@ -49,11 +49,11 @@ private slots:
     void reset_at_compile_change(bool);
 
 private:
-    Ui::NewDialog *ui {};
-    Ui::NewDialogCache *ui_cache_p {}, *ui_cache_d {};
+    Box<Ui::NewDialog> ui {};
+    Box<Ui::NewDialogCache> ui_cache_p {}, ui_cache_d {};
     QSettings *settings;
 
-    machine::MachineConfig *config;
+    Box<machine::MachineConfig> config;
     void config_gui(); // Apply configuration to gui
 
     unsigned preset_number();
