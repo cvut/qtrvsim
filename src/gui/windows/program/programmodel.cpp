@@ -41,7 +41,7 @@ QVariant ProgramModel::headerData(int section, Qt::Orientation orientation, int 
     if (orientation == Qt::Horizontal) {
         if (role == Qt::DisplayRole) {
             switch (section) {
-            case 0: return tr("Bp");
+            case 0: return tr("BP");
             case 1: return tr("Address");
             case 2: return tr("Code");
             case 3: return tr("Instruction");
@@ -120,6 +120,10 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
         return {};
     }
     if (role == Qt::FontRole) { return data_font; }
+    if (role == Qt::TextAlignmentRole) {
+        if (index.column() == 0) { return Qt::AlignCenter; }
+        return Qt::AlignLeft;
+    }
     return {};
 }
 
