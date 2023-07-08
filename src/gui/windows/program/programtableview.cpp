@@ -32,8 +32,6 @@ void ProgramTableView::addr0_save_change(machine::Address val) {
 
 void ProgramTableView::adjustColumnCount() {
     QModelIndex idx;
-    int cwidth_dh;
-    int totwidth;
 
     auto *m = dynamic_cast<ProgramModel *>(model());
 
@@ -46,29 +44,32 @@ void ProgramTableView::adjustColumnCount() {
 
     initViewItemOption(&viewOpts);
 
+    int totwidth = 0;
     idx = m->index(0, 0);
-    cwidth_dh = delegate->sizeHintForText(viewOpts, idx, "Bp").width() + 2;
+    auto cwidth_dh0 = delegate->sizeHintForText(viewOpts, idx, "BP").width() + 2;
     horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
-    horizontalHeader()->resizeSection(0, cwidth_dh);
-    totwidth = cwidth_dh;
+    horizontalHeader()->resizeSection(0, cwidth_dh0);
+    totwidth += cwidth_dh0;
 
     idx = m->index(0, 1);
-    cwidth_dh = delegate->sizeHintForText(viewOpts, idx, "0x00000000").width() + 2;
+    auto cwidth_dh1 = delegate->sizeHintForText(viewOpts, idx, "0x00000000").width() + 2;
     horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
-    horizontalHeader()->resizeSection(1, cwidth_dh);
-    totwidth += cwidth_dh;
+    horizontalHeader()->resizeSection(1, cwidth_dh1);
+    totwidth += cwidth_dh1;
 
     idx = m->index(0, 2);
-    cwidth_dh = delegate->sizeHintForText(viewOpts, idx, "00000000").width() + 2;
+    auto cwidth_dh2 = delegate->sizeHintForText(viewOpts, idx, "00000000").width() + 2;
     horizontalHeader()->setSectionResizeMode(2, QHeaderView::Fixed);
-    horizontalHeader()->resizeSection(2, cwidth_dh);
-    totwidth += cwidth_dh;
+    horizontalHeader()->resizeSection(2, cwidth_dh2);
+    totwidth += cwidth_dh2;
 
     horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
     idx = m->index(0, 3);
     totwidth += delegate->sizeHintForText(viewOpts, idx, "BEQ $18, $17, 0x00000258").width() + 2;
     totwidth += verticalHeader()->width();
     setColumnHidden(2, totwidth > width());
+    setColumnHidden(1, totwidth - cwidth_dh2 > width());
+    setColumnHidden(0, totwidth - cwidth_dh2 - cwidth_dh1 > width());
 
     if (!initial_address.is_null()) {
         go_to_address(initial_address);
