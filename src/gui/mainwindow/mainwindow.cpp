@@ -1,3 +1,5 @@
+#include "widgets/HidingTabWidget.h"
+
 #include <QProcessEnvironment>
 #include <QtWidgets>
 #include <qwidget.h>
@@ -41,12 +43,14 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     setWindowTitle(APP_NAME);
     setDockNestingEnabled(true);
 
-    central_window.reset(new QTabWidget(this));
+    central_window.reset(new HidingTabWidget(this));
+    central_window->setTabBarAutoHide(true);
     this->setCentralWidget(central_window.data());
 
     // Prepare empty core view
     coreview.reset(new GraphicsView(this));
     central_window->addTab(coreview.data(), "Core");
+
     // Create/prepare other widgets
     ndialog.reset(new NewDialog(this, settings));
     registers.reset(new RegistersDock(this, machine::Xlen::_32));
@@ -130,7 +134,8 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
 
     // Source editor related actions
     connect(
-        central_window.data(), &QTabWidget::currentChanged, this, &MainWindow::central_tab_changed);
+        central_window.data(), &HidingTabWidget::currentChanged, this,
+        &MainWindow::central_tab_changed);
 
     foreach (QString file_name, settings->value("openSrcFiles").toStringList()) {
         if (file_name.isEmpty()) { continue; }
@@ -165,12 +170,16 @@ void MainWindow::start() {
 
 void MainWindow::show_hide_coreview(bool show) {
     coreview_shown = show;
-    if (!show && (corescene == nullptr)) { return; }
-    if ((machine == nullptr) || !show) {
-        corescene.reset();
-        if (coreview != nullptr) { coreview->setScene(corescene.data()); }
+    if (!show) {
+        if (corescene == nullptr) {
+        } else {
+            central_window->removeTab(central_window->indexOf(coreview.data()));
+            corescene.reset();
+            if (coreview != nullptr) { coreview->setScene(corescene.data()); }
+        }
         return;
     }
+    if (machine == nullptr) { return; }
     if (corescene != nullptr) { return; }
 
     if (machine->config().pipelined()) {
@@ -178,6 +187,11 @@ void MainWindow::show_hide_coreview(bool show) {
     } else {
         corescene.reset(new CoreViewSceneSimple(machine.data()));
     }
+    central_window->insertTab(0, coreview.data(), "Core");
+    // Ensures correct zoom.
+    coreview->setScene(corescene.data());
+    this->setCentralWidget(central_window.data());
+
     // Connect scene signals to actions
     connect(corescene.data(), &CoreViewScene::request_registers, this, &MainWindow::show_registers);
     connect(

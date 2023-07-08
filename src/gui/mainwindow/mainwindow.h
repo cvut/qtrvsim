@@ -8,6 +8,7 @@
 #include "machine/machineconfig.h"
 #include "scene.h"
 #include "ui_MainWindow.h"
+#include "widgets/HidingTabWidget.h"
 #include "windows/cache/cachedock.h"
 #include "windows/csr/csrdock.h"
 #include "windows/editor/srceditor.h"
@@ -116,7 +117,7 @@ private:
     Box<Ui::MainWindow> ui {};
 
     Box<NewDialog> ndialog {};
-    Box<QTabWidget> central_window {};
+    Box<HidingTabWidget> central_window {};
 
     Box<GraphicsView> coreview {};
     Box<CoreViewScene> corescene;
