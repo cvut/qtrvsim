@@ -1,9 +1,9 @@
 #include "messagesdock.h"
 
 #include "assembler/messagetype.h"
-#include "hexlineedit.h"
 #include "messagesmodel.h"
 #include "messagesview.h"
+#include "ui/hexlineedit.h"
 
 #include <QHeaderView>
 #include <QSettings>

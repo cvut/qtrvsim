@@ -1,9 +1,9 @@
 #include "programdock.h"
 
 #include "helper/async_modal.h"
-#include "hexlineedit.h"
 #include "programmodel.h"
 #include "programtableview.h"
+#include "ui/hexlineedit.h"
 
 #include <QComboBox>
 #include <QHeaderView>

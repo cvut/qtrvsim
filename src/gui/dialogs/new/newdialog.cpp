@@ -2,7 +2,7 @@
 
 #include "helper/async_modal.h"
 #include "machine/simulator_exception.h"
-#include "mainwindow.h"
+#include "mainwindow/mainwindow.h"
 
 #include <utility>
 

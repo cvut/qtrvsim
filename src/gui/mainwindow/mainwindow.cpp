@@ -4,15 +4,15 @@
     #include <QPrintDialog>
     #include <QPrinter>
 #endif
-#include "aboutdialog.h"
 #include "assembler/fixmatheval.h"
 #include "assembler/simpleasm.h"
+#include "dialogs/about/aboutdialog.h"
+#include "dialogs/gotosymbol/gotosymboldialog.h"
+#include "dialogs/savechanged/savechangeddialog.h"
 #include "extprocess.h"
-#include "gotosymboldialog.h"
 #include "helper/async_modal.h"
 #include "mainwindow.h"
 #include "os_emulation/ossyscall.h"
-#include "savechangeddialog.h"
 #include "textsignalaction.h"
 
 #include <QFile>

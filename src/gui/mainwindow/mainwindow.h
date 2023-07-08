@@ -2,22 +2,22 @@
 #define MAINWINDOW_H
 
 #include "assembler/simpleasm.h"
-#include "cachedock.h"
-#include "csrdock.h"
+#include "dialogs/new/newdialog.h"
 #include "extprocess.h"
-#include "gui/srceditor.h"
-#include "lcddisplaydock.h"
 #include "machine/machine.h"
 #include "machine/machineconfig.h"
-#include "memorydock.h"
-#include "messagesdock.h"
-#include "newdialog.h"
-#include "peripheralsdock.h"
-#include "programdock.h"
-#include "registersdock.h"
 #include "scene.h"
-#include "terminaldock.h"
 #include "ui_MainWindow.h"
+#include "windows/cache/cachedock.h"
+#include "windows/csr/csrdock.h"
+#include "windows/editor/srceditor.h"
+#include "windows/lcd/lcddisplaydock.h"
+#include "windows/memory/memorydock.h"
+#include "windows/messages/messagesdock.h"
+#include "windows/peripherals/peripheralsdock.h"
+#include "windows/program/programdock.h"
+#include "windows/registers/registersdock.h"
+#include "windows/terminal/terminaldock.h"
 
 #include <QMainWindow>
 #include <QPointer>

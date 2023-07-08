@@ -1,8 +1,8 @@
 #include "memorydock.h"
 
-#include "hexlineedit.h"
 #include "memorymodel.h"
 #include "memorytableview.h"
+#include "ui/hexlineedit.h"
 
 #include <QComboBox>
 #include <QHeaderView>

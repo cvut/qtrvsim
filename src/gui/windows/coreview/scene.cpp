@@ -1,7 +1,7 @@
 #include "scene.h"
 
 #include "common/logging.h"
-#include "coreview/data.h"
+#include "data.h"
 #include "machine/core.h"
 
 #include <svgscene/components/hyperlinkitem.h>

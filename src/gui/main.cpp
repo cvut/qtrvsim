@@ -1,6 +1,6 @@
 #include "common/logging.h"
 #include "common/logging_format_colors.h"
-#include "mainwindow.h"
+#include "mainwindow/mainwindow.h"
 
 #include <QApplication>
 

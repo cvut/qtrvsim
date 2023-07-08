@@ -1,7 +1,7 @@
 #include "srceditor.h"
 
-#include "highlighterasm.h"
-#include "highlighterc.h"
+#include "windows/editor/highlighterasm.h"
+#include "windows/editor/highlighterc.h"
 
 #include <QFile>
 #include <QFileInfo>

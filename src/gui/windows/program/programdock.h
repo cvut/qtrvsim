@@ -2,7 +2,7 @@
 #define PROGRAMDOCK_H
 
 #include "machine/machine.h"
-#include "peripheralsview.h"
+#include "windows/peripherals/peripheralsview.h"
 
 #include <QComboBox>
 #include <QDockWidget>
