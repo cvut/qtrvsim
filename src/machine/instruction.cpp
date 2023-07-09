@@ -1183,6 +1183,7 @@ constexpr uint64_t Instruction::modify_pseudoinst_imm(Instruction::Modifier mod,
     case Modifier::NONE: return value;
     case Modifier::COMPOSED_IMM_UPPER: return get_bits(value, 31, 12) + get_bit(value, 11);
     case Modifier::COMPOSED_IMM_LOWER: return get_bits(value, 11, 0);
+    default: UNREACHABLE
     }
 }
 

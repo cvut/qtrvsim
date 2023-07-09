@@ -20,7 +20,9 @@ namespace machine { namespace CSR {
         reset();
     }
 
-    ControlState::ControlState(const ControlState &other) : register_data(other.register_data) {}
+    ControlState::ControlState(const ControlState &other)
+        : QObject(this->parent())
+        , register_data(other.register_data) {}
 
     void ControlState::reset() {
         std::transform(
