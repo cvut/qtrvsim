@@ -61,28 +61,29 @@ public:
     constexpr inline RegisterValue(int8_t value) // NOLINT(google-explicit-constructor)
         : data(value) {};
 
-    constexpr inline uint64_t as_xlen(Xlen xlen) const {
+    [[nodiscard]] constexpr inline uint64_t as_xlen(Xlen xlen) const {
         switch (xlen) {
         case Xlen::_32: return as_u32();
         case Xlen::_64: return as_u64();
+        default: UNREACHABLE
         }
     }
 
-    constexpr inline int8_t as_i8() const { return (int8_t)data; };
+    [[nodiscard]] constexpr inline int8_t as_i8() const { return (int8_t)data; };
 
-    constexpr inline uint8_t as_u8() const { return (uint8_t)data; };
+    [[nodiscard]] constexpr inline uint8_t as_u8() const { return (uint8_t)data; };
 
-    constexpr inline int16_t as_i16() const { return (int16_t)data; };
+    [[nodiscard]] constexpr inline int16_t as_i16() const { return (int16_t)data; };
 
-    constexpr inline uint16_t as_u16() const { return (uint16_t)data; };
+    [[nodiscard]] constexpr inline uint16_t as_u16() const { return (uint16_t)data; };
 
-    constexpr inline int32_t as_i32() const { return (int32_t)data; };
+    [[nodiscard]] constexpr inline int32_t as_i32() const { return (int32_t)data; };
 
-    constexpr inline uint32_t as_u32() const { return (uint32_t)data; };
+    [[nodiscard]] constexpr inline uint32_t as_u32() const { return (uint32_t)data; };
 
-    constexpr inline int64_t as_i64() const { return (int64_t)data; };
+    [[nodiscard]] constexpr inline int64_t as_i64() const { return (int64_t)data; };
 
-    constexpr inline uint64_t as_u64() const { return (uint64_t)data; };
+    [[nodiscard]] constexpr inline uint64_t as_u64() const { return (uint64_t)data; };
 
     constexpr explicit operator int8_t() const { return as_i8(); };
 

@@ -467,6 +467,7 @@ uint64_t Core::get_xlen_from_reg(RegisterValue reg) const {
     switch (this->xlen) {
     case Xlen::_32: return reg.as_u32();
     case Xlen::_64: return reg.as_u64();
+    default: UNREACHABLE
     }
 }
 

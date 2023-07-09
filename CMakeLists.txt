@@ -143,7 +143,7 @@ endif ()
 if (MSVC)
     add_compile_options(/W4 /WX)
 else ()
-    add_compile_options(-Wall -Wextra)
+    add_compile_options(-Wall -Wextra -Werror=switch)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         # This is currently a wont-fix and it will be OK in cpp20.
         add_compile_options(-Wno-c99-designator)
