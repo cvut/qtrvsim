@@ -226,8 +226,10 @@ void MainWindow::create_core(
     machine.reset(new_machine);
 
     // Create machine view
+    auto focused_index = central_window->currentIndex();
     corescene.reset();
     show_hide_coreview(coreview_shown);
+    central_window->setCurrentIndex(focused_index);
 
     set_speed(); // Update machine speed to current settings
 
