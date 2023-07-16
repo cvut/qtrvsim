@@ -163,7 +163,7 @@ void ProgramTableView::focus_address(machine::Address address) {
     if (m == nullptr) { return; }
     if (!m->get_row_for_address(row, address)) { go_to_address_priv(address); }
     if (!m->get_row_for_address(row, address)) { return; }
-    setCurrentIndex(m->index(row, 1));
+    setCurrentIndex(m->index(row, 3));
 }
 
 void ProgramTableView::focus_address_with_save(machine::Address address) {
