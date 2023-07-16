@@ -43,13 +43,17 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     setWindowTitle(APP_NAME);
     setDockNestingEnabled(true);
 
-    central_window.reset(new HidingTabWidget(this));
-    central_window->setTabBarAutoHide(true);
-    this->setCentralWidget(central_window.data());
+    central_widget_tabs.reset(new HidingTabWidget(this));
+    central_widget_tabs->setTabBarAutoHide(true);
+    this->setCentralWidget(central_widget_tabs.data());
 
-    // Prepare empty core view
     coreview.reset(new GraphicsView(this));
-    central_window->addTab(coreview.data(), "Core");
+    central_widget_tabs->addTab(coreview.data(), "Core");
+
+    editor_tabs.reset(new HidingTabWidget(this));
+    editor_tabs->setTabBarAutoHide(true);
+    central_widget_tabs->addTab(editor_tabs.data(), "Editor");
+    central_widget_tabs->setTabVisible(central_widget_tabs->indexOf(editor_tabs.data()), false);
 
     // Create/prepare other widgets
     ndialog.reset(new NewDialog(this, settings));
@@ -458,7 +462,8 @@ void MainWindow::save_exit_or_ignore(bool cancel, const QStringList &tosavelist)
 #ifndef __EMSCRIPTEN__
             editor->saveFile();
 #else
-            central_window->setCurrentWidget(editor);
+            editor_tabs->setCurrentWidget(editor);
+            central_widget_tabs->setCurrentWidget(editor_tabs.data());
             save_source();
             return;
 #endif

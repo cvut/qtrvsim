@@ -117,7 +117,8 @@ private:
     Box<Ui::MainWindow> ui {};
 
     Box<NewDialog> ndialog {};
-    Box<HidingTabWidget> central_window {};
+    Box<HidingTabWidget> central_widget_tabs {};
+    Box<HidingTabWidget> editor_tabs {};
 
     Box<GraphicsView> coreview {};
     Box<CoreViewScene> corescene;
