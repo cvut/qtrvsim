@@ -1,4 +1,4 @@
-#include "HidingTabWidget.h"
+#include "hidingtabwidget.h"
 
 void HidingTabWidget::tabInserted(int index) {
     QTabWidget::tabInserted(index);

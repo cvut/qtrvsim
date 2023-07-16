@@ -1,5 +1,3 @@
-#include "widgets/HidingTabWidget.h"
-
 #include <QProcessEnvironment>
 #include <QtWidgets>
 #include <qwidget.h>

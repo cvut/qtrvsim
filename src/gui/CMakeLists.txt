@@ -45,7 +45,7 @@ set(gui_SOURCES
         textsignalaction.cpp
         windows/coreview/components/value_handlers.cpp
         windows/coreview/components/cache.cpp
-        widgets/HidingTabWidget.cpp
+        widgets/hidingtabwidget.cpp
         )
 set(gui_HEADERS
         dialogs/about/aboutdialog.h
@@ -86,7 +86,7 @@ set(gui_HEADERS
         windows/coreview/data.h
         windows/coreview/components/cache.h
         helper/async_modal.h
-        widgets/HidingTabWidget.h
+        widgets/hidingtabwidget.h
         )
 set(gui_UI
         dialogs/gotosymbol/gotosymboldialog.ui

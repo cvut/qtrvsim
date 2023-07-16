@@ -8,7 +8,7 @@
 #include "machine/machineconfig.h"
 #include "scene.h"
 #include "ui_MainWindow.h"
-#include "widgets/HidingTabWidget.h"
+#include "widgets/hidingtabwidget.h"
 #include "windows/cache/cachedock.h"
 #include "windows/csr/csrdock.h"
 #include "windows/editor/srceditor.h"
