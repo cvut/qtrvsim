@@ -32,6 +32,9 @@ void SrcEditor::setup_common() {
     setPalette(p);
 
     setTextColor(Qt::black);
+
+    // Set tab width to 4 spaces
+    setTabStopDistance(fontMetrics().horizontalAdvance(' ') * TAB_WIDTH);
 }
 
 SrcEditor::SrcEditor(QWidget *parent) : Super(parent) {
@@ -116,6 +119,14 @@ void SrcEditor::keyPressEvent(QKeyEvent *event) {
     QTextCursor cursor = textCursor();
     if (cursor.hasSelection()) {
         switch (event->key()) {
+        case Qt::Key_Tab: {
+            indent_selection(cursor);
+            return;
+        }
+        case Qt::Key_Backtab: {
+            unindent_selection(cursor);
+            return;
+        }
         default: break;
         }
     }
@@ -139,4 +150,40 @@ void SrcEditor::keyPressEvent(QKeyEvent *event) {
     }
 
     QTextEdit::keyPressEvent(event);
+}
+
+void SrcEditor::indent_selection(QTextCursor &cursor) {
+    auto end = cursor.selectionEnd();
+    cursor.beginEditBlock();
+    cursor.setPosition(cursor.selectionStart());
+    cursor.movePosition(QTextCursor::StartOfLine);
+    while (cursor.position() < end) {
+        cursor.insertText("\t");
+        cursor.movePosition(QTextCursor::Down);
+    }
+    cursor.endEditBlock();
+}
+
+void SrcEditor::unindent_selection(QTextCursor &cursor) {
+    cursor.beginEditBlock();
+    auto end_line = document()->findBlock(cursor.selectionEnd()).blockNumber();
+    cursor.setPosition(cursor.selectionStart());
+    cursor.movePosition(QTextCursor::StartOfLine);
+    while (cursor.blockNumber() <= end_line) {
+        auto txt = cursor.block().text();
+        if (txt.isEmpty()) {
+            // Empty line, skip
+        } else if (txt.startsWith("\t")) {
+            cursor.deleteChar();
+        } else if (txt.startsWith(" ")) {
+            // Delete at most TAB_WIDTH spaces
+            unsigned to_delete = std::min<unsigned>(txt.size(), TAB_WIDTH);
+            while (to_delete > 0 && cursor.block().text().startsWith(" ")) {
+                cursor.deleteChar();
+                to_delete--;
+            }
+        }
+        cursor.movePosition(QTextCursor::Down);
+    }
+    cursor.endEditBlock();
 }
