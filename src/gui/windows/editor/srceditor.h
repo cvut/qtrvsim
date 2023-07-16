@@ -27,12 +27,31 @@ public:
     void setSaveAsRequired(bool val);
     [[nodiscard]] bool saveAsRequired() const;
 
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+
 private:
     ::Box<QSyntaxHighlighter> highlighter {};
     void setup_common();
     QString fname;
     QString tname;
     bool saveAsRequiredFl {};
+    /** Width of a tab character in spaces. */
+    static constexpr unsigned TAB_WIDTH = 4;
+
+    /** Indents selected lines by one tab. */
+    void indent_selection(QTextCursor &cursor);
+
+    /** Unindents selected lines by one tab or 4 spaces from the beginning of each line.
+     * If only some lines contain less prefix whitespace, remove as much as possible to mimic
+     * VS Code behavior. */
+    void unindent_selection(QTextCursor &cursor);
+
+    /** Returns true if all lines in the selection are commented out. */
+    bool is_selection_comment();
+
+    /** Comments out all lines in the selection. */
+    void toggle_selection_comment(QTextCursor &cursor, bool is_comment);
 };
 
 #endif // SRCEDITOR_H
