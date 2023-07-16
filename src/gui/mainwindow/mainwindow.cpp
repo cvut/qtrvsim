@@ -54,6 +54,9 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     editor_tabs->setTabBarAutoHide(true);
     central_widget_tabs->addTab(editor_tabs.data(), "Editor");
     central_widget_tabs->setTabVisible(central_widget_tabs->indexOf(editor_tabs.data()), false);
+    connect(
+        editor_tabs.data(), &HidingTabWidget::requestSetVisible, central_widget_tabs.data(),
+        &HidingTabWidget::setTabVisibleRequested);
 
     // Create/prepare other widgets
     ndialog.reset(new NewDialog(this, settings));
@@ -138,7 +141,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
 
     // Source editor related actions
     connect(
-        central_window.data(), &HidingTabWidget::currentChanged, this,
+        editor_tabs.data(), &HidingTabWidget::currentChanged, this,
         &MainWindow::central_tab_changed);
 
     foreach (QString file_name, settings->value("openSrcFiles").toStringList()) {
@@ -177,7 +180,7 @@ void MainWindow::show_hide_coreview(bool show) {
     if (!show) {
         if (corescene == nullptr) {
         } else {
-            central_window->removeTab(central_window->indexOf(coreview.data()));
+            central_widget_tabs->setTabVisibleRequested(coreview.data(), false);
             corescene.reset();
             if (coreview != nullptr) { coreview->setScene(corescene.data()); }
         }
@@ -191,10 +194,7 @@ void MainWindow::show_hide_coreview(bool show) {
     } else {
         corescene.reset(new CoreViewSceneSimple(machine.data()));
     }
-    central_window->insertTab(0, coreview.data(), "Core");
-    // Ensures correct zoom.
-    coreview->setScene(corescene.data());
-    this->setCentralWidget(central_window.data());
+    central_widget_tabs->setTabVisibleRequested(coreview.data(), true);
 
     // Connect scene signals to actions
     connect(corescene.data(), &CoreViewScene::request_registers, this, &MainWindow::show_registers);
@@ -230,10 +230,10 @@ void MainWindow::create_core(
     machine.reset(new_machine);
 
     // Create machine view
-    auto focused_index = central_window->currentIndex();
+    auto focused_index = central_widget_tabs->currentIndex();
     corescene.reset();
     show_hide_coreview(coreview_shown);
-    central_window->setCurrentIndex(focused_index);
+    central_widget_tabs->setCurrentIndex(focused_index);
 
     set_speed(); // Update machine speed to current settings
 
@@ -469,13 +469,13 @@ void MainWindow::save_exit_or_ignore(bool cancel, const QStringList &tosavelist)
 #endif
         }
     }
-    if (save_unnamed && (central_window != nullptr)) {
-        for (int i = 0; i < central_window->count(); i++) {
-            QWidget *w = central_window->widget(i);
+    if (save_unnamed && (editor_tabs != nullptr)) {
+        for (int i = 0; i < editor_tabs->count(); i++) {
+            QWidget *w = editor_tabs->widget(i);
             auto *editor = dynamic_cast<SrcEditor *>(w);
             if (editor == nullptr) { continue; }
             if (!editor->saveAsRequired()) { continue; }
-            central_window->setCurrentWidget(editor);
+            editor_tabs->setCurrentWidget(editor);
             save_source_as();
             return;
         }
@@ -557,22 +557,23 @@ void MainWindow::tab_widget_destroyed(QObject *obj) {
 }
 
 void MainWindow::central_tab_changed(int index) {
-    QWidget *widget = central_window->widget(index);
+    QWidget *widget = editor_tabs->widget(index);
     auto *srceditor = dynamic_cast<SrcEditor *>(widget);
     if (srceditor != nullptr) { setCurrentSrcEditor(srceditor); }
 }
 
 void MainWindow::add_src_editor_to_tabs(SrcEditor *editor) {
-    central_window->addTab(editor, editor->title());
-    central_window->setCurrentWidget(editor);
+    editor_tabs->addTab(editor, editor->title());
+    editor_tabs->setCurrentWidget(editor);
+    central_widget_tabs->setCurrentWidget(editor_tabs.data());
     connect(editor, &QObject::destroyed, this, &MainWindow::tab_widget_destroyed);
 }
 
 void MainWindow::update_open_file_list() {
     QStringList open_src_files;
-    if ((central_window == nullptr) || (settings == nullptr)) { return; }
-    for (int i = 0; i < central_window->count(); i++) {
-        QWidget *w = central_window->widget(i);
+    if ((editor_tabs == nullptr) || (settings == nullptr)) { return; }
+    for (int i = 0; i < editor_tabs->count(); i++) {
+        QWidget *w = editor_tabs->widget(i);
         auto *editor = dynamic_cast<SrcEditor *>(w);
         if (editor == nullptr) { continue; }
         if (editor->filename() == "") { continue; }
@@ -584,9 +585,9 @@ void MainWindow::update_open_file_list() {
 bool MainWindow::modified_file_list(QStringList &list, bool report_unnamed) {
     bool ret = false;
     list.clear();
-    if (central_window == nullptr) { return false; }
-    for (int i = 0; i < central_window->count(); i++) {
-        QWidget *w = central_window->widget(i);
+    if (editor_tabs == nullptr) { return false; }
+    for (int i = 0; i < editor_tabs->count(); i++) {
+        QWidget *w = editor_tabs->widget(i);
         auto *editor = dynamic_cast<SrcEditor *>(w);
         if (editor == nullptr) { continue; }
         if ((editor->filename() == "") && !report_unnamed) { continue; }
@@ -608,11 +609,11 @@ static int compare_filenames(const QString &filename1, const QString &filename2)
 }
 
 SrcEditor *MainWindow::source_editor_for_file(const QString &filename, bool open) {
-    if (central_window == nullptr) { return nullptr; }
+    if (editor_tabs == nullptr) { return nullptr; }
     int found_match = 0;
     SrcEditor *found_editor = nullptr;
-    for (int i = 0; i < central_window->count(); i++) {
-        QWidget *w = central_window->widget(i);
+    for (int i = 0; i < editor_tabs->count(); i++) {
+        QWidget *w = editor_tabs->widget(i);
         auto *editor = dynamic_cast<SrcEditor *>(w);
         if (editor == nullptr) { continue; }
         int match = compare_filenames(filename, editor->filename());
@@ -649,7 +650,7 @@ void MainWindow::open_source() {
     if (!file_name.isEmpty()) {
         SrcEditor *editor = source_editor_for_file(file_name, false);
         if (editor != nullptr) {
-            if (central_window != nullptr) { central_window->setCurrentWidget(editor); }
+            if (editor_tabs != nullptr) { editor_tabs->setCurrentWidget(editor); }
             return;
         }
         editor = new SrcEditor();
@@ -684,8 +685,8 @@ void MainWindow::save_source_as() {
         showAsyncCriticalBox(this, "Simulator Error", tr("Cannot save file '%1'.").arg(fn));
         return;
     }
-    int idx = central_window->indexOf(current_srceditor);
-    if (idx >= 0) { central_window->setTabText(idx, current_srceditor->title()); }
+    int idx = editor_tabs->indexOf(current_srceditor);
+    if (idx >= 0) { editor_tabs->setTabText(idx, current_srceditor->title()); }
     update_open_file_list();
 #else
     QString filename = current_srceditor->filename();
@@ -707,8 +708,8 @@ void MainWindow::src_editor_save_to(const QString &filename) {
     if (filename.isEmpty() || (current_srceditor == nullptr)) { return; }
     current_srceditor->setFileName(filename);
     if (!current_srceditor->filename().isEmpty()) { save_source(); }
-    int idx = central_window->indexOf(current_srceditor);
-    if (idx >= 0) { central_window->setTabText(idx, current_srceditor->title()); }
+    int idx = editor_tabs->indexOf(current_srceditor);
+    if (idx >= 0) { editor_tabs->setTabText(idx, current_srceditor->title()); }
     update_open_file_list();
 }
 
@@ -767,8 +768,8 @@ void MainWindow::close_source() {
     if (current_srceditor == nullptr) { return; }
     SrcEditor *editor = current_srceditor;
     setCurrentSrcEditor(nullptr);
-    int idx = central_window->indexOf(editor);
-    if (idx >= 0) { central_window->removeTab(idx); }
+    int idx = editor_tabs->indexOf(editor);
+    if (idx >= 0) { editor_tabs->removeTab(idx); }
     delete editor;
     update_open_file_list();
 }
@@ -816,7 +817,7 @@ void MainWindow::message_selected(
     if (editor == nullptr) { return; }
     editor->setCursorToLine(line);
     editor->setFocus();
-    if (central_window != nullptr) { central_window->setCurrentWidget(editor); }
+    if (editor_tabs != nullptr) { editor_tabs->setCurrentWidget(editor); }
 }
 
 bool SimpleAsmWithEditorCheck::process_file(const QString &filename, QString *error_ptr) {
@@ -864,8 +865,8 @@ bool SimpleAsmWithEditorCheck::process_pragma(
     if (op == "tab") {
         if ((operands.count() < 3) || error_occured) { return true; }
         if (!QString::compare(operands.at(2), "core", Qt::CaseInsensitive)
-            && (mainwindow->central_window != nullptr) && (mainwindow->coreview != nullptr)) {
-            mainwindow->central_window->setCurrentWidget(mainwindow->coreview.data());
+            && (mainwindow->editor_tabs != nullptr) && (mainwindow->coreview != nullptr)) {
+            mainwindow->editor_tabs->setCurrentWidget(mainwindow->coreview.data());
         }
         return true;
     }
