@@ -16,10 +16,10 @@ public:
     void tabRemoved(int index) override;
 
 signals:
-    void requestSetVisible(QWidget *tab, bool visible);
+    void requestAddRemoveTab(QWidget *tab, bool visible);
 
 public slots:
-    void setTabVisibleRequested(QWidget *tab, bool visible);
+    void addRemoveTabRequested(QWidget *tab, bool exists);
 };
 
 #endif // HIDINGTABWIDGET_H

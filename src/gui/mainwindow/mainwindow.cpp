@@ -50,11 +50,10 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
 
     editor_tabs.reset(new HidingTabWidget(this));
     editor_tabs->setTabBarAutoHide(true);
-    central_widget_tabs->addTab(editor_tabs.data(), "Editor");
-    central_widget_tabs->setTabVisible(central_widget_tabs->indexOf(editor_tabs.data()), false);
+    editor_tabs->setWindowTitle("Editor");
     connect(
-        editor_tabs.data(), &HidingTabWidget::requestSetVisible, central_widget_tabs.data(),
-        &HidingTabWidget::setTabVisibleRequested);
+        editor_tabs.data(), &HidingTabWidget::requestAddRemoveTab, central_widget_tabs.data(),
+        &HidingTabWidget::addRemoveTabRequested);
 
     // Create/prepare other widgets
     ndialog.reset(new NewDialog(this, settings));
@@ -178,7 +177,7 @@ void MainWindow::show_hide_coreview(bool show) {
     if (!show) {
         if (corescene == nullptr) {
         } else {
-            central_widget_tabs->setTabVisibleRequested(coreview.data(), false);
+            central_widget_tabs->removeTab(central_widget_tabs->indexOf(coreview.data()));
             corescene.reset();
             if (coreview != nullptr) { coreview->setScene(corescene.data()); }
         }
@@ -192,7 +191,10 @@ void MainWindow::show_hide_coreview(bool show) {
     } else {
         corescene.reset(new CoreViewSceneSimple(machine.data()));
     }
-    central_widget_tabs->setTabVisibleRequested(coreview.data(), true);
+    central_widget_tabs->insertTab(0, coreview.data(), "Core");
+    // Ensures correct zoom.
+    coreview->setScene(corescene.data());
+    this->setCentralWidget(central_widget_tabs.data());
 
     // Connect scene signals to actions
     connect(corescene.data(), &CoreViewScene::request_registers, this, &MainWindow::show_registers);
