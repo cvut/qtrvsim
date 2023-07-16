@@ -46,6 +46,12 @@ private:
      * If only some lines contain less prefix whitespace, remove as much as possible to mimic
      * VS Code behavior. */
     void unindent_selection(QTextCursor &cursor);
+
+    /** Returns true if all lines in the selection are commented out. */
+    bool is_selection_comment();
+
+    /** Comments out all lines in the selection. */
+    void toggle_selection_comment(QTextCursor &cursor, bool is_comment);
 };
 
 #endif // SRCEDITOR_H

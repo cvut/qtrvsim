@@ -127,6 +127,12 @@ void SrcEditor::keyPressEvent(QKeyEvent *event) {
             unindent_selection(cursor);
             return;
         }
+        case Qt::Key_Slash:
+            if (event->modifiers() & Qt::ControlModifier) {
+                toggle_selection_comment(cursor, is_selection_comment());
+                return;
+            }
+            break;
         default: break;
         }
     }
@@ -146,6 +152,21 @@ void SrcEditor::keyPressEvent(QKeyEvent *event) {
         cursor.insertText(indent);
         setTextCursor(cursor);
         return;
+    }
+    case Qt::Key_Slash: {
+        if (event->modifiers() & Qt::ControlModifier) {
+            // Toggle comment
+            if (cursor.block().text().startsWith("//")) {
+                cursor.movePosition(QTextCursor::StartOfLine);
+                cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, 2);
+                cursor.removeSelectedText();
+            } else {
+                cursor.movePosition(QTextCursor::StartOfLine);
+                cursor.insertText("//");
+            }
+            return;
+        }
+        break;
     }
     }
 
@@ -187,3 +208,37 @@ void SrcEditor::unindent_selection(QTextCursor &cursor) {
     }
     cursor.endEditBlock();
 }
+
+bool SrcEditor::is_selection_comment() {
+    QTextCursor cursor = textCursor();
+    bool all_commented = true;
+
+    auto end_line = document()->findBlock(cursor.selectionEnd()).blockNumber();
+    while (cursor.blockNumber() <= end_line) {
+        auto txt = cursor.block().text();
+        if (!txt.startsWith("//")) {
+            all_commented = false;
+            break;
+        }
+        cursor.movePosition(QTextCursor::Down);
+    }
+
+    return all_commented;
+}
+
+void SrcEditor::toggle_selection_comment(QTextCursor &cursor, bool is_comment) {
+    auto end_line = document()->findBlock(cursor.selectionEnd()).blockNumber();
+    cursor.beginEditBlock();
+    cursor.setPosition(cursor.selectionStart());
+    cursor.movePosition(QTextCursor::StartOfLine);
+    while (cursor.blockNumber() <= end_line) {
+        if (is_comment) {
+            cursor.deleteChar();
+            cursor.deleteChar();
+        } else {
+            cursor.insertText("//");
+        }
+        cursor.movePosition(QTextCursor::Down);
+    }
+    cursor.endEditBlock();
+};
