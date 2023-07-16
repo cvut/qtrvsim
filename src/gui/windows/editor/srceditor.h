@@ -27,6 +27,9 @@ public:
     void setSaveAsRequired(bool val);
     [[nodiscard]] bool saveAsRequired() const;
 
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+
 private:
     ::Box<QSyntaxHighlighter> highlighter {};
     void setup_common();

@@ -1,5 +1,6 @@
 #include "srceditor.h"
 
+#include "common/logging.h"
 #include "windows/editor/highlighterasm.h"
 #include "windows/editor/highlighterc.h"
 
@@ -8,6 +9,11 @@
 #include <QPalette>
 #include <QTextCursor>
 #include <QTextDocumentWriter>
+#include <qglobal.h>
+#include <qtextdocument.h>
+#include <qtextedit.h>
+
+LOG_CATEGORY("gui.src_editor");
 
 void SrcEditor::setup_common() {
     QFont font;
@@ -32,8 +38,7 @@ SrcEditor::SrcEditor(QWidget *parent) : Super(parent) {
     setup_common();
 }
 
-SrcEditor::SrcEditor(const QString &text, QWidget *parent)
-    : Super(text, parent) {
+SrcEditor::SrcEditor(const QString &text, QWidget *parent) : Super(text, parent) {
     setup_common();
 }
 
@@ -70,30 +75,20 @@ bool SrcEditor::loadFile(const QString &filename) {
     }
 }
 
-bool SrcEditor::loadByteArray(
-    const QByteArray &content,
-    const QString &filename) {
+bool SrcEditor::loadByteArray(const QByteArray &content, const QString &filename) {
     setPlainText(QString::fromUtf8(content.data(), content.size()));
-    if (!filename.isEmpty()) {
-        setFileName(filename);
-    }
+    if (!filename.isEmpty()) { setFileName(filename); }
     return true;
 }
 
 bool SrcEditor::saveFile(QString filename) {
-    if (filename.isEmpty()) {
-        filename = this->filename();
-    }
-    if (filename.isEmpty()) {
-        return false;
-    }
+    if (filename.isEmpty()) { filename = this->filename(); }
+    if (filename.isEmpty()) { return false; }
     QTextDocumentWriter writer(filename);
     writer.setFormat("plaintext");
     bool success = writer.write(document());
     setFileName(filename);
-    if (success) {
-        document()->setModified(false);
-    }
+    if (success) { document()->setModified(false); }
     return success;
 }
 
@@ -116,4 +111,32 @@ void SrcEditor::setSaveAsRequired(bool val) {
 
 bool SrcEditor::saveAsRequired() const {
     return saveAsRequiredFl;
+}
+void SrcEditor::keyPressEvent(QKeyEvent *event) {
+    QTextCursor cursor = textCursor();
+    if (cursor.hasSelection()) {
+        switch (event->key()) {
+        default: break;
+        }
+    }
+
+    switch (event->key()) {
+    case Qt::Key_Return: { // Keep indentation
+        QString txt = cursor.block().text();
+        QString indent;
+        for (auto ch : txt) {
+            if (ch.isSpace()) {
+                indent.append(ch);
+            } else {
+                break;
+            }
+        }
+        cursor.insertText("\n");
+        cursor.insertText(indent);
+        setTextCursor(cursor);
+        return;
+    }
+    }
+
+    QTextEdit::keyPressEvent(event);
 }
