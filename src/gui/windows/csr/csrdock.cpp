@@ -3,26 +3,25 @@
 #include "csr/controlstate.h"
 
 CsrDock::CsrDock(QWidget *parent) : QDockWidget(parent) {
-    scrollarea.reset(new QScrollArea(this));
+    scrollarea = new QScrollArea(this);
     scrollarea->setWidgetResizable(true);
-    widg.reset(new StaticTable(scrollarea.data()));
+    widg = new StaticTable(scrollarea);
 
-    csr_view[0].reset();
     for (size_t i = 0; i < machine::CSR::REGISTERS.size(); i++) {
         auto &desc = machine::CSR::REGISTERS.at(i);
-        csr_view[i].reset(new QLabel("0x00000000", widg.data()));
+        csr_view[i] = new QLabel("0x00000000", widg);
         csr_view[i]->setFixedSize(csr_view[i]->sizeHint());
         csr_view[i]->setText("");
         csr_view[i]->setTextInteractionFlags(Qt::TextSelectableByMouse);
-        auto desc_label = new QLabel(QString(desc.name), widg.data());
+        auto desc_label = new QLabel(QString(desc.name), widg);
         desc_label->setToolTip(
             (QString("%0 (0x%1)").arg(desc.description).arg(desc.address.data, 0, 16)));
-        widg->addRow({ desc_label, csr_view[i].data() });
+        widg->addRow({ desc_label, csr_view[i] });
         csr_highlighted[i] = false;
     }
-    scrollarea->setWidget(widg.data());
+    scrollarea->setWidget(widg);
 
-    setWidget(scrollarea.data());
+    setWidget(scrollarea);
     setObjectName("Control and Status Registers");
     setWindowTitle("Control and Status Registers");
 
@@ -47,7 +46,7 @@ void CsrDock::setup(machine::Machine *machine) {
     const machine::CSR::ControlState *controlst = machine->control_state();
 
     for (size_t i = 0; i < machine::CSR::REGISTERS.size(); i++) {
-        labelVal(csr_view[i].data(), controlst->read_internal(i).as_u64());
+        labelVal(csr_view[i], controlst->read_internal(i).as_u64());
     }
 
     connect(controlst, &machine::CSR::ControlState::write_signal, this, &CsrDock::csr_changed);
@@ -61,7 +60,7 @@ void CsrDock::csr_changed(size_t internal_reg_id, machine::RegisterValue val) {
         (uint)internal_reg_id < machine::CSR::REGISTERS.size(),
         QString("CsrDock received signal with invalid CSR register: ")
             + QString::number((uint)internal_reg_id));
-    labelVal(csr_view[(uint)internal_reg_id].data(), val.as_u64());
+    labelVal(csr_view[(uint)internal_reg_id], val.as_u64());
     csr_view[internal_reg_id]->setPalette(pal_updated);
     csr_highlighted[internal_reg_id] = true;
     csr_highlighted_any = true;

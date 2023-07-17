@@ -25,10 +25,10 @@ private slots:
     void clear_highlights();
 
 private:
-    Box<StaticTable> widg;
-    Box<QScrollArea> scrollarea;
+    QT_OWNED StaticTable *widg;
+    QT_OWNED QScrollArea *scrollarea;
 
-    std::array<Box<QLabel>, machine::CSR::REGISTERS.size()> csr_view;
+    std::array<QT_OWNED QLabel *, machine::CSR::REGISTERS.size()> csr_view;
     bool csr_highlighted[machine::CSR::REGISTERS.size()] {};
     bool csr_highlighted_any;
 
