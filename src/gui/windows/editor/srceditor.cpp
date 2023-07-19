@@ -10,6 +10,9 @@
 #include <QTextCursor>
 #include <QTextDocumentWriter>
 #include <qglobal.h>
+#include <qnamespace.h>
+#include <qplaintextedit.h>
+#include <qstyle.h>
 #include <qtextdocument.h>
 #include <qtextedit.h>
 
@@ -31,7 +34,9 @@ void SrcEditor::setup_common() {
     p.setColor(QPalette::Disabled, QPalette::Base, Qt::white);
     setPalette(p);
 
-    setTextColor(Qt::black);
+    QTextCharFormat fmt;
+    fmt.setForeground(Qt::black);
+    mergeCurrentCharFormat(fmt);
 
     // Set tab width to 4 spaces
     setTabStopDistance(fontMetrics().horizontalAdvance(' ') * TAB_WIDTH);
@@ -170,7 +175,7 @@ void SrcEditor::keyPressEvent(QKeyEvent *event) {
     }
     }
 
-    QTextEdit::keyPressEvent(event);
+    QPlainTextEdit::keyPressEvent(event);
 }
 
 void SrcEditor::indent_selection(QTextCursor &cursor) {

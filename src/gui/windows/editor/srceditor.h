@@ -7,10 +7,11 @@
 #include <QString>
 #include <QSyntaxHighlighter>
 #include <QTextEdit>
+#include <qplaintextedit.h>
 
-class SrcEditor : public QTextEdit {
+class SrcEditor : public QPlainTextEdit {
     Q_OBJECT
-    using Super = QTextEdit;
+    using Super = QPlainTextEdit;
 
 public:
     explicit SrcEditor(const QString &text, QWidget *parent = nullptr);
