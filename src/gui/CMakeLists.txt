@@ -27,6 +27,7 @@ set(gui_SOURCES
         ui/hexlineedit.cpp
         windows/editor/highlighterasm.cpp
         windows/editor/highlighterc.cpp
+        windows/editor/linenumberarea.cpp
         hinttabledelegate.cpp
         windows/lcd/lcddisplaydock.cpp
         windows/lcd/lcddisplayview.cpp
@@ -67,6 +68,7 @@ set(gui_HEADERS
         ui/hexlineedit.h
         windows/editor/highlighterasm.h
         windows/editor/highlighterc.h
+        windows/editor/linenumberarea.h
         hinttabledelegate.h
         windows/lcd/lcddisplaydock.h
         windows/lcd/lcddisplayview.h

@@ -2,12 +2,14 @@
 #define SRCEDITOR_H
 
 #include "common/memory_ownership.h"
+#include "linenumberarea.h"
 #include "machine/machine.h"
 
 #include <QString>
 #include <QSyntaxHighlighter>
 #include <QTextEdit>
 #include <qplaintextedit.h>
+#include <qwidget.h>
 
 class SrcEditor : public QPlainTextEdit {
     Q_OBJECT
@@ -30,10 +32,15 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+
+private slots:
+    void updateMargins(int newBlockCount);
+    void updateLineNumberArea(const QRect &rect, int dy);
 
 private:
     ::Box<QSyntaxHighlighter> highlighter {};
-    void setup_common();
+    QWidget *line_number_area;
     QString fname;
     QString tname;
     bool saveAsRequiredFl {};
@@ -53,6 +60,8 @@ private:
 
     /** Comments out all lines in the selection. */
     void toggle_selection_comment(QTextCursor &cursor, bool is_comment);
+
+    friend class LineNumberArea;
 };
 
 #endif // SRCEDITOR_H

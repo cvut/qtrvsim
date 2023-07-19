@@ -1,53 +1,52 @@
 #include "srceditor.h"
 
 #include "common/logging.h"
+#include "linenumberarea.h"
 #include "windows/editor/highlighterasm.h"
 #include "windows/editor/highlighterc.h"
 
 #include <QFile>
 #include <QFileInfo>
+#include <QPainter>
 #include <QPalette>
 #include <QTextCursor>
 #include <QTextDocumentWriter>
 #include <qglobal.h>
 #include <qnamespace.h>
+#include <qpalette.h>
 #include <qplaintextedit.h>
 #include <qstyle.h>
-#include <qtextdocument.h>
 #include <qtextedit.h>
 
 LOG_CATEGORY("gui.src_editor");
 
-void SrcEditor::setup_common() {
-    QFont font;
+SrcEditor::SrcEditor(QWidget *parent) : SrcEditor("", parent) {}
+
+SrcEditor::SrcEditor(const QString &text, QWidget *parent)
+    : Super(text, parent)
+    , line_number_area(new LineNumberArea(this)) {
+    QFont font1;
     saveAsRequiredFl = true;
-    font.setFamily("Courier");
-    font.setFixedPitch(true);
-    font.setPointSize(10);
-    setFont(font);
+    font1.setFamily("Courier");
+    font1.setFixedPitch(true);
+    font1.setPointSize(10);
+    setFont(font1);
     tname = "Unknown";
     highlighter.reset(new HighlighterAsm(document()));
 
     QPalette p = palette();
-    p.setColor(QPalette::Active, QPalette::Base, Qt::white);
-    p.setColor(QPalette::Inactive, QPalette::Base, Qt::white);
-    p.setColor(QPalette::Disabled, QPalette::Base, Qt::white);
+    p.setColor(QPalette::Base, Qt::white);
+    p.setColor(QPalette::Text, Qt::black);
+    p.setColor(QPalette::WindowText, Qt::darkGray);
     setPalette(p);
-
-    QTextCharFormat fmt;
-    fmt.setForeground(Qt::black);
-    mergeCurrentCharFormat(fmt);
 
     // Set tab width to 4 spaces
     setTabStopDistance(fontMetrics().horizontalAdvance(' ') * TAB_WIDTH);
-}
 
-SrcEditor::SrcEditor(QWidget *parent) : Super(parent) {
-    setup_common();
-}
+    connect(this, &SrcEditor::blockCountChanged, this, &SrcEditor::updateMargins);
+    connect(this, &SrcEditor::updateRequest, this, &SrcEditor::updateLineNumberArea);
 
-SrcEditor::SrcEditor(const QString &text, QWidget *parent) : Super(text, parent) {
-    setup_common();
+    updateMargins(0);
 }
 
 QString SrcEditor::filename() {
@@ -246,4 +245,26 @@ void SrcEditor::toggle_selection_comment(QTextCursor &cursor, bool is_comment) {
         cursor.movePosition(QTextCursor::Down);
     }
     cursor.endEditBlock();
-};
+}
+
+void SrcEditor::updateMargins(int /* newBlockCount */) {
+    setViewportMargins(line_number_area->sizeHint().width(), 0, 0, 0);
+}
+
+void SrcEditor::updateLineNumberArea(const QRect &rect, int dy) {
+    if (dy) {
+        line_number_area->scroll(0, dy);
+    } else {
+        line_number_area->update(0, rect.y(), line_number_area->width(), rect.height());
+    }
+
+    if (rect.contains(viewport()->rect())) updateMargins(0);
+}
+
+void SrcEditor::resizeEvent(QResizeEvent *event) {
+    QPlainTextEdit::resizeEvent(event);
+
+    QRect cr = contentsRect();
+    line_number_area->setGeometry(
+        QRect(cr.left(), cr.top(), line_number_area->sizeHint().width(), cr.height()));
+}
