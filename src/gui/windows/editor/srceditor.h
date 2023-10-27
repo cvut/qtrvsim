@@ -16,9 +16,8 @@ class SrcEditor : public QPlainTextEdit {
     using Super = QPlainTextEdit;
 
 public:
-    explicit SrcEditor(const QString &text, QWidget *parent = nullptr);
-    explicit SrcEditor(QWidget *parent = nullptr);
-    QString filename();
+    explicit SrcEditor(QWidget *parent);
+    QString filename() const;
     QString title();
     bool loadFile(const QString &filename);
     bool saveFile(QString filename = "");
@@ -34,13 +33,20 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
 
+signals:
+    void file_name_change();
+
+public slots:
+    void setShowLineNumbers(bool visible);
+
 private slots:
     void updateMargins(int newBlockCount);
     void updateLineNumberArea(const QRect &rect, int dy);
 
 private:
     ::Box<QSyntaxHighlighter> highlighter {};
-    QWidget *line_number_area;
+    LineNumberArea *line_number_area;
+    bool line_numbers_visible = true;
     QString fname;
     QString tname;
     bool saveAsRequiredFl {};

@@ -2,16 +2,19 @@
 
 #include "srceditor.h"
 
+#include <cmath>
 #include <qpainter.h>
 #include <qsize.h>
 
-constexpr int RIGHT_MARGIN = 10;
+constexpr int RIGHT_MARGIN = 5;
 constexpr int RIGHT_PADDING = 5;
 constexpr int LEFT_PADDING = 5;
 
 LineNumberArea::LineNumberArea(SrcEditor *editor_) : QWidget(editor_), editor(editor_) {}
 
 QSize LineNumberArea::sizeHint() const {
+    if (!line_numbers_visible) { return { 0, 0 }; }
+
     int digits = std::log10(std::max(1, editor->blockCount())) + 2;
     int space = editor->fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits + LEFT_PADDING
                 + RIGHT_PADDING + RIGHT_MARGIN;
@@ -43,4 +46,8 @@ void LineNumberArea::paintEvent(QPaintEvent *event) {
         bottom = top + qRound(editor->blockBoundingRect(block).height());
         ++blockNumber;
     }
+}
+void LineNumberArea::set(bool visible) {
+    QWidget::setVisible(visible);
+    line_numbers_visible = visible;
 }

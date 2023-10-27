@@ -6,6 +6,7 @@ void HidingTabWidget::tabInserted(int index) {
         show();
         requestAddRemoveTab(this, true);
     }
+    tabCountChanged();
 }
 void HidingTabWidget::tabRemoved(int index) {
     QTabWidget::tabRemoved(index);
@@ -13,6 +14,7 @@ void HidingTabWidget::tabRemoved(int index) {
         hide();
         requestAddRemoveTab(this, false);
     }
+    tabCountChanged();
 }
 void HidingTabWidget::addRemoveTabRequested(QWidget *tab, bool exists) {
     if (!exists) {

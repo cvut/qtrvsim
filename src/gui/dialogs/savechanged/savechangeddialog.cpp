@@ -8,8 +8,7 @@
 #include <QTabWidget>
 #include <QVBoxLayout>
 
-SaveChnagedDialog::SaveChnagedDialog(QStringList &changedlist, QWidget *parent)
-    : QDialog(parent) {
+SaveChangedDialog::SaveChangedDialog(QStringList &changedlist, QWidget *parent) : QDialog(parent) {
     setAttribute(Qt::WA_DeleteOnClose);
     setAttribute(Qt::WA_ShowModal);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -49,15 +48,9 @@ SaveChnagedDialog::SaveChnagedDialog(QStringList &changedlist, QWidget *parent)
     auto *ignoreButton = new QPushButton(tr("&Ignore"), parent);
     auto *saveButton = new QPushButton(tr("&Save"), parent);
     saveButton->setFocus();
-    connect(
-        cancelButton, &QAbstractButton::clicked, this,
-        &SaveChnagedDialog::cancel_clicked);
-    connect(
-        ignoreButton, &QAbstractButton::clicked, this,
-        &SaveChnagedDialog::ignore_clicked);
-    connect(
-        saveButton, &QAbstractButton::clicked, this,
-        &SaveChnagedDialog::save_clicked);
+    connect(cancelButton, &QAbstractButton::clicked, this, &SaveChangedDialog::cancel_clicked);
+    connect(ignoreButton, &QAbstractButton::clicked, this, &SaveChangedDialog::ignore_clicked);
+    connect(saveButton, &QAbstractButton::clicked, this, &SaveChangedDialog::save_clicked);
     hlBtn->addWidget(cancelButton);
     hlBtn->addStretch();
     hlBtn->addWidget(ignoreButton);
@@ -69,19 +62,19 @@ SaveChnagedDialog::SaveChnagedDialog(QStringList &changedlist, QWidget *parent)
     setMinimumSize(400, 300);
 }
 
-void SaveChnagedDialog::cancel_clicked() {
+void SaveChangedDialog::cancel_clicked() {
     QStringList list;
     emit user_decision(true, list);
     close();
 }
 
-void SaveChnagedDialog::ignore_clicked() {
+void SaveChangedDialog::ignore_clicked() {
     QStringList list;
     emit user_decision(false, list);
     close();
 }
 
-void SaveChnagedDialog::save_clicked() {
+void SaveChangedDialog::save_clicked() {
     QStringList list;
     for (int r = 0; r < model->rowCount(); ++r) {
         if (model->item(r)->checkState() == Qt::Checked) {

@@ -6,13 +6,11 @@
 #include <QStandardItemModel>
 #include <QStringList>
 
-class SaveChnagedDialog : public QDialog {
+class SaveChangedDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit SaveChnagedDialog(
-        QStringList &changedlist,
-        QWidget *parent = nullptr);
+    explicit SaveChangedDialog(QStringList &changedlist, QWidget *parent = nullptr);
 signals:
     void user_decision(bool cancel, QStringList tosavelist);
 private slots:

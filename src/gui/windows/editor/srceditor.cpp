@@ -1,30 +1,26 @@
 #include "srceditor.h"
 
 #include "common/logging.h"
+#include "editordock.h"
+#include "editortab.h"
 #include "linenumberarea.h"
 #include "windows/editor/highlighterasm.h"
 #include "windows/editor/highlighterc.h"
 
+#include <QCoreApplication>
 #include <QFile>
 #include <QFileInfo>
 #include <QPainter>
-#include <QPalette>
 #include <QTextCursor>
 #include <QTextDocumentWriter>
 #include <qglobal.h>
-#include <qnamespace.h>
 #include <qpalette.h>
 #include <qplaintextedit.h>
 #include <qstyle.h>
-#include <qtextedit.h>
 
 LOG_CATEGORY("gui.src_editor");
 
-SrcEditor::SrcEditor(QWidget *parent) : SrcEditor("", parent) {}
-
-SrcEditor::SrcEditor(const QString &text, QWidget *parent)
-    : Super(text, parent)
-    , line_number_area(new LineNumberArea(this)) {
+SrcEditor::SrcEditor(QWidget *parent) : Super(parent), line_number_area(new LineNumberArea(this)) {
     QFont font1;
     saveAsRequiredFl = true;
     font1.setFamily("Courier");
@@ -49,7 +45,7 @@ SrcEditor::SrcEditor(const QString &text, QWidget *parent)
     updateMargins(0);
 }
 
-QString SrcEditor::filename() {
+QString SrcEditor::filename() const {
     return fname;
 }
 
@@ -69,6 +65,8 @@ void SrcEditor::setFileName(const QString &filename) {
     } else {
         highlighter.reset(new HighlighterAsm(document()));
     }
+
+    emit file_name_change();
 }
 
 bool SrcEditor::loadFile(const QString &filename) {
@@ -184,7 +182,7 @@ void SrcEditor::indent_selection(QTextCursor &cursor) {
     cursor.movePosition(QTextCursor::StartOfLine);
     while (cursor.position() < end) {
         cursor.insertText("\t");
-        cursor.movePosition(QTextCursor::Down);
+        if (!cursor.movePosition(QTextCursor::Down)) break;
     }
     cursor.endEditBlock();
 }
@@ -208,7 +206,7 @@ void SrcEditor::unindent_selection(QTextCursor &cursor) {
                 to_delete--;
             }
         }
-        cursor.movePosition(QTextCursor::Down);
+        if (!cursor.movePosition(QTextCursor::Down)) break;
     }
     cursor.endEditBlock();
 }
@@ -224,7 +222,7 @@ bool SrcEditor::is_selection_comment() {
             all_commented = false;
             break;
         }
-        cursor.movePosition(QTextCursor::Down);
+        if (!cursor.movePosition(QTextCursor::Down)) break;
     }
 
     return all_commented;
@@ -242,7 +240,7 @@ void SrcEditor::toggle_selection_comment(QTextCursor &cursor, bool is_comment) {
         } else {
             cursor.insertText("//");
         }
-        cursor.movePosition(QTextCursor::Down);
+        if (!cursor.movePosition(QTextCursor::Down)) break;
     }
     cursor.endEditBlock();
 }
@@ -267,4 +265,8 @@ void SrcEditor::resizeEvent(QResizeEvent *event) {
     QRect cr = contentsRect();
     line_number_area->setGeometry(
         QRect(cr.left(), cr.top(), line_number_area->sizeHint().width(), cr.height()));
+}
+void SrcEditor::setShowLineNumbers(bool show) {
+    line_number_area->set(show);
+    updateMargins(0);
 }

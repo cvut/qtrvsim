@@ -28,6 +28,8 @@ set(gui_SOURCES
         windows/editor/highlighterasm.cpp
         windows/editor/highlighterc.cpp
         windows/editor/linenumberarea.cpp
+        windows/editor/editordock.cpp
+        windows/editor/editortab.cpp
         hinttabledelegate.cpp
         windows/lcd/lcddisplaydock.cpp
         windows/lcd/lcddisplayview.cpp
@@ -69,6 +71,7 @@ set(gui_HEADERS
         windows/editor/highlighterasm.h
         windows/editor/highlighterc.h
         windows/editor/linenumberarea.h
+        windows/editor/editordock.h
         hinttabledelegate.h
         windows/lcd/lcddisplaydock.h
         windows/lcd/lcddisplayview.h

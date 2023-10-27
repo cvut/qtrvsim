@@ -20,6 +20,9 @@ signals:
 
 public slots:
     void addRemoveTabRequested(QWidget *tab, bool exists);
+
+protected:
+    virtual void tabCountChanged() {};
 };
 
 #endif // HIDINGTABWIDGET_H
