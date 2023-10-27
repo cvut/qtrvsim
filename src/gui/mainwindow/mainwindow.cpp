@@ -30,6 +30,10 @@
     #include "qhtml5file.h"
 
     #include <QFileInfo>
+
+constexpr bool WEB_ASSEMBLY = true;
+#else
+constexpr bool WEB_ASSEMBLY = false;
 #endif
 
 MainWindow::MainWindow(QSettings *settings, QWidget *parent)
@@ -58,6 +62,15 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     editor_tabs.reset(new EditorDock(this->settings, central_widget_tabs.data()));
     editor_tabs->setTabBarAutoHide(true);
     editor_tabs->setWindowTitle("&Editor");
+    ui->actionBuildExe->setEnabled(false);
+    connect(ui->actionNew, &QAction::triggered, editor_tabs.data(), &EditorDock::create_empty_tab);
+    connect(ui->actionOpen, &QAction::triggered, editor_tabs.data(), &EditorDock::open_file_dialog);
+    connect(ui->actionSave, &QAction::triggered, editor_tabs.data(), &EditorDock::save_current_tab);
+    connect(
+        ui->actionSaveAs, &QAction::triggered, editor_tabs.data(),
+        &EditorDock::save_current_tab_as);
+    connect(
+        ui->actionClose, &QAction::triggered, editor_tabs.data(), &EditorDock::close_current_tab);
     connect(
         editor_tabs.data(), &EditorDock::requestAddRemoveTab, central_widget_tabs.data(),
         &HidingTabWidget::addRemoveTabRequested);
@@ -69,6 +82,15 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
             ui->actionClose->setEnabled(available);
             ui->actionCompileSource->setEnabled(available);
         });
+    if constexpr (!WEB_ASSEMBLY) {
+        // Only enable build action if we know there to look for the Makefile.
+        connect(editor_tabs.data(), &EditorDock::currentChanged, this, [this](int index) {
+            bool has_elf_file = machine != nullptr && !machine->config().elf().isEmpty();
+            bool current_tab_is_file
+                = (index >= 0) && !editor_tabs->get_tab(index)->get_editor()->filename().isEmpty();
+            ui->actionBuildExe->setEnabled(has_elf_file || current_tab_is_file);
+        });
+    }
     connect(
         ui->actionEditorShowLineNumbers, &QAction::triggered, editor_tabs.data(),
         &EditorDock::set_show_line_numbers);
@@ -118,15 +140,6 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(ui->actionReload, &QAction::triggered, this, [this] { machine_reload(false, false); });
     connect(ui->actionPrint, &QAction::triggered, this, &MainWindow::print_action);
 
-    // Editor actions
-    connect(ui->actionNew, &QAction::triggered, editor_tabs.data(), &EditorDock::create_empty_tab);
-    connect(ui->actionOpen, &QAction::triggered, editor_tabs.data(), &EditorDock::open_file_dialog);
-    connect(ui->actionSave, &QAction::triggered, editor_tabs.data(), &EditorDock::save_current_tab);
-    connect(
-        ui->actionSaveAs, &QAction::triggered, editor_tabs.data(),
-        &EditorDock::save_current_tab_as);
-    connect(
-        ui->actionClose, &QAction::triggered, editor_tabs.data(), &EditorDock::close_current_tab);
     connect(
         ui->actionMnemonicRegisters, &QAction::triggered, this,
         &MainWindow::view_mnemonics_registers);
@@ -174,10 +187,6 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
         ui->menuExamples->addAction(textsigac);
         connect(textsigac, &TextSignalAction::activated, this, &MainWindow::example_source);
     }
-
-#ifdef __EMSCRIPTEN__
-    ui->actionBuildExe->setEnabled(false);
-#endif
 }
 
 MainWindow::~MainWindow() {
@@ -760,7 +769,8 @@ void MainWindow::build_execute_no_check() {
             work_dir = fi.dir().path();
         }
     }
-    if (!work_dir.isEmpty()) { proc->setWorkingDirectory(work_dir); }
-    // API without args has been deprecated.
-    proc->start("make", {}, QProcess::Unbuffered | QProcess::ReadOnly);
+    if (!work_dir.isEmpty()) {
+        proc->setWorkingDirectory(work_dir);
+        proc->start("make", {}, QProcess::Unbuffered | QProcess::ReadOnly);
+    }
 }
