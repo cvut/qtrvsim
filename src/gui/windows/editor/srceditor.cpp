@@ -42,6 +42,9 @@ SrcEditor::SrcEditor(QWidget *parent) : Super(parent), line_number_area(new Line
     connect(this, &SrcEditor::blockCountChanged, this, &SrcEditor::updateMargins);
     connect(this, &SrcEditor::updateRequest, this, &SrcEditor::updateLineNumberArea);
 
+    // Clear error highlight on typing
+    connect(this, &SrcEditor::textChanged, [this]() { setExtraSelections({}); });
+
     updateMargins(0);
 }
 
@@ -102,6 +105,12 @@ void SrcEditor::setCursorToLine(int ln) {
     setTextCursor(cursor);
 }
 
+void SrcEditor::setCursorTo(int ln, int col) {
+    QTextCursor cursor(document()->findBlockByLineNumber(ln - 1));
+    cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor, col - 1);
+    setTextCursor(cursor);
+}
+
 bool SrcEditor::isModified() const {
     return document()->isModified();
 }
@@ -113,10 +122,10 @@ void SrcEditor::setModified(bool val) {
 void SrcEditor::setSaveAsRequired(bool val) {
     saveAsRequiredFl = val;
 }
-
 bool SrcEditor::saveAsRequired() const {
     return saveAsRequiredFl;
 }
+
 void SrcEditor::keyPressEvent(QKeyEvent *event) {
     QTextCursor cursor = textCursor();
     if (cursor.hasSelection()) {
@@ -258,7 +267,6 @@ void SrcEditor::updateLineNumberArea(const QRect &rect, int dy) {
 
     if (rect.contains(viewport()->rect())) updateMargins(0);
 }
-
 void SrcEditor::resizeEvent(QResizeEvent *event) {
     QPlainTextEdit::resizeEvent(event);
 

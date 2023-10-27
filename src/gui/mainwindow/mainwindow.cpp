@@ -557,10 +557,20 @@ void MainWindow::message_selected(
     (void)hint;
 
     if (file.isEmpty()) { return; }
-    SrcEditor *editor = editor_tabs->open_file_if_not_open(file, true)->get_editor();
+    auto editor = (file == "Unknown") ? editor_tabs->get_current_editor()
+                                      : editor_tabs->find_tab_by_filename(file)->get_editor();
     if (editor == nullptr) { return; }
-    editor->setCursorToLine(line);
+    editor->setCursorTo(line, column);
     editor->setFocus();
+
+    // Highlight the line
+    QTextEdit::ExtraSelection selection;
+    selection.format.setBackground(QColor(Qt::red).lighter(160));
+    selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+    selection.cursor = editor->textCursor();
+    selection.cursor.clearSelection();
+    editor->setExtraSelections({ selection });
+
     if (editor_tabs != nullptr) { editor_tabs->setCurrentWidget(editor); }
 }
 
@@ -674,7 +684,7 @@ void MainWindow::compile_source() {
     machine->cache_sync();
 
     auto editor = editor_tabs->get_current_editor();
-    auto filename = editor->filename();
+    auto filename = editor->filename().isEmpty() ? "Unknown" : editor->filename();
     auto content = editor->document();
 
     emit clear_messages();

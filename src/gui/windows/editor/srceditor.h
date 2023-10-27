@@ -23,6 +23,7 @@ public:
     bool saveFile(QString filename = "");
     bool loadByteArray(const QByteArray &content, const QString &filename = "");
     void setCursorToLine(int ln);
+    void setCursorTo(int ln, int col);
     void setFileName(const QString &filename);
     [[nodiscard]] bool isModified() const;
     void setModified(bool val);
