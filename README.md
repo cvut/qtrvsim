@@ -90,7 +90,7 @@ not found in the system, local fallback is used.__)
 brew install qt libelf
 ```
 
-Now build the project the same way as in general compilation (above).
+Now build the project the same way as in general compilation ([above](#general-compilation)).
 
 ### Download Binary Packages
 
