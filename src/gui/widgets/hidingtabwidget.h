@@ -14,6 +14,15 @@ public:
 
     void tabInserted(int index) override;
     void tabRemoved(int index) override;
+
+signals:
+    void requestAddRemoveTab(QWidget *tab, bool visible);
+
+public slots:
+    void addRemoveTabRequested(QWidget *tab, bool exists);
+
+protected:
+    virtual void tabCountChanged() {};
 };
 
 #endif // HIDINGTABWIDGET_H

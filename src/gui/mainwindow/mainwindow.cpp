@@ -1,8 +1,11 @@
-#include "widgets/HidingTabWidget.h"
+#include "windows/editor/editordock.h"
+#include "windows/editor/editortab.h"
 
 #include <QProcessEnvironment>
 #include <QtWidgets>
+#include <qactiongroup.h>
 #include <qwidget.h>
+
 #ifdef WITH_PRINTING
     #include <QPrintDialog>
     #include <QPrinter>
@@ -27,31 +30,77 @@
     #include "qhtml5file.h"
 
     #include <QFileInfo>
+
+constexpr bool WEB_ASSEMBLY = true;
+#else
+constexpr bool WEB_ASSEMBLY = false;
 #endif
 
 MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     : QMainWindow(parent)
     , settings(settings) {
-    ignore_unsaved = false;
     machine.reset();
     corescene.reset();
-    current_srceditor = nullptr;
-    coreview_shown = true;
 
     ui.reset(new Ui::MainWindow());
     ui->setupUi(this);
     setWindowTitle(APP_NAME);
     setDockNestingEnabled(true);
 
-    central_window.reset(new HidingTabWidget(this));
-    central_window->setTabBarAutoHide(true);
-    this->setCentralWidget(central_window.data());
+    // Setup central widget
 
-    // Prepare empty core view
+    central_widget_tabs.reset(new HidingTabWidget(this));
+    central_widget_tabs->setTabBarAutoHide(true);
+    this->setCentralWidget(central_widget_tabs.data());
+
     coreview.reset(new GraphicsView(this));
-    central_window->addTab(coreview.data(), "Core");
+    coreview->setWindowTitle("&Core");
+    central_widget_tabs->addTab(coreview.data(), coreview->windowTitle());
+
+    // Setup editor
+
+    editor_tabs.reset(new EditorDock(this->settings, central_widget_tabs.data()));
+    editor_tabs->setTabBarAutoHide(true);
+    editor_tabs->setWindowTitle("&Editor");
+    ui->actionBuildExe->setEnabled(false);
+    connect(ui->actionNew, &QAction::triggered, editor_tabs.data(), &EditorDock::create_empty_tab);
+    connect(ui->actionOpen, &QAction::triggered, editor_tabs.data(), &EditorDock::open_file_dialog);
+    connect(ui->actionSave, &QAction::triggered, editor_tabs.data(), &EditorDock::save_current_tab);
+    connect(
+        ui->actionSaveAs, &QAction::triggered, editor_tabs.data(),
+        &EditorDock::save_current_tab_as);
+    connect(
+        ui->actionClose, &QAction::triggered, editor_tabs.data(), &EditorDock::close_current_tab);
+    connect(
+        editor_tabs.data(), &EditorDock::requestAddRemoveTab, central_widget_tabs.data(),
+        &HidingTabWidget::addRemoveTabRequested);
+
+    connect(
+        editor_tabs.data(), &EditorDock::editor_available_changed, this, [this](bool available) {
+            ui->actionSave->setEnabled(available);
+            ui->actionSaveAs->setEnabled(available);
+            ui->actionClose->setEnabled(available);
+            ui->actionCompileSource->setEnabled(available);
+        });
+    if constexpr (!WEB_ASSEMBLY) {
+        // Only enable build action if we know there to look for the Makefile.
+        connect(editor_tabs.data(), &EditorDock::currentChanged, this, [this](int index) {
+            bool has_elf_file = machine != nullptr && !machine->config().elf().isEmpty();
+            bool current_tab_is_file
+                = (index >= 0) && !editor_tabs->get_tab(index)->get_editor()->filename().isEmpty();
+            ui->actionBuildExe->setEnabled(has_elf_file || current_tab_is_file);
+        });
+    }
+    connect(
+        ui->actionEditorShowLineNumbers, &QAction::triggered, editor_tabs.data(),
+        &EditorDock::set_show_line_numbers);
+
+    bool line_numbers_visible = settings->value("EditorShowLineNumbers", true).toBool();
+    editor_tabs->set_show_line_numbers(line_numbers_visible);
+    ui->actionEditorShowLineNumbers->setChecked(line_numbers_visible);
 
     // Create/prepare other widgets
+
     ndialog.reset(new NewDialog(this, settings));
     registers.reset(new RegistersDock(this, machine::Xlen::_32));
     registers->hide();
@@ -90,11 +139,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(ui->actionNewMachine, &QAction::triggered, this, &MainWindow::new_machine);
     connect(ui->actionReload, &QAction::triggered, this, [this] { machine_reload(false, false); });
     connect(ui->actionPrint, &QAction::triggered, this, &MainWindow::print_action);
-    connect(ui->actionNew, &QAction::triggered, this, &MainWindow::new_source);
-    connect(ui->actionOpen, &QAction::triggered, this, &MainWindow::open_source);
-    connect(ui->actionSave, &QAction::triggered, this, &MainWindow::save_source);
-    connect(ui->actionSaveAs, &QAction::triggered, this, &MainWindow::save_source_as);
-    connect(ui->actionClose, &QAction::triggered, this, &MainWindow::close_source_check);
+
     connect(
         ui->actionMnemonicRegisters, &QAction::triggered, this,
         &MainWindow::view_mnemonics_registers);
@@ -132,19 +177,8 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
         ui->actionMnemonicRegisters->trigger();
     }
 
-    // Source editor related actions
-    connect(
-        central_window.data(), &HidingTabWidget::currentChanged, this,
-        &MainWindow::central_tab_changed);
-
-    foreach (QString file_name, settings->value("openSrcFiles").toStringList()) {
-        if (file_name.isEmpty()) { continue; }
-        auto *editor = new SrcEditor();
-        if (editor->loadFile(file_name)) {
-            add_src_editor_to_tabs(editor);
-        } else {
-            delete (editor);
-        }
+    for (const QString &file_name : settings->value("openSrcFiles").toStringList()) {
+        editor_tabs->open_file(file_name);
     }
 
     QDir samples_dir(":/samples");
@@ -153,10 +187,6 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
         ui->menuExamples->addAction(textsigac);
         connect(textsigac, &TextSignalAction::activated, this, &MainWindow::example_source);
     }
-
-#ifdef __EMSCRIPTEN__
-    ui->actionBuildExe->setEnabled(false);
-#endif
 }
 
 MainWindow::~MainWindow() {
@@ -173,7 +203,7 @@ void MainWindow::show_hide_coreview(bool show) {
     if (!show) {
         if (corescene == nullptr) {
         } else {
-            central_window->removeTab(central_window->indexOf(coreview.data()));
+            central_widget_tabs->removeTab(central_widget_tabs->indexOf(coreview.data()));
             corescene.reset();
             if (coreview != nullptr) { coreview->setScene(corescene.data()); }
         }
@@ -187,10 +217,10 @@ void MainWindow::show_hide_coreview(bool show) {
     } else {
         corescene.reset(new CoreViewSceneSimple(machine.data()));
     }
-    central_window->insertTab(0, coreview.data(), "Core");
+    central_widget_tabs->insertTab(0, coreview.data(), coreview->windowTitle());
     // Ensures correct zoom.
     coreview->setScene(corescene.data());
-    this->setCentralWidget(central_window.data());
+    this->setCentralWidget(central_widget_tabs.data());
 
     // Connect scene signals to actions
     connect(corescene.data(), &CoreViewScene::request_registers, this, &MainWindow::show_registers);
@@ -226,8 +256,10 @@ void MainWindow::create_core(
     machine.reset(new_machine);
 
     // Create machine view
+    auto focused_index = central_widget_tabs->currentIndex();
     corescene.reset();
     show_hide_coreview(coreview_shown);
+    central_widget_tabs->setCurrentIndex(focused_index);
 
     set_speed(); // Update machine speed to current settings
 
@@ -430,51 +462,30 @@ void MainWindow::view_mnemonics_registers(bool enable) {
 void MainWindow::closeEvent(QCloseEvent *event) {
     settings->setValue("windowGeometry", saveGeometry());
     settings->setValue("windowState", saveState());
+    settings->setValue("openSrcFiles", editor_tabs->get_open_file_list());
     settings->sync();
 
     QStringList list;
-    if (modified_file_list(list, true) && !ignore_unsaved) {
+    if (!ignore_unsaved && editor_tabs->get_modified_tab_filenames(list, true)) {
         event->ignore();
-        auto *dialog = new SaveChnagedDialog(list, this);
-        int id = qMetaTypeId<QStringList>();
-        if (!QMetaType::isRegistered(id)) { qRegisterMetaType<QStringList>(); }
+        auto *dialog = new SaveChangedDialog(list, this);
+        if (!QMetaType::isRegistered(qMetaTypeId<QStringList>())) {
+            qRegisterMetaType<QStringList>();
+        }
         connect(
-            dialog, &SaveChnagedDialog::user_decision, this, &MainWindow::save_exit_or_ignore,
+            dialog, &SaveChangedDialog::user_decision, this,
+            [this](bool cancel, const QStringList &tabs_to_save) {
+                if (cancel) return;
+                for (const auto &name : tabs_to_save) {
+                    auto tab_id = editor_tabs->find_tab_id_by_filename(name);
+                    if (tab_id.has_value()) editor_tabs->save_tab(tab_id.value());
+                }
+                ignore_unsaved = true;
+                close();
+            },
             Qt::QueuedConnection);
         dialog->open();
     }
-}
-
-void MainWindow::save_exit_or_ignore(bool cancel, const QStringList &tosavelist) {
-    bool save_unnamed = false;
-    if (cancel) { return; }
-    for (const auto &fname : tosavelist) {
-        SrcEditor *editor = source_editor_for_file(fname, false);
-        if (editor->saveAsRequired()) {
-            save_unnamed = true;
-        } else if (editor != nullptr) {
-#ifndef __EMSCRIPTEN__
-            editor->saveFile();
-#else
-            central_window->setCurrentWidget(editor);
-            save_source();
-            return;
-#endif
-        }
-    }
-    if (save_unnamed && (central_window != nullptr)) {
-        for (int i = 0; i < central_window->count(); i++) {
-            QWidget *w = central_window->widget(i);
-            auto *editor = dynamic_cast<SrcEditor *>(w);
-            if (editor == nullptr) { continue; }
-            if (!editor->saveAsRequired()) { continue; }
-            central_window->setCurrentWidget(editor);
-            save_source_as();
-            return;
-        }
-    }
-    ignore_unsaved = true;
-    close();
 }
 
 void MainWindow::show_dockwidget(QDockWidget *dw, Qt::DockWidgetArea area) {
@@ -530,265 +541,15 @@ void MainWindow::machine_trap(machine::SimulatorException &e) {
     showAsyncCriticalBox(this, "Machine trapped", e.msg(false), e.msg(true));
 }
 
-void MainWindow::setCurrentSrcEditor(SrcEditor *srceditor) {
-    current_srceditor = srceditor;
-    if (srceditor == nullptr) {
-        ui->actionSave->setEnabled(false);
-        ui->actionSaveAs->setEnabled(false);
-        ui->actionClose->setEnabled(false);
-        ui->actionCompileSource->setEnabled(false);
-    } else {
-        ui->actionSave->setEnabled(true);
-        ui->actionSaveAs->setEnabled(true);
-        ui->actionClose->setEnabled(true);
-        ui->actionCompileSource->setEnabled(true);
-    }
-}
-
-void MainWindow::tab_widget_destroyed(QObject *obj) {
-    if (obj == current_srceditor) { setCurrentSrcEditor(nullptr); }
-}
-
-void MainWindow::central_tab_changed(int index) {
-    QWidget *widget = central_window->widget(index);
-    auto *srceditor = dynamic_cast<SrcEditor *>(widget);
-    if (srceditor != nullptr) { setCurrentSrcEditor(srceditor); }
-}
-
-void MainWindow::add_src_editor_to_tabs(SrcEditor *editor) {
-    central_window->addTab(editor, editor->title());
-    central_window->setCurrentWidget(editor);
-    connect(editor, &QObject::destroyed, this, &MainWindow::tab_widget_destroyed);
-}
-
-void MainWindow::update_open_file_list() {
-    QStringList open_src_files;
-    if ((central_window == nullptr) || (settings == nullptr)) { return; }
-    for (int i = 0; i < central_window->count(); i++) {
-        QWidget *w = central_window->widget(i);
-        auto *editor = dynamic_cast<SrcEditor *>(w);
-        if (editor == nullptr) { continue; }
-        if (editor->filename() == "") { continue; }
-        open_src_files.append(editor->filename());
-    }
-    settings->setValue("openSrcFiles", open_src_files);
-}
-
-bool MainWindow::modified_file_list(QStringList &list, bool report_unnamed) {
-    bool ret = false;
-    list.clear();
-    if (central_window == nullptr) { return false; }
-    for (int i = 0; i < central_window->count(); i++) {
-        QWidget *w = central_window->widget(i);
-        auto *editor = dynamic_cast<SrcEditor *>(w);
-        if (editor == nullptr) { continue; }
-        if ((editor->filename() == "") && !report_unnamed) { continue; }
-        if (!editor->isModified()) { continue; }
-        ret = true;
-        list.append(editor->filename());
-    }
-    return ret;
-}
-
-static int compare_filenames(const QString &filename1, const QString &filename2) {
-    QFileInfo fi1(filename1);
-    QFileInfo fi2(filename2);
-    QString canon1 = fi1.canonicalFilePath();
-    QString canon2 = fi2.canonicalFilePath();
-    if (!canon1.isEmpty() && (canon1 == canon2)) { return 2; }
-    if (filename1 == filename2) { return 1; }
-    return 0;
-}
-
-SrcEditor *MainWindow::source_editor_for_file(const QString &filename, bool open) {
-    if (central_window == nullptr) { return nullptr; }
-    int found_match = 0;
-    SrcEditor *found_editor = nullptr;
-    for (int i = 0; i < central_window->count(); i++) {
-        QWidget *w = central_window->widget(i);
-        auto *editor = dynamic_cast<SrcEditor *>(w);
-        if (editor == nullptr) { continue; }
-        int match = compare_filenames(filename, editor->filename());
-        if ((match > found_match) || ((editor == current_srceditor) && (match >= found_match))) {
-            found_editor = editor;
-            found_match = match;
-        }
-    }
-    if (found_match > 0) { return found_editor; }
-
-    if (!open) { return nullptr; }
-
-    auto *editor = new SrcEditor();
-    if (!editor->loadFile(filename)) {
-        delete editor;
-        return nullptr;
-    }
-    add_src_editor_to_tabs(editor);
-    update_open_file_list();
-    return editor;
-}
-
-void MainWindow::new_source() {
-    auto *editor = new SrcEditor();
-    add_src_editor_to_tabs(editor);
-    update_open_file_list();
-}
-
-void MainWindow::open_source() {
-#ifndef __EMSCRIPTEN__
-    QString file_name = QFileDialog::getOpenFileName(
-        this, tr("Open File"), "", "Source Files (*.asm *.S *.s *.c Makefile)");
-
-    if (!file_name.isEmpty()) {
-        SrcEditor *editor = source_editor_for_file(file_name, false);
-        if (editor != nullptr) {
-            if (central_window != nullptr) { central_window->setCurrentWidget(editor); }
-            return;
-        }
-        editor = new SrcEditor();
-
-        if (editor->loadFile(file_name)) {
-            add_src_editor_to_tabs(editor);
-        } else {
-            showAsyncCriticalBox(
-                this, "Simulator Error", tr("Cannot open file '%1' for reading.").arg(file_name));
-            delete (editor);
-        }
-    }
-#else
-    QHtml5File::load("*", [&](const QByteArray &content, const QString &filename) {
-        SrcEditor *editor = new SrcEditor();
-        editor->loadByteArray(content, filename);
-        add_src_editor_to_tabs(editor);
-    });
-#endif
-    update_open_file_list();
-}
-
-void MainWindow::save_source_as() {
-    if (current_srceditor == nullptr) { return; }
-#ifndef __EMSCRIPTEN__
-    QFileDialog fileDialog(this, tr("Save as..."));
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.setDefaultSuffix("s");
-    if (fileDialog.exec() != QDialog::Accepted) { return; }
-    const QString fn = fileDialog.selectedFiles().first();
-    if (!current_srceditor->saveFile(fn)) {
-        showAsyncCriticalBox(this, "Simulator Error", tr("Cannot save file '%1'.").arg(fn));
-        return;
-    }
-    int idx = central_window->indexOf(current_srceditor);
-    if (idx >= 0) { central_window->setTabText(idx, current_srceditor->title()); }
-    update_open_file_list();
-#else
-    QString filename = current_srceditor->filename();
-    if (filename.isEmpty()) filename = "unknown.s";
-    QInputDialog *dialog = new QInputDialog(this);
-    dialog->setWindowTitle("Select file name");
-    dialog->setLabelText("File name:");
-    dialog->setTextValue(filename);
-    dialog->setMinimumSize(QSize(200, 100));
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
-    connect(
-        dialog, &QInputDialog::textValueSelected, this, &MainWindow::src_editor_save_to,
-        Qt::QueuedConnection);
-    dialog->open();
-#endif
-}
-
-void MainWindow::src_editor_save_to(const QString &filename) {
-    if (filename.isEmpty() || (current_srceditor == nullptr)) { return; }
-    current_srceditor->setFileName(filename);
-    if (!current_srceditor->filename().isEmpty()) { save_source(); }
-    int idx = central_window->indexOf(current_srceditor);
-    if (idx >= 0) { central_window->setTabText(idx, current_srceditor->title()); }
-    update_open_file_list();
-}
-
-void MainWindow::save_source() {
-    if (current_srceditor == nullptr) { return; }
-    if (current_srceditor->saveAsRequired()) { return save_source_as(); }
-#ifndef __EMSCRIPTEN__
-    if (!current_srceditor->saveFile()) {
-        showAsyncCriticalBox(
-            this, "Simulator Error",
-            tr("Cannot save file '%1'.").arg(current_srceditor->filename()));
-    }
-#else
-    QHtml5File::save(
-        current_srceditor->document()->toPlainText().toUtf8(), current_srceditor->filename());
-    current_srceditor->setModified(false);
-#endif
-}
-
-void MainWindow::close_source_check() {
-    if (current_srceditor == nullptr) { return; }
-    SrcEditor *editor = current_srceditor;
-    if (!editor->isModified()) {
-        close_source();
-        return;
-    }
-    auto *msgbox = new QMessageBox(this);
-    msgbox->setWindowTitle("Close unsaved source");
-    msgbox->setText("Close unsaved source.");
-    msgbox->setInformativeText("Do you want to save your changes?");
-    msgbox->setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-    msgbox->setDefaultButton(QMessageBox::Save);
-    msgbox->setMinimumSize(QSize(200, 150));
-    msgbox->setAttribute(Qt::WA_DeleteOnClose);
-    connect(
-        msgbox, &QDialog::finished, this, &MainWindow::close_source_decided, Qt::QueuedConnection);
-    msgbox->open();
-}
-
-void MainWindow::close_source_decided(int result) {
-    if (current_srceditor == nullptr) { return; }
-    SrcEditor *editor = current_srceditor;
-    if (result == QMessageBox::Save) {
-        if (editor->saveAsRequired()) {
-            save_source_as();
-            return;
-        }
-        save_source();
-    } else if (result != QMessageBox::Discard) {
-        return;
-    }
-    close_source();
-}
-
-void MainWindow::close_source() {
-    if (current_srceditor == nullptr) { return; }
-    SrcEditor *editor = current_srceditor;
-    setCurrentSrcEditor(nullptr);
-    int idx = central_window->indexOf(editor);
-    if (idx >= 0) { central_window->removeTab(idx); }
-    delete editor;
-    update_open_file_list();
-}
-
 void MainWindow::close_source_by_name(QString &filename, bool ask) {
-    SrcEditor *editor = source_editor_for_file(filename, false);
-    if (editor == nullptr) return;
-    setCurrentSrcEditor(editor);
-    if (ask) {
-        close_source_check();
-    } else {
-        close_source();
-    }
+    editor_tabs->close_tab_by_name(filename, ask);
 }
 
 void MainWindow::example_source(const QString &source_file) {
-    auto *editor = new SrcEditor();
-
-    if (editor->loadFile(source_file)) {
-        editor->setSaveAsRequired(true);
-        add_src_editor_to_tabs(editor);
-        update_open_file_list();
-    } else {
+    if (!editor_tabs->open_file(source_file, true)) {
         showAsyncCriticalBox(
             this, "Simulator Error",
             tr("Cannot open example file '%1' for reading.").arg(source_file));
-        delete (editor);
     }
 }
 
@@ -805,15 +566,25 @@ void MainWindow::message_selected(
     (void)hint;
 
     if (file.isEmpty()) { return; }
-    SrcEditor *editor = source_editor_for_file(file, true);
+    auto editor = (file == "Unknown") ? editor_tabs->get_current_editor()
+                                      : editor_tabs->find_tab_by_filename(file)->get_editor();
     if (editor == nullptr) { return; }
-    editor->setCursorToLine(line);
+    editor->setCursorTo(line, column);
     editor->setFocus();
-    if (central_window != nullptr) { central_window->setCurrentWidget(editor); }
+
+    // Highlight the line
+    QTextEdit::ExtraSelection selection;
+    selection.format.setBackground(QColor(Qt::red).lighter(160));
+    selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+    selection.cursor = editor->textCursor();
+    selection.cursor.clearSelection();
+    editor->setExtraSelections({ selection });
+
+    if (editor_tabs != nullptr) { editor_tabs->setCurrentWidget(editor); }
 }
 
 bool SimpleAsmWithEditorCheck::process_file(const QString &filename, QString *error_ptr) {
-    SrcEditor *editor = mainwindow->source_editor_for_file(filename, false);
+    SrcEditor *editor = mainwindow->editor_tabs->find_tab_by_filename(filename)->get_editor();
     if (editor == nullptr) { return Super::process_file(filename, error_ptr); }
     QTextDocument *doc = editor->document();
     int ln = 1;
@@ -857,8 +628,8 @@ bool SimpleAsmWithEditorCheck::process_pragma(
     if (op == "tab") {
         if ((operands.count() < 3) || error_occured) { return true; }
         if (!QString::compare(operands.at(2), "core", Qt::CaseInsensitive)
-            && (mainwindow->central_window != nullptr) && (mainwindow->coreview != nullptr)) {
-            mainwindow->central_window->setCurrentWidget(mainwindow->coreview.data());
+            && (mainwindow->editor_tabs != nullptr) && (mainwindow->coreview != nullptr)) {
+            mainwindow->editor_tabs->setCurrentWidget(mainwindow->coreview.data());
         }
         return true;
     }
@@ -904,7 +675,6 @@ bool SimpleAsmWithEditorCheck::process_pragma(
 
 void MainWindow::compile_source() {
     bool error_occured = false;
-    if (current_srceditor == nullptr) { return; }
     if (machine != nullptr) {
         if (machine->config().reset_at_compile()) { machine_reload(true); }
     }
@@ -919,11 +689,12 @@ void MainWindow::compile_source() {
             this, "Simulator Error", tr("No physical addresspace to store program."));
         return;
     }
-    QString filename = current_srceditor->filename();
 
     machine->cache_sync();
-    SrcEditor *editor = current_srceditor;
-    QTextDocument *doc = editor->document();
+
+    auto editor = editor_tabs->get_current_editor();
+    auto filename = editor->filename().isEmpty() ? "Unknown" : editor->filename();
+    auto content = editor->document();
 
     emit clear_messages();
     SimpleAsmWithEditorCheck sasm(this);
@@ -933,7 +704,7 @@ void MainWindow::compile_source() {
     sasm.setup(mem, &symtab, machine::Address(0x00000200), machine->core()->get_xlen());
 
     int ln = 1;
-    for (QTextBlock block = doc->begin(); block.isValid(); block = block.next(), ln++) {
+    for (QTextBlock block = content->begin(); block.isValid(); block = block.next(), ln++) {
         QString line = block.text();
         if (!sasm.process_line(line, filename, ln)) { error_occured = true; }
     }
@@ -944,10 +715,10 @@ void MainWindow::compile_source() {
 
 void MainWindow::build_execute() {
     QStringList list;
-    if (modified_file_list(list)) {
-        auto *dialog = new SaveChnagedDialog(list, this);
+    if (editor_tabs->get_modified_tab_filenames(list, false)) {
+        auto *dialog = new SaveChangedDialog(list, this);
         connect(
-            dialog, &SaveChnagedDialog::user_decision, this, &MainWindow::build_execute_with_save);
+            dialog, &SaveChangedDialog::user_decision, this, &MainWindow::build_execute_with_save);
         dialog->open();
     } else {
         build_execute_no_check();
@@ -958,9 +729,8 @@ void MainWindow::build_execute_with_save(
     bool cancel,
     QStringList tosavelist) { // NOLINT(performance-unnecessary-value-param)
     if (cancel) { return; }
-    for (const auto &fname : tosavelist) {
-        SrcEditor *editor = source_editor_for_file(fname, false);
-        editor->saveFile();
+    for (const auto &filename : tosavelist) {
+        editor_tabs->find_tab_by_filename(filename)->get_editor()->saveFile();
     }
     build_execute_no_check();
 }
@@ -981,12 +751,17 @@ void MainWindow::build_execute_no_check() {
     connect(proc, &ExtProcess::report_message, this, &MainWindow::report_message);
     connect(
         proc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
-        &MainWindow::build_execute_finished);
-    if (current_srceditor != nullptr) {
-        if (!current_srceditor->filename().isEmpty()) {
-            QFileInfo fi(current_srceditor->filename());
-            work_dir = fi.dir().path();
-        }
+        [this](int exitCode, QProcess::ExitStatus exitStatus) {
+            if ((exitStatus != QProcess::NormalExit) || (exitCode != 0)) { return; }
+
+            if (machine != nullptr) {
+                if (machine->config().reset_at_compile()) { machine_reload(true, true); }
+            }
+        });
+    auto current_srceditor = editor_tabs->get_current_editor();
+    if (current_srceditor != nullptr && !current_srceditor->filename().isEmpty()) {
+        QFileInfo fi(current_srceditor->filename());
+        work_dir = fi.dir().path();
     }
     if (work_dir.isEmpty() && (machine != nullptr)) {
         if (!machine->config().elf().isEmpty()) {
@@ -994,15 +769,8 @@ void MainWindow::build_execute_no_check() {
             work_dir = fi.dir().path();
         }
     }
-    if (!work_dir.isEmpty()) { proc->setWorkingDirectory(work_dir); }
-    // API without args has been deprecated.
-    proc->start("make", {}, QProcess::Unbuffered | QProcess::ReadOnly);
-}
-
-void MainWindow::build_execute_finished(int exitCode, QProcess::ExitStatus exitStatus) {
-    if ((exitStatus != QProcess::NormalExit) || (exitCode != 0)) { return; }
-
-    if (machine != nullptr) {
-        if (machine->config().reset_at_compile()) { machine_reload(true, true); }
+    if (!work_dir.isEmpty()) {
+        proc->setWorkingDirectory(work_dir);
+        proc->start("make", {}, QProcess::Unbuffered | QProcess::ReadOnly);
     }
 }

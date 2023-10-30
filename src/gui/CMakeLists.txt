@@ -27,6 +27,9 @@ set(gui_SOURCES
         ui/hexlineedit.cpp
         windows/editor/highlighterasm.cpp
         windows/editor/highlighterc.cpp
+        windows/editor/linenumberarea.cpp
+        windows/editor/editordock.cpp
+        windows/editor/editortab.cpp
         hinttabledelegate.cpp
         windows/lcd/lcddisplaydock.cpp
         windows/lcd/lcddisplayview.cpp
@@ -45,7 +48,7 @@ set(gui_SOURCES
         textsignalaction.cpp
         windows/coreview/components/value_handlers.cpp
         windows/coreview/components/cache.cpp
-        widgets/HidingTabWidget.cpp
+        widgets/hidingtabwidget.cpp
         )
 set(gui_HEADERS
         dialogs/about/aboutdialog.h
@@ -67,6 +70,8 @@ set(gui_HEADERS
         ui/hexlineedit.h
         windows/editor/highlighterasm.h
         windows/editor/highlighterc.h
+        windows/editor/linenumberarea.h
+        windows/editor/editordock.h
         hinttabledelegate.h
         windows/lcd/lcddisplaydock.h
         windows/lcd/lcddisplayview.h
@@ -86,7 +91,7 @@ set(gui_HEADERS
         windows/coreview/data.h
         windows/coreview/components/cache.h
         helper/async_modal.h
-        widgets/HidingTabWidget.h
+        widgets/hidingtabwidget.h
         )
 set(gui_UI
         dialogs/gotosymbol/gotosymboldialog.ui

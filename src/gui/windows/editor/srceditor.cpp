@@ -1,51 +1,54 @@
 #include "srceditor.h"
 
 #include "common/logging.h"
+#include "editordock.h"
+#include "editortab.h"
+#include "linenumberarea.h"
 #include "windows/editor/highlighterasm.h"
 #include "windows/editor/highlighterc.h"
 
+#include <QCoreApplication>
 #include <QFile>
 #include <QFileInfo>
-#include <QPalette>
+#include <QPainter>
 #include <QTextCursor>
 #include <QTextDocumentWriter>
 #include <qglobal.h>
-#include <qtextdocument.h>
-#include <qtextedit.h>
+#include <qpalette.h>
+#include <qplaintextedit.h>
+#include <qstyle.h>
 
 LOG_CATEGORY("gui.src_editor");
 
-void SrcEditor::setup_common() {
-    QFont font;
+SrcEditor::SrcEditor(QWidget *parent) : Super(parent), line_number_area(new LineNumberArea(this)) {
+    QFont font1;
     saveAsRequiredFl = true;
-    font.setFamily("Courier");
-    font.setFixedPitch(true);
-    font.setPointSize(10);
-    setFont(font);
+    font1.setFamily("Courier");
+    font1.setFixedPitch(true);
+    font1.setPointSize(10);
+    setFont(font1);
     tname = "Unknown";
     highlighter.reset(new HighlighterAsm(document()));
 
     QPalette p = palette();
-    p.setColor(QPalette::Active, QPalette::Base, Qt::white);
-    p.setColor(QPalette::Inactive, QPalette::Base, Qt::white);
-    p.setColor(QPalette::Disabled, QPalette::Base, Qt::white);
+    p.setColor(QPalette::Base, Qt::white);
+    p.setColor(QPalette::Text, Qt::black);
+    p.setColor(QPalette::WindowText, Qt::darkGray);
     setPalette(p);
-
-    setTextColor(Qt::black);
 
     // Set tab width to 4 spaces
     setTabStopDistance(fontMetrics().horizontalAdvance(' ') * TAB_WIDTH);
+
+    connect(this, &SrcEditor::blockCountChanged, this, &SrcEditor::updateMargins);
+    connect(this, &SrcEditor::updateRequest, this, &SrcEditor::updateLineNumberArea);
+
+    // Clear error highlight on typing
+    connect(this, &SrcEditor::textChanged, [this]() { setExtraSelections({}); });
+
+    updateMargins(0);
 }
 
-SrcEditor::SrcEditor(QWidget *parent) : Super(parent) {
-    setup_common();
-}
-
-SrcEditor::SrcEditor(const QString &text, QWidget *parent) : Super(text, parent) {
-    setup_common();
-}
-
-QString SrcEditor::filename() {
+QString SrcEditor::filename() const {
     return fname;
 }
 
@@ -65,6 +68,8 @@ void SrcEditor::setFileName(const QString &filename) {
     } else {
         highlighter.reset(new HighlighterAsm(document()));
     }
+
+    emit file_name_change();
 }
 
 bool SrcEditor::loadFile(const QString &filename) {
@@ -100,6 +105,12 @@ void SrcEditor::setCursorToLine(int ln) {
     setTextCursor(cursor);
 }
 
+void SrcEditor::setCursorTo(int ln, int col) {
+    QTextCursor cursor(document()->findBlockByLineNumber(ln - 1));
+    cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor, col - 1);
+    setTextCursor(cursor);
+}
+
 bool SrcEditor::isModified() const {
     return document()->isModified();
 }
@@ -111,10 +122,10 @@ void SrcEditor::setModified(bool val) {
 void SrcEditor::setSaveAsRequired(bool val) {
     saveAsRequiredFl = val;
 }
-
 bool SrcEditor::saveAsRequired() const {
     return saveAsRequiredFl;
 }
+
 void SrcEditor::keyPressEvent(QKeyEvent *event) {
     QTextCursor cursor = textCursor();
     if (cursor.hasSelection()) {
@@ -170,7 +181,7 @@ void SrcEditor::keyPressEvent(QKeyEvent *event) {
     }
     }
 
-    QTextEdit::keyPressEvent(event);
+    QPlainTextEdit::keyPressEvent(event);
 }
 
 void SrcEditor::indent_selection(QTextCursor &cursor) {
@@ -180,7 +191,7 @@ void SrcEditor::indent_selection(QTextCursor &cursor) {
     cursor.movePosition(QTextCursor::StartOfLine);
     while (cursor.position() < end) {
         cursor.insertText("\t");
-        cursor.movePosition(QTextCursor::Down);
+        if (!cursor.movePosition(QTextCursor::Down)) break;
     }
     cursor.endEditBlock();
 }
@@ -204,7 +215,7 @@ void SrcEditor::unindent_selection(QTextCursor &cursor) {
                 to_delete--;
             }
         }
-        cursor.movePosition(QTextCursor::Down);
+        if (!cursor.movePosition(QTextCursor::Down)) break;
     }
     cursor.endEditBlock();
 }
@@ -220,7 +231,7 @@ bool SrcEditor::is_selection_comment() {
             all_commented = false;
             break;
         }
-        cursor.movePosition(QTextCursor::Down);
+        if (!cursor.movePosition(QTextCursor::Down)) break;
     }
 
     return all_commented;
@@ -238,7 +249,32 @@ void SrcEditor::toggle_selection_comment(QTextCursor &cursor, bool is_comment) {
         } else {
             cursor.insertText("//");
         }
-        cursor.movePosition(QTextCursor::Down);
+        if (!cursor.movePosition(QTextCursor::Down)) break;
     }
     cursor.endEditBlock();
-};
+}
+
+void SrcEditor::updateMargins(int /* newBlockCount */) {
+    setViewportMargins(line_number_area->sizeHint().width(), 0, 0, 0);
+}
+
+void SrcEditor::updateLineNumberArea(const QRect &rect, int dy) {
+    if (dy) {
+        line_number_area->scroll(0, dy);
+    } else {
+        line_number_area->update(0, rect.y(), line_number_area->width(), rect.height());
+    }
+
+    if (rect.contains(viewport()->rect())) updateMargins(0);
+}
+void SrcEditor::resizeEvent(QResizeEvent *event) {
+    QPlainTextEdit::resizeEvent(event);
+
+    QRect cr = contentsRect();
+    line_number_area->setGeometry(
+        QRect(cr.left(), cr.top(), line_number_area->sizeHint().width(), cr.height()));
+}
+void SrcEditor::setShowLineNumbers(bool show) {
+    line_number_area->set(show);
+    updateMargins(0);
+}

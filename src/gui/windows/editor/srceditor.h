@@ -2,25 +2,28 @@
 #define SRCEDITOR_H
 
 #include "common/memory_ownership.h"
+#include "linenumberarea.h"
 #include "machine/machine.h"
 
 #include <QString>
 #include <QSyntaxHighlighter>
 #include <QTextEdit>
+#include <qplaintextedit.h>
+#include <qwidget.h>
 
-class SrcEditor : public QTextEdit {
+class SrcEditor : public QPlainTextEdit {
     Q_OBJECT
-    using Super = QTextEdit;
+    using Super = QPlainTextEdit;
 
 public:
-    explicit SrcEditor(const QString &text, QWidget *parent = nullptr);
-    explicit SrcEditor(QWidget *parent = nullptr);
-    QString filename();
+    explicit SrcEditor(QWidget *parent);
+    QString filename() const;
     QString title();
     bool loadFile(const QString &filename);
     bool saveFile(QString filename = "");
     bool loadByteArray(const QByteArray &content, const QString &filename = "");
     void setCursorToLine(int ln);
+    void setCursorTo(int ln, int col);
     void setFileName(const QString &filename);
     [[nodiscard]] bool isModified() const;
     void setModified(bool val);
@@ -29,10 +32,22 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+
+signals:
+    void file_name_change();
+
+public slots:
+    void setShowLineNumbers(bool visible);
+
+private slots:
+    void updateMargins(int newBlockCount);
+    void updateLineNumberArea(const QRect &rect, int dy);
 
 private:
     ::Box<QSyntaxHighlighter> highlighter {};
-    void setup_common();
+    LineNumberArea *line_number_area;
+    bool line_numbers_visible = true;
     QString fname;
     QString tname;
     bool saveAsRequiredFl {};
@@ -52,6 +67,8 @@ private:
 
     /** Comments out all lines in the selection. */
     void toggle_selection_comment(QTextCursor &cursor, bool is_comment);
+
+    friend class LineNumberArea;
 };
 
 #endif // SRCEDITOR_H
