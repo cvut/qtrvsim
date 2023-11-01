@@ -267,6 +267,7 @@ void SrcEditor::updateLineNumberArea(const QRect &rect, int dy) {
 
     if (rect.contains(viewport()->rect())) updateMargins(0);
 }
+
 void SrcEditor::resizeEvent(QResizeEvent *event) {
     QPlainTextEdit::resizeEvent(event);
 
@@ -274,7 +275,12 @@ void SrcEditor::resizeEvent(QResizeEvent *event) {
     line_number_area->setGeometry(
         QRect(cr.left(), cr.top(), line_number_area->sizeHint().width(), cr.height()));
 }
+
 void SrcEditor::setShowLineNumbers(bool show) {
     line_number_area->set(show);
     updateMargins(0);
+}
+
+void SrcEditor::insertFromMimeData(const QMimeData *source) {
+    if (source->hasText()) { insertPlainText(source->text()); }
 }
