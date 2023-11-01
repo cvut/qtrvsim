@@ -284,3 +284,7 @@ void SrcEditor::setShowLineNumbers(bool show) {
 void SrcEditor::insertFromMimeData(const QMimeData *source) {
     if (source->hasText()) { insertPlainText(source->text()); }
 }
+
+bool SrcEditor::canInsertFromMimeData(const QMimeData *source) const {
+    return source->hasText();
+}
