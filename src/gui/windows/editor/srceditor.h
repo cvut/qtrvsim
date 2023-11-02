@@ -8,6 +8,7 @@
 #include <QString>
 #include <QSyntaxHighlighter>
 #include <QTextEdit>
+#include <QMimeData>
 #include <qplaintextedit.h>
 #include <qwidget.h>
 
@@ -33,6 +34,8 @@ public:
 protected:
     void keyPressEvent(QKeyEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
+    void insertFromMimeData(const QMimeData *source) override;
+    bool canInsertFromMimeData(const QMimeData *source) const override;
 
 signals:
     void file_name_change();
