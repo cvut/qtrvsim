@@ -18,8 +18,9 @@ enum class AccessEffects {
     REGULAR, //> All (memory, simulation counters, simulation flags, allocation
              // on read miss (write allocation is necessary)). For accessed
              // requested by simulated program.
-    INTERNAL //> Only memory. Internal access performed for visualization,
-             // control and debugging.
+    INTERNAL,       //> Only memory. Internal access performed for visualization,
+                    // control and debugging.
+    EXTERNAL_ASYNC, //> Used for DMA.
 };
 
 /**
