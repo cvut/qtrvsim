@@ -122,8 +122,7 @@ void PeripSpiLed::knob_update_notify(uint32_t val, uint32_t mask, size_t shift) 
     spiled_reg_knobs_8bit |= val;
 
     emit external_backend_change_notify(
-        this, SPILED_REG_KNOBS_8BIT_o, SPILED_REG_KNOBS_8BIT_o + 3,
-        ae::INTERNAL);
+        this, SPILED_REG_KNOBS_8BIT_o, SPILED_REG_KNOBS_8BIT_o + 3, ae::EXTERNAL_ASYNC);
 }
 
 void PeripSpiLed::red_knob_update(int val) {

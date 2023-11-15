@@ -92,7 +92,7 @@ void SerialPort::rx_queue_check_internal() const {
 void SerialPort::rx_queue_check() const {
     rx_queue_check_internal();
     emit external_backend_change_notify(
-        this, SERP_RX_ST_REG_o, SERP_RX_DATA_REG_o + 3, ae::INTERNAL);
+        this, SERP_RX_ST_REG_o, SERP_RX_DATA_REG_o + 3, ae::EXTERNAL_ASYNC);
 }
 
 void SerialPort::update_tx_irq() const {
@@ -122,8 +122,7 @@ uint32_t SerialPort::read_reg(Offset source, AccessEffects type) const {
                 rx_st_reg &= ~SERP_RX_ST_REG_READY_m;
                 update_rx_irq();
                 emit external_backend_change_notify(
-                    this, SERP_RX_ST_REG_o, SERP_RX_DATA_REG_o + 3,
-                    ae::INTERNAL);
+                    this, SERP_RX_ST_REG_o, SERP_RX_DATA_REG_o + 3, ae::EXTERNAL_ASYNC);
             }
         } else {
             value = 0;
