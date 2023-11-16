@@ -11,6 +11,7 @@
 #include <QMultiMap>
 #include <cctype>
 #include <cstring>
+#include <cinttypes>
 #include <set>
 #include <type_traits>
 #include <utility>
@@ -205,7 +206,7 @@ static const struct InstructionMap OP_ALU_map[] = {
 
 // RV32M
 #define MUL_MAP_ITEM(NAME, OP, CODE) \
-    { NAME, IT_R, { .mul_op = (OP) }, NOMEM, nullptr, {"d", "s", "t"}, (0x02000033 | (CODE)), 0xfc00707f, { .flags = (FLAGS_ALU_T_R_STD | IMF_MUL) }}
+    { NAME, IT_R, { .mul_op = (OP) }, NOMEM, nullptr, {"d", "s", "t"}, (0x02000033 | (CODE)), 0xfe00707f, { .flags = (FLAGS_ALU_T_R_STD | IMF_MUL) }}
 
 static const struct InstructionMap OP_MUL_map[] = {
     MUL_MAP_ITEM("mul",     MulOp::MUL,     0x0000),
@@ -241,7 +242,7 @@ static const struct InstructionMap ENVIRONMENT_AND_BREAKPOINTS_map[] = {
 };
 
 #define CSR_MAP_ITEM(NAME, SOURCE, CODE, ALU_OP,  EXTRA_FLAGS) \
-    { NAME, Instruction::ZICSR, { .alu_op=AluOp::ALU_OP }, NOMEM, nullptr,  {"d", "E", SOURCE}, 0x00000073 | (CODE), 0x0000003f, { .flags = IMF_SUPPORTED | IMF_CSR | IMF_REGWRITE | IMF_ALU_REQ_RS | (EXTRA_FLAGS) } }
+    { NAME, Instruction::ZICSR, { .alu_op=AluOp::ALU_OP }, NOMEM, nullptr,  {"d", "E", SOURCE}, 0x00000073 | (CODE), 0x0000707f, { .flags = IMF_SUPPORTED | IMF_CSR | IMF_REGWRITE | IMF_ALU_REQ_RS | (EXTRA_FLAGS) } }
 
 static const struct InstructionMap SYSTEM_map[] = {
     {"environment_and_breakpoints", IT_I, NOALU, NOMEM, ENVIRONMENT_AND_BREAKPOINTS_map, {}, 0x00000073, 0xffffffff, { .subfield = {1, 20} }},
@@ -257,8 +258,8 @@ static const struct InstructionMap SYSTEM_map[] = {
 #undef CSR_MAP_ITEM
 
 static const struct InstructionMap MISC_MEM_map[] = {
-    {"fence", IT_I, NOALU, AC_CACHE_OP, nullptr, {}, 0x0000000f, 0x0000703f, { .flags = IMF_SUPPORTED | IMF_MEM }},
-    {"fence.i", IT_I, NOALU, AC_CACHE_OP, nullptr, {}, 0x000100f, 0x0000703f, { .flags = IMF_SUPPORTED | IMF_MEM }},
+    {"fence", IT_I, NOALU, AC_CACHE_OP, nullptr, {}, 0x0000000f, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_MEM }},
+    {"fence.i", IT_I, NOALU, AC_CACHE_OP, nullptr, {}, 0x000100f, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_MEM }},
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
@@ -308,7 +309,7 @@ static const struct InstructionMap OP_ALU_32_map[] = {
 
 // RV64M
 #define MUL_32_MAP_ITEM(NAME, OP, CODE) \
-    { NAME, IT_R, { .mul_op = (OP) }, NOMEM, nullptr, {"d", "s", "t"}, (0x0200003b | (CODE)), 0xfc00707f, { .flags = (FLAGS_ALU_T_R_STD | IMF_MUL | IMF_FORCE_W_OP ) }}
+    { NAME, IT_R, { .mul_op = (OP) }, NOMEM, nullptr, {"d", "s", "t"}, (0x0200003b | (CODE)), 0xfe00707f, { .flags = (FLAGS_ALU_T_R_STD | IMF_MUL | IMF_FORCE_W_OP ) }}
 
 static const struct InstructionMap OP_MUL_32_map[] = {
     MUL_32_MAP_ITEM("mulw",     MulOp::MUL,     0x0000),
@@ -373,6 +374,8 @@ static const struct InstructionMap C_inst_map[] = {
     {"i", IT_UNKNOWN, NOALU, NOMEM, I_inst_map, {}, 0x3, 0x3, { .subfield = {5, 2} }},
 };
 
+static const struct InstructionMap C_inst_unknown = IM_UNKNOWN;
+
 // clang-format on
 
 const BitField instruction_map_opcode_field = { 2, 0 };
@@ -381,6 +384,9 @@ static inline const struct InstructionMap &InstructionMapFind(uint32_t code) {
     const struct InstructionMap *im = &C_inst_map[instruction_map_opcode_field.decode(code)];
     while (im->subclass != nullptr) {
         im = &im->subclass[im->subfield.decode(code)];
+    }
+    if ((code ^ im->code) & im->mask) {
+        return C_inst_unknown;
     }
     return *im;
 }
@@ -498,7 +504,6 @@ void Instruction::flags_alu_op_mem_ctl(
     flags = (enum InstructionFlags)im.flags;
     alu_op = im.alu;
     mem_ctl = im.mem_ctl;
-    if ((dt ^ im.code) & (im.mask)) { flags = (enum InstructionFlags)(flags & ~IMF_SUPPORTED); }
 }
 
 bool Instruction::operator==(const Instruction &c) const {
@@ -588,23 +593,31 @@ QMultiMap<QString, uint32_t> str_to_instruction_code_map;
 void instruction_from_string_build_base(
     const InstructionMap *im,
     BitField field,
-    uint32_t base_code) {
+    uint32_t base_code, uint32_t base_mask) {
     uint32_t code;
     uint8_t bits = field.count;
     uint8_t shift = field.offset;
 
+    base_mask |= (((uint32_t)1 << bits) - 1) << shift;
+
     for (unsigned int i = 0; i < 1U << bits; i++, im++) {
         code = base_code | (i << shift);
         if (im->subclass) {
-            instruction_from_string_build_base(im->subclass, im->subfield, code);
+            instruction_from_string_build_base(im->subclass, im->subfield, code, base_mask);
             continue;
         }
         if (!(im->flags & IMF_SUPPORTED)) { continue; }
-        if (im->code != code) {
-            ERROR("code mismatch %s computed 0x%08x found 0x%08x", im->name, code, im->code);
+        if ((im->code ^ code) & base_mask) {
+            ERROR("code mismatch %s computed 0x%08" PRIx32 " (mask 0x%08" PRIx32 ") found 0x%08" PRIx32,
+                  im->name, code, base_mask, im->code);
             continue;
         }
-        str_to_instruction_code_map.insert(im->name, code);
+        if (~im->mask & base_mask) {
+            ERROR("code mismatch %s computed 0x%08" PRIx32 " (mask 0x%08" PRIx32 ") found 0x%08" PRIx32 " with too wide mask 0x%08" PRIx32,
+                  im->name, code, base_mask, im->code, im->mask);
+            continue;
+        }
+        str_to_instruction_code_map.insert(im->name, im->code);
     }
 #if 0
     for (auto i = str_to_instruction_code_map.begin();
@@ -614,7 +627,7 @@ void instruction_from_string_build_base(
 }
 
 void instruction_from_string_build_base() {
-    return instruction_from_string_build_base(C_inst_map, instruction_map_opcode_field, 0);
+    return instruction_from_string_build_base(C_inst_map, instruction_map_opcode_field, 0, 0);
 }
 
 static int parse_reg_from_string(const QString &str, uint *chars_taken = nullptr) {
