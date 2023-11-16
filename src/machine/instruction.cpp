@@ -428,11 +428,11 @@ static inline const struct InstructionMap &InstructionMapFind(uint32_t code) {
     return *im;
 }
 
-const std::array<const QString, 34> RECOGNIZED_PSEUDOINSTRUCTIONS {
+const std::array<const QString, 36> RECOGNIZED_PSEUDOINSTRUCTIONS {
     "nop",    "la",     "li",     "mv",     "not",  "neg",  "negw", "sext.b", "sext.h",
     "sext.w", "zext.b", "zext.h", "zext.w", "seqz", "snez", "sltz", "slgz",   "beqz",
     "bnez",   "blez",   "bgez",   "bltz",   "bgtz", "bgt",  "ble",  "bgtu",   "bleu",
-    "j",      "jal",    "jr",     "jalr",   "ret",  "call", "tail"
+    "j",      "jal",    "jr",     "jalr",   "ret",  "call", "tail", "csrr", "csrw"
 };
 
 bool Instruction::symbolic_registers_enabled = false;
@@ -995,7 +995,14 @@ size_t Instruction::pseudo_from_tokens(
                     .data();
         return 8;
     }
-
+    if (inst.base[0] == 'c') {
+        if (inst.base == QLatin1String("csrr")) {
+            return partially_apply("csrrs", 2, 2, "x0", code, buffsize, inst, reloc);
+        }
+        if (inst.base == QLatin1String("csrw")) {
+            return partially_apply("csrrw", 2, 0, "x0", code, buffsize, inst, reloc);
+        }
+    }
     return 0;
 }
 size_t Instruction::partially_apply(
