@@ -175,8 +175,8 @@ void MemoryDataBus::range_backend_external_change(
     Offset start_offset,
     Offset last_offset,
     AccessEffects type) {
-    if (type != ae::INTERNAL) { change_counter++;
-    }
+    change_counter++;
+
     // We only use device here for lookup, so const_cast is safe as find takes
     // it by const reference .
     for (auto i = ranges_by_device.find(const_cast<BackendMemory *>(device));
