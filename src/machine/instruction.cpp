@@ -241,11 +241,48 @@ static const struct InstructionMap ENVIRONMENT_AND_BREAKPOINTS_map[] = {
     {"ebreak", IT_I, NOALU, NOMEM, nullptr, {}, 0x00100073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_EXCEPTION | IMF_EBREAK }},
 };
 
+// Priviledged system isntructions, only 5-bits (29:25) are decoded for now.
+// Full decode is should cover 128 entries (31:25) but we radly support hypervisor even in future
+static const struct InstructionMap SYSTEM_PRIV_map[] = {
+    {"environment_and_breakpoints", IT_I, NOALU, NOMEM, ENVIRONMENT_AND_BREAKPOINTS_map, {}, 0x00000073, 0xffffffff, { .subfield = {1, 20} }},
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    {"sret", IT_I, NOALU, NOMEM, nullptr, {}, 0x10200073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_XRET }},
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    {"mret", IT_I, NOALU, NOMEM, nullptr, {}, 0x30200073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_XRET }},
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+};
+
 #define CSR_MAP_ITEM(NAME, SOURCE, CODE, ALU_OP,  EXTRA_FLAGS) \
     { NAME, Instruction::ZICSR, { .alu_op=AluOp::ALU_OP }, NOMEM, nullptr,  {"d", "E", SOURCE}, 0x00000073 | (CODE), 0x0000707f, { .flags = IMF_SUPPORTED | IMF_CSR | IMF_REGWRITE | IMF_ALU_REQ_RS | (EXTRA_FLAGS) } }
 
 static const struct InstructionMap SYSTEM_map[] = {
-    {"environment_and_breakpoints", IT_I, NOALU, NOMEM, ENVIRONMENT_AND_BREAKPOINTS_map, {}, 0x00000073, 0xffffffff, { .subfield = {1, 20} }},
+    {"system_priviledged", IT_I, NOALU, NOMEM, SYSTEM_PRIV_map, {}, 0x00000073, 0xffffffff, { .subfield = {5, 25} }},
     CSR_MAP_ITEM("csrrw", "s", 0x1000, ADD, 0),
     CSR_MAP_ITEM("csrrs", "s", 0x2000, OR, IMF_CSR_TO_ALU),
     CSR_MAP_ITEM("csrrc", "s", 0x3000, AND, IMF_CSR_TO_ALU | IMF_ALU_MOD),
