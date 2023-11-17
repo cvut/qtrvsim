@@ -139,6 +139,8 @@ if(NOT ${WASM})
 	add_test(NAME cache COMMAND cache_test)
 
 	add_executable(instruction_test
+			csr/controlstate.cpp
+			csr/controlstate.h
 			instruction.cpp
 			instruction.h
 			instruction.test.cpp
@@ -151,6 +153,8 @@ if(NOT ${WASM})
 	add_test(NAME instruction COMMAND instruction_test)
 
 	add_executable(program_loader_test
+			csr/controlstate.cpp
+			csr/controlstate.h
 			instruction.cpp
 			instruction.h
 			memory/backend/backend_memory.h

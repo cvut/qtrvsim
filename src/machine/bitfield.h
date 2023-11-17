@@ -20,11 +20,14 @@ struct BitField {
 
     template<typename T>
     [[nodiscard]] T decode(T val) const {
-        return (val >> offset) & ((1L << count) - 1);
+        return (val >> offset) & (((uint64_t)1 << count) - 1);
     }
     template<typename T>
     [[nodiscard]] T encode(T val) const {
-        return ((val & ((1L << count) - 1)) << offset);
+        return ((val & (((uint64_t)1 << count) - 1)) << offset);
+    }
+    [[nodiscard]] uint64_t mask() const {
+        return (((uint64_t)1 << count) - 1) << offset;
     }
 };
 

@@ -1,3 +1,4 @@
+#include <cinttypes>
 #include "controlstate.h"
 
 #include "common/logging.h"
@@ -53,14 +54,14 @@ namespace machine { namespace CSR {
         // Only machine level privilege is supported so no checking is needed.
         size_t reg_id = get_register_internal_id(address);
         RegisterValue value = register_data[reg_id];
-        DEBUG("Read CSR[%u] == %lu", address.data, value.as_u64());
+        DEBUG("Read CSR[%u] == 0x%" PRIx64, address.data, value.as_u64());
         emit read_signal(reg_id, value);
         return value;
     }
 
     void ControlState::write(Address address, RegisterValue value) {
         DEBUG(
-            "Write CSR[%u/%lu] <== %lu", address.data, get_register_internal_id(address),
+            "Write CSR[%u/%lu] <== 0x%" PRIx64, address.data, get_register_internal_id(address),
             value.as_u64());
         // Attempts to write a read-only register also raise illegal instruction exceptions.
         if (!address.is_writable()) {
@@ -69,6 +70,24 @@ namespace machine { namespace CSR {
                 QString("CSR address %1 is not writable.").arg(address.data), "");
         }
         write_internal(get_register_internal_id(address), value);
+    }
+
+    void ControlState::default_wlrl_write_handler(
+        const RegisterDesc &desc,
+        RegisterValue &reg,
+        RegisterValue val) {
+        uint64_t u;
+        u = val.as_u64() & desc.write_mask.as_u64();
+        u |= reg.as_u64() & ~desc.write_mask.as_u64();
+        if  (xlen == Xlen::_32)
+            u &= 0xffffffff;
+        reg = u;
+    }
+    void ControlState::mstatus_wlrl_write_handler(
+        const RegisterDesc &desc,
+        RegisterValue &reg,
+            RegisterValue val) {
+        default_wlrl_write_handler(desc, reg, val);
     }
 
     bool ControlState::operator==(const ControlState &other) const {
@@ -136,8 +155,9 @@ namespace machine { namespace CSR {
 
     void ControlState::write_internal(size_t internal_id, RegisterValue value) {
         RegisterDesc desc = REGISTERS[internal_id];
-        (this->*desc.write_handler)(desc, register_data[internal_id], value);
-        write_signal(internal_id, value);
+        RegisterValue &reg = register_data[internal_id];
+        (this->*desc.write_handler)(desc, reg, value);
+        write_signal(internal_id, reg);
     }
     void ControlState::increment_internal(size_t internal_id, uint64_t amount) {
         auto value = register_data[internal_id];
