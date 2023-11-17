@@ -21,8 +21,8 @@ constexpr Offset SERP_TX_DATA_REG_o = 0xcu;
 
 SerialPort::SerialPort(Endian simulated_machine_endian)
     : BackendMemory(simulated_machine_endian)
-    , tx_irq_level(2)
-    , rx_irq_level(3) // HW interrupt 1
+    , tx_irq_level(17) // The second platform HW interrupt
+    , rx_irq_level(16) // The first platform HW interrupt
 {}
 
 SerialPort::~SerialPort() = default;
