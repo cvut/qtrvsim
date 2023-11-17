@@ -317,68 +317,50 @@ is selected.
 <details>
   <summary>Implemented CSR registers and their usage</summary>
 
-(NOTICE: Coprocessor0 will have to be replaced with RISC-V status registers)
+(NOTICE: Replacement of MIPS Coprocessor0 by RISC-V control status registers is work in progress)
 
 List of interrupt sources:
 
 | Irq number | Cause/Status Bit | Source                                       |
 |-----------:|-----------------:|:---------------------------------------------|
-| 2 / HW0    | 10               | Serial port ready to accept character to Tx  |
-| 3 / HW1    | 11               | There is received character ready to be read |
-| 7 / HW5    | 15               | Counter reached value in Compare register    |
+| 7          | 7                | Machine timer interrupt                      |
+| 16 / HW0   | 16               | There is received character ready to be read |
+| 17 / HW1   | 17               | Serial port ready to accept character to Tx  |
 
-Following coprocessor 0 registers are recognized
+Following Control Status registers are recognized
 
 | Number | Name       | Description                                                         |
 |-------:|:-----------|:--------------------------------------------------------------------|
-|  $4,2  | UserLocal  | Used as TLS base by operating system usually                        |
-|  $8,0  | BadVAddr   | Reports the address for the most recent address-related exception   |
-|  $9,0  | Count      | Processor cycle count                                               |
-| $11,0  | Compare    | Timer interrupt control                                             |
-| $12,0  | Status     | Processor status and control                                        |
-| $13,0  | Cause      | Cause of last exception                                             |
-| $14,0  | EPC        | Program counter at last exception                                   |
-| $15,1  | EBase      | Exception vector base register                                      |
-| $16,0  | Config     | Configuration registers                                             |
+|  0x300 | mstatus    | Machine status register. |
+|  0x304 | mie        | Machine interrupt-enable register. |
+|  0x305 | mtvec      | Machine trap-handler base address. |
+|  0x340 | mscratch   | Scratch register for machine trap handlers. |
+|  0x341 | mepc       | Machine exception program counter. |
+|  0x342 | mcause     | Machine trap cause. |
+|  0x343 | mtval      | Machine bad address or instruction. |
+|  0x344 | mip        | Machine interrupt pending. |
+|  0x34A | mtinsr     | Machine trap instruction (transformed). |
+|  0x34B | mtval2     | Machine bad guest physical address. |
+|  0xB00 | mcycle     | Machine cycle counter. |
+|  0xB02 | minstret   | Machine instructions-retired counter. |
+|  0xF11 | mvendorid  | Vendor ID. |
+|  0xF12 | marchid    | Architecture ID. |
+|  0xF13 | mimpid     | Implementation ID. |
+|  0xF14 | mhardid    | Hardware thread ID. |
 
-`mtc0` and `mfc0` are used to copy value from/to general purpose registers to/from coprocessor 0 register.
-
-Hardware/special registers implemented:
-
-| Number | Name       | Description                                              |
-|-------:|:-----------|:---------------------------------------------------------|
-|  0     | CPUNum     | CPU number, fixed to 0                                   |
-|  1     | SYNCI_Step | Increment required for instruction cache synchronization |
-|  2     | CC         | Cycle counter                                            |
-|  3     | CCRes      | Cycle counter resolution, fixed on 1                     |
-| 29     | UserLocal  | Read only value of Coprocessor 0 $4,2 register           |
+`csrr`, `csrw`, `csrrs` , `csrrs` and `csrrw` are used to copy and exchange value from/to RISC-V control status registers.
 
 Sequence to enable serial port receive interrupt:
 
-Decide location of interrupt service routine the first. The default address is 0x80000180. The base can be
-changed (`EBase` register) and then PC is set to address EBase + 0x180. This is in accordance with MIPS release 1 and 2
-manuals.
+Decide location of interrupt service routine the first. The address of the common trap handler is defined by `mtvec` register and then PC is set to this address when exception or interrupt is accepted.
 
-Enable bit 11 (interrupt mask) in the Status register. Ensure that bit 1 (`EXL`) is zero and bit 0 (`IE`) is set to one.
+Enable bit 16 in the machine Interrupt-Enable register (`mie`). Ensure that bit 3 (`mstatus.mie` - machine global interrupt-enable) of Machine Status register is set is set to one.
 
 Enable interrupt in the receiver status register (bit 1 of `SERP_RX_ST_REG`).
 
 Write character to the terminal. It should be immediately consumed by the serial port receiver if interrupt is enabled
 in `SERP_RX_ST_REG`. CPU should report interrupt exception and when it propagates to the execution phase `PC` is set to
 the interrupt routine start address.
-
-Some hints how to direct linker to place interrupt handler routine at appropriate address. Implement interrupt routine
-in new section
-
-```
-.section .irq_handler, "ax"
-```
-
-Use next linker option to place section start at right address
-
-```
- -Wl,--section-start=.irq_handler=0x80000180
-```
 
 </details>
 
