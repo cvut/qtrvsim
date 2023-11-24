@@ -472,9 +472,7 @@ int main(int argc, char *argv[]) {
 
     if (asm_source) {
         MsgReport msg_report(&app);
-        if (!assemble(machine, msg_report, p.positionalArguments()[0])) {
-            QCoreApplication::exit(1);
-        }
+        if (!assemble(machine, msg_report, p.positionalArguments()[0])) { exit(EXIT_FAILURE); }
     }
 
     load_ranges(machine, p.values("load-range"));
