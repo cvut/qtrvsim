@@ -116,6 +116,7 @@ struct DecodeInterstage {
     bool csr = false;         // Zicsr, implies csr read and csr write
     bool csr_to_alu = false;
     bool csr_write = false;
+    bool xret = false;        // Return from exception, MRET and SRET
     bool insert_stall_before = false;
 
 public:
@@ -177,6 +178,7 @@ struct ExecuteInterstage {
     bool alu_zero = false;
     bool csr = false;
     bool csr_write = false;
+    bool xret = false;
 
 public:
     /** Reset to value corresponding to NOP. */
@@ -261,6 +263,7 @@ struct MemoryInternalState {
     bool branch_outcome = false;
     bool branch_jalx = false;
     bool branch_jalr = false;
+    bool xret = false;
 };
 
 struct MemoryState {

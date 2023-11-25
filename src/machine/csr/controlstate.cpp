@@ -9,14 +9,6 @@ LOG_CATEGORY("machine.csr.control_state");
 
 namespace machine { namespace CSR {
 
-    // TODO this is mips
-    enum StatusReg {
-        Status_IE = 0x00000001,
-        Status_EXL = 0x00000002,
-        Status_ERL = 0x00000004,
-        Status_IntMask = 0x0000ff00,
-    };
-
     ControlState::ControlState() {
         reset();
     }
@@ -100,20 +92,34 @@ namespace machine { namespace CSR {
 
     void ControlState::update_exception_cause(enum ExceptionCause excause) {
         RegisterValue &value = register_data[Id::MCAUSE];
-        value = value.as_u32() & ~0x80000000 & ~0x0000007f;
         if (excause != EXCAUSE_INT) {
-            value = value.as_u32() | static_cast<unsigned>(excause) << 2;
+            value = static_cast<unsigned>(excause);
+        } else {
+            RegisterValue mie = register_data[Id::MIE];
+            RegisterValue mip = register_data[Id::MIP];
+            int irq_to_signal = 0;
+
+            uint64_t irqs = mie.as_u64() & mip.as_u64() & 0xffffffff;
+
+            // use ffs or __builtin_ffsl where available
+            for (int i = 0; i < 32; i++) {
+                if (irqs & (1UL << i)) {
+                    irq_to_signal = i;
+                    break;
+                }
+            }
+
+            value = (uint64_t)(irq_to_signal |
+                    ((uint64_t)1 << ((xlen == Xlen::_32)? 31: 63)));
         }
-        // TODO: this is known ahead of time
         emit write_signal(Id::MCAUSE, value);
     }
 
-    // TODO this is mips
     void ControlState::set_interrupt_signal(uint irq_num, bool active) {
-        if (irq_num >= 8) { return; }
+        if (irq_num >= 32) { return; }
         uint64_t mask = 1 << irq_num;
         size_t reg_id = Id::MIP;
-        RegisterValue value = register_data[reg_id];
+        RegisterValue &value = register_data[reg_id];
         if (active) {
             value = value.as_xlen(xlen) | mask;
         } else {
@@ -122,27 +128,43 @@ namespace machine { namespace CSR {
         emit write_signal(reg_id, value);
     }
 
-    // TODO this is mips
     bool ControlState::core_interrupt_request() {
-        RegisterValue mstatus = register_data[Id::MSTATUS];
-        RegisterValue mcause = register_data[Id::MCAUSE];
+        RegisterValue mie = register_data[Id::MIE];
+        RegisterValue mip = register_data[Id::MIP];
 
-        uint64_t irqs = mstatus.as_u64() & mcause.as_u64() & Status_IntMask;
+        uint64_t irqs = mie.as_u64() & mip.as_u64() & 0xffffffff;
 
-        return irqs && mstatus.as_u64() & Status_IntMask && !(mstatus.as_u64() & Status_EXL)
-               && !(mstatus.as_u64() & Status_ERL);
+        return irqs && read_field(Field::mstatus::MIE).as_u64();
     }
 
-    // TODO this is mips
-    void ControlState::set_status_exl(bool value) {
+    void ControlState::exception_initiate(PrivilegeLevel act_privlev, PrivilegeLevel to_privlev) {
         size_t reg_id = Id::MSTATUS;
         RegisterValue &reg = register_data[reg_id];
-        if (value) {
-            reg = reg.as_xlen(xlen) & Status_EXL;
-        } else {
-            reg = reg.as_xlen(xlen) & ~Status_EXL;
-        }
+        Q_UNUSED(act_privlev)
+        Q_UNUSED(to_privlev)
+
+        write_field(Field::mstatus::MPIE, read_field(Field::mstatus::MIE).as_u32());
+        write_field(Field::mstatus::MIE, (uint64_t)0);
+
+        write_field(Field::mstatus::MPP, static_cast<uint64_t>(act_privlev));
+
         emit write_signal(reg_id, reg);
+    }
+
+    PrivilegeLevel ControlState::exception_return(enum PrivilegeLevel act_privlev) {
+        size_t reg_id = Id::MSTATUS;
+        RegisterValue &reg = register_data[reg_id];
+        PrivilegeLevel restored_privlev;
+        Q_UNUSED(act_privlev)
+
+        write_field(Field::mstatus::MIE, read_field(Field::mstatus::MPIE).as_u32());
+
+        restored_privlev = static_cast<PrivilegeLevel>(read_field(Field::mstatus::MPP).as_u32());
+        write_field(Field::mstatus::MPP, (uint64_t)0);
+
+        emit write_signal(reg_id, reg);
+
+        return restored_privlev;
     }
 
     machine::Address ControlState::exception_pc_address() {

@@ -133,7 +133,8 @@ namespace machine { namespace CSR {
 
     public slots:
         void set_interrupt_signal(uint irq_num, bool active);
-        void set_status_exl(bool value);
+        void exception_initiate(PrivilegeLevel act_privlev, PrivilegeLevel to_privlev);
+        PrivilegeLevel exception_return(enum PrivilegeLevel act_privlev);
 
     private:
         static size_t get_register_internal_id(Address address);
