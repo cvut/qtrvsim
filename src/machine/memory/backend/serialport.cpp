@@ -8,14 +8,14 @@ using ae = machine::AccessEffects; // For enum values, type is obvious from
 namespace machine {
 
 constexpr Offset SERP_RX_ST_REG_o = 0x00u;
-constexpr Offset SERP_RX_ST_REG_READY_m = 0x1u;
-constexpr Offset SERP_RX_ST_REG_IE_m = 0x2u;
+constexpr uint32_t SERP_RX_ST_REG_READY_m = 0x1u;
+constexpr uint32_t SERP_RX_ST_REG_IE_m = 0x2u;
 
 constexpr Offset SERP_RX_DATA_REG_o = 0x04u;
 
 constexpr Offset SERP_TX_ST_REG_o = 0x08u;
-constexpr Offset SERP_TX_ST_REG_READY_m = 0x1u;
-constexpr Offset SERP_TX_ST_REG_IE_m = 0x2u;
+constexpr uint32_t SERP_TX_ST_REG_READY_m = 0x1u;
+constexpr uint32_t SERP_TX_ST_REG_IE_m = 0x2u;
 
 constexpr Offset SERP_TX_DATA_REG_o = 0xcu;
 
@@ -23,6 +23,7 @@ SerialPort::SerialPort(Endian simulated_machine_endian)
     : BackendMemory(simulated_machine_endian)
     , tx_irq_level(17) // The second platform HW interrupt
     , rx_irq_level(16) // The first platform HW interrupt
+    , tx_st_reg(SERP_TX_ST_REG_READY_m)
 {}
 
 SerialPort::~SerialPort() = default;
@@ -129,7 +130,7 @@ uint32_t SerialPort::read_reg(Offset source, AccessEffects type) const {
         }
         rx_queue_check_internal();
         break;
-    case SERP_TX_ST_REG_o: value = tx_st_reg | SERP_TX_ST_REG_READY_m; break;
+    case SERP_TX_ST_REG_o: value = tx_st_reg; break;
     default: printf("WARNING: Serial port - read out of range (at 0x%lu).\n", source); break;
     }
 
