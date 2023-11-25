@@ -40,19 +40,27 @@ static_assert(is_special_access((AccessControl)11), "");
 
 enum ExceptionCause {
     EXCAUSE_NONE = 0, // Use zero as default value when no exception is
-    // pending.
-    EXCAUSE_INT = 1, // Int is 0 on real CPU and in Cause register.
-    EXCAUSE_UNKNOWN = 2,
-    EXCAUSE_ADDRL = 4,
-    EXCAUSE_ADDRS = 5,
-    EXCAUSE_IBUS = 6,
-    EXCAUSE_DBUS = 7,
-    EXCAUSE_SYSCALL = 8,
-    EXCAUSE_BREAK = 9,
-    EXCAUSE_OVERFLOW = 12,
-    EXCAUSE_TRAP = 13,
-    EXCAUSE_HWBREAK = 14,
-    EXCAUSE_COUNT = 15,
+    // ECAUSE_INSN_MISALIGNED - not defined for now, overlaps with EXCAUSE_NON
+    EXCAUSE_INSN_FAULT = 1,        // Instruction access fault
+    EXCAUSE_INSN_ILLEGAL = 2,      // Illegal instruction
+    EXCAUSE_BREAK = 3,             // Breakpoint
+    EXCAUSE_LOAD_MISALIGNED = 4,   // Load address misaligned
+    EXCAUSE_LOAD_FAULT = 5,        // Load access fault
+    EXCAUSE_STORE_MISALIGNED = 6,  // Store/AMO address misaligned
+    EXCAUSE_STORE_FAULT = 7,       // Store/AMO access fault
+    EXCAUSE_ECALL_U = 8,           // Environment call from U-mode
+    EXCAUSE_ECALL_S = 9,           // Environment call from S-mode
+    EXCAUSE_RESERVED_10 = 10,      // Reserved
+    EXCAUSE_ECALL_M = 11,          // Environment call from M-mode
+    EXCAUSE_INSN_PAGE_FAULT = 12,  // Instruction page fault
+    EXCAUSE_LOAD_PAGE_FAULT = 13,  // Load page fault
+    EXCAUSE_RESERVED_14 = 14,      // Reserved
+    EXCAUSE_STORE_PAGE_FAULT = 15, // Store/AMO page fault
+    // Simulator specific exception cause codes, alliases
+    EXCAUSE_HWBREAK = 16,
+    EXCAUSE_ECALL_ANY = 17,        // sythetic exception to mark ECALL instruction
+    EXCAUSE_INT = 18,              // External/asynchronous interrupt, bit 32 or 63
+    EXCAUSE_COUNT = 19,
 };
 
 enum LocationStatus {

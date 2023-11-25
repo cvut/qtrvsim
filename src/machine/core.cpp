@@ -129,7 +129,7 @@ bool Core::handle_exception(
     Address next_addr,
     Address jump_branch_pc,
     Address mem_ref_addr) {
-    if (excause == EXCAUSE_UNKNOWN) {
+    if (excause == EXCAUSE_INSN_ILLEGAL) {
         throw SIMULATOR_EXCEPTION(
             UnsupportedInstruction, "Instruction with following encoding is not supported",
             QString::number(inst.data(), 16));
@@ -224,7 +224,7 @@ DecodeState Core::decode(const FetchInterstage &dt) {
 
     dt.inst.flags_alu_op_mem_ctl(flags, alu_op, mem_ctl);
 
-    if (!(flags & IMF_SUPPORTED)) { excause = EXCAUSE_UNKNOWN; }
+    if (!(flags & IMF_SUPPORTED)) { excause = EXCAUSE_INSN_ILLEGAL; }
 
     RegisterId num_rs = (flags & (IMF_ALU_REQ_RS | IMF_ALU_RS_ID)) ? dt.inst.rs() : 0;
     RegisterId num_rt = (flags & IMF_ALU_REQ_RT) ? dt.inst.rt() : 0;
@@ -246,7 +246,7 @@ DecodeState Core::decode(const FetchInterstage &dt) {
         if (flags & IMF_EBREAK) {
             excause = EXCAUSE_BREAK;
         } else if (flags & IMF_ECALL) {
-            excause = EXCAUSE_SYSCALL;
+            excause = EXCAUSE_ECALL_ANY;
         }
     }
     if (flags & IMF_FORCE_W_OP)
