@@ -462,7 +462,7 @@ WritebackState Core::writeback(const MemoryInterstage &dt) {
     if (dt.regwrite) { regs->write_gp(dt.num_rd, dt.towrite_val); }
 
     return WritebackState { WritebackInternalState {
-        .inst = dt.inst,
+        .inst = (dt.excause == EXCAUSE_NONE)? dt.inst: Instruction::NOP,
         .inst_addr = dt.inst_addr,
         .value = dt.towrite_val,
         .num_rd = dt.num_rd,
