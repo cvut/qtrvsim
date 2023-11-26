@@ -5,6 +5,8 @@
 #include "machinedefs.h"
 #include "simulator_exception.h"
 
+#include <QtAlgorithms>
+
 LOG_CATEGORY("machine.csr.control_state");
 
 namespace machine { namespace CSR {
@@ -99,14 +101,11 @@ namespace machine { namespace CSR {
             RegisterValue mip = register_data[Id::MIP];
             int irq_to_signal = 0;
 
-            uint64_t irqs = mie.as_u64() & mip.as_u64() & 0xffffffff;
+            quint64 irqs = mie.as_u64() & mip.as_u64() & 0xffffffff;
 
-            // use ffs or __builtin_ffsl where available
-            for (int i = 0; i < 32; i++) {
-                if (irqs & (1UL << i)) {
-                    irq_to_signal = i;
-                    break;
-                }
+            if (irqs != 0) {
+                // Find the first (leas significant) set bit
+                irq_to_signal = 63 - qCountLeadingZeroBits(irqs & (~irqs + 1));
             }
 
             value = (uint64_t)(irq_to_signal |

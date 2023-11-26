@@ -4,9 +4,7 @@
 
 #include <cmath>
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
 #include <QtAlgorithms>
-#endif
 
 //////////////////////
 #define ROW_HEIGHT 14
@@ -23,39 +21,7 @@
 using namespace std;
 
 static inline unsigned int bitsToRepresent(quint32 range_max_val) {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
     return 32 - qCountLeadingZeroBits(range_max_val);
-#else
-    const static qint8 bit_table[256] = {
-        /*       x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 xA xB xC xD xE xF */
-        /* 0x */  0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
-        /* 1x */  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
-        /* 2x */  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-        /* 3x */  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-        /* 4x */  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-        /* 5x */  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-        /* 6x */  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-        /* 7x */  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-        /* 8x */  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        /* 9x */  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        /* Ax */  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        /* Bx */  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        /* Cx */  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        /* Dx */  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        /* Ex */  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        /* Fx */  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-    };
-    unsigned int res = 0;
-    unsigned int step;
-    step = ~(quint32)((qint32)((range_max_val >> 16) - 1) >> 31) & 16;
-    res += step;
-    range_max_val >>=step;
-    step = ~(quint32)((qint32)((range_max_val >> 8) - 1) >> 31) & 8;
-    res += step;
-    range_max_val >>=step;
-    res += bit_table[range_max_val];
-    return res;
-#endif
 }
 
 CacheAddressBlock::CacheAddressBlock(const machine::Cache *cache, unsigned width) {
