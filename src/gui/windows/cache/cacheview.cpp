@@ -4,6 +4,10 @@
 
 #include <cmath>
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+#include <QtAlgorithms>
+#endif
+
 //////////////////////
 #define ROW_HEIGHT 14
 #define VD_WIDTH 10
@@ -18,12 +22,48 @@
 #include <iostream>
 using namespace std;
 
+static inline unsigned int bitsToRepresent(quint32 range_max_val) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+    return 32 - qCountLeadingZeroBits(range_max_val);
+#else
+    const static qint8 bit_table[256] = {
+        /*       x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 xA xB xC xD xE xF */
+        /* 0x */  0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
+        /* 1x */  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+        /* 2x */  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+        /* 3x */  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+        /* 4x */  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+        /* 5x */  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+        /* 6x */  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+        /* 7x */  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+        /* 8x */  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        /* 9x */  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        /* Ax */  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        /* Bx */  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        /* Cx */  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        /* Dx */  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        /* Ex */  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        /* Fx */  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+    };
+    unsigned int res = 0;
+    unsigned int step;
+    step = ~(quint32)((qint32)((range_max_val >> 16) - 1) >> 31) & 16;
+    res += step;
+    range_max_val >>=step;
+    step = ~(quint32)((qint32)((range_max_val >> 8) - 1) >> 31) & 8;
+    res += step;
+    range_max_val >>=step;
+    res += bit_table[range_max_val];
+    return res;
+#endif
+}
+
 CacheAddressBlock::CacheAddressBlock(const machine::Cache *cache, unsigned width) {
     rows = cache->get_config().set_count();
     columns = cache->get_config().block_size();
-    s_row = cache->get_config().set_count() > 1 ? sqrt(cache->get_config().set_count()) : 0;
+    s_row = cache->get_config().set_count() > 1 ? bitsToRepresent(cache->get_config().set_count() - 1) : 0;
     this->width = width;
-    s_col = cache->get_config().block_size() > 1 ? sqrt(cache->get_config().block_size()) : 0;
+    s_col = cache->get_config().block_size() > 1 ? bitsToRepresent(cache->get_config().block_size() - 1) : 0;
     s_tag = 30 - s_row - s_col; // 32 bits - 2 unused and then every bit used
                                 // for different index
     this->width = width;
@@ -51,7 +91,7 @@ void CacheAddressBlock::paint(
 
     unsigned wpos = 5;
     // Part used for tag (we expect that tag is always used)
-    unsigned wid = s_tag == 0 ? 0 : ((s_tag / 4) + 1);
+    unsigned wid = s_tag == 0 ? 0 : (((s_tag - 1) / 4) + 1);
     unsigned tag_center = wpos + wid * LETTERW / 2 + 1;
     QRectF rect(wpos, 16, wid * LETTERW + 2, ROW_HEIGHT);
     painter->drawRect(rect);
@@ -60,7 +100,7 @@ void CacheAddressBlock::paint(
     // Part used for the set
     unsigned row_center = wpos;
     if (s_row > 0) {
-        wid = s_row == 0 ? 0 : ((s_row / 4) + 1);
+        wid = s_row == 0 ? 0 : (((s_row - 1) / 4) + 1);
         row_center += wid * LETTERW / 2 + 1;
         rect = QRectF(wpos, 16, wid * LETTERW + 2, ROW_HEIGHT);
         painter->drawRect(rect);
@@ -70,7 +110,7 @@ void CacheAddressBlock::paint(
     // Part used for block
     unsigned col_center = wpos;
     if (s_col > 0) {
-        wid = s_col == 0 ? 0 : ((s_col / 4) + 1);
+        wid = s_col == 0 ? 0 : (((s_col - 1) / 4) + 1);
         col_center += wid * LETTERW / 2 + 1;
         rect = QRectF(wpos, 16, wid * LETTERW + 2, ROW_HEIGHT);
         painter->drawRect(rect);
