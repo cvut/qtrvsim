@@ -89,11 +89,11 @@ void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const 
     if (pieces.size() < 3) {
         fprintf(
             stderr, "Parameters %s cache incorrect (correct lru,4,2,2,wb).\n", qPrintable(which));
-        QCoreApplication::exit(1);
+        exit(EXIT_FAILURE);
     }
     if (pieces.at(0).size() < 1) {
         fprintf(stderr, "Policy for %s cache is incorrect.\n", qPrintable(which));
-        QCoreApplication::exit(1);
+        exit(EXIT_FAILURE);
     }
     if (!pieces.at(0).at(0).isDigit()) {
         if (pieces.at(0).toLower() == "random") {
@@ -104,7 +104,7 @@ void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const 
             cacheconf.set_replacement_policy(CacheConfig::RP_LFU);
         } else {
             fprintf(stderr, "Policy for %s cache is incorrect.\n", qPrintable(which));
-            QCoreApplication::exit(1);
+            exit(EXIT_FAILURE);
         }
         pieces.removeFirst();
     }
@@ -112,7 +112,7 @@ void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const 
         fprintf(
             stderr, "Parameters for  %s  cache incorrect (correct lru,4,2,2,wb). \n",
             qPrintable(which));
-        QCoreApplication::exit(1);
+        exit(EXIT_FAILURE);
     }
     cacheconf.set_set_count(pieces.at(0).toLong());
     cacheconf.set_block_size(pieces.at(1).toLong());
@@ -121,7 +121,7 @@ void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const 
         || cacheconf.associativity() == 0) {
         fprintf(
             stderr, "Parameters for  %s  cache cannot have zero component. \n", qPrintable(which));
-        QCoreApplication::exit(1);
+        exit(EXIT_FAILURE);
     }
     if (pieces.size() > 3) {
         if (pieces.at(3).toLower() == "wb") {
@@ -134,7 +134,7 @@ void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const 
             fprintf(
                 stderr, "Write policy for  %s  cache is incorrect (correct wb/wt/wtna/wta). \n",
                 qPrintable(which));
-            QCoreApplication::exit(1);
+            exit(EXIT_FAILURE);
         }
     }
 }
@@ -156,7 +156,7 @@ void parse_u32_option(
             fprintf(
                 stderr, "Value of option %s is not a valid unsigned integer.",
                 qPrintable(option_name));
-            QCoreApplication::exit(1);
+            exit(EXIT_FAILURE);
         }
     }
 }
@@ -176,7 +176,7 @@ void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
     if (!hazard_unit_values.empty()) {
         if (!config.set_hazard_unit(hazard_unit_values.last().toLower())) {
             fprintf(stderr, "Unknown kind of hazard unit specified\n");
-            QCoreApplication::exit(1);
+            exit(EXIT_FAILURE);
         }
     }
 
@@ -222,7 +222,7 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
             } else {
                 fprintf(
                     stderr, "Unknown register number given for trace-gp: %s\n", qPrintable(gps[i]));
-                QCoreApplication::exit(1);
+                exit(EXIT_FAILURE);
             }
         }
     }
@@ -246,7 +246,7 @@ void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *s
             case 'i': reason = Reporter::FR_UNSUPPORTED_INSTR; break;
             default:
                 fprintf(stderr, "Unknown fail condition: %c\n", qPrintable(fail[i])[y]);
-                QCoreApplication::exit(1);
+                exit(EXIT_FAILURE);
             }
             r.expect_fail(reason);
         }
@@ -261,12 +261,12 @@ void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *s
         int comma1 = range_arg.indexOf(",");
         if (comma1 < 0) {
             fprintf(stderr, "Range start missing\n");
-            QCoreApplication::exit(1);
+            exit(EXIT_FAILURE);
         }
         int comma2 = range_arg.indexOf(",", comma1 + 1);
         if (comma2 < 0) {
             fprintf(stderr, "Range length/name missing\n");
-            QCoreApplication::exit(1);
+            exit(EXIT_FAILURE);
         }
         str = range_arg.mid(0, comma1);
         Address start;
@@ -285,7 +285,7 @@ void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *s
         }
         if (!ok1 || !ok2) {
             fprintf(stderr, "Range start/length specification error.\n");
-            QCoreApplication::exit(1);
+            exit(EXIT_FAILURE);
         }
         r.add_dump_range(start, len, range_arg.mid(comma2 + 1));
     }
@@ -314,7 +314,7 @@ void configure_serial_port(QCommandLineParser &p, SerialPort *ser_port) {
         }
         if (!ser_in->open(mode)) {
             fprintf(stderr, "Serial port input file cannot be open for read.\n");
-            QCoreApplication::exit(1);
+            exit(EXIT_FAILURE);
         }
     }
 
@@ -325,7 +325,7 @@ void configure_serial_port(QCommandLineParser &p, SerialPort *ser_port) {
             ser_out = new CharIOHandler(qf, ser_port);
             if (!ser_out->open(QFile::WriteOnly)) {
                 fprintf(stderr, "Serial port output file cannot be open for write.\n");
-                QCoreApplication::exit(1);
+                exit(EXIT_FAILURE);
             }
         }
     }
@@ -353,7 +353,7 @@ void configure_osemu(QCommandLineParser &p, MachineConfig &config, Machine *mach
         std_out = new CharIOHandler(qf, machine);
         if (!std_out->open(QFile::WriteOnly)) {
             fprintf(stderr, "Emulated system standard output file cannot be open for write.\n");
-            QCoreApplication::exit(1);
+            exit(EXIT_FAILURE);
         }
     }
     const static machine::ExceptionCause ecall_variats[] = {machine::EXCAUSE_ECALL_ANY,
@@ -391,7 +391,7 @@ void load_ranges(Machine &machine, const QStringList &ranges) {
         int comma1 = range_arg.indexOf(",");
         if (comma1 < 0) {
             fprintf(stderr, "Range start missing\n");
-            QCoreApplication::exit(1);
+            exit(EXIT_FAILURE);
         }
         str = range_arg.mid(0, comma1);
         Address start;
@@ -404,7 +404,7 @@ void load_ranges(Machine &machine, const QStringList &ranges) {
         }
         if (!ok) {
             fprintf(stderr, "Range start/length specification error.\n");
-            QCoreApplication::exit(1);
+            exit(EXIT_FAILURE);
         }
         ifstream in;
         in.open(range_arg.mid(comma1 + 1).toLocal8Bit().data(), ios::in);
@@ -423,7 +423,7 @@ void load_ranges(Machine &machine, const QStringList &ranges) {
             uint32_t val = stoul(line, &idx, 0);
             if (idx != line.size()) {
                 fprintf(stderr, "cannot parse load range data.\n");
-                QCoreApplication::exit(1);
+                exit(EXIT_FAILURE);
             }
             machine.memory_data_bus_rw()->write_u32(addr, val, ae::INTERNAL);
             addr += 4;
@@ -469,9 +469,6 @@ int main(int argc, char *argv[]) {
     Tracer tr(&machine);
     configure_tracer(p, tr);
 
-    Reporter r(&app, &machine);
-    configure_reporter(p, r, machine.symbol_table());
-
     configure_serial_port(p, machine.serial_port());
 
     configure_osemu(p, config, &machine);
@@ -480,6 +477,9 @@ int main(int argc, char *argv[]) {
         MsgReport msg_report(&app);
         if (!assemble(machine, msg_report, p.positionalArguments()[0])) { exit(EXIT_FAILURE); }
     }
+
+    Reporter r(&app, &machine);
+    configure_reporter(p, r, machine.symbol_table());
 
     load_ranges(machine, p.values("load-range"));
 
