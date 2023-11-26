@@ -45,15 +45,16 @@ enum InstructionFlags : unsigned {
     IMF_FORCE_W_OP = 1L << 15,  /**< Force word (32-bit) operation even for XLEN=64  */
     IMF_ECALL = 1L << 16,       // seems easiest to encode ecall and ebreak as flags, but they might
     IMF_EBREAK = 1L << 17,      // be moved elsewhere in case we run out of InstructionFlag space.
+    IMF_XRET = 1L << 18,        /**< Return from exception, MRET and SRET  */
 
     // Extensions:
     // =============================================================================================
     // RV64/32M
-    IMF_MUL = 1L << 18, /**< Enables multiplication component of ALU. */
+    IMF_MUL = 1L << 19, /**< Enables multiplication component of ALU. */
     // Zicsr
-    IMF_CSR = 1L << 19,        /**< Implies csr read and write */
-    IMF_CSR_TO_ALU = 1L << 20, /**< Instruction modifies the current value */
-    IMF_ALU_RS_ID = 1L << 21,
+    IMF_CSR = 1L << 20,        /**< Implies csr read and write */
+    IMF_CSR_TO_ALU = 1L << 21, /**< Instruction modifies the current value */
+    IMF_ALU_RS_ID = 1L << 22,
     // TODO do we want to add those signals to the visualization?
 };
 

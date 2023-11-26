@@ -129,7 +129,7 @@ bool Core::handle_exception(
     Address next_addr,
     Address jump_branch_pc,
     Address mem_ref_addr) {
-    if (excause == EXCAUSE_UNKNOWN) {
+    if (excause == EXCAUSE_INSN_ILLEGAL) {
         throw SIMULATOR_EXCEPTION(
             UnsupportedInstruction, "Instruction with following encoding is not supported",
             QString::number(inst.data(), 16));
@@ -142,7 +142,7 @@ bool Core::handle_exception(
         control_state->update_exception_cause(excause);
         if (control_state->read_internal(CSR::Id::MTVEC) != 0
             && !get_step_over_exception(excause)) {
-            control_state->set_status_exl(true);
+            control_state->exception_initiate(CSR::PrivilegeLevel::MACHINE, CSR::PrivilegeLevel::MACHINE);
             regs->write_pc(control_state->exception_pc_address());
         }
     }
@@ -224,7 +224,7 @@ DecodeState Core::decode(const FetchInterstage &dt) {
 
     dt.inst.flags_alu_op_mem_ctl(flags, alu_op, mem_ctl);
 
-    if (!(flags & IMF_SUPPORTED)) { excause = EXCAUSE_UNKNOWN; }
+    if (!(flags & IMF_SUPPORTED)) { excause = EXCAUSE_INSN_ILLEGAL; }
 
     RegisterId num_rs = (flags & (IMF_ALU_REQ_RS | IMF_ALU_RS_ID)) ? dt.inst.rs() : 0;
     RegisterId num_rt = (flags & IMF_ALU_REQ_RT) ? dt.inst.rt() : 0;
@@ -246,7 +246,7 @@ DecodeState Core::decode(const FetchInterstage &dt) {
         if (flags & IMF_EBREAK) {
             excause = EXCAUSE_BREAK;
         } else if (flags & IMF_ECALL) {
-            excause = EXCAUSE_SYSCALL;
+            excause = EXCAUSE_ECALL_ANY;
         }
     }
     if (flags & IMF_FORCE_W_OP)
@@ -297,6 +297,7 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .csr = bool(flags & IMF_CSR),
                                 .csr_to_alu = bool(flags & IMF_CSR_TO_ALU),
                                 .csr_write = csr_write,
+                                .xret = bool(flags & IMF_XRET),
                                 .insert_stall_before = bool(flags & IMF_CSR) } };
 }
 
@@ -365,6 +366,7 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
                  .alu_zero = alu_val == 0,
                  .csr = dt.csr,
                  .csr_write = dt.csr_write,
+                 .xret = dt.xret,
              } };
 }
 
@@ -374,6 +376,7 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
     bool memread = dt.memread;
     bool memwrite = dt.memwrite;
     bool regwrite = dt.regwrite;
+    Address computed_next_inst_addr;
 
     enum ExceptionCause excause = dt.excause;
     if (excause == EXCAUSE_NONE) {
@@ -395,6 +398,13 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
         regwrite = false;
     }
 
+    // Conditional branch (BXX = BEQ | BNE...) is executed and should be taken.
+    const bool branch_bxx_taken = dt.branch_bxx && (!dt.branch_val ^ !dt.alu_zero);
+    // Unconditional jump should be taken (JALX = JAL | JALR).
+    const bool branch_jalx = dt.branch_jalr || dt.branch_jal;
+
+    computed_next_inst_addr = compute_next_inst_addr(dt, branch_bxx_taken);
+
     bool csr_written = false;
     if (control_state != nullptr && dt.is_valid && dt.excause == EXCAUSE_NONE) {
         control_state->increment_internal(CSR::Id::MINSTRET, 1);
@@ -402,12 +412,15 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
             control_state->write(dt.csr_address, dt.alu_val);
             csr_written = true;
         }
+        if (dt.xret) {
+            control_state->exception_return(CSR::PrivilegeLevel::MACHINE);
+            if (this->xlen == Xlen::_32)
+                computed_next_inst_addr = Address(control_state->read_internal(CSR::Id::MEPC).as_u32());
+            else
+                computed_next_inst_addr = Address(control_state->read_internal(CSR::Id::MEPC).as_u64());
+            csr_written = true;
+        }
     }
-
-    // Conditional branch (BXX = BEQ | BNE...) is executed and should be taken.
-    const bool branch_bxx_taken = dt.branch_bxx && (!dt.branch_val ^ !dt.alu_zero);
-    // Unconditional jump should be taken (JALX = JAL | JALR).
-    const bool branch_jalx = dt.branch_jalr || dt.branch_jal;
 
     return { MemoryInternalState {
                  .mem_read_val = towrite_val,
@@ -422,13 +435,14 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
                  .branch_outcome = branch_bxx_taken || branch_jalx,
                  .branch_jalx = branch_jalx,
                  .branch_jalr = dt.branch_jalr,
+                 .xret = dt.xret,
              },
              MemoryInterstage {
                  .inst = dt.inst,
                  .inst_addr = dt.inst_addr,
                  .next_inst_addr = dt.next_inst_addr,
                  .predicted_next_inst_addr = dt.predicted_next_inst_addr,
-                 .computed_next_inst_addr = compute_next_inst_addr(dt, branch_bxx_taken),
+                 .computed_next_inst_addr = computed_next_inst_addr,
                  .mem_addr = mem_addr,
                  .towrite_val = [=]() -> RegisterValue {
                      if (dt.csr) return dt.csr_read_val;
@@ -448,7 +462,7 @@ WritebackState Core::writeback(const MemoryInterstage &dt) {
     if (dt.regwrite) { regs->write_gp(dt.num_rd, dt.towrite_val); }
 
     return WritebackState { WritebackInternalState {
-        .inst = dt.inst,
+        .inst = (dt.excause == EXCAUSE_NONE)? dt.inst: Instruction::NOP,
         .inst_addr = dt.inst_addr,
         .value = dt.towrite_val,
         .num_rd = dt.num_rd,

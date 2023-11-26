@@ -25,17 +25,25 @@ using machine::RegisterValue;
 
 static const std::unordered_map<unsigned, QString> EXCEPTION_NAME_TABLE = {
     { machine::EXCAUSE_NONE, QStringLiteral("NONE") },
-    { machine::EXCAUSE_INT, QStringLiteral("INT") },
-    { machine::EXCAUSE_ADDRL, QStringLiteral("ADDRL") },
-    { machine::EXCAUSE_ADDRS, QStringLiteral("ADDRS") },
-    { machine::EXCAUSE_IBUS, QStringLiteral("IBUS") },
-    { machine::EXCAUSE_DBUS, QStringLiteral("DBUS") },
-    { machine::EXCAUSE_SYSCALL, QStringLiteral("SYSCALL") },
+    { machine::EXCAUSE_INSN_FAULT, QStringLiteral("I_FAULT") },
+    { machine::EXCAUSE_INSN_ILLEGAL, QStringLiteral("I_ILLEGAL") },
     { machine::EXCAUSE_BREAK, QStringLiteral("BREAK") },
-    { machine::EXCAUSE_OVERFLOW, QStringLiteral("OVERFLOW") },
-    { machine::EXCAUSE_TRAP, QStringLiteral("TRAP") },
+    { machine::EXCAUSE_LOAD_MISALIGNED, QStringLiteral("L_MALIGN") },
+    { machine::EXCAUSE_LOAD_FAULT, QStringLiteral("L_FAULT") },
+    { machine::EXCAUSE_STORE_MISALIGNED, QStringLiteral("S_MALIGN") },
+    { machine::EXCAUSE_STORE_FAULT, QStringLiteral("S_FAULT") },
+    { machine::EXCAUSE_ECALL_U, QStringLiteral("ECALL_U") },
+    { machine::EXCAUSE_ECALL_S, QStringLiteral("ECALL_S") },
+    { machine::EXCAUSE_RESERVED_10, QStringLiteral("RES_10") },
+    { machine::EXCAUSE_ECALL_M, QStringLiteral("ECALL_M") },
+    { machine::EXCAUSE_INSN_PAGE_FAULT, QStringLiteral("I_PGFAULT") },
+    { machine::EXCAUSE_LOAD_PAGE_FAULT, QStringLiteral("L_PGFAULT") },
+    { machine::EXCAUSE_RESERVED_14, QStringLiteral("RES_14") },
+    { machine::EXCAUSE_STORE_PAGE_FAULT, QStringLiteral("S_PGFAULT") },
+    // Simulator specific exception cause codes, alliases
     { machine::EXCAUSE_HWBREAK, QStringLiteral("HWBREAK") },
-    { machine::EXCAUSE_UNKNOWN, QStringLiteral("UNKNOWN") },
+    { machine::EXCAUSE_ECALL_ANY, QStringLiteral("ECALL") },
+    { machine::EXCAUSE_INT, QStringLiteral("INT") },
 };
 
 static const std::unordered_map<unsigned, QString> STALL_TEXT_TABLE = {

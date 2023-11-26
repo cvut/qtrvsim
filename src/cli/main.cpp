@@ -356,12 +356,13 @@ void configure_osemu(QCommandLineParser &p, MachineConfig &config, Machine *mach
             QCoreApplication::exit(1);
         }
     }
+    const static machine::ExceptionCause ecall_variats[] = {machine::EXCAUSE_ECALL_ANY,
+        machine::EXCAUSE_ECALL_M, machine::EXCAUSE_ECALL_S, machine::EXCAUSE_ECALL_U};
 
     if (config.osemu_enable()) {
         auto *osemu_handler = new osemu::OsSyscallExceptionHandler(
             config.osemu_known_syscall_stop(), config.osemu_unknown_syscall_stop(),
             config.osemu_fs_root());
-        machine->register_exception_handler(machine::EXCAUSE_SYSCALL, osemu_handler);
         if (std_out) {
             machine->connect(
                 osemu_handler, &osemu::OsSyscallExceptionHandler::char_written,
@@ -370,11 +371,16 @@ void configure_osemu(QCommandLineParser &p, MachineConfig &config, Machine *mach
         /*connect(
             osemu_handler, &osemu::OsSyscallExceptionHandler::rx_byte_pool, terminal,
             &TerminalDock::rx_byte_pool);*/
-        machine->set_step_over_exception(machine::EXCAUSE_SYSCALL, true);
-        machine->set_stop_on_exception(machine::EXCAUSE_SYSCALL, false);
+        for (unsigned int i = 0; i < sizeof(ecall_variats)/sizeof(ecall_variats[0]); i++) {
+            machine->register_exception_handler(ecall_variats[i], osemu_handler);
+            machine->set_step_over_exception(ecall_variats[i], true);
+            machine->set_stop_on_exception(ecall_variats[i], false);
+        }
     } else {
-        machine->set_step_over_exception(machine::EXCAUSE_SYSCALL, false);
-        machine->set_stop_on_exception(machine::EXCAUSE_SYSCALL, config.osemu_exception_stop());
+        for (unsigned int i = 0; i < sizeof(ecall_variats)/sizeof(ecall_variats[0]); i++) {
+            machine->set_step_over_exception(ecall_variats[i], false);
+            machine->set_stop_on_exception(ecall_variats[i], config.osemu_exception_stop());
+        }
     }
 }
 
