@@ -3,7 +3,7 @@
 //
 //  template.S       - example file
 //
-//  (C) 2021 by Pavel Pisa
+//  (C) 2021-2023 by Pavel Pisa
 //      e-mail:   pisa@cmp.felk.cvut.cz
 //      homepage: http://cmp.felk.cvut.cz/~pisa
 //      work:     http://www.pikron.com/
@@ -40,7 +40,6 @@
 .equ SERP_TX_DATA_REG,      0xffffc00c // Write word to send 8 LSB bits to terminal
 .equ SERP_TX_DATA_REG_o,        0x000c // Offset of TX_DATA_REG
 
-
 // Memory mapped peripheral for dial knobs input,
 // LED and RGB LEDs output designed to match
 // MZ_APO education Zynq based board developed
@@ -66,11 +65,15 @@
 .equ LCD_FB_START,          0xffe00000
 .equ LCD_FB_END,            0xffe4afff
 
+// RISC-V ACLINT MTIMER memory mapped peripheral
+.equ ACLINT_MTIMECMP,       0xfffd4000 // core 0 compare value
+.equ ACLINT_MTIME,          0xfffdbff8 // timer base 10 MHz
+
 // Mapping of interrupts
-// Irq number   Cause/Status Bit   Source
-//  2 / HW0      10                Serial port ready to accept character to Tx
-//  3 / HW1      11                There is received character ready to be read
-//  7 / HW5      15                Counter reached value in Compare register
+// Irq number   mcause Bit   Source
+//   7           7         MTIME reached value of MTIMECMP
+//  16          16         There is received character ready to be read
+//  17          17         Serial port ready to accept character to Tx
 
 // Start address after reset
 .org 0x00000200
