@@ -43,6 +43,7 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
     setup_serial_port();
     setup_perip_spi_led();
     setup_lcd_display();
+    setup_aclint_mtime();
 
     cch_program = new Cache(
         data_bus, &machine_config.cache_program(),
@@ -101,6 +102,17 @@ void Machine::setup_serial_port() {
     memory_bus_insert_range(ser_port, 0xffff0000_addr, 0xffff003f_addr, false);
     connect(
         ser_port, &SerialPort::signal_interrupt, this,
+        &Machine::set_interrupt_signal);
+}
+
+void Machine::setup_aclint_mtime() {
+    aclint_mtimer = new aclint::AclintMtimer(machine_config.get_simulated_endian());
+    memory_bus_insert_range(aclint_mtimer,
+                            0xfffd0000_addr + aclint::CLINT_MTIMER_OFFSET,
+                            0xfffd0000_addr + aclint::CLINT_MTIMER_OFFSET + aclint::CLINT_MTIMER_SIZE - 1,
+                            true);
+    connect(
+        aclint_mtimer, &aclint::AclintMtimer::signal_interrupt, this,
         &Machine::set_interrupt_signal);
 }
 
