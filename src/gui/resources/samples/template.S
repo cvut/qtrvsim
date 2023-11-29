@@ -65,12 +65,14 @@
 .equ LCD_FB_START,          0xffe00000
 .equ LCD_FB_END,            0xffe4afff
 
-// RISC-V ACLINT MTIMER memory mapped peripheral
+// RISC-V ACLINT MSWI and MTIMER memory mapped peripherals
+.equ ACLINT_MSWI,           0xfffd0000 // core 0 SW interrupt request
 .equ ACLINT_MTIMECMP,       0xfffd4000 // core 0 compare value
 .equ ACLINT_MTIME,          0xfffdbff8 // timer base 10 MHz
 
 // Mapping of interrupts
 // Irq number   mcause Bit   Source
+//   3           3         ACLINT MSWI
 //   7           7         MTIME reached value of MTIMECMP
 //  16          16         There is received character ready to be read
 //  17          17         Serial port ready to accept character to Tx

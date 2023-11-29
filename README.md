@@ -245,7 +245,7 @@ even that is not an option then default directory when the emulator has been sta
 ### Peripherals
 
 <details>
-  <summary>Emuated LCD, knobs, buttons, serial port...</summary>
+  <summary>Emuated LCD, knobs, buttons, serial port, timer...</summary>
 
 The simulator implements emulation of two peripherals for now.
 
@@ -310,7 +310,19 @@ Limitation: actual concept of memory view updates and access does not allow to r
 I/O memory content. It is possible to write into framebuffer memory when cached (from CPU perspective) access to memory
 is selected.
 
-</details>  
+The basic implementation of RISC-V Advanced Core Local Interruptor
+is implemented with basic support for
+
+- Machine-level Timer Device (MTIMER)
+- Machine-level Software Interrupt Device (MSWI)
+
+```
+#define ACLINT_MSWI        0xfffd0000 // core 0 SW interrupt request
+#define ACLINT_MTIMECMP    0xfffd4000 // core 0 compare value
+#define ACLINT_MTIME       0xfffdbff8 // timer base 10 MHz
+```
+
+</details>
 
 ### Interrupts and Control and Status Registers
 
@@ -323,9 +335,10 @@ List of interrupt sources:
 
 | Irq number | Cause/Status Bit | Source                                       |
 |-----------:|-----------------:|:---------------------------------------------|
+| 3          | 3                | Machine software interrupt request           |
 | 7          | 7                | Machine timer interrupt                      |
-| 16 / HW0   | 16               | There is received character ready to be read |
-| 17 / HW1   | 17               | Serial port ready to accept character to Tx  |
+| 16         | 16               | There is received character ready to be read |
+| 17         | 17               | Serial port ready to accept character to Tx  |
 
 Following Control Status registers are recognized
 
