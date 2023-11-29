@@ -573,21 +573,17 @@ void MainWindow::message_selected(
     (void)hint;
 
     if (file.isEmpty()) { return; }
-    auto editor = (file == "Unknown") ? editor_tabs->get_current_editor()
-                                      : editor_tabs->find_tab_by_filename(file)->get_editor();
-    if (editor == nullptr) { return; }
-    editor->setCursorTo(line, column);
-    editor->setFocus();
+    central_widget_tabs->setCurrentWidget(editor_tabs.data());
+    editor_tabs->set_cursor_to(file, line, column);
 
     // Highlight the line
+    auto editor = editor_tabs->get_current_editor();
     QTextEdit::ExtraSelection selection;
     selection.format.setBackground(QColor(Qt::red).lighter(160));
     selection.format.setProperty(QTextFormat::FullWidthSelection, true);
     selection.cursor = editor->textCursor();
     selection.cursor.clearSelection();
     editor->setExtraSelections({ selection });
-
-    if (editor_tabs != nullptr) { editor_tabs->setCurrentWidget(editor); }
 }
 
 bool SimpleAsmWithEditorCheck::process_file(const QString &filename, QString *error_ptr) {

@@ -109,6 +109,7 @@ void SrcEditor::setCursorTo(int ln, int col) {
     QTextCursor cursor(document()->findBlockByNumber(ln - 1));
     cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor, col - 1);
     setTextCursor(cursor);
+    setFocus();
 }
 
 bool SrcEditor::isModified() const {

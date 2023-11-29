@@ -308,3 +308,14 @@ void EditorDock::confirm_close_tab_dialog(int index) {
         Qt::QueuedConnection);
     msgbox->open();
 }
+
+void EditorDock::set_cursor_to(const QString &filename, int line, int column) {
+    auto tab = (filename == "Unknown") ? get_tab(currentIndex()) : find_tab_by_filename(filename);
+    if (tab == nullptr) {
+        WARN(
+            "Cannot find tab for file '%s'. Unable to set cursor.", filename.toStdString().c_str());
+        return;
+    }
+    setCurrentWidget(tab);
+    tab->get_editor()->setCursorTo(line, column);
+}
