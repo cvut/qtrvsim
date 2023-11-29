@@ -101,12 +101,12 @@ bool SrcEditor::saveFile(QString filename) {
 }
 
 void SrcEditor::setCursorToLine(int ln) {
-    QTextCursor cursor(document()->findBlockByLineNumber(ln - 1));
+    QTextCursor cursor(document()->findBlockByNumber(ln - 1));
     setTextCursor(cursor);
 }
 
 void SrcEditor::setCursorTo(int ln, int col) {
-    QTextCursor cursor(document()->findBlockByLineNumber(ln - 1));
+    QTextCursor cursor(document()->findBlockByNumber(ln - 1));
     cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor, col - 1);
     setTextCursor(cursor);
 }
