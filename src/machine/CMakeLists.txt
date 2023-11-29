@@ -16,6 +16,7 @@ set(machine_SOURCES
 		memory/backend/peripspiled.cpp
 		memory/backend/serialport.cpp
 		memory/backend/aclintmtimer.cpp
+		memory/backend/aclintmswi.cpp
 		memory/cache/cache.cpp
 		memory/cache/cache_policy.cpp
 		memory/frontend_memory.cpp
@@ -44,6 +45,7 @@ set(machine_HEADERS
 		memory/backend/peripspiled.h
 		memory/backend/serialport.h
 		memory/backend/aclintmtimer.h
+		memory/backend/aclintmswi.h
 		memory/cache/cache.h
 		memory/cache/cache_policy.h
 		memory/cache/cache_types.h

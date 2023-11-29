@@ -8,6 +8,7 @@
 #include "memory/backend/peripspiled.h"
 #include "memory/backend/serialport.h"
 #include "memory/backend/aclintmtimer.h"
+#include "memory/backend/aclintmswi.h"
 #include "memory/cache/cache.h"
 #include "memory/memory_bus.h"
 #include "predictor.h"
@@ -116,6 +117,7 @@ private:
     PeripSpiLed *perip_spi_led = nullptr;
     LcdDisplay *perip_lcd_display = nullptr;
     aclint::AclintMtimer *aclint_mtimer = nullptr;
+    aclint::AclintMswi *aclint_mswi = nullptr;
     Cache *cch_program = nullptr;
     Cache *cch_data = nullptr;
     CSR::ControlState *controlst = nullptr;
@@ -133,6 +135,7 @@ private:
     void setup_perip_spi_led();
     void setup_lcd_display();
     void setup_aclint_mtime();
+    void setup_aclint_mswi();
 };
 
 } // namespace machine
