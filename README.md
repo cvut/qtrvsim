@@ -29,7 +29,7 @@ at [Czech Technical University](http://www.cvut.cz/).
   - [Interrupts and Control and Status Registers](#interrupts-and-control-and-status-registers)
   - [System Calls Support](#system-calls-support)
 - [Limitations of the Implementation](#limitations-of-the-implementation)
-  - [QtMips original limitations](#qtmips-original-limitations)
+  - [QtRvSim limitations](#qtrvsim-limitations)
   - [List of Currently Supported Instructions](#list-of-currently-supported-instructions)
 - [Links to Resources and Similar Projects](#links-to-resources-and-similar-projects)
 - [Copyright](#copyright)
@@ -122,7 +122,7 @@ nix-env -if .
 Tests are managed by CTest (part of CMake). To build and run all tests, use this commands:
 
 ```bash
-cmake -DCMAKE_BUILD_TYPE=Release /path/to/qtRVSim
+cmake -DCMAKE_BUILD_TYPE=Release /path/to/QtRVSim
 make
 ctest
 ```
@@ -306,10 +306,6 @@ at `LCD_FB_START` address. The display size is 480 x 320 pixel. Pixel format RGB
 #define LCD_FB_END         0xffe4afff
 ```
 
-Limitation: actual concept of memory view updates and access does not allow to reliably read peripheral registers, and
-I/O memory content. It is possible to write into framebuffer memory when cached (from CPU perspective) access to memory
-is selected.
-
 The basic implementation of RISC-V Advanced Core Local Interruptor
 is implemented with basic support for
 
@@ -322,6 +318,8 @@ is implemented with basic support for
 #define ACLINT_MTIME       0xfffdbff8 // timer base 10 MHz
 ```
 
+More information about ACLINT can be found in [RISC-V Advanced Core Local Interruptor Specification](https://github.com/riscv/riscv-aclint/blob/main/riscv-aclint.adoc).
+
 </details>
 
 ### Interrupts and Control and Status Registers
@@ -329,11 +327,9 @@ is implemented with basic support for
 <details>
   <summary>Implemented CSR registers and their usage</summary>
 
-(NOTICE: Replacement of MIPS Coprocessor0 by RISC-V control status registers is work in progress)
-
 List of interrupt sources:
 
-| Irq number | Cause/Status Bit | Source                                       |
+| Irq number | mie / mip Bit    | Source                                       |
 |-----------:|-----------------:|:---------------------------------------------|
 | 3          | 3                | Machine software interrupt request           |
 | 7          | 7                | Machine timer interrupt                      |
@@ -367,7 +363,7 @@ Sequence to enable serial port receive interrupt:
 
 Decide location of interrupt service routine the first. The address of the common trap handler is defined by `mtvec` register and then PC is set to this address when exception or interrupt is accepted.
 
-Enable bit 16 in the machine Interrupt-Enable register (`mie`). Ensure that bit 3 (`mstatus.mie` - machine global interrupt-enable) of Machine Status register is set is set to one.
+Enable bit 16 in the machine Interrupt-Enable register (`mie`). Ensure that bit 3 (`mstatus.mie` - machine global interrupt-enable) of Machine Status register is set to one.
 
 Enable interrupt in the receiver status register (bit 1 of `SERP_RX_ST_REG`).
 
@@ -442,7 +438,7 @@ implementation. Whole address space up to 0xffff0000 is backuped by automaticall
 #### int [ftruncate](http://man7.org/linux/man-pages/man2/ftruncate.2.html)(int fd, off_t length) __NR_truncate (46)
 
 Set length of the open file specified by `fd` to the new `length`. The `length`
-argument is 64-bit even on 32-bit system and for big-endian MIPS it is apssed as higher part and the lower part in the
+argument is 64-bit even on 32-bit system and it is passed as the lower part and the higher part in the
 second and third argument.
 
 #### ssize_t [readv](http://man7.org/linux/man-pages/man2/readv.2.html)(int fd, const struct iovec *iov, int iovcnt) __NR_Linux (65)
@@ -460,17 +456,19 @@ pairs of base address, length pairs stored in memory at address pass in `iov`.
 ## Limitations of the Implementation
 
 - See list of currently supported instructions.
-- Coprocessor0 has to be ported to RISC-V status registers.
 
-### QtMips original limitations
+### QtRvSim limitations
 
-* Only very minimal support for privileged instruction is implemented for now. Only RDHWR, SYNCI, CACHE and some
-  coprocessor 0 registers implemented. TLB and virtual memory and complete exception model are not implemented.
-* Coprocessors (so no floating point unit and only limited coprocessor 0)
+* Only very minimal support for privileged instruction is implemented for now (mret).
+* Only machine mode and minimal subset of machne CSR is implemented.
+* TLB and virtual memory are not implemented.
+* No floating point support
 * Memory access stall (stalling execution because of cache miss would be pretty annoying for users so difference between
   cache and memory is just in collected statistics)
-* Only limited support for interrupts and exceptions. When `syscall` or `break`
-  instruction is recognized, emulation stops. Single step proceed after instruction.
+* Only limited support for interrupts and exceptions. When `ebreak`
+  instruction is recognized, small subset of the Linux kernel system calls
+  can be emulated or simulator can be configured to continue by trap handler
+  on `mtvec` address.
 
 ### List of Currently Supported Instructions
 
@@ -482,7 +480,7 @@ pairs of base address, length pairs stored in memory at address pass in `iov`.
   - **OP-IMM**: `addi, sll, slti, sltiu, xori, srli, srai, ori, andi, auipc, lui`
   - **BRANCH**: `beq, bne, btl, bge, bltu, bgtu`
   - **JUMP**: `jal, jalr`
-  - **SYSTEM**: `ecall, ebreak, csrrw, csrrs, csrrc, csrrwi, csrrsi, csrrci`
+  - **SYSTEM**: `ecall, mret, ebreak, csrrw, csrrs, csrrc, csrrwi, csrrsi, csrrci`
 - **RV64G**:
   - **LOAD/STORE**: `lwu, ld, sd`
   - **OP-32**: `addw, subw, sllw, srlw, sraw, or, and`

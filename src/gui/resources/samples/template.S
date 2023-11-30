@@ -71,11 +71,12 @@
 .equ ACLINT_MTIME,          0xfffdbff8 // timer base 10 MHz
 
 // Mapping of interrupts
-// Irq number   mcause Bit   Source
-//   3           3         ACLINT MSWI
-//   7           7         MTIME reached value of MTIMECMP
-//  16          16         There is received character ready to be read
-//  17          17         Serial port ready to accept character to Tx
+// mcause      mie / mip
+// irq number    bit       Source
+//   3            3        ACLINT MSWI
+//   7            7        MTIME reached value of MTIMECMP
+//  16           16        There is received character ready to be read
+//  17           17        Serial port ready to accept character to Tx
 
 // Start address after reset
 .org 0x00000200
