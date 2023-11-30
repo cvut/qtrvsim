@@ -39,50 +39,50 @@ void ExtProcess::process_output() {
     int ln = 0;
     int col = 0;
     messagetype::Type type = messagetype::MSG_INFO;
-    if (!canReadLine()) {
-        return;
-    }
-    QString line = QString::fromLocal8Bit(readLine());
-    while (line.count() > 0) {
-        if (line.at(line.count() - 1) != '\n'
-            && line.at(line.count() - 1) != '\r') {
-            break;
+
+    while (canReadLine()) {
+        QString line = QString::fromLocal8Bit(readLine());
+        while (line.count() > 0) {
+            if (line.at(line.count() - 1) != '\n'
+                && line.at(line.count() - 1) != '\r') {
+                break;
+            }
+            line.truncate(line.count() - 1);
         }
-        line.truncate(line.count() - 1);
-    }
 
-    int pos = line.indexOf(':');
-    if (pos >= 0) {
-        QFileInfo fi(QDir(workingDirectory()), line.mid(0, pos));
-        line = line.mid(pos + 1);
-        file = fi.absoluteFilePath();
-    }
+        int pos = line.indexOf(':');
+        if (pos >= 0) {
+            QFileInfo fi(QDir(workingDirectory()), line.mid(0, pos));
+            line = line.mid(pos + 1);
+            file = fi.absoluteFilePath();
+        }
 
-    for (pos = 0; line.count() > pos && line.at(pos).isDigit(); pos++) {}
+        for (pos = 0; line.count() > pos && line.at(pos).isDigit(); pos++) {}
 
-    if ((pos < line.count()) && (line.at(pos) == ':')) {
-        ln = line.mid(0, pos).toInt();
-        line = line.mid(pos + 1);
-    }
+        if ((pos < line.count()) && (line.at(pos) == ':')) {
+            ln = line.mid(0, pos).toInt();
+            line = line.mid(pos + 1);
+        }
 
-    for (pos = 0; line.count() > pos && line.at(pos).isDigit(); pos++) {}
+        for (pos = 0; line.count() > pos && line.at(pos).isDigit(); pos++) {}
 
-    if ((pos < line.count()) && (line.at(pos) == ':')) {
-        col = line.mid(0, pos).toInt();
-        line = line.mid(pos + 1);
-    }
+        if ((pos < line.count()) && (line.at(pos) == ':')) {
+            col = line.mid(0, pos).toInt();
+            line = line.mid(pos + 1);
+        }
 
-    if (line.startsWith(' ')) {
-        line = line.mid(1);
-    }
-    if (line.startsWith('\t')) {
-        line = line.mid(1);
-    }
-    if (line.startsWith("error:", Qt::CaseInsensitive)) {
-        type = messagetype::MSG_ERROR;
-    } else if (line.startsWith("warning:", Qt::CaseInsensitive)) {
-        type = messagetype::MSG_WARNING;
-    }
+        if (line.startsWith(' ')) {
+            line = line.mid(1);
+        }
+        if (line.startsWith('\t')) {
+            line = line.mid(1);
+        }
+        if (line.startsWith("error:", Qt::CaseInsensitive)) {
+            type = messagetype::MSG_ERROR;
+        } else if (line.startsWith("warning:", Qt::CaseInsensitive)) {
+            type = messagetype::MSG_WARNING;
+        }
 
-    report_message(type, file, ln, col, line, "");
+        report_message(type, file, ln, col, line, "");
+    }
 }
