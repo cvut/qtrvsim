@@ -1138,7 +1138,10 @@ int OsSyscallExceptionHandler::do_sys_ftruncate(
 
     result = 0;
     int fd = a1;
-    uint64_t length = ((uint64_t)a2 << 32) | a3;
+    uint64_t length = core->get_xlen_from_reg(a2);
+    if (core->get_xlen() == Xlen::_32) {
+        length |= core->get_xlen_from_reg(a3) << 32;
+    }
 
     printf("sys_ftruncate fd %d\n", fd);
 
