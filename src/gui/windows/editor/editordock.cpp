@@ -87,6 +87,14 @@ EditorTab *EditorDock::open_file_if_not_open(const QString &filename, bool save_
 
 EditorTab *EditorDock::create_empty_tab() {
     auto tab = new EditorTab(line_numbers_visible, this);
+    while (true) {
+        auto filename = QString("Unknown %1").arg(unknown_editor_counter++);
+        if (!find_tab_id_by_filename(filename).has_value()) {
+            tab->get_editor()->setFileName(filename);
+            tab->get_editor()->setSaveAsRequired(true);
+            break;
+        }
+    }
     addTab(tab, tab->title());
     setCurrentWidget(tab);
     return tab;

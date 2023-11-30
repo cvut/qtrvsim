@@ -59,6 +59,7 @@ private:
 private:
     QSharedPointer<QSettings> settings;
     bool line_numbers_visible = true;
+    size_t unknown_editor_counter = 1;
 };
 
 #endif // EDITORDOCK_H
