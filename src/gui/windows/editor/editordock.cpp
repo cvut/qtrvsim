@@ -87,6 +87,14 @@ EditorTab *EditorDock::open_file_if_not_open(const QString &filename, bool save_
 
 EditorTab *EditorDock::create_empty_tab() {
     auto tab = new EditorTab(line_numbers_visible, this);
+    while (true) {
+        auto filename = QString("Unknown %1").arg(unknown_editor_counter++);
+        if (!find_tab_id_by_filename(filename).has_value()) {
+            tab->get_editor()->setFileName(filename);
+            tab->get_editor()->setSaveAsRequired(true);
+            break;
+        }
+    }
     addTab(tab, tab->title());
     setCurrentWidget(tab);
     return tab;
@@ -307,4 +315,15 @@ void EditorDock::confirm_close_tab_dialog(int index) {
         },
         Qt::QueuedConnection);
     msgbox->open();
+}
+
+void EditorDock::set_cursor_to(const QString &filename, int line, int column) {
+    auto tab = (filename == "Unknown") ? get_tab(currentIndex()) : find_tab_by_filename(filename);
+    if (tab == nullptr) {
+        WARN(
+            "Cannot find tab for file '%s'. Unable to set cursor.", filename.toStdString().c_str());
+        return;
+    }
+    setCurrentWidget(tab);
+    tab->get_editor()->setCursorTo(line, column);
 }
