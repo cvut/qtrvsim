@@ -157,6 +157,7 @@ namespace machine { namespace CSR {
         Q_UNUSED(act_privlev)
 
         write_field(Field::mstatus::MIE, read_field(Field::mstatus::MPIE).as_u32());
+        write_field(Field::mstatus::MPIE, (uint64_t)1);
 
         restored_privlev = static_cast<PrivilegeLevel>(read_field(Field::mstatus::MPP).as_u32());
         write_field(Field::mstatus::MPP, (uint64_t)0);

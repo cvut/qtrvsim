@@ -246,7 +246,8 @@ DecodeState Core::decode(const FetchInterstage &dt) {
         if (flags & IMF_EBREAK) {
             excause = EXCAUSE_BREAK;
         } else if (flags & IMF_ECALL) {
-            excause = EXCAUSE_ECALL_ANY;
+            excause = EXCAUSE_ECALL_M;
+            // TODO: EXCAUSE_ECALL_S, EXCAUSE_ECALL_U
         }
     }
     if (flags & IMF_FORCE_W_OP)
