@@ -613,7 +613,11 @@ QString Instruction::to_str(Address inst_addr) const {
             }
             case 'E': {
                 if (symbolic_registers_enabled) {
-                    res += CSR::REGISTERS[CSR::REGISTER_MAP.at(CSR::Address(field))].name;
+                    try {
+                        res += CSR::REGISTERS[CSR::REGISTER_MAP.at(CSR::Address(field))].name;
+                    } catch (std::out_of_range &e) {
+                        res.append(str::asHex(field));
+                    }
                 } else {
                     res.append(str::asHex(field));
                 }
