@@ -158,6 +158,10 @@ namespace machine { namespace CSR {
             const RegisterDesc &desc,
             RegisterValue &reg,
             RegisterValue val);
+        void mcycle_wlrl_write_handler(
+            const RegisterDesc &desc,
+            RegisterValue &reg,
+            RegisterValue val);
     };
 
     struct RegisterDesc {
@@ -202,19 +206,22 @@ namespace machine { namespace CSR {
                         0, 0x807FFFEA, &ControlState::mstatus_wlrl_write_handler,
                         {Field::mstatus::fields, Field::mstatus::count} },
         [Id::MISA] = { "misa", 0x301_csr, "Machine ISA Register.",
-                       (1 << 30) | (1 << ('I'-'A')) | (1 << ('M'-'A')), 0},
-        [Id::MIE] = { "mie", 0x304_csr, "Machine interrupt-enable register." },
-        [Id::MTVEC] = { "mtvec", 0x305_csr, "Machine trap-handler base address." },
+                        (1 << 30) | (1 << ('I'-'A')) | (1 << ('M'-'A')), 0},
+        [Id::MIE] = { "mie", 0x304_csr, "Machine interrupt-enable register.",
+                        0, 0x00ff0AAA},
+        [Id::MTVEC] = { "mtvec", 0x305_csr, "Machine trap-handler base address."},
         [Id::MSCRATCH] = { "mscratch", 0x340_csr, "Scratch register for machine trap handlers." },
         [Id::MEPC] = { "mepc", 0x341_csr, "Machine exception program counter." },
         [Id::MCAUSE] = { "mcause", 0x342_csr, "Machine trap cause." },
         [Id::MTVAL] = { "mtval", 0x343_csr, "Machine bad address or instruction." },
-        [Id::MIP] = { "mip", 0x344_csr, "Machine interrupt pending." },
-        [Id::MTINST] = { "mtinsr", 0x34A_csr, "Machine trap instruction (transformed)." },
+        [Id::MIP] = { "mip", 0x344_csr, "Machine interrupt pending.",
+                        0, 0x00000222},
+        [Id::MTINST] = { "mtinst", 0x34A_csr, "Machine trap instruction (transformed)." },
         [Id::MTVAL2] = { "mtval2", 0x34B_csr, "Machine bad guest physical address." },
         // Machine Counter/Timers
-        [Id::MCYCLE] = { "mcycle", 0xB00_csr, "Machine cycle counter." },
-        [Id::MINSTRET] = { "minstret", 0xB02_csr, "Machine instructions-retired counter." },
+        [Id::MCYCLE] = { "mcycle", 0xB00_csr, "Machine cycle counter.",
+                        0, (register_storage_t)0xffffffffffffffff, &ControlState::mcycle_wlrl_write_handler},
+        [Id::MINSTRET] = { "minstret", 0xB02_csr, "Machine instructions-retired counter."},
     } };
 
     /** Lookup from CSR address (value used in instruction) to internal id (index in continuous

@@ -86,6 +86,16 @@ namespace machine { namespace CSR {
         default_wlrl_write_handler(desc, reg, val);
     }
 
+    void ControlState::mcycle_wlrl_write_handler(
+        const RegisterDesc &desc,
+        RegisterValue &reg,
+        RegisterValue val) {
+        Q_UNUSED(desc)
+        reg = val;
+        register_data[Id::CYCLE] = val;
+        write_signal(Id::CYCLE, register_data[Id::CYCLE]);
+    }
+
     bool ControlState::operator==(const ControlState &other) const {
         return register_data == other.register_data;
     }
