@@ -57,7 +57,7 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         machine_config.memory_access_time_write(),
         machine_config.memory_access_time_burst());
 
-    controlst = new CSR::ControlState();
+    controlst = new CSR::ControlState(machine_config.get_simulated_xlen());
     predictor = new FalsePredictor();
 
     if (machine_config.pipelined()) {

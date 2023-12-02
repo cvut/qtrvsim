@@ -17,6 +17,8 @@ namespace machine { namespace CSR {
     /** CSR register names mapping the registers to continuous locations in internal buffer */
     struct Id {
         enum IdxType{
+            // Unprivileged Counter/Timers
+            CYCLE,
             // Machine Information Registers
             MVENDORID,
             MARCHID,
@@ -25,7 +27,7 @@ namespace machine { namespace CSR {
             //            MCONFIGPTR,
             // Machine Trap Setup
             MSTATUS,
-            //            MISA,
+            MISA,
             //            MEDELEG,
             //            MIDELET,
             MIE,
@@ -79,7 +81,7 @@ namespace machine { namespace CSR {
         Q_OBJECT
 
     public:
-        ControlState();
+        ControlState(Xlen xlen = Xlen::_32);
         ControlState(const ControlState &);
 
         /** Read CSR register with ISA specified address. */
@@ -189,13 +191,18 @@ namespace machine { namespace CSR {
 
     /** Definitions of supported CSR registers */
     inline constexpr std::array<RegisterDesc, Id::_COUNT> REGISTERS { {
-        [Id::MVENDORID] = { "mvendorid", 0xF11_csr, "Vendor ID." },
-        [Id::MARCHID] = { "marchid", 0xF12_csr, "Architecture ID." },
-        [Id::MIMPID] = { "mimpid", 0xF13_csr, "Implementation ID." },
+        // Unprivileged Counter/Timers
+        [Id::CYCLE] = { "cycle", 0xC00_csr, "Cycle counter for RDCYCLE instruction.", 0, 0},
+        // Priviledged Machine Mode Registers
+        [Id::MVENDORID] = { "mvendorid", 0xF11_csr, "Vendor ID.", 0, 0},
+        [Id::MARCHID] = { "marchid", 0xF12_csr, "Architecture ID.", 0, 0},
+        [Id::MIMPID] = { "mimpid", 0xF13_csr, "Implementation ID.", 0, 0},
         [Id::MHARTID] = { "mhardid", 0xF14_csr, "Hardware thread ID." },
         [Id::MSTATUS] = { "mstatus", 0x300_csr, "Machine status register.",
-                          0, 0x807FFFEA, &ControlState::mstatus_wlrl_write_handler,
-                          {Field::mstatus::fields, Field::mstatus::count} },
+                        0, 0x807FFFEA, &ControlState::mstatus_wlrl_write_handler,
+                        {Field::mstatus::fields, Field::mstatus::count} },
+        [Id::MISA] = { "misa", 0x301_csr, "Machine ISA Register.",
+                       (1 << 30) | (1 << ('I'-'A')) | (1 << ('M'-'A')), 0},
         [Id::MIE] = { "mie", 0x304_csr, "Machine interrupt-enable register." },
         [Id::MTVEC] = { "mtvec", 0x305_csr, "Machine trap-handler base address." },
         [Id::MSCRATCH] = { "mscratch", 0x340_csr, "Scratch register for machine trap handlers." },

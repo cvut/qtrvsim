@@ -198,7 +198,10 @@ FetchState Core::fetch(PCInterstage pc, bool skip_break) {
 
     if (!skip_break && hw_breaks.contains(inst_addr)) { excause = EXCAUSE_HWBREAK; }
 
-    if (control_state != nullptr) { control_state->increment_internal(CSR::Id::MCYCLE, 1); }
+    if (control_state != nullptr) {
+        control_state->increment_internal(CSR::Id::MCYCLE, 1);
+        control_state->write_internal(CSR::Id::CYCLE, control_state->read_internal(CSR::Id::MCYCLE));
+    }
 
     if (control_state != nullptr && excause == EXCAUSE_NONE) {
         if (control_state->core_interrupt_request()) { excause = EXCAUSE_INT; }

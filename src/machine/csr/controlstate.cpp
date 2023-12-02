@@ -11,7 +11,7 @@ LOG_CATEGORY("machine.csr.control_state");
 
 namespace machine { namespace CSR {
 
-    ControlState::ControlState() {
+    ControlState::ControlState(Xlen xlen) : xlen(xlen) {
         reset();
     }
 
@@ -23,17 +23,19 @@ namespace machine { namespace CSR {
         std::transform(
             REGISTERS.begin(), REGISTERS.end(), register_data.begin(),
             [](const RegisterDesc &desc) { return desc.initial_value; });
+
+        uint64_t misa = read_internal(CSR::Id::MISA).as_u64();
+        misa &= 0x3fffffff;
+        if (xlen == Xlen::_32) {
+            misa |= (uint64_t)1 << 30;
+        } else if (xlen == Xlen::_64) {
+            misa |= (uint64_t)2 << 62;
+        }
+        register_data[CSR::Id::MISA] = misa;
     }
 
     size_t ControlState::get_register_internal_id(Address address) {
-        if (address.get_privilege_level() != PrivilegeLevel::MACHINE) {
-            throw SIMULATOR_EXCEPTION(
-                UnsupportedInstruction,
-                QString("Only machine level CSR registers are currently implemented. Accessed "
-                        "level %1.")
-                    .arg(static_cast<unsigned>(address.get_privilege_level())),
-                "");
-        }
+        // if (address.get_privilege_level() != PrivilegeLevel::MACHINE)
 
         try {
             return CSR::REGISTER_MAP.at(address);
