@@ -313,9 +313,10 @@ is implemented with basic support for
 - Machine-level Software Interrupt Device (MSWI)
 
 ```
-#define ACLINT_MSWI        0xfffd0000 // core 0 SW interrupt request
+#define ACLINT_MSWI        0xfffd0000 // core 0 machine SW interrupt request
 #define ACLINT_MTIMECMP    0xfffd4000 // core 0 compare value
 #define ACLINT_MTIME       0xfffdbff8 // timer base 10 MHz
+#define ACLINT_SSWI        0xfffd0000 // core 0 system SW interrupt request
 ```
 
 More information about ACLINT can be found in [RISC-V Advanced Core Local Interruptor Specification](https://github.com/riscv/riscv-aclint/blob/main/riscv-aclint.adoc).

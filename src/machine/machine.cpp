@@ -45,6 +45,7 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
     setup_lcd_display();
     setup_aclint_mtime();
     setup_aclint_mswi();
+    setup_aclint_sswi();
 
     cch_program = new Cache(
         data_bus, &machine_config.cache_program(),
@@ -125,6 +126,17 @@ void Machine::setup_aclint_mswi() {
                             true);
     connect(
         aclint_mswi, &aclint::AclintMswi::signal_interrupt, this,
+        &Machine::set_interrupt_signal);
+}
+
+void Machine::setup_aclint_sswi() {
+    aclint_sswi = new aclint::AclintSswi(machine_config.get_simulated_endian());
+    memory_bus_insert_range(aclint_sswi,
+                            0xfffd0000_addr + aclint::CLINT_SSWI_OFFSET,
+                            0xfffd0000_addr + aclint::CLINT_SSWI_OFFSET + aclint::CLINT_SSWI_SIZE - 1,
+                            true);
+    connect(
+        aclint_sswi, &aclint::AclintSswi::signal_interrupt, this,
         &Machine::set_interrupt_signal);
 }
 

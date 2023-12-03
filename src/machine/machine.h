@@ -9,6 +9,7 @@
 #include "memory/backend/serialport.h"
 #include "memory/backend/aclintmtimer.h"
 #include "memory/backend/aclintmswi.h"
+#include "memory/backend/aclintsswi.h"
 #include "memory/cache/cache.h"
 #include "memory/memory_bus.h"
 #include "predictor.h"
@@ -118,6 +119,7 @@ private:
     LcdDisplay *perip_lcd_display = nullptr;
     aclint::AclintMtimer *aclint_mtimer = nullptr;
     aclint::AclintMswi *aclint_mswi = nullptr;
+    aclint::AclintSswi *aclint_sswi = nullptr;
     Cache *cch_program = nullptr;
     Cache *cch_data = nullptr;
     CSR::ControlState *controlst = nullptr;
@@ -136,6 +138,7 @@ private:
     void setup_lcd_display();
     void setup_aclint_mtime();
     void setup_aclint_mswi();
+    void setup_aclint_sswi();
 };
 
 } // namespace machine
