@@ -275,6 +275,23 @@
             </property>
            </widget>
           </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_level2">
+            <property name="text">
+             <string>L2 Access:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="mem_time_level2">
+            <property name="minimum">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <number>999999999</number>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -301,6 +318,11 @@
      <widget class="QWidget" name="tab_cache_data">
       <attribute name="title">
        <string>Data cache</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tab_cache_level2">
+      <attribute name="title">
+       <string>L2 cache</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="tab_os_emulation">

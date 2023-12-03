@@ -71,6 +71,10 @@ void create_parser(QCommandLineParser &p) {
                   "Instruction cache. Format policy,sets,words_in_blocks,associativity "
                   "where policy is random/lru/lfu",
                   "ICACHE" });
+    p.addOption({ "l2-cache",
+                  "L2 cache. Format policy,sets,words_in_blocks,associativity where "
+                  "policy is random/lru/lfu",
+                  "L2CACHE" });
     p.addOption({ "read-time", "Memory read access time (cycles).", "RTIME" });
     p.addOption({ "write-time", "Memory read access time (cycles).", "WTIME" });
     p.addOption({ "burst-time", "Memory read access time (cycles).", "BTIME" });
@@ -186,6 +190,7 @@ void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
 
     configure_cache(*config.access_cache_data(), parser.values("d-cache"), "data");
     configure_cache(*config.access_cache_program(), parser.values("i-cache"), "instruction");
+    configure_cache(*config.access_cache_program(), parser.values("l2-cache"), "level2");
 
     config.set_osemu_enable(parser.isSet("os-emulation"));
     config.set_osemu_known_syscall_stop(false);

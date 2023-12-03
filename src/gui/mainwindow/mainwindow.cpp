@@ -113,6 +113,8 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     cache_program->hide();
     cache_data.reset(new CacheDock(this, "Data"));
     cache_data->hide();
+    cache_level2.reset(new CacheDock(this, "L2"));
+    cache_level2->hide();
     peripherals.reset(new PeripheralsDock(this, settings));
     peripherals->hide();
     terminal.reset(new TerminalDock(this, settings));
@@ -151,6 +153,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(ui->actionMemory, &QAction::triggered, this, &MainWindow::show_memory);
     connect(ui->actionProgram_Cache, &QAction::triggered, this, &MainWindow::show_cache_program);
     connect(ui->actionData_Cache, &QAction::triggered, this, &MainWindow::show_cache_data);
+    connect(ui->actionL2_Cache, &QAction::triggered, this, &MainWindow::show_cache_level2);
     connect(ui->actionPeripherals, &QAction::triggered, this, &MainWindow::show_peripherals);
     connect(ui->actionTerminal, &QAction::triggered, this, &MainWindow::show_terminal);
     connect(ui->actionLcdDisplay, &QAction::triggered, this, &MainWindow::show_lcd_display);
@@ -308,6 +311,7 @@ void MainWindow::create_core(
     memory->setup(machine.data());
     cache_program->setup(machine->cache_program());
     cache_data->setup(machine->cache_data());
+    cache_level2->setup(machine->cache_level2());
     terminal->setup(machine->serial_port());
     peripherals->setup(machine->peripheral_spi_led());
     lcd_display->setup(machine->peripheral_lcd_display());
@@ -404,6 +408,7 @@ SHOW_HANDLER(program, Qt::LeftDockWidgetArea)
 SHOW_HANDLER(memory, Qt::RightDockWidgetArea)
 SHOW_HANDLER(cache_program, Qt::RightDockWidgetArea)
 SHOW_HANDLER(cache_data, Qt::RightDockWidgetArea)
+SHOW_HANDLER(cache_level2, Qt::RightDockWidgetArea)
 SHOW_HANDLER(peripherals, Qt::RightDockWidgetArea)
 SHOW_HANDLER(terminal, Qt::RightDockWidgetArea)
 SHOW_HANDLER(lcd_display, Qt::RightDockWidgetArea)

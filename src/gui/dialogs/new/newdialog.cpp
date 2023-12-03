@@ -26,6 +26,8 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     ui_cache_p->label_writeback->hide();
     ui_cache_d.reset(new Ui::NewDialogCache());
     ui_cache_d->setupUi(ui->tab_cache_data);
+    ui_cache_l2.reset(new Ui::NewDialogCache());
+    ui_cache_l2->setupUi(ui->tab_cache_level2);
 
     connect(
         ui->pushButton_example, &QAbstractButton::clicked, this,
@@ -91,6 +93,9 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     connect(
         ui->mem_time_burst, QOverload<int>::of(&QSpinBox::valueChanged), this,
         &NewDialog::mem_time_burst_change);
+    connect(
+        ui->mem_time_level2, QOverload<int>::of(&QSpinBox::valueChanged), this,
+        &NewDialog::mem_time_level2_change);
 
     connect(
         ui->osemu_enable, &QAbstractButton::clicked, this,
@@ -114,6 +119,7 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
 
     cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d.data());
     cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p.data());
+    cache_handler_l2 = new NewDialogCacheHandler(this, ui_cache_l2.data());
 
     // TODO remove this block when protections are implemented
     ui->mem_protec_exec->setVisible(false);
@@ -264,6 +270,13 @@ void NewDialog::mem_time_burst_change(int v) {
     }
 }
 
+void NewDialog::mem_time_level2_change(int v) {
+    if (config->memory_access_time_level2() != (unsigned)v) {
+        config->set_memory_access_time_level2(v);
+        switch2custom();
+    }
+}
+
 void NewDialog::osemu_enable_change(bool v) {
     config->set_osemu_enable(v);
 }
@@ -324,9 +337,11 @@ void NewDialog::config_gui() {
     ui->mem_time_read->setValue((int)config->memory_access_time_read());
     ui->mem_time_write->setValue((int)config->memory_access_time_write());
     ui->mem_time_burst->setValue((int)config->memory_access_time_burst());
+    ui->mem_time_level2->setValue((int)config->memory_access_time_level2());
     // Cache
     cache_handler_d->config_gui();
     cache_handler_p->config_gui();
+    cache_handler_l2->config_gui();
     // Operating system and exceptions
     ui->osemu_enable->setChecked(config->osemu_enable());
     ui->osemu_known_syscall_stop->setChecked(config->osemu_known_syscall_stop());
@@ -360,6 +375,7 @@ void NewDialog::load_settings() {
     config.reset(new machine::MachineConfig(settings));
     cache_handler_d->set_config(config->access_cache_data());
     cache_handler_p->set_config(config->access_cache_program());
+    cache_handler_l2->set_config(config->access_cache_level2());
 
     // Load preset
     unsigned preset = settings->value("Preset", 1).toUInt();

@@ -38,6 +38,7 @@ public:
     Memory *memory_rw();
     const Cache *cache_program();
     const Cache *cache_data();
+    const Cache *cache_level2();
     Cache *cache_data_rw();
     void cache_sync();
     const MemoryDataBus *memory_data_bus();
@@ -122,6 +123,7 @@ private:
     aclint::AclintSswi *aclint_sswi = nullptr;
     Cache *cch_program = nullptr;
     Cache *cch_data = nullptr;
+    Cache *cch_level2 = nullptr;
     CSR::ControlState *controlst = nullptr;
     Predictor *predictor = nullptr;
     Core *cr = nullptr;

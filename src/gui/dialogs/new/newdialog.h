@@ -39,6 +39,7 @@ private slots:
     void mem_time_read_change(int);
     void mem_time_write_change(int);
     void mem_time_burst_change(int);
+    void mem_time_level2_change(int);
     void osemu_enable_change(bool);
     void osemu_known_syscall_stop_change(bool);
     void osemu_unknown_syscall_stop_change(bool);
@@ -50,7 +51,7 @@ private slots:
 
 private:
     Box<Ui::NewDialog> ui {};
-    Box<Ui::NewDialogCache> ui_cache_p {}, ui_cache_d {};
+    Box<Ui::NewDialogCache> ui_cache_p {}, ui_cache_d {}, ui_cache_l2 {};
     QSettings *settings;
 
     Box<machine::MachineConfig> config;
@@ -59,7 +60,7 @@ private:
     unsigned preset_number();
     void load_settings();
     void store_settings();
-    NewDialogCacheHandler *cache_handler_p {}, *cache_handler_d {};
+    NewDialogCacheHandler *cache_handler_p {}, *cache_handler_d {}, *cache_handler_l2 {};
 };
 
 class NewDialogCacheHandler : public QObject {

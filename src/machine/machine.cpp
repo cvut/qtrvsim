@@ -47,16 +47,30 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
     setup_aclint_mswi();
     setup_aclint_sswi();
 
+    unsigned access_time_read = machine_config.memory_access_time_read();
+    unsigned access_time_write = machine_config.memory_access_time_write();
+    unsigned access_time_burst = machine_config.memory_access_time_burst();
+
+    cch_level2 = new Cache(
+        data_bus, &machine_config.cache_level2(),
+        access_time_read,
+        access_time_write,
+        access_time_burst);
+    if (machine_config.cache_level2().enabled()) {
+        access_time_read = machine_config.memory_access_time_level2();
+        access_time_write = machine_config.memory_access_time_level2();
+        access_time_burst = 1;
+    }
     cch_program = new Cache(
-        data_bus, &machine_config.cache_program(),
-        machine_config.memory_access_time_read(),
-        machine_config.memory_access_time_write(),
-        machine_config.memory_access_time_burst());
+        cch_level2, &machine_config.cache_program(),
+        access_time_read,
+        access_time_write,
+        access_time_burst);
     cch_data = new Cache(
-        data_bus, &machine_config.cache_data(),
-        machine_config.memory_access_time_read(),
-        machine_config.memory_access_time_write(),
-        machine_config.memory_access_time_burst());
+        cch_level2, &machine_config.cache_data(),
+        access_time_read,
+        access_time_write,
+        access_time_burst);
 
     controlst = new CSR::ControlState(machine_config.get_simulated_xlen());
     predictor = new FalsePredictor();
@@ -155,6 +169,8 @@ Machine::~Machine() {
     cch_program = nullptr;
     delete cch_data;
     cch_data = nullptr;
+    delete cch_level2;
+    cch_level2 = nullptr;
     delete data_bus;
     data_bus = nullptr;
     delete mem_program_only;
@@ -198,6 +214,10 @@ const Cache *Machine::cache_data() {
     return cch_data;
 }
 
+const Cache *Machine::cache_level2() {
+    return cch_level2;
+}
+
 Cache *Machine::cache_data_rw() {
     return cch_data;
 }
@@ -208,6 +228,9 @@ void Machine::cache_sync() {
     }
     if (cch_data != nullptr) {
         cch_data->sync();
+    }
+    if (cch_level2 != nullptr) {
+        cch_level2->sync();
     }
 }
 
@@ -346,6 +369,7 @@ void Machine::restart() {
     }
     cch_program->reset();
     cch_data->reset();
+    cch_level2->reset();
     cr->reset();
     set_status(ST_READY);
 }

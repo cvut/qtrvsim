@@ -87,6 +87,7 @@
     <addaction name="actionMemory"/>
     <addaction name="actionProgram_Cache"/>
     <addaction name="actionData_Cache"/>
+    <addaction name="actionL2_Cache"/>
     <addaction name="actionPeripherals"/>
     <addaction name="actionTerminal"/>
     <addaction name="actionLcdDisplay"/>
@@ -489,6 +490,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+M</string>
+   </property>
+  </action>
+  <action name="actionL2_Cache">
+   <property name="text">
+    <string>L2 Cache</string>
    </property>
   </action>
   <action name="ips2">

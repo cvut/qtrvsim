@@ -104,6 +104,7 @@ public:
     void set_memory_access_time_read(unsigned);
     void set_memory_access_time_write(unsigned);
     void set_memory_access_time_burst(unsigned);
+    void set_memory_access_time_level2(unsigned);
     // Operating system and exceptions setup
     void set_osemu_enable(bool);
     void set_osemu_known_syscall_stop(bool);
@@ -119,6 +120,7 @@ public:
     // Configure cache
     void set_cache_program(const CacheConfig &);
     void set_cache_data(const CacheConfig &);
+    void set_cache_level2(const CacheConfig &);
     void set_simulated_endian(Endian endian);
     void set_simulated_xlen(Xlen xlen);
 
@@ -130,6 +132,7 @@ public:
     unsigned memory_access_time_read() const;
     unsigned memory_access_time_write() const;
     unsigned memory_access_time_burst() const;
+    unsigned memory_access_time_level2() const;
     bool osemu_enable() const;
     bool osemu_known_syscall_stop() const;
     bool osemu_unknown_syscall_stop() const;
@@ -140,11 +143,13 @@ public:
     QString elf() const;
     const CacheConfig &cache_program() const;
     const CacheConfig &cache_data() const;
+    const CacheConfig &cache_level2() const;
     Endian get_simulated_endian() const;
     Xlen get_simulated_xlen() const;
 
     CacheConfig *access_cache_program();
     CacheConfig *access_cache_data();
+    CacheConfig *access_cache_level2();
 
     bool operator==(const MachineConfig &c) const;
     bool operator!=(const MachineConfig &c) const;
@@ -153,13 +158,13 @@ private:
     bool pipeline, delayslot;
     enum HazardUnit hunit;
     bool exec_protect, write_protect;
-    unsigned mem_acc_read, mem_acc_write, mem_acc_burst;
+    unsigned mem_acc_read, mem_acc_write, mem_acc_burst, mem_acc_level2;
     bool osem_enable, osem_known_syscall_stop, osem_unknown_syscall_stop;
     bool osem_interrupt_stop, osem_exception_stop;
     bool res_at_compile;
     QString osem_fs_root;
     QString elf_path;
-    CacheConfig cch_program, cch_data;
+    CacheConfig cch_program, cch_data, cch_level2;
     Endian simulated_endian = LITTLE;
     Xlen simulated_xlen = Xlen::_32;
 };

@@ -72,6 +72,7 @@ public slots:
     void show_memory();
     void show_cache_data();
     void show_cache_program();
+    void show_cache_level2();
     void show_peripherals();
     void show_terminal();
     void show_lcd_display();
@@ -113,7 +114,7 @@ private:
     Box<RegistersDock> registers {};
     Box<ProgramDock> program {};
     Box<MemoryDock> memory {};
-    Box<CacheDock> cache_program {}, cache_data {};
+    Box<CacheDock> cache_program {}, cache_data {}, cache_level2 {};
     Box<PeripheralsDock> peripherals {};
     Box<TerminalDock> terminal {};
     Box<LcdDisplayDock> lcd_display {};

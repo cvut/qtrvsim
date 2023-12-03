@@ -17,6 +17,7 @@ using namespace machine;
 #define DF_MEM_ACC_READ 10
 #define DF_MEM_ACC_WRITE 10
 #define DF_MEM_ACC_BURST 0
+#define DF_MEM_ACC_LEVEL2 2
 #define DF_ELF QString("")
 //////////////////////////////////////////////////////////////////////////////
 /// Default config of CacheConfig
@@ -155,6 +156,7 @@ MachineConfig::MachineConfig() {
     mem_acc_read = DF_MEM_ACC_READ;
     mem_acc_write = DF_MEM_ACC_WRITE;
     mem_acc_burst = DF_MEM_ACC_BURST;
+    mem_acc_level2 = DF_MEM_ACC_LEVEL2;
     osem_enable = true;
     osem_known_syscall_stop = true;
     osem_unknown_syscall_stop = true;
@@ -165,6 +167,7 @@ MachineConfig::MachineConfig() {
     elf_path = DF_ELF;
     cch_program = CacheConfig();
     cch_data = CacheConfig();
+    cch_level2 = CacheConfig();
 }
 
 MachineConfig::MachineConfig(const MachineConfig *config) {
@@ -176,6 +179,7 @@ MachineConfig::MachineConfig(const MachineConfig *config) {
     mem_acc_read = config->memory_access_time_read();
     mem_acc_write = config->memory_access_time_write();
     mem_acc_burst = config->memory_access_time_burst();
+    mem_acc_level2 = config->memory_access_time_level2();
     osem_enable = config->osemu_enable();
     osem_known_syscall_stop = config->osemu_known_syscall_stop();
     osem_unknown_syscall_stop = config->osemu_unknown_syscall_stop();
@@ -186,6 +190,7 @@ MachineConfig::MachineConfig(const MachineConfig *config) {
     elf_path = config->elf();
     cch_program = config->cache_program();
     cch_data = config->cache_data();
+    cch_level2 = config->cache_level2();
 }
 
 #define N(STR) (prefix + QString(STR))
@@ -201,6 +206,7 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     mem_acc_read = sts->value(N("MemoryRead"), DF_MEM_ACC_READ).toUInt();
     mem_acc_write = sts->value(N("MemoryWrite"), DF_MEM_ACC_WRITE).toUInt();
     mem_acc_burst = sts->value(N("MemoryBurts"), DF_MEM_ACC_BURST).toUInt();
+    mem_acc_level2 = sts->value(N("MemoryLevel2"), DF_MEM_ACC_LEVEL2).toUInt();
     osem_enable = sts->value(N("OsemuEnable"), true).toBool();
     osem_known_syscall_stop
         = sts->value(N("OsemuKnownSyscallStop"), true).toBool();
@@ -213,6 +219,7 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     elf_path = sts->value(N("Elf"), DF_ELF).toString();
     cch_program = CacheConfig(sts, N("ProgramCache_"));
     cch_data = CacheConfig(sts, N("DataCache_"));
+    cch_level2 = CacheConfig(sts, N("Level2Cache_"));
 }
 
 void MachineConfig::store(QSettings *sts, const QString &prefix) {
@@ -222,6 +229,7 @@ void MachineConfig::store(QSettings *sts, const QString &prefix) {
     sts->setValue(N("MemoryRead"), memory_access_time_read());
     sts->setValue(N("MemoryWrite"), memory_access_time_write());
     sts->setValue(N("MemoryBurts"), memory_access_time_burst());
+    sts->setValue(N("MemoryLevel2"), memory_access_time_level2());
     sts->setValue(N("OsemuEnable"), osemu_enable());
     sts->setValue(N("OsemuKnownSyscallStop"), osemu_known_syscall_stop());
     sts->setValue(N("OsemuUnknownSyscallStop"), osemu_unknown_syscall_stop());
@@ -232,6 +240,7 @@ void MachineConfig::store(QSettings *sts, const QString &prefix) {
     sts->setValue(N("Elf"), elf_path);
     cch_program.store(sts, N("ProgramCache_"));
     cch_data.store(sts, N("DataCache_"));
+    cch_level2.store(sts, N("Level2Cache_"));
 }
 
 #undef N
@@ -260,9 +269,20 @@ void MachineConfig::preset(enum ConfigPresets p) {
     set_memory_access_time_read(DF_MEM_ACC_READ);
     set_memory_access_time_write(DF_MEM_ACC_WRITE);
     set_memory_access_time_burst(DF_MEM_ACC_BURST);
+    set_memory_access_time_level2(DF_MEM_ACC_LEVEL2);
 
     access_cache_program()->preset(p);
     access_cache_data()->preset(p);
+    access_cache_level2()->preset(p);
+
+    switch (p) {
+    case CP_SINGLE:
+    case CP_SINGLE_CACHE:
+    case CP_PIPE_NO_HAZARD:
+    case CP_PIPE:
+        access_cache_level2()->set_enabled(false);
+        break;
+    }
 }
 
 void MachineConfig::set_pipelined(bool v) {
@@ -311,6 +331,10 @@ void MachineConfig::set_memory_access_time_burst(unsigned v) {
     mem_acc_burst = v;
 }
 
+void MachineConfig::set_memory_access_time_level2(unsigned v) {
+    mem_acc_level2 = v;
+}
+
 void MachineConfig::set_osemu_enable(bool v) {
     osem_enable = v;
 }
@@ -349,6 +373,10 @@ void MachineConfig::set_cache_program(const CacheConfig &c) {
 
 void MachineConfig::set_cache_data(const CacheConfig &c) {
     cch_data = c;
+}
+
+void MachineConfig::set_cache_level2(const CacheConfig &c) {
+    cch_level2 = c;
 }
 
 void MachineConfig::set_simulated_endian(Endian endian) {
@@ -393,6 +421,10 @@ unsigned MachineConfig::memory_access_time_burst() const {
     return mem_acc_burst;
 }
 
+unsigned MachineConfig::memory_access_time_level2() const {
+    return mem_acc_level2;
+}
+
 bool MachineConfig::osemu_enable() const {
     return osem_enable;
 }
@@ -429,12 +461,20 @@ const CacheConfig &MachineConfig::cache_data() const {
     return cch_data;
 }
 
+const CacheConfig &MachineConfig::cache_level2() const {
+    return cch_level2;
+}
+
 CacheConfig *MachineConfig::access_cache_program() {
     return &cch_program;
 }
 
 CacheConfig *MachineConfig::access_cache_data() {
     return &cch_data;
+}
+
+CacheConfig *MachineConfig::access_cache_level2() {
+    return &cch_level2;
 }
 
 Endian MachineConfig::get_simulated_endian() const {
@@ -450,8 +490,9 @@ bool MachineConfig::operator==(const MachineConfig &c) const {
     return CMP(pipelined) && CMP(delay_slot) && CMP(hazard_unit)
            && CMP(memory_execute_protection) && CMP(memory_write_protection)
            && CMP(memory_access_time_read) && CMP(memory_access_time_write)
-           && CMP(memory_access_time_burst) && CMP(elf) && CMP(cache_program)
-           && CMP(cache_data);
+           && CMP(memory_access_time_burst) && CMP(memory_access_time_level2)
+           && CMP(elf) && CMP(cache_program)
+           && CMP(cache_data) && CMP(cache_level2);
 #undef CMP
 }
 
