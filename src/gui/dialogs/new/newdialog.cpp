@@ -396,9 +396,8 @@ void NewDialog::store_settings() {
     }
 }
 
-NewDialogCacheHandler::NewDialogCacheHandler(
-    NewDialog *nd,
-    Ui::NewDialogCache *cui) {
+NewDialogCacheHandler::NewDialogCacheHandler(NewDialog *nd,
+    Ui::NewDialogCache *cui) : Super(nd) {
     this->nd = nd;
     this->ui = cui;
     this->config = nullptr;

@@ -183,7 +183,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
 
     QDir samples_dir(":/samples");
     for (const QString &fname : samples_dir.entryList(QDir::Files)) {
-        auto *textsigac = new TextSignalAction(fname, ":/samples/" + fname);
+        auto *textsigac = new TextSignalAction(fname, ":/samples/" + fname, ui->menuExamples);
         ui->menuExamples->addAction(textsigac);
         connect(textsigac, &TextSignalAction::activated, this, &MainWindow::example_source);
     }
@@ -270,6 +270,7 @@ void MainWindow::create_core(
         auto *osemu_handler = new osemu::OsSyscallExceptionHandler(
             config.osemu_known_syscall_stop(), config.osemu_unknown_syscall_stop(),
             config.osemu_fs_root());
+        osemu_handler->setParent(new_machine);
         connect(
             osemu_handler, &osemu::OsSyscallExceptionHandler::char_written, terminal.data(),
             QOverload<int, unsigned int>::of(&TerminalDock::tx_byte));

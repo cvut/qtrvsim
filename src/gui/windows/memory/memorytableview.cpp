@@ -13,7 +13,7 @@
 #include <QtGlobal>
 
 MemoryTableView::MemoryTableView(QWidget *parent, QSettings *settings) : Super(parent) {
-    setItemDelegate(new HintTableDelegate);
+    setItemDelegate(new HintTableDelegate(this));
     connect(
         verticalScrollBar(), &QAbstractSlider::valueChanged, this,
         &MemoryTableView::adjust_scroll_pos_check);

@@ -11,7 +11,7 @@
 #include <QtGlobal>
 
 ProgramTableView::ProgramTableView(QWidget *parent, QSettings *settings) : Super(parent) {
-    setItemDelegate(new HintTableDelegate);
+    setItemDelegate(new HintTableDelegate(this));
     connect(
         verticalScrollBar(), &QAbstractSlider::valueChanged, this,
         &ProgramTableView::adjust_scroll_pos_check);
