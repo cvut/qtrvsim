@@ -28,8 +28,8 @@ private:
     QT_OWNED QVBoxLayout *layout;
     QT_OWNED SrcEditor *editor;
     QT_OWNED QHBoxLayout *status_bar_layout;
+    QT_OWNED QLabel *status_bar_path;
     QT_OWNED QLabel *status_bar_location;
-    QT_OWNED QLabel *status_bar_line;
 };
 
 #endif // EDITORTAB_H

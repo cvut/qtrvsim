@@ -10,21 +10,22 @@ EditorTab::EditorTab(bool show_line_numbers, QWidget *parent)
     , layout(new QVBoxLayout(this))
     , editor(new SrcEditor(this))
     , status_bar_layout(new QHBoxLayout())
-    , status_bar_location(new QLabel("Unknown", this))
-    , status_bar_line(new QLabel("0:0", this)) {
+    , status_bar_path(new QLabel("Unknown", this))
+    , status_bar_location(new QLabel("0:0", this)) {
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(reinterpret_cast<QWidget *>(editor));
     status_bar_layout->setSpacing(0);
     status_bar_layout->setContentsMargins(5, 0, 5, 0);
+    status_bar_layout->addWidget(status_bar_path);
     status_bar_layout->addWidget(status_bar_location);
-    status_bar_layout->addWidget(status_bar_line);
     layout->addLayout(status_bar_layout);
-    status_bar_location->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-    status_bar_line->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+    status_bar_path->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    status_bar_location->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     connect(editor, &SrcEditor::cursorPositionChanged, this, [this]() {
         auto cursor = editor->textCursor();
-        status_bar_line->setText(
+        auto width = status_bar_location->width();
+        status_bar_location->setText(
             QString("%1:%2").arg(cursor.blockNumber() + 1).arg(cursor.columnNumber() + 1));
     });
     connect(editor, &SrcEditor::file_name_change, this, [this]() { elide_file_name(); });
@@ -46,8 +47,8 @@ void EditorTab::resizeEvent(QResizeEvent *event) {
 
 void EditorTab::elide_file_name() {
     auto filename = editor->filename().isEmpty() ? "Unknown" : editor->filename();
-    QFontMetrics matrix(status_bar_location->font());
-    int width = status_bar_location->width();
-    QString clippedText = matrix.elidedText(filename, Qt::ElideMiddle, width);
-    status_bar_location->setText(clippedText);
+    QFontMetrics metrics(status_bar_path->font());
+    int width = status_bar_layout->geometry().width() - status_bar_location->geometry().width() - 10;
+    QString clippedText = metrics.elidedText(filename, Qt::ElideMiddle, width);
+    status_bar_path->setText(clippedText);
 }
