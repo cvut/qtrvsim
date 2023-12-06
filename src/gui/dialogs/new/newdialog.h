@@ -38,6 +38,7 @@ private slots:
     void mem_protec_write_change(bool);
     void mem_time_read_change(int);
     void mem_time_write_change(int);
+    void mem_enable_burst_change(bool);
     void mem_time_burst_change(int);
     void mem_time_level2_change(int);
     void osemu_enable_change(bool);

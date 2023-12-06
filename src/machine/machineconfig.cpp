@@ -18,6 +18,7 @@ using namespace machine;
 #define DF_MEM_ACC_WRITE 10
 #define DF_MEM_ACC_BURST 0
 #define DF_MEM_ACC_LEVEL2 2
+#define DF_MEM_ACC_BURST_ENABLE false
 #define DF_ELF QString("")
 //////////////////////////////////////////////////////////////////////////////
 /// Default config of CacheConfig
@@ -157,6 +158,7 @@ MachineConfig::MachineConfig() {
     mem_acc_write = DF_MEM_ACC_WRITE;
     mem_acc_burst = DF_MEM_ACC_BURST;
     mem_acc_level2 = DF_MEM_ACC_LEVEL2;
+    mem_acc_enable_burst = DF_MEM_ACC_BURST_ENABLE;
     osem_enable = true;
     osem_known_syscall_stop = true;
     osem_unknown_syscall_stop = true;
@@ -180,6 +182,7 @@ MachineConfig::MachineConfig(const MachineConfig *config) {
     mem_acc_write = config->memory_access_time_write();
     mem_acc_burst = config->memory_access_time_burst();
     mem_acc_level2 = config->memory_access_time_level2();
+    mem_acc_enable_burst = config->memory_access_enable_burst();
     osem_enable = config->osemu_enable();
     osem_known_syscall_stop = config->osemu_known_syscall_stop();
     osem_unknown_syscall_stop = config->osemu_unknown_syscall_stop();
@@ -205,8 +208,9 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
         = sts->value(N("MemoryWriteProtection"), DF_WRITE_PROTEC).toBool();
     mem_acc_read = sts->value(N("MemoryRead"), DF_MEM_ACC_READ).toUInt();
     mem_acc_write = sts->value(N("MemoryWrite"), DF_MEM_ACC_WRITE).toUInt();
-    mem_acc_burst = sts->value(N("MemoryBurts"), DF_MEM_ACC_BURST).toUInt();
+    mem_acc_burst = sts->value(N("MemoryBurst"), DF_MEM_ACC_BURST).toUInt();
     mem_acc_level2 = sts->value(N("MemoryLevel2"), DF_MEM_ACC_LEVEL2).toUInt();
+    mem_acc_enable_burst = sts->value(N("MemoryBurstEnable"), DF_MEM_ACC_BURST_ENABLE).toBool();
     osem_enable = sts->value(N("OsemuEnable"), true).toBool();
     osem_known_syscall_stop
         = sts->value(N("OsemuKnownSyscallStop"), true).toBool();
@@ -228,8 +232,9 @@ void MachineConfig::store(QSettings *sts, const QString &prefix) {
     sts->setValue(N("HazardUnit"), (unsigned)hazard_unit());
     sts->setValue(N("MemoryRead"), memory_access_time_read());
     sts->setValue(N("MemoryWrite"), memory_access_time_write());
-    sts->setValue(N("MemoryBurts"), memory_access_time_burst());
+    sts->setValue(N("MemoryBurst"), memory_access_time_burst());
     sts->setValue(N("MemoryLevel2"), memory_access_time_level2());
+    sts->setValue(N("MemoryBurstEnable"), memory_access_enable_burst());
     sts->setValue(N("OsemuEnable"), osemu_enable());
     sts->setValue(N("OsemuKnownSyscallStop"), osemu_known_syscall_stop());
     sts->setValue(N("OsemuUnknownSyscallStop"), osemu_unknown_syscall_stop());
@@ -270,6 +275,7 @@ void MachineConfig::preset(enum ConfigPresets p) {
     set_memory_access_time_write(DF_MEM_ACC_WRITE);
     set_memory_access_time_burst(DF_MEM_ACC_BURST);
     set_memory_access_time_level2(DF_MEM_ACC_LEVEL2);
+    set_memory_access_enable_burst(DF_MEM_ACC_BURST_ENABLE);
 
     access_cache_program()->preset(p);
     access_cache_data()->preset(p);
@@ -333,6 +339,10 @@ void MachineConfig::set_memory_access_time_burst(unsigned v) {
 
 void MachineConfig::set_memory_access_time_level2(unsigned v) {
     mem_acc_level2 = v;
+}
+
+void MachineConfig::set_memory_access_enable_burst(bool v) {
+    mem_acc_enable_burst = v;
 }
 
 void MachineConfig::set_osemu_enable(bool v) {
@@ -425,6 +435,10 @@ unsigned MachineConfig::memory_access_time_level2() const {
     return mem_acc_level2;
 }
 
+bool MachineConfig::memory_access_enable_burst() const {
+    return mem_acc_enable_burst;
+}
+
 bool MachineConfig::osemu_enable() const {
     return osem_enable;
 }
@@ -491,6 +505,7 @@ bool MachineConfig::operator==(const MachineConfig &c) const {
            && CMP(memory_execute_protection) && CMP(memory_write_protection)
            && CMP(memory_access_time_read) && CMP(memory_access_time_write)
            && CMP(memory_access_time_burst) && CMP(memory_access_time_level2)
+           && CMP(memory_access_enable_burst)
            && CMP(elf) && CMP(cache_program)
            && CMP(cache_data) && CMP(cache_level2);
 #undef CMP

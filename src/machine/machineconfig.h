@@ -105,6 +105,7 @@ public:
     void set_memory_access_time_write(unsigned);
     void set_memory_access_time_burst(unsigned);
     void set_memory_access_time_level2(unsigned);
+    void set_memory_access_enable_burst(bool);
     // Operating system and exceptions setup
     void set_osemu_enable(bool);
     void set_osemu_known_syscall_stop(bool);
@@ -133,6 +134,7 @@ public:
     unsigned memory_access_time_write() const;
     unsigned memory_access_time_burst() const;
     unsigned memory_access_time_level2() const;
+    bool memory_access_enable_burst() const;
     bool osemu_enable() const;
     bool osemu_known_syscall_stop() const;
     bool osemu_unknown_syscall_stop() const;
@@ -159,6 +161,7 @@ private:
     enum HazardUnit hunit;
     bool exec_protect, write_protect;
     unsigned mem_acc_read, mem_acc_write, mem_acc_burst, mem_acc_level2;
+    bool mem_acc_enable_burst;
     bool osem_enable, osem_known_syscall_stop, osem_unknown_syscall_stop;
     bool osem_interrupt_stop, osem_exception_stop;
     bool res_at_compile;

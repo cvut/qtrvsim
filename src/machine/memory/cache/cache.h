@@ -53,7 +53,8 @@ public:
         const CacheConfig *config,
         uint32_t memory_access_penalty_r = 1,
         uint32_t memory_access_penalty_w = 1,
-        uint32_t memory_access_penalty_b = 0);
+        uint32_t memory_access_penalty_b = 0,
+        bool memory_access_enable_b = false);
 
     ~Cache() override;
 
@@ -115,6 +116,7 @@ private:
     const Address uncached_start;
     const Address uncached_last;
     const uint32_t access_pen_r, access_pen_w, access_pen_b;
+    const bool access_ena_b;
     const std::unique_ptr<CachePolicy> replacement_policy;
 
     mutable std::vector<std::vector<CacheLine>> dt;

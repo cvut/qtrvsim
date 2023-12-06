@@ -50,27 +50,32 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
     unsigned access_time_read = machine_config.memory_access_time_read();
     unsigned access_time_write = machine_config.memory_access_time_write();
     unsigned access_time_burst = machine_config.memory_access_time_burst();
+    bool access_enable_burst = machine_config.memory_access_enable_burst();
 
     cch_level2 = new Cache(
         data_bus, &machine_config.cache_level2(),
         access_time_read,
         access_time_write,
-        access_time_burst);
+        access_time_burst,
+        access_enable_burst);
     if (machine_config.cache_level2().enabled()) {
         access_time_read = machine_config.memory_access_time_level2();
         access_time_write = machine_config.memory_access_time_level2();
-        access_time_burst = 1;
+        access_time_burst = 0;
+        access_enable_burst = true;
     }
     cch_program = new Cache(
         cch_level2, &machine_config.cache_program(),
         access_time_read,
         access_time_write,
-        access_time_burst);
+        access_time_burst,
+        access_enable_burst);
     cch_data = new Cache(
         cch_level2, &machine_config.cache_data(),
         access_time_read,
         access_time_write,
-        access_time_burst);
+        access_time_burst,
+        access_enable_burst);
 
     controlst = new CSR::ControlState(machine_config.get_simulated_xlen());
     predictor = new FalsePredictor();

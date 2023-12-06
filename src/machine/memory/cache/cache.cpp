@@ -12,7 +12,8 @@ Cache::Cache(
     const CacheConfig *config,
     uint32_t memory_access_penalty_r,
     uint32_t memory_access_penalty_w,
-    uint32_t memory_access_penalty_b)
+    uint32_t memory_access_penalty_b,
+    bool memory_access_enable_b)
     : FrontendMemory(memory->simulated_machine_endian)
     , cache_config(config)
     , mem(memory)
@@ -21,6 +22,7 @@ Cache::Cache(
     , access_pen_r(memory_access_penalty_r)
     , access_pen_w(memory_access_penalty_w)
     , access_pen_b(memory_access_penalty_b)
+    , access_ena_b(memory_access_enable_b)
     , replacement_policy(CachePolicy::get_policy_instance(config)) {
     // Skip memory allocation if cache is disabled
     if (!config->enabled()) {
@@ -411,7 +413,7 @@ uint32_t Cache::get_stall_count() const {
     uint32_t st_cycles
         = mem_reads * (access_pen_r - 1) + mem_writes * (access_pen_w - 1);
     st_cycles += (miss_read + miss_write) * cache_config.block_size();
-    if (access_pen_b != 0) {
+    if (access_ena_b) {
         st_cycles -= burst_reads * (access_pen_r - access_pen_b)
                      + burst_writes * (access_pen_w - access_pen_b);
     }
@@ -430,7 +432,7 @@ double Cache::get_speed_improvement() const {
         lookup_time += hit_write + miss_write;
     }
     mem_access_time = mem_reads * access_pen_r + mem_writes * access_pen_w;
-    if (access_pen_b != 0) {
+    if (access_ena_b) {
         mem_access_time -= burst_reads * (access_pen_r - access_pen_b)
                            + burst_writes * (access_pen_w - access_pen_b);
     }

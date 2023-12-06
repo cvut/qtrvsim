@@ -91,6 +91,9 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
         ui->mem_time_write, QOverload<int>::of(&QSpinBox::valueChanged), this,
         &NewDialog::mem_time_write_change);
     connect(
+        ui->mem_enable_burst, &QAbstractButton::clicked, this,
+        &NewDialog::mem_enable_burst_change);
+    connect(
         ui->mem_time_burst, QOverload<int>::of(&QSpinBox::valueChanged), this,
         &NewDialog::mem_time_burst_change);
     connect(
@@ -263,6 +266,13 @@ void NewDialog::mem_time_write_change(int v) {
     }
 }
 
+void NewDialog::mem_enable_burst_change(bool v) {
+    if (config->memory_access_enable_burst() != v) {
+        config->set_memory_access_enable_burst(v);
+        switch2custom();
+    }
+}
+
 void NewDialog::mem_time_burst_change(int v) {
     if (config->memory_access_time_burst() != (unsigned)v) {
         config->set_memory_access_time_burst(v);
@@ -338,6 +348,7 @@ void NewDialog::config_gui() {
     ui->mem_time_write->setValue((int)config->memory_access_time_write());
     ui->mem_time_burst->setValue((int)config->memory_access_time_burst());
     ui->mem_time_level2->setValue((int)config->memory_access_time_level2());
+    ui->mem_enable_burst->setChecked((int)config->memory_access_enable_burst());
     // Cache
     cache_handler_d->config_gui();
     cache_handler_p->config_gui();
