@@ -106,6 +106,15 @@ bool argdesbycode_filled = fill_argdesbycode();
 #define FLAGS_ALU_T_R_D (IMF_SUPPORTED | IMF_REGWRITE)
 #define FLAGS_ALU_T_R_STD (FLAGS_ALU_T_R_D | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
 
+#define FLAGS_AMO_LOAD                                                                             \
+    (FLAGS_ALU_I_LOAD | IMF_AMO)
+// FLAGS_AMO_STORE for store conditional requires IMF_MEMREAD to ensure stalling because
+// forwarding is not possible from memory stage after memory read, TODO to solve better way
+#define FLAGS_AMO_STORE                                                                            \
+    (FLAGS_ALU_I_STORE | FLAGS_ALU_T_R_D | IMF_AMO | IMF_MEMREAD)
+#define FLAGS_AMO_MODIFY                                                                           \
+    (FLAGS_ALU_I_LOAD | FLAGS_AMO_STORE | IMF_AMO)
+
 #define NOALU                                                                                      \
     { .alu_op = AluOp::ADD }
 #define NOMEM .mem_ctl = AC_NONE
@@ -143,9 +152,107 @@ struct InstructionMap {
 #define IT_B Instruction::B
 #define IT_U Instruction::U
 #define IT_J Instruction::J
+#define IT_AMO Instruction::AMO
 #define IT_UNKNOWN Instruction::UNKNOWN
 
 // clang-format off
+
+
+// RV32/64A - Atomi Memory Operations
+
+#define AMO_ARGS_LOAD {"d", "(s)"}
+#define AMO_ARGS_STORE {"d", "t", "(s)"}
+#define AMO_ARGS_MODIFY {"d", "t", "(s)"}
+
+#define AMO_MAP_4ITEMS(NAME_BASE, CODE_BASE, MASK, MEM_CTL, FLAGS, ARGS) \
+    { NAME_BASE, IT_AMO, NOALU, MEM_CTL, nullptr, ARGS , ((CODE_BASE) | 0x00000000), 0xfe00707f, { .flags = FLAGS}, nullptr}, \
+    { NAME_BASE ".rl", IT_AMO, NOALU, MEM_CTL, nullptr, ARGS , ((CODE_BASE) | 0x02000000), 0xfe00707f, { .flags = FLAGS}, nullptr}, \
+    { NAME_BASE ".aq", IT_AMO, NOALU, MEM_CTL, nullptr, ARGS , ((CODE_BASE) | 0x04000000), 0xfe00707f, { .flags = FLAGS}, nullptr}, \
+    { NAME_BASE ".aqrl", IT_AMO, NOALU, MEM_CTL, nullptr, ARGS , ((CODE_BASE) | 0x06000000), 0xfe00707f, { .flags = FLAGS}, nullptr}
+
+static const struct InstructionMap AMO_32_map[] = {
+    AMO_MAP_4ITEMS("amoadd.w", 0x0000202f, 0xfe00707f, AC_AMOADD32, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    AMO_MAP_4ITEMS("amoswap.w", 0x0800202f, 0xfe00707f, AC_AMOSWAP32, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    AMO_MAP_4ITEMS("lr.w", 0x1000202f, 0xfff0707f, AC_LR32, FLAGS_AMO_LOAD, AMO_ARGS_LOAD),
+    AMO_MAP_4ITEMS("sc.w", 0x1800202f, 0xfe00707f, AC_SC32, FLAGS_AMO_STORE, AMO_ARGS_STORE),
+    AMO_MAP_4ITEMS("amoxor.w", 0x2000202f, 0xfe00707f, AC_AMOXOR32, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    AMO_MAP_4ITEMS("amoor.w", 0x4000202f, 0xfe00707f, AC_AMOOR32, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    AMO_MAP_4ITEMS("amoand.w", 0x6000202f, 0xfe00707f, AC_AMOAND32, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    AMO_MAP_4ITEMS("amomin.w", 0x8000202f, 0xfe00707f, AC_AMOMIN32, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    AMO_MAP_4ITEMS("amomax.w", 0xa000202f, 0xfe00707f, AC_AMOMAX32, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    AMO_MAP_4ITEMS("amominu.w", 0xc000202f, 0xfe00707f, AC_AMOMINU32, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    AMO_MAP_4ITEMS("amomaxu.w", 0xe000202f, 0xfe00707f, AC_AMOMAXU32, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+};
+
+static const struct InstructionMap AMO_64_map[] = {
+    AMO_MAP_4ITEMS("amoadd.d", 0x0000302f, 0xfe00707f, AC_AMOADD64, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    AMO_MAP_4ITEMS("amoswap.d", 0x0800302f, 0xfe00707f, AC_AMOSWAP64, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    AMO_MAP_4ITEMS("lr.d", 0x1000302f, 0xfff0707f, AC_LR64, FLAGS_AMO_LOAD, AMO_ARGS_LOAD),
+    AMO_MAP_4ITEMS("sc.d", 0x1800302f, 0xfe00707f, AC_SC64, FLAGS_AMO_STORE, AMO_ARGS_STORE),
+    AMO_MAP_4ITEMS("amoxor.d", 0x2000302f, 0xfe00707f, AC_AMOXOR64, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    AMO_MAP_4ITEMS("amoor.d", 0x4000302f, 0xfe00707f, AC_AMOOR64, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    AMO_MAP_4ITEMS("amoand.d", 0x6000302f, 0xfe00707f, AC_AMOAND64, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    AMO_MAP_4ITEMS("amomin.d", 0x8000302f, 0xfe00707f, AC_AMOMIN64, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    AMO_MAP_4ITEMS("amomax.d", 0xa000302f, 0xfe00707f, AC_AMOMAX64, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    AMO_MAP_4ITEMS("amominu.d", 0xc000302f, 0xfe00707f, AC_AMOMINU64, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    AMO_MAP_4ITEMS("amomaxu.d", 0xe000302f, 0xfe00707f, AC_AMOMAXU64, FLAGS_AMO_MODIFY, AMO_ARGS_MODIFY),
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+    IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN, IM_UNKNOWN,
+};
+
+static const struct InstructionMap AMO_map[] = {
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    {"amo-32", IT_R, NOALU, NOMEM, AMO_32_map, {}, 0x0002027, 0x0000707f, { .subfield = {7, 25} }, nullptr}, // OP-32
+    {"amo-64", IT_R, NOALU, NOMEM, AMO_64_map, {}, 0x0003027, 0x0000707f, { .subfield = {7, 25} }, nullptr}, // OP-32
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+};
+
+#undef AMO_MAP_4ITEMS
 
 static const struct InstructionMap LOAD_map[] = {
     {"lb",  IT_I, { .alu_op=AluOp::ADD }, AC_I8,  nullptr, {"d", "o(s)"}, 0x00000003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }, nullptr}, // LB
@@ -380,7 +487,7 @@ static const struct InstructionMap I_inst_map[] = {
     {"store", IT_I, NOALU, NOMEM, STORE_map, {}, 0x23, 0x7f, { .subfield = {3, 12} }, nullptr}, // STORE
     IM_UNKNOWN, // STORE-FP
     IM_UNKNOWN, // custom-1
-    IM_UNKNOWN, // AMO
+    {"amo", IT_R, NOALU, NOMEM, AMO_map, {}, 0x2f, 0x7f, { .subfield = {3, 12} }, nullptr}, // OP-32
     {"op", IT_R, NOALU, NOMEM, OP_map, {}, 0x33, 0x7f, { .subfield = {1, 25} }, nullptr}, // OP
     {"lui", IT_U, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "u"}, 0x37, 0x7f, { .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE }, nullptr}, // LUI
     {"op-32", IT_R, NOALU, NOMEM, OP_32_map, {}, 0x3b, 0x7f, { .subfield = {1, 25} }, nullptr}, // OP-32
@@ -499,6 +606,7 @@ int32_t Instruction::immediate() const {
             MASK(10, 21) << 1 | MASK(1, 20) << 11 | MASK(8, 12) << 12 | MASK(1, 31) << 20, 21);
         break;
     case ZICSR:
+    case AMO:
     case UNKNOWN: break;
     }
     return ret;

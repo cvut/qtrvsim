@@ -159,6 +159,38 @@ bool Core::handle_exception(
     return ret;
 }
 
+static int32_t amo32_operations(enum AccessControl memctl, int32_t a, int32_t b) {
+    switch(memctl) {
+    case AC_AMOSWAP32: return b;
+    case AC_AMOADD32:  return a + b;
+    case AC_AMOXOR32:  return a ^ b;
+    case AC_AMOAND32:  return a & b;
+    case AC_AMOOR32:   return a | b;
+    case AC_AMOMIN32:  return a < b? a: b;
+    case AC_AMOMAX32:  return a < b? b: a;
+    case AC_AMOMINU32: return (uint32_t)a < (uint32_t)b? a: b;
+    case AC_AMOMAXU32: return (uint32_t)a < (uint32_t)b? b: a;
+    default: break;
+    }
+    return 0;
+}
+
+static int64_t amo64_operations(enum AccessControl memctl, int64_t a, int64_t b) {
+    switch(memctl) {
+    case AC_AMOSWAP64: return b;
+    case AC_AMOADD64:  return a + b;
+    case AC_AMOXOR64:  return a ^ b;
+    case AC_AMOAND64:  return a & b;
+    case AC_AMOOR64:   return a | b;
+    case AC_AMOMIN64:  return a < b? a: b;
+    case AC_AMOMAX64:  return a < b? b: a;
+    case AC_AMOMINU64: return (uint64_t)a < (uint64_t)b? a: b;
+    case AC_AMOMAXU64: return (uint64_t)a < (uint64_t)b? b: a;
+    default: break;
+    }
+    return 0;
+}
+
 enum ExceptionCause Core::memory_special(
     enum AccessControl memctl,
     int mode,
@@ -174,15 +206,55 @@ enum ExceptionCause Core::memory_special(
         mem_data->sync();
         mem_program->sync();
         break;
-    case AC_STORE_CONDITIONAL:
-        if (!memwrite) { break; }
-        mem_data->write_u32(mem_addr, rt_value.as_u32());
-        towrite_val = 1;
-        break;
-    case AC_LOAD_LINKED:
+    case AC_LR32:
         if (!memread) { break; }
-        towrite_val = mem_data->read_u32(mem_addr);
+        state.LoadReservedRange = AddressRange(mem_addr, mem_addr + 3);
+        towrite_val = (int32_t)(mem_data->read_u32(mem_addr));
         break;
+    case AC_SC32:
+        if (!memwrite) { break; }
+        if (state.LoadReservedRange.contains(AddressRange(mem_addr, mem_addr + 3))) {
+            mem_data->write_u32(mem_addr, rt_value.as_u32());
+            towrite_val = 0;
+        } else {
+            towrite_val = 1;
+        }
+        state.LoadReservedRange.reset();
+        break;
+    case AC_LR64:
+        if (!memread) { break; }
+        state.LoadReservedRange = AddressRange(mem_addr, mem_addr + 7);
+        towrite_val = mem_data->read_u64(mem_addr);
+        break;
+    case AC_SC64:
+        if (!memwrite) { break; }
+        if (state.LoadReservedRange.contains(AddressRange(mem_addr, mem_addr + 7))) {
+            mem_data->write_u64(mem_addr, rt_value.as_u64());
+            towrite_val = 0;
+        } else {
+            towrite_val = 1;
+        }
+        break;
+    case AC_FISRT_AMO_MODIFY32 ... AC_LAST_AMO_MODIFY32:
+    {
+        if (!memread || !memwrite) { break; }
+        int32_t fetched_value;
+        fetched_value = (int32_t)(mem_data->read_u32(mem_addr));
+        towrite_val = amo32_operations(memctl, fetched_value, rt_value.as_u32());
+        mem_data->write_u32(mem_addr, towrite_val.as_u32());
+        towrite_val = fetched_value;
+        break;
+    }
+    case AC_FISRT_AMO_MODIFY64 ... AC_LAST_AMO_MODIFY64:
+    {
+        if (!memread || !memwrite) { break; }
+        int64_t fetched_value;
+        fetched_value = (int64_t)(mem_data->read_u64(mem_addr));
+        towrite_val = (uint64_t)amo64_operations(memctl, fetched_value, rt_value.as_u64());
+        mem_data->write_u64(mem_addr, towrite_val.as_u64());
+        towrite_val = fetched_value;
+        break;
+    }
     default: break;
     }
 
@@ -275,8 +347,8 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .excause = excause,
                                 .ff_rs = FORWARD_NONE,
                                 .ff_rt = FORWARD_NONE,
-                                .alu_component
-                                = (flags & IMF_MUL) ? AluComponent::MUL : AluComponent::ALU,
+                                .alu_component = (flags & IMF_AMO) ? AluComponent::PASS :
+                                                 (flags & IMF_MUL) ? AluComponent::MUL : AluComponent::ALU,
                                 .aluop = alu_op,
                                 .memctl = mem_ctl,
                                 .num_rs = num_rs,

@@ -39,6 +39,7 @@ set(machine_HEADERS
 		machineconfig.h
 		machinedefs.h
 		memory/address.h
+		memory/address_range.h
 		memory/backend/backend_memory.h
 		memory/backend/lcddisplay.h
 		memory/backend/memory.h

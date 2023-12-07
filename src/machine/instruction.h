@@ -55,6 +55,8 @@ enum InstructionFlags : unsigned {
     IMF_CSR = 1L << 20,        /**< Implies csr read and write */
     IMF_CSR_TO_ALU = 1L << 21, /**< Instruction modifies the current value */
     IMF_ALU_RS_ID = 1L << 22,
+    // RV64/32A - Atomic Memory Operations
+    IMF_AMO = 1L << 23,        /**< Instruction is AMO */
     // TODO do we want to add those signals to the visualization?
 };
 
@@ -108,7 +110,7 @@ public:
     static const Instruction NOP;
     static const Instruction UNKNOWN_INST;
 
-    enum Type { R, I, S, B, U, J, ZICSR, UNKNOWN };
+    enum Type { R, I, S, B, U, J, ZICSR, AMO, UNKNOWN };
 
     /** Modified encoding to enable pseudoinstructions. */
     enum class Modifier {

@@ -17,6 +17,8 @@ RegisterValue alu_combined_operate(
                              : alu64_operate(op.alu_op, modified, a, b);
     case AluComponent::MUL:
         return (w_operation) ? mul32_operate(op.mul_op, a, b) : mul64_operate(op.mul_op, a, b);
+    case AluComponent::PASS:
+        return a;
     default: qDebug("ERROR, unknown alu component: %hhx", uint8_t(component)); return 0;
     }
 }

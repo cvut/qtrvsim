@@ -18,15 +18,39 @@ enum AccessControl {
     AC_U32,
     AC_I64,
     AC_U64,
-    AC_LOAD_LINKED,
-    AC_STORE_CONDITIONAL,
+    AC_LR32,
+    AC_SC32,
+    AC_AMOSWAP32,
+    AC_AMOADD32,
+    AC_AMOXOR32,
+    AC_AMOAND32,
+    AC_AMOOR32,
+    AC_AMOMIN32,
+    AC_AMOMAX32,
+    AC_AMOMINU32,
+    AC_AMOMAXU32,
+    AC_LR64,
+    AC_SC64,
+    AC_AMOSWAP64,
+    AC_AMOADD64,
+    AC_AMOXOR64,
+    AC_AMOAND64,
+    AC_AMOOR64,
+    AC_AMOMIN64,
+    AC_AMOMAX64,
+    AC_AMOMINU64,
+    AC_AMOMAXU64,
     AC_CACHE_OP,
 };
 
 constexpr AccessControl AC_FIRST_REGULAR = AC_I8;
 constexpr AccessControl AC_LAST_REGULAR = AC_U64;
-constexpr AccessControl AC_FIRST_SPECIAL = AC_LOAD_LINKED;
+constexpr AccessControl AC_FIRST_SPECIAL = AC_LR32;
 constexpr AccessControl AC_LAST_SPECIAL = AC_CACHE_OP;
+constexpr AccessControl AC_FISRT_AMO_MODIFY32 = AC_AMOSWAP32;
+constexpr AccessControl AC_LAST_AMO_MODIFY32 = AC_AMOMAXU32;
+constexpr AccessControl AC_FISRT_AMO_MODIFY64 = AC_AMOSWAP64;
+constexpr AccessControl AC_LAST_AMO_MODIFY64 = AC_AMOMAXU64;
 
 constexpr bool is_regular_access(AccessControl type) {
     return AC_FIRST_REGULAR <= type and type <= AC_LAST_REGULAR;
