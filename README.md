@@ -473,7 +473,7 @@ pairs of base address, length pairs stored in memory at address pass in `iov`.
 
 ### List of Currently Supported Instructions
 
-- **RV32G**:
+- **RV32I**:
   - **LOAD**: `lw, lh, lb, lwu, lhu, lbu`
   - **STORE**: `sw, sh, sb, swu, shu, sbu`
   - **OP**: `add, sub, sll, slt, sltu, xor, srl, sra, or, and`
@@ -482,7 +482,7 @@ pairs of base address, length pairs stored in memory at address pass in `iov`.
   - **BRANCH**: `beq, bne, btl, bge, bltu, bgtu`
   - **JUMP**: `jal, jalr`
   - **SYSTEM**: `ecall, mret, ebreak, csrrw, csrrs, csrrc, csrrwi, csrrsi, csrrci`
-- **RV64G**:
+- **RV64I**:
   - **LOAD/STORE**: `lwu, ld, sd`
   - **OP-32**: `addw, subw, sllw, srlw, sraw, or, and`
   - **OP-IMM-32**: `addiw, sllw, srliw, sraiw`
@@ -495,6 +495,8 @@ pairs of base address, length pairs stored in memory at address pass in `iov`.
 - **Extensions**
   - **RV32M/RV64M**: `mul, mulh, mulhsu, div, divu, rem, remu`
   - **RV64M**: `mulw, divw, divuw, remw, remuw`
+  - **RV32A/RV64A**: `lr.w, sc.w, amoswap.w, amoadd.w, amoxor.w, amoand.w, amoor.w, amomin.w, amomax.w, amominu.w, amomaxu.w`
+  - **RV64A**: `lr.d, sc.d, amoswap.d, amoadd.d, amoxor.d, amoand.d, amoor.d, amomin.d, amomax.d, amominu.d, amomaxu.d`
   - **Zicsr**: `csrrw, csrrs, csrrc, csrrwi, csrrsi, csrrci`
 
 For details about RISC-V, refer to the ISA specification:
