@@ -116,7 +116,8 @@ bool argdesbycode_filled = fill_argdesbycode();
     {                                                                                              \
         "unknown", Instruction::UNKNOWN, NOALU, NOMEM, nullptr, {}, 0, 0, {                        \
             0                                                                                      \
-        }                                                                                          \
+        },                                                                                         \
+        nullptr                                                                                    \
     }
 
 struct InstructionMap {
@@ -133,6 +134,7 @@ struct InstructionMap {
         decltype(underlying_type<InstructionFlags>::type()) flags;
         BitField subfield;
     };
+    const InstructionMap *aliases;
 };
 
 #define IT_R Instruction::R
@@ -146,37 +148,37 @@ struct InstructionMap {
 // clang-format off
 
 static const struct InstructionMap LOAD_map[] = {
-    {"lb",  IT_I, { .alu_op=AluOp::ADD }, AC_I8,  nullptr, {"d", "o(s)"}, 0x00000003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }}, // LB
-    {"lh",  IT_I, { .alu_op=AluOp::ADD }, AC_I16, nullptr, {"d", "o(s)"}, 0x00001003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }}, // LH
-    {"lw",  IT_I, { .alu_op=AluOp::ADD }, AC_I32, nullptr, {"d", "o(s)"}, 0x00002003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }}, // LW
-    {"ld",  IT_I, { .alu_op=AluOp::ADD }, AC_I64, nullptr, {"d", "o(s)"}, 0x00003003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }}, // LD
-    {"lbu", IT_I, { .alu_op=AluOp::ADD }, AC_U8,  nullptr, {"d", "o(s)"}, 0x00004003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }}, // LBU
-    {"lhu", IT_I, { .alu_op=AluOp::ADD }, AC_U16, nullptr, {"d", "o(s)"}, 0x00005003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }}, // LHU
-    {"lwu", IT_I, { .alu_op=AluOp::ADD }, AC_U32, nullptr, {"d", "o(s)"}, 0x00006003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }}, // LWU
+    {"lb",  IT_I, { .alu_op=AluOp::ADD }, AC_I8,  nullptr, {"d", "o(s)"}, 0x00000003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }, nullptr}, // LB
+    {"lh",  IT_I, { .alu_op=AluOp::ADD }, AC_I16, nullptr, {"d", "o(s)"}, 0x00001003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }, nullptr}, // LH
+    {"lw",  IT_I, { .alu_op=AluOp::ADD }, AC_I32, nullptr, {"d", "o(s)"}, 0x00002003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }, nullptr}, // LW
+    {"ld",  IT_I, { .alu_op=AluOp::ADD }, AC_I64, nullptr, {"d", "o(s)"}, 0x00003003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }, nullptr}, // LD
+    {"lbu", IT_I, { .alu_op=AluOp::ADD }, AC_U8,  nullptr, {"d", "o(s)"}, 0x00004003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }, nullptr}, // LBU
+    {"lhu", IT_I, { .alu_op=AluOp::ADD }, AC_U16, nullptr, {"d", "o(s)"}, 0x00005003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }, nullptr}, // LHU
+    {"lwu", IT_I, { .alu_op=AluOp::ADD }, AC_U32, nullptr, {"d", "o(s)"}, 0x00006003,0x0000707f, { .flags = FLAGS_ALU_I_LOAD }, nullptr}, // LWU
     IM_UNKNOWN,
 };
 
 static const struct InstructionMap SRI_map[] = { // 0xfe00707f mask changed to 0xfc00707f to support RV64I
-    {"srli", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x00005013,0xfc00707f, { .flags = FLAGS_ALU_I }}, // SRLI
-    {"srai", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x40005013,0xfc00707f, { .flags = (FLAGS_ALU_I | IMF_ALU_MOD) }}, // SRAI
+    {"srli", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x00005013,0xfc00707f, { .flags = FLAGS_ALU_I }, nullptr}, // SRLI
+    {"srai", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x40005013,0xfc00707f, { .flags = (FLAGS_ALU_I | IMF_ALU_MOD) }, nullptr}, // SRAI
 };
 
 static const struct InstructionMap OP_IMM_map[] = {
-    {"addi",  IT_I, { .alu_op=AluOp::ADD },  NOMEM, nullptr, {"d", "s", "j"}, 0x00000013,0x0000707f, { .flags = FLAGS_ALU_I }}, // ADDI
-    {"slli",  IT_I, { .alu_op=AluOp::SLL },  NOMEM, nullptr, {"d", "s", ">"}, 0x00001013,0xfc00707f, { .flags = FLAGS_ALU_I }}, // SLLI
-    {"slti",  IT_I, { .alu_op=AluOp::SLT },  NOMEM, nullptr, {"d", "s", "j"}, 0x00002013,0x0000707f, { .flags = FLAGS_ALU_I }}, // SLTI
-    {"sltiu", IT_I, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"d", "s", "j"}, 0x00003013,0x0000707f, { .flags = FLAGS_ALU_I }}, // SLTIU
-    {"xori",  IT_I, { .alu_op=AluOp::XOR },  NOMEM, nullptr, {"d", "s", "j"}, 0x00004013,0x0000707f, { .flags = FLAGS_ALU_I }}, // XORI
-    {"sri",   IT_I, NOALU,       NOMEM, SRI_map,              {}, 0x00005013, 0xbe00707f, { .subfield = {1, 30} }}, // SRLI, SRAI
-    {"ori",   IT_I, { .alu_op=AluOp::OR },   NOMEM, nullptr, {"d", "s", "j"}, 0x00006013,0x0000707f, { .flags = FLAGS_ALU_I }}, // ORI
-    {"andi",  IT_I, { .alu_op=AluOp::AND },  NOMEM, nullptr, {"d", "s", "j"}, 0x00007013,0x0000707f, { .flags = FLAGS_ALU_I }}, // ANDI
+    {"addi",  IT_I, { .alu_op=AluOp::ADD },  NOMEM, nullptr, {"d", "s", "j"}, 0x00000013,0x0000707f, { .flags = FLAGS_ALU_I }, nullptr}, // ADDI
+    {"slli",  IT_I, { .alu_op=AluOp::SLL },  NOMEM, nullptr, {"d", "s", ">"}, 0x00001013,0xfc00707f, { .flags = FLAGS_ALU_I }, nullptr}, // SLLI
+    {"slti",  IT_I, { .alu_op=AluOp::SLT },  NOMEM, nullptr, {"d", "s", "j"}, 0x00002013,0x0000707f, { .flags = FLAGS_ALU_I }, nullptr}, // SLTI
+    {"sltiu", IT_I, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"d", "s", "j"}, 0x00003013,0x0000707f, { .flags = FLAGS_ALU_I }, nullptr}, // SLTIU
+    {"xori",  IT_I, { .alu_op=AluOp::XOR },  NOMEM, nullptr, {"d", "s", "j"}, 0x00004013,0x0000707f, { .flags = FLAGS_ALU_I }, nullptr}, // XORI
+    {"sri",   IT_I, NOALU,       NOMEM, SRI_map,              {}, 0x00005013, 0xbe00707f, { .subfield = {1, 30} }, nullptr}, // SRLI, SRAI
+    {"ori",   IT_I, { .alu_op=AluOp::OR },   NOMEM, nullptr, {"d", "s", "j"}, 0x00006013,0x0000707f, { .flags = FLAGS_ALU_I }, nullptr}, // ORI
+    {"andi",  IT_I, { .alu_op=AluOp::AND },  NOMEM, nullptr, {"d", "s", "j"}, 0x00007013,0x0000707f, { .flags = FLAGS_ALU_I }, nullptr}, // ANDI
 };
 
 static const struct InstructionMap STORE_map[] = {
-    {"sb", IT_S, { .alu_op=AluOp::ADD }, AC_U8,  nullptr, {"t", "q(s)"}, 0x00000023, 0x0000707f, { .flags = FLAGS_ALU_I_STORE }}, // SB
-    {"sh", IT_S, { .alu_op=AluOp::ADD }, AC_U16, nullptr, {"t", "q(s)"}, 0x00001023, 0x0000707f, { .flags = FLAGS_ALU_I_STORE }}, // SH
-    {"sw", IT_S, { .alu_op=AluOp::ADD }, AC_U32, nullptr, {"t", "q(s)"}, 0x00002023, 0x0000707f, { .flags = FLAGS_ALU_I_STORE }}, // SW
-    {"sd", IT_S, { .alu_op=AluOp::ADD }, AC_U64, nullptr, {"t", "q(s)"}, 0x00003023, 0x0000707f, { .flags = FLAGS_ALU_I_STORE }}, // SD
+    {"sb", IT_S, { .alu_op=AluOp::ADD }, AC_U8,  nullptr, {"t", "q(s)"}, 0x00000023, 0x0000707f, { .flags = FLAGS_ALU_I_STORE }, nullptr}, // SB
+    {"sh", IT_S, { .alu_op=AluOp::ADD }, AC_U16, nullptr, {"t", "q(s)"}, 0x00001023, 0x0000707f, { .flags = FLAGS_ALU_I_STORE }, nullptr}, // SH
+    {"sw", IT_S, { .alu_op=AluOp::ADD }, AC_U32, nullptr, {"t", "q(s)"}, 0x00002023, 0x0000707f, { .flags = FLAGS_ALU_I_STORE }, nullptr}, // SW
+    {"sd", IT_S, { .alu_op=AluOp::ADD }, AC_U64, nullptr, {"t", "q(s)"}, 0x00003023, 0x0000707f, { .flags = FLAGS_ALU_I_STORE }, nullptr}, // SD
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
@@ -184,29 +186,29 @@ static const struct InstructionMap STORE_map[] = {
 };
 
 static const struct InstructionMap ADD_map[] = {
-    {"add", IT_R, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "s", "t"}, 0x00000033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }},
-    {"sub", IT_R, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "s", "t"}, 0x40000033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_MOD }},
+    {"add", IT_R, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "s", "t"}, 0x00000033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }, nullptr},
+    {"sub", IT_R, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "s", "t"}, 0x40000033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_MOD }, nullptr},
 };
 
 static const struct InstructionMap SR_map[] = {
-    {"srl", IT_R, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", "t"}, 0x00005033,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }}, // SRL
-    {"sra", IT_R, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", "t"}, 0x40005033,0xfe00707f,  { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_MOD }}, // SRA
+    {"srl", IT_R, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", "t"}, 0x00005033,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }, nullptr}, // SRL
+    {"sra", IT_R, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", "t"}, 0x40005033,0xfe00707f,  { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_MOD }, nullptr}, // SRA
 };
 
 static const struct InstructionMap OP_ALU_map[] = {
-    {"add/sub", IT_R, NOALU,    NOMEM, ADD_map,              {}, 0x00000033, 0xbe00707f, { .subfield = {1, 30} }},
-    {"sll",  IT_R, { .alu_op=AluOp::SLL },  NOMEM, nullptr, {"d", "s", "t"}, 0x00001033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }}, // SLL
-    {"slt",  IT_R, { .alu_op=AluOp::SLT },  NOMEM, nullptr, {"d", "s", "t"}, 0x00002033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }}, // SLT
-    {"sltu", IT_R, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"d", "s", "t"}, 0x00003033,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }}, // SLTU
-    {"xor",  IT_R, { .alu_op=AluOp::XOR },  NOMEM, nullptr, {"d", "s", "t"}, 0x00004033,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }}, // XOR
-    {"sr",   IT_R, NOALU,       NOMEM,  SR_map,              {}, 0x00005033, 0xbe00707f, { .subfield = {1, 30} }}, // SRL, SRA
-    {"or",   IT_R, { .alu_op=AluOp::OR },   NOMEM, nullptr, {"d", "s", "t"}, 0x00006033,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }}, // OR
-    {"and",  IT_R, { .alu_op=AluOp::AND },  NOMEM, nullptr, {"d", "s", "t"}, 0x00007033,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }}, // AND
+    {"add/sub", IT_R, NOALU,    NOMEM, ADD_map,              {}, 0x00000033, 0xbe00707f, { .subfield = {1, 30} }, nullptr},
+    {"sll",  IT_R, { .alu_op=AluOp::SLL },  NOMEM, nullptr, {"d", "s", "t"}, 0x00001033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }, nullptr}, // SLL
+    {"slt",  IT_R, { .alu_op=AluOp::SLT },  NOMEM, nullptr, {"d", "s", "t"}, 0x00002033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }, nullptr}, // SLT
+    {"sltu", IT_R, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"d", "s", "t"}, 0x00003033,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }, nullptr}, // SLTU
+    {"xor",  IT_R, { .alu_op=AluOp::XOR },  NOMEM, nullptr, {"d", "s", "t"}, 0x00004033,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }, nullptr}, // XOR
+    {"sr",   IT_R, NOALU,       NOMEM,  SR_map,              {}, 0x00005033, 0xbe00707f, { .subfield = {1, 30} }, nullptr}, // SRL, SRA
+    {"or",   IT_R, { .alu_op=AluOp::OR },   NOMEM, nullptr, {"d", "s", "t"}, 0x00006033,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }, nullptr}, // OR
+    {"and",  IT_R, { .alu_op=AluOp::AND },  NOMEM, nullptr, {"d", "s", "t"}, 0x00007033,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }, nullptr}, // AND
 };
 
 // RV32M
 #define MUL_MAP_ITEM(NAME, OP, CODE) \
-    { NAME, IT_R, { .mul_op = (OP) }, NOMEM, nullptr, {"d", "s", "t"}, (0x02000033 | (CODE)), 0xfe00707f, { .flags = (FLAGS_ALU_T_R_STD | IMF_MUL) }}
+    { NAME, IT_R, { .mul_op = (OP) }, NOMEM, nullptr, {"d", "s", "t"}, (0x02000033 | (CODE)), 0xfe00707f, { .flags = (FLAGS_ALU_T_R_STD | IMF_MUL) }, nullptr}
 
 static const struct InstructionMap OP_MUL_map[] = {
     MUL_MAP_ITEM("mul",     MulOp::MUL,     0x0000),
@@ -220,31 +222,31 @@ static const struct InstructionMap OP_MUL_map[] = {
 };
 
 static const struct InstructionMap OP_map[] = {
-    {"alu", IT_R, NOALU, NOMEM, OP_ALU_map, {}, 0x00000033, 0x0000707f, { .subfield = {3, 12} }},
-    {"mul", IT_R, NOALU, NOMEM, OP_MUL_map, {}, 0x02000033, 0xfc00707f, { .subfield = {3, 12} }},
+    {"alu", IT_R, NOALU, NOMEM, OP_ALU_map, {}, 0x00000033, 0x0000707f, { .subfield = {3, 12} }, nullptr},
+    {"mul", IT_R, NOALU, NOMEM, OP_MUL_map, {}, 0x02000033, 0xfc00707f, { .subfield = {3, 12} }, nullptr},
 };
 
 static const struct InstructionMap BRANCH_map[] = {
-    {"beq",  IT_B, { .alu_op=AluOp::ADD }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00000063,0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_ALU_MOD }}, // BEQ
-    {"bne",  IT_B, { .alu_op=AluOp::ADD }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00001063, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_ALU_MOD | IMF_BJ_NOT }}, // BNE
+    {"beq",  IT_B, { .alu_op=AluOp::ADD }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00000063,0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_ALU_MOD }, nullptr}, // BEQ
+    {"bne",  IT_B, { .alu_op=AluOp::ADD }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00001063, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_ALU_MOD | IMF_BJ_NOT }, nullptr}, // BNE
     IM_UNKNOWN,
     IM_UNKNOWN,
-    {"blt",  IT_B, { .alu_op=AluOp::SLT }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00004063, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_BJ_NOT }}, // BLT
-    {"bge",  IT_B, { .alu_op=AluOp::SLT }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00005063,0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT }}, // BGE
-    {"bltu", IT_B, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"s", "t", "p"}, 0x00006063, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_BJ_NOT }}, // BLTU
-    {"bgeu", IT_B, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"s", "t", "p"}, 0x00007063,0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT }}, // BGEU
+    {"blt",  IT_B, { .alu_op=AluOp::SLT }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00004063, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_BJ_NOT }, nullptr}, // BLT
+    {"bge",  IT_B, { .alu_op=AluOp::SLT }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00005063,0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT }, nullptr}, // BGE
+    {"bltu", IT_B, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"s", "t", "p"}, 0x00006063, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_BJ_NOT }, nullptr}, // BLTU
+    {"bgeu", IT_B, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"s", "t", "p"}, 0x00007063,0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT }, nullptr}, // BGEU
 };
 
 // Spec vol. 1: 2.8
 static const struct InstructionMap ENVIRONMENT_AND_BREAKPOINTS_map[] = {
-    {"ecall", IT_I, NOALU, NOMEM, nullptr, {}, 0x00000073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_EXCEPTION | IMF_ECALL }},
-    {"ebreak", IT_I, NOALU, NOMEM, nullptr, {}, 0x00100073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_EXCEPTION | IMF_EBREAK }},
+    {"ecall", IT_I, NOALU, NOMEM, nullptr, {}, 0x00000073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_EXCEPTION | IMF_ECALL }, nullptr},
+    {"ebreak", IT_I, NOALU, NOMEM, nullptr, {}, 0x00100073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_EXCEPTION | IMF_EBREAK }, nullptr},
 };
 
 // Priviledged system isntructions, only 5-bits (29:25) are decoded for now.
 // Full decode is should cover 128 entries (31:25) but we radly support hypervisor even in future
 static const struct InstructionMap SYSTEM_PRIV_map[] = {
-    {"environment_and_breakpoints", IT_I, NOALU, NOMEM, ENVIRONMENT_AND_BREAKPOINTS_map, {}, 0x00000073, 0xffffffff, { .subfield = {1, 20} }},
+    {"environment_and_breakpoints", IT_I, NOALU, NOMEM, ENVIRONMENT_AND_BREAKPOINTS_map, {}, 0x00000073, 0xffffffff, { .subfield = {1, 20} }, nullptr},
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
@@ -252,7 +254,7 @@ static const struct InstructionMap SYSTEM_PRIV_map[] = {
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
-    {"sret", IT_I, NOALU, NOMEM, nullptr, {}, 0x10200073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_XRET }},
+    {"sret", IT_I, NOALU, NOMEM, nullptr, {}, 0x10200073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_XRET }, nullptr},
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
@@ -268,7 +270,7 @@ static const struct InstructionMap SYSTEM_PRIV_map[] = {
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
-    {"mret", IT_I, NOALU, NOMEM, nullptr, {}, 0x30200073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_XRET }},
+    {"mret", IT_I, NOALU, NOMEM, nullptr, {}, 0x30200073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_XRET }, nullptr},
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
@@ -279,10 +281,10 @@ static const struct InstructionMap SYSTEM_PRIV_map[] = {
 };
 
 #define CSR_MAP_ITEM(NAME, SOURCE, CODE, ALU_OP,  EXTRA_FLAGS) \
-    { NAME, Instruction::ZICSR, { .alu_op=AluOp::ALU_OP }, NOMEM, nullptr,  {"d", "E", SOURCE}, 0x00000073 | (CODE), 0x0000707f, { .flags = IMF_SUPPORTED | IMF_CSR | IMF_REGWRITE | IMF_ALU_REQ_RS | (EXTRA_FLAGS) } }
+    { NAME, Instruction::ZICSR, { .alu_op=AluOp::ALU_OP }, NOMEM, nullptr,  {"d", "E", SOURCE}, 0x00000073 | (CODE), 0x0000707f, { .flags = IMF_SUPPORTED | IMF_CSR | IMF_REGWRITE | IMF_ALU_REQ_RS | (EXTRA_FLAGS) }, nullptr}
 
 static const struct InstructionMap SYSTEM_map[] = {
-    {"system_priviledged", IT_I, NOALU, NOMEM, SYSTEM_PRIV_map, {}, 0x00000073, 0xffffffff, { .subfield = {5, 25} }},
+    {"system_priviledged", IT_I, NOALU, NOMEM, SYSTEM_PRIV_map, {}, 0x00000073, 0xffffffff, { .subfield = {5, 25} }, nullptr},
     CSR_MAP_ITEM("csrrw", "s", 0x1000, ADD, 0),
     CSR_MAP_ITEM("csrrs", "s", 0x2000, OR, IMF_CSR_TO_ALU),
     CSR_MAP_ITEM("csrrc", "s", 0x3000, AND, IMF_CSR_TO_ALU | IMF_ALU_MOD),
@@ -295,8 +297,8 @@ static const struct InstructionMap SYSTEM_map[] = {
 #undef CSR_MAP_ITEM
 
 static const struct InstructionMap MISC_MEM_map[] = {
-    {"fence", IT_I, NOALU, AC_CACHE_OP, nullptr, {}, 0x0000000f, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_MEM }},
-    {"fence.i", IT_I, NOALU, AC_CACHE_OP, nullptr, {}, 0x000100f, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_MEM }},
+    {"fence", IT_I, NOALU, AC_CACHE_OP, nullptr, {}, 0x0000000f, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_MEM }, nullptr},
+    {"fence.i", IT_I, NOALU, AC_CACHE_OP, nullptr, {}, 0x000100f, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_MEM }, nullptr},
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
@@ -308,45 +310,45 @@ static const struct InstructionMap MISC_MEM_map[] = {
 // RV64I specific operations
 
 static const struct InstructionMap SRI_32_map[] = {
-    {"srliw", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x0000501b,0xfe00707f, { .flags = FLAGS_ALU_I | IMF_FORCE_W_OP }}, // SRLIW
-    {"sraiw", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x4000501b,0xfe00707f, { .flags = (FLAGS_ALU_I | IMF_ALU_MOD | IMF_FORCE_W_OP ) }}, // SRAIW
+    {"srliw", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x0000501b,0xfe00707f, { .flags = FLAGS_ALU_I | IMF_FORCE_W_OP }, nullptr}, // SRLIW
+    {"sraiw", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x4000501b,0xfe00707f, { .flags = (FLAGS_ALU_I | IMF_ALU_MOD | IMF_FORCE_W_OP ) }, nullptr}, // SRAIW
 };
 
 static const struct InstructionMap OP_IMM_32_map[] = {
-    {"addiw", IT_I, { .alu_op=AluOp::ADD },  NOMEM, nullptr, {"d", "s", "j"}, 0x0000001b,0x0000707f, { .flags = FLAGS_ALU_I | IMF_FORCE_W_OP }}, // ADDIW
-    {"slliw", IT_I, { .alu_op=AluOp::SLL },  NOMEM, nullptr, {"d", "s", ">"}, 0x0000101b,0xfe00707f, { .flags = FLAGS_ALU_I | IMF_FORCE_W_OP }}, // SLLIW
+    {"addiw", IT_I, { .alu_op=AluOp::ADD },  NOMEM, nullptr, {"d", "s", "j"}, 0x0000001b,0x0000707f, { .flags = FLAGS_ALU_I | IMF_FORCE_W_OP }, nullptr}, // ADDIW
+    {"slliw", IT_I, { .alu_op=AluOp::SLL },  NOMEM, nullptr, {"d", "s", ">"}, 0x0000101b,0xfe00707f, { .flags = FLAGS_ALU_I | IMF_FORCE_W_OP }, nullptr}, // SLLIW
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
-    {"sriw",   IT_I, NOALU,       NOMEM, SRI_32_map,              {}, 0x0000501b, 0xbe00707f, { .subfield = {1, 30} }}, // SRLIW, SRAIW
+    {"sriw",   IT_I, NOALU,       NOMEM, SRI_32_map,              {}, 0x0000501b, 0xbe00707f, { .subfield = {1, 30} }, nullptr}, // SRLIW, SRAIW
     IM_UNKNOWN,
     IM_UNKNOWN,
 };
 
 static const struct InstructionMap ADD_32_map[] = {
-    {"addw", IT_R, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "s", "t"}, 0x0000003b, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_FORCE_W_OP }},
-    {"subw", IT_R, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "s", "t"}, 0x4000003b, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_MOD | IMF_FORCE_W_OP }},
+    {"addw", IT_R, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "s", "t"}, 0x0000003b, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_FORCE_W_OP }, nullptr},
+    {"subw", IT_R, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "s", "t"}, 0x4000003b, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_MOD | IMF_FORCE_W_OP }, nullptr},
 };
 
 static const struct InstructionMap SR_32_map[] = {
-    {"srlw", IT_R, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", "t"}, 0x0000503b,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_FORCE_W_OP }}, // SRL
-    {"sraw", IT_R, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", "t"}, 0x4000503b,0xfe00707f,  { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_MOD | IMF_FORCE_W_OP }}, // SRA
+    {"srlw", IT_R, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", "t"}, 0x0000503b,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_FORCE_W_OP }, nullptr}, // SRL
+    {"sraw", IT_R, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", "t"}, 0x4000503b,0xfe00707f,  { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_MOD | IMF_FORCE_W_OP }, nullptr}, // SRA
 };
 
 static const struct InstructionMap OP_ALU_32_map[] = {
-    {"addw/subw", IT_R, NOALU,    NOMEM, ADD_32_map,              {}, 0x0000003b, 0xbe00707f, { .subfield = {1, 30} }},
-    {"sllw",  IT_R, { .alu_op=AluOp::SLL },  NOMEM, nullptr, {"d", "s", "t"}, 0x0000103b, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_FORCE_W_OP }}, // SLL
+    {"addw/subw", IT_R, NOALU,    NOMEM, ADD_32_map,              {}, 0x0000003b, 0xbe00707f, { .subfield = {1, 30} }, nullptr},
+    {"sllw",  IT_R, { .alu_op=AluOp::SLL },  NOMEM, nullptr, {"d", "s", "t"}, 0x0000103b, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_FORCE_W_OP }, nullptr}, // SLL
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
-    {"srw",   IT_R, NOALU,       NOMEM,  SR_32_map,              {}, 0x0000503b, 0xbe00707f, { .subfield = {1, 30} }}, // SRL, SRA
+    {"srw",   IT_R, NOALU,       NOMEM,  SR_32_map,              {}, 0x0000503b, 0xbe00707f, { .subfield = {1, 30} }, nullptr}, // SRL, SRA
     IM_UNKNOWN,
     IM_UNKNOWN,
 };
 
 // RV64M
 #define MUL_32_MAP_ITEM(NAME, OP, CODE) \
-    { NAME, IT_R, { .mul_op = (OP) }, NOMEM, nullptr, {"d", "s", "t"}, (0x0200003b | (CODE)), 0xfe00707f, { .flags = (FLAGS_ALU_T_R_STD | IMF_MUL | IMF_FORCE_W_OP ) }}
+    { NAME, IT_R, { .mul_op = (OP) }, NOMEM, nullptr, {"d", "s", "t"}, (0x0200003b | (CODE)), 0xfe00707f, { .flags = (FLAGS_ALU_T_R_STD | IMF_MUL | IMF_FORCE_W_OP ) }, nullptr}
 
 static const struct InstructionMap OP_MUL_32_map[] = {
     MUL_32_MAP_ITEM("mulw",     MulOp::MUL,     0x0000),
@@ -360,28 +362,28 @@ static const struct InstructionMap OP_MUL_32_map[] = {
 };
 
 static const struct InstructionMap OP_32_map[] = {
-    {"aluw", IT_R, NOALU, NOMEM, OP_ALU_32_map, {}, 0x00000033, 0x0000707f, { .subfield = {3, 12} }},
-    {"mulw", IT_R, NOALU, NOMEM, OP_MUL_32_map, {}, 0x02000033, 0xfc00707f, { .subfield = {3, 12} }},
+    {"aluw", IT_R, NOALU, NOMEM, OP_ALU_32_map, {}, 0x00000033, 0x0000707f, { .subfield = {3, 12} }, nullptr},
+    {"mulw", IT_R, NOALU, NOMEM, OP_MUL_32_map, {}, 0x02000033, 0xfc00707f, { .subfield = {3, 12} }, nullptr},
 };
 
 // Full, uncomprese, instructions top level map
 
 static const struct InstructionMap I_inst_map[] = {
-    {"load", IT_I, NOALU, NOMEM, LOAD_map, {}, 0x03, 0x7f, { .subfield = {3, 12} }}, // LOAD
+    {"load", IT_I, NOALU, NOMEM, LOAD_map, {}, 0x03, 0x7f, { .subfield = {3, 12} }, nullptr}, // LOAD
     IM_UNKNOWN, // LOAD-FP
     IM_UNKNOWN, // custom-0
-    {"misc-mem", IT_I, NOALU, NOMEM, MISC_MEM_map, {}, 0x0f, 0x7f, { .subfield = {3, 12} }}, // MISC-MEM
-    {"op-imm", IT_I, NOALU, NOMEM, OP_IMM_map, {}, 0x13, 0x7f, { .subfield = {3, 12} }}, // OP-IMM
-    {"auipc", IT_U, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "u"}, 0x17, 0x7f, { .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_PC_TO_ALU }}, // AUIPC
-    {"op-imm-32", IT_I, NOALU, NOMEM, OP_IMM_32_map, {}, 0x1b, 0x7f, { .subfield = {3, 12} }}, // OP-IMM-32    IM_UNKNOWN, // OP-IMM-32
+    {"misc-mem", IT_I, NOALU, NOMEM, MISC_MEM_map, {}, 0x0f, 0x7f, { .subfield = {3, 12} }, nullptr}, // MISC-MEM
+    {"op-imm", IT_I, NOALU, NOMEM, OP_IMM_map, {}, 0x13, 0x7f, { .subfield = {3, 12} }, nullptr}, // OP-IMM
+    {"auipc", IT_U, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "u"}, 0x17, 0x7f, { .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_PC_TO_ALU }, nullptr}, // AUIPC
+    {"op-imm-32", IT_I, NOALU, NOMEM, OP_IMM_32_map, {}, 0x1b, 0x7f, { .subfield = {3, 12} }, nullptr}, // OP-IMM-32    IM_UNKNOWN, // OP-IMM-32
     IM_UNKNOWN, // 48b
-    {"store", IT_I, NOALU, NOMEM, STORE_map, {}, 0x23, 0x7f, { .subfield = {3, 12} }}, // STORE
+    {"store", IT_I, NOALU, NOMEM, STORE_map, {}, 0x23, 0x7f, { .subfield = {3, 12} }, nullptr}, // STORE
     IM_UNKNOWN, // STORE-FP
     IM_UNKNOWN, // custom-1
     IM_UNKNOWN, // AMO
-    {"op", IT_R, NOALU, NOMEM, OP_map, {}, 0x33, 0x7f, { .subfield = {1, 25} }}, // OP
-    {"lui", IT_U, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "u"}, 0x37, 0x7f, { .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE }}, // LUI
-    {"op-32", IT_R, NOALU, NOMEM, OP_32_map, {}, 0x3b, 0x7f, { .subfield = {1, 25} }}, // OP-32
+    {"op", IT_R, NOALU, NOMEM, OP_map, {}, 0x33, 0x7f, { .subfield = {1, 25} }, nullptr}, // OP
+    {"lui", IT_U, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "u"}, 0x37, 0x7f, { .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE }, nullptr}, // LUI
+    {"op-32", IT_R, NOALU, NOMEM, OP_32_map, {}, 0x3b, 0x7f, { .subfield = {1, 25} }, nullptr}, // OP-32
     IM_UNKNOWN, // 64b
     IM_UNKNOWN, // MADD
     IM_UNKNOWN, // MSUB
@@ -391,14 +393,14 @@ static const struct InstructionMap I_inst_map[] = {
     IM_UNKNOWN, // reserved
     IM_UNKNOWN, // custom-2/rv128
     IM_UNKNOWN, // 48b
-    {"branch", IT_B, NOALU, NOMEM, BRANCH_map, {}, 0x63, 0x7f, { .subfield = {3, 12} }}, // BRANCH
+    {"branch", IT_B, NOALU, NOMEM, BRANCH_map, {}, 0x63, 0x7f, { .subfield = {3, 12} }, nullptr}, // BRANCH
     {"jalr", IT_I, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "o(s)"}, 0x67, 0x7f, { .flags =
-IMF_SUPPORTED | IMF_REGWRITE | IMF_BRANCH_JALR | IMF_ALUSRC | IMF_ALU_REQ_RS }}, // JALR
+IMF_SUPPORTED | IMF_REGWRITE | IMF_BRANCH_JALR | IMF_ALUSRC | IMF_ALU_REQ_RS }, nullptr}, // JALR
     IM_UNKNOWN, // reserved
     {"jal", IT_J, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "a"}, 0x6f, 0x7f, { .flags =
 IMF_SUPPORTED |
-IMF_REGWRITE | IMF_JUMP | IMF_PC_TO_ALU | IMF_ALUSRC }}, // JAL
-    {"system", IT_I, NOALU, NOMEM, SYSTEM_map, {}, 0x73, 0x7f, { .subfield = {3, 12} }}, // SYSTEM
+IMF_REGWRITE | IMF_JUMP | IMF_PC_TO_ALU | IMF_ALUSRC }, nullptr}, // JAL
+    {"system", IT_I, NOALU, NOMEM, SYSTEM_map, {}, 0x73, 0x7f, { .subfield = {3, 12} }, nullptr}, // SYSTEM
     IM_UNKNOWN, // reserved
     IM_UNKNOWN, // custom-3/rv128
     IM_UNKNOWN, // >= 80b
@@ -408,7 +410,7 @@ static const struct InstructionMap C_inst_map[] = {
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
-    {"i", IT_UNKNOWN, NOALU, NOMEM, I_inst_map, {}, 0x3, 0x3, { .subfield = {5, 2} }},
+    {"i", IT_UNKNOWN, NOALU, NOMEM, I_inst_map, {}, 0x3, 0x3, { .subfield = {5, 2} }, nullptr},
 };
 
 static const struct InstructionMap C_inst_unknown = IM_UNKNOWN;
