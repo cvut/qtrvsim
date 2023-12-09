@@ -6,10 +6,11 @@ CsrDock::CsrDock(QWidget *parent) : QDockWidget(parent) {
     scrollarea = new QScrollArea(this);
     scrollarea->setWidgetResizable(true);
     widg = new StaticTable(scrollarea);
+    xlen = machine::Xlen::_32;
 
     for (size_t i = 0; i < machine::CSR::REGISTERS.size(); i++) {
         auto &desc = machine::CSR::REGISTERS.at(i);
-        csr_view[i] = new QLabel("0x00000000", widg);
+        csr_view[i] = new QLabel(sizeHintText(), widg);
         csr_view[i]->setFixedSize(csr_view[i]->sizeHint());
         csr_view[i]->setText("");
         csr_view[i]->setTextInteractionFlags(Qt::TextSelectableByMouse);
@@ -34,6 +35,13 @@ CsrDock::CsrDock(QWidget *parent) : QDockWidget(parent) {
     csr_highlighted_any = false;
 }
 
+const char *CsrDock::sizeHintText() {
+    if (xlen == machine::Xlen::_64)
+        return "0x0000000000000000";
+    else
+        return "0x00000000";
+}
+
 void CsrDock::setup(machine::Machine *machine) {
     if (machine == nullptr) {
         // Reset data
@@ -44,9 +52,21 @@ void CsrDock::setup(machine::Machine *machine) {
     }
 
     const machine::CSR::ControlState *controlst = machine->control_state();
+    if (controlst == nullptr)
+        return;
+
+    // if xlen changes adjust space to show full value
+    if (xlen != machine->config().get_simulated_xlen()) {
+        xlen = machine->config().get_simulated_xlen();
+        auto *dumy_data_label = new QLabel(sizeHintText(), widg);
+        for (size_t i = 0; i < machine::CSR::REGISTERS.size(); i++) {
+            csr_view[i]->setFixedSize(dumy_data_label->sizeHint());
+        }
+        delete dumy_data_label;
+    }
 
     for (size_t i = 0; i < machine::CSR::REGISTERS.size(); i++) {
-        labelVal(csr_view[i], controlst->read_internal(i).as_u64());
+        labelVal(csr_view[i], controlst->read_internal(i).as_xlen(xlen));
     }
 
     connect(controlst, &machine::CSR::ControlState::write_signal, this, &CsrDock::csr_changed);
@@ -60,7 +80,7 @@ void CsrDock::csr_changed(size_t internal_reg_id, machine::RegisterValue val) {
         (uint)internal_reg_id < machine::CSR::REGISTERS.size(),
         QString("CsrDock received signal with invalid CSR register: ")
             + QString::number((uint)internal_reg_id));
-    labelVal(csr_view[(uint)internal_reg_id], val.as_u64());
+    labelVal(csr_view[(uint)internal_reg_id], val.as_xlen(xlen));
     csr_view[internal_reg_id]->setPalette(pal_updated);
     csr_highlighted[internal_reg_id] = true;
     csr_highlighted_any = true;

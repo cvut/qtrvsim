@@ -25,8 +25,15 @@ RegistersDock::RegistersDock(QWidget *parent, machine::Xlen xlen)
     setWindowTitle("Registers");
 }
 
+const char *RegistersDock::sizeHintText() {
+    if (xlen == machine::Xlen::_64)
+        return "0x0000000000000000";
+    else
+        return "0x00000000";
+}
+
 QLabel *RegistersDock::addRegisterLabel(const QString &title) {
-    auto *data_label = new QLabel("0x00000000", table_widget.data());
+    auto *data_label = new QLabel(sizeHintText(), table_widget.data());
     data_label->setFixedSize(data_label->sizeHint());
     data_label->setText("");
     data_label->setPalette(pal_normal);
@@ -53,10 +60,21 @@ void RegistersDock::connectToMachine(machine::Machine *machine) {
 
     const machine::Registers *regs = machine->registers();
 
+    // if xlen changes adjust space to show full value
+    if (xlen != machine->config().get_simulated_xlen()) {
+        xlen = machine->config().get_simulated_xlen();
+        auto *dumy_data_label = new QLabel(sizeHintText(), table_widget.data());
+        for (size_t i = 0; i < gp.size(); i++) {
+            gp[i]->setFixedSize(dumy_data_label->sizeHint());
+        }
+        pc->setFixedSize(dumy_data_label->sizeHint());
+        delete dumy_data_label;
+    }
+
     // Load values
     setRegisterValueToLabel(pc, regs->read_pc().get_raw());
     for (size_t i = 0; i < gp.size(); i++) {
-        setRegisterValueToLabel(gp[i], regs->read_gp(i).as_u32());
+        setRegisterValueToLabel(gp[i], regs->read_gp(i));
     }
 
     connect(regs, &machine::Registers::pc_update, this, &RegistersDock::pc_changed);
@@ -70,7 +88,7 @@ void RegistersDock::pc_changed(machine::Address val) {
 }
 
 void RegistersDock::gp_changed(machine::RegisterId i, machine::RegisterValue val) {
-    setRegisterValueToLabel(gp[i], val.as_u32());
+    setRegisterValueToLabel(gp[i], val);
     gp[i]->setPalette(pal_updated);
     gp_highlighted[i] = true;
 }

@@ -41,7 +41,7 @@ RegisterValue Registers::read_gp(RegisterId reg) const {
     }
 
     RegisterValue value = this->gp.at(reg);
-    emit gp_read(reg, value.as_u32());
+    emit gp_read(reg, value);
     return value;
 }
 
@@ -51,7 +51,7 @@ void Registers::write_gp(RegisterId reg, RegisterValue value) {
     }
 
     this->gp.at(reg) = value;
-    emit gp_update(reg, value.as_u32());
+    emit gp_update(reg, value);
 }
 
 bool Registers::operator==(const Registers &c) const {

@@ -25,6 +25,10 @@ private slots:
     void clear_highlights();
 
 private:
+    machine::Xlen xlen;
+
+    const char *sizeHintText();
+
     QT_OWNED StaticTable *widg;
     QT_OWNED QScrollArea *scrollarea;
 

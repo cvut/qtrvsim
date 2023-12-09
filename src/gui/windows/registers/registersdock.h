@@ -30,7 +30,9 @@ private slots:
     void clear_highlights();
 
 private:
-    const machine::Xlen xlen;
+    machine::Xlen xlen;
+
+    const char *sizeHintText();
 
     Box<QScrollArea> scroll_area;
     Box<StaticTable> table_widget;
