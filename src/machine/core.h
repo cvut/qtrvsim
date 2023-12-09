@@ -33,7 +33,8 @@ public:
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
         CSR::ControlState *control_state,
-        Xlen xlen);
+        Xlen xlen,
+        ConfigIsaWord isa_word);
 
     void step(bool skip_break = false);
     void reset(); // Reset core (only core, memory and registers has to be reset separately).
@@ -106,6 +107,8 @@ protected:
         Address mem_ref_addr);
 
     const Xlen xlen;
+    const InstructionFlags check_inst_flags_val;
+    const InstructionFlags check_inst_flags_mask;
     BORROWED Registers *const regs;
     BORROWED CSR::ControlState *const control_state;
     BORROWED Predictor *const predictor;
@@ -147,7 +150,8 @@ public:
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
         CSR::ControlState *control_state,
-        Xlen xlen);
+        Xlen xlen,
+        ConfigIsaWord isa_word);
 
 protected:
     void do_step(bool skip_break) override;
@@ -166,6 +170,7 @@ public:
         FrontendMemory *mem_data,
         CSR::ControlState *control_state,
         Xlen xlen,
+        ConfigIsaWord isa_word,
         // Default value is used to keep same interface as core single.
         // Forward was chosen as the most conservative variant (regarding correctness).
         MachineConfig::HazardUnit hazard_unit = MachineConfig::HazardUnit::HU_STALL_FORWARD);

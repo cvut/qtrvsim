@@ -37,6 +37,7 @@ set(machine_HEADERS
 		instruction.h
 		machine.h
 		machineconfig.h
+		config_isa.h
 		machinedefs.h
 		memory/address.h
 		memory/address_range.h
@@ -123,6 +124,7 @@ if(NOT ${WASM})
 	add_executable(cache_test
 			machineconfig.cpp
 			machineconfig.h
+			config_isa.h
 			memory/backend/backend_memory.h
 			memory/backend/memory.cpp
 			memory/backend/memory.h

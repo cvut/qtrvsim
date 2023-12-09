@@ -23,8 +23,6 @@ public:
     Address first; //> The first valid location of the range
     Address last; //> The last valid location of the range
 
-    constexpr explicit AddressRange(uint64_t);
-
     /**
      *  Default constructor results for empty range.
      */

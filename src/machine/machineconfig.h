@@ -2,6 +2,7 @@
 #define MACHINECONFIG_H
 
 #include "common/endian.h"
+#include "config_isa.h"
 
 #include <QSettings>
 #include <QString>
@@ -24,6 +25,11 @@ enum ConfigPresets {
     CP_PIPE_NO_HAZARD, // Pipelined cpu without hazard unit and without cache
     CP_PIPE            // Full pipelined cpu
 };
+
+constexpr ConfigIsaWord config_isa_word_default = ConfigIsaWord::byChar('E') | ConfigIsaWord::byChar('I') |
+        ConfigIsaWord::byChar('A') |ConfigIsaWord::byChar('M');
+
+constexpr ConfigIsaWord config_isa_word_fixed = ConfigIsaWord::byChar('E') | ConfigIsaWord::byChar('I');
 
 class CacheConfig {
 public:
@@ -124,6 +130,8 @@ public:
     void set_cache_level2(const CacheConfig &);
     void set_simulated_endian(Endian endian);
     void set_simulated_xlen(Xlen xlen);
+    void set_isa_word(ConfigIsaWord bits);
+    void modify_isa_word(ConfigIsaWord mask, ConfigIsaWord val);
 
     bool pipelined() const;
     bool delay_slot() const;
@@ -148,6 +156,7 @@ public:
     const CacheConfig &cache_level2() const;
     Endian get_simulated_endian() const;
     Xlen get_simulated_xlen() const;
+    ConfigIsaWord get_isa_word() const;
 
     CacheConfig *access_cache_program();
     CacheConfig *access_cache_data();
@@ -168,8 +177,9 @@ private:
     QString osem_fs_root;
     QString elf_path;
     CacheConfig cch_program, cch_data, cch_level2;
-    Endian simulated_endian = LITTLE;
-    Xlen simulated_xlen = Xlen::_32;
+    Endian simulated_endian;
+    Xlen simulated_xlen;
+    ConfigIsaWord isa_word;
 };
 
 } // namespace machine

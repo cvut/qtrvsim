@@ -83,10 +83,10 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
     if (machine_config.pipelined()) {
         cr = new CorePipelined(
                     regs, predictor, cch_program, cch_data, controlst,
-                    machine_config.get_simulated_xlen(), machine_config.hazard_unit());
+                    machine_config.get_simulated_xlen(), machine_config.get_isa_word(), machine_config.hazard_unit());
     } else {
         cr = new CoreSingle(regs, predictor, cch_program, cch_data, controlst,
-                            machine_config.get_simulated_xlen());
+                            machine_config.get_simulated_xlen(), machine_config.get_isa_word());
     }
     connect(
         this, &Machine::set_interrupt_signal, controlst, &CSR::ControlState::set_interrupt_signal);

@@ -58,6 +58,8 @@ enum InstructionFlags : unsigned {
     // RV64/32A - Atomic Memory Operations
     IMF_AMO = 1L << 23,        /**< Instruction is AMO */
     // TODO do we want to add those signals to the visualization?
+
+    IMF_RV64 = 1L << 24, /**< Mark instructions which are available in 64-bit mode only. */
 };
 
 /**

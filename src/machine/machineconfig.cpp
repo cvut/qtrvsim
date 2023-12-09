@@ -149,6 +149,9 @@ bool CacheConfig::operator!=(const CacheConfig &c) const {
 }
 
 MachineConfig::MachineConfig() {
+    simulated_endian = LITTLE;
+    simulated_xlen = Xlen::_32;
+    isa_word = config_isa_word_default;
     pipeline = DF_PIPELINE;
     delayslot = DF_DELAYSLOT;
     hunit = DF_HUNIT;
@@ -173,6 +176,9 @@ MachineConfig::MachineConfig() {
 }
 
 MachineConfig::MachineConfig(const MachineConfig *config) {
+    simulated_endian = config->get_simulated_endian();
+    simulated_xlen = config->get_simulated_xlen();
+    isa_word = config->get_isa_word();
     pipeline = config->pipelined();
     delayslot = config->delay_slot();
     hunit = config->hazard_unit();
@@ -199,6 +205,10 @@ MachineConfig::MachineConfig(const MachineConfig *config) {
 #define N(STR) (prefix + QString(STR))
 
 MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
+    simulated_endian = LITTLE;
+    unsigned int xlen_num_bits = sts->value(N("XlenBits"), 32).toUInt();
+    simulated_xlen = xlen_num_bits == 64? Xlen::_64 :  Xlen::_32;
+    isa_word = ConfigIsaWord(sts->value(N("IsaWord"), config_isa_word_default.toUnsigned()).toUInt());
     pipeline = sts->value(N("Pipelined"), DF_PIPELINE).toBool();
     delayslot = sts->value(N("DelaySlot"), DF_DELAYSLOT).toBool();
     hunit = (enum HazardUnit)sts->value(N("HazardUnit"), DF_HUNIT).toUInt();
@@ -227,6 +237,8 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
 }
 
 void MachineConfig::store(QSettings *sts, const QString &prefix) {
+    sts->setValue(N("XlenBits"), get_simulated_xlen() == Xlen::_64? 64: 32);
+    sts->setValue(N("IsaWord"), get_isa_word().toUnsigned());
     sts->setValue(N("Pipelined"), pipelined());
     sts->setValue(N("DelaySlot"), delay_slot());
     sts->setValue(N("HazardUnit"), (unsigned)hazard_unit());
@@ -280,6 +292,9 @@ void MachineConfig::preset(enum ConfigPresets p) {
     access_cache_program()->preset(p);
     access_cache_data()->preset(p);
     access_cache_level2()->preset(p);
+
+    set_simulated_xlen(Xlen::_32);
+    set_isa_word(config_isa_word_default);
 
     switch (p) {
     case CP_SINGLE:
@@ -397,6 +412,14 @@ void MachineConfig::set_simulated_xlen(Xlen xlen) {
     simulated_xlen = xlen;
 }
 
+void MachineConfig::set_isa_word(ConfigIsaWord bits) {
+    isa_word = bits | config_isa_word_fixed;
+}
+void MachineConfig::modify_isa_word(ConfigIsaWord mask, ConfigIsaWord val) {
+    mask &= ~config_isa_word_fixed;
+    isa_word.modify(mask, val);
+}
+
 bool MachineConfig::pipelined() const {
     return pipeline;
 }
@@ -499,9 +522,14 @@ Xlen MachineConfig::get_simulated_xlen() const {
     return simulated_xlen;
 }
 
+ConfigIsaWord MachineConfig::get_isa_word() const {
+    return isa_word;
+}
+
 bool MachineConfig::operator==(const MachineConfig &c) const {
 #define CMP(GETTER) (GETTER)() == (c.GETTER)()
     return CMP(pipelined) && CMP(delay_slot) && CMP(hazard_unit)
+           && CMP(get_simulated_xlen) && CMP(get_isa_word)
            && CMP(memory_execute_protection) && CMP(memory_write_protection)
            && CMP(memory_access_time_read) && CMP(memory_access_time_write)
            && CMP(memory_access_time_burst) && CMP(memory_access_time_level2)

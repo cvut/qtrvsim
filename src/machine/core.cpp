@@ -10,19 +10,32 @@ LOG_CATEGORY("machine.core");
 
 using namespace machine;
 
-Core::Core(
-    Registers *regs,
+static InstructionFlags unsupported_inst_flags_to_check(Xlen xlen,
+                            ConfigIsaWord isa_word) {
+    unsigned flags_to_check = IMF_SUPPORTED;
+    if (xlen == Xlen::_32)
+        flags_to_check |= IMF_RV64;
+    if (!isa_word.contains('A'))
+        flags_to_check |= IMF_AMO;
+    if (!isa_word.contains('M'))
+        flags_to_check |= IMF_MUL;
+    return InstructionFlags(flags_to_check);
+}
+
+Core::Core(Registers *regs,
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
     CSR::ControlState *control_state,
-    Xlen xlen)
+    Xlen xlen, ConfigIsaWord isa_word)
     : pc_if(state.pipeline.pc.final)
     , if_id(state.pipeline.fetch.final)
     , id_ex(state.pipeline.decode.final)
     , ex_mem(state.pipeline.execute.final)
     , mem_wb(state.pipeline.memory.final)
     , xlen(xlen)
+    , check_inst_flags_val(IMF_SUPPORTED)
+    , check_inst_flags_mask(unsupported_inst_flags_to_check(xlen, isa_word))
     , regs(regs)
     , control_state(control_state)
     , predictor(predictor)
@@ -298,7 +311,9 @@ DecodeState Core::decode(const FetchInterstage &dt) {
 
     dt.inst.flags_alu_op_mem_ctl(flags, alu_op, mem_ctl);
 
-    if (!(flags & IMF_SUPPORTED)) { excause = EXCAUSE_INSN_ILLEGAL; }
+    if ((flags ^ check_inst_flags_val) & check_inst_flags_mask) {
+        excause = EXCAUSE_INSN_ILLEGAL;
+    }
 
     RegisterId num_rs = (flags & (IMF_ALU_REQ_RS | IMF_ALU_RS_ID)) ? dt.inst.rs() : 0;
     RegisterId num_rt = (flags & IMF_ALU_REQ_RT) ? dt.inst.rt() : 0;
@@ -560,14 +575,13 @@ uint64_t Core::get_xlen_from_reg(RegisterValue reg) const {
     }
 }
 
-CoreSingle::CoreSingle(
-    Registers *regs,
+CoreSingle::CoreSingle(Registers *regs,
     Predictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
     CSR::ControlState *control_state,
-    Xlen xlen)
-    : Core(regs, predictor, mem_program, mem_data, control_state, xlen) {
+    Xlen xlen, ConfigIsaWord isa_word)
+    : Core(regs, predictor, mem_program, mem_data, control_state, xlen, isa_word) {
     reset();
 }
 
@@ -603,8 +617,9 @@ CorePipelined::CorePipelined(
     FrontendMemory *mem_data,
     CSR::ControlState *control_state,
     Xlen xlen,
+    ConfigIsaWord isa_word,
     MachineConfig::HazardUnit hazard_unit)
-    : Core(regs, predictor, mem_program, mem_data, control_state, xlen) {
+    : Core(regs, predictor, mem_program, mem_data, control_state, xlen, isa_word) {
     this->hazard_unit = hazard_unit;
     reset();
 }
