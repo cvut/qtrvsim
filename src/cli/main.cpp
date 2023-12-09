@@ -84,6 +84,7 @@ void create_parser(QCommandLineParser &p) {
     p.addOption({ { "os-emulation", "osemu" }, "Operating system emulation." });
     p.addOption({ { "std-out", "stdout" }, "File connected to the syscall standard output.", "FNAME" });
     p.addOption({ { "os-fs-root", "osfsroot" }, "Emulated system root/prefix for opened files", "DIR" });
+    p.addOption({ { "isa-variant", "isavariant" }, "Instruction set to emulate (default RV32IMA)", "STR" });
 }
 
 void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const QString &which) {
@@ -200,6 +201,39 @@ void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
         QString osemu_fs_root = parser.values("os-fs-root").at(siz - 1);
         if (osemu_fs_root.length() > 0)
             config.set_osemu_fs_root(osemu_fs_root);
+    }
+    siz = parser.values("isa-variant").size();
+    for (int i = 0; i < siz; i++) {
+        int pos = 0;
+        bool first = true;
+        bool subtract = false;
+        QString isa_str = parser.values("isa-variant").at(i).toUpper();
+        if (isa_str.startsWith ("RV32")) {
+            config.set_simulated_xlen(machine::Xlen::_32);
+            pos = 4;
+        } else if (isa_str.startsWith ("RV64")) {
+            config.set_simulated_xlen(machine::Xlen::_64);
+            pos = 4;
+        }
+        for (; pos < isa_str.size(); pos++, first = false) {
+            char ch = isa_str.at(pos).toLatin1();
+            if (ch == '+') {
+                subtract = false;
+                continue;
+            } else if (ch == '-') {
+                subtract = true;
+                continue;
+            }
+            auto flag = machine::ConfigIsaWord::byChar(ch);
+            if (flag.isEmpty())
+                continue;
+            if (first)
+                config.modify_isa_word(~machine::ConfigIsaWord::empty(), machine::ConfigIsaWord::empty());
+            if (subtract)
+                config.modify_isa_word(flag, machine::ConfigIsaWord::empty());
+            else
+                config.modify_isa_word(flag, flag);
+        }
     }
 }
 
