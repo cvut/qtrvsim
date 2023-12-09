@@ -209,6 +209,8 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     unsigned int xlen_num_bits = sts->value(N("XlenBits"), 32).toUInt();
     simulated_xlen = xlen_num_bits == 64? Xlen::_64 :  Xlen::_32;
     isa_word = ConfigIsaWord(sts->value(N("IsaWord"), config_isa_word_default.toUnsigned()).toUInt());
+    isa_word |= config_isa_word_default & config_isa_word_fixed;
+    isa_word &= config_isa_word_default | ~config_isa_word_fixed;
     pipeline = sts->value(N("Pipelined"), DF_PIPELINE).toBool();
     delayslot = sts->value(N("DelaySlot"), DF_DELAYSLOT).toBool();
     hunit = (enum HazardUnit)sts->value(N("HazardUnit"), DF_HUNIT).toUInt();

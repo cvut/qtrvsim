@@ -77,7 +77,7 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         access_time_burst,
         access_enable_burst);
 
-    controlst = new CSR::ControlState(machine_config.get_simulated_xlen());
+    controlst = new CSR::ControlState(machine_config.get_simulated_xlen(), machine_config.get_isa_word());
     predictor = new FalsePredictor();
 
     if (machine_config.pipelined()) {

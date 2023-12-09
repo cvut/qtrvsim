@@ -11,13 +11,16 @@ LOG_CATEGORY("machine.csr.control_state");
 
 namespace machine { namespace CSR {
 
-    ControlState::ControlState(Xlen xlen) : xlen(xlen) {
+    ControlState::ControlState(Xlen xlen, ConfigIsaWord isa_word) : xlen(xlen) {
         reset();
+        uint64_t misa = read_internal(CSR::Id::MISA).as_u64();
+        misa |= isa_word.toUnsigned();
+        register_data[CSR::Id::MISA] = misa;
     }
 
     ControlState::ControlState(const ControlState &other)
         : QObject(this->parent())
-        , register_data(other.register_data) {}
+        , xlen(other.xlen), register_data(other.register_data) {}
 
     void ControlState::reset() {
         std::transform(

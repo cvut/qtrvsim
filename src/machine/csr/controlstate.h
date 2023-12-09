@@ -7,6 +7,7 @@
 #include "register_value.h"
 #include "simulator_exception.h"
 #include "bitfield.h"
+#include "config_isa.h"
 
 #include <QObject>
 #include <QString>
@@ -81,7 +82,7 @@ namespace machine { namespace CSR {
         Q_OBJECT
 
     public:
-        ControlState(Xlen xlen = Xlen::_32);
+        ControlState(Xlen xlen = Xlen::_32, ConfigIsaWord isa_word = 0);
         ControlState(const ControlState &);
 
         /** Read CSR register with ISA specified address. */
@@ -205,8 +206,7 @@ namespace machine { namespace CSR {
         [Id::MSTATUS] = { "mstatus", 0x300_csr, "Machine status register.",
                         0, 0x807FFFEA, &ControlState::mstatus_wlrl_write_handler,
                         {Field::mstatus::fields, Field::mstatus::count} },
-        [Id::MISA] = { "misa", 0x301_csr, "Machine ISA Register.",
-                        (1 << 30) | (1 << ('I'-'A')) | (1 << ('M'-'A')), 0},
+        [Id::MISA] = { "misa", 0x301_csr, "Machine ISA Register.", 0, 0},
         [Id::MIE] = { "mie", 0x304_csr, "Machine interrupt-enable register.",
                         0, 0x00ff0AAA},
         [Id::MTVEC] = { "mtvec", 0x305_csr, "Machine trap-handler base address."},
