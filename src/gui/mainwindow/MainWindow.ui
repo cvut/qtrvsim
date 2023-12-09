@@ -94,6 +94,7 @@
     <addaction name="actionCsrShow"/>
     <addaction name="actionCore_View_show"/>
     <addaction name="actionMessages"/>
+    <addaction name="actionResetWindows"/>
    </widget>
    <widget class="QMenu" name="menuMachine">
     <property name="title">
@@ -495,6 +496,11 @@
   <action name="actionL2_Cache">
    <property name="text">
     <string>L2 Cache</string>
+   </property>
+  </action>
+  <action name="actionResetWindows">
+   <property name="text">
+    <string>Reset Windows</string>
    </property>
   </action>
   <action name="ips2">

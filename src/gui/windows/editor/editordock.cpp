@@ -40,6 +40,7 @@ EditorDock::EditorDock(QSharedPointer<QSettings> settings, QTabWidget *parent_ta
         bar->setFont(font);
     }
 
+    setObjectName("EditorDock");
     setTabsClosable(true);
     connect(this, &EditorDock::tabCloseRequested, this, [this](int index) { close_tab(index); });
 

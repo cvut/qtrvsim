@@ -67,6 +67,17 @@ public slots:
     void build_execute();
     void build_execute_no_check();
     void build_execute_with_save(bool cancel, QStringList tosavelist);
+    void reset_state_registers();
+    void reset_state_program();
+    void reset_state_memory();
+    void reset_state_cache_program();
+    void reset_state_cache_data();
+    void reset_state_cache_level2();
+    void reset_state_peripherals();
+    void reset_state_terminal();
+    void reset_state_lcd_display();
+    void reset_state_csrdock();
+    void reset_state_messages();
     void show_registers();
     void show_program();
     void show_memory();
@@ -78,8 +89,9 @@ public slots:
     void show_lcd_display();
     void show_csrdock();
     void show_hide_coreview(bool show);
-    void show_symbol_dialog();
     void show_messages();
+    void reset_windows();
+    void show_symbol_dialog();
     // Actions - help
     void about_program();
     void about_qt();
@@ -128,7 +140,8 @@ private:
 
     Box<machine::Machine> machine; // Current simulated machine
 
-    void show_dockwidget(QDockWidget *w, Qt::DockWidgetArea area = Qt::RightDockWidgetArea);
+    void show_dockwidget(QDockWidget *w, Qt::DockWidgetArea area = Qt::RightDockWidgetArea,
+                         bool defaultVisible = false, bool resetState = false);
     QPointer<ExtProcess> build_process;
     bool ignore_unsaved = false;
 };

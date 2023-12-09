@@ -20,11 +20,14 @@
 #include "mainwindow.h"
 #include "os_emulation/ossyscall.h"
 #include "textsignalaction.h"
+#include "common/logging.h"
 
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QMetaObject>
 #include <QTextDocument>
+
+LOG_CATEGORY("gui.mainwindow");
 
 #ifdef __EMSCRIPTEN__
     #include "qhtml5file.h"
@@ -160,6 +163,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(ui->actionCsrShow, &QAction::triggered, this, &MainWindow::show_csrdock);
     connect(ui->actionCore_View_show, &QAction::triggered, this, &MainWindow::show_hide_coreview);
     connect(ui->actionMessages, &QAction::triggered, this, &MainWindow::show_messages);
+    connect(ui->actionResetWindows, &QAction::triggered, this, &MainWindow::reset_windows);
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about_program);
     connect(ui->actionAboutQt, &QAction::triggered, this, &MainWindow::about_qt);
     connect(ui->ips1, &QAction::toggled, this, &MainWindow::set_speed);
@@ -398,23 +402,40 @@ void MainWindow::print_action() {
 #endif // WITH_PRINTING
 }
 
-#define SHOW_HANDLER(NAME, DEFAULT_AREA)                                                           \
+#define SHOW_HANDLER(NAME, DEFAULT_AREA, DEFAULT_VISIBLE)                                          \
     void MainWindow::show_##NAME() {                                                               \
-        show_dockwidget(&*NAME, DEFAULT_AREA);                                                     \
-    }
+        show_dockwidget(&*NAME, DEFAULT_AREA, true, false);                                        \
+    }                                                                                              \
+void MainWindow::reset_state_##NAME() {                                                            \
+    show_dockwidget(&*NAME, DEFAULT_AREA, DEFAULT_VISIBLE, true);                                  \
+}
 
-SHOW_HANDLER(registers, Qt::TopDockWidgetArea)
-SHOW_HANDLER(program, Qt::LeftDockWidgetArea)
-SHOW_HANDLER(memory, Qt::RightDockWidgetArea)
-SHOW_HANDLER(cache_program, Qt::RightDockWidgetArea)
-SHOW_HANDLER(cache_data, Qt::RightDockWidgetArea)
-SHOW_HANDLER(cache_level2, Qt::RightDockWidgetArea)
-SHOW_HANDLER(peripherals, Qt::RightDockWidgetArea)
-SHOW_HANDLER(terminal, Qt::RightDockWidgetArea)
-SHOW_HANDLER(lcd_display, Qt::RightDockWidgetArea)
-SHOW_HANDLER(csrdock, Qt::TopDockWidgetArea)
-SHOW_HANDLER(messages, Qt::BottomDockWidgetArea)
+SHOW_HANDLER(registers, Qt::TopDockWidgetArea, true)
+SHOW_HANDLER(program, Qt::LeftDockWidgetArea, true)
+SHOW_HANDLER(memory, Qt::RightDockWidgetArea, true )
+SHOW_HANDLER(cache_program, Qt::RightDockWidgetArea, false)
+SHOW_HANDLER(cache_data, Qt::RightDockWidgetArea, false)
+SHOW_HANDLER(cache_level2, Qt::RightDockWidgetArea, false)
+SHOW_HANDLER(peripherals, Qt::RightDockWidgetArea, false)
+SHOW_HANDLER(terminal, Qt::RightDockWidgetArea, false)
+SHOW_HANDLER(lcd_display, Qt::RightDockWidgetArea, false)
+SHOW_HANDLER(csrdock, Qt::TopDockWidgetArea, false)
+SHOW_HANDLER(messages, Qt::BottomDockWidgetArea, false)
 #undef SHOW_HANDLER
+
+void MainWindow::reset_windows() {
+    reset_state_registers();
+    reset_state_program();
+    reset_state_memory();
+    reset_state_cache_program();
+    reset_state_cache_data();
+    reset_state_cache_level2();
+    reset_state_peripherals();
+    reset_state_terminal();
+    reset_state_lcd_display();
+    reset_state_csrdock();
+    reset_state_messages();
+}
 
 void MainWindow::show_symbol_dialog() {
     if (machine == nullptr || machine->symbol_table() == nullptr) { return; }
@@ -501,9 +522,21 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     }
 }
 
-void MainWindow::show_dockwidget(QDockWidget *dw, Qt::DockWidgetArea area) {
+void MainWindow::show_dockwidget(QDockWidget *dw, Qt::DockWidgetArea area,
+                                 bool defaultVisible, bool resetState) {
     if (dw == nullptr) { return; }
-    if (dw->isHidden()) {
+    if (resetState) {
+        if (dw->isFloating()) {
+            dw->hide();
+            dw->setFloating(false);
+        }
+        addDockWidget(area, dw);
+        if (defaultVisible) {
+            dw->show();
+        } else {
+            dw->hide();
+        }
+    } else if (dw->isHidden()) {
         dw->show();
         addDockWidget(area, dw);
     } else {
