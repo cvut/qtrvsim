@@ -12,6 +12,8 @@ struct ConfigIsaWord {
     constexpr ConfigIsaWord(const ConfigIsaWord &isaWord) = default;    //> Copy constructor
     constexpr ConfigIsaWord &operator=(const ConfigIsaWord &isaWord) = default; //> Assign constructor
 
+    constexpr static ConfigIsaWord empty() {return ConfigIsaWord(); };
+
     constexpr ConfigIsaWord &operator&=(const ConfigIsaWord &isaWord) {
         bits &= isaWord.bits;
         return *this;

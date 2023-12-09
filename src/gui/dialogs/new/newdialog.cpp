@@ -63,6 +63,15 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
         &NewDialog::reset_at_compile_change);
 
     connect(
+        ui->xlen_64bit, &QAbstractButton::clicked, this,
+        &NewDialog::xlen_64bit_change);
+    connect(
+        ui->isa_atomic, &QAbstractButton::clicked, this,
+        &NewDialog::isa_atomic_change);
+    connect(
+        ui->isa_multiply, &QAbstractButton::clicked, this,
+        &NewDialog::isa_multiply_change);
+    connect(
         ui->pipelined, &QAbstractButton::clicked, this,
         &NewDialog::pipelined_change);
     connect(
@@ -220,6 +229,32 @@ void NewDialog::set_preset() {
     }
 }
 
+void NewDialog::xlen_64bit_change(bool val) {
+    if (val)
+        config->set_simulated_xlen(machine::Xlen::_64);
+    else
+        config->set_simulated_xlen(machine::Xlen::_32);
+    switch2custom();
+}
+
+void NewDialog::isa_atomic_change(bool val) {
+    auto isa_mask =  machine::ConfigIsaWord::byChar('A');
+    if (val)
+        config->modify_isa_word(isa_mask, isa_mask);
+    else
+        config->modify_isa_word(isa_mask, machine::ConfigIsaWord::empty());
+    switch2custom();
+}
+
+void NewDialog::isa_multiply_change(bool val) {
+    auto isa_mask =  machine::ConfigIsaWord::byChar('M');
+    if (val)
+        config->modify_isa_word(isa_mask, isa_mask);
+    else
+        config->modify_isa_word(isa_mask, machine::ConfigIsaWord::empty());
+    switch2custom();
+}
+
 void NewDialog::pipelined_change(bool val) {
     config->set_pipelined(val);
     switch2custom();
@@ -335,6 +370,9 @@ void NewDialog::config_gui() {
     ui->elf_file->setText(config->elf());
     ui->reset_at_compile->setChecked(config->reset_at_compile());
     // Core
+    ui->xlen_64bit->setChecked(config->get_simulated_xlen() == machine::Xlen::_64);
+    ui->isa_multiply->setChecked(config->get_isa_word().contains('M'));
+    ui->isa_atomic->setChecked(config->get_isa_word().contains('A'));
     ui->pipelined->setChecked(config->pipelined());
     ui->delay_slot->setChecked(config->delay_slot());
     ui->hazard_unit->setChecked(config->hazard_unit() != machine::MachineConfig::HU_NONE);

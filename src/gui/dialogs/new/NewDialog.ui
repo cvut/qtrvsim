@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>558</width>
-    <height>323</height>
+    <height>353</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -139,18 +139,43 @@
         <enum>QLayout::SetDefaultConstraint</enum>
        </property>
        <item>
-        <widget class="QCheckBox" name="pipelined">
-         <property name="text">
-          <string>Pipelined</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="delay_slot">
-         <property name="text">
-          <string>Delay slot</string>
-         </property>
-        </widget>
+        <layout class="QGridLayout" name="gridLayoutIsa">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="pipelined">
+           <property name="text">
+            <string>Pipelined</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="xlen_64bit">
+           <property name="text">
+            <string>XLEN 64-bit</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QCheckBox" name="isa_atomic">
+           <property name="text">
+            <string>Atomic (A)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="delay_slot">
+           <property name="text">
+            <string>Delay slot</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QCheckBox" name="isa_multiply">
+           <property name="text">
+            <string>Multiply (M)</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <widget class="QGroupBox" name="hazard_unit">

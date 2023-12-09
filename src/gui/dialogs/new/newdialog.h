@@ -31,6 +31,9 @@ private slots:
     void browse_elf();
     void elf_change(QString val);
     void set_preset();
+    void xlen_64bit_change(bool);
+    void isa_atomic_change(bool);
+    void isa_multiply_change(bool);
     void pipelined_change(bool);
     void delay_slot_change(bool);
     void hazard_unit_change();
