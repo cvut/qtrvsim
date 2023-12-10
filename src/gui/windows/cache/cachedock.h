@@ -14,7 +14,7 @@ class CacheDock : public QDockWidget {
 public:
     CacheDock(QWidget *parent, const QString &type);
 
-    void setup(const machine::Cache *cache);
+    void setup(const machine::Cache *cache, bool cache_after_cache = false);
 
 private slots:
     void hit_update(unsigned);

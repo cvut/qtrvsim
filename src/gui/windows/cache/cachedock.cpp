@@ -38,7 +38,7 @@ CacheDock::CacheDock(QWidget *parent, const QString &type)
     setWindowTitle(type + " Cache");
 }
 
-void CacheDock::setup(const machine::Cache *cache) {
+void CacheDock::setup(const machine::Cache *cache, bool cache_after_cache) {
     l_hit->setText("0");
     l_miss->setText("0");
     l_stalled->setText("0");
@@ -46,6 +46,7 @@ void CacheDock::setup(const machine::Cache *cache) {
     l_m_writes->setText("0");
     l_hit_rate->setText("0.000%");
     l_speed->setText("100%");
+    l_speed->setHidden(cache_after_cache);
     if (cache != nullptr) {
         connect(
             cache, &machine::Cache::hit_update, this, &CacheDock::hit_update);

@@ -315,7 +315,8 @@ void MainWindow::create_core(
     memory->setup(machine.data());
     cache_program->setup(machine->cache_program());
     cache_data->setup(machine->cache_data());
-    cache_level2->setup(machine->cache_level2());
+    bool cache_after_cache = config.cache_data().enabled() || config.cache_program().enabled();
+    cache_level2->setup(machine->cache_level2(), cache_after_cache);
     terminal->setup(machine->serial_port());
     peripherals->setup(machine->peripheral_spi_led());
     lcd_display->setup(machine->peripheral_lcd_display());
