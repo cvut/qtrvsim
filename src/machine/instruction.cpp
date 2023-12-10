@@ -131,10 +131,10 @@ bool argdesbycode_filled = fill_argdesbycode();
 
 struct InstructionMap {
     const char *name;
-    Instruction::Type type;
-    AluCombinedOp alu;
-    AccessControl mem_ctl;
-    const struct InstructionMap *subclass; // when subclass is used then flags
+    Instruction::Type type = Instruction::UNKNOWN;
+    AluCombinedOp alu = { .alu_op = AluOp::ADD } ;
+    AccessControl mem_ctl = AC_NONE;
+    const struct InstructionMap *subclass = nullptr; // when subclass is used then flags
                                            // has special meaning
     const cvector<QString, 3> args;
     uint32_t code;
@@ -143,7 +143,7 @@ struct InstructionMap {
         decltype(underlying_type<InstructionFlags>::type()) flags;
         BitField subfield;
     };
-    const InstructionMap *aliases;
+    const InstructionMap *aliases = nullptr;
 };
 
 #define IT_R Instruction::R
@@ -157,6 +157,117 @@ struct InstructionMap {
 
 // clang-format off
 
+// alliases for instructions for internal assembler and possibly
+// disassembler if simplified format is requested.
+// They are not used during decoding and execution
+
+#define INST_ALIAS_LIST_END {.name = nullptr, .args = {}, .code = 0 , .mask = 0, .flags = 0 }
+
+static const struct InstructionMap inst_aliases_addi[] = {
+    { .name = "mv", .args = {"d", "s"}, .code = 0x13, .mask = 0x707f | (0xffful << 20), .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_andi[] = {
+    { .name = "zext.b", .args = {"d", "s"}, .code = 0x7013 | (0xfful << 20), .mask = 0x707f | (0xffful << 20), .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_addiw[] = {
+    { .name = "sext.w", .args = {"d", "s"}, .code = 0x1b, .mask = 0x707f | (0xffful << 20), .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_xori[] = {
+    { .name = "not", .args = {"d", "s"}, .code = 0x4013 | (0xffful << 20), .mask = 0x707f | (0xffful << 20), .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_sub[] = {
+    { .name = "neg", .args = {"d", "t"}, .code = 0x40000033 | (0 << 15), .mask = 0xfe00707f | (31 << 15), .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_subw[] = {
+    { .name = "negw", .args = {"d", "t"}, .code = 0x4000003b | (0 << 15), .mask = 0xfe00707f | (31 << 15), .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_sltiu[] = {
+    { .name = "seqz", .args = {"d", "s"}, .code = 0x3013| (1 << 20), .mask = 0x0000707f | (0xffful << 20), .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_sltu[] = {
+    { .name = "snez", .args = {"d", "t"}, .code = 0x3033 | (0 << 15), .mask = 0xfe00707f | (31 << 15), .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_slt[] = {
+    { .name = "sltz", .args = {"d", "s"}, .code = 0x2033 | (0 << 20), .mask = 0xfe00707f | (31 << 20), .flags = IMF_SUPPORTED },
+    { .name = "sgtz", .args = {"d", "t"}, .code = 0x2033 | (0 << 15), .mask = 0xfe00707f | (31 << 15), .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_beq[] = { //0x00000063,0x0000707f
+    { .name = "beqz", .args = {"s", "p"}, .code = 0x0063 | (0 << 20), .mask = 0x707f | (31 << 20), .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_bne[] = { //0x00001063, 0x0000707f
+    { .name = "bnez", .args = {"s", "p"}, .code = 0x1063 | (0 << 20), .mask = 0x707f | (31 << 20), .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_blt[] = { //0x00004063, 0x0000707f
+    { .name = "bltz", .args = {"s", "p"}, .code = 0x4063 | (0 << 20), .mask = 0x707f | (31 << 20), .flags = IMF_SUPPORTED },
+    { .name = "bgtz", .args = {"t", "p"}, .code = 0x4063 | (0 << 15), .mask = 0x707f | (31 << 15), .flags = IMF_SUPPORTED },
+    { .name = "bgt", .args = {"t", "s", "p"}, .code = 0x4063, .mask = 0x707f, .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_bge[] = { //0x00005063,0x0000707f
+    { .name = "bgez", .args = {"s", "p"}, .code = 0x5063 | (0 << 20), .mask = 0x707f | (31 << 20), .flags = IMF_SUPPORTED },
+    { .name = "ble", .args = {"t", "s", "p"}, .code = 0x5063, .mask = 0x707f, .flags = IMF_SUPPORTED },
+    { .name = "blez", .args = {"t", "p"}, .code = 0x5063 | (0 << 15), .mask = 0x707f | (31 << 15), .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_bltu[] = { //0x00006063, 0x0000707f
+    { .name = "bgtu", .args = {"t", "s", "p"}, .code = 0x6063, .mask = 0x707f, .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_bgeu[] = { //0x00007063,0x0000707f
+    { .name = "bleu", .args = {"t", "s", "p"}, .code = 0x7063, .mask = 0x707f, .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_jal[] = {
+    { .name = "j", .args = {"a"}, .code = 0x6f | (0 << 7) , .mask = 0x7f | (31 << 7), .flags = IMF_SUPPORTED },
+    { .name = "jal", .args = {"a"}, .code = 0x6f | (1 << 7) , .mask = 0x7f | (31 << 7), .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_jalr[] = {
+    { .name = "ret", .args = {}, .code = 0x67 | (0 << 7) | (1 << 15) , .mask = 0xfffffffful, .flags = IMF_SUPPORTED },
+    { .name = "jr", .args = {"s"}, .code = 0x67 | (0 << 7) , .mask = 0x7f | (31 << 7) | (0xffful << 20), .flags = IMF_SUPPORTED },
+    { .name = "jr", .args = {"o(s)"}, .code = 0x67 | (0 << 7) , .mask = 0x7f | (31 << 7), .flags = IMF_SUPPORTED },
+    { .name = "jalr", .args = {"s"}, .code = 0x67 | (1 << 7) , .mask = 0x7f | (31 << 7) | (0xffful << 20), .flags = IMF_SUPPORTED },
+    { .name = "jalr", .args = {"o(s)"}, .code = 0x67 | (1 << 7) , .mask = 0x7f | (31 << 7), .flags = IMF_SUPPORTED },
+    { .name = "jalr", .args = {"d", "s", "o"}, .code = 0x67, .mask = 0x7f, .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_csrrw[] = {
+    { .name = "csrw", .args = {"E", "s"}, .code = 0x1073 | (0 << 7) | (0 << 15) , .mask = 0x707f | (31 << 7), .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
+static const struct InstructionMap inst_aliases_csrrs[] = {
+    { .name = "csrr", .args = {"d", "E"}, .code = 0x2073 | (0 << 15) , .mask = 0x707f | (31 << 15), .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
 
 // RV32/64A - Atomi Memory Operations
 
@@ -271,14 +382,14 @@ static const struct InstructionMap SRI_map[] = { // 0xfe00707f mask changed to 0
 };
 
 static const struct InstructionMap OP_IMM_map[] = {
-    {"addi",  IT_I, { .alu_op=AluOp::ADD },  NOMEM, nullptr, {"d", "s", "j"}, 0x00000013,0x0000707f, { .flags = FLAGS_ALU_I }, nullptr}, // ADDI
+    {"addi",  IT_I, { .alu_op=AluOp::ADD },  NOMEM, nullptr, {"d", "s", "j"}, 0x00000013,0x0000707f, { .flags = FLAGS_ALU_I }, inst_aliases_addi}, // ADDI
     {"slli",  IT_I, { .alu_op=AluOp::SLL },  NOMEM, nullptr, {"d", "s", ">"}, 0x00001013,0xfc00707f, { .flags = FLAGS_ALU_I }, nullptr}, // SLLI
     {"slti",  IT_I, { .alu_op=AluOp::SLT },  NOMEM, nullptr, {"d", "s", "j"}, 0x00002013,0x0000707f, { .flags = FLAGS_ALU_I }, nullptr}, // SLTI
-    {"sltiu", IT_I, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"d", "s", "j"}, 0x00003013,0x0000707f, { .flags = FLAGS_ALU_I }, nullptr}, // SLTIU
-    {"xori",  IT_I, { .alu_op=AluOp::XOR },  NOMEM, nullptr, {"d", "s", "j"}, 0x00004013,0x0000707f, { .flags = FLAGS_ALU_I }, nullptr}, // XORI
+    {"sltiu", IT_I, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"d", "s", "j"}, 0x00003013,0x0000707f, { .flags = FLAGS_ALU_I }, inst_aliases_sltiu}, // SLTIU
+    {"xori",  IT_I, { .alu_op=AluOp::XOR },  NOMEM, nullptr, {"d", "s", "j"}, 0x00004013,0x0000707f, { .flags = FLAGS_ALU_I }, inst_aliases_xori}, // XORI
     {"sri",   IT_I, NOALU,       NOMEM, SRI_map,              {}, 0x00005013, 0xbe00707f, { .subfield = {1, 30} }, nullptr}, // SRLI, SRAI
     {"ori",   IT_I, { .alu_op=AluOp::OR },   NOMEM, nullptr, {"d", "s", "j"}, 0x00006013,0x0000707f, { .flags = FLAGS_ALU_I }, nullptr}, // ORI
-    {"andi",  IT_I, { .alu_op=AluOp::AND },  NOMEM, nullptr, {"d", "s", "j"}, 0x00007013,0x0000707f, { .flags = FLAGS_ALU_I }, nullptr}, // ANDI
+    {"andi",  IT_I, { .alu_op=AluOp::AND },  NOMEM, nullptr, {"d", "s", "j"}, 0x00007013,0x0000707f, { .flags = FLAGS_ALU_I }, inst_aliases_andi}, // ANDI
 };
 
 static const struct InstructionMap STORE_map[] = {
@@ -294,7 +405,7 @@ static const struct InstructionMap STORE_map[] = {
 
 static const struct InstructionMap ADD_map[] = {
     {"add", IT_R, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "s", "t"}, 0x00000033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }, nullptr},
-    {"sub", IT_R, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "s", "t"}, 0x40000033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_MOD }, nullptr},
+    {"sub", IT_R, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "s", "t"}, 0x40000033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_MOD }, inst_aliases_sub},
 };
 
 static const struct InstructionMap SR_map[] = {
@@ -305,8 +416,8 @@ static const struct InstructionMap SR_map[] = {
 static const struct InstructionMap OP_ALU_map[] = {
     {"add/sub", IT_R, NOALU,    NOMEM, ADD_map,              {}, 0x00000033, 0xbe00707f, { .subfield = {1, 30} }, nullptr},
     {"sll",  IT_R, { .alu_op=AluOp::SLL },  NOMEM, nullptr, {"d", "s", "t"}, 0x00001033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }, nullptr}, // SLL
-    {"slt",  IT_R, { .alu_op=AluOp::SLT },  NOMEM, nullptr, {"d", "s", "t"}, 0x00002033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }, nullptr}, // SLT
-    {"sltu", IT_R, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"d", "s", "t"}, 0x00003033,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }, nullptr}, // SLTU
+    {"slt",  IT_R, { .alu_op=AluOp::SLT },  NOMEM, nullptr, {"d", "s", "t"}, 0x00002033, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }, inst_aliases_slt}, // SLT
+    {"sltu", IT_R, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"d", "s", "t"}, 0x00003033,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }, inst_aliases_sltu}, // SLTU
     {"xor",  IT_R, { .alu_op=AluOp::XOR },  NOMEM, nullptr, {"d", "s", "t"}, 0x00004033,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }, nullptr}, // XOR
     {"sr",   IT_R, NOALU,       NOMEM,  SR_map,              {}, 0x00005033, 0xbe00707f, { .subfield = {1, 30} }, nullptr}, // SRL, SRA
     {"or",   IT_R, { .alu_op=AluOp::OR },   NOMEM, nullptr, {"d", "s", "t"}, 0x00006033,0xfe00707f, { .flags = FLAGS_ALU_T_R_STD }, nullptr}, // OR
@@ -334,14 +445,14 @@ static const struct InstructionMap OP_map[] = {
 };
 
 static const struct InstructionMap BRANCH_map[] = {
-    {"beq",  IT_B, { .alu_op=AluOp::ADD }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00000063,0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_ALU_MOD }, nullptr}, // BEQ
-    {"bne",  IT_B, { .alu_op=AluOp::ADD }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00001063, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_ALU_MOD | IMF_BJ_NOT }, nullptr}, // BNE
+    {"beq",  IT_B, { .alu_op=AluOp::ADD }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00000063,0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_ALU_MOD }, inst_aliases_beq}, // BEQ
+    {"bne",  IT_B, { .alu_op=AluOp::ADD }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00001063, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_ALU_MOD | IMF_BJ_NOT }, inst_aliases_bne}, // BNE
     IM_UNKNOWN,
     IM_UNKNOWN,
-    {"blt",  IT_B, { .alu_op=AluOp::SLT }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00004063, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_BJ_NOT }, nullptr}, // BLT
-    {"bge",  IT_B, { .alu_op=AluOp::SLT }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00005063,0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT }, nullptr}, // BGE
-    {"bltu", IT_B, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"s", "t", "p"}, 0x00006063, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_BJ_NOT }, nullptr}, // BLTU
-    {"bgeu", IT_B, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"s", "t", "p"}, 0x00007063,0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT }, nullptr}, // BGEU
+    {"blt",  IT_B, { .alu_op=AluOp::SLT }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00004063, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_BJ_NOT }, inst_aliases_blt}, // BLT
+    {"bge",  IT_B, { .alu_op=AluOp::SLT }, NOMEM,  nullptr, {"s", "t", "p"}, 0x00005063,0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT }, inst_aliases_bge}, // BGE
+    {"bltu", IT_B, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"s", "t", "p"}, 0x00006063, 0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT | IMF_BJ_NOT }, inst_aliases_bltu}, // BLTU
+    {"bgeu", IT_B, { .alu_op=AluOp::SLTU }, NOMEM, nullptr, {"s", "t", "p"}, 0x00007063,0x0000707f, { .flags = IMF_SUPPORTED | IMF_BRANCH | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT }, inst_aliases_bgeu}, // BGEU
 };
 
 // Spec vol. 1: 2.8
@@ -387,18 +498,18 @@ static const struct InstructionMap SYSTEM_PRIV_map[] = {
     IM_UNKNOWN,
 };
 
-#define CSR_MAP_ITEM(NAME, SOURCE, CODE, ALU_OP,  EXTRA_FLAGS) \
-    { NAME, Instruction::ZICSR, { .alu_op=AluOp::ALU_OP }, NOMEM, nullptr,  {"d", "E", SOURCE}, 0x00000073 | (CODE), 0x0000707f, { .flags = IMF_SUPPORTED | IMF_CSR | IMF_REGWRITE | IMF_ALU_REQ_RS | (EXTRA_FLAGS) }, nullptr}
+#define CSR_MAP_ITEM(NAME, SOURCE, CODE, ALU_OP,  EXTRA_FLAGS, ALIASES) \
+    { NAME, Instruction::ZICSR, { .alu_op=AluOp::ALU_OP }, NOMEM, nullptr,  {"d", "E", SOURCE}, 0x00000073 | (CODE), 0x0000707f, { .flags = IMF_SUPPORTED | IMF_CSR | IMF_REGWRITE | IMF_ALU_REQ_RS | (EXTRA_FLAGS) }, ALIASES}
 
 static const struct InstructionMap SYSTEM_map[] = {
     {"system_priviledged", IT_I, NOALU, NOMEM, SYSTEM_PRIV_map, {}, 0x00000073, 0xffffffff, { .subfield = {5, 25} }, nullptr},
-    CSR_MAP_ITEM("csrrw", "s", 0x1000, ADD, 0),
-    CSR_MAP_ITEM("csrrs", "s", 0x2000, OR, IMF_CSR_TO_ALU),
-    CSR_MAP_ITEM("csrrc", "s", 0x3000, AND, IMF_CSR_TO_ALU | IMF_ALU_MOD),
+    CSR_MAP_ITEM("csrrw", "s", 0x1000, ADD, 0, inst_aliases_csrrw),
+    CSR_MAP_ITEM("csrrs", "s", 0x2000, OR, IMF_CSR_TO_ALU, inst_aliases_csrrs),
+    CSR_MAP_ITEM("csrrc", "s", 0x3000, AND, IMF_CSR_TO_ALU | IMF_ALU_MOD, nullptr),
     IM_UNKNOWN,
-    CSR_MAP_ITEM("csrrwi", "Z", 0x5000, ADD, IMF_ALU_RS_ID),
-    CSR_MAP_ITEM("csrrsi", "Z", 0x6000, OR, IMF_ALU_RS_ID | IMF_CSR_TO_ALU),
-    CSR_MAP_ITEM("csrrci", "Z", 0x7000, AND, IMF_ALU_RS_ID | IMF_CSR_TO_ALU | IMF_ALU_MOD),
+    CSR_MAP_ITEM("csrrwi", "Z", 0x5000, ADD, IMF_ALU_RS_ID, nullptr),
+    CSR_MAP_ITEM("csrrsi", "Z", 0x6000, OR, IMF_ALU_RS_ID | IMF_CSR_TO_ALU, nullptr),
+    CSR_MAP_ITEM("csrrci", "Z", 0x7000, AND, IMF_ALU_RS_ID | IMF_CSR_TO_ALU | IMF_ALU_MOD, nullptr),
 };
 
 #undef CSR_MAP_ITEM
@@ -422,7 +533,7 @@ static const struct InstructionMap SRI_32_map[] = {
 };
 
 static const struct InstructionMap OP_IMM_32_map[] = {
-    {"addiw", IT_I, { .alu_op=AluOp::ADD },  NOMEM, nullptr, {"d", "s", "j"}, 0x0000001b,0x0000707f, { .flags = FLAGS_ALU_I | IMF_FORCE_W_OP | IMF_RV64 }, nullptr}, // ADDIW
+    {"addiw", IT_I, { .alu_op=AluOp::ADD },  NOMEM, nullptr, {"d", "s", "j"}, 0x0000001b,0x0000707f, { .flags = FLAGS_ALU_I | IMF_FORCE_W_OP | IMF_RV64 }, inst_aliases_addiw}, // ADDIW
     {"slliw", IT_I, { .alu_op=AluOp::SLL },  NOMEM, nullptr, {"d", "s", ">"}, 0x0000101b,0xfe00707f, { .flags = FLAGS_ALU_I | IMF_FORCE_W_OP | IMF_RV64 }, nullptr}, // SLLIW
     IM_UNKNOWN,
     IM_UNKNOWN,
@@ -434,7 +545,7 @@ static const struct InstructionMap OP_IMM_32_map[] = {
 
 static const struct InstructionMap ADD_32_map[] = {
     {"addw", IT_R, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "s", "t"}, 0x0000003b, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_FORCE_W_OP | IMF_RV64 }, nullptr},
-    {"subw", IT_R, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "s", "t"}, 0x4000003b, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_MOD | IMF_FORCE_W_OP | IMF_RV64 }, nullptr},
+    {"subw", IT_R, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "s", "t"}, 0x4000003b, 0xfe00707f, { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_MOD | IMF_FORCE_W_OP | IMF_RV64 }, inst_aliases_subw},
 };
 
 static const struct InstructionMap SR_32_map[] = {
@@ -502,11 +613,11 @@ static const struct InstructionMap I_inst_map[] = {
     IM_UNKNOWN, // 48b
     {"branch", IT_B, NOALU, NOMEM, BRANCH_map, {}, 0x63, 0x7f, { .subfield = {3, 12} }, nullptr}, // BRANCH
     {"jalr", IT_I, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "o(s)"}, 0x67, 0x7f, { .flags =
-IMF_SUPPORTED | IMF_REGWRITE | IMF_BRANCH_JALR | IMF_ALUSRC | IMF_ALU_REQ_RS }, nullptr}, // JALR
+IMF_SUPPORTED | IMF_REGWRITE | IMF_BRANCH_JALR | IMF_ALUSRC | IMF_ALU_REQ_RS }, inst_aliases_jalr}, // JALR
     IM_UNKNOWN, // reserved
     {"jal", IT_J, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "a"}, 0x6f, 0x7f, { .flags =
 IMF_SUPPORTED |
-IMF_REGWRITE | IMF_JUMP | IMF_PC_TO_ALU | IMF_ALUSRC }, nullptr}, // JAL
+IMF_REGWRITE | IMF_JUMP | IMF_PC_TO_ALU | IMF_ALUSRC }, inst_aliases_jal}, // JAL
     {"system", IT_I, NOALU, NOMEM, SYSTEM_map, {}, 0x73, 0x7f, { .subfield = {3, 12} }, nullptr}, // SYSTEM
     IM_UNKNOWN, // reserved
     IM_UNKNOWN, // custom-3/rv128
@@ -538,10 +649,8 @@ static inline const struct InstructionMap &InstructionMapFind(uint32_t code) {
 }
 
 const std::array<const QString, 36> RECOGNIZED_PSEUDOINSTRUCTIONS {
-    "nop",    "la",     "li",     "mv",     "not",  "neg",  "negw", "sext.b", "sext.h",
-    "sext.w", "zext.b", "zext.h", "zext.w", "seqz", "snez", "sltz", "slgz",   "beqz",
-    "bnez",   "blez",   "bgez",   "bltz",   "bgtz", "bgt",  "ble",  "bgtu",   "bleu",
-    "j",      "jal",    "jr",     "jalr",   "ret",  "call", "tail", "csrr", "csrw"
+    "nop",    "la",     "li",     "sext.b", "sext.h",
+    "zext.h", "zext.w", "call", "tail"
 };
 
 bool Instruction::symbolic_registers_enabled = false;
@@ -741,6 +850,35 @@ QString Instruction::to_str(Address inst_addr) const {
 
 QMultiMap<QString, uint32_t> str_to_instruction_code_map;
 
+static void instruction_from_string_build_base_aliases(uint32_t base_code,
+                uint32_t base_mask, const InstructionMap *ia) {
+    for (; ia->name != nullptr; ia++) {
+        if ((ia->code ^ base_code) & base_mask) {
+            ERROR("alias code mismatch %s computed 0x%08" PRIx32 " (mask 0x%08" PRIx32 ") found 0x%08" PRIx32,
+                  ia->name, base_code, base_mask, ia->code);
+            continue;
+        }
+        if (~ia->mask & base_mask) {
+            ERROR("aliase code mismatch %s computed 0x%08" PRIx32 " (mask 0x%08" PRIx32 ") found 0x%08" PRIx32 " with too wide mask 0x%08" PRIx32,
+                  ia->name, base_code, base_mask, ia->code, ia->mask);
+            continue;
+        }
+        bool found = false;
+        auto iter_range = str_to_instruction_code_map.equal_range(ia->name);
+        for (auto i = iter_range.first; i != iter_range.second; i += 1) {
+            if (i.value() == base_code) {
+                found = true;
+                break;
+            }
+        }
+        if (found)
+            continue;
+
+        // store base code, the iteration over alliases is required anyway
+        str_to_instruction_code_map.insert(ia->name, base_code);
+    }
+}
+
 void instruction_from_string_build_base(
     const InstructionMap *im,
     BitField field,
@@ -769,6 +907,9 @@ void instruction_from_string_build_base(
             continue;
         }
         str_to_instruction_code_map.insert(im->name, im->code);
+
+        if (im->aliases != nullptr)
+            instruction_from_string_build_base_aliases(im->code, im->mask, im->aliases);
     }
 #if 0
     for (auto i = str_to_instruction_code_map.begin();
@@ -886,7 +1027,7 @@ size_t Instruction::pseudo_from_tokens(
         *code = result.data();
         return result.size();
     }
-    if (inst.base == QLatin1String("la")) {
+    if ((inst.base == QLatin1String("la")) && (buffsize >= 8)) {
         if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
         *code = base_from_tokens(
                     { "auipc", inst.fields, inst.address, inst.filename, inst.line }, reloc, UPPER,
@@ -901,7 +1042,7 @@ size_t Instruction::pseudo_from_tokens(
         return 8;
     }
 
-    if (inst.base == QLatin1String("li")) {
+    if ((inst.base == QLatin1String("li")) && (buffsize >= 8)) {
         if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
         *code = base_from_tokens(
                     { "lui", inst.fields, inst.address, inst.filename, inst.line }, reloc, UPPER)
@@ -914,170 +1055,8 @@ size_t Instruction::pseudo_from_tokens(
                   .data();
         return 8;
     }
-    if (inst.base == QLatin1String("mv")) {
-        return partially_apply("addi", 2, 2, "0", code, buffsize, inst, reloc);
-    }
-    if (inst.base[0] == 'n') {
-        if (inst.base == QLatin1String("not")) {
-            return partially_apply("xori", 2, 2, "-1", code, buffsize, inst, reloc);
-        }
-        if (inst.base == QLatin1String("neg")) {
-            return partially_apply("sub", 2, 1, "x0", code, buffsize, inst, reloc);
-        }
-        if (inst.base == QLatin1String("negw")) {
-            return partially_apply("subw", 2, 1, "x0", code, buffsize, inst, reloc);
-        }
-    }
-    if (inst.base[0] == 's') {
-        if (inst.base == QLatin1String("sext.b")) {
-            if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
-            inst.base = "slli";
-            inst.fields.append("XLEN-8");
-            *code = base_from_tokens(inst, reloc).data();
-            code += 1;
-            inst.base = "srai";
-            inst.fields[1] = inst.fields[0];
-            *code = base_from_tokens(inst, reloc).data();
-            return 8;
-        }
-        if (inst.base == QLatin1String("sext.h")) {
-            if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
-            inst.base = "slli";
-            inst.fields.append("XLEN-16");
-            *code = base_from_tokens(inst, reloc).data();
-            code += 1;
-            inst.base = "srai";
-            inst.fields[1] = inst.fields[0];
-            *code = base_from_tokens(inst, reloc).data();
-            return 8;
-        }
-        if (inst.base == QLatin1String("sext.w")) {
-            return partially_apply("addiw", 2, 2, "0", code, buffsize, inst, reloc);
-        }
-    }
-    if (inst.base[0] == 'z') {
-        if (inst.base == QLatin1String("zext.b")) {
-            return partially_apply("addi", 2, 2, "255", code, buffsize, inst, reloc);
-        }
-        if (inst.base == QLatin1String("zext.h")) {
-            if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
-            inst.base = "slli";
-            inst.fields.append("XLEN-16");
-            *code = base_from_tokens(inst, reloc).data();
-            code += 1;
-            inst.base = "srli";
-            inst.fields[1] = inst.fields[0];
-            inst.fields.append("XLEN-16");
-            *code = base_from_tokens(inst, reloc).data();
-            return 8;
-        }
-        if (inst.base == QLatin1String("zext.w")) {
-            if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
-            inst.base = "slli";
-            inst.fields.append("XLEN-32");
-            *code = base_from_tokens(inst, reloc).data();
-            code += 1;
-            inst.base = "srli";
-            inst.fields[1] = inst.fields[0];
-            inst.fields.append("XLEN-32");
-            *code = base_from_tokens(inst, reloc).data();
-            return 8;
-        }
-    }
-    if (inst.base[0] == 's') {
-        if (inst.base == QLatin1String("seqz")) {
-            return partially_apply("sltiu", 2, 2, "1", code, buffsize, inst, reloc);
-        }
-        if (inst.base == QLatin1String("snez")) {
-            return partially_apply("sltu", 2, 1, "x0", code, buffsize, inst, reloc);
-        }
-        if (inst.base == QLatin1String("sltz")) {
-            return partially_apply("slt", 2, 2, "x0", code, buffsize, inst, reloc);
-        }
-        if (inst.base == QLatin1String("slgz")) {
-            return partially_apply("slt", 2, 1, "x0", code, buffsize, inst, reloc);
-        }
-    }
-    if (inst.base[0] == 'b') {
-        if (inst.base == QLatin1String("beqz")) {
-            return partially_apply("beq", 2, 1, "x0", code, buffsize, inst, reloc);
-        }
-        if (inst.base == QLatin1String("bnez")) {
-            return partially_apply("bne", 2, 1, "x0", code, buffsize, inst, reloc);
-        }
-        if (inst.base == QLatin1String("blez")) {
-            return partially_apply("ble", 2, 0, "x0", code, buffsize, inst, reloc);
-        }
-        if (inst.base == QLatin1String("bgez")) {
-            return partially_apply("bge", 2, 0, "x0", code, buffsize, inst, reloc);
-        }
-        if (inst.base == QLatin1String("bltz")) {
-            return partially_apply("blt", 2, 1, "x0", code, buffsize, inst, reloc);
-        }
-        if (inst.base == QLatin1String("bgtz")) {
-            return partially_apply("blt", 2, 0, "x0", code, buffsize, inst, reloc);
-        }
-        if (inst.base == QLatin1String("bgt")) {
-            if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
-            inst.base = "blt";
-            std::swap(inst.fields[0], inst.fields[1]);
-            return code_from_tokens(code, buffsize, inst, reloc, false);
-        }
-        if (inst.base == QLatin1String("ble")) {
-            if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
-            inst.base = "bge";
-            std::swap(inst.fields[0], inst.fields[1]);
-            return code_from_tokens(code, buffsize, inst, reloc, false);
-        }
-        if (inst.base == QLatin1String("bgtu")) {
-            if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
-            inst.base = "bltu";
-            std::swap(inst.fields[0], inst.fields[1]);
-            return code_from_tokens(code, buffsize, inst, reloc, false);
-        }
-        if (inst.base == QLatin1String("bleu")) {
-            if (inst.fields.size() != 3) { throw ParseError("number of arguments does not match"); }
-            inst.base = "bgeu";
-            std::swap(inst.fields[0], inst.fields[1]);
-            return code_from_tokens(code, buffsize, inst, reloc, false);
-        }
-    }
-    if (inst.base[0] == 'j') {
-        if (inst.base == QLatin1String("j")) {
-            if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
-            inst.base = "jal";
-            inst.fields.insert(0, "x0");
-            return code_from_tokens(code, buffsize, inst, reloc, false);
-        }
-        if (inst.base == QLatin1String("jal")) {
-            if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
-            inst.base = "jal";
-            inst.fields.insert(0, "x1");
-            return code_from_tokens(code, buffsize, inst, reloc, false);
-        }
-        if (inst.base == QLatin1String("jr")) {
-            if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
-            inst.base = "jalr";
-            inst.fields.insert(0, "x0");
-            inst.fields[1] = QString("0x0(%0)").arg(inst.fields[1]);
-            return code_from_tokens(code, buffsize, inst, reloc, false);
-        }
-        if (inst.base == QLatin1String("jalr")) {
-            if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
-            inst.base = "jalr";
-            inst.fields.insert(0, "x1");
-            inst.fields[1] = QString("0x0(%0)").arg(inst.fields[1]);
-            return code_from_tokens(code, buffsize, inst, reloc, false);
-        }
-    }
-    if (inst.base == QLatin1String("ret")) {
-        if (inst.fields.size() != 0) { throw ParseError("number of arguments does not match"); }
-        inst.base = "jalr";
-        inst.fields.append("x0");
-        inst.fields.append("0x0(x1)");
-        return code_from_tokens(code, buffsize, inst, reloc, false);
-    }
-    if (inst.base == QLatin1String("call")) {
+
+    if ((inst.base == QLatin1String("call")) && (buffsize >= 8)) {
         if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
         inst.fields.insert(0, "x6");
         *code = base_from_tokens(
@@ -1093,7 +1072,8 @@ size_t Instruction::pseudo_from_tokens(
                     .data();
         return 8;
     }
-    if (inst.base == QLatin1String("tail")) {
+
+    if ((inst.base == QLatin1String("tail")) && (buffsize >= 8)) {
         if (inst.fields.size() != 1) { throw ParseError("number of arguments does not match"); }
         inst.fields.insert(0, "x6");
         *code = base_from_tokens(
@@ -1109,12 +1089,55 @@ size_t Instruction::pseudo_from_tokens(
                     .data();
         return 8;
     }
-    if (inst.base[0] == 'c') {
-        if (inst.base == QLatin1String("csrr")) {
-            return partially_apply("csrrs", 2, 2, "x0", code, buffsize, inst, reloc);
+
+    if (inst.base[0] == 's') {
+        if ((inst.base == QLatin1String("sext.b")) && (buffsize >= 8)) {
+            if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
+            inst.base = "slli";
+            inst.fields.append("XLEN-8");
+            *code = base_from_tokens(inst, reloc).data();
+            code += 1;
+            inst.base = "srai";
+            inst.fields[1] = inst.fields[0];
+            *code = base_from_tokens(inst, reloc).data();
+            return 8;
         }
-        if (inst.base == QLatin1String("csrw")) {
-            return partially_apply("csrrw", 2, 0, "x0", code, buffsize, inst, reloc);
+        if ((inst.base == QLatin1String("sext.h")) && (buffsize >= 8)) {
+            if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
+            inst.base = "slli";
+            inst.fields.append("XLEN-16");
+            *code = base_from_tokens(inst, reloc).data();
+            code += 1;
+            inst.base = "srai";
+            inst.fields[1] = inst.fields[0];
+            *code = base_from_tokens(inst, reloc).data();
+            return 8;
+        }
+    }
+    if (inst.base[0] == 'z') {
+        if ((inst.base == QLatin1String("zext.h")) && (buffsize >= 8)) {
+            if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
+            inst.base = "slli";
+            inst.fields.append("XLEN-16");
+            *code = base_from_tokens(inst, reloc).data();
+            code += 1;
+            inst.base = "srli";
+            inst.fields[1] = inst.fields[0];
+            inst.fields.append("XLEN-16");
+            *code = base_from_tokens(inst, reloc).data();
+            return 8;
+        }
+        if ((inst.base == QLatin1String("zext.w")) && (buffsize >= 8)) {
+            if (inst.fields.size() != 2) { throw ParseError("number of arguments does not match"); }
+            inst.base = "slli";
+            inst.fields.append("XLEN-32");
+            *code = base_from_tokens(inst, reloc).data();
+            code += 1;
+            inst.base = "srli";
+            inst.fields[1] = inst.fields[0];
+            inst.fields.append("XLEN-32");
+            *code = base_from_tokens(inst, reloc).data();
+            return 8;
         }
     }
     return 0;
@@ -1135,11 +1158,25 @@ size_t Instruction::partially_apply(
     inst.fields.insert(position, value);
     return code_from_tokens(code, buffsize, inst, reloc, false);
 }
+
+static void instruction_code_map_next_im(const InstructionMap *&im, bool &processing_aliases) {
+    if (!processing_aliases) {
+        processing_aliases = true;
+        im = im->aliases;
+    } else {
+        im++;
+        if (im->name == nullptr)
+            im = nullptr;
+    }
+}
+
 Instruction Instruction::base_from_tokens(
     const TokenizedInstruction &inst,
     RelocExpressionList *reloc,
     Modifier pseudo_mod,
     uint64_t initial_immediate_value) {
+    int rethrow = false;
+    ParseError parse_error = ParseError("no match for arguments combination found");
     auto iter_range = str_to_instruction_code_map.equal_range(inst.base);
     if (iter_range.first == iter_range.second) {
         DEBUG("Base instruction of the name %s not found.", qPrintable(inst.base));
@@ -1147,22 +1184,37 @@ Instruction Instruction::base_from_tokens(
     }
     // Process all codes associated with given instruction name and try matching the supplied
     // instruction field tokens to fields. First matching instruction is used.
-    // TODO: Can the map contain more codes for single name?
-    // TODO: Why not store `InstructionMap` directly in the multimap?
-    for (; iter_range.first != iter_range.second; iter_range.first += 1) {
-        uint32_t inst_code = iter_range.first.value();
-        const InstructionMap &imap = InstructionMapFind(inst_code);
+    for (auto it = iter_range.first; it != iter_range.second; it++) {
+        uint32_t inst_code = it.value();
+        bool processing_aliases = false;
 
-        if (inst.fields.count() != (int)imap.args.size()) { continue; }
+        const InstructionMap *im = &InstructionMapFind(inst_code);
+        for ( ; im != nullptr; instruction_code_map_next_im(im, processing_aliases) ) {
+            if (inst.base != im->name)
+                continue;
 
-        for (int field_index = 0; field_index < (int)imap.args.size(); field_index += 1) {
-            const QString &arg = imap.args[field_index];
-            QString field_token = inst.fields[field_index];
-            inst_code |= parse_field(
-                field_token, arg, inst.address, reloc, inst.filename, inst.line, pseudo_mod,
-                initial_immediate_value);
+            try {
+                 inst_code = im->code;
+
+                 if (inst.fields.count() != (int)im->args.size()) { continue; }
+
+                for (int field_index = 0; field_index < (int)im->args.size(); field_index++) {
+                    const QString &arg = im->args[field_index];
+                    QString field_token = inst.fields[field_index];
+                    inst_code |= parse_field(
+                        field_token, arg, inst.address, reloc, inst.filename, inst.line, pseudo_mod,
+                        initial_immediate_value);
+                }
+                return Instruction(inst_code);
+            } catch(ParseError &pe) {
+                rethrow = true;
+                parse_error = pe;
+            }
         }
-        return Instruction(inst_code);
+    }
+
+    if (rethrow) {
+        throw parse_error;
     }
 
     DEBUG(
