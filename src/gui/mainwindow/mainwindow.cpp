@@ -614,7 +614,11 @@ void MainWindow::message_selected(
 
     if (file.isEmpty()) { return; }
     central_widget_tabs->setCurrentWidget(editor_tabs.data());
-    editor_tabs->set_cursor_to(file, line, column);
+    if (!editor_tabs->set_cursor_to(file, line, column)) {
+        editor_tabs->open_file_if_not_open(file, false);
+        if (!editor_tabs->set_cursor_to(file, line, column))
+            return;
+    }
 
     // Highlight the line
     auto editor = editor_tabs->get_current_editor();

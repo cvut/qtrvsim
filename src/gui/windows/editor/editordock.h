@@ -30,7 +30,7 @@ public:
     BORROWED [[nodiscard]] SrcEditor *get_current_editor() const;
     [[nodiscard]] QStringList get_open_file_list() const;
     bool get_modified_tab_filenames(QStringList &output, bool report_unnamed = false) const;
-    void set_cursor_to(const QString &filename, int line, int column);
+    bool set_cursor_to(const QString &filename, int line, int column);
 
 protected:
     void tabCountChanged() override;
