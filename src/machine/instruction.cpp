@@ -1196,7 +1196,13 @@ Instruction Instruction::base_from_tokens(
             try {
                  inst_code = im->code;
 
-                 if (inst.fields.count() != (int)im->args.size()) { continue; }
+                 if (inst.fields.count() != (int)im->args.size()) {
+                     if (!rethrow) {
+                         parse_error = ParseError("number of arguments does not match");
+                         rethrow = true;
+                     }
+                     continue;
+                 }
 
                 for (int field_index = 0; field_index < (int)im->args.size(); field_index++) {
                     const QString &arg = im->args[field_index];

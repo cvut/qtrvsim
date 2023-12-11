@@ -123,8 +123,6 @@ uint64_t AclintMtimer::read_reg64(Offset source, AccessEffects type) const {
     } else if ((source >= ACLINT_MTIMECMP_OFFSET) &&
                (source < ACLINT_MTIMECMP_OFFSET + 8 * mtimecmp_count)) {
         value = mtimecmp_value[source >> 3];
-    } else {
-        printf("WARNING: ACLINT MTIMER - read out of range (at 0x%lu).\n", source);
     }
 
     emit read_notification(source, value);

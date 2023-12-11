@@ -72,8 +72,6 @@ uint32_t AclintMswi::read_reg32(Offset source, AccessEffects type) const {
     if ((source >= ACLINT_MSWI_OFFSET) &&
                (source < ACLINT_MSWI_OFFSET + 4 * mswi_count)) {
         value = mswi_value[source >> 2]? 1: 0;
-    } else {
-        printf("WARNING: ACLINT MSWI - read out of range (at 0x%lu).\n", source);
     }
 
     emit read_notification(source, value);

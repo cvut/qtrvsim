@@ -58,8 +58,6 @@ uint32_t AclintSswi::read_reg32(Offset source, AccessEffects type) const {
 
     if ((source >= ACLINT_SSWI_OFFSET) &&
                (source < ACLINT_SSWI_OFFSET + 4 * sswi_count)) {
-    } else {
-        printf("WARNING: ACLINT SSWI - read out of range (at 0x%lu).\n", source);
     }
 
     emit read_notification(source, value);
