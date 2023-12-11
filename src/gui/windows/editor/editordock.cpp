@@ -68,7 +68,8 @@ EditorTab *EditorDock::open_file(const QString &filename, bool save_as_required)
     if (tab->get_editor()->loadFile(filename)) {
         addTab(tab, tab->title());
         setCurrentWidget(tab);
-        tab->get_editor()->setSaveAsRequired(save_as_required);
+        if (save_as_required)
+            tab->get_editor()->setSaveAsRequired(save_as_required);
         return tab;
     } else {
         delete tab;
