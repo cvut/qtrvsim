@@ -122,6 +122,9 @@ void Reporter::report_caches() const {
     printf("Cache statistics report:\n");
     report_cache("i-cache", *machine->cache_program());
     report_cache("d-cache", *machine->cache_data());
+    if (machine->config().cache_level2().enabled()) {
+        report_cache("l2-cache", *machine->cache_level2());
+    }
 }
 
 void Reporter::report_cache(const char *cache_name, const Cache &cache) {

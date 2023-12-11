@@ -189,10 +189,11 @@ void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
     parse_u32_option(parser, "read-time", config, &MachineConfig::set_memory_access_time_read);
     parse_u32_option(parser, "write-time", config, &MachineConfig::set_memory_access_time_write);
     parse_u32_option(parser, "burst-time", config, &MachineConfig::set_memory_access_time_burst);
+    if (parser.values("burst-time").size() > 0) config.set_memory_access_enable_burst(true);
 
     configure_cache(*config.access_cache_data(), parser.values("d-cache"), "data");
     configure_cache(*config.access_cache_program(), parser.values("i-cache"), "instruction");
-    configure_cache(*config.access_cache_program(), parser.values("l2-cache"), "level2");
+    configure_cache(*config.access_cache_level2(), parser.values("l2-cache"), "level2");
 
     config.set_osemu_enable(parser.isSet("os-emulation"));
     config.set_osemu_known_syscall_stop(false);
