@@ -85,6 +85,7 @@ void create_parser(QCommandLineParser &p) {
     p.addOption({ { "std-out", "stdout" }, "File connected to the syscall standard output.", "FNAME" });
     p.addOption({ { "os-fs-root", "osfsroot" }, "Emulated system root/prefix for opened files", "DIR" });
     p.addOption({ { "isa-variant", "isavariant" }, "Instruction set to emulate (default RV32IMA)", "STR" });
+    p.addOption({ "cycle-limit", "Limit execution to specified maximum clock cycles", "NUMBER" });
 }
 
 void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const QString &which) {
@@ -268,6 +269,17 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
 
     if (p.isSet("trace-rdmem")) { tr.trace_rdmem = true; }
     if (p.isSet("trace-wrmem")) { tr.trace_wrmem = true; }
+
+    QStringList clim = p.values("cycle-limit");
+    if (clim.size() > 0) {
+        bool ok;
+        tr.cycle_limit = clim.at(clim.size() - 1).toLong(&ok);
+        if (!ok) {
+            fprintf(
+                stderr, "Cycle limit parse error\n");
+            exit(EXIT_FAILURE);
+        }
+    }
 
     // TODO
 }
@@ -519,6 +531,8 @@ int main(int argc, char *argv[]) {
 
     Reporter r(&app, &machine);
     configure_reporter(p, r, machine.symbol_table());
+
+    QObject::connect(&tr, &Tracer::cycle_limit_reached, &r, &Reporter::cycle_limit_reached);
 
     load_ranges(machine, p.values("load-range"));
 

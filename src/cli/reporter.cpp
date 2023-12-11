@@ -65,6 +65,12 @@ void Reporter::machine_exception_reached() {
     QCoreApplication::exit();
 }
 
+void Reporter::cycle_limit_reached() {
+    printf("Specified cycle limit reached\n");
+    report();
+    QCoreApplication::exit();
+}
+
 void Reporter::machine_trap(SimulatorException &e) {
     report();
 

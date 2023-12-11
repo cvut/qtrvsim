@@ -5,6 +5,8 @@
 using namespace machine;
 
 Tracer::Tracer(Machine *machine) : core_state(machine->core()->get_state()) {
+    cycle_limit = 0;
+
     connect(machine->core(), &Core::step_done, this, &Tracer::step_output);
 }
 
@@ -44,5 +46,8 @@ void Tracer::step_output() {
     if (trace_wrmem && mem.memwrite) {
         printf("MEM[%" PRIx64 "]:  WR %" PRIx64 "\n", mem_wb.mem_addr.get_raw(),
                mem.mem_write_val.as_u64());
+    }
+    if ((cycle_limit != 0) && (core_state.cycle_count >= cycle_limit)) {
+        emit cycle_limit_reached();
     }
 }

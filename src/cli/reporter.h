@@ -40,6 +40,9 @@ public:
     };
     void add_dump_range(Address start, size_t len, const QString &path_to_write);
 
+public slots:
+    void cycle_limit_reached();
+
 private slots:
     void machine_exit();
     void machine_trap(machine::SimulatorException &e);
