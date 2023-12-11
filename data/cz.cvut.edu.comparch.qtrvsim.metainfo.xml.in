@@ -16,9 +16,14 @@
   </description>
 
   <releases>
-    <release version="@MAIN_PROJECT_VERSION@" date="2023-01-16">
+    <release version="@MAIN_PROJECT_VERSION@" date="2023-12-11">
       <description>
         <p>Current project release.</p>
+      </description>
+    </release>
+    <release version="0.9.5" date="2023-01-16">
+      <description>
+        <p>More CSR updates, fix branch range, CLI OS emulation, coreview diagrams updates, RV64IM in CI</p>
       </description>
     </release>
     <release version="0.9.4" date="2022-10-26">
