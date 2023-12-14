@@ -142,6 +142,13 @@ namespace machine { namespace CSR {
     private:
         static size_t get_register_internal_id(Address address);
 
+        /** Write CSR register field without write handler, read-only masking and signal */
+        void write_field_raw(const RegisterFieldDesc &field_desc, uint64_t value) {
+            uint64_t u = register_data[field_desc.regId].as_u64();
+            u = field_desc.update(u, value);
+            register_data[field_desc.regId] = u;
+        }
+
         Xlen xlen = Xlen::_32; // TODO
 
         /**
@@ -184,12 +191,14 @@ namespace machine { namespace CSR {
     namespace Field {
         namespace mstatus {
             static constexpr RegisterFieldDesc SIE = { "SIE", Id::MSTATUS, {1, 1}, "System global interrupt-enable"};
-            static constexpr RegisterFieldDesc MIE = { "SIE", Id::MSTATUS, {1, 3}, "Machine global interrupt-enable"};
+            static constexpr RegisterFieldDesc MIE = { "MIE", Id::MSTATUS, {1, 3}, "Machine global interrupt-enable"};
             static constexpr RegisterFieldDesc SPIE = { "SPIE", Id::MSTATUS, {1, 5}, "Previous SIE before the trap"};
             static constexpr RegisterFieldDesc MPIE = { "MPIE", Id::MSTATUS, {1, 7}, "Previous MIE before the trap"};
             static constexpr RegisterFieldDesc SPP = { "SPP", Id::MSTATUS, {1, 8}, "System previous privilege mode"};
             static constexpr RegisterFieldDesc MPP = { "MPP", Id::MSTATUS, {2, 11}, "Machine previous privilege mode"};
-            static constexpr const RegisterFieldDesc *fields[] = { &SIE, &MIE, &SPIE, &MPIE, &SPP, &MPP};
+            static constexpr RegisterFieldDesc UXL = { "UXL", Id::MSTATUS, {2, 32}, "User mode XLEN (RV64 only)"};
+            static constexpr RegisterFieldDesc SXL = { "SXL", Id::MSTATUS, {2, 34}, "Supervisor mode XLEN (RV64 only)"};
+            static constexpr const RegisterFieldDesc *fields[] = { &SIE, &MIE, &SPIE, &MPIE, &SPP, &MPP, &UXL, &SXL};
             static constexpr unsigned count = sizeof(fields) / sizeof(fields[0]);
         }
     }
@@ -204,7 +213,7 @@ namespace machine { namespace CSR {
         [Id::MIMPID] = { "mimpid", 0xF13_csr, "Implementation ID.", 0, 0},
         [Id::MHARTID] = { "mhardid", 0xF14_csr, "Hardware thread ID." },
         [Id::MSTATUS] = { "mstatus", 0x300_csr, "Machine status register.",
-                        0, 0x807FFFEA, &ControlState::mstatus_wlrl_write_handler,
+                        0, 0x007FFFEA, &ControlState::mstatus_wlrl_write_handler,
                         {Field::mstatus::fields, Field::mstatus::count} },
         [Id::MISA] = { "misa", 0x301_csr, "Machine ISA Register.", 0, 0},
         [Id::MIE] = { "mie", 0x304_csr, "Machine interrupt-enable register.",

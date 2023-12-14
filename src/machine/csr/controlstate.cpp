@@ -35,6 +35,11 @@ namespace machine { namespace CSR {
             misa |= (uint64_t)2 << 62;
         }
         register_data[CSR::Id::MISA] = misa;
+
+        if (xlen == Xlen::_64) {
+            write_field_raw(Field::mstatus::UXL, 2);
+            write_field_raw(Field::mstatus::SXL, 2);
+        }
     }
 
     size_t ControlState::get_register_internal_id(Address address) {
