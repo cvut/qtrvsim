@@ -280,7 +280,7 @@ The UART registers region is mirrored on the address 0xffff0000 to enable use of
 for [SPIM](http://spimsimulator.sourceforge.net/) or [MARS](http://courses.missouristate.edu/KenVollmar/MARS/)
 emulators.
 
-The another peripheral allows to set three byte values concatenated to single word (read-only KNOBS_8BIT register)
+The another peripheral allows to set three byte values concatenated to single word (read-only `KNOBS_8BIT` register)
 from user panel set by knobs and display one word in hexadecimal, decimal and binary format (`LED_LINE` register). There
 are two other words writable which control color of RGB LED 1 and 2
 (registers `LED_RGB1` and `LED_RGB2`).
@@ -384,19 +384,19 @@ The emulator includes support for a few Linux kernel system calls. The RV32G ilp
 | Register                           | use on input          | use on output   | Calling Convention             |
 |:-----------------------------------|:----------------------|:----------------|:-------------------------------|
 | zero (x0)                          | —                     | -               | Hard-wired zero                |
-| ra (x1)                            | —                     | -               | Return address                 |
-| sp (x2)                            | —                     | (caller saved)  | Stack pointer                  |
-| gp (x3)                            | —                     | (caller saved)  | Stack pointer                  |
-| tp (x4)                            | —                     | (caller saved)  | Thread pointer                 |
+| ra (x1)                            | —                     | (preserved)     | Return address                 |
+| sp (x2)                            | —                     | (callee saved)  | Stack pointer                  |
+| gp (x3)                            | —                     | (preserved)     | Global pointer                  |
+| tp (x4)                            | —                     | (preserved)     | Thread pointer                 |
 | t0 .. t2 (x5 .. x7)                | —                     | -               | Temporaries                    |
-| s0/fp (x8)                         | —                     | (caller saved)  | Saved register/frame pointer   |
-| s1 (x9)                            | —                     | (caller saved)  | Saved register                 |
+| s0/fp (x8)                         | —                     | (callee saved)  | Saved register/frame pointer   |
+| s1 (x9)                            | —                     | (callee saved)  | Saved register                 |
 | a0 (x10)                           | 1st syscall argument  | return value    | Function argument/return value |
 | a1 (x11)                           | 2nd syscall argument  | -               | Function argument/return value |
 | a2 .. a5 (x12 .. x15)              | syscall arguments     | -               | Function arguments             |
 | a6 (x16)                           | -                     | -               | Function arguments             |
 | a7 (x17)                           | syscall number        | -               | Function arguments             |
-| s2 .. s11 (x18 .. x27)             | —                     | (caller saved)  | Saved registers                |
+| s2 .. s11 (x18 .. x27)             | —                     | (callee saved)  | Saved registers                |
 | t3 .. t6 (x28 .. x31)              | —                     | -               | Temporaries                    |
 
 The all system call input arguments are passed in register.
@@ -429,7 +429,7 @@ Open file and associate it with the first unused file descriptor number and retu
 option `OS Emulation`->`Filesystem root`
 is not empty then the file path `pathname` received from emulated environment is appended to the path specified
 by `Filesystem root`. The host filesystem is protected against attempt to traverse to random directory by use of `..`
-path elements. If the root is not specified then all open files are targetted to the emulated terminal.
+path elements. If the root is not specified then all open files are targetted to the emulated terminal. Only `TARGET_AT_FDCWD` (`dirfd` = -100) mode is supported.
 
 #### void * [brk](http://man7.org/linux/man-pages/man2/brk.2.html)(void *addr) __NR_brk (214)
 
@@ -461,12 +461,12 @@ pairs of base address, length pairs stored in memory at address pass in `iov`.
 ### QtRvSim limitations
 
 * Only very minimal support for privileged instruction is implemented for now (mret).
-* Only machine mode and minimal subset of machne CSR is implemented.
+* Only machine mode and minimal subset of machine CSRs is implemented.
 * TLB and virtual memory are not implemented.
 * No floating point support
 * Memory access stall (stalling execution because of cache miss would be pretty annoying for users so difference between
   cache and memory is just in collected statistics)
-* Only limited support for interrupts and exceptions. When `ebreak`
+* Only limited support for interrupts and exceptions. When `ecall`
   instruction is recognized, small subset of the Linux kernel system calls
   can be emulated or simulator can be configured to continue by trap handler
   on `mtvec` address.
