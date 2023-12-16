@@ -83,11 +83,10 @@ install Command Line Tools. Then open Xcode, accept the license agreement and wa
 components. After you finally see the "Welcome to Xcode" screen, from the top bar
 choose `Xcode -> Preferences -> Locations -> Command Line Tools` and select an SDK version.
 
-Install [Homebrew](https://brew.sh/) and use it to install Qt and libelf. (__Installing libelf is optional. If libelf is
-not found in the system, local fallback is used.__)
+Install [Homebrew](https://brew.sh/) and use it to install Qt. (macOS builds must use the bundled libelf)
 
 ```shell
-brew install qt libelf
+brew install qt
 ```
 
 Now build the project the same way as in general compilation ([above](#general-compilation)).
