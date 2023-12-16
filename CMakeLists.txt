@@ -212,7 +212,7 @@ else ()
             # Turn non-cmake library into a cmake target
             add_library(libelf INTERFACE)
             target_link_libraries(libelf INTERFACE ${LIBELF_LIBRARY})
-            target_include_directories(libelf INTERFACE ${LIBELF_INCLUDE})
+            target_include_directories(libelf INTERFACE ${LIBELF_INCLUDE_DIR})
             message(STATUS "Using system libelf")
         endif ()
     endif ()
