@@ -48,7 +48,7 @@ EditorDock::EditorDock(QSharedPointer<QSettings> settings, QTabWidget *parent_ta
         this, &EditorDock::currentChanged, parent_tabs,
         [this, parent_tabs](int index) {
             // Update parent title
-            if (count() == 0) return;
+            if (count() == 0 || index < 0) return;
             auto *editor = get_tab(index)->get_editor();
             QString title = QString("&Editor (%1)").arg(editor->title());
             parent_tabs->setTabText(parent_tabs->indexOf(this), title);
