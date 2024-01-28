@@ -14,7 +14,7 @@ jobs:
       matrix:
         config:
           - {
-            name: "Ubuntu Latest GCC",
+            name: "Ubuntu Latest GCC - Debug",
             os: ubuntu-latest,
             build_type: "Debug",
             cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
@@ -23,14 +23,14 @@ jobs:
             # Apt is significantly faster that aqt.
           }
           - {
-            name: "Ubuntu Latest GCC + Qt6",
+            name: "Ubuntu Latest GCC + Qt6 - Debug",
             os: ubuntu-latest,
             build_type: "Debug",
             cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
             qt_version: "6.2.1"
           }
           - {
-            name: "macOS Latest Clang",
+            name: "macOS Latest Clang - Debug",
             os: macos-latest,
             build_type: "Debug",
             cc: "clang", cxx: "clang++", build_system: "Unix Makefiles",
@@ -38,9 +38,41 @@ jobs:
             # Cached aqt is faster that brew.
           }
           - {
-            name: "Windows 2019 MinGW",
+            name: "Windows 2019 MinGW - Debug",
             os: windows-2019,
             build_type: "Debug",
+            cc: "gcc", cxx: "g++", build_system: "MinGW Makefiles",
+            # Older Qt releases do not have 64bit mingw release
+            qt_version: "5.12.9", qt_arch: "win64_mingw73"
+          }
+          - {
+            name: "Ubuntu Latest GCC - Release",
+            os: ubuntu-latest,
+            build_type: "Release",
+            cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
+            qt_version: "native",
+            qt_install_command: "sudo apt-get update && sudo apt-get install qtbase5-dev",
+            # Apt is significantly faster that aqt.
+          }
+          - {
+            name: "Ubuntu Latest GCC + Qt6 - Release",
+            os: ubuntu-latest,
+            build_type: "Release",
+            cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
+            qt_version: "6.2.1"
+          }
+          - {
+            name: "macOS Latest Clang - Release",
+            os: macos-latest,
+            build_type: "Release",
+            cc: "clang", cxx: "clang++", build_system: "Unix Makefiles",
+            qt_version: "5.15.2",
+            # Cached aqt is faster that brew.
+          }
+          - {
+            name: "Windows 2019 MinGW - Release",
+            os: windows-2019,
+            build_type: "Release",
             cc: "gcc", cxx: "g++", build_system: "MinGW Makefiles",
             # Older Qt releases do not have 64bit mingw release
             qt_version: "5.12.9", qt_arch: "win64_mingw73"
@@ -87,6 +119,12 @@ jobs:
       - name: Build
         working-directory: ${{ github.workspace }}/build
         run: cmake --build . -j3
+      
+      - name: Deploy on Windows
+        if: runner.os == 'Windows'
+        working-directory: ${{ github.workspace }}/build
+        shell: bash
+        run: "windeployqt \"${{ github.workspace }}/build/target/qtrvsim_gui.exe\""
 
       - name: Test
         working-directory: ${{ github.workspace }}/build
@@ -130,7 +168,7 @@ jobs:
       - name: Store created artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: target-${{ runner.os }}-qt${{ matrix.config.qt_version }}
+          name: target-${{ runner.os }}-qt${{ matrix.config.qt_version }}-${{ matrix.config.build_type }}
           path: ${{ github.workspace }}/build/target
 
   build-emscripten:
