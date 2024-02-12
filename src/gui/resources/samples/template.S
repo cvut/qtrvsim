@@ -3,7 +3,7 @@
 //
 //  template.S       - example file
 //
-//  (C) 2021-2023 by Pavel Pisa
+//  (C) 2021-2024 by Pavel Pisa
 //      e-mail:   pisa@cmp.felk.cvut.cz
 //      homepage: http://cmp.felk.cvut.cz/~pisa
 //      work:     http://www.pikron.com/
