@@ -200,7 +200,7 @@ jobs:
 
       - name: Deploy on Windows
         if: runner.os == 'Windows'
-        working-directory: ${{ github.workspace }}/build
+        working-directory: ${{ github.workspace }}/build/target
         shell: bash
         run: "windeployqt \"${{ github.workspace }}/build/target/qtrvsim_gui.exe\""
 
