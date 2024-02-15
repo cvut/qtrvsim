@@ -105,7 +105,9 @@ void MessagesModel::insert_line(
 }
 
 void MessagesModel::clear_messages() {
-    beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
+    auto row_count = rowCount();
+    if (row_count == 0) return;
+    beginRemoveRows(QModelIndex(), 0, row_count - 1);
     while (!messages.isEmpty()) {
         delete messages.takeFirst();
     }
