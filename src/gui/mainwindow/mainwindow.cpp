@@ -284,15 +284,15 @@ void MainWindow::create_core(
         connect(
             osemu_handler, &osemu::OsSyscallExceptionHandler::rx_byte_pool, terminal.data(),
             &TerminalDock::rx_byte_pool);
-        for (unsigned int i = 0; i < sizeof(ecall_variats)/sizeof(ecall_variats[0]); i++) {
-            machine->register_exception_handler(ecall_variats[i], osemu_handler);
-            machine->set_step_over_exception(ecall_variats[i], true);
-            machine->set_stop_on_exception(ecall_variats[i], false);
+        for (auto ecall_variat : ecall_variats) {
+            machine->register_exception_handler(ecall_variat, osemu_handler);
+            machine->set_step_over_exception(ecall_variat, true);
+            machine->set_stop_on_exception(ecall_variat, false);
         }
     } else {
-        for (unsigned int i = 0; i < sizeof(ecall_variats)/sizeof(ecall_variats[0]); i++) {
-            machine->set_step_over_exception(ecall_variats[i], false);
-            machine->set_stop_on_exception(ecall_variats[i], config.osemu_exception_stop());
+        for (auto ecall_variat : ecall_variats) {
+            machine->set_step_over_exception(ecall_variat, false);
+            machine->set_stop_on_exception(ecall_variat, config.osemu_exception_stop());
         }
     }
 

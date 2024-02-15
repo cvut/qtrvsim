@@ -23,17 +23,17 @@ public:
     void insertFd(const int &fd);
     void removeFd(const int &fd);
 
-    bool isSequential() const override;
+    [[nodiscard]] bool isSequential() const override;
     bool open(OpenMode mode) override;
     void close() override;
-    qint64 pos() const override;
-    qint64 size() const override;
+    [[nodiscard]] qint64 pos() const override;
+    [[nodiscard]] qint64 size() const override;
     bool seek(qint64 pos) override;
-    bool atEnd() const override;
+    [[nodiscard]] bool atEnd() const override;
     bool reset() override;
-    qint64 bytesAvailable() const override;
-    qint64 bytesToWrite() const override;
-    bool canReadLine() const override;
+    [[nodiscard]] qint64 bytesAvailable() const override;
+    [[nodiscard]] qint64 bytesToWrite() const override;
+    [[nodiscard]] bool canReadLine() const override;
     bool waitForReadyRead(int msecs) override;
     bool waitForBytesWritten(int msecs) override;
 

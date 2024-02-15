@@ -100,7 +100,7 @@ protected:
 
     bool handle_exception(
         ExceptionCause excause,
-        Instruction inst,
+        const Instruction &inst,
         Address inst_addr,
         Address next_addr,
         Address jump_branch_pc,

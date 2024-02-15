@@ -137,7 +137,7 @@ void Core::register_exception_handler(ExceptionCause excause, ExceptionHandler *
 
 bool Core::handle_exception(
     ExceptionCause excause,
-    Instruction inst,
+    const Instruction& inst,
     Address inst_addr,
     Address next_addr,
     Address jump_branch_pc,
@@ -462,7 +462,7 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
 
 MemoryState Core::memory(const ExecuteInterstage &dt) {
     RegisterValue towrite_val = dt.alu_val;
-    Address mem_addr = Address(get_xlen_from_reg(dt.alu_val));
+    auto mem_addr = Address(get_xlen_from_reg(dt.alu_val));
     bool memread = dt.memread;
     bool memwrite = dt.memwrite;
     bool regwrite = dt.regwrite;

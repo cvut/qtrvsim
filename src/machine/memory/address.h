@@ -40,7 +40,7 @@ public:
      * Extracts raw numeric value of the address.
      * Why it exists? Output, unsafe operations not supported by operators.
      */
-    constexpr uint64_t get_raw() const;
+    [[nodiscard]] constexpr uint64_t get_raw() const;
 
     /**
      * Explicit cast operator to underlying type.
@@ -68,7 +68,7 @@ public:
      * Alternative: `address.get_raw() == 0`
      * Alternative: `address == Address::null()`
      */
-    constexpr bool is_null() const;
+    [[nodiscard]] constexpr bool is_null() const;
 
     /**
      * Test whether address is aligned to the size of type T.
@@ -79,7 +79,7 @@ public:
      * ```
      */
     template<typename T>
-    constexpr bool is_aligned() const;
+    [[nodiscard]] constexpr bool is_aligned() const;
 
     /* Eq */
     constexpr inline bool operator==(const Address &other) const;

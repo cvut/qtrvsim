@@ -296,7 +296,7 @@ void TestCore::singlecore_jmp() {
     QSKIP("Switched ALU to RV.");
     QFETCH(Instruction, i);
     QFETCH(Registers, regs);
-    QFETCH(uint64_t, pc);
+    // QFETCH(uint64_t, pc);
 
     Memory mem(BIG);
     TrivialBus mem_frontend(&mem);
@@ -323,7 +323,7 @@ void TestCore::pipecore_jmp() {
     QSKIP("Switched ALU to RV.");
     QFETCH(Instruction, i);
     QFETCH(Registers, regs);
-    QFETCH(uint64_t, pc);
+    // QFETCH(uint64_t, pc);
 
     Memory mem(BIG);
     TrivialBus mem_frontend(&mem);

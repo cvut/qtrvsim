@@ -32,9 +32,9 @@ template<typename BASE, typename FIELD_TYPE>
 using Lens = const FIELD_TYPE &(*const)(const BASE &);
 
 #define LENS(BASE_TYPE, MEMBER)                                                                    \
-    [](const BASE_TYPE &base) -> const auto & {                                                    \
+    ([](const BASE_TYPE &base) -> const auto & {                                                    \
         return base.MEMBER;                                                                        \
-    }
+    })
 
 template<typename BASE, typename FIELD_TYPE_A, typename FIELD_TYPE_B>
 using LensPair = std::pair<const FIELD_TYPE_A &, const FIELD_TYPE_B &> (*const)(const BASE &);

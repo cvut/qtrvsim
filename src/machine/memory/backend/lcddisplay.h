@@ -36,19 +36,19 @@ public:
         size_t size,
         ReadOptions options) const override;
 
-    LocationStatus location_status(Offset offset) const override;
+    [[nodiscard]] LocationStatus location_status(Offset offset) const override;
 
     /**
      * @return  framebuffer width in pixels
      */
-    inline constexpr size_t get_width() const {
+    [[nodiscard]] inline constexpr size_t get_width() const {
         return fb_width;
     }
 
     /**
      * @return  framebuffer height in pixels
      */
-    inline constexpr size_t get_height() const {
+    [[nodiscard]] inline constexpr size_t get_height() const {
         return fb_height;
     }
 
@@ -57,15 +57,15 @@ private:
     static constexpr Endian internal_endian = NATIVE_ENDIAN;
 
     /** Read HW register - allows only 32bit aligned access. */
-    uint16_t read_raw_pixel(Offset source) const;
+    [[nodiscard]] uint16_t read_raw_pixel(Offset source) const;
 
     /** Write HW register - allows only 32bit aligned access */
     bool write_raw_pixel(Offset destination, uint16_t value);
 
-    size_t get_fb_line_size() const;
-    size_t get_fb_size_bytes() const;
-    size_t get_address_from_pixel(size_t x, size_t y) const;
-    std::tuple<size_t, size_t> get_pixel_from_address(size_t address) const;
+    [[nodiscard]] size_t get_fb_line_size() const;
+    [[nodiscard]] size_t get_fb_size_bytes() const;
+    [[nodiscard]] size_t get_address_from_pixel(size_t x, size_t y) const;
+    [[nodiscard]] std::tuple<size_t, size_t> get_pixel_from_address(size_t address) const;
 
     const size_t fb_width;  //> Width in pixels
     const size_t fb_height; //> Height in pixels

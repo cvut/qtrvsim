@@ -64,8 +64,8 @@ void RegistersDock::connectToMachine(machine::Machine *machine) {
     if (xlen != machine->config().get_simulated_xlen()) {
         xlen = machine->config().get_simulated_xlen();
         auto *dumy_data_label = new QLabel(sizeHintText(), table_widget.data());
-        for (size_t i = 0; i < gp.size(); i++) {
-            gp[i]->setFixedSize(dumy_data_label->sizeHint());
+        for (auto & i : gp) {
+            i->setFixedSize(dumy_data_label->sizeHint());
         }
         pc->setFixedSize(dumy_data_label->sizeHint());
         delete dumy_data_label;

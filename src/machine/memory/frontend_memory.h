@@ -60,10 +60,10 @@ public:
     bool
     write_u64(Address address, uint64_t value, AccessEffects type = ae::REGULAR);
 
-    uint8_t read_u8(Address address, AccessEffects type = ae::REGULAR) const;
-    uint16_t read_u16(Address address, AccessEffects type = ae::REGULAR) const;
-    uint32_t read_u32(Address address, AccessEffects type = ae::REGULAR) const;
-    uint64_t read_u64(Address address, AccessEffects type = ae::REGULAR) const;
+    [[nodiscard]] uint8_t read_u8(Address address, AccessEffects type = ae::REGULAR) const;
+    [[nodiscard]] uint16_t read_u16(Address address, AccessEffects type = ae::REGULAR) const;
+    [[nodiscard]] uint32_t read_u32(Address address, AccessEffects type = ae::REGULAR) const;
+    [[nodiscard]] uint64_t read_u64(Address address, AccessEffects type = ae::REGULAR) const;
 
     /**
      * Store with size specified by the CPU control unit.
@@ -84,11 +84,11 @@ public:
      * ae::REGULAR.
      * @param control_signal    CPU control unit signal
      */
-    RegisterValue read_ctl(enum AccessControl ctl, Address source) const;
+    [[nodiscard]] RegisterValue read_ctl(enum AccessControl ctl, Address source) const;
 
     virtual void sync();
-    virtual LocationStatus location_status(Address address) const;
-    virtual uint32_t get_change_counter() const = 0;
+    [[nodiscard]] virtual LocationStatus location_status(Address address) const;
+    [[nodiscard]] virtual uint32_t get_change_counter() const = 0;
 
     /**
      * Write byte sequence to memory

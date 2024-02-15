@@ -68,7 +68,7 @@ private:
     void arm_mtimer_event();
 
     unsigned mtimecmp_count;
-    uint64_t mtimecmp_value[ACLINT_MTIMECMP_COUNT_MAX];
+    uint64_t mtimecmp_value[ACLINT_MTIMECMP_COUNT_MAX]{};
 
     const uint8_t mtimer_irq_level;
     QTime mtime_start_offset;

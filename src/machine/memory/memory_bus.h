@@ -178,13 +178,13 @@ public:
     /**
      * Tells, whether given address belongs to this range.
      */
-    bool contains(Address address) const;
+    [[nodiscard]] bool contains(Address address) const;
 
     /*
      * Tells, whether this range (of the RangeDesc) overlaps with supplied
      * range.
      */
-    bool overlaps(Address start, Address last) const;
+    [[nodiscard]] bool overlaps(Address start, Address last) const;
 
     BackendMemory *const device; // TODO consider a shared pointer
     const Address start_addr;

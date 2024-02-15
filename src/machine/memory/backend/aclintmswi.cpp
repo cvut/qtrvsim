@@ -7,15 +7,15 @@
 using ae = machine::AccessEffects; // For enum values, type is obvious from
                                    // context.
 
-namespace machine {  namespace aclint {
+ namespace machine::aclint {
 
 AclintMswi::AclintMswi(Endian simulated_machine_endian)
     : BackendMemory(simulated_machine_endian)
     , mswi_irq_level(3)
 {
     mswi_count = 1;
-    for (unsigned i = 0; i < ACLINT_MSWI_COUNT_MAX; i++)
-        mswi_value[i] = false;
+    for (bool & i : mswi_value)
+        i = false;
 }
 
 AclintMswi::~AclintMswi() = default;
@@ -107,4 +107,4 @@ LocationStatus AclintMswi::location_status(Offset offset) const {
     return LOCSTAT_ILLEGAL;
 }
 
-} } // namespace machine aclint
+} // namespace machine aclint

@@ -91,7 +91,7 @@ CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &core_svg_
                 auto conn_trees = component.findAll<QGraphicsPathItem>("stroke-linecap", "round");
                 if (conn_trees.size() != 2) {
                     WARN(
-                        "Mux2 does not have 2 connections found %lld (source: \"%s\").",
+                        "Mux2 does not have 2 connections found %zi (source: \"%s\").",
                         conn_trees.size(), qPrintable(source_name));
                     break;
                 }

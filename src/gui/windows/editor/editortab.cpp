@@ -24,7 +24,6 @@ EditorTab::EditorTab(bool show_line_numbers, QWidget *parent)
     status_bar_location->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     connect(editor, &SrcEditor::cursorPositionChanged, this, [this]() {
         auto cursor = editor->textCursor();
-        auto width = status_bar_location->width();
         status_bar_location->setText(
             QString("%1:%2").arg(cursor.blockNumber() + 1).arg(cursor.columnNumber() + 1));
     });

@@ -15,14 +15,14 @@ public:
 
 class FmeNode {
 public:
-    FmeNode(int priority);
+    explicit FmeNode(int priority);
     virtual ~FmeNode();
     virtual bool eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) = 0;
     virtual bool insert(FmeNode *node);
     virtual FmeNode *child();
     virtual QString dump() = 0;
     FmeNode *find_last_child();
-    int priority() const;
+    [[nodiscard]] int priority() const;
 
 private:
     int prio;
@@ -30,7 +30,7 @@ private:
 
 class FmeNodeConstant : public FmeNode {
 public:
-    FmeNodeConstant(FmeValue value);
+    explicit FmeNodeConstant(FmeValue value);
     ~FmeNodeConstant() override;
     bool eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) override;
     QString dump() override;
@@ -41,7 +41,7 @@ private:
 
 class FmeNodeSymbol : public FmeNode {
 public:
-    FmeNodeSymbol(QString &name);
+    explicit FmeNodeSymbol(QString &name);
     ~FmeNodeSymbol() override;
     bool eval(FmeValue &value, FmeSymbolDb *symdb, QString &error) override;
     QString dump() override;

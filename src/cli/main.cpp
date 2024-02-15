@@ -189,7 +189,7 @@ void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
     parse_u32_option(parser, "read-time", config, &MachineConfig::set_memory_access_time_read);
     parse_u32_option(parser, "write-time", config, &MachineConfig::set_memory_access_time_write);
     parse_u32_option(parser, "burst-time", config, &MachineConfig::set_memory_access_time_burst);
-    if (parser.values("burst-time").size() > 0) config.set_memory_access_enable_burst(true);
+    if (!parser.values("burst-time").empty()) config.set_memory_access_enable_burst(true);
 
     configure_cache(*config.access_cache_data(), parser.values("d-cache"), "data");
     configure_cache(*config.access_cache_program(), parser.values("i-cache"), "instruction");
@@ -252,17 +252,17 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
     if (p.isSet("trace-gp")) { tr.trace_regs_gp = true; }
 
     QStringList gps = p.values("trace-gp");
-    for (int i = 0; i < gps.size(); i++) {
-        if (gps[i] == "*") {
+    for (const auto & gp : gps) {
+        if (gp == "*") {
             tr.regs_to_trace.fill(true);
         } else {
             bool res;
-            size_t num = gps[i].toInt(&res);
+            size_t num = gp.toInt(&res);
             if (res && num <= machine::REGISTER_COUNT) {
                 tr.regs_to_trace.at(num) = true;
             } else {
                 fprintf(
-                    stderr, "Unknown register number given for trace-gp: %s\n", qPrintable(gps[i]));
+                    stderr, "Unknown register number given for trace-gp: %s\n", qPrintable(gp));
                 exit(EXIT_FAILURE);
             }
         }
@@ -272,7 +272,7 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
     if (p.isSet("trace-wrmem")) { tr.trace_wrmem = true; }
 
     QStringList clim = p.values("cycle-limit");
-    if (clim.size() > 0) {
+    if (!clim.empty()) {
         bool ok;
         tr.cycle_limit = clim.at(clim.size() - 1).toLong(&ok);
         if (!ok) {
@@ -291,13 +291,13 @@ void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *s
     if (p.isSet("dump-cycles")) { r.enable_cycles_reporting(); }
 
     QStringList fail = p.values("fail-match");
-    for (int i = 0; i < fail.size(); i++) {
-        for (int y = 0; y < fail[i].length(); y++) {
+    for (const auto & i : fail) {
+        for (int y = 0; y < i.length(); y++) {
             enum Reporter::FailReason reason;
-            switch (tolower(fail[i].toStdString()[y])) {
+            switch (tolower(i.toStdString()[y])) {
             case 'i': reason = Reporter::FR_UNSUPPORTED_INSTR; break;
             default:
-                fprintf(stderr, "Unknown fail condition: %c\n", qPrintable(fail[i])[y]);
+                fprintf(stderr, "Unknown fail condition: %c\n", qPrintable(i)[y]);
                 exit(EXIT_FAILURE);
             }
             r.expect_fail(reason);
@@ -416,22 +416,22 @@ void configure_osemu(QCommandLineParser &p, MachineConfig &config, Machine *mach
             config.osemu_known_syscall_stop(), config.osemu_unknown_syscall_stop(),
             config.osemu_fs_root());
         if (std_out) {
-            machine->connect(
+            machine::Machine::connect(
                 osemu_handler, &osemu::OsSyscallExceptionHandler::char_written,
                 std_out, QOverload<int, unsigned>::of(&CharIOHandler::writeByte));
         }
         /*connect(
             osemu_handler, &osemu::OsSyscallExceptionHandler::rx_byte_pool, terminal,
             &TerminalDock::rx_byte_pool);*/
-        for (unsigned int i = 0; i < sizeof(ecall_variats)/sizeof(ecall_variats[0]); i++) {
-            machine->register_exception_handler(ecall_variats[i], osemu_handler);
-            machine->set_step_over_exception(ecall_variats[i], true);
-            machine->set_stop_on_exception(ecall_variats[i], false);
+        for (auto ecall_variat : ecall_variats) {
+            machine->register_exception_handler(ecall_variat, osemu_handler);
+            machine->set_step_over_exception(ecall_variat, true);
+            machine->set_stop_on_exception(ecall_variat, false);
         }
     } else {
-        for (unsigned int i = 0; i < sizeof(ecall_variats)/sizeof(ecall_variats[0]); i++) {
-            machine->set_step_over_exception(ecall_variats[i], false);
-            machine->set_stop_on_exception(ecall_variats[i], config.osemu_exception_stop());
+        for (auto ecall_variat : ecall_variats) {
+            machine->set_step_over_exception(ecall_variat, false);
+            machine->set_stop_on_exception(ecall_variat, config.osemu_exception_stop());
         }
     }
 }

@@ -8,7 +8,7 @@
 
 #include <QTime>
 
-namespace machine { namespace aclint {
+namespace machine::aclint {
 
 constexpr Offset CLINT_SSWI_OFFSET    = 0xc000u;
 constexpr Offset CLINT_SSWI_SIZE      = 0x4000u;
@@ -48,13 +48,13 @@ public:
         size_t size,
         ReadOptions options) const override;
 
-    LocationStatus location_status(Offset offset) const override;
+    [[nodiscard]] LocationStatus location_status(Offset offset) const override;
 
 private:
     /** endian of internal registers of the periphery use. */
     static constexpr Endian internal_endian = NATIVE_ENDIAN;
 
-    uint32_t read_reg32(Offset source, AccessEffects type) const;
+    [[nodiscard]] uint32_t read_reg32(Offset source, AccessEffects type) const;
     bool write_reg32(Offset destination, uint32_t value);
 
     unsigned sswi_count;
@@ -62,6 +62,6 @@ private:
     const uint8_t sswi_irq_level;
 };
 
-} } // namespace machine aclint
+} // namespace machine aclint
 
 #endif // ACLINTSSWI_H

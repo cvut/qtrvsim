@@ -3,19 +3,22 @@
 #include "common/endian.h"
 
 #include <QTimerEvent>
+#include <common/logging.h>
+
+LOG_CATEGORY("machine.memory.aclintmtimer");
 
 using ae = machine::AccessEffects; // For enum values, type is obvious from
                                    // context.
 
-namespace machine {  namespace aclint {
+ namespace machine::aclint {
 
 AclintMtimer::AclintMtimer(Endian simulated_machine_endian)
     : BackendMemory(simulated_machine_endian)
     , mtimer_irq_level(7)
 {
     mtimecmp_count = 1;
-    for (unsigned i = 0; i < ACLINT_MTIMECMP_COUNT_MAX; i++)
-        mtimecmp_value[i] = 0;
+    for (auto &i : mtimecmp_value)
+        i = 0;
     mtime_start_offset = QTime::currentTime();
     qt_timer_id = -1;
 }
@@ -148,13 +151,14 @@ bool AclintMtimer::write_reg64(Offset destination, uint64_t value) {
         if (!update_mtimer_irq())
             arm_mtimer_event();
     } else {
-        printf("WARNING: ACLINT MTIMER - read out of range (at 0x%lu).\n", destination);
+        WARN("ACLINT MTIMER - read out of range (at 0x%zu).\n", destination);
     }
 
     emit write_notification(destination, value);
 
     return changed;
 }
+
 LocationStatus AclintMtimer::location_status(Offset offset) const {
 
     if ((offset >= ACLINT_MTIMECMP_OFFSET) &&
@@ -165,4 +169,4 @@ LocationStatus AclintMtimer::location_status(Offset offset) const {
 
     return LOCSTAT_ILLEGAL;
 }
-} } // namespace machine aclint
+} // namespace machine aclint

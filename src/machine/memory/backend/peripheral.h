@@ -41,7 +41,7 @@ public:
         size_t size,
         ReadOptions options) const override;
 
-    LocationStatus location_status(Offset offset) const override;
+    [[nodiscard]] LocationStatus location_status(Offset offset) const override;
 };
 
 } // namespace machine

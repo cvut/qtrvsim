@@ -43,7 +43,7 @@ struct ArgumentDesc {
         , kind(kind)
         , min(min)
         , max(max)
-        , arg(std::move(arg)) {}
+        , arg(arg) {}
 
     /** Check whether given value fits into this instruction field. */
     [[nodiscard]] constexpr bool is_value_in_field_range(RegisterValue val) const {
@@ -1303,8 +1303,6 @@ uint32_t Instruction::parse_field(
     if (field_token.trimmed() != "") { throw ParseError("excessive characters in argument"); }
     return inst_code;
 }
-
-uint16_t parse_csr_address(const QString &field_token, uint &chars_taken);
 
 void parse_immediate_value(
     const QString &field_token,

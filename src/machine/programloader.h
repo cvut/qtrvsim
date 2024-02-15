@@ -48,7 +48,7 @@ private:
     union {
         Elf32_Phdr *arch32;
         Elf64_Phdr *arch64;
-    } sections_headers;
+    } sections_headers{};
     QVector<size_t> indexes_of_load_sections; // external index to sections_headers index
     Address executable_entry;
 };

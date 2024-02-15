@@ -32,7 +32,7 @@ void ignore(const T &) {}
 
 #define UNIMPLEMENTED throw std::logic_error("Unimplemented");
 #define PANIC throw std::logic_error("The program panicked.");
-#define UNREACHABLE assert(false);
+#define UNREACHABLE Q_UNREACHABLE();
 #define UNUSED(arg) ignore(arg);
 /**
  * Annotate pointer ownership.

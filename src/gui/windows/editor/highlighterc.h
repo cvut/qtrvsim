@@ -64,7 +64,7 @@ class HighlighterC : public QSyntaxHighlighter {
     Q_OBJECT
 
 public:
-    HighlighterC(QTextDocument *parent = nullptr);
+    explicit HighlighterC(QTextDocument *parent = nullptr);
 
 protected:
     void highlightBlock(const QString &text) override;

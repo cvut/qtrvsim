@@ -46,10 +46,10 @@ public:
         size_t size,
         ReadOptions options) const override;
 
-    LocationStatus location_status(Offset offset) const override;
+    [[nodiscard]] LocationStatus location_status(Offset offset) const override;
 
 private:
-    uint32_t read_reg(Offset source) const;
+    [[nodiscard]] uint32_t read_reg(Offset source) const;
     bool write_reg(Offset destination, uint32_t value);
     void knob_update_notify(uint32_t val, uint32_t mask, size_t shift);
 

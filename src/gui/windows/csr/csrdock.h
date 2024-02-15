@@ -32,7 +32,7 @@ private:
     QT_OWNED StaticTable *widg;
     QT_OWNED QScrollArea *scrollarea;
 
-    std::array<QT_OWNED QLabel *, machine::CSR::REGISTERS.size()> csr_view;
+    std::array<QT_OWNED QLabel *, machine::CSR::REGISTERS.size()> csr_view {};
     bool csr_highlighted[machine::CSR::REGISTERS.size()] {};
     bool csr_highlighted_any;
 

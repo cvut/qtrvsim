@@ -36,10 +36,10 @@ public:
         size_t size,
         ReadOptions options) const override;
 
-    LocationStatus location_status(Offset offset) const override;
+    [[nodiscard]] LocationStatus location_status(Offset offset) const override;
 
-    size_t length() const;
-    const byte *data() const;
+    [[nodiscard]] size_t length() const;
+    [[nodiscard]] const byte *data() const;
 
     bool operator==(const MemorySection &) const;
     bool operator!=(const MemorySection &) const;
@@ -85,7 +85,7 @@ public:
     void reset(const Memory &);
 
     // returns section containing given address
-    MemorySection *get_section(size_t offset, bool create) const;
+    [[nodiscard]] MemorySection *get_section(size_t offset, bool create) const;
 
     WriteResult write(
         Offset destination,
@@ -99,12 +99,12 @@ public:
         size_t size,
         ReadOptions options) const override;
 
-    LocationStatus location_status(Offset offset) const override;
+    [[nodiscard]] LocationStatus location_status(Offset offset) const override;
 
     bool operator==(const Memory &) const;
     bool operator!=(const Memory &) const;
 
-    const union MemoryTree *get_memory_tree_root() const;
+    [[nodiscard]] const union MemoryTree *get_memory_tree_root() const;
 
 private:
     union MemoryTree *mt_root;
@@ -117,7 +117,7 @@ private:
         size_t depth);
     static union MemoryTree *
     copy_section_tree(const union MemoryTree *, size_t depth);
-    uint32_t get_change_counter() const;
+    [[nodiscard]] uint32_t get_change_counter() const;
 };
 } // namespace machine
 

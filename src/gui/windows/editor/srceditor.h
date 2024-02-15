@@ -18,7 +18,7 @@ class SrcEditor : public QPlainTextEdit {
 
 public:
     explicit SrcEditor(QWidget *parent);
-    QString filename() const;
+    [[nodiscard]] QString filename() const;
     QString title();
     bool loadFile(const QString &filename);
     bool saveFile(QString filename = "");

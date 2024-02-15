@@ -2,6 +2,10 @@
 
 #include "common/endian.h"
 
+#include <common/logging.h>
+
+LOG_CATEGORY("machine.memory.serialport");
+
 using ae = machine::AccessEffects; // For enum values, type is obvious from
                                    // context.
 
@@ -131,7 +135,7 @@ uint32_t SerialPort::read_reg(Offset source, AccessEffects type) const {
         rx_queue_check_internal();
         break;
     case SERP_TX_ST_REG_o: value = tx_st_reg; break;
-    default: printf("WARNING: Serial port - read out of range (at 0x%lu).\n", source); break;
+    default: WARN("Serial port - read out of range (at 0x%zu).\n", source); break;
     }
 
     emit read_notification(source, value);
@@ -159,9 +163,7 @@ bool SerialPort::write_reg(Offset destination, uint32_t value) {
             emit tx_byte(value & 0xffu);
             update_tx_irq();
             return true;
-        default:
-            printf("WARNING: Serial port - write out of range (at 0x%lu).\n", destination);
-            return false;
+        default: WARN("Serial port - write out of range (at 0x%zu).\n", destination); return false;
         }
     }();
 

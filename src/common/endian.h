@@ -24,6 +24,7 @@ inline const char *to_string(Endian val) {
     case LITTLE: return "LITTLE";
     case BIG: return "BIG";
     }
+    UNREACHABLE;
 }
 
 inline constexpr Endian get_native_endian() {

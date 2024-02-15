@@ -92,7 +92,7 @@ public:
      *  - LOCSTAT_ILLEGAL       address is not occupied, write will result in
      *                          NOP, read will return constant zero.
      */
-    virtual enum LocationStatus location_status(Offset offset) const = 0;
+    [[nodiscard]] virtual enum LocationStatus location_status(Offset offset) const = 0;
 
     /**
      * Endian of the simulated CPU/memory system.

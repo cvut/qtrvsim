@@ -20,7 +20,7 @@ namespace machine {
  */
 class CachePolicy {
 public:
-    virtual size_t select_way_to_evict(size_t row) const = 0;
+    [[nodiscard]] virtual size_t select_way_to_evict(size_t row) const = 0;
 
     /**
      * To be called by cache on any change of validity.
@@ -52,7 +52,7 @@ public:
      */
     CachePolicyLRU(size_t associativity, size_t set_count);
 
-    size_t select_way_to_evict(size_t row) const final;
+    [[nodiscard]] size_t select_way_to_evict(size_t row) const final;
 
     void update_stats(size_t way, size_t row, bool is_valid) final;
 
@@ -79,7 +79,7 @@ public:
      */
     CachePolicyLFU(size_t associativity, size_t set_count);
 
-    size_t select_way_to_evict(size_t row) const final;
+    [[nodiscard]] size_t select_way_to_evict(size_t row) const final;
 
     void update_stats(size_t way, size_t row, bool is_valid) final;
 
@@ -94,7 +94,7 @@ public:
      */
     explicit CachePolicyRAND(size_t associativity);
 
-    size_t select_way_to_evict(size_t row) const final;
+    [[nodiscard]] size_t select_way_to_evict(size_t row) const final;
 
     void update_stats(size_t way, size_t row, bool is_valid) final;
 
