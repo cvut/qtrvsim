@@ -3,7 +3,7 @@ cmake_policy(VERSION 3.10)
 
 project(QtRVSim
         LANGUAGES C CXX
-        VERSION 0.9.6
+        VERSION 0.9.7
         DESCRIPTION "RISC-V CPU simulator for education purposes")
 
 set(KAREL_KOCI "Karel Koci <cynerd@email.cz>")

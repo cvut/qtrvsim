@@ -1,3 +1,14 @@
+qtrvsim (0.9.7-1) unstable; urgency=medium
+
+  * GUI: fix examples button crashes on Windows and sometimes other platforms
+  * GUI: fix crash when no tab is selected
+  * CI: add windows libs to artifacts and use more cores available
+  * CI: Make pack QT with Win artifact
+  * Project: Use the include directory for LibElf on macOS, Homebrew misses RISC-V
+  * Machine: set SXL and UXL to 64-bit XLEN for RV64
+
+-- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Thu, 15 Feb 2024 20:57:12 +0100
+
 qtrvsim (0.9.6-1) unstable; urgency=medium
 
   * GUI: add reset widows menu entry to restore default windows layout

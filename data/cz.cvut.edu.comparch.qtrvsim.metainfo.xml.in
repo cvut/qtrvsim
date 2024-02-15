@@ -16,9 +16,14 @@
   </description>
 
   <releases>
-    <release version="@MAIN_PROJECT_VERSION@" date="2023-12-11">
+    <release version="@MAIN_PROJECT_VERSION@" date="2024-02-16">
       <description>
         <p>Current project release.</p>
+      </description>
+    </release>
+    <release version="0.9.6" date="2023-12-11">
+      <description>
+        <p>RISC-V A extension, ACLINT MTIMER, IRQ support, L2 cache, GUI editor tabs</p>
       </description>
     </release>
     <release version="0.9.5" date="2023-01-16">
