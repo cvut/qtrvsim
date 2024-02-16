@@ -49,6 +49,8 @@ Please, report any difficulties via [GitHub issues](https://github.com/cvut/qtrv
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/qtrvsim.svg)](https://repology.org/project/qtrvsim/versions)
 
+[![build result](https://build.opensuse.org/projects/home:jdupak/packages/qtrvsim/badge.svg?type=default)](https://build.opensuse.org/package/show/home:jdupak/qtrvsim)
+
 ### Build Dependencies
 
 - Qt 5 (minimal tested version is 5.9.5), experimental support of Qt 6
