@@ -65,7 +65,7 @@ namespace machine { namespace CSR {
 
     void ControlState::write(Address address, RegisterValue value) {
         DEBUG(
-            "Write CSR[%u/%z] <== 0x%z", address.data, get_register_internal_id(address),
+            "Write CSR[%u/%zu] <== 0x%zu", address.data, get_register_internal_id(address),
             value.as_u64());
         // Attempts to write a read-only register also raise illegal instruction exceptions.
         if (!address.is_writable()) {
