@@ -10,7 +10,6 @@
 #include <gelf.h>
 #include <qstring.h>
 #include <qvector.h>
-#include <unistd.h>
 
 namespace machine {
 

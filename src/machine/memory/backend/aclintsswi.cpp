@@ -2,6 +2,7 @@
 
 #include "common/endian.h"
 
+#include <cstdio>
 #include <QTimerEvent>
 
 using ae = machine::AccessEffects; // For enum values, type is obvious from
@@ -76,7 +77,7 @@ bool AclintSswi::write_reg32(Offset destination, uint32_t value) {
         if (value_bool)
             emit signal_interrupt(sswi_irq_level, value_bool);
      } else {
-        printf("WARNING: ACLINT SSWI - read out of range (at 0x%lu).\n", destination);
+        printf("WARNING: ACLINT SSWI - read out of range (at 0x%zu).\n", destination);
     }
 
     emit write_notification(destination, value);

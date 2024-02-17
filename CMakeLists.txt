@@ -140,6 +140,11 @@ endif ()
 ## Warning level
 ## ============================================================================
 
+if (WIN32)
+    # otherwise CRT complains that `strerror` is deprecated
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+endif ()
+
 if (MSVC)
     add_compile_options(/W4 /WX)
 else ()
