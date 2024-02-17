@@ -631,8 +631,9 @@ void MainWindow::message_selected(
 }
 
 bool SimpleAsmWithEditorCheck::process_file(const QString &filename, QString *error_ptr) {
-    SrcEditor *editor = mainwindow->editor_tabs->find_tab_by_filename(filename)->get_editor();
-    if (editor == nullptr) { return Super::process_file(filename, error_ptr); }
+    EditorTab* tab = mainwindow->editor_tabs->find_tab_by_filename(filename);
+    if (tab == nullptr) { return Super::process_file(filename, error_ptr); }
+    SrcEditor *editor = tab->get_editor();
     QTextDocument *doc = editor->document();
     int ln = 1;
     for (QTextBlock block = doc->begin(); block.isValid(); block = block.next(), ln++) {
