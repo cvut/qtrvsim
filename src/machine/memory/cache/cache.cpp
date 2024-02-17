@@ -2,6 +2,8 @@
 
 #include "memory/cache/cache_types.h"
 
+#include <cstddef>
+
 using ae = machine::AccessEffects; // For enum values, type is obvious from
                                    // context.
 
@@ -301,8 +303,8 @@ size_t Cache::calculate_overflow_to_next_blocks(
     size_t access_size,
     const CacheLocation &loc) const {
     return std::max(
-        (ssize_t)(loc.col * BLOCK_ITEM_SIZE + loc.byte + access_size)
-            - (ssize_t)(cache_config.block_size() * BLOCK_ITEM_SIZE),
+        (ptrdiff_t)(loc.col * BLOCK_ITEM_SIZE + loc.byte + access_size)
+            - (ptrdiff_t)(cache_config.block_size() * BLOCK_ITEM_SIZE),
         { 0 });
 }
 

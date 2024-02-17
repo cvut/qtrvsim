@@ -3,6 +3,8 @@
 #include "simulator_exception.h"
 #include "utils.h"
 
+#include <cstddef>
+
 namespace machine {
 
 std::unique_ptr<CachePolicy>
@@ -50,7 +52,7 @@ void CachePolicyLRU::update_stats(size_t way, size_t row, bool is_valid) {
         uint32_t next_way = way;
 
         if (is_valid) {
-            ssize_t i = associativity - 1;
+            ptrdiff_t i = (ptrdiff_t)associativity - 1;
             do {
                 std::swap(row_stats.at(i), next_way);
                 i--;

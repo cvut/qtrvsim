@@ -91,7 +91,7 @@ bool AclintMswi::write_reg32(Offset destination, uint32_t value) {
         mswi_value[destination >> 2] = value_bool;
         update_mswi_irq();
     } else {
-        printf("WARNING: ACLINT MSWI - read out of range (at 0x%lu).\n", destination);
+        printf("WARNING: ACLINT MSWI - read out of range (at 0x%zu).\n", destination);
     }
 
     emit write_notification(destination, value);
