@@ -1,17 +1,16 @@
 #include "ossyscall.h"
 
-#include "errno.h"
 #include "machine/core.h"
 #include "machine/utils.h"
 #include "syscall_nr.h"
 #include "target_errno.h"
+#include "posix_polyfill.h"
 
 #include <cerrno>
 #include <cinttypes>
 #include <cstdio>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 using namespace machine;
 using namespace osemu;
