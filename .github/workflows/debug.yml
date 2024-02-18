@@ -45,6 +45,16 @@ jobs:
             # Older Qt releases do not have 64bit mingw release
             qt_version: "5.12.9", qt_arch: "win64_mingw73"
           }
+          - {
+            name: "Windows 2022 Clang + Qt6",
+            os: windows-2022,
+            build_type: "Debug",
+            # on Windows, msbuild does not support Clang with GNU-like interface
+            #  and NMake does not support parallel builds
+            cc: "clang", cxx: "clang++", build_system: "Ninja",
+            qt_version: "6.7.0", qt_arch: "win64_msvc2019_64"
+          }
+
 
     steps:
       - uses: actions/checkout@v2
@@ -68,6 +78,10 @@ jobs:
       - name: Install native Qt by package manager
         if: matrix.config.qt_version == 'native'
         run: ${{ matrix.config.qt_install_command }}
+
+      -  name: Setup Ninja
+         if: matrix.config.build_system == 'Ninja'
+         uses: seanmiddleditch/gha-setup-ninja@v4
 
       - name: Create Build Environment
         run: cmake -E make_directory ${{ github.workspace }}/build
