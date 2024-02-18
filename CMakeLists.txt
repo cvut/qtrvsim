@@ -110,7 +110,10 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (NOT "${SANITIZERS}" MATCHES "none" AND NOT "${WASM}" AND NOT "${MINGW}" AND NOT "${MSVC}")
+# MSVC is not supported, Clang+MSVC currently does not seem to support sanitizers in with debug CRT,
+#  MinGW does not support sanitizers at all; all together, just skip sanitizers on Windows and re-investigate
+#  in a year or two whether Clang sanitizer support has improved
+if (NOT "${SANITIZERS}" MATCHES "none" AND NOT "${WASM}" AND NOT "${WIN32}")
     set(CMAKE_C_FLAGS_DEBUG
             "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS} -g -g3 -ggdb")
     set(CMAKE_CXX_FLAGS_DEBUG
@@ -118,7 +121,6 @@ if (NOT "${SANITIZERS}" MATCHES "none" AND NOT "${WASM}" AND NOT "${MINGW}" AND 
     set(CMAKE_LINKER_FLAGS_DEBUG
             "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=${SANITIZERS}")
 endif ()
-
 
 if (NOT "${BUILD_DEBUG}")
     message(STATUS "Debug prints globally suppressed.")
