@@ -160,7 +160,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(ui->actionPeripherals, &QAction::triggered, this, &MainWindow::show_peripherals);
     connect(ui->actionTerminal, &QAction::triggered, this, &MainWindow::show_terminal);
     connect(ui->actionLcdDisplay, &QAction::triggered, this, &MainWindow::show_lcd_display);
-    connect(ui->actionCsrShow, &QAction::triggered, this, &MainWindow::show_csrdock);
+    connect(ui->actionCsrShow, &QAction::triggered, this, &MainWindow::toggle_csrdock);
     connect(ui->actionCore_View_show, &QAction::triggered, this, &MainWindow::show_hide_coreview);
     connect(ui->actionMessages, &QAction::triggered, this, &MainWindow::show_messages);
     connect(ui->actionResetWindows, &QAction::triggered, this, &MainWindow::reset_windows);
@@ -409,6 +409,9 @@ void MainWindow::print_action() {
     }                                                                                              \
 void MainWindow::reset_state_##NAME() {                                                            \
     show_dockwidget(&*NAME, DEFAULT_AREA, DEFAULT_VISIBLE, true);                                  \
+}                                                                                                  \
+void MainWindow::toggle_##NAME() {                                                                 \
+    toggle_dockwidget(&*NAME, DEFAULT_AREA, DEFAULT_VISIBLE, true);                                \
 }
 
 SHOW_HANDLER(registers, Qt::TopDockWidgetArea, true)
@@ -538,11 +541,25 @@ void MainWindow::show_dockwidget(QDockWidget *dw, Qt::DockWidgetArea area,
             dw->hide();
         }
     } else if (dw->isHidden()) {
-        dw->show();
         addDockWidget(area, dw);
+        dw->show();
     } else {
         dw->raise();
         dw->setFocus();
+    }
+}
+
+void MainWindow::toggle_dockwidget(QDockWidget *dw, Qt::DockWidgetArea area,
+                                 bool defaultVisible, bool resetState) {
+    if (dw == nullptr) { return; }
+    if (dw->isHidden()) {
+        addDockWidget(area, dw);
+        dw->show();
+    } else {
+        dw->hide();
+        if (dw->isFloating()) {
+            dw->setFloating(false);
+        }
     }
 }
 

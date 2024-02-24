@@ -90,6 +90,17 @@ public slots:
     void show_csrdock();
     void show_hide_coreview(bool show);
     void show_messages();
+    void toggle_registers();
+    void toggle_program();
+    void toggle_memory();
+    void toggle_cache_data();
+    void toggle_cache_program();
+    void toggle_cache_level2();
+    void toggle_peripherals();
+    void toggle_terminal();
+    void toggle_lcd_display();
+    void toggle_csrdock();
+    void toggle_messages();
     void reset_windows();
     void show_symbol_dialog();
     // Actions - help
@@ -141,6 +152,8 @@ private:
     Box<machine::Machine> machine; // Current simulated machine
 
     void show_dockwidget(QDockWidget *w, Qt::DockWidgetArea area = Qt::RightDockWidgetArea,
+                         bool defaultVisible = false, bool resetState = false);
+    void toggle_dockwidget(QDockWidget *w, Qt::DockWidgetArea area = Qt::RightDockWidgetArea,
                          bool defaultVisible = false, bool resetState = false);
     QPointer<ExtProcess> build_process;
     bool ignore_unsaved = false;
