@@ -541,8 +541,8 @@ void MainWindow::show_dockwidget(QDockWidget *dw, Qt::DockWidgetArea area,
             dw->hide();
         }
     } else if (dw->isHidden()) {
-        addDockWidget(area, dw);
         dw->show();
+        addDockWidget(area, dw);
     } else {
         dw->raise();
         dw->setFocus();
@@ -553,8 +553,8 @@ void MainWindow::toggle_dockwidget(QDockWidget *dw, Qt::DockWidgetArea area,
                                  bool defaultVisible, bool resetState) {
     if (dw == nullptr) { return; }
     if (dw->isHidden()) {
-        addDockWidget(area, dw);
         dw->show();
+        addDockWidget(area, dw);
     } else {
         dw->hide();
         if (dw->isFloating()) {
