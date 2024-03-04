@@ -22,7 +22,7 @@ using ae = machine::AccessEffects; // For enum values, type is obvious from
                                    // context.
 
 void create_parser(QCommandLineParser &p) {
-    p.setApplicationDescription("QtMips CLI machine simulator");
+    p.setApplicationDescription("QtRvSim CLI machine simulator");
     p.addHelpOption();
     p.addVersionOption();
 

@@ -18,7 +18,7 @@ protected:
     int line;
 };
 
-/* This is list of all QtMips specific exceptions
+/* This is list of all QtRvSim specific exceptions
  *
  * Input:
  *  Exception durring input loading
@@ -39,11 +39,11 @@ protected:
  * UnknownMemoryControl:
  *  Used unknown MemoryAccess control value (write_ctl or read_ctl)
  *  This can be raised by invalid instruction but in such case we shoul raise
- * UnknownInstruction instead So this should signal just some QtMips bug.
+ * UnknownInstruction instead So this should signal just some QtRvSim bug.
  * OutOfMemoryAccess:
  *  Trying to access address outside of the memory
  *  As we are simulating whole 32bit memory address space then this is most
- * probably QtMips bug if raised not program. Sanity: This is sanity check
+ * probably QtRvSim bug if raised not program. Sanity: This is sanity check
  * exception
  */
 #define SIMULATOR_EXCEPTIONS                                                                       \
@@ -66,7 +66,7 @@ protected:
 SIMULATOR_EXCEPTIONS
 #undef EXCEPTION
 
-// This is helper macro for throwing QtMips exceptions
+// This is helper macro for throwing QtRvSim exceptions
 #define SIMULATOR_EXCEPTION(TYPE, REASON, EXT)                                                     \
     (machine::SimulatorException##TYPE(QString(REASON), QString(EXT), QString(__FILE__), __LINE__))
 
