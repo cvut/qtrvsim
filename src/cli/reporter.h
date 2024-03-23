@@ -15,7 +15,7 @@ using machine::Address;
 
 enum DumpFormat {
     CONSOLE = 1 << 0,
-    JSON = 2 << 0,
+    JSON = 1 << 1,
 };
 
 /**

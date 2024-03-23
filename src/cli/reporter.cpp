@@ -120,7 +120,7 @@ void Reporter::report() {
 }
 
 void Reporter::report_regs() {
-    dump_data_json["regs"] = {};
+    if (dump_format & DumpFormat::JSON) { dump_data_json["regs"] = {}; }
     report_pc();
     for (unsigned i = 0; i < REGISTER_COUNT; i++) {
         report_gp_reg(i, (i == REGISTER_COUNT - 1));
@@ -149,7 +149,7 @@ void Reporter::report_gp_reg(unsigned int i, bool last) {
         dump_data_json["regs"] = regs;
     }
     if (dump_format & DumpFormat::CONSOLE) {
-        printf("%s:%s%s", qPrintable(key), qPrintable(value), (last) ? "\n" : " ");
+        printf("%s: %s%s", qPrintable(key), qPrintable(value), (last) ? "\n" : " ");
     }
 }
 
@@ -163,7 +163,7 @@ void Reporter::report_csr_reg(size_t internal_id, bool last) {
         dump_data_json["regs"] = regs;
     }
     if (dump_format & DumpFormat::CONSOLE) {
-        printf("%s:%s%s", qPrintable(key), qPrintable(value), (last) ? "\n" : " ");
+        printf("%s: %s%s", qPrintable(key), qPrintable(value), (last) ? "\n" : " ");
     }
 }
 
