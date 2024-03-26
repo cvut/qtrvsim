@@ -450,6 +450,9 @@
    </property>
   </action>
   <action name="actionCsrShow">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>C&amp;ontrol and Status Registers</string>
    </property>
