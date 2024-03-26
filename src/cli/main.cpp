@@ -51,6 +51,7 @@ void create_parser(QCommandLineParser &p) {
                   "Print general purpose register changes. You can use * for "
                   "all registers.",
                   "REG" });
+    p.addOption({ "dump-to-json", "Configure reportor dump to json file.", "FNAME" });
     p.addOption({ { "dump-registers", "d-regs" }, "Dump registers state at program exit." });
     p.addOption({ "dump-cache-stats", "Dump cache statistics at program exit." });
     p.addOption({ "dump-cycles", "Dump number of CPU cycles till program end." });
@@ -286,6 +287,10 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
 }
 
 void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *symtab) {
+    if (p.isSet("dump-to-json")) {
+        r.dump_format = (DumpFormat)(r.dump_format | DumpFormat::JSON);
+        r.dump_file_json = p.value("dump-to-json");
+    }
     if (p.isSet("dump-registers")) { r.enable_regs_reporting(); }
     if (p.isSet("dump-cache-stats")) { r.enable_cache_stats(); }
     if (p.isSet("dump-cycles")) { r.enable_cycles_reporting(); }

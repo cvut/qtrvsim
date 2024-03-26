@@ -89,16 +89,39 @@ void Reporter::report() {
     if (e_regs) { report_regs(); }
     if (e_cache_stats) { report_caches(); }
     if (e_cycles) {
-        printf("cycles: %" PRIu32 "\n", machine->core()->get_cycle_count());
-        printf("stalls: %" PRIu32 "\n", machine->core()->get_stall_count());
+        QString cycle_count = QString::asprintf("%" PRIu32, machine->core()->get_cycle_count());
+        QString stall_count = QString::asprintf("%" PRIu32, machine->core()->get_stall_count());
+        if (dump_format & DumpFormat::JSON) {
+            QJsonObject temp = {};
+            temp["cycles"] = cycle_count;
+            temp["stalls"] = stall_count;
+            dump_data_json["cycles"] = temp;
+        }
+        if (dump_format & DumpFormat::CONSOLE) {
+            printf("cycles: %s\n", qPrintable(cycle_count));
+            printf("stalls: %s\n", qPrintable(stall_count));
+        }
     }
     for (const DumpRange &range : dump_ranges) {
         report_range(range);
     }
+
+    if (dump_format & DumpFormat::JSON) {
+        QFile file(dump_file_json);
+        QByteArray bytes = QJsonDocument(dump_data_json).toJson(QJsonDocument::Indented);
+        if (file.open(QIODevice::WriteOnly)) {
+            file.write(bytes);
+            file.close();
+            printf("JSON object written to file");
+        } else {
+            printf("Could not open file for writing");
+        }
+    }
 }
 
-void Reporter::report_regs() const {
-    printf("PC:0x%08" PRIx64 "\n", machine->registers()->read_pc().get_raw());
+void Reporter::report_regs() {
+    if (dump_format & DumpFormat::JSON) { dump_data_json["regs"] = {}; }
+    report_pc();
     for (unsigned i = 0; i < REGISTER_COUNT; i++) {
         report_gp_reg(i, (i == REGISTER_COUNT - 1));
     }
@@ -107,18 +130,45 @@ void Reporter::report_regs() const {
     }
 }
 
-void Reporter::report_gp_reg(unsigned int i, bool last) const {
-    printf(
-        "R%u:0x%08" PRIx64 "%s", i, machine->registers()->read_gp(i).as_u64(), (last) ? "\n" : " ");
+void Reporter::report_pc() {
+    QString value = QString::asprintf("0x%08" PRIx64, machine->registers()->read_pc().get_raw());
+    if (dump_format & DumpFormat::JSON) {
+        QJsonObject regs = dump_data_json["regs"].toObject();
+        regs["PC"] = value;
+        dump_data_json["regs"] = regs;
+    }
+    if (dump_format & DumpFormat::CONSOLE) { printf("PC:%s\n", qPrintable(value)); }
 }
 
-void Reporter::report_csr_reg(size_t internal_id, bool last) const {
-    printf(
-        "%s: 0x%08" PRIx64 "%s", CSR::REGISTERS[internal_id].name,
-        machine->control_state()->read_internal(internal_id).as_u64(), (last) ? "\n" : " ");
+void Reporter::report_gp_reg(unsigned int i, bool last) {
+    QString key = QString::asprintf("R%u", i);
+    QString value = QString::asprintf("0x%08" PRIx64, machine->registers()->read_gp(i).as_u64());
+    if (dump_format & DumpFormat::JSON) {
+        QJsonObject regs = dump_data_json["regs"].toObject();
+        regs[key] = value;
+        dump_data_json["regs"] = regs;
+    }
+    if (dump_format & DumpFormat::CONSOLE) {
+        printf("%s:%s%s", qPrintable(key), qPrintable(value), (last) ? "\n" : " ");
+    }
 }
 
-void Reporter::report_caches() const {
+void Reporter::report_csr_reg(size_t internal_id, bool last) {
+    QString key = QString::asprintf("%s", CSR::REGISTERS[internal_id].name);
+    QString value = QString::asprintf(
+        "0x%08" PRIx64, machine->control_state()->read_internal(internal_id).as_u64());
+    if (dump_format & DumpFormat::JSON) {
+        QJsonObject regs = dump_data_json["regs"].toObject();
+        regs[key] = value;
+        dump_data_json["regs"] = regs;
+    }
+    if (dump_format & DumpFormat::CONSOLE) {
+        printf("%s: %s%s", qPrintable(key), qPrintable(value), (last) ? "\n" : " ");
+    }
+}
+
+void Reporter::report_caches() {
+    if (dump_format & DumpFormat::JSON) { dump_data_json["caches"] = {}; }
     printf("Cache statistics report:\n");
     report_cache("i-cache", *machine->cache_program());
     report_cache("d-cache", *machine->cache_data());
@@ -128,15 +178,29 @@ void Reporter::report_caches() const {
 }
 
 void Reporter::report_cache(const char *cache_name, const Cache &cache) {
-    printf("%s:reads: %" PRIu32 "\n", cache_name, cache.get_read_count());
-    printf("%s:hit: %" PRIu32 "\n", cache_name, cache.get_hit_count());
-    printf("%s:miss: %" PRIu32 "\n", cache_name, cache.get_miss_count());
-    printf("%s:hit-rate: %.3lf\n", cache_name, cache.get_hit_rate());
-    printf("%s:stalled-cycles: %" PRIu32 "\n", cache_name, cache.get_stall_count());
-    printf("%s:improved-speed: %.3lf\n", cache_name, cache.get_speed_improvement());
+    if (dump_format & DumpFormat::JSON) {
+        QJsonObject caches = dump_data_json["caches"].toObject();
+        QJsonObject temp = {};
+        temp["reads"] = QString::asprintf("%" PRIu32, cache.get_read_count());
+        temp["hit"] = QString::asprintf("%" PRIu32, cache.get_hit_count());
+        temp["miss"] = QString::asprintf("%" PRIu32, cache.get_miss_count());
+        temp["hit_rate"] = QString::asprintf("%.3lf", cache.get_hit_rate());
+        temp["stalled_cycles"] = QString::asprintf("%" PRIu32, cache.get_stall_count());
+        temp["improved_speed"] = QString::asprintf("%.3lf", cache.get_speed_improvement());
+        caches[cache_name] = temp;
+        dump_data_json["caches"] = caches;
+    }
+    if (dump_format & DumpFormat::CONSOLE) {
+        printf("%s:reads: %" PRIu32 "\n", cache_name, cache.get_read_count());
+        printf("%s:hit: %" PRIu32 "\n", cache_name, cache.get_hit_count());
+        printf("%s:miss: %" PRIu32 "\n", cache_name, cache.get_miss_count());
+        printf("%s:hit-rate: %.3lf\n", cache_name, cache.get_hit_rate());
+        printf("%s:stalled-cycles: %" PRIu32 "\n", cache_name, cache.get_stall_count());
+        printf("%s:improved-speed: %.3lf\n", cache_name, cache.get_speed_improvement());
+    }
 }
 
-void Reporter::report_range(const Reporter::DumpRange &range) const {
+void Reporter::report_range(const Reporter::DumpRange &range) {
     FILE *out = fopen(range.path_to_write.toLocal8Bit().data(), "w");
     if (out == nullptr) {
         fprintf(

@@ -5,11 +5,18 @@
 #include "machine/machine.h"
 
 #include <QCoreApplication>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QObject>
 #include <QString>
-#include <QVector>
 
 using machine::Address;
+
+enum DumpFormat {
+    CONSOLE = 1 << 0,
+    JSON = 1 << 1,
+};
 
 /**
  * Watches for special events in the machine (e.g. stop, exception, trap) and prints related
@@ -59,12 +66,18 @@ private:
     FailReason e_fail = FR_NONE;
 
     void report();
-    void report_regs() const;
-    void report_caches() const;
-    void report_range(const DumpRange &range) const;
-    void report_csr_reg(size_t internal_id, bool last) const;
-    void report_gp_reg(unsigned int i, bool last) const;
-    static void report_cache(const char *cache_name, const machine::Cache &cache);
+    void report_pc();
+    void report_regs();
+    void report_caches();
+    void report_range(const DumpRange &range);
+    void report_csr_reg(size_t internal_id, bool last);
+    void report_gp_reg(unsigned int i, bool last);
+    void report_cache(const char *cache_name, const machine::Cache &cache);
+
+public:
+    DumpFormat dump_format = DumpFormat::CONSOLE;
+    QString dump_file_json;
+    QJsonObject dump_data_json = {};
 };
 
 #endif // REPORTER_H
