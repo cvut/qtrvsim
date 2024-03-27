@@ -969,8 +969,24 @@ static void reloc_append(
     Instruction::Modifier pseudo_mod = machine::Instruction::Modifier::NONE) {
     QString expression = "";
     QString allowed_operators = "+-/*|&^~";
-    int i = 0;
-    for (; i < fl.size(); i++) {
+    const QStringList mods = {"%hi(", "%lo("};
+    const Instruction::Modifier modcodes[] = {
+      machine::Instruction::Modifier::COMPOSED_IMM_UPPER,
+      machine::Instruction::Modifier::COMPOSED_IMM_LOWER
+    };
+    int i = 0, e = fl.size() , a = 0;
+
+    for (unsigned m=0; m<mods.size(); ++m) {
+      if (fl.startsWith(mods[m]) && fl.last(1)==")") {
+        pseudo_mod = modcodes[m];
+        i = mods[m].length();
+        e--;
+        a = 1;
+        break;
+      }
+    }
+
+    for (; i < e; i++) {
         QChar ch = fl.at(i);
         if (ch.isSpace()) { continue; }
         if (ch.isLetterOrNumber() || (ch == '_')) {
@@ -985,7 +1001,7 @@ static void reloc_append(
     reloc->append(new RelocExpression(
         inst_addr, expression, offset, adesc->min, adesc->max, &adesc->arg, filename, line,
         pseudo_mod));
-    if (chars_taken != nullptr) { *chars_taken = i; }
+    if (chars_taken != nullptr) { *chars_taken = i + a; }
 }
 
 size_t Instruction::code_from_tokens(
