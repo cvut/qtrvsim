@@ -977,7 +977,7 @@ static void reloc_append(
     int i = 0, e = fl.size() , a = 0;
 
     for (unsigned m=0; m<mods.size(); ++m) {
-      if (fl.startsWith(mods[m]) && fl.last(1)==")") {
+      if (fl.startsWith(mods[m]) && fl.endsWith(")")) {
         pseudo_mod = modcodes[m];
         i = mods[m].length();
         e--;
