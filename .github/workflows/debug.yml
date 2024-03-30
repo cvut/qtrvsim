@@ -57,7 +57,7 @@ jobs:
 
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: git submodule update --recursive --init
 
       - name: Ccache
@@ -148,7 +148,7 @@ jobs:
         run: python qtrvsim_tester.py -M -A --pipeline --cache ${{ github.workspace }}/build/target/qtrvsim_cli
 
       - name: Store created artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: target-${{ runner.os }}-qt${{ matrix.config.qt_version }}
           path: ${{ github.workspace }}/build/target
@@ -171,7 +171,7 @@ jobs:
             qt_version: 5.15.2,
           }
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Ccache
         uses: hendrikmuhs/ccache-action@v1.2.11 # https://github.com/hendrikmuhs/ccache-action/issues/181
@@ -180,7 +180,7 @@ jobs:
 
       - name: Setup EMSDK cache
         id: cache-system-libraries
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: 'emsdk-cache'
           key: ${{ runner.os }}-${{ matrix.config.emsdk_version }}-${{ matrix.config.qt_version }}-emsdk
@@ -219,7 +219,7 @@ jobs:
         run: cmake --build . -j4
 
       - name: Store created artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: target-wasm-${{ runner.os }}-qt${{ matrix.config.qt_version }}
           path: ${{ github.workspace }}/build/target
@@ -230,7 +230,7 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: git submodule update --recursive --init
 
       - name: Get cache key
@@ -241,7 +241,7 @@ jobs:
 
       - name: Cache
         id: cache-tests
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/tests/riscv-official/isa
           key: riscv-tests-${{ steps.subtree-hash.outputs.stdout }}
