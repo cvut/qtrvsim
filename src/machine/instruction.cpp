@@ -979,9 +979,12 @@ static void reloc_append(
         }
     }
 
-    reloc->append(new RelocExpression(
-        inst_addr, expression, offset, adesc->min, adesc->max, &adesc->arg, filename, line,
-        pseudo_mod));
+    if (i > 0) {
+        // Do not append empty relocation expressions
+        reloc->append(new RelocExpression(
+            inst_addr, expression, offset, adesc->min, adesc->max, &adesc->arg, filename, line,
+            pseudo_mod));
+    }
     if (chars_taken != nullptr) { *chars_taken = i; }
 }
 
