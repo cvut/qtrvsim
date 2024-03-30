@@ -6,10 +6,6 @@
 #include <qactiongroup.h>
 #include <qwidget.h>
 
-#ifdef WITH_PRINTING
-    #include <QPrintDialog>
-    #include <QPrinter>
-#endif
 #include "assembler/fixmatheval.h"
 #include "assembler/simpleasm.h"
 #include "dialogs/about/aboutdialog.h"
@@ -353,9 +349,7 @@ void MainWindow::machine_reload(bool force_memory_reset, bool force_elf_load) {
 
 void MainWindow::print_action() {
 #ifdef WITH_PRINTING
-    QPrinter printer(QPrinter::HighResolution);
     printer.setColorMode(QPrinter::Color);
-    QPrintDialog print_dialog(&printer, this);
     if (print_dialog.exec() == QDialog::Accepted) {
         // This vector pre-drawing step is required because Qt fallbacks to
         // bitmap and produces extremely large and slow to render files.
