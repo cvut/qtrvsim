@@ -1,6 +1,10 @@
 ﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#ifdef WITH_PRINTING
+    #include <QPrintDialog>
+    #include <QPrinter>
+#endif
 #include "assembler/simpleasm.h"
 #include "dialogs/new/newdialog.h"
 #include "extprocess.h"
@@ -57,9 +61,7 @@ signals:
 public slots:
     // Actions signals
     void new_machine();
-    void machine_reload(
-        bool force_memory_reset = false,
-        bool force_elf_load = false);
+    void machine_reload(bool force_memory_reset = false, bool force_elf_load = false);
     void print_action();
     void close_source_by_name(QString &filename, bool ask = false);
     void example_source(const QString &source_file);
@@ -140,10 +142,18 @@ private:
 
     Box<machine::Machine> machine; // Current simulated machine
 
-    void show_dockwidget(QDockWidget *w, Qt::DockWidgetArea area = Qt::RightDockWidgetArea,
-                         bool defaultVisible = false, bool resetState = false);
+    void show_dockwidget(
+        QDockWidget *w,
+        Qt::DockWidgetArea area = Qt::RightDockWidgetArea,
+        bool defaultVisible = false,
+        bool resetState = false);
     QPointer<ExtProcess> build_process;
     bool ignore_unsaved = false;
+
+#ifdef WITH_PRINTING
+    QPrinter printer { QPrinter::HighResolution };
+    QPrintDialog print_dialog { &printer, this };
+#endif
 };
 
 class SimpleAsmWithEditorCheck : public SimpleAsm {
@@ -154,8 +164,7 @@ public:
     explicit SimpleAsmWithEditorCheck(MainWindow *a_mainwindow, QObject *parent = nullptr)
         : Super(parent)
         , mainwindow(a_mainwindow) {}
-    bool process_file(const QString &filename, QString *error_ptr = nullptr)
-        override;
+    bool process_file(const QString &filename, QString *error_ptr = nullptr) override;
 
 protected:
     bool process_pragma(
