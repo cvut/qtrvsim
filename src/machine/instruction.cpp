@@ -1232,7 +1232,7 @@ Instruction Instruction::base_from_tokens(
 
 uint16_t parse_csr_address(const QString &field_token, uint &chars_taken);
 
-void parse_immediate_value(
+bool parse_immediate_value(
     const QString &field_token,
     Address &inst_addr,
     RelocExpressionList *reloc,
@@ -1282,9 +1282,12 @@ uint32_t Instruction::parse_field(
         case 'o':
         case 'n': {
             val += initial_immediate_value;
-            parse_immediate_value(
-                field_token, inst_addr, reloc, filename, line, need_reloc, adesc, effective_mod,
-                val, chars_taken);
+            if (!parse_immediate_value(
+                    field_token, inst_addr, reloc, filename, line, need_reloc, adesc, effective_mod,
+                    val, chars_taken)) {
+                throw ParseError(
+                    QString("field_token %1 is not a valid immediate value").arg(field_token));
+            }
             break;
         }
         case 'E': val = parse_csr_address(field_token, chars_taken); break;
@@ -1304,7 +1307,7 @@ uint32_t Instruction::parse_field(
     return inst_code;
 }
 
-void parse_immediate_value(
+bool parse_immediate_value(
     const QString &field_token,
     Address &inst_addr,
     RelocExpressionList *reloc,
@@ -1352,6 +1355,7 @@ void parse_immediate_value(
             reloc, field_token, inst_addr, val, adesc, &chars_taken, filename, line, effective_mod);
         val = 0;
     }
+    return chars_taken != 0;
 }
 
 uint16_t parse_csr_address(const QString &field_token, uint &chars_taken) {
