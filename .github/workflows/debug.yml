@@ -61,7 +61,7 @@ jobs:
       - run: git submodule update --recursive --init
 
       - name: Ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@v1.2.11 # https://github.com/hendrikmuhs/ccache-action/issues/181
         with:
           key: ${{ github.ref_name }}-${{ matrix.config.name }}
 
@@ -174,7 +174,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@v1.2.11 # https://github.com/hendrikmuhs/ccache-action/issues/181
         with:
           key: ${{ github.ref_name }}-${{ matrix.config.name }}
 
