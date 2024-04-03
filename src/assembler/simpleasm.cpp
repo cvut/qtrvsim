@@ -277,7 +277,7 @@ bool SimpleAsm::process_line(
             if (error_ptr != nullptr) { *error_ptr = error; }
             return false;
         }
-        ok = expression.eval(value, symtab, error);
+        ok = expression.eval(value, symtab, error, address);
         if (!ok) {
             fatal_occured = true;
             error = tr(".orig %1 evaluation error.").arg(line);
@@ -311,7 +311,7 @@ bool SimpleAsm::process_line(
                 if (error_ptr != nullptr) { *error_ptr = error; }
                 return false;
             }
-            ok = expression.eval(fill, symtab, error);
+            ok = expression.eval(fill, symtab, error, address);
             if (!ok) {
                 fatal_occured = true;
                 error = tr(".space/.skip %1 evaluation error.").arg(line);
@@ -330,7 +330,7 @@ bool SimpleAsm::process_line(
             if (error_ptr != nullptr) { *error_ptr = error; }
             return false;
         }
-        ok = expression.eval(value, symtab, error);
+        ok = expression.eval(value, symtab, error, address);
         if (!ok) {
             fatal_occured = true;
             error = tr(".space/.skip %1 evaluation error.").arg(line);
@@ -360,7 +360,7 @@ bool SimpleAsm::process_line(
         if (operands.count() > 1) {
             fixmatheval::FmeExpression expression;
             ok = expression.parse(operands.at(1), error);
-            if (ok) { ok = expression.eval(value, symtab, error); }
+            if (ok) { ok = expression.eval(value, symtab, error, address); }
             if (!ok) {
                 error = tr(".set or .equ %1 parse error.").arg(operands.at(1));
                 emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
@@ -466,7 +466,7 @@ bool SimpleAsm::process_line(
                     if (error_ptr != nullptr) { *error_ptr = error; }
                     return false;
                 }
-                ok = expression.eval(value, symtab, error);
+                ok = expression.eval(value, symtab, error, address);
                 if (!ok) {
                     fatal_occured = true;
                     error = tr(".byte %1 evaluation error.").arg(line);
@@ -563,7 +563,7 @@ bool SimpleAsm::finish(QString *error_ptr) {
             error_reported = true;
         } else {
             fixmatheval::FmeValue value;
-            if (!expression.eval(value, symtab, error)) {
+            if (!expression.eval(value, symtab, error, r->location)) {
                 error = tr("expression evalution error %1 at line %2 , "
                            "expression %3.")
                             .arg(error, QString::number(r->line), expression.dump());
