@@ -57,6 +57,7 @@ constexpr inline T get_bits(T val, size_t start, size_t end) {
 template<typename T>
 constexpr inline T sign_extend(T val, size_t size) {
     size_t T_size = std::numeric_limits<T>::digits;
+    if (std::numeric_limits<T>::is_signed) T_size += 1;
     size_t shift = T_size - size;
     return ((int64_t)val << shift) >> shift;
 }

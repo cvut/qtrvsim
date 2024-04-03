@@ -63,3 +63,17 @@ add_cli_test(
         --asm "${CMAKE_SOURCE_DIR}/tests/cli/asm-error/program.S"
 )
 set_tests_properties(cli_asm_error PROPERTIES WILL_FAIL TRUE)
+
+add_cli_test(
+        NAME modifiers
+        ARGS
+        --asm "${CMAKE_SOURCE_DIR}/tests/cli/modifiers/program.S"
+        EXPECTED_OUTPUT "tests/cli/modifiers/stdout.txt"
+)
+
+add_cli_test(
+        NAME modifiers-pcrel
+        ARGS
+        --asm "${CMAKE_SOURCE_DIR}/tests/cli/modifiers-pcrel/program.S"
+        EXPECTED_OUTPUT "tests/cli/modifiers-pcrel/stdout.txt"
+)

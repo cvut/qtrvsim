@@ -74,12 +74,12 @@ protected:
     bool error_occured {};
     bool fatal_occured {};
     SymbolTableDb *symtab {};
+    machine::Address address {};
 
 private:
     QStringList include_stack;
     machine::FrontendMemory *mem {};
     machine::RelocExpressionList reloc;
-    machine::Address address {};
 };
 
 #endif /*SIMPLEASM_H*/

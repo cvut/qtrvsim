@@ -688,7 +688,7 @@ bool SimpleAsmWithEditorCheck::process_pragma(
                 "expression parse error " + error, "");
             return true;
         }
-        ok = expression.eval(value, symtab, error);
+        ok = expression.eval(value, symtab, error, address);
         if (!ok) {
             emit report_message(
                 messagetype::MSG_WARNING, filename, line_number, 0,

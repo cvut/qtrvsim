@@ -954,22 +954,36 @@ static int parse_reg_from_string(const QString &str, uint *chars_taken = nullptr
     }
 }
 
-const QString allowed_special_chars = QStringLiteral("_+-/*|&^~");
+const QString reloc_operators = QStringLiteral("+-/*|&^~");
+const QString reloc_special_chars = QStringLiteral("()%_");
 
 /** Takes largest sequence of valid relocation expression chars and removes whitespaces */
 static std::pair<QString, uint32_t> read_reloc_expression(const QString &input) {
     QString expression;
     uint32_t chars_taken = 0;
+    bool prev_was_operator = false;
+    bool is_modifier = false;
     for (QChar ch : input) {
-        if (ch.isLetterOrNumber() || allowed_special_chars.contains(ch)) {
+        bool is_operator = reloc_operators.contains(ch);
+
+        if (ch == '(' && !prev_was_operator) {
+            if (is_modifier) {
+                is_modifier = false;
+            } else {
+                // This is a start of a new field.
+                break;
+            }
+        }
+
+        if (ch.isLetterOrNumber() || is_operator || reloc_special_chars.contains(ch)) {
             expression.append(ch);
-            chars_taken += 1;
-        } else if (ch.isSpace()) {
-            chars_taken += 1;
-            continue;
-        } else {
+            if (ch == '%') { is_modifier = true; }
+        } else if (!ch.isSpace()) {
             break;
         }
+
+        chars_taken += 1;
+        prev_was_operator = is_operator;
     }
     return { expression, chars_taken };
 }
@@ -1343,7 +1357,7 @@ bool parse_immediate_value(
             r++;
         }
         chars_taken = r - p;
-        if (*r && strchr("+-/*|&^~", *r)) {
+        if (*r && strchr("+-/*|&^~%", *r)) {
             need_reloc = true;
         } else {
             // extend signed bits
