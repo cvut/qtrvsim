@@ -957,18 +957,21 @@ static int parse_reg_from_string(const QString &str, uint *chars_taken = nullptr
 const QString allowed_special_chars = QStringLiteral("_+-/*|&^~");
 
 /** Takes largest sequence of valid relocation expression chars and removes whitespaces */
-static QString read_reloc_expression(const QString &input) {
+static std::pair<QString, uint32_t> read_reloc_expression(const QString &input) {
     QString expression;
+    uint32_t chars_taken = 0;
     for (QChar ch : input) {
         if (ch.isLetterOrNumber() || allowed_special_chars.contains(ch)) {
             expression.append(ch);
+            chars_taken += 1;
         } else if (ch.isSpace()) {
+            chars_taken += 1;
             continue;
         } else {
             break;
         }
     }
-    return expression;
+    return { expression, chars_taken };
 }
 
 static void reloc_append(
@@ -981,14 +984,14 @@ static void reloc_append(
     const QString &filename = "",
     int line = 0,
     Instruction::Modifier pseudo_mod = machine::Instruction::Modifier::NONE) {
-    QString expression = read_reloc_expression(fl);
+    auto [expression, chars_taken_] = read_reloc_expression(fl);
     if (expression.size() > 0) {
         // Do not append empty relocation expressions
         reloc->append(new RelocExpression(
             inst_addr, expression, offset, adesc->min, adesc->max, &adesc->arg, filename, line,
             pseudo_mod));
     }
-    if (chars_taken != nullptr) { *chars_taken = expression.size(); }
+    if (chars_taken != nullptr) { *chars_taken = chars_taken_; }
 }
 
 size_t Instruction::code_from_tokens(
