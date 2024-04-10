@@ -370,6 +370,7 @@ void MainWindow::print_action() {
             QRectF paint_rect = layout.paintRect(QPageLayout::Point);
             QSize pointsize = pagesize.sizePoints();
             qreal ratio = scene_rect.width() / scene_rect.height();
+            // Cut off the excess
             if (paint_rect.height() * ratio > paint_rect.width()) {
                 pointsize.setHeight(
                     pointsize.height() - paint_rect.height() + paint_rect.width() / ratio);
@@ -383,6 +384,12 @@ void MainWindow::print_action() {
         }
 
         QPainter painter(&printer);
+        // scale to fit paint size
+        QRectF paint_rect = printer.pageLayout().paintRect(QPageLayout::Millimeter);
+        double xscale = paint_rect.width() / scene_as_vector.widthMM();
+        double yscale = paint_rect.height() / scene_as_vector.heightMM();
+        double scale = qMin(xscale, yscale);
+        painter.scale(scale, scale);
         painter.drawPicture(0, 0, scene_as_vector);
         painter.end();
     }
