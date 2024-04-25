@@ -1488,7 +1488,7 @@ TokenizedInstruction TokenizedInstruction::from_line(
     }
     end = start;
     while (end < line_str.size()) {
-        if (!line_str.at(end).isLetterOrNumber()) { break; }
+        if (line_str.at(end).isSpace()) { break; }
         end++;
     }
     QString inst_base = line_str.mid(start, end - start).toLower();
