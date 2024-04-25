@@ -147,6 +147,13 @@ if(NOT ${WASM})
 			PRIVATE ${QtLib}::Core ${QtLib}::Test)
 	add_test(NAME cache COMMAND cache_test)
 
+	add_executable(instruction_test_gendata
+			instruction.test.gendata.cpp
+			)
+	target_link_libraries(instruction_test_gendata
+			PRIVATE machine ${QtLib}::Core
+			)
+
 	add_executable(instruction_test
 			csr/controlstate.cpp
 			csr/controlstate.h
@@ -216,5 +223,5 @@ if(NOT ${WASM})
 	add_test(NAME core COMMAND core_test)
 
 	add_custom_target(machine_unit_tests
-			DEPENDS alu_test registers_test memory_test cache_test instruction_test program_loader_test core_test)
+			DEPENDS alu_test registers_test memory_test cache_test instruction_test_gendata instruction_test program_loader_test core_test)
 endif()
