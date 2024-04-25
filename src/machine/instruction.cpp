@@ -1143,7 +1143,6 @@ size_t Instruction::pseudo_from_tokens(
             code += 1;
             inst.base = "srli";
             inst.fields[1] = inst.fields[0];
-            inst.fields.append("XLEN-16");
             *code = base_from_tokens(inst, reloc).data();
             return 8;
         }
@@ -1155,7 +1154,6 @@ size_t Instruction::pseudo_from_tokens(
             code += 1;
             inst.base = "srli";
             inst.fields[1] = inst.fields[0];
-            inst.fields.append("XLEN-32");
             *code = base_from_tokens(inst, reloc).data();
             return 8;
         }
