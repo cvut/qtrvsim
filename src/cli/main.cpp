@@ -244,7 +244,7 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
     if (p.isSet("trace-fetch")) { tr.trace_fetch = true; }
     if (p.isSet("pipelined")) { // Following are added only if we have stages
         if (p.isSet("trace-decode")) { tr.trace_decode = true; }
-        if (p.isSet("trace-execute")) { tr.trace_fetch = true; }
+        if (p.isSet("trace-execute")) { tr.trace_execute = true; }
         if (p.isSet("trace-memory")) { tr.trace_memory = true; }
         if (p.isSet("trace-writeback")) { tr.trace_writeback = true; }
     }
