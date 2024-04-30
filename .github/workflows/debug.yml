@@ -30,11 +30,19 @@ jobs:
             qt_version: "6.2.1"
           }
           - {
-            name: "macOS Latest Clang",
-            os: macos-latest,
+            name: "macOS AMD64 Clang",
+            os: macos-13,
             build_type: "Debug",
             cc: "clang", cxx: "clang++", build_system: "Unix Makefiles",
             qt_version: "5.15.2",
+            # Cached aqt is faster that brew.
+          }
+          - {
+            name: "macOS ARM Clang + Qt6",
+            os: macos-latest,
+            build_type: "Debug",
+            cc: "clang", cxx: "clang++", build_system: "Unix Makefiles",
+            qt_version: "6.6.3",
             # Cached aqt is faster that brew.
           }
           - {
