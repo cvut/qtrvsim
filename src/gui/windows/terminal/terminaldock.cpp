@@ -6,8 +6,7 @@
 #include <QTextBlock>
 #include <QTextCursor>
 
-TerminalDock::TerminalDock(QWidget *parent, QSettings *settings)
-    : QDockWidget(parent) {
+TerminalDock::TerminalDock(QWidget *parent, QSettings *settings) : QDockWidget(parent) {
     (void)settings;
     top_widget = new QWidget(this);
     setWidget(top_widget);
@@ -22,24 +21,22 @@ TerminalDock::TerminalDock(QWidget *parent, QSettings *settings)
     input_edit = new QLineEdit();
     layout_bottom_box->addWidget(input_edit);
     layout_box->addLayout(layout_bottom_box);
+    // insert newline on enter (it will be displayed as space)
+    connect(input_edit, &QLineEdit::returnPressed, [this]() {
+        input_edit->setText(input_edit->text() + '\n');
+    });
 
     setObjectName("Terminal");
     setWindowTitle("Terminal");
 }
 
 void TerminalDock::setup(machine::SerialPort *ser_port) {
-    if (ser_port == nullptr) {
-        return;
-    }
+    if (ser_port == nullptr) { return; }
     connect(
         ser_port, &machine::SerialPort::tx_byte, this,
         QOverload<unsigned int>::of(&TerminalDock::tx_byte));
-    connect(
-        ser_port, &machine::SerialPort::rx_byte_pool, this,
-        &TerminalDock::rx_byte_pool);
-    connect(
-        input_edit, &QLineEdit::textChanged, ser_port,
-        &machine::SerialPort::rx_queue_check);
+    connect(ser_port, &machine::SerialPort::rx_byte_pool, this, &TerminalDock::rx_byte_pool);
+    connect(input_edit, &QLineEdit::textChanged, ser_port, &machine::SerialPort::rx_queue_check);
 }
 
 void TerminalDock::tx_byte(unsigned int data) {
