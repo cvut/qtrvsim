@@ -60,6 +60,11 @@ enum InstructionFlags : unsigned {
     // TODO do we want to add those signals to the visualization?
 
     IMF_RV64 = 1L << 24, /**< Mark instructions which are available in 64-bit mode only. */
+    
+    // RV64/32F
+    IMF_ALU_REQ_RS_F = 1L << 25, /** < Execution phase/ALU/mem requires RS value in Float Reg*/
+    IMF_ALU_REQ_RT_F = 1L << 26, /**< Execution phase/ALU/mem requires RT value in Float Reg*/
+    IMF_ALU_REQ_RD_F = 1L << 27, /**< Execution phase/ALU/mem requires RD value in Float Reg*/
 };
 
 /**

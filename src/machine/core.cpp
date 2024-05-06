@@ -19,6 +19,8 @@ static InstructionFlags unsupported_inst_flags_to_check(Xlen xlen,
         flags_to_check |= IMF_AMO;
     if (!isa_word.contains('M'))
         flags_to_check |= IMF_MUL;
+    if(!isa_word.contains('F'))
+        flags_to_check |= (IMF_ALU_REQ_RD_F | IMF_ALU_REQ_RS_F | IMF_ALU_REQ_RT_F);
     return InstructionFlags(flags_to_check);
 }
 
@@ -321,8 +323,9 @@ DecodeState Core::decode(const FetchInterstage &dt) {
     // When instruction does not specify register, it is set to x0 as operations on x0 have no
     // side effects (not even visualization).
     RegisterValue val_rs
-        = (flags & IMF_ALU_RS_ID) ? uint64_t(size_t(num_rs)) : regs->read_gp(num_rs);
-    RegisterValue val_rt = regs->read_gp(num_rt);
+        = (flags & IMF_ALU_RS_ID) ? uint64_t(size_t(num_rs)) : (flags & IMF_ALU_REQ_RS_F) ? regs->read_fp(num_rs) : regs->read_gp(num_rs);
+    RegisterValue val_rt 
+        = (flags & IMF_ALU_REQ_RT_F) ? regs->read_fp(num_rt) : regs->read_gp(num_rt);
     RegisterValue immediate_val = dt.inst.immediate();
     const bool regwrite = flags & IMF_REGWRITE;
 
