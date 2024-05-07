@@ -6,7 +6,11 @@
 namespace str {
 template<typename T>
 QString asHex(T number) {
-    return QString("0x%1").arg(number, 0, 16);
+    if (number < 0) {
+        return QString::asprintf("-0x%x", -number);
+    } else {
+        return QString::asprintf("0x%x", number);
+    }
 }
 } // namespace str
 
