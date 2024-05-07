@@ -366,7 +366,9 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .ff_rs = FORWARD_NONE,
                                 .ff_rt = FORWARD_NONE,
                                 .alu_component = (flags & IMF_AMO) ? AluComponent::PASS :
-                                                 (flags & IMF_MUL) ? AluComponent::MUL : AluComponent::ALU,
+                                                 (flags & IMF_MUL) ? AluComponent::MUL :                                                 
+                                                 //  AluComponent::ALU,
+                                                (flags & (IMF_ALU_REQ_RD_F | IMF_ALU_REQ_RS_F | IMF_ALU_REQ_RT_F)) == (IMF_ALU_REQ_RD_F | IMF_ALU_REQ_RS_F | IMF_ALU_REQ_RT_F) ? AluComponent::FALU : AluComponent::ALU,
                                 .aluop = alu_op,
                                 .memctl = mem_ctl,
                                 .num_rs = num_rs,
@@ -376,8 +378,10 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .memwrite = bool(flags & IMF_MEMWRITE),
                                 .alusrc = bool(flags & IMF_ALUSRC),
                                 .regwrite = regwrite,
+                                .regwrite_fp = bool(flags & IMF_ALU_REQ_RD_F),
                                 .alu_req_rs = bool(flags & IMF_ALU_REQ_RS),
                                 .alu_req_rt = bool(flags & IMF_ALU_REQ_RT),
+                                .alu_fp = bool(flags & (IMF_ALU_REQ_RD_F | IMF_ALU_REQ_RS_F | IMF_ALU_REQ_RT_F)), // maybe not correct
                                 .branch_bxx = bool(flags & IMF_BRANCH),
                                 .branch_jal = bool(flags & IMF_JUMP),
                                 .branch_val = bool(flags & IMF_BJ_NOT),
@@ -451,6 +455,8 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
                  .memread = dt.memread,
                  .memwrite = dt.memwrite,
                  .regwrite = dt.regwrite,
+                 .regwrite_fp = dt.regwrite_fp,
+                 .alu_fp = dt.alu_fp,
                  .is_valid = dt.is_valid,
                  .branch_bxx = dt.branch_bxx,
                  .branch_jal = dt.branch_jal,
@@ -546,13 +552,14 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
                  .num_rd = dt.num_rd,
                  .memtoreg = memread,
                  .regwrite = regwrite,
+                 .regwrite_fp = dt.regwrite_fp,
                  .is_valid = dt.is_valid,
                  .csr_written = csr_written,
              } };
 }
 
 WritebackState Core::writeback(const MemoryInterstage &dt) {
-    if (dt.regwrite) { regs->write_gp(dt.num_rd, dt.towrite_val); }
+    if (dt.regwrite) { (dt.regwrite_fp) ? regs->write_fp(dt.num_rd, dt.towrite_val) : regs->write_gp(dt.num_rd, dt.towrite_val); }
 
     return WritebackState { WritebackInternalState {
         .inst = (dt.excause == EXCAUSE_NONE)? dt.inst: Instruction::NOP,

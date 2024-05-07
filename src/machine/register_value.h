@@ -79,7 +79,9 @@ public:
 
     [[nodiscard]] constexpr inline int32_t as_i32() const { return (int32_t)data; };
 
-    [[nodiscard]] constexpr inline uint32_t as_u32() const { return (uint32_t)data; };
+    [[nodiscard]] constexpr inline uint32_t as_u32() const { return (uint32_t)data; };    
+    
+    [[nodiscard]] constexpr inline float as_f32() const { union { uint32_t u; float f; } u = {(uint32_t)data}; return u.f; };
 
     [[nodiscard]] constexpr inline int64_t as_i64() const { return (int64_t)data; };
 
@@ -96,6 +98,8 @@ public:
     constexpr explicit operator int32_t() const { return as_i32(); };
 
     constexpr explicit operator uint32_t() const { return as_u32(); };
+
+    constexpr explicit operator float() const { return as_f32(); };
 
     constexpr explicit operator int64_t() const { return as_i64(); };
 
