@@ -22,6 +22,8 @@
 #include "windows/memory/memorydock.h"
 #include "windows/messages/messagesdock.h"
 #include "windows/peripherals/peripheralsdock.h"
+#include "windows/predictor/predictor_bht_dock.h"
+#include "windows/predictor/predictor_btt_dock.h"
 #include "windows/program/programdock.h"
 #include "windows/registers/registersdock.h"
 #include "windows/terminal/terminaldock.h"
@@ -94,6 +96,11 @@ public slots:
     void show_messages();
     void reset_windows();
     void show_symbol_dialog();
+    // Branch predictor
+    void show_dock_bp_btt();
+    void show_dock_bp_bht();
+    void reset_state_dock_bp_btt();
+    void reset_state_dock_bp_bht();
     // Actions - help
     void about_program();
     void about_qt();
@@ -129,6 +136,11 @@ private:
     Box<ProgramDock> program {};
     Box<MemoryDock> memory {};
     Box<CacheDock> cache_program {}, cache_data {}, cache_level2 {};
+
+    // Branch predictor
+    Box<DockPredictorBTT> dock_bp_btt {};
+    Box<DockPredictorBHT> dock_bp_bht {};
+
     Box<PeripheralsDock> peripherals {};
     Box<TerminalDock> terminal {};
     Box<LcdDisplayDock> lcd_display {};
