@@ -92,6 +92,7 @@ protected:
 
 signals:
     void stop_on_exception_reached();
+    void step_started();
     void step_done(const CoreState &);
 
 protected:

@@ -51,6 +51,7 @@ Core::Core(
 }
 
 void Core::step(bool skip_break) {
+    emit step_started();
     state.cycle_count++;
     do_step(skip_break);
     emit step_done(state);
