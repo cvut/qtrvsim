@@ -23,7 +23,7 @@ static InstructionFlags unsupported_inst_flags_to_check(Xlen xlen,
 }
 
 Core::Core(Registers *regs,
-    Predictor *predictor,
+    BranchPredictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
     CSR::ControlState *control_state,
@@ -84,7 +84,7 @@ FrontendMemory *Core::get_mem_program() const {
     return mem_program;
 }
 
-Predictor *Core::get_predictor() const {
+BranchPredictor *Core::get_predictor() const {
     return predictor;
 }
 
@@ -296,7 +296,7 @@ FetchState Core::fetch(PCInterstage pc, bool skip_break) {
                  .inst = inst,
                  .inst_addr = inst_addr,
                  .next_inst_addr = inst_addr + inst.size(),
-                 .predicted_next_inst_addr = predictor->predict(inst, inst_addr),
+                 .predicted_next_inst_addr = predictor->predict_next_pc_address(inst, inst_addr),
                  .excause = excause,
                  .is_valid = true,
              } };
@@ -576,7 +576,7 @@ uint64_t Core::get_xlen_from_reg(RegisterValue reg) const {
 }
 
 CoreSingle::CoreSingle(Registers *regs,
-    Predictor *predictor,
+    BranchPredictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
     CSR::ControlState *control_state,
@@ -612,7 +612,7 @@ void CoreSingle::do_reset() {
 
 CorePipelined::CorePipelined(
     Registers *regs,
-    Predictor *predictor,
+    BranchPredictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
     CSR::ControlState *control_state,

@@ -29,7 +29,7 @@ class Core : public QObject {
 public:
     Core(
         Registers *regs,
-        Predictor *predictor,
+        BranchPredictor *predictor,
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
         CSR::ControlState *control_state,
@@ -44,7 +44,7 @@ public:
 
     Registers *get_regs() const;
     CSR::ControlState *get_control_state() const;
-    Predictor *get_predictor() const;
+    BranchPredictor *get_predictor() const;
     FrontendMemory *get_mem_data() const;
     FrontendMemory *get_mem_program() const;
     const CoreState &get_state() const;
@@ -111,7 +111,7 @@ protected:
     const InstructionFlags check_inst_flags_mask;
     BORROWED Registers *const regs;
     BORROWED CSR::ControlState *const control_state;
-    BORROWED Predictor *const predictor;
+    BORROWED BranchPredictor *const predictor;
     BORROWED FrontendMemory *const mem_data, *const mem_program;
 
     array<bool, EXCAUSE_COUNT> stop_on_exception {};
@@ -146,7 +146,7 @@ class CoreSingle : public Core {
 public:
     CoreSingle(
         Registers *regs,
-        Predictor *predictor,
+        BranchPredictor *predictor,
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
         CSR::ControlState *control_state,
@@ -165,7 +165,7 @@ class CorePipelined : public Core {
 public:
     CorePipelined(
         Registers *regs,
-        Predictor *predictor,
+        BranchPredictor *predictor,
         FrontendMemory *mem_program,
         FrontendMemory *mem_data,
         CSR::ControlState *control_state,
