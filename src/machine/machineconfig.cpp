@@ -20,6 +20,12 @@ using namespace machine;
 #define DF_MEM_ACC_LEVEL2 2
 #define DF_MEM_ACC_BURST_ENABLE false
 #define DF_ELF QString("")
+/// Default config of branch predictor
+#define DFC_BP_ENABLED false
+#define DFC_BP_TYPE PredictorType::SMITH_1_BIT
+#define DFC_BP_INIT_STATE PredictorState::NOT_TAKEN
+#define DFC_BP_BHR_BITS 0
+#define DFC_BP_ADDRESS_BITS 2
 //////////////////////////////////////////////////////////////////////////////
 /// Default config of CacheConfig
 #define DFC_EN false
@@ -173,6 +179,14 @@ MachineConfig::MachineConfig() {
     cch_program = CacheConfig();
     cch_data = CacheConfig();
     cch_level2 = CacheConfig();
+
+    // Branch predictor
+    bp_enabled = DFC_BP_ENABLED;
+    bp_type = DFC_BP_TYPE;
+    bp_init_state = DFC_BP_INIT_STATE;
+    bp_bhr_bits = DFC_BP_BHR_BITS;
+    bp_address_bits = DFC_BP_ADDRESS_BITS;
+    bp_table_bits = bp_bhr_bits + bp_address_bits;
 }
 
 MachineConfig::MachineConfig(const MachineConfig *config) {
@@ -200,6 +214,14 @@ MachineConfig::MachineConfig(const MachineConfig *config) {
     cch_program = config->cache_program();
     cch_data = config->cache_data();
     cch_level2 = config->cache_level2();
+
+    // Branch predictor
+    bp_enabled = config->get_bp_enabled();
+    bp_type = config->get_bp_type();
+    bp_init_state = config->get_bp_init_state();
+    bp_bhr_bits = config->get_bp_bhr_bits();
+    bp_address_bits = config->get_bp_address_bits();
+    bp_table_bits = bp_bhr_bits + bp_address_bits;
 }
 
 #define N(STR) (prefix + QString(STR))
@@ -236,6 +258,16 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     cch_program = CacheConfig(sts, N("ProgramCache_"));
     cch_data = CacheConfig(sts, N("DataCache_"));
     cch_level2 = CacheConfig(sts, N("Level2Cache_"));
+
+    // Branch predictor
+    bp_enabled = sts->value(N("BranchPredictor_Enabled"), DFC_BP_ENABLED).toBool();
+    bp_type = (PredictorType)sts->value(N("BranchPredictor_Type"), (uint8_t)DFC_BP_TYPE).toUInt();
+    bp_init_state
+        = (PredictorState)sts->value(N("BranchPredictor_InitState"), (uint8_t)DFC_BP_INIT_STATE)
+              .toUInt();
+    bp_bhr_bits = sts->value(N("BranchPredictor_BitsBHR"), DFC_BP_BHR_BITS).toUInt();
+    bp_address_bits = sts->value(N("BranchPredictor_BitsAddress"), DFC_BP_ADDRESS_BITS).toUInt();
+    bp_table_bits = bp_bhr_bits + bp_address_bits;
 }
 
 void MachineConfig::store(QSettings *sts, const QString &prefix) {
@@ -260,6 +292,13 @@ void MachineConfig::store(QSettings *sts, const QString &prefix) {
     cch_program.store(sts, N("ProgramCache_"));
     cch_data.store(sts, N("DataCache_"));
     cch_level2.store(sts, N("Level2Cache_"));
+
+    // Branch predictor
+    sts->setValue(N("BranchPredictor_Enabled"), get_bp_enabled());
+    sts->setValue(N("BranchPredictor_Type"), (uint8_t)get_bp_type());
+    sts->setValue(N("BranchPredictor_InitState"), (uint8_t)get_bp_init_state());
+    sts->setValue(N("BranchPredictor_BitsBHR"), get_bp_bhr_bits());
+    sts->setValue(N("BranchPredictor_BitsAddress"), get_bp_address_bits());
 }
 
 #undef N
@@ -526,6 +565,55 @@ Xlen MachineConfig::get_simulated_xlen() const {
 
 ConfigIsaWord MachineConfig::get_isa_word() const {
     return isa_word;
+}
+
+void MachineConfig::set_bp_enabled(bool e) {
+    bp_enabled = e;
+}
+
+void MachineConfig::set_bp_type(PredictorType t) {
+    bp_type = t;
+}
+
+void MachineConfig::set_bp_init_state(PredictorState i) {
+    bp_init_state = i;
+}
+
+void MachineConfig::set_bp_bhr_bits(uint8_t b) {
+    bp_bhr_bits = b > PREDICTOR_MAX_TABLE_BITS ? PREDICTOR_MAX_TABLE_BITS : b;
+    bp_address_bits = bp_address_bits + bp_bhr_bits > PREDICTOR_MAX_TABLE_BITS
+                          ? PREDICTOR_MAX_TABLE_BITS
+                          : bp_address_bits;
+    bp_table_bits = bp_bhr_bits + bp_address_bits;
+}
+
+void MachineConfig::set_bp_address_bits(uint8_t b) {
+    bp_address_bits = (b + bp_bhr_bits) > PREDICTOR_MAX_TABLE_BITS ? PREDICTOR_MAX_TABLE_BITS : b;
+    bp_table_bits = bp_bhr_bits + bp_address_bits;
+}
+
+bool MachineConfig::get_bp_enabled() const {
+    return bp_enabled;
+}
+
+PredictorType MachineConfig::get_bp_type() const {
+    return bp_type;
+}
+
+PredictorState MachineConfig::get_bp_init_state() const {
+    return bp_init_state;
+}
+
+uint8_t MachineConfig::get_bp_bhr_bits() const {
+    return bp_bhr_bits;
+}
+
+uint8_t MachineConfig::get_bp_address_bits() const {
+    return bp_address_bits;
+}
+
+uint8_t MachineConfig::get_bp_table_bits() const {
+    return bp_table_bits;
 }
 
 bool MachineConfig::operator==(const MachineConfig &c) const {

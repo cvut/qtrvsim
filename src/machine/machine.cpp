@@ -78,7 +78,10 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         access_enable_burst);
 
     controlst = new CSR::ControlState(machine_config.get_simulated_xlen(), machine_config.get_isa_word());
-    predictor = new BranchPredictor();
+    predictor = new BranchPredictor(
+        machine_config.get_bp_enabled(), machine_config.get_bp_type(),
+        machine_config.get_bp_init_state(), machine_config.get_bp_bhr_bits(),
+        machine_config.get_bp_address_bits());
 
     if (machine_config.pipelined()) {
         cr = new CorePipelined(
