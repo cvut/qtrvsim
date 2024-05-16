@@ -3,6 +3,7 @@
 
 #include "common/memory_ownership.h"
 #include "machine/machineconfig.h"
+#include "predictor_types.h"
 #include "ui_NewDialog.h"
 #include "ui_NewDialogCache.h"
 
@@ -52,6 +53,13 @@ private slots:
     void browse_osemu_fs_root();
     void osemu_fs_root_change(QString val);
     void reset_at_compile_change(bool);
+
+    // Branch Predictor
+    void bp_enabled_change();
+    void bp_type_change();
+    void bp_init_state_change();
+    void bp_bhr_bits_change();
+    void bp_address_bits_change();
 
 private:
     Box<Ui::NewDialog> ui {};
