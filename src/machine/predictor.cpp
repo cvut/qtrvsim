@@ -774,6 +774,9 @@ void BranchPredictor::update_result(const Instruction instruction, const Address
         return;
     }
 
+    // Update global branch history
+    bhr->update(result);
+
     // Check if address exists in BTT
     Address target_address = btt->get_target_address(instruction_address);
     if (target_address.is_null()) {
@@ -788,7 +791,4 @@ void BranchPredictor::update_result(const Instruction instruction, const Address
         .result = result
     };
     predictor->update(prediction_feedback);
-
-    // Update global branch history
-    bhr->update(result);
 }
