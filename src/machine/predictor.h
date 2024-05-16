@@ -6,18 +6,16 @@
 
 namespace machine {
 
-class Predictor {
+class BranchPredictor {
 public:
-    virtual Address predict(Instruction inst, Address addr) = 0;
-    virtual ~Predictor() = default;
-};
-
-// Always predicts not taking the branch, even on JAL(R) instructions
-class FalsePredictor : public Predictor {
-    Address predict(Instruction inst, Address addr) final {
-        (void)inst; // explicitly unused argument
-        return addr + 4;
-    }
+    virtual ~BranchPredictor() = default;
+    Address predict_next_pc_address(
+        const Instruction instruction,
+        const Address instruction_address) const {
+        (void)instruction; // explicitly unused argument
+        // Always predicts not taking the branch, even on JAL(R) instructions
+        return instruction_address + 4;
+    };
 };
 
 } // namespace machine

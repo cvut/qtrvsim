@@ -22,12 +22,14 @@ static InstructionFlags unsupported_inst_flags_to_check(Xlen xlen,
     return InstructionFlags(flags_to_check);
 }
 
-Core::Core(Registers *regs,
-    Predictor *predictor,
+Core::Core(
+    Registers *regs,
+    BranchPredictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
     CSR::ControlState *control_state,
-    Xlen xlen, ConfigIsaWord isa_word)
+    Xlen xlen,
+    ConfigIsaWord isa_word)
     : pc_if(state.pipeline.pc.final)
     , if_id(state.pipeline.fetch.final)
     , id_ex(state.pipeline.decode.final)
@@ -84,7 +86,7 @@ FrontendMemory *Core::get_mem_program() const {
     return mem_program;
 }
 
-Predictor *Core::get_predictor() const {
+BranchPredictor *Core::get_predictor() const {
     return predictor;
 }
 
@@ -296,7 +298,7 @@ FetchState Core::fetch(PCInterstage pc, bool skip_break) {
                  .inst = inst,
                  .inst_addr = inst_addr,
                  .next_inst_addr = inst_addr + inst.size(),
-                 .predicted_next_inst_addr = predictor->predict(inst, inst_addr),
+                 .predicted_next_inst_addr = predictor->predict_next_pc_address(inst, inst_addr),
                  .excause = excause,
                  .is_valid = true,
              } };
@@ -575,12 +577,14 @@ uint64_t Core::get_xlen_from_reg(RegisterValue reg) const {
     }
 }
 
-CoreSingle::CoreSingle(Registers *regs,
-    Predictor *predictor,
+CoreSingle::CoreSingle(
+    Registers *regs,
+    BranchPredictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
     CSR::ControlState *control_state,
-    Xlen xlen, ConfigIsaWord isa_word)
+    Xlen xlen,
+    ConfigIsaWord isa_word)
     : Core(regs, predictor, mem_program, mem_data, control_state, xlen, isa_word) {
     reset();
 }
@@ -612,7 +616,7 @@ void CoreSingle::do_reset() {
 
 CorePipelined::CorePipelined(
     Registers *regs,
-    Predictor *predictor,
+    BranchPredictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
     CSR::ControlState *control_state,
