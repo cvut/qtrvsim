@@ -497,6 +497,40 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
 
     computed_next_inst_addr = compute_next_inst_addr(dt, branch_bxx_taken);
 
+    // Predictor Branch Target Table update
+    if (dt.branch_jal) {
+        // Update branch target for:
+        // JAL Jump instruction (J-type (alternative to U-type with different immediate bit order))
+        predictor->update_target(dt.inst_addr, dt.branch_jal_target);
+    } else if (dt.branch_jalr) {
+        // Update branch target for:
+        // JALR Jump register instruction (I-type)
+        predictor->update_target(dt.inst_addr, Address(get_xlen_from_reg(dt.alu_val)));
+    } else if (dt.branch_bxx && branch_bxx_taken) {
+        // Update branch target for:
+        // BXX Conditional branch instruction (B-type (alternative to S-type with different
+        // immediate bit order)) only if the result is TAKEN
+        predictor->update_target(dt.inst_addr, dt.branch_jal_target);
+    }
+
+    // Predictor Branch History Table update
+    if (dt.branch_jal) {
+        // Update branch result for:
+        // JAL Jump instruction (J-type (alternative to U-type with different immediate bit order))
+        predictor->update_result(dt.inst, dt.inst_addr, BranchResult::TAKEN);
+    } else if (dt.branch_jalr) {
+        // Update branch result for:
+        // JALR Jump register instruction (I-type)
+        predictor->update_result(dt.inst, dt.inst_addr, BranchResult::TAKEN);
+    } else if (dt.branch_bxx) {
+        // Update branch result for:
+        // BXX Conditional branch instruction (B-type (alternative to S-type with different
+        // immediate bit order))
+        predictor->update_result(
+            dt.inst, dt.inst_addr,
+            branch_bxx_taken ? BranchResult::TAKEN : BranchResult::NOT_TAKEN);
+    }
+
     bool csr_written = false;
     if (control_state != nullptr && dt.is_valid && dt.excause == EXCAUSE_NONE) {
         control_state->increment_internal(CSR::Id::MINSTRET, 1);
