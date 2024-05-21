@@ -159,8 +159,12 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(ui->actionL2_Cache, &QAction::triggered, this, &MainWindow::show_cache_level2);
 
     // Branch predictor
-    connect(ui->actionBranch_Predictor_History_table, &QAction::triggered, this, &MainWindow::show_dock_bp_bht);
-    connect(ui->actionBranch_Predictor_Target_table, &QAction::triggered, this, &MainWindow::show_dock_bp_btb);
+    connect(
+        ui->actionBranch_Predictor_History_table, &QAction::triggered, this,
+        &MainWindow::show_dock_bp_bht);
+    connect(
+        ui->actionBranch_Predictor_Target_table, &QAction::triggered, this,
+        &MainWindow::show_dock_bp_btb);
 
     connect(ui->actionPeripherals, &QAction::triggered, this, &MainWindow::show_peripherals);
     connect(ui->actionTerminal, &QAction::triggered, this, &MainWindow::show_terminal);

@@ -131,41 +131,23 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
 
     // Branch predictor
     connect(
-        ui->group_branch_predictor,
-        QOverload<bool>::of(&QGroupBox::toggled),
-        this,
-        &NewDialog::bp_enabled_change
-    );
+        ui->group_branch_predictor, QOverload<bool>::of(&QGroupBox::toggled), this,
+        &NewDialog::bp_enabled_change);
     connect(
-        ui->select_bp_type,
-        QOverload<int>::of(&QComboBox::activated),
-        this,
-        &NewDialog::bp_type_change
-    );
+        ui->select_bp_type, QOverload<int>::of(&QComboBox::activated), this,
+        &NewDialog::bp_type_change);
     connect(
-        ui->select_bp_init_state,
-        QOverload<int>::of(&QComboBox::activated),
-        this,
-        &NewDialog::bp_init_state_change
-    );
+        ui->select_bp_init_state, QOverload<int>::of(&QComboBox::activated), this,
+        &NewDialog::bp_init_state_change);
     connect(
-        ui->slider_bp_btb_bits,
-        &QAbstractSlider::valueChanged,
-        this,
-        &NewDialog::bp_btb_bits_change
-    );
+        ui->slider_bp_btb_bits, &QAbstractSlider::valueChanged, this,
+        &NewDialog::bp_btb_bits_change);
     connect(
-        ui->slider_bp_bhr_bits,
-        &QAbstractSlider::valueChanged,
-        this,
-        &NewDialog::bp_bhr_bits_change
-    );
+        ui->slider_bp_bhr_bits, &QAbstractSlider::valueChanged, this,
+        &NewDialog::bp_bhr_bits_change);
     connect(
-        ui->slider_bp_bht_addr_bits,
-        &QAbstractSlider::valueChanged,
-        this,
-        &NewDialog::bp_bht_addr_bits_change
-    );
+        ui->slider_bp_bht_addr_bits, &QAbstractSlider::valueChanged, this,
+        &NewDialog::bp_bht_addr_bits_change);
 
     cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d.data());
     cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p.data());
@@ -408,17 +390,19 @@ void NewDialog::bp_enabled_change() {
 }
 
 void NewDialog::bp_type_change() {
-    config->set_bp_type((machine::PredictorType) ui->select_bp_type->currentData().toUInt());
+    config->set_bp_type((machine::PredictorType)ui->select_bp_type->currentData().toUInt());
 
     // Remove all items from init state list
-    while (ui->select_bp_init_state->count() > 0) { 
+    while (ui->select_bp_init_state->count() > 0) {
         ui->select_bp_init_state->removeItem(0);
     };
 
     if (config->get_bp_type() == machine::PredictorType::SMITH_1_BIT) {
-        ui->select_bp_init_state->addItem("Not taken", QVariant((uint8_t) machine::PredictorState::NOT_TAKEN));
-        ui->select_bp_init_state->addItem("Taken", QVariant((uint8_t) machine::PredictorState::TAKEN));
-        ui->select_bp_init_state->setCurrentIndex((uint8_t) machine::PredictorState::NOT_TAKEN);
+        ui->select_bp_init_state->addItem(
+            "Not taken", QVariant((uint8_t)machine::PredictorState::NOT_TAKEN));
+        ui->select_bp_init_state->addItem(
+            "Taken", QVariant((uint8_t)machine::PredictorState::TAKEN));
+        ui->select_bp_init_state->setCurrentIndex((uint8_t)machine::PredictorState::NOT_TAKEN);
         config->set_bp_init_state(machine::PredictorState::NOT_TAKEN);
         ui->select_bp_init_state->setEnabled(true);
         ui->select_bp_init_state->setEnabled(true);
@@ -427,13 +411,17 @@ void NewDialog::bp_type_change() {
         ui->slider_bp_bht_addr_bits->setEnabled(true);
         ui->text_bp_bht_addr_bits_number->setEnabled(true);
         ui->text_bp_bht_bits_number->setEnabled(true);
-    }
-    else if (config->get_bp_type() == machine::PredictorType::SMITH_2_BIT) {
-        ui->select_bp_init_state->addItem("Strongly not taken", QVariant((uint8_t) machine::PredictorState::STRONGLY_NOT_TAKEN));
-        ui->select_bp_init_state->addItem("Weakly not taken", QVariant((uint8_t) machine::PredictorState::WEAKLY_NOT_TAKEN));
-        ui->select_bp_init_state->addItem("Weakly taken", QVariant((uint8_t) machine::PredictorState::WEAKLY_TAKEN));
-        ui->select_bp_init_state->addItem("Strongly taken", QVariant((uint8_t) machine::PredictorState::STRONGLY_TAKEN));
-        ui->select_bp_init_state->setCurrentIndex(((uint8_t) machine::PredictorState::WEAKLY_NOT_TAKEN) - 2);
+    } else if (config->get_bp_type() == machine::PredictorType::SMITH_2_BIT) {
+        ui->select_bp_init_state->addItem(
+            "Strongly not taken", QVariant((uint8_t)machine::PredictorState::STRONGLY_NOT_TAKEN));
+        ui->select_bp_init_state->addItem(
+            "Weakly not taken", QVariant((uint8_t)machine::PredictorState::WEAKLY_NOT_TAKEN));
+        ui->select_bp_init_state->addItem(
+            "Weakly taken", QVariant((uint8_t)machine::PredictorState::WEAKLY_TAKEN));
+        ui->select_bp_init_state->addItem(
+            "Strongly taken", QVariant((uint8_t)machine::PredictorState::STRONGLY_TAKEN));
+        ui->select_bp_init_state->setCurrentIndex(
+            ((uint8_t)machine::PredictorState::WEAKLY_NOT_TAKEN) - 2);
         config->set_bp_init_state(machine::PredictorState::WEAKLY_NOT_TAKEN);
         ui->select_bp_init_state->setEnabled(true);
         ui->select_bp_init_state->setEnabled(true);
@@ -442,13 +430,17 @@ void NewDialog::bp_type_change() {
         ui->slider_bp_bht_addr_bits->setEnabled(true);
         ui->text_bp_bht_addr_bits_number->setEnabled(true);
         ui->text_bp_bht_bits_number->setEnabled(true);
-    }
-    else if (config->get_bp_type() == machine::PredictorType::SMITH_2_BIT_HYSTERESIS) {
-        ui->select_bp_init_state->addItem("Strongly not taken", QVariant((uint8_t) machine::PredictorState::STRONGLY_NOT_TAKEN));
-        ui->select_bp_init_state->addItem("Weakly not taken", QVariant((uint8_t) machine::PredictorState::WEAKLY_NOT_TAKEN));
-        ui->select_bp_init_state->addItem("Weakly taken", QVariant((uint8_t) machine::PredictorState::WEAKLY_TAKEN));
-        ui->select_bp_init_state->addItem("Strongly taken", QVariant((uint8_t) machine::PredictorState::STRONGLY_TAKEN));
-        ui->select_bp_init_state->setCurrentIndex(((uint8_t) machine::PredictorState::WEAKLY_NOT_TAKEN) - 2);
+    } else if (config->get_bp_type() == machine::PredictorType::SMITH_2_BIT_HYSTERESIS) {
+        ui->select_bp_init_state->addItem(
+            "Strongly not taken", QVariant((uint8_t)machine::PredictorState::STRONGLY_NOT_TAKEN));
+        ui->select_bp_init_state->addItem(
+            "Weakly not taken", QVariant((uint8_t)machine::PredictorState::WEAKLY_NOT_TAKEN));
+        ui->select_bp_init_state->addItem(
+            "Weakly taken", QVariant((uint8_t)machine::PredictorState::WEAKLY_TAKEN));
+        ui->select_bp_init_state->addItem(
+            "Strongly taken", QVariant((uint8_t)machine::PredictorState::STRONGLY_TAKEN));
+        ui->select_bp_init_state->setCurrentIndex(
+            ((uint8_t)machine::PredictorState::WEAKLY_NOT_TAKEN) - 2);
         config->set_bp_init_state(machine::PredictorState::WEAKLY_NOT_TAKEN);
         ui->select_bp_init_state->setEnabled(true);
         ui->select_bp_init_state->setEnabled(true);
@@ -457,8 +449,7 @@ void NewDialog::bp_type_change() {
         ui->slider_bp_bht_addr_bits->setEnabled(true);
         ui->text_bp_bht_addr_bits_number->setEnabled(true);
         ui->text_bp_bht_bits_number->setEnabled(true);
-    }
-    else {
+    } else {
         ui->select_bp_init_state->setEnabled(false);
         ui->slider_bp_bhr_bits->setEnabled(false);
         ui->text_bp_bhr_bits_number->setEnabled(false);
@@ -469,22 +460,23 @@ void NewDialog::bp_type_change() {
 }
 
 void NewDialog::bp_init_state_change() {
-    config->set_bp_init_state((machine::PredictorState) ui->select_bp_init_state->currentData().toUInt());
+    config->set_bp_init_state(
+        (machine::PredictorState)ui->select_bp_init_state->currentData().toUInt());
 }
 
 void NewDialog::bp_btb_bits_change() {
-    config->set_bp_btb_bits((uint8_t) ui->slider_bp_btb_bits->value());
+    config->set_bp_btb_bits((uint8_t)ui->slider_bp_btb_bits->value());
     ui->text_bp_btb_bits_number->setText(QString::number(config->get_bp_btb_bits()));
 }
 
 void NewDialog::bp_bhr_bits_change() {
-    config->set_bp_bhr_bits((uint8_t) ui->slider_bp_bhr_bits->value());
+    config->set_bp_bhr_bits((uint8_t)ui->slider_bp_bhr_bits->value());
     ui->text_bp_bhr_bits_number->setText(QString::number(config->get_bp_bhr_bits()));
     ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
 }
 
 void NewDialog::bp_bht_addr_bits_change() {
-    config->set_bp_bht_addr_bits((uint8_t) ui->slider_bp_bht_addr_bits->value());
+    config->set_bp_bht_addr_bits((uint8_t)ui->slider_bp_bht_addr_bits->value());
     ui->text_bp_bht_addr_bits_number->setText(QString::number(config->get_bp_bht_addr_bits()));
     ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
 }
@@ -509,13 +501,20 @@ void NewDialog::config_gui() {
     while (ui->select_bp_type->count() > 0) { // Remove all items
         ui->select_bp_type->removeItem(0);
     }
-    ui->select_bp_type->addItem("Always not taken", QVariant((uint8_t) machine::PredictorType::ALWAYS_NOT_TAKEN));
-    ui->select_bp_type->addItem("Always taken", QVariant((uint8_t) machine::PredictorType::ALWAYS_TAKEN));
-    ui->select_bp_type->addItem("Backward taken forward not taken", QVariant((uint8_t) machine::PredictorType::BTFNT));
-    ui->select_bp_type->addItem("Smith 1 bit", QVariant((uint8_t) machine::PredictorType::SMITH_1_BIT));
-    ui->select_bp_type->addItem("Smith 2 bit", QVariant((uint8_t) machine::PredictorType::SMITH_2_BIT));
-    ui->select_bp_type->addItem("Smith 2 bit with hysteresis", QVariant((uint8_t) machine::PredictorType::SMITH_2_BIT_HYSTERESIS));
-    ui->select_bp_type->setCurrentIndex((uint8_t) config->get_bp_type());
+    ui->select_bp_type->addItem(
+        "Always not taken", QVariant((uint8_t)machine::PredictorType::ALWAYS_NOT_TAKEN));
+    ui->select_bp_type->addItem(
+        "Always taken", QVariant((uint8_t)machine::PredictorType::ALWAYS_TAKEN));
+    ui->select_bp_type->addItem(
+        "Backward taken forward not taken", QVariant((uint8_t)machine::PredictorType::BTFNT));
+    ui->select_bp_type->addItem(
+        "Smith 1 bit", QVariant((uint8_t)machine::PredictorType::SMITH_1_BIT));
+    ui->select_bp_type->addItem(
+        "Smith 2 bit", QVariant((uint8_t)machine::PredictorType::SMITH_2_BIT));
+    ui->select_bp_type->addItem(
+        "Smith 2 bit with hysteresis",
+        QVariant((uint8_t)machine::PredictorType::SMITH_2_BIT_HYSTERESIS));
+    ui->select_bp_type->setCurrentIndex((uint8_t)config->get_bp_type());
     bp_type_change();
     ui->slider_bp_btb_bits->setMaximum(BP_MAX_BTB_BITS);
     ui->slider_bp_btb_bits->setValue(config->get_bp_btb_bits());

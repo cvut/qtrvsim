@@ -22,11 +22,11 @@
 #include "windows/memory/memorydock.h"
 #include "windows/messages/messagesdock.h"
 #include "windows/peripherals/peripheralsdock.h"
+#include "windows/predictor/predictor_bht_dock.h"
+#include "windows/predictor/predictor_btb_dock.h"
 #include "windows/program/programdock.h"
 #include "windows/registers/registersdock.h"
 #include "windows/terminal/terminaldock.h"
-#include "windows/predictor/predictor_btb_dock.h"
-#include "windows/predictor/predictor_bht_dock.h"
 
 #include <QMainWindow>
 #include <QPointer>

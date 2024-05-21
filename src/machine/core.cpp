@@ -500,14 +500,16 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
     if (dt.branch_jal) {
         // JAL Jump instruction (J-type (alternative to U-type with different immediate bit order))
         predictor->update(dt.inst, dt.inst_addr, dt.branch_jal_target, BranchResult::TAKEN);
-    }
-    else if (dt.branch_jalr) {
+    } else if (dt.branch_jalr) {
         // JALR Jump register instruction (I-type)
-        predictor->update(dt.inst, dt.inst_addr, Address(get_xlen_from_reg(dt.alu_val)), BranchResult::TAKEN);
-    }
-    else if (dt.branch_bxx) {
-        // BXX Conditional branch instruction (B-type (alternative to S-type with different immediate bit order))
-        predictor->update(dt.inst, dt.inst_addr, dt.branch_jal_target, branch_bxx_taken ? BranchResult::TAKEN : BranchResult::NOT_TAKEN);
+        predictor->update(
+            dt.inst, dt.inst_addr, Address(get_xlen_from_reg(dt.alu_val)), BranchResult::TAKEN);
+    } else if (dt.branch_bxx) {
+        // BXX Conditional branch instruction (B-type (alternative to S-type with different
+        // immediate bit order))
+        predictor->update(
+            dt.inst, dt.inst_addr, dt.branch_jal_target,
+            branch_bxx_taken ? BranchResult::TAKEN : BranchResult::NOT_TAKEN);
     }
 
     bool csr_written = false;

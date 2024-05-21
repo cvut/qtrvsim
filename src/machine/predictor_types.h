@@ -9,11 +9,7 @@ namespace machine {
 #define BP_MAX_BHT_ADDR_BITS 8
 #define BP_MAX_BHT_BITS (BP_MAX_BHT_ADDR_BITS + BP_MAX_BHT_ADDR_BITS)
 
-enum class BranchResult {
-    NOT_TAKEN,
-    TAKEN,
-    UNDEFINED
-};
+enum class BranchResult { NOT_TAKEN, TAKEN, UNDEFINED };
 
 enum class PredictorType {
     ALWAYS_NOT_TAKEN,
@@ -26,12 +22,12 @@ enum class PredictorType {
 };
 
 enum class PredictorState {
-    NOT_TAKEN, // Smith 1 bit
-    TAKEN, // Smith 1 bit
+    NOT_TAKEN,          // Smith 1 bit
+    TAKEN,              // Smith 1 bit
     STRONGLY_NOT_TAKEN, // Smith 2 bit
-    WEAKLY_NOT_TAKEN, // Smith 2 bit
-    WEAKLY_TAKEN, // Smith 2 bit
-    STRONGLY_TAKEN, // Smith 2 bit
+    WEAKLY_NOT_TAKEN,   // Smith 2 bit
+    WEAKLY_TAKEN,       // Smith 2 bit
+    STRONGLY_TAKEN,     // Smith 2 bit
     UNDEFINED
 };
 

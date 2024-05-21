@@ -80,6 +80,7 @@ class NewDialogCacheHandler : public QObject {
     Q_OBJECT
 
     using Super = QObject;
+
 public:
     NewDialogCacheHandler(NewDialog *nd, Ui::NewDialogCache *ui);
 
