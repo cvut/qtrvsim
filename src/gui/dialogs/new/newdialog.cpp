@@ -149,16 +149,22 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
         &NewDialog::bp_init_state_change
     );
     connect(
-        ui->slider_bp_address_bits,
+        ui->slider_bp_btb_bits,
         &QAbstractSlider::valueChanged,
         this,
-        &NewDialog::bp_address_bits_change
+        &NewDialog::bp_btb_bits_change
     );
     connect(
         ui->slider_bp_bhr_bits,
         &QAbstractSlider::valueChanged,
         this,
         &NewDialog::bp_bhr_bits_change
+    );
+    connect(
+        ui->slider_bp_bht_addr_bits,
+        &QAbstractSlider::valueChanged,
+        this,
+        &NewDialog::bp_bht_addr_bits_change
     );
 
     cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d.data());
@@ -415,6 +421,12 @@ void NewDialog::bp_type_change() {
         ui->select_bp_init_state->setCurrentIndex((uint8_t) machine::PredictorState::NOT_TAKEN);
         config->set_bp_init_state(machine::PredictorState::NOT_TAKEN);
         ui->select_bp_init_state->setEnabled(true);
+        ui->select_bp_init_state->setEnabled(true);
+        ui->slider_bp_bhr_bits->setEnabled(true);
+        ui->text_bp_bhr_bits_number->setEnabled(true);
+        ui->slider_bp_bht_addr_bits->setEnabled(true);
+        ui->text_bp_bht_addr_bits_number->setEnabled(true);
+        ui->text_bp_bht_bits_number->setEnabled(true);
     }
     else if (config->get_bp_type() == machine::PredictorType::SMITH_2_BIT) {
         ui->select_bp_init_state->addItem("Strongly not taken", QVariant((uint8_t) machine::PredictorState::STRONGLY_NOT_TAKEN));
@@ -424,6 +436,12 @@ void NewDialog::bp_type_change() {
         ui->select_bp_init_state->setCurrentIndex(((uint8_t) machine::PredictorState::WEAKLY_NOT_TAKEN) - 2);
         config->set_bp_init_state(machine::PredictorState::WEAKLY_NOT_TAKEN);
         ui->select_bp_init_state->setEnabled(true);
+        ui->select_bp_init_state->setEnabled(true);
+        ui->slider_bp_bhr_bits->setEnabled(true);
+        ui->text_bp_bhr_bits_number->setEnabled(true);
+        ui->slider_bp_bht_addr_bits->setEnabled(true);
+        ui->text_bp_bht_addr_bits_number->setEnabled(true);
+        ui->text_bp_bht_bits_number->setEnabled(true);
     }
     else if (config->get_bp_type() == machine::PredictorType::SMITH_2_BIT_HYSTERESIS) {
         ui->select_bp_init_state->addItem("Strongly not taken", QVariant((uint8_t) machine::PredictorState::STRONGLY_NOT_TAKEN));
@@ -433,9 +451,20 @@ void NewDialog::bp_type_change() {
         ui->select_bp_init_state->setCurrentIndex(((uint8_t) machine::PredictorState::WEAKLY_NOT_TAKEN) - 2);
         config->set_bp_init_state(machine::PredictorState::WEAKLY_NOT_TAKEN);
         ui->select_bp_init_state->setEnabled(true);
+        ui->select_bp_init_state->setEnabled(true);
+        ui->slider_bp_bhr_bits->setEnabled(true);
+        ui->text_bp_bhr_bits_number->setEnabled(true);
+        ui->slider_bp_bht_addr_bits->setEnabled(true);
+        ui->text_bp_bht_addr_bits_number->setEnabled(true);
+        ui->text_bp_bht_bits_number->setEnabled(true);
     }
     else {
         ui->select_bp_init_state->setEnabled(false);
+        ui->slider_bp_bhr_bits->setEnabled(false);
+        ui->text_bp_bhr_bits_number->setEnabled(false);
+        ui->slider_bp_bht_addr_bits->setEnabled(false);
+        ui->text_bp_bht_addr_bits_number->setEnabled(false);
+        ui->text_bp_bht_bits_number->setEnabled(false);
     }
 }
 
@@ -443,16 +472,21 @@ void NewDialog::bp_init_state_change() {
     config->set_bp_init_state((machine::PredictorState) ui->select_bp_init_state->currentData().toUInt());
 }
 
-void NewDialog::bp_bhr_bits_change() {
-    config->set_bp_bhr_bits((uint8_t) ui->slider_bp_bhr_bits->value());
-    ui->text_bp_table_bits_number->setText(QString::number(config->get_bp_table_bits()));
-    ui->label_bp_bhr_bits->setText(QString::number(config->get_bp_bhr_bits()));
+void NewDialog::bp_btb_bits_change() {
+    config->set_bp_btb_bits((uint8_t) ui->slider_bp_btb_bits->value());
+    ui->text_bp_btb_bits_number->setText(QString::number(config->get_bp_btb_bits()));
 }
 
-void NewDialog::bp_address_bits_change() {
-    config->set_bp_address_bits((uint8_t) ui->slider_bp_address_bits->value());
-    ui->text_bp_table_bits_number->setText(QString::number(config->get_bp_table_bits()));
-    ui->label_bp_address_bits->setText(QString::number(config->get_bp_address_bits()));
+void NewDialog::bp_bhr_bits_change() {
+    config->set_bp_bhr_bits((uint8_t) ui->slider_bp_bhr_bits->value());
+    ui->text_bp_bhr_bits_number->setText(QString::number(config->get_bp_bhr_bits()));
+    ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
+}
+
+void NewDialog::bp_bht_addr_bits_change() {
+    config->set_bp_bht_addr_bits((uint8_t) ui->slider_bp_bht_addr_bits->value());
+    ui->text_bp_bht_addr_bits_number->setText(QString::number(config->get_bp_bht_addr_bits()));
+    ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
 }
 
 void NewDialog::config_gui() {
@@ -483,9 +517,16 @@ void NewDialog::config_gui() {
     ui->select_bp_type->addItem("Smith 2 bit with hysteresis", QVariant((uint8_t) machine::PredictorType::SMITH_2_BIT_HYSTERESIS));
     ui->select_bp_type->setCurrentIndex((uint8_t) config->get_bp_type());
     bp_type_change();
+    ui->slider_bp_btb_bits->setMaximum(BP_MAX_BTB_BITS);
+    ui->slider_bp_btb_bits->setValue(config->get_bp_btb_bits());
+    ui->text_bp_btb_bits_number->setText(QString::number(config->get_bp_btb_bits()));
+    ui->slider_bp_bhr_bits->setMaximum(BP_MAX_BHR_BITS);
     ui->slider_bp_bhr_bits->setValue(config->get_bp_bhr_bits());
-    ui->slider_bp_address_bits->setValue(config->get_bp_address_bits());
-    ui->text_bp_table_bits_number->setText(QString::number(config->get_bp_table_bits()));
+    ui->text_bp_bhr_bits_number->setText(QString::number(config->get_bp_bhr_bits()));
+    ui->slider_bp_bht_addr_bits->setMaximum(BP_MAX_BHT_ADDR_BITS);
+    ui->slider_bp_bht_addr_bits->setValue(config->get_bp_bht_addr_bits());
+    ui->text_bp_bht_addr_bits_number->setText(QString::number(config->get_bp_bht_addr_bits()));
+    ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
 
     // Memory
     ui->mem_protec_exec->setChecked(config->memory_execute_protection());

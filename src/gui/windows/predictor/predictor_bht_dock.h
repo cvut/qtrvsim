@@ -48,7 +48,7 @@ public: // Constructors & Destructor
     ~DockPredictorBHT();
 
 private: // Internal functions
-    uint8_t init_number_of_bits(const uint8_t number_of_bits) const;
+    uint8_t init_number_of_bits(const uint8_t b) const;
     void init_table(machine::PredictorState initial_state = machine::PredictorState::UNDEFINED);
     void set_table_color(QColor color);
     void set_row_color(uint16_t row_index, QColor color);
@@ -60,8 +60,8 @@ public: // General functions
 
 public slots:
     void update_bhr(uint8_t number_of_bhr_bits, uint16_t register_value);
-    void update_new_prediction(machine::PredictionInput input, machine::BranchResult result);
-    void update_new_update(machine::PredictionFeedback feedback);
+    void update_new_prediction(uint16_t index, machine::PredictionInput input, machine::BranchResult result);
+    void update_new_update(uint16_t index, machine::PredictionFeedback feedback);
     void update_predictor_stats(machine::PredictionStatistics stats);
     void update_bht_row(uint16_t index, machine::BranchHistoryTableEntry entry);
     void reset_colors();

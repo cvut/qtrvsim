@@ -4,7 +4,10 @@
 namespace machine {
 
 // Should not exceed 16, because uint16_t is used for addressing
-#define PREDICTOR_MAX_TABLE_BITS 16
+#define BP_MAX_BTB_BITS 8
+#define BP_MAX_BHR_BITS 8
+#define BP_MAX_BHT_ADDR_BITS 8
+#define BP_MAX_BHT_BITS (BP_MAX_BHT_ADDR_BITS + BP_MAX_BHT_ADDR_BITS)
 
 enum class BranchResult {
     NOT_TAKEN,

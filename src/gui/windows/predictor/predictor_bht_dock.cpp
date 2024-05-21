@@ -3,7 +3,7 @@
 LOG_CATEGORY("gui.DockPredictorBHT");
 
 DockPredictorBHT::DockPredictorBHT(QWidget *parent) : Super(parent) {
-    setObjectName("PredictorBTT");
+    setObjectName("PredictorBHT");
     setWindowTitle("Predictor Branch History");
 
     /////////////////////////
@@ -188,12 +188,12 @@ DockPredictorBHT::~DockPredictorBHT() {
 
 }
 
-uint8_t DockPredictorBHT::init_number_of_bits(const uint8_t number_of_bits) const {
-    if (number_of_bits > PREDICTOR_MAX_TABLE_BITS) {
-        WARN("Number of BHT bits (%u) was larger than %u during init", number_of_bits, PREDICTOR_MAX_TABLE_BITS);
-        return PREDICTOR_MAX_TABLE_BITS;
+uint8_t DockPredictorBHT::init_number_of_bits(const uint8_t b) const {
+    if (b > BP_MAX_BHT_BITS) {
+        WARN("Number of BHT bits (%u) was larger than %u during init", b, BP_MAX_BHT_BITS);
+        return BP_MAX_BHT_BITS;
     }
-    return number_of_bits;
+    return b;
 }
 
 void DockPredictorBHT::init_table(machine::PredictorState initial_state) {
@@ -273,15 +273,15 @@ void DockPredictorBHT::set_update_widget_color(QString color_stylesheet) {
 }
 
 void DockPredictorBHT::setup(const machine::BranchPredictor* branch_predictor, const machine::Core* core) {
-    connect(branch_predictor, &machine::BranchPredictor::updated_bhr, this, &DockPredictorBHT::update_bhr);
-    connect(branch_predictor, &machine::BranchPredictor::new_prediction, this, &DockPredictorBHT::update_new_prediction);
-    connect(branch_predictor, &machine::BranchPredictor::new_update, this, &DockPredictorBHT::update_new_update);
-    connect(branch_predictor, &machine::BranchPredictor::updated_predictor_stats, this, &DockPredictorBHT::update_predictor_stats);
-    connect(branch_predictor, &machine::BranchPredictor::updated_bht_row, this, &DockPredictorBHT::update_bht_row);
+    connect(branch_predictor, &machine::BranchPredictor::update_bhr_done, this, &DockPredictorBHT::update_bhr);
+    connect(branch_predictor, &machine::BranchPredictor::prediction_done, this, &DockPredictorBHT::update_new_prediction);
+    connect(branch_predictor, &machine::BranchPredictor::update_predictor_done, this, &DockPredictorBHT::update_new_update);
+    connect(branch_predictor, &machine::BranchPredictor::update_predictor_stats_done, this, &DockPredictorBHT::update_predictor_stats);
+    connect(branch_predictor, &machine::BranchPredictor::update_predictor_bht_row_done, this, &DockPredictorBHT::update_bht_row);
     connect(core, &machine::Core::step_started, this, &DockPredictorBHT::reset_colors);
 
-    number_of_bht_bits = branch_predictor->get_number_of_table_bits();
     number_of_bhr_bits = branch_predictor->get_number_of_bhr_bits();
+    number_of_bht_bits = branch_predictor->get_number_of_bht_bits();
     const machine::PredictorType predictor_type{branch_predictor->get_predictor_type()};
     const bool is_predictor_dynamic{
         predictor_type == machine::PredictorType::SMITH_1_BIT
@@ -365,23 +365,23 @@ void DockPredictorBHT::update_bhr(uint8_t number_of_bhr_bits, uint16_t register_
     }
 }
 
-void DockPredictorBHT::update_new_prediction(machine::PredictionInput input, machine::BranchResult result) {
+void DockPredictorBHT::update_new_prediction(uint16_t index, machine::PredictionInput input, machine::BranchResult result) {
     value_event_predict_instruction->setText(input.instruction.to_str());
     value_event_predict_address->setText(machine::addr_to_hex_str(input.instruction_address));
-    value_event_predict_index->setText(QString::number(input.bht_index));
+    value_event_predict_index->setText(QString::number(index));
     value_event_predict_result->setText(machine::branch_result_to_string(result));
 
-    set_row_color(input.bht_index, Q_COLOR_PREDICT);
+    set_row_color(index, Q_COLOR_PREDICT);
     set_predict_widget_color(STYLESHEET_COLOR_PREDICT);
 }
 
-void DockPredictorBHT::update_new_update(machine::PredictionFeedback feedback) {
+void DockPredictorBHT::update_new_update(uint16_t index, machine::PredictionFeedback feedback) {
     value_event_update_instruction->setText(feedback.instruction.to_str());
     value_event_update_address->setText(machine::addr_to_hex_str(feedback.instruction_address));
-    value_event_update_index->setText(QString::number(feedback.bht_index));
+    value_event_update_index->setText(QString::number(index));
     value_event_update_result->setText(machine::branch_result_to_string(feedback.result));
 
-    set_row_color(feedback.bht_index, Q_COLOR_UPDATE);
+    set_row_color(index, Q_COLOR_UPDATE);
     set_update_widget_color(STYLESHEET_COLOR_UPDATE);
 }
 
@@ -393,7 +393,7 @@ void DockPredictorBHT::update_predictor_stats(machine::PredictionStatistics stat
 
 void DockPredictorBHT::update_bht_row(uint16_t index, machine::BranchHistoryTableEntry entry) {
     if (index >= bht->rowCount()) {
-        WARN("BTT dock update received invalid row index: %u", index);
+        WARN("BHT dock update received invalid row index: %u", index);
         return;
     }
 

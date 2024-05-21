@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>537</width>
-    <height>411</height>
+    <width>544</width>
+    <height>455</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -256,104 +256,137 @@
            </layout>
           </item>
           <item>
-           <layout class="QGridLayout" name="layout_bp_index_bits">
+           <layout class="QGridLayout" name="layout_bp_bit_settings" rowstretch="0,0,0,0">
             <property name="topMargin">
              <number>0</number>
             </property>
-            <item row="1" column="0">
-             <widget class="QLabel" name="text_bp_bhr_bits">
+            <item row="3" column="2">
+             <widget class="QLabel" name="text_bp_bht_bits_number">
+              <property name="minimumSize">
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
               <property name="text">
-               <string>Branch History Register (BHR) Bits:</string>
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="text_bp_bht_addr_bits">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Branch History Table (BHT) PC address bits: </string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="text_bp_btb_bits">
+              <property name="text">
+               <string>Branch Target Buffer (BTB) bits:</string>
               </property>
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QLabel" name="text_bp_address_bits">
-              <property name="text">
-               <string>Predictor Address index bits:</string>
+             <widget class="QSlider" name="slider_bp_bhr_bits">
+              <property name="maximum">
+               <number>8</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="tickPosition">
+               <enum>QSlider::TicksBothSides</enum>
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
-             <layout class="QHBoxLayout" name="layout_bp_table_bits">
-              <property name="topMargin">
-               <number>0</number>
+            <item row="1" column="2">
+             <widget class="QLabel" name="text_bp_bhr_bits_number">
+              <property name="minimumSize">
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
               </property>
-              <item>
-               <widget class="QLabel" name="text_bp_table_bits">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>Total number of bits: </string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="text_bp_table_bits_number">
-                <property name="text">
-                 <string>0</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
             </item>
-            <item row="2" column="0">
-             <layout class="QHBoxLayout" name="layout_bp_bhr_slider">
-              <property name="bottomMargin">
-               <number>0</number>
+            <item row="1" column="0">
+             <widget class="QLabel" name="text_bp_bhr_bits">
+              <property name="text">
+               <string>Branch History Register (BHR) bits:</string>
               </property>
-              <item>
-               <widget class="QSlider" name="slider_bp_bhr_bits">
-                <property name="maximum">
-                 <number>8</number>
-                </property>
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="invertedAppearance">
-                 <bool>false</bool>
-                </property>
-                <property name="tickPosition">
-                 <enum>QSlider::TicksBelow</enum>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_bp_bhr_bits">
-                <property name="text">
-                 <string>0</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QLabel" name="text_bp_bht_addr_bits_number">
+              <property name="minimumSize">
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="text_bp_btb_bits_number">
+              <property name="minimumSize">
+               <size>
+                <width>20</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="text_bp_bht_bits">
+              <property name="text">
+               <string>Branch History Table (BHT) bits:</string>
+              </property>
+             </widget>
             </item>
             <item row="2" column="1">
-             <layout class="QHBoxLayout" name="layour_bp_address_slider">
-              <item>
-               <widget class="QSlider" name="slider_bp_address_bits">
-                <property name="maximum">
-                 <number>8</number>
-                </property>
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="tickPosition">
-                 <enum>QSlider::TicksBelow</enum>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_bp_address_bits">
-                <property name="text">
-                 <string>0</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <widget class="QSlider" name="slider_bp_bht_addr_bits">
+              <property name="maximum">
+               <number>8</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="tickPosition">
+               <enum>QSlider::TicksBothSides</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSlider" name="slider_bp_btb_bits">
+              <property name="maximum">
+               <number>8</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>false</bool>
+              </property>
+              <property name="tickPosition">
+               <enum>QSlider::TicksBothSides</enum>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>

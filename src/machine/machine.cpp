@@ -82,8 +82,9 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         machine_config.get_bp_enabled(),
         machine_config.get_bp_type(),
         machine_config.get_bp_init_state(),
+        machine_config.get_bp_btb_bits(),
         machine_config.get_bp_bhr_bits(),
-        machine_config.get_bp_address_bits()
+        machine_config.get_bp_bht_addr_bits()
     );
 
     if (machine_config.pipelined()) {

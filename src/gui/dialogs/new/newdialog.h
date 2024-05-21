@@ -58,8 +58,9 @@ private slots:
     void bp_enabled_change();
     void bp_type_change();
     void bp_init_state_change();
+    void bp_btb_bits_change();
     void bp_bhr_bits_change();
-    void bp_address_bits_change();
+    void bp_bht_addr_bits_change();
 
 private:
     Box<Ui::NewDialog> ui {};

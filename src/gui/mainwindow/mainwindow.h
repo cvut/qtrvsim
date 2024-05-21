@@ -25,7 +25,7 @@
 #include "windows/program/programdock.h"
 #include "windows/registers/registersdock.h"
 #include "windows/terminal/terminaldock.h"
-#include "windows/predictor/predictor_btt_dock.h"
+#include "windows/predictor/predictor_btb_dock.h"
 #include "windows/predictor/predictor_bht_dock.h"
 
 #include <QMainWindow>
@@ -97,9 +97,9 @@ public slots:
     void reset_windows();
     void show_symbol_dialog();
     // Branch predictor
-    void show_dock_bp_btt();
+    void show_dock_bp_btb();
     void show_dock_bp_bht();
-    void reset_state_dock_bp_btt();
+    void reset_state_dock_bp_btb();
     void reset_state_dock_bp_bht();
     // Actions - help
     void about_program();
@@ -138,7 +138,7 @@ private:
     Box<CacheDock> cache_program {}, cache_data {}, cache_level2 {};
 
     // Branch predictor
-    Box<DockPredictorBTT> dock_bp_btt {};
+    Box<DockPredictorBTB> dock_bp_btb {};
     Box<DockPredictorBHT> dock_bp_bht {};
 
     Box<PeripheralsDock> peripherals {};
