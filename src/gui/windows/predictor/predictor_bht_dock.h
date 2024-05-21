@@ -6,6 +6,7 @@
 #include "machine/memory/address.h"
 #include "machine/predictor.h"
 #include "machine/predictor_types.h"
+#include "ui/hexlineedit.h"
 
 #include <QDockWidget>
 #include <QGridLayout>
@@ -43,10 +44,8 @@ class DockPredictorBHT : public QDockWidget {
 
 public: // Constructors & Destructor
     DockPredictorBHT(QWidget *parent);
-    ~DockPredictorBHT();
 
 private: // Internal functions
-    uint8_t init_number_of_bits(const uint8_t number_of_bits) const;
     void init_table(machine::PredictorState initial_state = machine::PredictorState::UNDEFINED);
     void set_table_color(QColor color);
     void set_row_color(uint16_t row_index, QColor color);
@@ -58,8 +57,11 @@ public: // General functions
 
 public slots:
     void update_bhr(uint8_t number_of_bhr_bits, uint16_t register_value);
-    void update_new_prediction(machine::PredictionInput input, machine::BranchResult result);
-    void update_new_update(machine::PredictionFeedback feedback);
+    void update_new_prediction(
+        uint16_t index,
+        machine::PredictionInput input,
+        machine::BranchResult result);
+    void update_new_update(uint16_t index, machine::PredictionFeedback feedback);
     void update_predictor_stats(machine::PredictionStatistics stats);
     void update_bht_row(uint16_t index, machine::BranchHistoryTableEntry entry);
     void reset_colors();
@@ -68,54 +70,60 @@ private: // Internal variables
     uint8_t number_of_bhr_bits;
     uint8_t number_of_bht_bits;
 
-    QGroupBox *content;
+    QT_OWNED QGroupBox *content;
 
-    QVBoxLayout *layout_main;
+    QT_OWNED QVBoxLayout *layout_main;
 
     // Name
-    QHBoxLayout *layout_type;
-    QLabel *label_type;
-    QLabel *label_type_value;
+    QT_OWNED QHBoxLayout *layout_type;
+    QT_OWNED QLabel *label_type;
+    QT_OWNED QLabel *label_type_value;
 
-    QGridLayout *layout_stats;
-    QLabel *label_stats_correct_text;
-    QLabel *label_stats_wrong_text;
-    QLabel *label_stats_accuracy_text;
-    QLabel *label_stats_correct_value;
-    QLabel *label_stats_wrong_value;
-    QLabel *label_stats_accuracy_value;
+    // Stats
+    QT_OWNED QGridLayout *layout_stats;
+    QT_OWNED QLabel *label_stats_correct_text;
+    QT_OWNED QLabel *label_stats_wrong_text;
+    QT_OWNED QLabel *label_stats_accuracy_text;
+    QT_OWNED QLabel *label_stats_correct_value;
+    QT_OWNED QLabel *label_stats_wrong_value;
+    QT_OWNED QLabel *label_stats_accuracy_value;
 
-    QHBoxLayout *layout_event;
+    // Prediction & Update
+    QT_OWNED QHBoxLayout *layout_event;
 
-    QGroupBox *group_event_predict;
-    QVBoxLayout *layout_event_predict;
-    QLabel *label_event_predict_header;
-    QLabel *label_event_predict_instruction;
-    QLabel *label_event_predict_address;
-    QLabel *label_event_predict_index;
-    QLabel *label_event_predict_result;
-    QLineEdit *value_event_predict_instruction;
-    QLineEdit *value_event_predict_address;
-    QLineEdit *value_event_predict_index;
-    QLineEdit *value_event_predict_result;
+    // Prediction
+    QT_OWNED QGroupBox *group_event_predict;
+    QT_OWNED QVBoxLayout *layout_event_predict;
+    QT_OWNED QLabel *label_event_predict_header;
+    QT_OWNED QLabel *label_event_predict_instruction;
+    QT_OWNED QLabel *label_event_predict_address;
+    QT_OWNED QLabel *label_event_predict_index;
+    QT_OWNED QLabel *label_event_predict_result;
+    QT_OWNED QLineEdit *value_event_predict_instruction;
+    QT_OWNED QLineEdit *value_event_predict_address;
+    QT_OWNED QLineEdit *value_event_predict_index;
+    QT_OWNED QLineEdit *value_event_predict_result;
 
-    QGroupBox *group_event_update;
-    QVBoxLayout *layout_event_update;
-    QLabel *label_event_update_header;
-    QLabel *label_event_update_instruction;
-    QLabel *label_event_update_address;
-    QLabel *label_event_update_index;
-    QLabel *label_event_update_result;
-    QLineEdit *value_event_update_instruction;
-    QLineEdit *value_event_update_address;
-    QLineEdit *value_event_update_index;
-    QLineEdit *value_event_update_result;
+    // Update
+    QT_OWNED QGroupBox *group_event_update;
+    QT_OWNED QVBoxLayout *layout_event_update;
+    QT_OWNED QLabel *label_event_update_header;
+    QT_OWNED QLabel *label_event_update_instruction;
+    QT_OWNED QLabel *label_event_update_address;
+    QT_OWNED QLabel *label_event_update_index;
+    QT_OWNED QLabel *label_event_update_result;
+    QT_OWNED QLineEdit *value_event_update_instruction;
+    QT_OWNED QLineEdit *value_event_update_address;
+    QT_OWNED QLineEdit *value_event_update_index;
+    QT_OWNED QLineEdit *value_event_update_result;
 
-    QHBoxLayout *layout_bhr;
-    QLabel *label_bhr;
-    QLineEdit *value_bhr;
+    // BHR
+    QT_OWNED QHBoxLayout *layout_bhr;
+    QT_OWNED QLabel *label_bhr;
+    QT_OWNED QLineEdit *value_bhr;
 
-    QTableWidget *bht;
+    // BHT
+    QT_OWNED QTableWidget *bht;
 };
 
 #endif // PREDICTOR_BHT_DOCK_H
