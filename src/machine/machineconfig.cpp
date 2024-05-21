@@ -24,8 +24,9 @@ using namespace machine;
 #define DFC_BP_ENABLED false
 #define DFC_BP_TYPE PredictorType::SMITH_1_BIT
 #define DFC_BP_INIT_STATE PredictorState::NOT_TAKEN
+#define DFC_BP_BTB_BITS 2
 #define DFC_BP_BHR_BITS 0
-#define DFC_BP_ADDRESS_BITS 2
+#define DFC_BP_BHT_ADDR_BITS 2
 //////////////////////////////////////////////////////////////////////////////
 /// Default config of CacheConfig
 #define DFC_EN false
@@ -61,9 +62,7 @@ CacheConfig::CacheConfig(const QSettings *sts, const QString &prefix) {
     n_sets = sts->value(N("Sets"), DFC_SETS).toUInt();
     n_blocks = sts->value(N("Blocks"), DFC_BLOCKS).toUInt();
     d_associativity = sts->value(N("Associativity"), DFC_ASSOC).toUInt();
-    replac_pol
-        = (enum ReplacementPolicy)sts->value(N("Replacement"), DFC_REPLAC)
-              .toUInt();
+    replac_pol = (enum ReplacementPolicy)sts->value(N("Replacement"), DFC_REPLAC).toUInt();
     write_pol = (enum WritePolicy)sts->value(N("Write"), DFC_WRITE).toUInt();
 }
 
@@ -144,9 +143,8 @@ enum CacheConfig::WritePolicy CacheConfig::write_policy() const {
 
 bool CacheConfig::operator==(const CacheConfig &c) const {
 #define CMP(GETTER) (GETTER)() == (c.GETTER)()
-    return CMP(enabled) && CMP(set_count) && CMP(block_size)
-           && CMP(associativity) && CMP(replacement_policy)
-           && CMP(write_policy);
+    return CMP(enabled) && CMP(set_count) && CMP(block_size) && CMP(associativity)
+           && CMP(replacement_policy) && CMP(write_policy);
 #undef CMP
 }
 
@@ -184,9 +182,10 @@ MachineConfig::MachineConfig() {
     bp_enabled = DFC_BP_ENABLED;
     bp_type = DFC_BP_TYPE;
     bp_init_state = DFC_BP_INIT_STATE;
+    bp_btb_bits = DFC_BP_BTB_BITS;
     bp_bhr_bits = DFC_BP_BHR_BITS;
-    bp_address_bits = DFC_BP_ADDRESS_BITS;
-    bp_table_bits = bp_bhr_bits + bp_address_bits;
+    bp_bht_addr_bits = DFC_BP_BHT_ADDR_BITS;
+    bp_bht_bits = bp_bhr_bits + bp_bht_addr_bits;
 }
 
 MachineConfig::MachineConfig(const MachineConfig *config) {
@@ -219,9 +218,10 @@ MachineConfig::MachineConfig(const MachineConfig *config) {
     bp_enabled = config->get_bp_enabled();
     bp_type = config->get_bp_type();
     bp_init_state = config->get_bp_init_state();
+    bp_btb_bits = config->get_bp_btb_bits();
     bp_bhr_bits = config->get_bp_bhr_bits();
-    bp_address_bits = config->get_bp_address_bits();
-    bp_table_bits = bp_bhr_bits + bp_address_bits;
+    bp_bht_addr_bits = config->get_bp_bht_addr_bits();
+    bp_bht_bits = bp_bhr_bits + bp_bht_addr_bits;
 }
 
 #define N(STR) (prefix + QString(STR))
@@ -229,27 +229,24 @@ MachineConfig::MachineConfig(const MachineConfig *config) {
 MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     simulated_endian = LITTLE;
     unsigned int xlen_num_bits = sts->value(N("XlenBits"), 32).toUInt();
-    simulated_xlen = xlen_num_bits == 64? Xlen::_64 :  Xlen::_32;
-    isa_word = ConfigIsaWord(sts->value(N("IsaWord"), config_isa_word_default.toUnsigned()).toUInt());
+    simulated_xlen = xlen_num_bits == 64 ? Xlen::_64 : Xlen::_32;
+    isa_word
+        = ConfigIsaWord(sts->value(N("IsaWord"), config_isa_word_default.toUnsigned()).toUInt());
     isa_word |= config_isa_word_default & config_isa_word_fixed;
     isa_word &= config_isa_word_default | ~config_isa_word_fixed;
     pipeline = sts->value(N("Pipelined"), DF_PIPELINE).toBool();
     delayslot = sts->value(N("DelaySlot"), DF_DELAYSLOT).toBool();
     hunit = (enum HazardUnit)sts->value(N("HazardUnit"), DF_HUNIT).toUInt();
-    exec_protect
-        = sts->value(N("MemoryExecuteProtection"), DF_EXEC_PROTEC).toBool();
-    write_protect
-        = sts->value(N("MemoryWriteProtection"), DF_WRITE_PROTEC).toBool();
+    exec_protect = sts->value(N("MemoryExecuteProtection"), DF_EXEC_PROTEC).toBool();
+    write_protect = sts->value(N("MemoryWriteProtection"), DF_WRITE_PROTEC).toBool();
     mem_acc_read = sts->value(N("MemoryRead"), DF_MEM_ACC_READ).toUInt();
     mem_acc_write = sts->value(N("MemoryWrite"), DF_MEM_ACC_WRITE).toUInt();
     mem_acc_burst = sts->value(N("MemoryBurst"), DF_MEM_ACC_BURST).toUInt();
     mem_acc_level2 = sts->value(N("MemoryLevel2"), DF_MEM_ACC_LEVEL2).toUInt();
     mem_acc_enable_burst = sts->value(N("MemoryBurstEnable"), DF_MEM_ACC_BURST_ENABLE).toBool();
     osem_enable = sts->value(N("OsemuEnable"), true).toBool();
-    osem_known_syscall_stop
-        = sts->value(N("OsemuKnownSyscallStop"), true).toBool();
-    osem_unknown_syscall_stop
-        = sts->value(N("OsemuUnknownSyscallStop"), true).toBool();
+    osem_known_syscall_stop = sts->value(N("OsemuKnownSyscallStop"), true).toBool();
+    osem_unknown_syscall_stop = sts->value(N("OsemuUnknownSyscallStop"), true).toBool();
     osem_interrupt_stop = sts->value(N("OsemuInterruptStop"), true).toBool();
     osem_exception_stop = sts->value(N("OsemuExceptionStop"), true).toBool();
     osem_fs_root = sts->value(N("OsemuFilesystemRoot"), "").toString();
@@ -265,13 +262,14 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     bp_init_state
         = (PredictorState)sts->value(N("BranchPredictor_InitState"), (uint8_t)DFC_BP_INIT_STATE)
               .toUInt();
+    bp_btb_bits = sts->value(N("BranchPredictor_BitsBTB"), DFC_BP_BTB_BITS).toUInt();
     bp_bhr_bits = sts->value(N("BranchPredictor_BitsBHR"), DFC_BP_BHR_BITS).toUInt();
-    bp_address_bits = sts->value(N("BranchPredictor_BitsAddress"), DFC_BP_ADDRESS_BITS).toUInt();
-    bp_table_bits = bp_bhr_bits + bp_address_bits;
+    bp_bht_addr_bits = sts->value(N("BranchPredictor_BitsBHTAddr"), DFC_BP_BHT_ADDR_BITS).toUInt();
+    bp_bht_bits = bp_bhr_bits + bp_bht_addr_bits;
 }
 
 void MachineConfig::store(QSettings *sts, const QString &prefix) {
-    sts->setValue(N("XlenBits"), get_simulated_xlen() == Xlen::_64? 64: 32);
+    sts->setValue(N("XlenBits"), get_simulated_xlen() == Xlen::_64 ? 64 : 32);
     sts->setValue(N("IsaWord"), get_isa_word().toUnsigned());
     sts->setValue(N("Pipelined"), pipelined());
     sts->setValue(N("DelaySlot"), delay_slot());
@@ -297,8 +295,9 @@ void MachineConfig::store(QSettings *sts, const QString &prefix) {
     sts->setValue(N("BranchPredictor_Enabled"), get_bp_enabled());
     sts->setValue(N("BranchPredictor_Type"), (uint8_t)get_bp_type());
     sts->setValue(N("BranchPredictor_InitState"), (uint8_t)get_bp_init_state());
+    sts->setValue(N("BranchPredictor_BitsBTB"), get_bp_btb_bits());
     sts->setValue(N("BranchPredictor_BitsBHR"), get_bp_bhr_bits());
-    sts->setValue(N("BranchPredictor_BitsAddress"), get_bp_address_bits());
+    sts->setValue(N("BranchPredictor_BitsBHTAddr"), get_bp_bht_addr_bits());
 }
 
 #undef N
@@ -341,9 +340,7 @@ void MachineConfig::preset(enum ConfigPresets p) {
     case CP_SINGLE:
     case CP_SINGLE_CACHE:
     case CP_PIPE_NO_HAZARD:
-    case CP_PIPE:
-        access_cache_level2()->set_enabled(false);
-        break;
+    case CP_PIPE: access_cache_level2()->set_enabled(false); break;
     }
 }
 
@@ -366,9 +363,7 @@ bool MachineConfig::set_hazard_unit(const QString &hukind) {
         { "forward", HU_STALL_FORWARD },
         { "stall-forward", HU_STALL_FORWARD },
     };
-    if (!hukind_map.contains(hukind)) {
-        return false;
-    }
+    if (!hukind_map.contains(hukind)) { return false; }
     set_hazard_unit(hukind_map.value(hukind));
     return true;
 }
@@ -579,17 +574,23 @@ void MachineConfig::set_bp_init_state(PredictorState i) {
     bp_init_state = i;
 }
 
-void MachineConfig::set_bp_bhr_bits(uint8_t b) {
-    bp_bhr_bits = b > PREDICTOR_MAX_TABLE_BITS ? PREDICTOR_MAX_TABLE_BITS : b;
-    bp_address_bits = bp_address_bits + bp_bhr_bits > PREDICTOR_MAX_TABLE_BITS
-                          ? PREDICTOR_MAX_TABLE_BITS
-                          : bp_address_bits;
-    bp_table_bits = bp_bhr_bits + bp_address_bits;
+void MachineConfig::set_bp_btb_bits(uint8_t b) {
+    bp_btb_bits = b > BP_MAX_BTB_BITS ? BP_MAX_BTB_BITS : b;
 }
 
-void MachineConfig::set_bp_address_bits(uint8_t b) {
-    bp_address_bits = (b + bp_bhr_bits) > PREDICTOR_MAX_TABLE_BITS ? PREDICTOR_MAX_TABLE_BITS : b;
-    bp_table_bits = bp_bhr_bits + bp_address_bits;
+void MachineConfig::set_bp_bhr_bits(uint8_t b) {
+    bp_bhr_bits = b > BP_MAX_BHR_BITS ? BP_MAX_BHR_BITS : b;
+    bp_bht_addr_bits
+        = bp_bht_addr_bits > BP_MAX_BHT_ADDR_BITS ? BP_MAX_BHT_ADDR_BITS : bp_bht_addr_bits;
+    bp_bht_bits = bp_bhr_bits + bp_bht_addr_bits;
+    bp_bht_bits = bp_bht_bits > BP_MAX_BHT_BITS ? BP_MAX_BHT_BITS : bp_bht_bits;
+}
+
+void MachineConfig::set_bp_bht_addr_bits(uint8_t b) {
+    bp_bht_addr_bits = b > BP_MAX_BHT_ADDR_BITS ? BP_MAX_BHT_ADDR_BITS : b;
+    bp_bhr_bits = bp_bhr_bits > BP_MAX_BHR_BITS ? BP_MAX_BHR_BITS : bp_bhr_bits;
+    bp_bht_bits = bp_bhr_bits + bp_bht_addr_bits;
+    bp_bht_bits = bp_bht_bits > BP_MAX_BHT_BITS ? BP_MAX_BHT_BITS : bp_bht_bits;
 }
 
 bool MachineConfig::get_bp_enabled() const {
@@ -604,28 +605,30 @@ PredictorState MachineConfig::get_bp_init_state() const {
     return bp_init_state;
 }
 
+uint8_t MachineConfig::get_bp_btb_bits() const {
+    return bp_btb_bits;
+}
+
 uint8_t MachineConfig::get_bp_bhr_bits() const {
     return bp_bhr_bits;
 }
 
-uint8_t MachineConfig::get_bp_address_bits() const {
-    return bp_address_bits;
+uint8_t MachineConfig::get_bp_bht_addr_bits() const {
+    return bp_bht_addr_bits;
 }
 
-uint8_t MachineConfig::get_bp_table_bits() const {
-    return bp_table_bits;
+uint8_t MachineConfig::get_bp_bht_bits() const {
+    return bp_bht_bits;
 }
 
 bool MachineConfig::operator==(const MachineConfig &c) const {
 #define CMP(GETTER) (GETTER)() == (c.GETTER)()
-    return CMP(pipelined) && CMP(delay_slot) && CMP(hazard_unit)
-           && CMP(get_simulated_xlen) && CMP(get_isa_word)
-           && CMP(memory_execute_protection) && CMP(memory_write_protection)
+    return CMP(pipelined) && CMP(delay_slot) && CMP(hazard_unit) && CMP(get_simulated_xlen)
+           && CMP(get_isa_word) && CMP(memory_execute_protection) && CMP(memory_write_protection)
            && CMP(memory_access_time_read) && CMP(memory_access_time_write)
            && CMP(memory_access_time_burst) && CMP(memory_access_time_level2)
-           && CMP(memory_access_enable_burst)
-           && CMP(elf) && CMP(cache_program)
-           && CMP(cache_data) && CMP(cache_level2);
+           && CMP(memory_access_enable_burst) && CMP(elf) && CMP(cache_program) && CMP(cache_data)
+           && CMP(cache_level2);
 #undef CMP
 }
 

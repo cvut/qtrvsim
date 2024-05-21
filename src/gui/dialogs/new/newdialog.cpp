@@ -140,11 +140,14 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
         ui->select_bp_init_state, QOverload<int>::of(&QComboBox::activated), this,
         &NewDialog::bp_init_state_change);
     connect(
-        ui->slider_bp_address_bits, &QAbstractSlider::valueChanged, this,
-        &NewDialog::bp_address_bits_change);
+        ui->slider_bp_btb_bits, &QAbstractSlider::valueChanged, this,
+        &NewDialog::bp_btb_bits_change);
     connect(
         ui->slider_bp_bhr_bits, &QAbstractSlider::valueChanged, this,
         &NewDialog::bp_bhr_bits_change);
+    connect(
+        ui->slider_bp_bht_addr_bits, &QAbstractSlider::valueChanged, this,
+        &NewDialog::bp_bht_addr_bits_change);
 
     cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d.data());
     cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p.data());
@@ -387,67 +390,103 @@ void NewDialog::bp_enabled_change() {
 }
 
 void NewDialog::bp_type_change() {
-    config->set_bp_type((machine::PredictorType)ui->select_bp_type->currentData().toUInt());
+    // Read branch predictor type from GUI and store it in the config
+    const machine::PredictorType predictor_type {
+        ui->select_bp_type->currentData().value<machine::PredictorType>()
+    };
+    config->set_bp_type(predictor_type);
 
     // Remove all items from init state list
-    while (ui->select_bp_init_state->count() > 0) {
-        ui->select_bp_init_state->removeItem(0);
-    };
+    ui->select_bp_init_state->clear();
 
-    if (config->get_bp_type() == machine::PredictorType::SMITH_1_BIT) {
+    // Configure GUI based on predictor selection
+    switch (predictor_type) {
+    case machine::PredictorType::SMITH_1_BIT: {
+        bp_toggle_history_table_ui(true);
+
+        // Add items to the combo box
         ui->select_bp_init_state->addItem(
-            "Not taken", QVariant((uint8_t)machine::PredictorState::NOT_TAKEN));
+            predictor_state_to_string(machine::PredictorState::NOT_TAKEN, false).toString(),
+            QVariant::fromValue(machine::PredictorState::NOT_TAKEN));
         ui->select_bp_init_state->addItem(
-            "Taken", QVariant((uint8_t)machine::PredictorState::TAKEN));
-        ui->select_bp_init_state->setCurrentIndex((uint8_t)machine::PredictorState::NOT_TAKEN);
-        config->set_bp_init_state(machine::PredictorState::NOT_TAKEN);
-        ui->select_bp_init_state->setEnabled(true);
-    } else if (config->get_bp_type() == machine::PredictorType::SMITH_2_BIT) {
+            predictor_state_to_string(machine::PredictorState::TAKEN, false).toString(),
+            QVariant::fromValue(machine::PredictorState::TAKEN));
+
+        // Set selected value, or set default if not found
+        const int index { ui->select_bp_init_state->findData(
+            QVariant::fromValue(config->get_bp_init_state())) };
+        if (index >= 0) {
+            ui->select_bp_init_state->setCurrentIndex(index);
+        } else {
+            ui->select_bp_init_state->setCurrentIndex(ui->select_bp_init_state->findData(
+                QVariant::fromValue(machine::PredictorState::NOT_TAKEN)));
+            config->set_bp_init_state(machine::PredictorState::NOT_TAKEN);
+        }
+    } break;
+
+    case machine::PredictorType::SMITH_2_BIT:
+    case machine::PredictorType::SMITH_2_BIT_HYSTERESIS: {
+        bp_toggle_history_table_ui(true);
+
+        // Add items to the combo box
         ui->select_bp_init_state->addItem(
-            "Strongly not taken", QVariant((uint8_t)machine::PredictorState::STRONGLY_NOT_TAKEN));
+            predictor_state_to_string(machine::PredictorState::STRONGLY_NOT_TAKEN, false).toString(),
+            QVariant::fromValue(machine::PredictorState::STRONGLY_NOT_TAKEN));
         ui->select_bp_init_state->addItem(
-            "Weakly not taken", QVariant((uint8_t)machine::PredictorState::WEAKLY_NOT_TAKEN));
+            predictor_state_to_string(machine::PredictorState::WEAKLY_NOT_TAKEN, false).toString(),
+            QVariant::fromValue(machine::PredictorState::WEAKLY_NOT_TAKEN));
         ui->select_bp_init_state->addItem(
-            "Weakly taken", QVariant((uint8_t)machine::PredictorState::WEAKLY_TAKEN));
+            predictor_state_to_string(machine::PredictorState::WEAKLY_TAKEN, false).toString(),
+            QVariant::fromValue(machine::PredictorState::WEAKLY_TAKEN));
         ui->select_bp_init_state->addItem(
-            "Strongly taken", QVariant((uint8_t)machine::PredictorState::STRONGLY_TAKEN));
-        ui->select_bp_init_state->setCurrentIndex(
-            ((uint8_t)machine::PredictorState::WEAKLY_NOT_TAKEN) - 2);
-        config->set_bp_init_state(machine::PredictorState::WEAKLY_NOT_TAKEN);
-        ui->select_bp_init_state->setEnabled(true);
-    } else if (config->get_bp_type() == machine::PredictorType::SMITH_2_BIT_HYSTERESIS) {
-        ui->select_bp_init_state->addItem(
-            "Strongly not taken", QVariant((uint8_t)machine::PredictorState::STRONGLY_NOT_TAKEN));
-        ui->select_bp_init_state->addItem(
-            "Weakly not taken", QVariant((uint8_t)machine::PredictorState::WEAKLY_NOT_TAKEN));
-        ui->select_bp_init_state->addItem(
-            "Weakly taken", QVariant((uint8_t)machine::PredictorState::WEAKLY_TAKEN));
-        ui->select_bp_init_state->addItem(
-            "Strongly taken", QVariant((uint8_t)machine::PredictorState::STRONGLY_TAKEN));
-        ui->select_bp_init_state->setCurrentIndex(
-            ((uint8_t)machine::PredictorState::WEAKLY_NOT_TAKEN) - 2);
-        config->set_bp_init_state(machine::PredictorState::WEAKLY_NOT_TAKEN);
-        ui->select_bp_init_state->setEnabled(true);
-    } else {
-        ui->select_bp_init_state->setEnabled(false);
+            predictor_state_to_string(machine::PredictorState::STRONGLY_TAKEN, false).toString(),
+            QVariant::fromValue(machine::PredictorState::STRONGLY_TAKEN));
+
+        // Set selected value, or set default if not found
+        const int index { ui->select_bp_init_state->findData(
+            QVariant::fromValue(config->get_bp_init_state())) };
+        if (index >= 0) {
+            ui->select_bp_init_state->setCurrentIndex(index);
+        } else {
+            ui->select_bp_init_state->setCurrentIndex(ui->select_bp_init_state->findData(
+                QVariant::fromValue(machine::PredictorState::WEAKLY_NOT_TAKEN)));
+            config->set_bp_init_state(machine::PredictorState::WEAKLY_NOT_TAKEN);
+        }
+    } break;
+
+    default: bp_toggle_history_table_ui(false); break;
     }
 }
 
 void NewDialog::bp_init_state_change() {
     config->set_bp_init_state(
-        (machine::PredictorState)ui->select_bp_init_state->currentData().toUInt());
+        ui->select_bp_init_state->currentData().value<machine::PredictorState>());
+}
+
+void NewDialog::bp_btb_bits_change() {
+    config->set_bp_btb_bits((uint8_t)ui->slider_bp_btb_bits->value());
+    ui->text_bp_btb_bits_number->setText(QString::number(config->get_bp_btb_bits()));
 }
 
 void NewDialog::bp_bhr_bits_change() {
     config->set_bp_bhr_bits((uint8_t)ui->slider_bp_bhr_bits->value());
-    ui->text_bp_table_bits_number->setText(QString::number(config->get_bp_table_bits()));
-    ui->label_bp_bhr_bits->setText(QString::number(config->get_bp_bhr_bits()));
+    ui->text_bp_bhr_bits_number->setText(QString::number(config->get_bp_bhr_bits()));
+    ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
 }
 
-void NewDialog::bp_address_bits_change() {
-    config->set_bp_address_bits((uint8_t)ui->slider_bp_address_bits->value());
-    ui->text_bp_table_bits_number->setText(QString::number(config->get_bp_table_bits()));
-    ui->label_bp_address_bits->setText(QString::number(config->get_bp_address_bits()));
+void NewDialog::bp_bht_addr_bits_change() {
+    config->set_bp_bht_addr_bits((uint8_t)ui->slider_bp_bht_addr_bits->value());
+    ui->text_bp_bht_addr_bits_number->setText(QString::number(config->get_bp_bht_addr_bits()));
+    ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
+}
+
+void NewDialog::bp_toggle_history_table_ui(bool enabled) {
+    ui->select_bp_init_state->setEnabled(enabled);
+    ui->slider_bp_bhr_bits->setEnabled(enabled);
+    ui->text_bp_bhr_bits_number->setEnabled(enabled);
+    ui->slider_bp_bht_addr_bits->setEnabled(enabled);
+    ui->text_bp_bht_addr_bits_number->setEnabled(enabled);
+    ui->text_bp_bht_bits_number->setEnabled(enabled);
 }
 
 void NewDialog::config_gui() {
@@ -467,27 +506,44 @@ void NewDialog::config_gui() {
 
     // Branch predictor
     ui->group_branch_predictor->setChecked(config->get_bp_enabled());
-    while (ui->select_bp_type->count() > 0) { // Remove all items
-        ui->select_bp_type->removeItem(0);
+    ui->select_bp_type->clear();
+    ui->select_bp_type->addItem(
+        predictor_type_to_string(machine::PredictorType::ALWAYS_NOT_TAKEN).toString(),
+        QVariant::fromValue(machine::PredictorType::ALWAYS_NOT_TAKEN));
+    ui->select_bp_type->addItem(
+        predictor_type_to_string(machine::PredictorType::ALWAYS_TAKEN).toString(),
+        QVariant::fromValue(machine::PredictorType::ALWAYS_TAKEN));
+    ui->select_bp_type->addItem(
+        predictor_type_to_string(machine::PredictorType::BTFNT).toString(),
+        QVariant::fromValue(machine::PredictorType::BTFNT));
+    ui->select_bp_type->addItem(
+        predictor_type_to_string(machine::PredictorType::SMITH_1_BIT).toString(),
+        QVariant::fromValue(machine::PredictorType::SMITH_1_BIT));
+    ui->select_bp_type->addItem(
+        predictor_type_to_string(machine::PredictorType::SMITH_2_BIT).toString(),
+        QVariant::fromValue(machine::PredictorType::SMITH_2_BIT));
+    ui->select_bp_type->addItem(
+        predictor_type_to_string(machine::PredictorType::SMITH_2_BIT_HYSTERESIS).toString(),
+        QVariant::fromValue(machine::PredictorType::SMITH_2_BIT_HYSTERESIS));
+    const int index { ui->select_bp_type->findData(QVariant::fromValue(config->get_bp_type())) };
+    if (index >= 0) {
+        ui->select_bp_type->setCurrentIndex(index);
+    } else {
+        ui->select_bp_type->setCurrentIndex(
+            ui->select_bp_type->findData(QVariant::fromValue(machine::PredictorType::SMITH_1_BIT)));
+        config->set_bp_type(machine::PredictorType::SMITH_1_BIT);
     }
-    ui->select_bp_type->addItem(
-        "Always not taken", QVariant((uint8_t)machine::PredictorType::ALWAYS_NOT_TAKEN));
-    ui->select_bp_type->addItem(
-        "Always taken", QVariant((uint8_t)machine::PredictorType::ALWAYS_TAKEN));
-    ui->select_bp_type->addItem(
-        "Backward taken forward not taken", QVariant((uint8_t)machine::PredictorType::BTFNT));
-    ui->select_bp_type->addItem(
-        "Smith 1 bit", QVariant((uint8_t)machine::PredictorType::SMITH_1_BIT));
-    ui->select_bp_type->addItem(
-        "Smith 2 bit", QVariant((uint8_t)machine::PredictorType::SMITH_2_BIT));
-    ui->select_bp_type->addItem(
-        "Smith 2 bit with hysteresis",
-        QVariant((uint8_t)machine::PredictorType::SMITH_2_BIT_HYSTERESIS));
-    ui->select_bp_type->setCurrentIndex((uint8_t)config->get_bp_type());
     bp_type_change();
+    ui->slider_bp_btb_bits->setMaximum(BP_MAX_BTB_BITS);
+    ui->slider_bp_btb_bits->setValue(config->get_bp_btb_bits());
+    ui->text_bp_btb_bits_number->setText(QString::number(config->get_bp_btb_bits()));
+    ui->slider_bp_bhr_bits->setMaximum(BP_MAX_BHR_BITS);
     ui->slider_bp_bhr_bits->setValue(config->get_bp_bhr_bits());
-    ui->slider_bp_address_bits->setValue(config->get_bp_address_bits());
-    ui->text_bp_table_bits_number->setText(QString::number(config->get_bp_table_bits()));
+    ui->text_bp_bhr_bits_number->setText(QString::number(config->get_bp_bhr_bits()));
+    ui->slider_bp_bht_addr_bits->setMaximum(BP_MAX_BHT_ADDR_BITS);
+    ui->slider_bp_bht_addr_bits->setValue(config->get_bp_bht_addr_bits());
+    ui->text_bp_bht_addr_bits_number->setText(QString::number(config->get_bp_bht_addr_bits()));
+    ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
 
     // Memory
     ui->mem_protec_exec->setChecked(config->memory_execute_protection());
