@@ -11,25 +11,8 @@
 test_dir
 # Build directory
 build
-target
 /CMakeFiles/
 compile_commands.json
 /src/project_info.h
 # Local settings template
 .dev-config.mk
-
-# Build files
-*_autogen
-
-# .a files
-libsvgscene.a
-libassembler.a
-libmachine.a
-libos_emulation.a
-
-# CMake files
-CMakeFiles
-Makefile
-cmake_install.cmake
-CTestTestfile.cmake
-CMakeCache.txt
