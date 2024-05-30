@@ -5,6 +5,8 @@
 Developed by the [Computer Architectures Education](http://comparch.edu.cvut.cz) project
 at [Czech Technical University](http://www.cvut.cz/).
 
+**Are you using QtRvSim at your organization?** [Please, let us know in the discussion!](https://github.com/cvut/qtrvsim/discussions/136)
+
 ## Table of contents
 
 <!-- TOC start -->
