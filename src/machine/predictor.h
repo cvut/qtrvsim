@@ -11,8 +11,6 @@
 
 namespace machine {
 
-const char *int_to_bit_string(const uint64_t value, const uint8_t size = 8);
-
 QStringView branch_result_to_string(const BranchResult result, const bool abbrv = false);
 
 QStringView predictor_state_to_string(const PredictorState state, const bool abbrv = false);

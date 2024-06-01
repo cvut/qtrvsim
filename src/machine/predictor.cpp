@@ -4,14 +4,6 @@ LOG_CATEGORY("machine.BranchPredictor");
 
 using namespace machine;
 
-const char *machine::int_to_bit_string(const uint64_t value, const uint8_t size) {
-    std::string string = "";
-    for (int8_t i = size - 1; i >= 0; i--) {
-        string.append((value >> i) & 0x1 ? "1" : "0");
-    }
-    return string.c_str();
-}
-
 QStringView machine::branch_result_to_string(const BranchResult result, const bool abbrv) {
     switch (result)
     {
