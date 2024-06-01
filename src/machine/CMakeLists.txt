@@ -58,6 +58,7 @@ set(machine_HEADERS
 		memory/memory_bus.h
 		memory/memory_utils.h
 		programloader.h
+		predictor_types.h
 		predictor.h
 		pipeline.h
 		registers.h

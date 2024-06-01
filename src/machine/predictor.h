@@ -13,9 +13,11 @@ namespace machine {
 
 const char *int_to_bit_string(const uint64_t value, const uint8_t size = 8);
 
-const char *branch_result_to_string(const BranchResult result);
+QStringView branch_result_to_string(const BranchResult result, const bool abbrv = false);
 
-const char *predictor_state_to_string(const PredictorState state);
+QStringView predictor_state_to_string(const PredictorState state, const bool abbrv = false);
+
+QStringView predictor_type_to_string(const PredictorType type);
 
 QString addr_to_hex_str(const machine::Address address);
 
@@ -122,13 +124,12 @@ public: // Constructors & Destructor
 
 protected: // Internal functions
     virtual void update_stats(PredictionFeedback feedback);
-    virtual BranchResult make_prediction(PredictionInput input) const = 0; // Function which returns
+    virtual BranchResult make_prediction(PredictionInput input) const = 0; // Returns
                                                                            // prediction based on
                                                                            // internal state
 
 public: // General functions
-    virtual PredictorType get_type() const = 0;
-    virtual const char *get_name() const = 0;            // Returns name of the predictor as string
+    virtual PredictorType get_type() const { return PredictorType::UNDEFINED; };
     virtual BranchResult predict(PredictionInput input); // Function which handles all actions ties
                                                          // to making a branch prediction
     virtual void update(PredictionFeedback feedback);    // Update predictor based on jump / branch
@@ -154,7 +155,6 @@ private: // Internal functions
 
 public: // General functions
     PredictorType get_type() const override { return PredictorType::ALWAYS_NOT_TAKEN; };
-    const char *get_name() const override { return "Always not taken"; };
 };
 
 //  Static Predictor - Always predicts taking the branch
@@ -167,7 +167,6 @@ private: // Internal functions
 
 public: // General functions
     PredictorType get_type() const override { return PredictorType::ALWAYS_TAKEN; };
-    const char *get_name() const override { return "Always taken"; };
 };
 
 // Static Predictor - Backward Taken Forward Not Taken
@@ -180,7 +179,6 @@ private: // Internal functions
 
 public: // General functions
     PredictorType get_type() const override { return PredictorType::BTFNT; };
-    const char *get_name() const override { return "Backward Taken Forward Not Taken"; };
     virtual void update(PredictionFeedback feedback) override;
 };
 
@@ -227,7 +225,6 @@ private: // Internal functions
 
 public: // General functions
     PredictorType get_type() const override { return PredictorType::SMITH_1_BIT; };
-    const char *get_name() const override { return "Smith 1 bit"; };
 };
 
 // Dynamic Predictor - Smith 2 Bit
@@ -244,7 +241,6 @@ private: // Internal functions
 
 public: // General functions
     PredictorType get_type() const override { return PredictorType::SMITH_2_BIT; };
-    const char *get_name() const override { return "Smith 2 bit"; };
 };
 
 // Dynamic Predictor - Smith 2 Bit with hysteresis
@@ -261,7 +257,6 @@ private: // Internal functions
 
 public: // General functions
     PredictorType get_type() const override { return PredictorType::SMITH_2_BIT_HYSTERESIS; };
-    const char *get_name() const override { return "Smith 2 bit with hysteresis"; };
 };
 
 ///////////////////////////
@@ -290,7 +285,7 @@ private: // Internal functions
 public: // General functions
     bool get_enabled() const;
     PredictorType get_predictor_type() const;
-    const char *get_predictor_name() const;
+    QStringView get_predictor_name() const;
     PredictorState get_initial_state() const;
     uint8_t get_number_of_btb_bits() const;
     uint8_t get_number_of_bhr_bits() const;

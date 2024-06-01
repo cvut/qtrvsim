@@ -184,16 +184,6 @@ DockPredictorBHT::DockPredictorBHT(QWidget *parent) : Super(parent) {
     bht->verticalHeader()->hide();
 }
 
-DockPredictorBHT::~DockPredictorBHT() {}
-
-uint8_t DockPredictorBHT::init_number_of_bits(const uint8_t b) const {
-    if (b > BP_MAX_BHT_BITS) {
-        WARN("Number of BHT bits (%u) was larger than %u during init", b, BP_MAX_BHT_BITS);
-        return BP_MAX_BHT_BITS;
-    }
-    return b;
-}
-
 void DockPredictorBHT::init_table(machine::PredictorState initial_state) {
     for (uint16_t row_index = 0; row_index < bht->rowCount(); row_index++) {
         for (uint16_t column_index = 0; column_index < bht->columnCount(); column_index++) {
@@ -210,7 +200,7 @@ void DockPredictorBHT::init_table(machine::PredictorState initial_state) {
             if (column_index == DOCK_BHT_COL_INDEX) {
                 item->setData(Qt::DisplayRole, QString::number(row_index));
             } else if (column_index == DOCK_BHT_COL_HISTORY) {
-                item->setData(Qt::DisplayRole, machine::predictor_state_to_string(initial_state));
+                item->setData(Qt::DisplayRole, machine::predictor_state_to_string(initial_state, true).toString());
             } else if (column_index == DOCK_BHT_COL_CORRECT) {
                 item->setData(Qt::DisplayRole, QString::number(0));
             } else if (column_index == DOCK_BHT_COL_INCORRECT) {
@@ -315,7 +305,7 @@ void DockPredictorBHT::setup(
 
     // Init name
     if (is_predictor_enabled) {
-        label_type_value->setText(branch_predictor->get_predictor_name());
+        label_type_value->setText(branch_predictor->get_predictor_name().toString());
     } else {
         label_type_value->setText("None");
     }
@@ -370,9 +360,9 @@ void DockPredictorBHT::update_new_prediction(
     machine::PredictionInput input,
     machine::BranchResult result) {
     value_event_predict_instruction->setText(input.instruction.to_str());
-    value_event_predict_address->setText(machine::addr_to_hex_str(input.instruction_address));
+    value_event_predict_address->setText(addr_to_hex_str(input.instruction_address));
     value_event_predict_index->setText(QString::number(index));
-    value_event_predict_result->setText(machine::branch_result_to_string(result));
+    value_event_predict_result->setText(machine::branch_result_to_string(result).toString());
 
     set_row_color(index, Q_COLOR_PREDICT);
     set_predict_widget_color(STYLESHEET_COLOR_PREDICT);
@@ -380,9 +370,9 @@ void DockPredictorBHT::update_new_prediction(
 
 void DockPredictorBHT::update_new_update(uint16_t index, machine::PredictionFeedback feedback) {
     value_event_update_instruction->setText(feedback.instruction.to_str());
-    value_event_update_address->setText(machine::addr_to_hex_str(feedback.instruction_address));
+    value_event_update_address->setText(addr_to_hex_str(feedback.instruction_address));
     value_event_update_index->setText(QString::number(index));
-    value_event_update_result->setText(machine::branch_result_to_string(feedback.result));
+    value_event_update_result->setText(machine::branch_result_to_string(feedback.result).toString());
 
     set_row_color(index, Q_COLOR_UPDATE);
     set_update_widget_color(STYLESHEET_COLOR_UPDATE);
@@ -411,7 +401,7 @@ void DockPredictorBHT::update_bht_row(uint16_t index, machine::BranchHistoryTabl
         // Init cell
         item->setTextAlignment(Qt::AlignCenter);
         if (column_index == DOCK_BHT_COL_HISTORY) {
-            item->setData(Qt::DisplayRole, machine::predictor_state_to_string(entry.state));
+            item->setData(Qt::DisplayRole, machine::predictor_state_to_string(entry.state, true).toString());
         } else if (column_index == DOCK_BHT_COL_CORRECT) {
             item->setData(
                 Qt::DisplayRole, QString::number(entry.stats.number_of_correct_predictions));

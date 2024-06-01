@@ -97,10 +97,10 @@ public slots:
     void reset_windows();
     void show_symbol_dialog();
     // Branch predictor
-    void show_dock_bp_btb();
-    void show_dock_bp_bht();
-    void reset_state_dock_bp_btb();
-    void reset_state_dock_bp_bht();
+    void show_bp_btb();
+    void show_bp_bht();
+    void reset_state_bp_btb();
+    void reset_state_bp_bht();
     // Actions - help
     void about_program();
     void about_qt();
@@ -138,8 +138,8 @@ private:
     Box<CacheDock> cache_program {}, cache_data {}, cache_level2 {};
 
     // Branch predictor
-    Box<DockPredictorBTB> dock_bp_btb {};
-    Box<DockPredictorBHT> dock_bp_bht {};
+    Box<DockPredictorBTB> bp_btb {};
+    Box<DockPredictorBHT> bp_bht {};
 
     Box<PeripheralsDock> peripherals {};
     Box<TerminalDock> terminal {};

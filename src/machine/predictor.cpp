@@ -12,31 +12,55 @@ const char *machine::int_to_bit_string(const uint64_t value, const uint8_t size)
     return string.c_str();
 }
 
-const char *machine::branch_result_to_string(const BranchResult result) {
-    if (result == BranchResult::NOT_TAKEN) {
-        return "NOT TAKEN";
-    } else if (result == BranchResult::TAKEN) {
-        return "TAKEN";
-    } else {
-        return "";
+QStringView machine::branch_result_to_string(const BranchResult result, const bool abbrv) {
+    switch (result)
+    {
+    case BranchResult::NOT_TAKEN:
+        return abbrv ? QStringViewLiteral("NT") : QStringViewLiteral("Not taken");
+    case BranchResult::TAKEN:
+        return abbrv ? QStringViewLiteral("T") : QStringViewLiteral("Taken");
+    default:
+        return QStringViewLiteral("");
     }
 }
 
-const char *machine::predictor_state_to_string(const PredictorState state) {
-    if (state == PredictorState::NOT_TAKEN) {
-        return "NT";
-    } else if (state == PredictorState::TAKEN) {
-        return "T";
-    } else if (state == PredictorState::STRONGLY_NOT_TAKEN) {
-        return "SNT";
-    } else if (state == PredictorState::WEAKLY_NOT_TAKEN) {
-        return "WNT";
-    } else if (state == PredictorState::WEAKLY_TAKEN) {
-        return "WT";
-    } else if (state == PredictorState::STRONGLY_TAKEN) {
-        return "ST";
-    } else {
-        return "";
+QStringView machine::predictor_state_to_string(const PredictorState state, const bool abbrv) {
+    switch (state)
+    {
+    case PredictorState::NOT_TAKEN:
+        return abbrv ? QStringViewLiteral("NT") : QStringViewLiteral("Not taken");
+    case PredictorState::TAKEN:
+        return abbrv ? QStringViewLiteral("T") : QStringViewLiteral("Taken");
+    case PredictorState::STRONGLY_NOT_TAKEN:
+        return abbrv ? QStringViewLiteral("SNT") : QStringViewLiteral("Strongly not taken");
+    case PredictorState::WEAKLY_NOT_TAKEN:
+        return abbrv ? QStringViewLiteral("WNT") : QStringViewLiteral("Weakly not taken");
+    case PredictorState::WEAKLY_TAKEN:
+        return abbrv ? QStringViewLiteral("WT") : QStringViewLiteral("Weakly taken");
+    case PredictorState::STRONGLY_TAKEN:
+        return abbrv ? QStringViewLiteral("ST") : QStringViewLiteral("Strongly taken");
+    default:
+        return QStringViewLiteral("");
+    }
+}
+
+QStringView machine::predictor_type_to_string(const PredictorType type) {
+    switch (type)
+    {
+    case PredictorType::ALWAYS_NOT_TAKEN:
+        return QStringViewLiteral("Always not taken");
+    case PredictorType::ALWAYS_TAKEN:
+        return QStringViewLiteral("Always taken");
+    case PredictorType::BTFNT:
+        return QStringViewLiteral("Backward Taken Forward Not Taken");
+    case PredictorType::SMITH_1_BIT:
+        return QStringViewLiteral("Smith 1 bit");
+    case PredictorType::SMITH_2_BIT:
+        return QStringViewLiteral("Smith 2 bit");
+    case PredictorType::SMITH_2_BIT_HYSTERESIS:
+        return QStringViewLiteral("Smith 2 bit with hysteresis");
+    default:
+        return QStringViewLiteral("");
     }
 }
 
@@ -577,38 +601,38 @@ BranchPredictor::BranchPredictor(
     switch (predictor_type) {
     case PredictorType::ALWAYS_NOT_TAKEN:
         predictor = new PredictorAlwaysNotTaken();
-        LOG("Initialized branch predictor: %s", predictor->get_name());
+        LOG("Initialized branch predictor: %s", qPrintable(get_predictor_name().toString()));
         break;
 
     case PredictorType::ALWAYS_TAKEN:
         predictor = new PredictorAlwaysTaken();
-        LOG("Initialized branch predictor: %s", predictor->get_name());
+        LOG("Initialized branch predictor: %s", qPrintable(get_predictor_name().toString()));
         break;
 
     case PredictorType::BTFNT:
         predictor = new PredictorBTFNT();
-        LOG("Initialized branch predictor: %s", predictor->get_name());
+        LOG("Initialized branch predictor: %s", qPrintable(get_predictor_name().toString()));
         break;
 
     case PredictorType::SMITH_1_BIT:
         predictor
             = new PredictorSmith1Bit(number_of_bht_addr_bits, number_of_bht_bits, initial_state);
         LOG("Initialized branch predictor: %s, with %u BHT bits, and initial state at: %s",
-            predictor->get_name(), number_of_bht_bits, predictor_state_to_string(initial_state));
+            qPrintable(get_predictor_name().toString()), number_of_bht_bits, qPrintable(predictor_state_to_string(initial_state).toString()));
         break;
 
     case PredictorType::SMITH_2_BIT:
         predictor
             = new PredictorSmith2Bit(number_of_bht_addr_bits, number_of_bht_bits, initial_state);
         LOG("Initialized branch predictor: %s, with %u BHT bits, and initial state at: %s",
-            predictor->get_name(), number_of_bht_bits, predictor_state_to_string(initial_state));
+            qPrintable(get_predictor_name().toString()), number_of_bht_bits, qPrintable(predictor_state_to_string(initial_state).toString()));
         break;
 
     case PredictorType::SMITH_2_BIT_HYSTERESIS:
         predictor = new PredictorSmith2BitHysteresis(
             number_of_bht_addr_bits, number_of_bht_bits, initial_state);
         LOG("Initialized branch predictor: %s, with %u BHT bits, and initial state at: %s",
-            predictor->get_name(), number_of_bht_bits, predictor_state_to_string(initial_state));
+            qPrintable(get_predictor_name().toString()), number_of_bht_bits, qPrintable(predictor_state_to_string(initial_state).toString()));
         break;
 
     default: throw std::invalid_argument("Invalid predictor type selected");
@@ -699,9 +723,11 @@ PredictorType BranchPredictor::get_predictor_type() const {
     return predictor->get_type();
 }
 
-const char *BranchPredictor::get_predictor_name() const {
-    if (!enabled) { return "None"; }
-    return predictor->get_name();
+QStringView BranchPredictor::get_predictor_name() const {
+    if (!enabled) { 
+        return QStringViewLiteral("None");
+    }
+    return predictor_type_to_string(predictor->get_type());
 }
 
 PredictorState BranchPredictor::get_initial_state() const {
