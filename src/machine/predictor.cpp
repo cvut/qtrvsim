@@ -16,11 +16,11 @@ QStringView machine::branch_result_to_string(const BranchResult result, const bo
     switch (result)
     {
     case BranchResult::NOT_TAKEN:
-        return abbrv ? QStringViewLiteral("NT") : QStringViewLiteral("Not taken");
+        return abbrv ? u"NT" : u"Not taken";
     case BranchResult::TAKEN:
-        return abbrv ? QStringViewLiteral("T") : QStringViewLiteral("Taken");
+        return abbrv ? u"T" : u"Taken";
     default:
-        return QStringViewLiteral("");
+        return u"";
     }
 }
 
@@ -28,19 +28,19 @@ QStringView machine::predictor_state_to_string(const PredictorState state, const
     switch (state)
     {
     case PredictorState::NOT_TAKEN:
-        return abbrv ? QStringViewLiteral("NT") : QStringViewLiteral("Not taken");
+        return abbrv ? u"NT" : u"Not taken";
     case PredictorState::TAKEN:
-        return abbrv ? QStringViewLiteral("T") : QStringViewLiteral("Taken");
+        return abbrv ? u"T" : u"Taken";
     case PredictorState::STRONGLY_NOT_TAKEN:
-        return abbrv ? QStringViewLiteral("SNT") : QStringViewLiteral("Strongly not taken");
+        return abbrv ? u"SNT" : u"Strongly not taken";
     case PredictorState::WEAKLY_NOT_TAKEN:
-        return abbrv ? QStringViewLiteral("WNT") : QStringViewLiteral("Weakly not taken");
+        return abbrv ? u"WNT" : u"Weakly not taken";
     case PredictorState::WEAKLY_TAKEN:
-        return abbrv ? QStringViewLiteral("WT") : QStringViewLiteral("Weakly taken");
+        return abbrv ? u"WT" : u"Weakly taken";
     case PredictorState::STRONGLY_TAKEN:
-        return abbrv ? QStringViewLiteral("ST") : QStringViewLiteral("Strongly taken");
+        return abbrv ? u"ST" : u"Strongly taken";
     default:
-        return QStringViewLiteral("");
+        return u"";
     }
 }
 
@@ -48,19 +48,19 @@ QStringView machine::predictor_type_to_string(const PredictorType type) {
     switch (type)
     {
     case PredictorType::ALWAYS_NOT_TAKEN:
-        return QStringViewLiteral("Always not taken");
+        return u"Always not taken";
     case PredictorType::ALWAYS_TAKEN:
-        return QStringViewLiteral("Always taken");
+        return u"Always taken";
     case PredictorType::BTFNT:
-        return QStringViewLiteral("Backward Taken Forward Not Taken");
+        return u"Backward Taken Forward Not Taken";
     case PredictorType::SMITH_1_BIT:
-        return QStringViewLiteral("Smith 1 bit");
+        return u"Smith 1 bit";
     case PredictorType::SMITH_2_BIT:
-        return QStringViewLiteral("Smith 2 bit");
+        return u"Smith 2 bit";
     case PredictorType::SMITH_2_BIT_HYSTERESIS:
-        return QStringViewLiteral("Smith 2 bit with hysteresis");
+        return u"Smith 2 bit with hysteresis";
     default:
-        return QStringViewLiteral("");
+        return u"";
     }
 }
 
@@ -725,7 +725,7 @@ PredictorType BranchPredictor::get_predictor_type() const {
 
 QStringView BranchPredictor::get_predictor_name() const {
     if (!enabled) { 
-        return QStringViewLiteral("None");
+        return u"None";
     }
     return predictor_type_to_string(predictor->get_type());
 }
