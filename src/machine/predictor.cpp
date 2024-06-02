@@ -614,7 +614,7 @@ BranchPredictor::BranchPredictor(
     }
 
     bhr = new BranchHistoryRegister(number_of_bhr_bits);
-    btb = new BranchTargetBuffer(number_of_bht_bits);
+    btb = new BranchTargetBuffer(number_of_btb_bits);
 
     if (enabled) {
         connect(
