@@ -130,24 +130,30 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     connect(ui->osemu_fs_root, &QLineEdit::textChanged, this, &NewDialog::osemu_fs_root_change);
 
     // Branch predictor
-    connect(
-        ui->group_branch_predictor, QOverload<bool>::of(&QGroupBox::toggled), this,
-        &NewDialog::bp_enabled_change);
+    connect(ui->group_branch_predictor, QOverload<bool>::of(&QGroupBox::toggled), this, [this] {
+        config->set_bp_enabled(ui->group_branch_predictor->isChecked());
+    });
     connect(
         ui->select_bp_type, QOverload<int>::of(&QComboBox::activated), this,
         &NewDialog::bp_type_change);
-    connect(
-        ui->select_bp_init_state, QOverload<int>::of(&QComboBox::activated), this,
-        &NewDialog::bp_init_state_change);
-    connect(
-        ui->slider_bp_btb_bits, &QAbstractSlider::valueChanged, this,
-        &NewDialog::bp_btb_bits_change);
-    connect(
-        ui->slider_bp_bhr_bits, &QAbstractSlider::valueChanged, this,
-        &NewDialog::bp_bhr_bits_change);
-    connect(
-        ui->slider_bp_bht_addr_bits, &QAbstractSlider::valueChanged, this,
-        &NewDialog::bp_bht_addr_bits_change);
+    connect(ui->select_bp_init_state, QOverload<int>::of(&QComboBox::activated), this, [this] {
+        config->set_bp_init_state(
+            ui->select_bp_init_state->currentData().value<machine::PredictorState>());
+    });
+    connect(ui->slider_bp_btb_bits, &QAbstractSlider::valueChanged, this, [this] {
+        config->set_bp_btb_bits((uint8_t)ui->slider_bp_btb_bits->value());
+        ui->text_bp_btb_bits_number->setText(QString::number(config->get_bp_btb_bits()));
+    });
+    connect(ui->slider_bp_bhr_bits, &QAbstractSlider::valueChanged, this, [this] {
+        config->set_bp_bhr_bits((uint8_t)ui->slider_bp_bhr_bits->value());
+        ui->text_bp_bhr_bits_number->setText(QString::number(config->get_bp_bhr_bits()));
+        ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
+    });
+    connect(ui->slider_bp_bht_addr_bits, &QAbstractSlider::valueChanged, this, [this] {
+        config->set_bp_bht_addr_bits((uint8_t)ui->slider_bp_bht_addr_bits->value());
+        ui->text_bp_bht_addr_bits_number->setText(QString::number(config->get_bp_bht_addr_bits()));
+        ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
+    });
 
     cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d.data());
     cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p.data());
@@ -385,10 +391,6 @@ void NewDialog::reset_at_compile_change(bool v) {
     config->set_reset_at_compile(v);
 }
 
-void NewDialog::bp_enabled_change() {
-    config->set_bp_enabled(ui->group_branch_predictor->isChecked());
-}
-
 void NewDialog::bp_type_change() {
     // Read branch predictor type from GUI and store it in the config
     const machine::PredictorType predictor_type {
@@ -456,28 +458,6 @@ void NewDialog::bp_type_change() {
 
     default: bp_toggle_history_table_ui(false); break;
     }
-}
-
-void NewDialog::bp_init_state_change() {
-    config->set_bp_init_state(
-        ui->select_bp_init_state->currentData().value<machine::PredictorState>());
-}
-
-void NewDialog::bp_btb_bits_change() {
-    config->set_bp_btb_bits((uint8_t)ui->slider_bp_btb_bits->value());
-    ui->text_bp_btb_bits_number->setText(QString::number(config->get_bp_btb_bits()));
-}
-
-void NewDialog::bp_bhr_bits_change() {
-    config->set_bp_bhr_bits((uint8_t)ui->slider_bp_bhr_bits->value());
-    ui->text_bp_bhr_bits_number->setText(QString::number(config->get_bp_bhr_bits()));
-    ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
-}
-
-void NewDialog::bp_bht_addr_bits_change() {
-    config->set_bp_bht_addr_bits((uint8_t)ui->slider_bp_bht_addr_bits->value());
-    ui->text_bp_bht_addr_bits_number->setText(QString::number(config->get_bp_bht_addr_bits()));
-    ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
 }
 
 void NewDialog::bp_toggle_history_table_ui(bool enabled) {
