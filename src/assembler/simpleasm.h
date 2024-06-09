@@ -55,7 +55,8 @@ public:
         machine::FrontendMemory *mem,
         SymbolTableDb *symtab,
         machine::Address address,
-        machine::Xlen xlen);
+        machine::Xlen xlen,
+        QMap<machine::Address, int> *address_to_blocknum = nullptr);
     bool process_line(
         const QString &line,
         const QString &filename = "",
@@ -78,6 +79,7 @@ protected:
 
 private:
     QStringList include_stack;
+    QMap<machine::Address, int> *address_to_blocknum = nullptr;
     machine::FrontendMemory *mem {};
     machine::RelocExpressionList reloc;
 };

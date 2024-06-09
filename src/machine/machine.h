@@ -36,6 +36,8 @@ public:
     const CSR::ControlState *control_state();
     const Memory *memory();
     Memory *memory_rw();
+    const QMap<machine::Address, int> *address_to_blocknum();
+    QMap<machine::Address, int> *address_to_blocknum_rw();
     const Cache *cache_program();
     const Cache *cache_data();
     const Cache *cache_level2();
@@ -92,6 +94,7 @@ public slots:
     void restart();
 
 signals:
+    void highlight_by_blocknum(int block_num);
     void program_exit();
     void program_trap(machine::SimulatorException &e);
     void status_change(enum machine::Machine::Status st);
@@ -114,6 +117,7 @@ private:
      * simulation reset without repeated ELF file loading.
      */
     Memory *mem_program_only = nullptr;
+    QMap<machine::Address, int> *addr_to_blocknum = nullptr;
     MemoryDataBus *data_bus = nullptr;
     SerialPort *ser_port = nullptr;
     PeripSpiLed *perip_spi_led = nullptr;

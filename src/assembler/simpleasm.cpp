@@ -71,11 +71,13 @@ void SimpleAsm::setup(
     machine::FrontendMemory *mem,
     SymbolTableDb *symtab,
     machine::Address address,
-    machine::Xlen xlen) {
+    machine::Xlen xlen,
+    QMap<machine::Address, int> *address_to_blocknum) {
     this->mem = mem;
     this->symtab = symtab;
     this->address = address;
     this->symtab->setSymbol("XLEN", static_cast<uint64_t>(xlen), sizeof(uint64_t));
+    this->address_to_blocknum = address_to_blocknum;
 }
 
 static const machine::BitArg wordArg = { { { 32, 0 } }, 0 };
@@ -521,6 +523,7 @@ bool SimpleAsm::process_line(
     }
     uint32_t *p = inst;
     for (size_t l = 0; l < size; l += 4) {
+        if (address_to_blocknum != nullptr) { address_to_blocknum->insert(address, line_number); }
         if (!fatal_occured) { mem->write_u32(address, *(p++), ae::INTERNAL); }
         address += 4;
     }
