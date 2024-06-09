@@ -145,6 +145,7 @@ struct InstructionMap {
 #define IT_U Instruction::U
 #define IT_J Instruction::J
 #define IT_AMO Instruction::AMO
+#define IT_ZICSR Instruction::ZICSR
 #define IT_UNKNOWN Instruction::UNKNOWN
 
 // clang-format off
@@ -1374,15 +1375,14 @@ bool parse_immediate_value(
 
 uint16_t parse_csr_address(const QString &field_token, uint &chars_taken) {
     if (field_token.at(0).isLetter()) {
-        // TODO maybe optimize
-        for (auto &reg : CSR::REGISTERS) {
-            if (field_token.startsWith(reg.name, Qt::CaseInsensitive)) {
-                chars_taken = strlen(reg.name);
-                return reg.address.data;
-            }
+        size_t index = CSR::REGISTER_MAP_BY_NAME.at(qPrintable(field_token));
+        if (index < 0) {
+            chars_taken = 0;
+            return 0;
         }
-        chars_taken = 0;
-        return 0;
+        auto &reg = CSR::REGISTERS[index];
+        chars_taken = strlen(reg.name);
+        return reg.address.data;
     } else {
         char *r;
         uint64_t val;
