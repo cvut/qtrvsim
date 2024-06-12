@@ -92,6 +92,11 @@
           <string>Least Frequently Used (LFU)</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Pseudo Least Recently Used (PLRU)</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="4" column="0">
