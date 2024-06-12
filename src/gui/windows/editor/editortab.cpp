@@ -39,6 +39,14 @@ void EditorTab::set_show_line_number(bool visible) {
     editor->setShowLineNumbers(visible);
 }
 
+void EditorTab::set_enable_highlight(bool enable) {
+    editor->setEnableHighlight(enable);
+}
+
+void EditorTab::set_enable_focus_change(bool enable) {
+    editor->setEnableFocusChange(enable);
+}
+
 void EditorTab::resizeEvent(QResizeEvent *event) {
     QWidget::resizeEvent(event);
     elide_file_name();
