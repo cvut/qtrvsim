@@ -42,6 +42,8 @@ signals:
 
 public slots:
     void setShowLineNumbers(bool visible);
+    void setEnableHighlight(bool enable);
+    void setEnableFocusChange(bool enable);
     void highlightBlock(int block_num);
 
 private slots:
@@ -52,6 +54,8 @@ private:
     ::Box<QSyntaxHighlighter> highlighter {};
     LineNumberArea *line_number_area;
     bool line_numbers_visible = true;
+    bool enable_highlight = true;
+    bool enable_focus_change = true;
     QString fname;
     QString tname;
     bool saveAsRequiredFl {};

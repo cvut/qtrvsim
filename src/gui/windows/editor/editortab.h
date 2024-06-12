@@ -19,6 +19,8 @@ public:
 
 public slots:
     void set_show_line_number(bool visible);
+    void set_enable_highlight(bool enable);
+    void set_enable_focus_change(bool enable);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;

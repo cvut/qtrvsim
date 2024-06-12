@@ -40,6 +40,8 @@ signals:
 
 public slots:
     void set_show_line_numbers(bool visible);
+    void set_enable_hightlight(bool enable);
+    void set_enable_focus_change(bool enable);
 
     void open_file_dialog();
     void save_tab(int index);
@@ -59,6 +61,8 @@ private:
 private:
     QSharedPointer<QSettings> settings;
     bool line_numbers_visible = true;
+    bool enable_hightlight = true;
+    bool enable_focus_change = true;
     size_t unknown_editor_counter = 1;
 };
 

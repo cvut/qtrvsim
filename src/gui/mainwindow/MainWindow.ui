@@ -127,9 +127,11 @@
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
-     <string>Options</string>
+     <string>&amp;Options</string>
     </property>
     <addaction name="actionEditorShowLineNumbers"/>
+    <addaction name="actionEditorEnableHighlight"/>
+    <addaction name="actionEditorEnableFocusChange"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuMachine"/>
@@ -628,6 +630,34 @@
    </property>
    <property name="toolTip">
     <string>Show line number in the code editor.</string>
+   </property>
+  </action>
+  <action name="actionEditorEnableHighlight">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Enable &amp;Highlighting</string>
+   </property>
+   <property name="toolTip">
+    <string>Highlight currently executed instruction in internal editor.</string>
+   </property>
+  </action>
+  <action name="actionEditorEnableFocusChange">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Enable &amp;Focus Change</string>
+   </property>
+   <property name="toolTip">
+    <string>Focus on currently executed instruction in internal editor.</string>
    </property>
   </action>
  </widget>

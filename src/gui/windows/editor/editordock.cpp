@@ -161,6 +161,22 @@ void EditorDock::set_show_line_numbers(bool visible) {
     }
 }
 
+void EditorDock::set_enable_hightlight(bool enable) {
+    enable_hightlight = enable;
+    settings->setValue("editorEnableHighlisht", enable);
+    for (int i = 0; i < this->count(); i++) {
+        get_tab(i)->set_enable_highlight(enable);
+    }
+}
+
+void EditorDock::set_enable_focus_change(bool enable) {
+    enable_focus_change = enable;
+    settings->setValue("editorEnableFocusChange", enable);
+    for (int i = 0; i < this->count(); i++) {
+        get_tab(i)->set_enable_focus_change(enable);
+    }
+}
+
 void EditorDock::tabCountChanged() {
     Super::tabCountChanged();
     emit editor_available_changed(count() > 0);
