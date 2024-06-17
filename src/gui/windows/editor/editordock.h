@@ -40,8 +40,8 @@ signals:
 
 public slots:
     void set_show_line_numbers(bool visible);
-    void set_enable_hightlight(bool enable);
-    void set_enable_focus_change(bool enable);
+    void set_highlight_pc(bool enable);
+    void set_follow_pc(bool enable);
 
     void open_file_dialog();
     void save_tab(int index);
