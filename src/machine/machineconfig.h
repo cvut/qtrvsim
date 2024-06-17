@@ -44,7 +44,8 @@ public:
     enum ReplacementPolicy {
         RP_RAND, // Random
         RP_LRU,  // Least recently used
-        RP_LFU   // Least frequently used
+        RP_LFU,  // Least frequently used
+        RP_PLRU  // Pseudo Least recently used
     };
 
     enum WritePolicy {

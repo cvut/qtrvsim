@@ -102,6 +102,33 @@ private:
     size_t associativity;
 };
 
+/**
+ * Pseudo Last recently used policy
+ *
+ * Hardware-Friendly LRU Implementation
+ */
+class CachePolicyPLRU final : public CachePolicy {
+public:
+    /**
+     * @param associativity     degree of assiciaivity
+     * @param set_count         number of blocks / rows in a way (or sets in
+     * cache)
+     */
+    CachePolicyPLRU(size_t associativity, size_t set_count);
+
+    [[nodiscard]] size_t select_way_to_evict(size_t row) const final;
+
+    void update_stats(size_t way, size_t row, bool is_valid) final;
+
+private:
+    /**
+     * Pointer to Least Recently Used Block
+     */
+    std::vector<std::vector<uint32_t>> plru_ptr;
+    const size_t associativity;
+    const size_t associativityCLog2;
+};
+
 } // namespace machine
 
 #endif // CACHE_POLICY_H
