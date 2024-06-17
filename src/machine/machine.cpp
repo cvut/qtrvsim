@@ -34,6 +34,7 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         mem = new Memory(*mem_program_only);
     } else {
         mem = new Memory(machine_config.get_simulated_endian());
+        addr_to_blocknum = new QMap<machine::Address, int>();
     }
 
     data_bus = new MemoryDataBus(machine_config.get_simulated_endian());
@@ -184,6 +185,8 @@ Machine::~Machine() {
     symtab = nullptr;
     delete predictor;
     predictor = nullptr;
+    delete addr_to_blocknum;
+    addr_to_blocknum = nullptr;
 }
 
 const MachineConfig &Machine::config() {
@@ -209,6 +212,14 @@ const Memory *Machine::memory() {
 
 Memory *Machine::memory_rw() {
     return mem;
+}
+
+const QMap<machine::Address, int> *Machine::address_to_blocknum() {
+    return addr_to_blocknum;
+}
+
+QMap<machine::Address, int> *Machine::address_to_blocknum_rw() {
+    return addr_to_blocknum;
 }
 
 const Cache *Machine::cache_program() {
@@ -331,6 +342,10 @@ void Machine::pause() {
 
 void Machine::step_internal(bool skip_break) {
     CTL_GUARD;
+    if (addr_to_blocknum != nullptr && addr_to_blocknum->contains(regs->read_pc())) {
+        emit highlight_by_blocknum(addr_to_blocknum->value(regs->read_pc()));
+    }
+
     enum Status stat_prev = stat;
     set_status(ST_BUSY);
     emit tick();

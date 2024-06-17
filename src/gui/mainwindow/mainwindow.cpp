@@ -754,7 +754,9 @@ void MainWindow::compile_source() {
 
     connect(&sasm, &SimpleAsm::report_message, this, &MainWindow::report_message);
 
-    sasm.setup(mem, &symtab, machine::Address(0x00000200), machine->core()->get_xlen());
+    sasm.setup(
+        mem, &symtab, machine::Address(0x00000200), machine->core()->get_xlen(),
+        machine->address_to_blocknum_rw());
 
     int ln = 1;
     for (QTextBlock block = content->begin(); block.isValid(); block = block.next(), ln++) {
@@ -762,6 +764,10 @@ void MainWindow::compile_source() {
         if (!sasm.process_line(line, filename, ln)) { error_occured = true; }
     }
     if (!sasm.finish()) { error_occured = true; }
+
+    connect(
+        machine.data(), &machine::Machine::highlight_by_blocknum, editor,
+        &SrcEditor::highlightBlock);
 
     if (error_occured) { show_messages(); }
 }

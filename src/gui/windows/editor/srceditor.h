@@ -42,6 +42,7 @@ signals:
 
 public slots:
     void setShowLineNumbers(bool visible);
+    void highlightBlock(int block_num);
 
 private slots:
     void updateMargins(int newBlockCount);

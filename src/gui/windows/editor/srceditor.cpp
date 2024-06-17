@@ -11,6 +11,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QPainter>
+#include <QScrollBar>
 #include <QTextCursor>
 #include <QTextDocumentWriter>
 #include <qglobal.h>
@@ -288,4 +289,30 @@ void SrcEditor::insertFromMimeData(const QMimeData *source) {
 
 bool SrcEditor::canInsertFromMimeData(const QMimeData *source) const {
     return source->hasText();
+}
+
+void SrcEditor::highlightBlock(int block_num) {
+    QList<QTextEdit::ExtraSelection> extra_selections;
+
+    // set hightly style
+    QTextEdit::ExtraSelection selection;
+    QColor lineColor = QColor(Qt::yellow).lighter(160);
+    selection.format.setBackground(lineColor);
+    selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+
+    // select block
+    QTextBlock block = document()->findBlockByNumber(block_num - 1);
+    selection.cursor = QTextCursor(block);
+    selection.cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor, block.length());
+    extra_selections.append(selection);
+
+    // calculate viewport line count
+    int viewport_line_count
+        = viewport()->height() / QFontMetrics(document()->defaultFont()).height();
+    // scroll to block and show it in editor middle
+    QScrollBar *vScrollBar = verticalScrollBar();
+    vScrollBar->setValue(
+        vScrollBar->singleStep() * (block.firstLineNumber() - viewport_line_count / 2));
+
+    setExtraSelections(extra_selections);
 }
