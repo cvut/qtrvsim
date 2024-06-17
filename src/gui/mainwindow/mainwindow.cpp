@@ -94,11 +94,11 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
         ui->actionEditorShowLineNumbers, &QAction::triggered, editor_tabs.data(),
         &EditorDock::set_show_line_numbers);
     connect(
-        ui->actionEditorEnableHighlight, &QAction::triggered, editor_tabs.data(),
-        &EditorDock::set_enable_hightlight);
+        ui->actionEditorHighlightPC, &QAction::triggered, editor_tabs.data(),
+        &EditorDock::set_highlight_pc);
     connect(
-        ui->actionEditorEnableFocusChange, &QAction::triggered, editor_tabs.data(),
-        &EditorDock::set_enable_focus_change);
+        ui->actionEditorFollowPC, &QAction::triggered, editor_tabs.data(),
+        &EditorDock::set_follow_pc);
 
     bool line_numbers_visible = settings->value("EditorShowLineNumbers", true).toBool();
     editor_tabs->set_show_line_numbers(line_numbers_visible);

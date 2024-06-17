@@ -161,7 +161,7 @@ void EditorDock::set_show_line_numbers(bool visible) {
     }
 }
 
-void EditorDock::set_enable_hightlight(bool enable) {
+void EditorDock::set_highlight_pc(bool enable) {
     enable_hightlight = enable;
     settings->setValue("editorEnableHighlisht", enable);
     for (int i = 0; i < this->count(); i++) {
@@ -169,7 +169,7 @@ void EditorDock::set_enable_hightlight(bool enable) {
     }
 }
 
-void EditorDock::set_enable_focus_change(bool enable) {
+void EditorDock::set_follow_pc(bool enable) {
     enable_focus_change = enable;
     settings->setValue("editorEnableFocusChange", enable);
     for (int i = 0; i < this->count(); i++) {

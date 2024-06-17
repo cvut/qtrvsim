@@ -17,7 +17,7 @@
    <iconset>
     <normaloff>
            :/icons/gui.png</normaloff>
-    :/icons/gui.png
+       :/icons/gui.png
    </iconset>
   </property>
   <property name="dockNestingEnabled">
@@ -54,7 +54,7 @@
      <x>0</x>
      <y>0</y>
      <width>900</width>
-     <height>32</height>
+        <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -130,8 +130,8 @@
      <string>&amp;Options</string>
     </property>
     <addaction name="actionEditorShowLineNumbers"/>
-    <addaction name="actionEditorEnableHighlight"/>
-    <addaction name="actionEditorEnableFocusChange"/>
+       <addaction name="actionEditorHighlightPC"/>
+       <addaction name="actionEditorFollowPC"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuMachine"/>
@@ -148,7 +148,7 @@
     <bool>false</bool>
    </property>
    <property name="allowedAreas">
-    <set>Qt::TopToolBarArea</set>
+       <set>Qt::ToolBarArea::TopToolBarArea</set>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -632,7 +632,7 @@
     <string>Show line number in the code editor.</string>
    </property>
   </action>
-  <action name="actionEditorEnableHighlight">
+     <action name="actionEditorHighlightPC">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -640,13 +640,13 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Enable &amp;Highlighting</string>
+       <string>&amp;Highlight Curent Instruction</string>
    </property>
    <property name="toolTip">
-    <string>Highlight currently executed instruction in internal editor.</string>
+       <string>Highlight currently the currently executed instruction in the internal editor.</string>
    </property>
   </action>
-  <action name="actionEditorEnableFocusChange">
+     <action name="actionEditorFollowPC">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -654,10 +654,10 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Enable &amp;Focus Change</string>
+       <string>&amp;Follow Current Instruction</string>
    </property>
    <property name="toolTip">
-    <string>Focus on currently executed instruction in internal editor.</string>
+       <string>Always focus the currently executed instruction in the internal editor.</string>
    </property>
   </action>
  </widget>
