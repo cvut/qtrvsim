@@ -258,14 +258,13 @@ void MainWindow::create_core(
     bool keep_memory) {
     // Create machine
     auto *new_machine = new machine::Machine(config, true, load_executable);
-
     if (keep_memory && (machine != nullptr)) {
         new_machine->memory_rw()->reset(*machine->memory());
+        *new_machine->address_to_blocknum_rw() = *machine->address_to_blocknum();
     }
 
     // Remove old machine
     machine.reset(new_machine);
-
     // Create machine view
     auto focused_index = central_widget_tabs->currentIndex();
     corescene.reset();
@@ -312,6 +311,7 @@ void MainWindow::create_core(
     connect(
         machine->core(), &machine::Core::stop_on_exception_reached, machine.data(),
         &machine::Machine::pause);
+    connect(machine.data(), &machine::Machine::highlight_by_blocknum, this, &MainWindow::handle_highlight_by_blocknum);
 
     // Setup docks
     registers->connectToMachine(machine.data());
@@ -760,6 +760,7 @@ void MainWindow::compile_source() {
 
     connect(&sasm, &SimpleAsm::report_message, this, &MainWindow::report_message);
 
+    machine->address_to_blocknum_rw()->clear();
     sasm.setup(
         mem, &symtab, machine::Address(0x00000200), machine->core()->get_xlen(),
         machine->address_to_blocknum_rw());
@@ -771,9 +772,7 @@ void MainWindow::compile_source() {
     }
     if (!sasm.finish()) { error_occured = true; }
 
-    connect(
-        machine.data(), &machine::Machine::highlight_by_blocknum, editor,
-        &SrcEditor::highlightBlock);
+    connect(this, &MainWindow::highlight_by_blocknum, editor, &SrcEditor::highlightBlock);
 
     if (error_occured) { show_messages(); }
 }

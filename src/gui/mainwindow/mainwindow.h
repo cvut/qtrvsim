@@ -57,6 +57,7 @@ signals:
         QString text,
         QString hint);
     void clear_messages();
+    void highlight_by_blocknum(int blocknum);
 
 public slots:
     // Actions signals
@@ -111,6 +112,9 @@ public slots:
         int column,
         const QString &text,
         const QString &hint);
+    void handle_highlight_by_blocknum(int blocknum) {
+        emit highlight_by_blocknum(blocknum);
+    }
 
 protected:
     void closeEvent(QCloseEvent *cancel) override;
