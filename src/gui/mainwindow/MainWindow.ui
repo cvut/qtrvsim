@@ -108,6 +108,7 @@
     <addaction name="ips2"/>
     <addaction name="ips5"/>
     <addaction name="ips10"/>
+    <addaction name="ips25"/>
     <addaction name="ipsUnlimited"/>
     <addaction name="ipsMax"/>
     <addaction name="separator"/>
@@ -164,6 +165,7 @@
    <addaction name="ips2"/>
    <addaction name="ips5"/>
    <addaction name="ips10"/>
+   <addaction name="ips25"/>
    <addaction name="ipsUnlimited"/>
    <addaction name="ipsMax"/>
    <addaction name="actionNew"/>
@@ -403,6 +405,23 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+0</string>
+   </property>
+  </action>
+  <action name="ips25">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>2&amp;5 instructions per second</string>
+   </property>
+   <property name="iconText">
+    <string>25x</string>
+   </property>
+   <property name="toolTip">
+    <string>Run CPU in speed of 25 instructions per second</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F5</string>
    </property>
   </action>
   <action name="ipsUnlimited">

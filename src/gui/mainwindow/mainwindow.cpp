@@ -131,6 +131,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     speed_group->addAction(ui->ips2);
     speed_group->addAction(ui->ips5);
     speed_group->addAction(ui->ips10);
+    speed_group->addAction(ui->ips25);
     speed_group->addAction(ui->ipsUnlimited);
     speed_group->addAction(ui->ipsMax);
     ui->ips1->setChecked(true);
@@ -166,6 +167,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(ui->ips2, &QAction::toggled, this, &MainWindow::set_speed);
     connect(ui->ips5, &QAction::toggled, this, &MainWindow::set_speed);
     connect(ui->ips10, &QAction::toggled, this, &MainWindow::set_speed);
+    connect(ui->ips25, &QAction::toggled, this, &MainWindow::set_speed);
     connect(ui->ipsUnlimited, &QAction::toggled, this, &MainWindow::set_speed);
     connect(ui->ipsMax, &QAction::toggled, this, &MainWindow::set_speed);
 
@@ -481,6 +483,8 @@ void MainWindow::set_speed() {
         machine->set_speed(200);
     } else if (ui->ips10->isChecked()) {
         machine->set_speed(100);
+    } else if (ui->ips25->isChecked()) {
+        machine->set_speed(40);
     } else if (ui->ipsMax->isChecked()) {
         machine->set_speed(0, 100);
     } else {
