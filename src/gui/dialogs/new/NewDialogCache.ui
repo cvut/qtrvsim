@@ -97,6 +97,11 @@
           <string>Pseudo Least Recently Used (PLRU)</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Not Most Recently Used (NMRU)</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="4" column="0">
