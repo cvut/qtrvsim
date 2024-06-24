@@ -255,16 +255,16 @@ namespace machine { namespace CSR {
 
     class RegisterMapByName {
         bool initialized = false;
-        std::unordered_map<const char *, size_t> map;
+        std::unordered_map<std::string, size_t> map;
 
         void init() {
             for (size_t i = 0; i < REGISTERS.size(); i++) {
-                map.emplace(REGISTERS[i].name, i);
+                map.emplace(std::string(REGISTERS[i].name), i);
             }
             initialized = true;
         }
     public:
-        size_t at(const char* name) {
+        size_t at(std::string name) {
             if (!initialized) init();
             return map.at(name);
         }

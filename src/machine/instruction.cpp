@@ -1375,14 +1375,15 @@ bool parse_immediate_value(
 
 uint16_t parse_csr_address(const QString &field_token, uint &chars_taken) {
     if (field_token.at(0).isLetter()) {
-        size_t index = CSR::REGISTER_MAP_BY_NAME.at(qPrintable(field_token));
-        if (index < 0) {
+        try {
+            size_t index = CSR::REGISTER_MAP_BY_NAME.at(field_token.toStdString());
+            auto &reg = CSR::REGISTERS[index];
+            chars_taken = strlen(reg.name);
+            return reg.address.data;
+        } catch (std::out_of_range &e) {
             chars_taken = 0;
             return 0;
         }
-        auto &reg = CSR::REGISTERS[index];
-        chars_taken = strlen(reg.name);
-        return reg.address.data;
     } else {
         char *r;
         uint64_t val;
