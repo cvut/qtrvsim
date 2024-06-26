@@ -765,6 +765,55 @@ Instruction &Instruction::operator=(const Instruction &c) {
     return *this;
 }
 
+QString field_to_string(int32_t field, const ArgumentDesc* arg_desc, Address inst_addr, bool symbolic_registers_enabled) {
+    QString res = "";
+    if (arg_desc->min < 0) {
+        field = extend(field, [&]() {
+            int sum = (int)arg_desc->arg.shift;
+            for (auto chunk : arg_desc->arg) {
+                sum += chunk.count;
+            }
+            return sum;
+        }());
+    }
+    switch (arg_desc->kind) {
+    case 'g': {
+        if (symbolic_registers_enabled) {
+            res += QString(Rv_regnames[field]);
+        } else {
+            res += "x" + QString::number(field);
+        }
+        break;
+    }
+    case 'p':
+    case 'a': {
+        field += (int32_t)inst_addr.get_raw();
+        res.append(str::asHex(field));
+        break;
+    }
+    case 'o':
+    case 'n': {
+        if (arg_desc->min < 0) {
+            res += QString::number((int32_t)field, 10);
+        } else {
+            res.append(str::asHex(uint32_t(field)));
+        }
+        break;
+    }
+    case 'E': {
+        if (symbolic_registers_enabled) {
+            try {
+                res += CSR::REGISTERS[CSR::REGISTER_MAP.at(CSR::Address(field))].name;
+            } catch (std::out_of_range &e) { res.append(str::asHex(field)); }
+        } else {
+            res.append(str::asHex(field));
+        }
+        break;
+    }
+    }
+    return res;
+}
+
 QString Instruction::to_str(Address inst_addr) const {
     const InstructionMap &im = InstructionMapFind(dt);
     // TODO there are exception where some fields are zero and such so we should
@@ -787,50 +836,7 @@ QString Instruction::to_str(Address inst_addr) const {
                 continue;
             }
             auto field = (int32_t)arg_desc->arg.decode(this->dt);
-            if (arg_desc->min < 0) {
-                field = extend(field, [&]() {
-                    int sum = (int)arg_desc->arg.shift;
-                    for (auto chunk : arg_desc->arg) {
-                        sum += chunk.count;
-                    }
-                    return sum;
-                }());
-            }
-            switch (arg_desc->kind) {
-            case 'g': {
-                if (symbolic_registers_enabled) {
-                    res += QString(Rv_regnames[field]);
-                } else {
-                    res += "x" + QString::number(field);
-                }
-                break;
-            }
-            case 'p':
-            case 'a': {
-                field += (int32_t)inst_addr.get_raw();
-                res.append(str::asHex(uint32_t(field)));
-                break;
-            }
-            case 'o':
-            case 'n': {
-                if (arg_desc->min < 0) {
-                    res += QString::number((int32_t)field, 10);
-                } else {
-                    res.append(str::asHex(uint32_t(field)));
-                }
-                break;
-            }
-            case 'E': {
-                if (symbolic_registers_enabled) {
-                    try {
-                        res += CSR::REGISTERS[CSR::REGISTER_MAP.at(CSR::Address(field))].name;
-                    } catch (std::out_of_range &e) { res.append(str::asHex(field)); }
-                } else {
-                    res.append(str::asHex(field));
-                }
-                break;
-            }
-            }
+            res += field_to_string(field, arg_desc, inst_addr, symbolic_registers_enabled);
         }
     }
     return res;
@@ -1375,14 +1381,15 @@ bool parse_immediate_value(
 
 uint16_t parse_csr_address(const QString &field_token, uint &chars_taken) {
     if (field_token.at(0).isLetter()) {
-        size_t index = CSR::REGISTER_MAP_BY_NAME.at(qPrintable(field_token));
-        if (index < 0) {
+        try {
+            size_t index = CSR::REGISTER_MAP_BY_NAME.at(field_token.toStdString());
+            auto &reg = CSR::REGISTERS[index];
+            chars_taken = strlen(reg.name);
+            return reg.address.data;
+        } catch (std::out_of_range &e) {
             chars_taken = 0;
             return 0;
         }
-        auto &reg = CSR::REGISTERS[index];
-        chars_taken = strlen(reg.name);
-        return reg.address.data;
     } else {
         char *r;
         uint64_t val;
@@ -1449,9 +1456,6 @@ void Instruction::set_symbolic_registers(bool enable) {
     symbolic_registers_enabled = enable;
 }
 
-inline int32_t Instruction::extend(uint32_t value, uint32_t used_bits) const {
-    return value | ~((value & (1 << (used_bits - 1))) - 1);
-}
 
 void Instruction::append_recognized_registers(QStringList &list) {
     for (auto name : Rv_regnames) {

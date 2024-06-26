@@ -1,138 +1,141 @@
-#include "common/logging.h"
-#include "machine/instruction.h"
-#include "machine/instruction.cpp"
-#include <QFile>
-#include <unordered_set>
+#include <instruction.test.gendata.h>
 
-using namespace machine;
+uint32_t
+random_arg_code_mask(const ArgumentDesc *arg_desc, const InstructionMap *im, QString *string_data) {
+    int32_t field
+        // = QRandomGenerator::global()->generate();
+        = QRandomGenerator::global()->bounded(int32_t(arg_desc->min), int32_t(arg_desc->max));
 
-static uint32_t MASK_AMO_RS2 = 0b1111100000000000000000000;
+    // set fields from value
+    uint32_t code_mask = arg_desc->arg.encode(field);
 
-#define AMO_MAP_4ITEMS(NAME_BASE, MASK) \
-    { NAME_BASE, MASK}, \
-    { NAME_BASE ".rl", MASK }, \
-    { NAME_BASE ".aq", MASK }, \
-    { NAME_BASE ".aqrl", MASK },
+    switch (arg_desc->kind) {
+    case 'E': {
+        field = field % CSR::Id::_COUNT;
+        CSR::RegisterDesc reg = CSR::REGISTERS[field];
+        field = reg.address.data;
+        code_mask = arg_desc->arg.encode(reg.address.data);
+    }
+    }
+    // set to zero if needed
+    if (zero_mask_tb.count(im->name)) { code_mask &= zero_mask_tb[im->name].zero_mask; }
 
-static std::unordered_map<QString, uint32_t> mask_map = {
-    AMO_MAP_4ITEMS("lr.w", MASK_AMO_RS2)
-    AMO_MAP_4ITEMS("lr.d", MASK_AMO_RS2)
-};
+    uint32_t decoded_value = arg_desc->arg.decode(code_mask);
+    *string_data = field_to_string(decoded_value, arg_desc, Address(0), false);
+    return code_mask;
+}
 
-void generate_code_and_string_data(QTextStream& out, const InstructionMap* im_iter, BitField subfield) {
-    for (int i = 0; i < (1 << subfield.count); i++) {
-        const InstructionMap* im = &im_iter[i];
+GeneratedInst random_inst_from_im(const InstructionMap *im, const InstructionMap *im_source) {
+    if (im->flags & InstructionFlags::IMF_CSR) {}
 
-        if (im->name == "unknown") {
-            continue;
+    uint32_t code = im->code;
+    QString string_data = im->name;
+
+    code &= im->mask;
+
+    QString next_delim = " ";
+    for (const QString &arg_string : im->args) {
+        string_data += next_delim;
+        next_delim = ", ";
+        for (int pos = 0; pos < arg_string.size(); pos += 1) {
+            char arg_letter = arg_string[pos].toLatin1();
+            const ArgumentDesc *arg_desc = arg_desc_by_code[(unsigned char)arg_letter];
+            if (arg_desc == nullptr) {
+                string_data += arg_letter;
+                continue;
+            }
+
+            QString field = 0;
+            const uint32_t code_mask = random_arg_code_mask(arg_desc, im, &field);
+            string_data += field;
+
+            code |= code_mask;
         }
+    }
+    return GeneratedInst { code, string_data, im, im_source };
+}
+
+void WalkInstructionMapHelper(
+    const InstructionMap *im_iter,
+    BitField subfield,
+    const InstructionMap *im_source,
+    std::function<void(const InstructionMap *, const InstructionMap *)> handler) {
+    for (int i = 0;; i++) {
+        if (im_source == nullptr) {
+            // end of subclass table
+            if (i >= (1 << subfield.count)) { break; }
+        } else {
+            // end of alias
+            if (im_iter[i].name == nullptr) { break; }
+        }
+
+        const InstructionMap *im = &im_iter[i];
 
         if (im->subclass != nullptr) {
-            generate_code_and_string_data(out, im->subclass, im->subfield);
+            // walk into subclass
+            WalkInstructionMapHelper(im->subclass, im->subfield, nullptr, handler);
             continue;
         }
 
-        uint32_t code = im->code;
-        QString string_data = im->name;
-
-        if (im->args.size()) {
-            int val_mask;
-            switch (im->type) {
-            case Instruction::Type::R:
-            case Instruction::Type::AMO:  {
-                val_mask = 0b00000000000100001000000010000000;
-                break;
-            }
-            case Instruction::Type::I: 
-                val_mask = 0b00000000000100001000000010000000;
-                break;
-            case Instruction::Type::ZICSR: {
-                val_mask = 0b00000000000100001000000010000000;
-                break;
-            }
-            case Instruction::Type::S: {
-                val_mask = 0b00000000000100001000000010000000;
-                break;
-            }
-            case Instruction::Type::B: {
-                val_mask = 0b00000000000100001000000100000000;
-                break;
-            }
-            case Instruction::Type::U: {
-                val_mask = 0b00000000000000000001000010000000;
-                break;
-            }
-            case Instruction::Type::J: {
-                val_mask = 0b00000000001000000000000010000000;
-                break;
-            }
-            case Instruction::Type::UNKNOWN: {
-                return;
-            }
-            }
-            code |= val_mask & ~im->mask;
-            if (mask_map.count(im->name)) {
-                uint32_t old_code = code; 
-                code &= ~mask_map[im->name];
-            }
-
-            QString next_delim = " ";
-            for (const QString &arg_string : im->args) {
-                string_data += next_delim;
-                next_delim = ", ";
-                for (int pos = 0; pos < arg_string.size(); pos += 1) {
-                    char arg_letter = arg_string[pos].toLatin1();
-                    const ArgumentDesc *arg_desc = arg_desc_by_code[(unsigned char)arg_letter];
-                    if (arg_desc == nullptr) {
-                        string_data += arg_letter;
-                        continue;
-                    }
-                    switch (arg_desc->kind) {
-                    case 'g': {
-                        string_data += "x1";
-                        break;
-                    }
-                    case 'p':
-                    case 'a':
-                        string_data += QString::asprintf("0x%d", Instruction(code).immediate());
-                        break;
-                    case 'o':
-                    case 'n': {
-                        if (arg_desc->min < 0) {
-                            string_data += "1";
-                        } else {
-                            string_data += "0x1";
-                        }
-                        break;
-                    }
-                    case 'E': {
-                        string_data += "0x1";
-                        break;
-                    }
-                    }
-                }
-            }
+        // handle alias
+        if (im->aliases != nullptr) {
+            WalkInstructionMapHelper(im->aliases, im->subfield, im, handler);
         }
 
-        QString enum_str = QString::asprintf("{0x%x, \"%s\"},", code, qPrintable(string_data));
-        if (Instruction(code).to_str() != string_data) {
-            enum_str += " // failed";
-        }
-        enum_str += "\n";
-        out << enum_str;
+        Instruction::Type t = im->type;
+        if (im_source != nullptr) { t = im_source->type; }
+        if (t == IT_UNKNOWN) { continue; }
+
+        // handle self
+        handler(im, im_source);
     }
 }
 
-int main(int argc, char *argv[]) {
+void WalkInstructionMap(
+    std::function<void(const InstructionMap *, const InstructionMap *)> handler) {
+    return WalkInstructionMapHelper(C_inst_map, instruction_map_opcode_field, nullptr, handler);
+}
+
+int main() {
     fill_argdesbycode();
     instruction_from_string_build_base();
-    QFile outfile("instruction.test.data.h");
-    if (outfile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream out(&outfile);
-        generate_code_and_string_data(out, C_inst_map, instruction_map_opcode_field);
-        outfile.close();
-    } else {
-        printf("open output file failed\n");
-        exit(1);
-    }
+    WalkInstructionMap([](const InstructionMap *im, const InstructionMap *im_source) {
+        printf("\ninst: [%s] \n\n", im->name);
+        for (int i = 0; i < 100; i++) {
+            printf("  - [%2d]", i);
+            auto generated = random_inst_from_im(im, im_source);
+            if (generated.im != nullptr) {
+                printf(
+                    "    code: [%10x] str: [%30s]\n", generated.code,
+                    qPrintable(generated.string_data));
+
+                try {
+                    uint32_t parsed_code;
+                    // mv 0, 0 => nop, which buffer is shorter
+                    Instruction::code_from_string(
+                        &parsed_code, 20, generated.string_data, Address(0x0));
+
+                    // check code_from_string
+                    if (parsed_code != generated.code) {
+                        throw Instruction::ParseError("code_from_string not match");
+                    }
+
+                    if (im->flags & IMF_CSR || im_source != nullptr) {
+                        // alias inst || csr inst
+                    } else {
+                        // base inst
+                        // check to_str()
+                        QString parsed_string_data = Instruction(generated.code).to_str();
+                        if (parsed_string_data != generated.string_data) {
+                            throw Instruction::ParseError("to_string not match");
+                        }
+                    }
+                } catch (const Instruction::ParseError &e) { 
+                    // QFAIL
+                    throw(e);
+                }
+            }
+        }
+    });
+    return 0;
 }
