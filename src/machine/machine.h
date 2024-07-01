@@ -125,7 +125,7 @@ private:
     Cache *cch_data = nullptr;
     Cache *cch_level2 = nullptr;
     CSR::ControlState *controlst = nullptr;
-    Predictor *predictor = nullptr;
+    BranchPredictor *predictor = nullptr;
     Core *cr = nullptr;
 
     QTimer *run_t = nullptr;

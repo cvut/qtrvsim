@@ -88,6 +88,8 @@
     <addaction name="actionProgram_Cache"/>
     <addaction name="actionData_Cache"/>
     <addaction name="actionL2_Cache"/>
+    <addaction name="actionBranch_Predictor_History_table"/>
+    <addaction name="actionBranch_Predictor_Target_table"/>
     <addaction name="actionPeripherals"/>
     <addaction name="actionTerminal"/>
     <addaction name="actionLcdDisplay"/>
@@ -628,6 +630,16 @@
    </property>
    <property name="toolTip">
     <string>Show line number in the code editor.</string>
+   </property>
+  </action>
+  <action name="actionBranch_Predictor_History_table">
+   <property name="text">
+    <string>Branch Predictor (History table)</string>
+   </property>
+  </action>
+  <action name="actionBranch_Predictor_Target_table">
+   <property name="text">
+    <string>Branch Predictor (Target table)</string>
    </property>
   </action>
  </widget>

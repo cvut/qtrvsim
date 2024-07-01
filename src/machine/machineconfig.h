@@ -3,6 +3,7 @@
 
 #include "common/endian.h"
 #include "config_isa.h"
+#include "predictor_types.h"
 
 #include <QSettings>
 #include <QString>
@@ -159,6 +160,22 @@ public:
     Xlen get_simulated_xlen() const;
     ConfigIsaWord get_isa_word() const;
 
+    // Branch predictor - Setters
+    void set_bp_enabled(bool e);
+    void set_bp_type(PredictorType t);
+    void set_bp_init_state(PredictorState i);
+    void set_bp_btb_bits(uint8_t b);
+    void set_bp_bhr_bits(uint8_t b);
+    void set_bp_bht_addr_bits(uint8_t b);
+    // Branch predictor - Getters
+    bool get_bp_enabled() const;
+    PredictorType get_bp_type() const;
+    PredictorState get_bp_init_state() const;
+    uint8_t get_bp_btb_bits() const;
+    uint8_t get_bp_bhr_bits() const;
+    uint8_t get_bp_bht_addr_bits() const;
+    uint8_t get_bp_bht_bits() const;
+
     CacheConfig *access_cache_program();
     CacheConfig *access_cache_data();
     CacheConfig *access_cache_level2();
@@ -181,6 +198,15 @@ private:
     Endian simulated_endian;
     Xlen simulated_xlen;
     ConfigIsaWord isa_word;
+
+    // Branch predictor
+    bool bp_enabled;
+    PredictorType bp_type;
+    PredictorState bp_init_state;
+    uint8_t bp_btb_bits;
+    uint8_t bp_bhr_bits;
+    uint8_t bp_bht_addr_bits;
+    uint8_t bp_bht_bits; // = bp_bhr_bits + bp_bht_addr_bits
 };
 
 } // namespace machine
