@@ -22,12 +22,14 @@ static InstructionFlags unsupported_inst_flags_to_check(Xlen xlen,
     return InstructionFlags(flags_to_check);
 }
 
-Core::Core(Registers *regs,
-    Predictor *predictor,
+Core::Core(
+    Registers *regs,
+    BranchPredictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
     CSR::ControlState *control_state,
-    Xlen xlen, ConfigIsaWord isa_word)
+    Xlen xlen,
+    ConfigIsaWord isa_word)
     : pc_if(state.pipeline.pc.final)
     , if_id(state.pipeline.fetch.final)
     , id_ex(state.pipeline.decode.final)
@@ -49,6 +51,7 @@ Core::Core(Registers *regs,
 }
 
 void Core::step(bool skip_break) {
+    emit step_started();
     state.cycle_count++;
     do_step(skip_break);
     emit step_done(state);
@@ -84,7 +87,7 @@ FrontendMemory *Core::get_mem_program() const {
     return mem_program;
 }
 
-Predictor *Core::get_predictor() const {
+BranchPredictor *Core::get_predictor() const {
     return predictor;
 }
 
@@ -296,7 +299,7 @@ FetchState Core::fetch(PCInterstage pc, bool skip_break) {
                  .inst = inst,
                  .inst_addr = inst_addr,
                  .next_inst_addr = inst_addr + inst.size(),
-                 .predicted_next_inst_addr = predictor->predict(inst, inst_addr),
+                 .predicted_next_inst_addr = predictor->predict_next_pc_address(inst, inst_addr),
                  .excause = excause,
                  .is_valid = true,
              } };
@@ -495,6 +498,22 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
 
     computed_next_inst_addr = compute_next_inst_addr(dt, branch_bxx_taken);
 
+    // Predictor update
+    if (dt.branch_jal) {
+        // JAL Jump instruction (J-type (alternative to U-type with different immediate bit order))
+        predictor->update(dt.inst, dt.inst_addr, dt.branch_jal_target, BranchResult::TAKEN);
+    } else if (dt.branch_jalr) {
+        // JALR Jump register instruction (I-type)
+        predictor->update(
+            dt.inst, dt.inst_addr, Address(get_xlen_from_reg(dt.alu_val)), BranchResult::TAKEN);
+    } else if (dt.branch_bxx) {
+        // BXX Conditional branch instruction (B-type (alternative to S-type with different
+        // immediate bit order))
+        predictor->update(
+            dt.inst, dt.inst_addr, dt.branch_jal_target,
+            branch_bxx_taken ? BranchResult::TAKEN : BranchResult::NOT_TAKEN);
+    }
+
     bool csr_written = false;
     if (control_state != nullptr && dt.is_valid && dt.excause == EXCAUSE_NONE) {
         control_state->increment_internal(CSR::Id::MINSTRET, 1);
@@ -575,12 +594,14 @@ uint64_t Core::get_xlen_from_reg(RegisterValue reg) const {
     }
 }
 
-CoreSingle::CoreSingle(Registers *regs,
-    Predictor *predictor,
+CoreSingle::CoreSingle(
+    Registers *regs,
+    BranchPredictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
     CSR::ControlState *control_state,
-    Xlen xlen, ConfigIsaWord isa_word)
+    Xlen xlen,
+    ConfigIsaWord isa_word)
     : Core(regs, predictor, mem_program, mem_data, control_state, xlen, isa_word) {
     reset();
 }
@@ -612,7 +633,7 @@ void CoreSingle::do_reset() {
 
 CorePipelined::CorePipelined(
     Registers *regs,
-    Predictor *predictor,
+    BranchPredictor *predictor,
     FrontendMemory *mem_program,
     FrontendMemory *mem_data,
     CSR::ControlState *control_state,

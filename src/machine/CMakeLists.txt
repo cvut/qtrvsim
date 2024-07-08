@@ -23,6 +23,7 @@ set(machine_SOURCES
 		memory/frontend_memory.cpp
 		memory/memory_bus.cpp
 		programloader.cpp
+		predictor.cpp
 		registers.cpp
 		simulator_exception.cpp
 		symboltable.cpp
@@ -57,6 +58,7 @@ set(machine_HEADERS
 		memory/memory_bus.h
 		memory/memory_utils.h
 		programloader.h
+		predictor_types.h
 		predictor.h
 		pipeline.h
 		registers.h
@@ -207,6 +209,9 @@ if(NOT ${WASM})
 			memory/memory_bus.h
 			registers.cpp
 			registers.h
+			predictor.cpp
+			predictor.h
+			predictor_types.h
 			simulator_exception.cpp
 			simulator_exception.h
 			machineconfig.cpp

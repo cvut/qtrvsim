@@ -114,6 +114,10 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     cache_data->hide();
     cache_level2.reset(new CacheDock(this, "L2"));
     cache_level2->hide();
+    bp_btb.reset(new DockPredictorBTB(this));
+    bp_btb->hide();
+    bp_bht.reset(new DockPredictorBHT(this));
+    bp_bht->hide();
     peripherals.reset(new PeripheralsDock(this, settings));
     peripherals->hide();
     terminal.reset(new TerminalDock(this, settings));
@@ -154,6 +158,15 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(ui->actionProgram_Cache, &QAction::triggered, this, &MainWindow::show_cache_program);
     connect(ui->actionData_Cache, &QAction::triggered, this, &MainWindow::show_cache_data);
     connect(ui->actionL2_Cache, &QAction::triggered, this, &MainWindow::show_cache_level2);
+
+    // Branch predictor
+    connect(
+        ui->actionBranch_Predictor_History_table, &QAction::triggered, this,
+        &MainWindow::show_bp_bht);
+    connect(
+        ui->actionBranch_Predictor_Target_table, &QAction::triggered, this,
+        &MainWindow::show_bp_btb);
+
     connect(ui->actionPeripherals, &QAction::triggered, this, &MainWindow::show_peripherals);
     connect(ui->actionTerminal, &QAction::triggered, this, &MainWindow::show_terminal);
     connect(ui->actionLcdDisplay, &QAction::triggered, this, &MainWindow::show_lcd_display);
@@ -315,6 +328,11 @@ void MainWindow::create_core(
     cache_data->setup(machine->cache_data());
     bool cache_after_cache = config.cache_data().enabled() || config.cache_program().enabled();
     cache_level2->setup(machine->cache_level2(), cache_after_cache);
+
+    // Branch predictor
+    bp_btb->setup(machine->core()->get_predictor(), machine->core());
+    bp_bht->setup(machine->core()->get_predictor(), machine->core());
+
     terminal->setup(machine->serial_port());
     peripherals->setup(machine->peripheral_spi_led());
     lcd_display->setup(machine->peripheral_lcd_display());
@@ -420,6 +438,8 @@ SHOW_HANDLER(memory, Qt::RightDockWidgetArea, true )
 SHOW_HANDLER(cache_program, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(cache_data, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(cache_level2, Qt::RightDockWidgetArea, false)
+SHOW_HANDLER(bp_btb, Qt::RightDockWidgetArea, false)
+SHOW_HANDLER(bp_bht, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(peripherals, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(terminal, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(lcd_display, Qt::RightDockWidgetArea, false)
@@ -434,6 +454,8 @@ void MainWindow::reset_windows() {
     reset_state_cache_program();
     reset_state_cache_data();
     reset_state_cache_level2();
+    reset_state_bp_btb();
+    reset_state_bp_bht();
     reset_state_peripherals();
     reset_state_terminal();
     reset_state_lcd_display();
