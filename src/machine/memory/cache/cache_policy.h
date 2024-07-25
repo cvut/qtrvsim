@@ -129,6 +129,32 @@ private:
     const size_t associativityCLog2;
 };
 
+/**
+ * Not Most Recently Used
+ *
+ * Select Randomly from Not Most
+ * Recently Used Blocks
+ */
+class CachePolicyNMRU final : public CachePolicy {
+public:
+    /**
+     * @param associativity     degree of assiciaivity
+     * @param set_count         number of blocks / rows in a way (or sets in
+     * cache)
+     */
+    CachePolicyNMRU(size_t associativity, size_t set_count);
+
+    [[nodiscard]] size_t select_way_to_evict(size_t row) const final;
+
+    void update_stats(size_t way, size_t row, bool is_valid) final;
+
+private:
+    /**
+     * Pointer to Most Recently Used Block
+     */
+    std::vector<uint32_t> mru_ptr;
+    const size_t associativity;
+};
 } // namespace machine
 
 #endif // CACHE_POLICY_H

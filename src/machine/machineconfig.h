@@ -46,7 +46,8 @@ public:
         RP_RAND, // Random
         RP_LRU,  // Least recently used
         RP_LFU,  // Least frequently used
-        RP_PLRU  // Pseudo Least recently used
+        RP_PLRU, // Pseudo Least recently used
+        RP_NMRU  // Not most recently used
     };
 
     enum WritePolicy {
