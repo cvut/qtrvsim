@@ -41,20 +41,20 @@ public: // Constructors & Destructor
 
 private: // Internal functions
     uint8_t init_number_of_bits(const uint8_t b) const;
+    QTableWidgetItem* get_btb_cell_item(uint8_t row_index, uint8_t col_index);
     void init_table();
     void set_table_color(QColor color);
     void set_row_color(uint16_t row_index, QColor color);
+    
 
 public: // General functions
     void setup(const machine::BranchPredictor *branch_predictor, const machine::Core *core);
 
 public slots:
-    void update_row(
-        uint16_t index,
-        machine::Address instruction_address,
-        machine::Address target_address);
+    void update_btb_row(uint16_t row_index, machine::BranchTargetBufferEntry btb_entry);
     void highligh_row_after_prediction(uint16_t index);
     void reset_colors();
+    void clear();
 
 private: // Internal variables
     uint8_t number_of_bits;

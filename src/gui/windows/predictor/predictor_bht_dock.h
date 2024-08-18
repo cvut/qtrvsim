@@ -25,7 +25,7 @@
 #include <QtMath>
 
 #define DOCK_BHT_COL_INDEX 0
-#define DOCK_BHT_COL_HISTORY 1
+#define DOCK_BHT_COL_STATE 1
 #define DOCK_BHT_COL_CORRECT 2
 #define DOCK_BHT_COL_INCORRECT 3
 #define DOCK_BHT_COL_ACCURACY 4
@@ -46,6 +46,7 @@ public: // Constructors & Destructor
     DockPredictorBHT(QWidget *parent);
 
 private: // Internal functions
+    QTableWidgetItem* get_bht_cell_item(uint8_t row_index, uint8_t col_index);
     void init_table(machine::PredictorState initial_state = machine::PredictorState::UNDEFINED);
     void set_table_color(QColor color);
     void set_row_color(uint16_t row_index, QColor color);
@@ -57,18 +58,20 @@ public: // General functions
 
 public slots:
     void update_bhr(uint8_t number_of_bhr_bits, uint16_t register_value);
-    void update_new_prediction(
+    void show_new_prediction(
         uint16_t index,
         machine::PredictionInput input,
         machine::BranchResult result);
-    void update_new_update(uint16_t index, machine::PredictionFeedback feedback);
+    void show_new_update(uint16_t index, machine::PredictionFeedback feedback);
     void update_predictor_stats(machine::PredictionStatistics stats);
-    void update_bht_row(uint16_t index, machine::BranchHistoryTableEntry entry);
+    void update_bht_row(uint16_t row_index, machine::BranchHistoryTableEntry bht_entry);
     void reset_colors();
+    void clear();
 
 private: // Internal variables
     uint8_t number_of_bhr_bits;
     uint8_t number_of_bht_bits;
+    machine::PredictorState initial_state;
 
     QT_OWNED QGroupBox *content;
 
