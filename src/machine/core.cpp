@@ -221,6 +221,7 @@ enum ExceptionCause Core::memory_special(
     case AC_CACHE_OP:
         mem_data->sync();
         mem_program->sync();
+        predictor->clear();
         break;
     case AC_LR32:
         if (!memread) { break; }

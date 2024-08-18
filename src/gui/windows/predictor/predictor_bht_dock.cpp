@@ -132,7 +132,7 @@ DockPredictorBHT::DockPredictorBHT(QWidget *parent) : Super(parent) {
     label_stats_wrong_text->setText("Wrong predictions:");
     label_stats_wrong_value->setText("0");
     label_stats_accuracy_text->setText("Accuracy:");
-    label_stats_accuracy_value->setText("0 %");
+    label_stats_accuracy_value->setText("100 %");
 
     // Prediction
     label_event_predict_header->setText("Last prediction");
@@ -178,53 +178,49 @@ DockPredictorBHT::DockPredictorBHT(QWidget *parent) : Super(parent) {
     // BHT
     bht->setRowCount(0);
     bht->setColumnCount(5); // Index, History, Correct, Incorrect, Accuracy
-    bht->setHorizontalHeaderLabels({ "Index", "History", "Correct", "Incorrect", "Accuracy" });
+    bht->setHorizontalHeaderLabels({ "Index", "State", "Correct", "Incorrect", "Accuracy" });
     bht->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     bht->resizeRowsToContents();
     bht->verticalHeader()->hide();
 }
 
+// Get BHT cell item, or create new one if needed
+QTableWidgetItem* DockPredictorBHT::get_bht_cell_item(uint8_t row_index, uint8_t col_index) {
+    QTableWidgetItem *item { bht->item(row_index, col_index) };
+    if (item == nullptr) {
+        item = new QTableWidgetItem();
+        bht->setItem(row_index, col_index, item);
+        item->setTextAlignment(Qt::AlignCenter);
+        item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    }
+    return item;
+}
+
 void DockPredictorBHT::init_table(machine::PredictorState initial_state) {
     for (uint16_t row_index = 0; row_index < bht->rowCount(); row_index++) {
-        for (uint16_t column_index = 0; column_index < bht->columnCount(); column_index++) {
-            // Get cell item, or create new one if needed
-            QTableWidgetItem *item { bht->item(row_index, column_index) };
-            if (item == nullptr) {
-                item = new QTableWidgetItem();
-                bht->setItem(row_index, column_index, item);
-            }
+        QTableWidgetItem *item;
 
-            // Init cell
-            item->setTextAlignment(Qt::AlignCenter);
-            item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-            if (column_index == DOCK_BHT_COL_INDEX) {
-                item->setData(Qt::DisplayRole, QString::number(row_index));
-            } else if (column_index == DOCK_BHT_COL_HISTORY) {
-                item->setData(
-                    Qt::DisplayRole,
-                    machine::predictor_state_to_string(initial_state, true).toString());
-            } else if (column_index == DOCK_BHT_COL_CORRECT) {
-                item->setData(Qt::DisplayRole, QString::number(0));
-            } else if (column_index == DOCK_BHT_COL_INCORRECT) {
-                item->setData(Qt::DisplayRole, QString::number(0));
-            } else if (column_index == DOCK_BHT_COL_ACCURACY) {
-                item->setData(Qt::DisplayRole, QString("0 %"));
-            }
-        }
+        item = get_bht_cell_item(row_index, DOCK_BHT_COL_INDEX);
+        item->setData(Qt::DisplayRole, QString::number(row_index));
+
+        item = get_bht_cell_item(row_index, DOCK_BHT_COL_STATE);
+        item->setData(Qt::DisplayRole, machine::predictor_state_to_string(initial_state, true).toString());
+
+        item = get_bht_cell_item(row_index, DOCK_BHT_COL_CORRECT);
+        item->setData(Qt::DisplayRole, QString::number(0));
+
+        item = get_bht_cell_item(row_index, DOCK_BHT_COL_INCORRECT);
+        item->setData(Qt::DisplayRole, QString::number(0));
+
+        item = get_bht_cell_item(row_index, DOCK_BHT_COL_ACCURACY);
+        item->setData(Qt::DisplayRole, QString("100 %"));
     }
 }
 
 void DockPredictorBHT::set_table_color(QColor color) {
     for (uint16_t row_index = 0; row_index < bht->rowCount(); row_index++) {
         for (uint16_t column_index = 0; column_index < bht->columnCount(); column_index++) {
-            // Get cell item, or create new one if needed
-            QTableWidgetItem *item { bht->item(row_index, column_index) };
-            if (item == nullptr) {
-                item = new QTableWidgetItem();
-                bht->setItem(row_index, column_index, item);
-            }
-
-            // Set color
+            QTableWidgetItem *item { get_bht_cell_item(row_index, column_index) };
             item->setBackground(QBrush(color));
         }
     }
@@ -232,14 +228,7 @@ void DockPredictorBHT::set_table_color(QColor color) {
 
 void DockPredictorBHT::set_row_color(uint16_t row_index, QColor color) {
     for (uint16_t column_index = 0; column_index < bht->columnCount(); column_index++) {
-        // Get cell item, or create new one if needed
-        QTableWidgetItem *item { bht->item(row_index, column_index) };
-        if (item == nullptr) {
-            item = new QTableWidgetItem();
-            bht->setItem(row_index, column_index, item);
-        }
-
-        // Set color
+        QTableWidgetItem *item { get_bht_cell_item(row_index, column_index) };
         item->setBackground(QBrush(color));
     }
 }
@@ -262,24 +251,30 @@ void DockPredictorBHT::setup(
     const machine::BranchPredictor *branch_predictor,
     const machine::Core *core) {
     connect(
-        branch_predictor, &machine::BranchPredictor::update_bhr_done, this,
-        &DockPredictorBHT::update_bhr);
+        branch_predictor, &machine::BranchPredictor::bhr_updated,
+        this, &DockPredictorBHT::update_bhr);
     connect(
-        branch_predictor, &machine::BranchPredictor::prediction_done, this,
-        &DockPredictorBHT::update_new_prediction);
+        branch_predictor, &machine::BranchPredictor::prediction_done,
+        this, &DockPredictorBHT::show_new_prediction);
     connect(
-        branch_predictor, &machine::BranchPredictor::update_predictor_done, this,
-        &DockPredictorBHT::update_new_update);
+        branch_predictor, &machine::BranchPredictor::update_done,
+        this, &DockPredictorBHT::show_new_update);
     connect(
-        branch_predictor, &machine::BranchPredictor::update_predictor_stats_done, this,
-        &DockPredictorBHT::update_predictor_stats);
+        branch_predictor, &machine::BranchPredictor::predictor_stats_updated,
+        this, &DockPredictorBHT::update_predictor_stats);
     connect(
-        branch_predictor, &machine::BranchPredictor::update_predictor_bht_row_done, this,
-        &DockPredictorBHT::update_bht_row);
-    connect(core, &machine::Core::step_started, this, &DockPredictorBHT::reset_colors);
+        branch_predictor, &machine::BranchPredictor::predictor_bht_row_updated,
+        this, &DockPredictorBHT::update_bht_row);
+    connect(
+        branch_predictor, &machine::BranchPredictor::cleared,
+        this, &DockPredictorBHT::clear);
+    connect(
+        core, &machine::Core::step_started,
+        this, &DockPredictorBHT::reset_colors);
 
     number_of_bhr_bits = branch_predictor->get_number_of_bhr_bits();
     number_of_bht_bits = branch_predictor->get_number_of_bht_bits();
+    initial_state = branch_predictor->get_initial_state();
     const machine::PredictorType predictor_type { branch_predictor->get_predictor_type() };
     const bool is_predictor_dynamic { predictor_type == machine::PredictorType::SMITH_1_BIT
                                       || predictor_type == machine::PredictorType::SMITH_2_BIT
@@ -301,7 +296,7 @@ void DockPredictorBHT::setup(
         bht->setDisabled(true);
         bht->setRowCount(0);
     }
-    init_table(branch_predictor->get_initial_state());
+    init_table(initial_state);
     bht->resizeRowsToContents();
     set_table_color(Q_COLOR_DEFAULT);
 
@@ -315,7 +310,7 @@ void DockPredictorBHT::setup(
     // Init stats
     label_stats_correct_value->setText("0");
     label_stats_wrong_value->setText("0");
-    label_stats_accuracy_value->setText("0 %");
+    label_stats_accuracy_value->setText("100 %");
 
     // Init last prediction
     value_event_predict_instruction->setText("");
@@ -357,7 +352,7 @@ void DockPredictorBHT::update_bhr(uint8_t number_of_bhr_bits, uint16_t register_
     }
 }
 
-void DockPredictorBHT::update_new_prediction(
+void DockPredictorBHT::show_new_prediction(
     uint16_t index,
     machine::PredictionInput input,
     machine::BranchResult result) {
@@ -370,7 +365,7 @@ void DockPredictorBHT::update_new_prediction(
     set_predict_widget_color(STYLESHEET_COLOR_PREDICT);
 }
 
-void DockPredictorBHT::update_new_update(uint16_t index, machine::PredictionFeedback feedback) {
+void DockPredictorBHT::show_new_update(uint16_t index, machine::PredictionFeedback feedback) {
     value_event_update_instruction->setText(feedback.instruction.to_str());
     value_event_update_address->setText(addr_to_hex_str(feedback.instruction_address));
     value_event_update_index->setText(QString::number(index));
@@ -387,39 +382,63 @@ void DockPredictorBHT::update_predictor_stats(machine::PredictionStatistics stat
     label_stats_accuracy_value->setText(QString::number(stats.accuracy) + " %");
 }
 
-void DockPredictorBHT::update_bht_row(uint16_t index, machine::BranchHistoryTableEntry entry) {
-    if (index >= bht->rowCount()) {
-        WARN("BHT dock update received invalid row index: %u", index);
+void DockPredictorBHT::update_bht_row(uint16_t row_index, machine::BranchHistoryTableEntry bht_entry) {
+    if (row_index >= bht->rowCount()) {
+        WARN("BHT dock update received invalid row index: %u", row_index);
         return;
     }
 
     for (uint16_t column_index = 0; column_index < bht->columnCount(); column_index++) {
-        // Get cell item, or create new one if needed
-        QTableWidgetItem *item { bht->item(index, column_index) };
-        if (item == nullptr) {
-            item = new QTableWidgetItem();
-            bht->setItem(index, column_index, item);
-        }
+        QTableWidgetItem *item;
 
-        // Init cell
-        item->setTextAlignment(Qt::AlignCenter);
-        if (column_index == DOCK_BHT_COL_HISTORY) {
-            item->setData(
-                Qt::DisplayRole, machine::predictor_state_to_string(entry.state, true).toString());
-        } else if (column_index == DOCK_BHT_COL_CORRECT) {
-            item->setData(
-                Qt::DisplayRole, QString::number(entry.stats.number_of_correct_predictions));
-        } else if (column_index == DOCK_BHT_COL_INCORRECT) {
-            item->setData(
-                Qt::DisplayRole, QString::number(entry.stats.number_of_wrong_predictions));
-        } else if (column_index == DOCK_BHT_COL_ACCURACY) {
-            item->setData(Qt::DisplayRole, QString::number(entry.stats.accuracy) + " %");
-        }
+        item = get_bht_cell_item(row_index, DOCK_BHT_COL_STATE);
+        item->setData(Qt::DisplayRole, machine::predictor_state_to_string(bht_entry.state, true).toString());
+
+        item = get_bht_cell_item(row_index, DOCK_BHT_COL_CORRECT);
+        item->setData(Qt::DisplayRole, QString::number(bht_entry.stats.number_of_correct_predictions));
+
+        item = get_bht_cell_item(row_index, DOCK_BHT_COL_INCORRECT);
+        item->setData(Qt::DisplayRole, QString::number(bht_entry.stats.number_of_wrong_predictions));
+
+        item = get_bht_cell_item(row_index, DOCK_BHT_COL_ACCURACY);
+        item->setData(Qt::DisplayRole, QString::number(bht_entry.stats.accuracy) + " %");
     }
-};
+}
 
 void DockPredictorBHT::reset_colors() {
     set_table_color(Q_COLOR_DEFAULT);
     set_predict_widget_color(STYLESHEET_COLOR_DEFAULT);
     set_update_widget_color(STYLESHEET_COLOR_DEFAULT);
+}
+
+void DockPredictorBHT::clear() {
+    // Clear BHT and colors
+    reset_colors();
+    init_table(initial_state);
+
+    // Clear stats
+    label_stats_correct_value->setText("0");
+    label_stats_wrong_value->setText("0");
+    label_stats_accuracy_value->setText("100 %");
+    
+    // Clear BHR
+    if (number_of_bhr_bits > 0) {
+        QString bhr_initial_value;
+        bhr_initial_value.fill('0', number_of_bhr_bits);
+        value_bhr->setText("0b" + bhr_initial_value);
+    } else {
+        value_bhr->setText("");
+    }
+
+    // Clear prediction display
+    value_event_predict_instruction->setText("");
+    value_event_predict_address->setText("");
+    value_event_predict_index->setText("");
+    value_event_predict_result->setText("");
+
+    // Clear update display
+    value_event_update_instruction->setText("");
+    value_event_update_address->setText("");
+    value_event_update_index->setText("");
+    value_event_update_result->setText("");
 }

@@ -92,7 +92,12 @@ void BranchHistoryRegister::update(const BranchResult result) {
     // Set all bits outside of the scope of the register to zero
     value = value & register_mask;
 
-    emit update_done(number_of_bits, value);
+    emit bhr_updated(number_of_bits, value);
+}
+
+void BranchHistoryRegister::clear() {
+    value = 0x0;
+    emit bhr_updated(number_of_bits, value);
 }
 
 /////////////////////////////
@@ -151,7 +156,7 @@ Address BranchTargetBuffer::get_target_address(const Address instruction_address
     }
 
     // Return target address at index
-    emit requested_target_address(index);
+    emit btb_target_address_requested(index);
     return btb.at(index).target_address;
 }
 
@@ -171,7 +176,13 @@ void BranchTargetBuffer::update(const Address instruction_address, const Address
         = { .instruction_address = instruction_address, .target_address = target_address };
 
     // Send signal with the data
-    emit update_row_done(index, instruction_address, target_address);
+    emit btb_row_updated(index, btb.at(index));
+}
+
+void BranchTargetBuffer::clear() {
+    for (uint16_t i = 0; i < btb.capacity(); i++) {
+        btb.at(i) = BranchTargetBufferEntry();
+    }
 }
 
 /////////////////////
@@ -196,6 +207,12 @@ void Predictor::update_stats(PredictionFeedback feedback) {
     } else {
         stats.accuracy = 0;
     }
+    emit stats_updated(stats);
+}
+
+void Predictor::clear_stats() {
+    stats = PredictionStatistics();
+    emit stats_updated(stats);
 }
 
 BranchResult Predictor::predict(PredictionInput input) {
@@ -207,7 +224,10 @@ BranchResult Predictor::predict(PredictionInput input) {
 
 void Predictor::update(PredictionFeedback feedback) {
     update_stats(feedback);
-    emit update_stats_done(stats);
+}
+
+void Predictor::clear() {
+    clear_stats();
 }
 
 // Always Not Taken
@@ -259,7 +279,6 @@ void PredictorBTFNT::update(PredictionFeedback feedback) {
                                               .instruction_address = feedback.instruction_address,
                                               .target_address = feedback.target_address });
     update_stats(feedback);
-    emit update_stats_done(stats);
 }
 
 // Smith Generic
@@ -270,12 +289,10 @@ PredictorSmith::PredictorSmith(
     uint8_t number_of_bht_bits,
     PredictorState initial_state)
     : number_of_bht_addr_bits(init_number_of_bht_addr_bits(number_of_bht_addr_bits))
-    , number_of_bht_bits(init_number_of_bht_bits(number_of_bht_bits)) {
+    , number_of_bht_bits(init_number_of_bht_bits(number_of_bht_bits))
+    , initial_state(initial_state) {
     bht.resize(qPow(2, number_of_bht_bits));
-    for (uint16_t i = 0; i < bht.capacity(); i++) {
-        bht.at(i).state = initial_state;
-        bht.at(i).stats.last_prediction = convert_state_to_prediction(initial_state);
-    }
+    clear_bht();
     stats.last_prediction = convert_state_to_prediction(initial_state);
 }
 
@@ -343,6 +360,8 @@ void PredictorSmith::update_stats(PredictionFeedback feedback) {
     }
 
     bht.at(index).stats = row_stats;
+
+    emit stats_updated(stats);
 }
 
 BranchResult PredictorSmith::convert_state_to_prediction(PredictorState state) const {
@@ -361,6 +380,13 @@ BranchResult PredictorSmith::convert_state_to_prediction(PredictorState state) c
     } else {
         WARN("Smith predictor was provided invalid state");
         return BranchResult::NOT_TAKEN;
+    }
+}
+
+void PredictorSmith::clear_bht() {
+    for (uint16_t i = 0; i < bht.capacity(); i++) {
+        bht.at(i).state = initial_state;
+        bht.at(i).stats = PredictionStatistics();
     }
 }
 
@@ -391,8 +417,12 @@ void PredictorSmith::update(PredictionFeedback feedback) {
     update_stats(feedback);
 
     emit update_done(index, feedback);
-    emit update_stats_done(stats);
-    emit update_bht_row_done(index, bht.at(index));
+    emit bht_row_updated(index, bht.at(index));
+}
+
+void PredictorSmith::clear() {
+    clear_stats();
+    clear_bht();
 }
 
 // Smith 1 Bit
@@ -617,20 +647,39 @@ BranchPredictor::BranchPredictor(
     btb = new BranchTargetBuffer(number_of_btb_bits);
 
     if (enabled) {
+        // Pass through predictor signals
         connect(
-            btb, &BranchTargetBuffer::requested_target_address, this,
-            &BranchPredictor::requested_bht_target_address);
+            predictor, &Predictor::prediction_done,
+            this, &BranchPredictor::prediction_done
+        );
         connect(
-            btb, &BranchTargetBuffer::update_row_done, this, &BranchPredictor::update_btb_row_done);
-        connect(bhr, &BranchHistoryRegister::update_done, this, &BranchPredictor::update_bhr_done);
-        connect(predictor, &Predictor::prediction_done, this, &BranchPredictor::prediction_done);
-        connect(predictor, &Predictor::update_done, this, &BranchPredictor::update_predictor_done);
+            predictor, &Predictor::update_done,
+            this, &BranchPredictor::update_done
+        );
         connect(
-            predictor, &Predictor::update_stats_done, this,
-            &BranchPredictor::update_predictor_stats_done);
+            predictor, &Predictor::stats_updated,
+            this, &BranchPredictor::predictor_stats_updated
+        );
         connect(
-            predictor, &Predictor::update_bht_row_done, this,
-            &BranchPredictor::update_predictor_bht_row_done);
+            predictor, &Predictor::bht_row_updated,
+            this, &BranchPredictor::predictor_bht_row_updated
+        );
+
+        // Pass through BHR signals
+        connect(
+            bhr, &BranchHistoryRegister::bhr_updated,
+            this, &BranchPredictor::bhr_updated
+        );
+
+        // Pass through BTB signals
+        connect(
+            btb, &BranchTargetBuffer::btb_row_updated,
+            this, &BranchPredictor::btb_row_updated
+        );
+        connect(
+            btb, &BranchTargetBuffer::btb_target_address_requested,
+            this, &BranchPredictor::btb_target_address_requested
+        );
     }
 }
 
@@ -782,4 +831,11 @@ void BranchPredictor::update(
 
     // Update global branch history
     bhr->update(result);
+}
+
+void BranchPredictor::clear() {
+    bhr->clear();
+    btb->clear();
+    predictor->clear();
+    emit cleared();
 }

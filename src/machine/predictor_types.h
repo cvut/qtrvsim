@@ -10,7 +10,18 @@ Q_NAMESPACE
 #define BP_MAX_BHT_ADDR_BITS 8
 #define BP_MAX_BHT_BITS (BP_MAX_BHT_ADDR_BITS + BP_MAX_BHT_ADDR_BITS)
 
-enum class BranchResult { NOT_TAKEN, TAKEN, UNDEFINED };
+enum class BranchKind {
+    UNCONDITIONAL, // JAL, JALR
+    CONDITIONAL,   // BXX
+    UNDEFINED
+};
+Q_ENUM_NS(machine::BranchKind)
+
+enum class BranchResult { 
+    NOT_TAKEN,
+    TAKEN,
+    UNDEFINED
+};
 Q_ENUM_NS(machine::BranchResult)
 
 enum class PredictorType {

@@ -56,7 +56,6 @@ private slots:
 
     // Branch Predictor
     void bp_type_change();
-    void bp_toggle_history_table_ui(bool enabled);
 
 private:
     Box<Ui::NewDialog> ui {};
