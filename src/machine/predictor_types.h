@@ -10,12 +10,12 @@ Q_NAMESPACE
 #define BP_MAX_BHT_ADDR_BITS 8
 #define BP_MAX_BHT_BITS (BP_MAX_BHT_ADDR_BITS + BP_MAX_BHT_ADDR_BITS)
 
-enum class BranchKind {
-    UNCONDITIONAL, // JAL, JALR
-    CONDITIONAL,   // BXX
+enum class BranchType {
+    JUMP, // JAL, JALR - Unconditional
+    BRANCH,   // BXX - Conditional
     UNDEFINED
 };
-Q_ENUM_NS(machine::BranchKind)
+Q_ENUM_NS(machine::BranchType)
 
 enum class BranchResult { 
     NOT_TAKEN,

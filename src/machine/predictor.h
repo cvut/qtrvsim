@@ -17,6 +17,8 @@ QStringView predictor_state_to_string(const PredictorState state, const bool abb
 
 QStringView predictor_type_to_string(const PredictorType type);
 
+QStringView branch_type_to_string(const BranchType type);
+
 QString addr_to_hex_str(const machine::Address address);
 
 /////////////////////////////////
@@ -56,6 +58,7 @@ private: // Internal variables
 struct BranchTargetBufferEntry {
     Address instruction_address { Address::null() };
     Address target_address { Address::null() };
+    BranchType branch_type { BranchType::UNDEFINED };
 };
 
 class BranchTargetBuffer final : public QObject {
@@ -72,7 +75,7 @@ public: // General functions
     uint8_t get_number_of_bits() const;
     Address get_instruction_address(const Address instruction_address) const;
     Address get_target_address(const Address instruction_address) const;
-    void update(const Address instruction_address, const Address target_address);
+    void update(const Address instruction_address, const Address target_address, const BranchType branch_type);
     void clear();
 
 signals:
@@ -302,6 +305,7 @@ public: // General functions
         const Instruction instruction,
         const Address instruction_address,
         const Address target_address,
+        const BranchType branch_type,
         const BranchResult result);
     void clear();
 

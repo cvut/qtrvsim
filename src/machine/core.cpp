@@ -502,16 +502,16 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
     // Predictor update
     if (dt.branch_jal) {
         // JAL Jump instruction (J-type (alternative to U-type with different immediate bit order))
-        predictor->update(dt.inst, dt.inst_addr, dt.branch_jal_target, BranchResult::TAKEN);
+        predictor->update(dt.inst, dt.inst_addr, dt.branch_jal_target, BranchType::JUMP, BranchResult::TAKEN);
     } else if (dt.branch_jalr) {
         // JALR Jump register instruction (I-type)
         predictor->update(
-            dt.inst, dt.inst_addr, Address(get_xlen_from_reg(dt.alu_val)), BranchResult::TAKEN);
+            dt.inst, dt.inst_addr, Address(get_xlen_from_reg(dt.alu_val)), BranchType::JUMP, BranchResult::TAKEN);
     } else if (dt.branch_bxx) {
         // BXX Conditional branch instruction (B-type (alternative to S-type with different
         // immediate bit order))
         predictor->update(
-            dt.inst, dt.inst_addr, dt.branch_jal_target,
+            dt.inst, dt.inst_addr, dt.branch_jal_target, BranchType::BRANCH,
             branch_bxx_taken ? BranchResult::TAKEN : BranchResult::NOT_TAKEN);
     }
 

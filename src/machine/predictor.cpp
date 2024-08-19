@@ -36,6 +36,14 @@ QStringView machine::predictor_type_to_string(const PredictorType type) {
     }
 }
 
+QStringView machine::branch_type_to_string(const BranchType type) {
+    switch (type) {
+    case BranchType::JUMP: return u"JUMP";
+    case BranchType::BRANCH: return u"BRANCH";
+    default: return u"";
+    }
+}
+
 QString machine::addr_to_hex_str(const machine::Address address) {
     QString hex_addr, zero_padding;
     hex_addr = QString::number(address.get_raw(), 16);
@@ -161,7 +169,7 @@ Address BranchTargetBuffer::get_target_address(const Address instruction_address
 }
 
 // Update BTB entry with given values, at index computed from the instruction address
-void BranchTargetBuffer::update(const Address instruction_address, const Address target_address) {
+void BranchTargetBuffer::update(const Address instruction_address, const Address target_address, const BranchType branch_type) {
     // Get index from instruction address
     const uint16_t index { calculate_index(instruction_address) };
 
@@ -173,7 +181,9 @@ void BranchTargetBuffer::update(const Address instruction_address, const Address
 
     // Write new entry to the table
     btb.at(index)
-        = { .instruction_address = instruction_address, .target_address = target_address };
+        = { .instruction_address = instruction_address, 
+            .target_address = target_address,
+            .branch_type = branch_type };
 
     // Send signal with the data
     emit btb_row_updated(index, btb.at(index));
@@ -815,19 +825,24 @@ void BranchPredictor::update(
     const Instruction instruction,
     const Address instruction_address,
     const Address target_address,
+    const BranchType branch_type,
     const BranchResult result) {
     // Check if predictor is enabled
     if (!enabled) { return; }
 
-    // Update Branch Target Table
-    if (result == BranchResult::TAKEN) { btb->update(instruction_address, target_address); }
+    // Update Branch Target Buffer
+    if (result == BranchResult::TAKEN) { 
+        btb->update(instruction_address, target_address, branch_type);
+    }
 
-    // Update predictor
-    const PredictionFeedback prediction_feedback { .instruction = instruction,
-                                                   .bhr_value = bhr->get_value(),
-                                                   .instruction_address = instruction_address,
-                                                   .result = result };
-    predictor->update(prediction_feedback);
+    // Update predictor only for conditional branches
+    if (branch_type == BranchType::BRANCH) {
+        const PredictionFeedback prediction_feedback { .instruction = instruction,
+                                                    .bhr_value = bhr->get_value(),
+                                                    .instruction_address = instruction_address,
+                                                    .result = result };
+        predictor->update(prediction_feedback);
+    }
 
     // Update global branch history
     bhr->update(result);
