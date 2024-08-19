@@ -8,8 +8,8 @@ DockPredictorBTB::DockPredictorBTB(QWidget *parent) : Super(parent) {
 
     btb = new QTableWidget();
     btb->setRowCount(0);
-    btb->setColumnCount(3); // Index, Instruction Address, Target Address
-    btb->setHorizontalHeaderLabels({ "Index", "Instruction Address", "Target Address" });
+    btb->setColumnCount(4); // Index, Instruction Address, Target Address, Type
+    btb->setHorizontalHeaderLabels({ "Index", "Instruction Address", "Target Address", "Type" });
     btb->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     btb->resizeRowsToContents();
     btb->verticalHeader()->hide();
@@ -63,6 +63,9 @@ void DockPredictorBTB::init_table() {
         item->setData(Qt::DisplayRole, QString(""));
 
         item = get_btb_cell_item(row_index, DOCK_BTB_COL_TARGET_ADDR);
+        item->setData(Qt::DisplayRole, QString(""));
+
+        item = get_btb_cell_item(row_index, DOCK_BTB_COL_TYPE);
         item->setData(Qt::DisplayRole, QString(""));
     }
 }
@@ -130,6 +133,9 @@ void DockPredictorBTB::update_btb_row(
 
     item = get_btb_cell_item(row_index, DOCK_BTB_COL_TARGET_ADDR);
     item->setData(Qt::DisplayRole, machine::addr_to_hex_str(btb_entry.target_address));
+
+    item = get_btb_cell_item(row_index, DOCK_BTB_COL_TYPE);
+    item->setData(Qt::DisplayRole, machine::branch_type_to_string(btb_entry.branch_type).toString());
 
     set_row_color(row_index, Q_COLOR_UPDATE);
 }
