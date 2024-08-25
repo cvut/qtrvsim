@@ -532,6 +532,11 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
         }
     }
 
+    // Predictor statistics update
+    if (computed_next_inst_addr != dt.predicted_next_inst_addr) {
+        predictor->increment_mispredictions();
+    }
+
     return { MemoryInternalState {
                  .mem_read_val = towrite_val,
                  .mem_write_val = dt.val_rt,
@@ -721,11 +726,7 @@ void CorePipelined::handle_stall(const FetchInterstage &saved_if_id) {
 }
 
 bool CorePipelined::detect_mispredicted_jump() const {
-    bool misprediction = mem_wb.computed_next_inst_addr != mem_wb.predicted_next_inst_addr;
-    if (misprediction) {
-        predictor->increment_mispredictions();
-    }
-    return misprediction;
+    return mem_wb.computed_next_inst_addr != mem_wb.predicted_next_inst_addr;
 }
 
 bool CorePipelined::is_stall_requested() const {

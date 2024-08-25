@@ -91,7 +91,7 @@ DockPredictorInfo::DockPredictorInfo(QWidget *parent) : Super(parent) {
 
     // Stats
     label_stats_total_text->setText("Jump/Branch count:");
-    label_stats_miss_text->setText("Flush count:");
+    label_stats_miss_text->setText("Misprediction count:");
     label_stats_accuracy_text->setText("Total accuracy:");
     clear_stats();
 
@@ -219,6 +219,11 @@ void DockPredictorInfo::setup(
         value_event_predict_index_bht->setEnabled(false);
         label_event_update_index_bht->setEnabled(false);
         value_event_update_index_bht->setEnabled(false);
+        label_bhr->setEnabled(false);
+        value_bhr->setEnabled(false);
+    }
+
+    if (number_of_bhr_bits == 0) {
         label_bhr->setEnabled(false);
         value_bhr->setEnabled(false);
     }
