@@ -24,6 +24,7 @@
 #include "windows/peripherals/peripheralsdock.h"
 #include "windows/predictor/predictor_bht_dock.h"
 #include "windows/predictor/predictor_btb_dock.h"
+#include "windows/predictor/predictor_info_dock.h"
 #include "windows/program/programdock.h"
 #include "windows/registers/registersdock.h"
 #include "windows/terminal/terminaldock.h"
@@ -99,8 +100,10 @@ public slots:
     // Branch predictor
     void show_bp_btb();
     void show_bp_bht();
+    void show_bp_info();
     void reset_state_bp_btb();
     void reset_state_bp_bht();
+    void reset_state_bp_info();
     // Actions - help
     void about_program();
     void about_qt();
@@ -140,6 +143,7 @@ private:
     // Branch predictor
     Box<DockPredictorBTB> bp_btb {};
     Box<DockPredictorBHT> bp_bht {};
+    Box<DockPredictorInfo> bp_info {};
 
     Box<PeripheralsDock> peripherals {};
     Box<TerminalDock> terminal {};

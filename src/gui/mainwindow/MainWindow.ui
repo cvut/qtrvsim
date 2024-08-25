@@ -17,8 +17,7 @@
    <iconset>
     <normaloff>
            :/icons/gui.png</normaloff>
-    :/icons/gui.png
-   </iconset>
+           :/icons/gui.png</iconset>
   </property>
   <property name="dockNestingEnabled">
    <bool>false</bool>
@@ -54,7 +53,7 @@
      <x>0</x>
      <y>0</y>
      <width>900</width>
-     <height>32</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -90,6 +89,7 @@
     <addaction name="actionL2_Cache"/>
     <addaction name="actionBranch_Predictor_History_table"/>
     <addaction name="actionBranch_Predictor_Target_table"/>
+    <addaction name="actionBranch_Predictor_Info"/>
     <addaction name="actionPeripherals"/>
     <addaction name="actionTerminal"/>
     <addaction name="actionLcdDisplay"/>
@@ -640,6 +640,11 @@
   <action name="actionBranch_Predictor_Target_table">
    <property name="text">
     <string>Branch Predictor (Target table)</string>
+   </property>
+  </action>
+  <action name="actionBranch_Predictor_Info">
+   <property name="text">
+    <string>Branch Predictor (Info)</string>
    </property>
   </action>
  </widget>

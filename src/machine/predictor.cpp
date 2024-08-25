@@ -228,7 +228,6 @@ void Predictor::clear_stats() {
 BranchResult Predictor::predict(PredictionInput input) {
     const BranchResult result { make_prediction(input) };
     stats.last_prediction = result;
-    emit prediction_done(0, input, result);
     return result;
 }
 
@@ -412,7 +411,6 @@ BranchResult PredictorSmith::predict(PredictionInput input) {
     stats.last_prediction = result;
     bht.at(index).stats.last_prediction = result;
 
-    emit prediction_done(index, input, result);
     return result;
 }
 
@@ -426,7 +424,6 @@ void PredictorSmith::update(PredictionFeedback feedback) {
     update_bht(feedback);
     update_stats(feedback);
 
-    emit update_done(index, feedback);
     emit bht_row_updated(index, bht.at(index));
 }
 
@@ -659,14 +656,6 @@ BranchPredictor::BranchPredictor(
     if (enabled) {
         // Pass through predictor signals
         connect(
-            predictor, &Predictor::prediction_done,
-            this, &BranchPredictor::prediction_done
-        );
-        connect(
-            predictor, &Predictor::update_done,
-            this, &BranchPredictor::update_done
-        );
-        connect(
             predictor, &Predictor::stats_updated,
             this, &BranchPredictor::predictor_stats_updated
         );
@@ -812,6 +801,7 @@ Address BranchPredictor::predict_next_pc_address(
         .target_address = target_address_from_btb,
     };
     const BranchResult predicted_result = predictor->predict(prediction_input);
+    emit prediction_done(0, 0, prediction_input, predicted_result);
 
     // If the branch was predicted taken
     if (predicted_result == BranchResult::TAKEN) { return target_address_from_btb; }
@@ -836,16 +826,20 @@ void BranchPredictor::update(
     }
 
     // Update predictor only for conditional branches
+    const PredictionFeedback prediction_feedback { 
+        .instruction = instruction,
+        .bhr_value = bhr->get_value(),
+        .instruction_address = instruction_address,
+        .result = result
+    };
     if (branch_type == BranchType::BRANCH) {
-        const PredictionFeedback prediction_feedback { .instruction = instruction,
-                                                    .bhr_value = bhr->get_value(),
-                                                    .instruction_address = instruction_address,
-                                                    .result = result };
         predictor->update(prediction_feedback);
     }
 
     // Update global branch history
     bhr->update(result);
+
+    emit update_done(0, 0, prediction_feedback);
 }
 
 void BranchPredictor::clear() {

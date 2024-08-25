@@ -55,6 +55,7 @@ private slots:
     void reset_at_compile_change(bool);
 
     // Branch Predictor
+    void bp_toggle_widgets();
     void bp_type_change();
 
 private:
