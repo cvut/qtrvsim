@@ -149,7 +149,9 @@ void DockPredictorInfo::set_predict_widget_color(QString color_stylesheet) {
     value_event_predict_instruction->setStyleSheet(color_stylesheet);
     value_event_predict_address->setStyleSheet(color_stylesheet);
     value_event_predict_index_btb->setStyleSheet(color_stylesheet);
-    value_event_predict_index_bht->setStyleSheet(color_stylesheet);
+    if (is_predictor_dynamic) {
+        value_event_predict_index_bht->setStyleSheet(color_stylesheet);
+    }
     value_event_predict_result->setStyleSheet(color_stylesheet);
 }
 
@@ -157,7 +159,9 @@ void DockPredictorInfo::set_update_widget_color(QString color_stylesheet) {
     value_event_update_instruction->setStyleSheet(color_stylesheet);
     value_event_update_address->setStyleSheet(color_stylesheet);
     value_event_update_index_btb->setStyleSheet(color_stylesheet);
-    value_event_update_index_bht->setStyleSheet(color_stylesheet);
+    if (is_predictor_dynamic) {
+        value_event_update_index_bht->setStyleSheet(color_stylesheet);
+    }
     value_event_update_result->setStyleSheet(color_stylesheet);
 }
 
@@ -165,17 +169,19 @@ void DockPredictorInfo::setup(
     const machine::BranchPredictor *branch_predictor,
     const machine::Core *core) {
 
+    clear();
+
     number_of_bhr_bits = branch_predictor->get_number_of_bhr_bits();
     initial_state = branch_predictor->get_initial_state();
     const machine::PredictorType predictor_type { branch_predictor->get_predictor_type() };
-    const bool is_predictor_dynamic { predictor_type == machine::PredictorType::SMITH_1_BIT
-                                      || predictor_type == machine::PredictorType::SMITH_2_BIT
-                                      || predictor_type  == machine::PredictorType::SMITH_2_BIT_HYSTERESIS };
-    const bool is_predictor_enabled { branch_predictor->get_enabled() };
+    is_predictor_dynamic = predictor_type == machine::PredictorType::SMITH_1_BIT
+                            || predictor_type == machine::PredictorType::SMITH_2_BIT
+                            || predictor_type  == machine::PredictorType::SMITH_2_BIT_HYSTERESIS;
+    is_predictor_enabled = branch_predictor->get_enabled();
 
     if (is_predictor_enabled) {
         connect(
-            branch_predictor, &machine::BranchPredictor::predictor_stats_updated,
+            branch_predictor, &machine::BranchPredictor::total_stats_updated,
             this, &DockPredictorInfo::update_stats);
         connect(
             branch_predictor, &machine::BranchPredictor::prediction_done,
@@ -183,17 +189,15 @@ void DockPredictorInfo::setup(
         connect(
             core, &machine::Core::step_started,
             this, &DockPredictorInfo::reset_colors);
+        connect(
+            branch_predictor, &machine::BranchPredictor::update_done,
+            this, &DockPredictorInfo::show_new_update);
 
         if (is_predictor_dynamic) {
-            connect(
-                branch_predictor, &machine::BranchPredictor::update_done,
-                this, &DockPredictorInfo::show_new_update);
+            
             connect(
                 branch_predictor, &machine::BranchPredictor::bhr_updated,
                 this, &DockPredictorInfo::update_bhr);
-            connect(
-                branch_predictor, &machine::BranchPredictor::cleared,
-                this, &DockPredictorInfo::clear_bhr);
         }
     }
 
@@ -204,9 +208,19 @@ void DockPredictorInfo::setup(
     }
 
     if (is_predictor_dynamic) {
-        group_event_update->setDisabled(false);
+        label_event_predict_index_bht->setEnabled(true);
+        value_event_predict_index_bht->setEnabled(true);
+        label_event_update_index_bht->setEnabled(true);
+        value_event_update_index_bht->setEnabled(true);
+        label_bhr->setEnabled(true);
+        value_bhr->setEnabled(true);
     } else {
-        group_event_update->setDisabled(true);
+        label_event_predict_index_bht->setEnabled(false);
+        value_event_predict_index_bht->setEnabled(false);
+        label_event_update_index_bht->setEnabled(false);
+        value_event_update_index_bht->setEnabled(false);
+        label_bhr->setEnabled(false);
+        value_bhr->setEnabled(false);
     }
 
     clear_bhr();
@@ -227,11 +241,18 @@ void DockPredictorInfo::show_new_prediction(
     uint16_t btb_index,
     uint16_t bht_index,
     machine::PredictionInput input,
-    machine::BranchResult result) {
+    machine::BranchResult result,
+    machine::BranchType branch_type) {
     value_event_predict_instruction->setText(input.instruction.to_str());
     value_event_predict_address->setText(addr_to_hex_str(input.instruction_address));
     value_event_predict_index_btb->setText(QString::number(btb_index));
-    value_event_predict_index_bht->setText(QString::number(bht_index));
+    if (!is_predictor_dynamic) {
+        value_event_predict_index_bht->setText("");
+    } else if (branch_type == machine::BranchType::BRANCH) {
+        value_event_predict_index_bht->setText(QString::number(bht_index));
+    } else {
+        value_event_predict_index_bht->setText("N/A");
+    }
     value_event_predict_result->setText(machine::branch_result_to_string(result).toString());
     set_predict_widget_color(STYLESHEET_COLOR_PREDICT);
 }
@@ -243,16 +264,21 @@ void DockPredictorInfo::show_new_update(
     value_event_update_instruction->setText(feedback.instruction.to_str());
     value_event_update_address->setText(addr_to_hex_str(feedback.instruction_address));
     value_event_update_index_btb->setText(QString::number(btb_index));
-    value_event_update_index_bht->setText(QString::number(bht_index));
+    if (!is_predictor_dynamic) {
+        value_event_update_index_bht->setText("");
+    } else if (feedback.branch_type == machine::BranchType::BRANCH ) {
+        value_event_update_index_bht->setText(QString::number(bht_index));
+    } else {
+        value_event_update_index_bht->setText("N/A");
+    }
     value_event_update_result->setText(
         machine::branch_result_to_string(feedback.result).toString());
     set_update_widget_color(STYLESHEET_COLOR_UPDATE);
 }
 
 void DockPredictorInfo::update_stats(machine::PredictionStatistics stats) {
-    // TODO
-    label_stats_total_value->setText(QString::number(stats.number_of_correct_predictions));
-    label_stats_miss_value->setText(QString::number(stats.number_of_wrong_predictions));
+    label_stats_total_value->setText(QString::number(stats.correct));
+    label_stats_miss_value->setText(QString::number(stats.wrong));
     label_stats_accuracy_value->setText(QString::number(stats.accuracy) + " %");
 }
 

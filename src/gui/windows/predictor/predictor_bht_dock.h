@@ -59,7 +59,8 @@ public slots:
         uint16_t btb_index,
         uint16_t bht_index,
         machine::PredictionInput input,
-        machine::BranchResult result);
+        machine::BranchResult result,
+        machine::BranchType branch_type);
     void show_new_update(
         uint16_t btb_index,
         uint16_t bht_index,
