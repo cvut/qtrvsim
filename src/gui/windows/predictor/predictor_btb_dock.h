@@ -51,8 +51,8 @@ public: // General functions
 
 public slots:
     void update_btb_row(uint16_t row_index, machine::BranchTargetBufferEntry btb_entry);
-    void highligh_row_after_prediction(uint16_t row_index);
-    void highligh_row_after_update(uint16_t row_index);
+    void highligh_row_after_prediction(uint16_t btb_index);
+    void highligh_row_after_update(uint16_t btb_index);
     void reset_colors();
     void clear_btb();
     void clear();

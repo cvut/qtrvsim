@@ -221,7 +221,7 @@ enum ExceptionCause Core::memory_special(
     case AC_CACHE_OP:
         mem_data->sync();
         mem_program->sync();
-        predictor->clear();
+        predictor->flush();
         break;
     case AC_LR32:
         if (!memread) { break; }
@@ -721,7 +721,11 @@ void CorePipelined::handle_stall(const FetchInterstage &saved_if_id) {
 }
 
 bool CorePipelined::detect_mispredicted_jump() const {
-    return mem_wb.computed_next_inst_addr != mem_wb.predicted_next_inst_addr;
+    bool misprediction = mem_wb.computed_next_inst_addr != mem_wb.predicted_next_inst_addr;
+    if (misprediction) {
+        predictor->increment_mispredictions();
+    }
+    return misprediction;
 }
 
 bool CorePipelined::is_stall_requested() const {

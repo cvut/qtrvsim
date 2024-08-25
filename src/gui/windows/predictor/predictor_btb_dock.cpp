@@ -65,6 +65,8 @@ void DockPredictorBTB::setup(
     const machine::BranchPredictor *branch_predictor,
     const machine::Core *core) {
 
+    clear();
+
     number_of_bits = init_number_of_bits(branch_predictor->get_number_of_btb_bits());
     const bool is_predictor_enabled { branch_predictor->get_enabled() };
 
@@ -77,14 +79,11 @@ void DockPredictorBTB::setup(
             branch_predictor, &machine::BranchPredictor::btb_row_updated,
             this, &DockPredictorBTB::update_btb_row);
         connect(
-            branch_predictor, &machine::BranchPredictor::btb_target_address_requested,
+            branch_predictor, &machine::BranchPredictor::prediction_done,
             this, &DockPredictorBTB::highligh_row_after_prediction);
         connect(
-            branch_predictor, &machine::BranchPredictor::btb_row_updated,
+            branch_predictor, &machine::BranchPredictor::update_done,
             this, &DockPredictorBTB::highligh_row_after_update);
-        connect(
-            branch_predictor, &machine::BranchPredictor::cleared,
-            this, &DockPredictorBTB::clear_btb);
         connect(
             core, &machine::Core::step_started,
             this, &DockPredictorBTB::reset_colors);
@@ -106,16 +105,25 @@ void DockPredictorBTB::update_btb_row(
 
     QTableWidgetItem *item;
 
-    item = get_btb_cell_item(row_index, DOCK_BTB_COL_INSTR_ADDR);
-    item->setData(Qt::DisplayRole, machine::addr_to_hex_str(btb_entry.instruction_address));
+    if (btb_entry.entry_valid) {
+        item = get_btb_cell_item(row_index, DOCK_BTB_COL_INSTR_ADDR);
+        item->setData(Qt::DisplayRole, machine::addr_to_hex_str(btb_entry.instruction_address));
 
-    item = get_btb_cell_item(row_index, DOCK_BTB_COL_TARGET_ADDR);
-    item->setData(Qt::DisplayRole, machine::addr_to_hex_str(btb_entry.target_address));
+        item = get_btb_cell_item(row_index, DOCK_BTB_COL_TARGET_ADDR);
+        item->setData(Qt::DisplayRole, machine::addr_to_hex_str(btb_entry.target_address));
 
-    item = get_btb_cell_item(row_index, DOCK_BTB_COL_TYPE);
-    item->setData(Qt::DisplayRole, machine::branch_type_to_string(btb_entry.branch_type).toString());
+        item = get_btb_cell_item(row_index, DOCK_BTB_COL_TYPE);
+        item->setData(Qt::DisplayRole, machine::branch_type_to_string(btb_entry.branch_type).toString());
+    } else {
+        item = get_btb_cell_item(row_index, DOCK_BTB_COL_INSTR_ADDR);
+        item->setData(Qt::DisplayRole, "");
 
-    set_row_color(row_index, Q_COLOR_UPDATE);
+        item = get_btb_cell_item(row_index, DOCK_BTB_COL_TARGET_ADDR);
+        item->setData(Qt::DisplayRole, "");
+
+        item = get_btb_cell_item(row_index, DOCK_BTB_COL_TYPE);
+        item->setData(Qt::DisplayRole, "");
+    }
 }
 
 void DockPredictorBTB::highligh_row_after_prediction(uint16_t row_index) {

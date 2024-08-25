@@ -53,7 +53,8 @@ public slots:
         uint16_t btb_index,
         uint16_t bht_index,
         machine::PredictionInput input,
-        machine::BranchResult result);
+        machine::BranchResult result,
+        machine::BranchType branch_type);
     void show_new_update(
         uint16_t btb_index,
         uint16_t bht_index,
@@ -67,6 +68,8 @@ public slots:
     void clear();
 
 private: // Internal variables
+    bool is_predictor_enabled{ false };
+    bool is_predictor_dynamic{ false };
     uint8_t number_of_bhr_bits{ 0 };
     machine::PredictorState initial_state{ machine::PredictorState::UNDEFINED };
 

@@ -85,6 +85,8 @@ void DockPredictorBHT::setup(
     const machine::BranchPredictor *branch_predictor,
     const machine::Core *core) {
 
+    clear();
+
     number_of_bhr_bits = branch_predictor->get_number_of_bhr_bits();
     number_of_bht_bits = branch_predictor->get_number_of_bht_bits();
     initial_state = branch_predictor->get_initial_state();
@@ -119,9 +121,6 @@ void DockPredictorBHT::setup(
             connect(
                 branch_predictor, &machine::BranchPredictor::predictor_bht_row_updated,
                 this, &DockPredictorBHT::update_bht_row);
-            connect(
-                branch_predictor, &machine::BranchPredictor::cleared,
-                this, &DockPredictorBHT::clear);
         } else {
             bht->setDisabled(true);
             bht->setRowCount(0);
@@ -136,11 +135,14 @@ void DockPredictorBHT::show_new_prediction(
     uint16_t btb_index,
     uint16_t bht_index,
     machine::PredictionInput input,
-    machine::BranchResult result) {
+    machine::BranchResult result,
+    machine::BranchType branch_type) {
     UNUSED(btb_index);
     UNUSED(input);
     UNUSED(result);
-    set_row_color(bht_index, Q_COLOR_PREDICT);
+    if (branch_type == machine::BranchType::BRANCH) {
+        set_row_color(bht_index, Q_COLOR_PREDICT);
+    }
 }
 
 void DockPredictorBHT::show_new_update(
@@ -148,14 +150,20 @@ void DockPredictorBHT::show_new_update(
     uint16_t bht_index,
     machine::PredictionFeedback feedback) {
     UNUSED(btb_index);
-    UNUSED(feedback);
-    set_row_color(bht_index, Q_COLOR_UPDATE);
+    if (feedback.branch_type == machine::BranchType::BRANCH) {
+        set_row_color(bht_index, Q_COLOR_UPDATE);
+    }
 }
 
 void DockPredictorBHT::update_predictor_stats(machine::PredictionStatistics stats) {
-    label_stats_correct_value->setText(QString::number(stats.number_of_correct_predictions));
-    label_stats_wrong_value->setText(QString::number(stats.number_of_wrong_predictions));
+    label_stats_correct_value->setText(QString::number(stats.correct));
+    label_stats_wrong_value->setText(QString::number(stats.wrong));
     label_stats_accuracy_value->setText(QString::number(stats.accuracy) + " %");
+    if (stats.total > 0) {
+        label_stats_accuracy_value->setText(QString::number(stats.accuracy) + " %");
+    } else {
+        label_stats_accuracy_value->setText("N/A");
+    }
 }
 
 void DockPredictorBHT::update_bht_row(uint16_t row_index, machine::BranchHistoryTableEntry bht_entry) {
@@ -171,13 +179,18 @@ void DockPredictorBHT::update_bht_row(uint16_t row_index, machine::BranchHistory
         item->setData(Qt::DisplayRole, machine::predictor_state_to_string(bht_entry.state, true).toString());
 
         item = get_bht_cell_item(row_index, DOCK_BHT_COL_CORRECT);
-        item->setData(Qt::DisplayRole, QString::number(bht_entry.stats.number_of_correct_predictions));
+        item->setData(Qt::DisplayRole, QString::number(bht_entry.stats.correct));
 
         item = get_bht_cell_item(row_index, DOCK_BHT_COL_INCORRECT);
-        item->setData(Qt::DisplayRole, QString::number(bht_entry.stats.number_of_wrong_predictions));
+        item->setData(Qt::DisplayRole, QString::number(bht_entry.stats.wrong));
 
         item = get_bht_cell_item(row_index, DOCK_BHT_COL_ACCURACY);
-        item->setData(Qt::DisplayRole, QString::number(bht_entry.stats.accuracy) + " %");
+        if (bht_entry.stats.total > 0) {
+            item->setData(Qt::DisplayRole, QString::number(bht_entry.stats.accuracy) + " %");
+        } else {
+            item->setData(Qt::DisplayRole, "N/A");
+        }
+        
     }
 }
 
