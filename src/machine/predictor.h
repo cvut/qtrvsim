@@ -141,8 +141,6 @@ public: // General functions
     virtual void clear();
 
 signals:
-    void prediction_done(uint16_t index, PredictionInput input, BranchResult result) const;
-    void update_done(uint16_t index, PredictionFeedback feedback) const;
     void stats_updated(PredictionStatistics stats) const;
     void bht_row_updated(uint16_t index, BranchHistoryTableEntry entry) const;
 
@@ -310,8 +308,8 @@ public: // General functions
     void clear();
 
 signals:
-    void prediction_done(uint16_t index, PredictionInput input, BranchResult result) const;
-    void update_done(uint16_t index, PredictionFeedback feedback) const;
+    void prediction_done(uint16_t btb_index, uint16_t bht_index, PredictionInput input, BranchResult result) const;
+    void update_done(uint16_t btb_index, uint16_t bht_index, PredictionFeedback feedback) const;
     void predictor_stats_updated(PredictionStatistics stats) const;
     void predictor_bht_row_updated(uint16_t index, BranchHistoryTableEntry entry) const;
     void bhr_updated(uint8_t number_of_bhr_bits, uint16_t register_value) const;

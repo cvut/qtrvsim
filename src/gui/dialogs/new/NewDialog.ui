@@ -149,7 +149,7 @@
             <x>0</x>
             <y>0</y>
             <width>536</width>
-            <height>547</height>
+            <height>519</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -279,6 +279,29 @@
                  <bool>false</bool>
                 </property>
                 <layout class="QGridLayout" name="gridLayout">
+                 <item row="1" column="0" colspan="3">
+                  <widget class="Line" name="line_bp_btb">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="2">
+                  <widget class="QLabel" name="text_bp_btb_addr_bits_number">
+                   <property name="minimumSize">
+                    <size>
+                     <width>40</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>0</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="0" column="0">
                   <widget class="QLabel" name="text_bp_btb_addr_bits">
                    <property name="toolTip">
@@ -305,86 +328,87 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="text_bp_btb_bits">
-                   <property name="minimumSize">
-                    <size>
-                     <width>140</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Number of bits:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="2">
-                  <widget class="QLabel" name="text_bp_btb_bits_number">
-                   <property name="minimumSize">
-                    <size>
-                     <width>40</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="2">
-                  <widget class="QLabel" name="text_bp_btb_entries_number">
-                   <property name="minimumSize">
-                    <size>
-                     <width>40</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>1</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="text_bp_btb_entries">
-                   <property name="minimumSize">
-                    <size>
-                     <width>140</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Number of entries:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="2">
-                  <widget class="QLabel" name="text_bp_btb_addr_bits_number">
-                   <property name="minimumSize">
-                    <size>
-                     <width>40</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0" colspan="3">
-                  <widget class="Line" name="line_bp_btb">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                  </widget>
+                 <item row="3" column="0" colspan="3">
+                  <layout class="QHBoxLayout" name="layout_bp_btb_status">
+                   <item>
+                    <widget class="QLabel" name="text_bp_btb_entries">
+                     <property name="minimumSize">
+                      <size>
+                       <width>140</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>Number of entries:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="text_bp_btb_entries_number">
+                     <property name="minimumSize">
+                      <size>
+                       <width>40</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>1</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer name="spacer_bp_btb_status">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item>
+                    <widget class="Line" name="line_bp_btb_status">
+                     <property name="orientation">
+                      <enum>Qt::Vertical</enum>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="text_bp_btb_bits">
+                     <property name="minimumSize">
+                      <size>
+                       <width>140</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>Number of bits:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="text_bp_btb_bits_number">
+                     <property name="minimumSize">
+                      <size>
+                       <width>40</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>0</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
                  </item>
                 </layout>
                </widget>
@@ -395,64 +419,6 @@
                  <string>Branch History Table (BHT)</string>
                 </property>
                 <layout class="QGridLayout" name="gridLayout_2">
-                 <item row="4" column="0">
-                  <widget class="QLabel" name="text_bp_bht_entries">
-                   <property name="minimumSize">
-                    <size>
-                     <width>140</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Number of entries:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="text_bp_bht_bits">
-                   <property name="minimumSize">
-                    <size>
-                     <width>140</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Number of bits:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="2">
-                  <widget class="QLabel" name="text_bp_bht_entries_number">
-                   <property name="minimumSize">
-                    <size>
-                     <width>40</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>1</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="2">
-                  <widget class="QLabel" name="text_bp_bht_bits_number">
-                   <property name="minimumSize">
-                    <size>
-                     <width>40</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="0" column="2">
                   <widget class="QLabel" name="text_bp_bht_bhr_bits_number">
                    <property name="minimumSize">
@@ -469,8 +435,24 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="1">
-                  <widget class="QSlider" name="slider_bp_bht_addr_bits">
+                 <item row="1" column="2">
+                  <widget class="QLabel" name="text_bp_bht_addr_bits_number">
+                   <property name="minimumSize">
+                    <size>
+                     <width>40</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>0</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QSlider" name="slider_bp_bht_bhr_bits">
                    <property name="maximum">
                     <number>8</number>
                    </property>
@@ -482,8 +464,8 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="1">
-                  <widget class="QSlider" name="slider_bp_bht_bhr_bits">
+                 <item row="1" column="1">
+                  <widget class="QSlider" name="slider_bp_bht_addr_bits">
                    <property name="maximum">
                     <number>8</number>
                    </property>
@@ -511,19 +493,10 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="2">
-                  <widget class="QLabel" name="text_bp_bht_addr_bits_number">
-                   <property name="minimumSize">
-                    <size>
-                     <width>40</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>0</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
+                 <item row="2" column="0" colspan="3">
+                  <widget class="Line" name="line_bp_bht">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
                    </property>
                   </widget>
                  </item>
@@ -543,12 +516,87 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="0" colspan="3">
-                  <widget class="Line" name="line_bp_bht">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                  </widget>
+                 <item row="3" column="0" colspan="3">
+                  <layout class="QHBoxLayout" name="layout_bp_bht_status">
+                   <item>
+                    <widget class="QLabel" name="text_bp_bht_entries">
+                     <property name="minimumSize">
+                      <size>
+                       <width>140</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>Number of entries:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="text_bp_bht_entries_number">
+                     <property name="minimumSize">
+                      <size>
+                       <width>40</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>1</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer name="spacer_bp_bht_status">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item>
+                    <widget class="Line" name="line_bp_bht_status">
+                     <property name="orientation">
+                      <enum>Qt::Vertical</enum>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="text_bp_bht_bits">
+                     <property name="minimumSize">
+                      <size>
+                       <width>140</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>Number of bits:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="text_bp_bht_bits_number">
+                     <property name="minimumSize">
+                      <size>
+                       <width>40</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>0</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
                  </item>
                 </layout>
                </widget>

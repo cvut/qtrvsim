@@ -118,6 +118,8 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     bp_btb->hide();
     bp_bht.reset(new DockPredictorBHT(this));
     bp_bht->hide();
+    bp_info.reset(new DockPredictorInfo(this));
+    bp_info->hide();
     peripherals.reset(new PeripheralsDock(this, settings));
     peripherals->hide();
     terminal.reset(new TerminalDock(this, settings));
@@ -166,6 +168,9 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(
         ui->actionBranch_Predictor_Target_table, &QAction::triggered, this,
         &MainWindow::show_bp_btb);
+    connect(
+        ui->actionBranch_Predictor_Info, &QAction::triggered, this,
+        &MainWindow::show_bp_info);
 
     connect(ui->actionPeripherals, &QAction::triggered, this, &MainWindow::show_peripherals);
     connect(ui->actionTerminal, &QAction::triggered, this, &MainWindow::show_terminal);
@@ -332,6 +337,7 @@ void MainWindow::create_core(
     // Branch predictor
     bp_btb->setup(machine->core()->get_predictor(), machine->core());
     bp_bht->setup(machine->core()->get_predictor(), machine->core());
+    bp_info->setup(machine->core()->get_predictor(), machine->core());
 
     terminal->setup(machine->serial_port());
     peripherals->setup(machine->peripheral_spi_led());
@@ -440,6 +446,7 @@ SHOW_HANDLER(cache_data, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(cache_level2, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(bp_btb, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(bp_bht, Qt::RightDockWidgetArea, false)
+SHOW_HANDLER(bp_info, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(peripherals, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(terminal, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(lcd_display, Qt::RightDockWidgetArea, false)
@@ -456,6 +463,7 @@ void MainWindow::reset_windows() {
     reset_state_cache_level2();
     reset_state_bp_btb();
     reset_state_bp_bht();
+    reset_state_bp_info();
     reset_state_peripherals();
     reset_state_terminal();
     reset_state_lcd_display();

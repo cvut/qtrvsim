@@ -6,30 +6,23 @@ DockPredictorBTB::DockPredictorBTB(QWidget *parent) : Super(parent) {
     setObjectName("PredictorBTB");
     setWindowTitle("Predictor Branch Target Buffer");
 
-    btb = new QTableWidget();
-    btb->setRowCount(0);
-    btb->setColumnCount(4); // Index, Instruction Address, Target Address, Type
-    btb->setHorizontalHeaderLabels({ "Index", "Instruction Address", "Target Address", "Type" });
-    btb->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    btb->resizeRowsToContents();
-    btb->verticalHeader()->hide();
-    init_table();
+    /////////////////////////
+    // Assign layout
 
-    layout = new QVBoxLayout();
     layout->addWidget(btb);
-
-    content = new QWidget();
     content->setLayout(layout);
     setWidget(content);
-}
 
-DockPredictorBTB::~DockPredictorBTB() {
-    delete btb;
-    btb = nullptr;
-    delete layout;
-    layout = nullptr;
-    delete content;
-    content = nullptr;
+    /////////////////////////
+    // Init widget properties
+
+    // BTB
+    btb->setRowCount(0);
+    btb->setColumnCount(4);
+    btb->setHorizontalHeaderLabels({ "Index", "Instr. Address", "Target Address", "Type" });
+    btb->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    btb->verticalHeader()->hide();
+    btb->resizeRowsToContents();
 }
 
 uint8_t DockPredictorBTB::init_number_of_bits(const uint8_t b) const {
@@ -52,24 +45,6 @@ QTableWidgetItem* DockPredictorBTB::get_btb_cell_item(uint8_t row_index, uint8_t
     return item;
 }
 
-void DockPredictorBTB::init_table() {
-    for (uint16_t row_index = 0; row_index < btb->rowCount(); row_index++) {
-        QTableWidgetItem *item;
-
-        item = get_btb_cell_item(row_index, DOCK_BTB_COL_INDEX);
-        item->setData(Qt::DisplayRole, QString::number(row_index));
-
-        item = get_btb_cell_item(row_index, DOCK_BTB_COL_INSTR_ADDR);
-        item->setData(Qt::DisplayRole, QString(""));
-
-        item = get_btb_cell_item(row_index, DOCK_BTB_COL_TARGET_ADDR);
-        item->setData(Qt::DisplayRole, QString(""));
-
-        item = get_btb_cell_item(row_index, DOCK_BTB_COL_TYPE);
-        item->setData(Qt::DisplayRole, QString(""));
-    }
-}
-
 void DockPredictorBTB::set_table_color(QColor color) {
     for (uint16_t row_index = 0; row_index < btb->rowCount(); row_index++) {
         for (uint16_t column_index = 0; column_index < btb->columnCount(); column_index++) {
@@ -89,18 +64,6 @@ void DockPredictorBTB::set_row_color(uint16_t row_index, QColor color) {
 void DockPredictorBTB::setup(
     const machine::BranchPredictor *branch_predictor,
     const machine::Core *core) {
-    connect(
-        branch_predictor, &machine::BranchPredictor::btb_row_updated,
-        this, &DockPredictorBTB::update_btb_row);
-    connect(
-        branch_predictor, &machine::BranchPredictor::btb_target_address_requested,
-        this, &DockPredictorBTB::highligh_row_after_prediction);
-    connect(
-        branch_predictor, &machine::BranchPredictor::cleared,
-        this, &DockPredictorBTB::clear);
-    connect(
-        core, &machine::Core::step_started,
-        this, &DockPredictorBTB::reset_colors);
 
     number_of_bits = init_number_of_bits(branch_predictor->get_number_of_btb_bits());
     const bool is_predictor_enabled { branch_predictor->get_enabled() };
@@ -108,13 +71,28 @@ void DockPredictorBTB::setup(
     if (is_predictor_enabled) {
         btb->setRowCount(qPow(2, number_of_bits));
         btb->setDisabled(false);
+        clear_btb();
+
+        connect(
+            branch_predictor, &machine::BranchPredictor::btb_row_updated,
+            this, &DockPredictorBTB::update_btb_row);
+        connect(
+            branch_predictor, &machine::BranchPredictor::btb_target_address_requested,
+            this, &DockPredictorBTB::highligh_row_after_prediction);
+        connect(
+            branch_predictor, &machine::BranchPredictor::btb_row_updated,
+            this, &DockPredictorBTB::highligh_row_after_update);
+        connect(
+            branch_predictor, &machine::BranchPredictor::cleared,
+            this, &DockPredictorBTB::clear_btb);
+        connect(
+            core, &machine::Core::step_started,
+            this, &DockPredictorBTB::reset_colors);
+        
     } else {
         btb->setRowCount(0);
         btb->setDisabled(true);
     }
-    init_table();
-    btb->resizeRowsToContents();
-    set_table_color(Q_COLOR_DEFAULT);
 }
 
 void DockPredictorBTB::update_btb_row(
@@ -140,15 +118,38 @@ void DockPredictorBTB::update_btb_row(
     set_row_color(row_index, Q_COLOR_UPDATE);
 }
 
-void DockPredictorBTB::highligh_row_after_prediction(uint16_t index) {
-    set_row_color(index, Q_COLOR_PREDICT);
+void DockPredictorBTB::highligh_row_after_prediction(uint16_t row_index) {
+    set_row_color(row_index, Q_COLOR_PREDICT);
+}
+
+void DockPredictorBTB::highligh_row_after_update(uint16_t row_index) {
+    set_row_color(row_index, Q_COLOR_UPDATE);
 }
 
 void DockPredictorBTB::reset_colors() {
     set_table_color(Q_COLOR_DEFAULT);
 }
 
+void DockPredictorBTB::clear_btb() {
+    for (uint16_t row_index = 0; row_index < btb->rowCount(); row_index++) {
+        QTableWidgetItem *item;
+
+        item = get_btb_cell_item(row_index, DOCK_BTB_COL_INDEX);
+        item->setData(Qt::DisplayRole, QString::number(row_index));
+
+        item = get_btb_cell_item(row_index, DOCK_BTB_COL_INSTR_ADDR);
+        item->setData(Qt::DisplayRole, QString(""));
+
+        item = get_btb_cell_item(row_index, DOCK_BTB_COL_TARGET_ADDR);
+        item->setData(Qt::DisplayRole, QString(""));
+
+        item = get_btb_cell_item(row_index, DOCK_BTB_COL_TYPE);
+        item->setData(Qt::DisplayRole, QString(""));
+    }
+    btb->resizeRowsToContents();
+    set_table_color(Q_COLOR_DEFAULT);
+}
+
 void DockPredictorBTB::clear() {
-    reset_colors();
-    init_table();
+    clear_btb();
 }
