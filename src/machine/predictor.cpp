@@ -51,6 +51,24 @@ QString machine::addr_to_hex_str(const machine::Address address) {
     return "0x" + zero_padding + hex_addr;
 }
 
+bool machine::is_predictor_type_dynamic(const PredictorType type) {
+    switch (type)
+    {
+    case PredictorType::ALWAYS_NOT_TAKEN:
+    case PredictorType::ALWAYS_TAKEN:
+    case PredictorType::BTFNT:
+        return false;
+
+    case PredictorType::SMITH_1_BIT:
+    case PredictorType::SMITH_2_BIT:
+    case PredictorType::SMITH_2_BIT_HYSTERESIS:
+        return true;
+
+    default:
+        return false;
+    }
+}
+
 /////////////////////////////////
 // BranchHistoryRegister class //
 /////////////////////////////////

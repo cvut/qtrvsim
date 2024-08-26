@@ -401,9 +401,7 @@ void NewDialog::bp_toggle_widgets() {
     // depending on the setting
 
     const machine::PredictorType predictor_type { config->get_bp_type() };
-    const bool is_predictor_dynamic { predictor_type == machine::PredictorType::SMITH_1_BIT
-                                      || predictor_type == machine::PredictorType::SMITH_2_BIT
-                                      || predictor_type == machine::PredictorType::SMITH_2_BIT_HYSTERESIS };
+    const bool is_predictor_dynamic { machine::is_predictor_type_dynamic(predictor_type) };
     const bool is_predictor_enabled { config->get_bp_enabled() };
 
     ui->group_bp_bht->setEnabled(is_predictor_enabled && is_predictor_dynamic);

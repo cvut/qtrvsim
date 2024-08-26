@@ -174,9 +174,7 @@ void DockPredictorInfo::setup(
     number_of_bhr_bits = branch_predictor->get_number_of_bhr_bits();
     initial_state = branch_predictor->get_initial_state();
     const machine::PredictorType predictor_type { branch_predictor->get_predictor_type() };
-    is_predictor_dynamic = predictor_type == machine::PredictorType::SMITH_1_BIT
-                            || predictor_type == machine::PredictorType::SMITH_2_BIT
-                            || predictor_type  == machine::PredictorType::SMITH_2_BIT_HYSTERESIS;
+    is_predictor_dynamic = machine::is_predictor_type_dynamic(predictor_type);
     is_predictor_enabled = branch_predictor->get_enabled();
 
     if (is_predictor_enabled) {
@@ -194,38 +192,39 @@ void DockPredictorInfo::setup(
             this, &DockPredictorInfo::show_new_update);
 
         if (is_predictor_dynamic) {
-            
             connect(
                 branch_predictor, &machine::BranchPredictor::bhr_updated,
                 this, &DockPredictorInfo::update_bhr);
         }
     }
 
-    if (is_predictor_enabled) {
-        content->setDisabled(false);
-    } else {
-        content->setDisabled(true);
-    }
-
+    // Toggle BHT index display
     if (is_predictor_dynamic) {
         label_event_predict_index_bht->setEnabled(true);
         value_event_predict_index_bht->setEnabled(true);
         label_event_update_index_bht->setEnabled(true);
         value_event_update_index_bht->setEnabled(true);
-        label_bhr->setEnabled(true);
-        value_bhr->setEnabled(true);
     } else {
         label_event_predict_index_bht->setEnabled(false);
         value_event_predict_index_bht->setEnabled(false);
         label_event_update_index_bht->setEnabled(false);
         value_event_update_index_bht->setEnabled(false);
+    }
+
+    // Toggle BHR display
+    if (is_predictor_dynamic && number_of_bhr_bits > 0) {
+        label_bhr->setEnabled(true);
+        value_bhr->setEnabled(true);
+    } else {
         label_bhr->setEnabled(false);
         value_bhr->setEnabled(false);
     }
 
-    if (number_of_bhr_bits == 0) {
-        label_bhr->setEnabled(false);
-        value_bhr->setEnabled(false);
+    // Toggle whole widget
+    if (is_predictor_enabled) {
+        content->setDisabled(false);
+    } else {
+        content->setDisabled(true);
     }
 
     clear_bhr();

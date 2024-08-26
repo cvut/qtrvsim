@@ -21,6 +21,8 @@ QStringView branch_type_to_string(const BranchType type);
 
 QString addr_to_hex_str(const machine::Address address);
 
+bool is_predictor_type_dynamic(const PredictorType type);
+
 /////////////////////////////////
 // BranchHistoryRegister class //
 /////////////////////////////////
@@ -138,7 +140,6 @@ protected: // Internal functions
 public: // General functions
     uint16_t calculate_bht_index(const uint16_t bhr_value, const Address instruction_address) const;
     virtual PredictorType get_type() const = 0;
-    virtual bool is_static() const = 0;
     virtual BranchResult predict(PredictionInput input) = 0; // Function which handles all actions ties
                                                              // to making a branch prediction
     virtual void update(PredictionFeedback feedback) = 0;    // Update predictor based on jump / branch
@@ -169,7 +170,6 @@ public: // Constructors & Destructor
 
 public: // General functions
     PredictorType get_type() const override { return PredictorType::ALWAYS_NOT_TAKEN; };
-    bool is_static() const override { return true; };
     BranchResult predict(PredictionInput input) override;
     void update(PredictionFeedback feedback) override;
 };
@@ -181,7 +181,6 @@ public: // Constructors & Destructor
 
 public: // General functions
     PredictorType get_type() const override { return PredictorType::ALWAYS_TAKEN; };
-    bool is_static() const override { return true; };
     BranchResult predict(PredictionInput input) override;
     void update(PredictionFeedback feedback) override;
 };
@@ -193,7 +192,6 @@ public: // Constructors & Destructor
 
 public: // General functions
     PredictorType get_type() const override { return PredictorType::BTFNT; };
-    bool is_static() const override { return true; };
     BranchResult predict(PredictionInput input) override;
     void update(PredictionFeedback feedback) override;
 };
@@ -208,7 +206,6 @@ public: // Constructors & Destructor
 
 public: // General functions
     PredictorType get_type() const override { return PredictorType::SMITH_1_BIT; };
-    bool is_static() const override { return false; };
     BranchResult predict(PredictionInput input) override;
     void update(PredictionFeedback feedback) override;
 };
@@ -223,7 +220,6 @@ public: // Constructors & Destructor
 
 public: // General functions
     PredictorType get_type() const override { return PredictorType::SMITH_2_BIT; };
-    bool is_static() const override { return false; };
     BranchResult predict(PredictionInput input) override;
     void update(PredictionFeedback feedback) override;
 };
@@ -238,7 +234,6 @@ public: // Constructors & Destructor
 
 public: // General functions
     PredictorType get_type() const override { return PredictorType::SMITH_2_BIT_HYSTERESIS; };
-    bool is_static() const override { return false; };
     BranchResult predict(PredictionInput input) override;
     void update(PredictionFeedback feedback) override;
 };

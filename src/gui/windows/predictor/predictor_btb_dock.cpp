@@ -48,16 +48,16 @@ QTableWidgetItem* DockPredictorBTB::get_btb_cell_item(uint8_t row_index, uint8_t
 void DockPredictorBTB::set_table_color(QColor color) {
     for (uint16_t row_index = 0; row_index < btb->rowCount(); row_index++) {
         for (uint16_t column_index = 0; column_index < btb->columnCount(); column_index++) {
-            QTableWidgetItem *item { get_btb_cell_item(row_index, column_index) };
-            item->setBackground(QBrush(color));
+            get_btb_cell_item(row_index, column_index)->setBackground(
+                QBrush(color));
         }
     }
 }
 
 void DockPredictorBTB::set_row_color(uint16_t row_index, QColor color) {
     for (uint16_t column_index = 0; column_index < btb->columnCount(); column_index++) {
-        QTableWidgetItem *item { get_btb_cell_item(row_index, column_index) };
-        item->setBackground(QBrush(color));
+        get_btb_cell_item(row_index, column_index)->setBackground(
+            QBrush(color));
     }
 }
 
@@ -103,26 +103,24 @@ void DockPredictorBTB::update_btb_row(
         return;
     }
 
-    QTableWidgetItem *item;
-
     if (btb_entry.entry_valid) {
-        item = get_btb_cell_item(row_index, DOCK_BTB_COL_INSTR_ADDR);
-        item->setData(Qt::DisplayRole, machine::addr_to_hex_str(btb_entry.instruction_address));
+        get_btb_cell_item(row_index, DOCK_BTB_COL_INSTR_ADDR)->setData(
+            Qt::DisplayRole, machine::addr_to_hex_str(btb_entry.instruction_address));
 
-        item = get_btb_cell_item(row_index, DOCK_BTB_COL_TARGET_ADDR);
-        item->setData(Qt::DisplayRole, machine::addr_to_hex_str(btb_entry.target_address));
+        get_btb_cell_item(row_index, DOCK_BTB_COL_TARGET_ADDR)->setData(
+            Qt::DisplayRole, machine::addr_to_hex_str(btb_entry.target_address));
 
-        item = get_btb_cell_item(row_index, DOCK_BTB_COL_TYPE);
-        item->setData(Qt::DisplayRole, machine::branch_type_to_string(btb_entry.branch_type).toString());
+        get_btb_cell_item(row_index, DOCK_BTB_COL_TYPE)->setData(
+            Qt::DisplayRole, machine::branch_type_to_string(btb_entry.branch_type).toString());
     } else {
-        item = get_btb_cell_item(row_index, DOCK_BTB_COL_INSTR_ADDR);
-        item->setData(Qt::DisplayRole, "");
+        get_btb_cell_item(row_index, DOCK_BTB_COL_INSTR_ADDR)->setData(
+            Qt::DisplayRole, "");
 
-        item = get_btb_cell_item(row_index, DOCK_BTB_COL_TARGET_ADDR);
-        item->setData(Qt::DisplayRole, "");
+        get_btb_cell_item(row_index, DOCK_BTB_COL_TARGET_ADDR)->setData(
+            Qt::DisplayRole, "");
 
-        item = get_btb_cell_item(row_index, DOCK_BTB_COL_TYPE);
-        item->setData(Qt::DisplayRole, "");
+        get_btb_cell_item(row_index, DOCK_BTB_COL_TYPE)->setData(
+            Qt::DisplayRole, "");
     }
 }
 
@@ -140,19 +138,17 @@ void DockPredictorBTB::reset_colors() {
 
 void DockPredictorBTB::clear_btb() {
     for (uint16_t row_index = 0; row_index < btb->rowCount(); row_index++) {
-        QTableWidgetItem *item;
+        get_btb_cell_item(row_index, DOCK_BTB_COL_INDEX)->setData(
+            Qt::DisplayRole, QString::number(row_index));
 
-        item = get_btb_cell_item(row_index, DOCK_BTB_COL_INDEX);
-        item->setData(Qt::DisplayRole, QString::number(row_index));
+        get_btb_cell_item(row_index, DOCK_BTB_COL_INSTR_ADDR)->setData(
+            Qt::DisplayRole, QString(""));
 
-        item = get_btb_cell_item(row_index, DOCK_BTB_COL_INSTR_ADDR);
-        item->setData(Qt::DisplayRole, QString(""));
+        get_btb_cell_item(row_index, DOCK_BTB_COL_TARGET_ADDR)->setData(
+            Qt::DisplayRole, QString(""));
 
-        item = get_btb_cell_item(row_index, DOCK_BTB_COL_TARGET_ADDR);
-        item->setData(Qt::DisplayRole, QString(""));
-
-        item = get_btb_cell_item(row_index, DOCK_BTB_COL_TYPE);
-        item->setData(Qt::DisplayRole, QString(""));
+        get_btb_cell_item(row_index, DOCK_BTB_COL_TYPE)->setData(
+            Qt::DisplayRole, QString(""));
     }
     btb->resizeRowsToContents();
     set_table_color(Q_COLOR_DEFAULT);
