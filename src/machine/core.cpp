@@ -221,6 +221,7 @@ enum ExceptionCause Core::memory_special(
     case AC_CACHE_OP:
         mem_data->sync();
         mem_program->sync();
+        predictor->flush();
         break;
     case AC_LR32:
         if (!memread) { break; }
@@ -501,16 +502,16 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
     // Predictor update
     if (dt.branch_jal) {
         // JAL Jump instruction (J-type (alternative to U-type with different immediate bit order))
-        predictor->update(dt.inst, dt.inst_addr, dt.branch_jal_target, BranchResult::TAKEN);
+        predictor->update(dt.inst, dt.inst_addr, dt.branch_jal_target, BranchType::JUMP, BranchResult::TAKEN);
     } else if (dt.branch_jalr) {
         // JALR Jump register instruction (I-type)
         predictor->update(
-            dt.inst, dt.inst_addr, Address(get_xlen_from_reg(dt.alu_val)), BranchResult::TAKEN);
+            dt.inst, dt.inst_addr, Address(get_xlen_from_reg(dt.alu_val)), BranchType::JUMP, BranchResult::TAKEN);
     } else if (dt.branch_bxx) {
         // BXX Conditional branch instruction (B-type (alternative to S-type with different
         // immediate bit order))
         predictor->update(
-            dt.inst, dt.inst_addr, dt.branch_jal_target,
+            dt.inst, dt.inst_addr, dt.branch_jal_target, BranchType::BRANCH,
             branch_bxx_taken ? BranchResult::TAKEN : BranchResult::NOT_TAKEN);
     }
 
@@ -529,6 +530,11 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
                 computed_next_inst_addr = Address(control_state->read_internal(CSR::Id::MEPC).as_u64());
             csr_written = true;
         }
+    }
+
+    // Predictor statistics update
+    if (computed_next_inst_addr != dt.predicted_next_inst_addr) {
+        predictor->increment_mispredictions();
     }
 
     return { MemoryInternalState {

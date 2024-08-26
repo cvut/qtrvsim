@@ -20,10 +20,12 @@
 #include <QVBoxLayout>
 #include <QWidget>
 #include <QtMath>
+#include <QGroupBox>
 
 #define DOCK_BTB_COL_INDEX 0
 #define DOCK_BTB_COL_INSTR_ADDR 1
 #define DOCK_BTB_COL_TARGET_ADDR 2
+#define DOCK_BTB_COL_TYPE 3
 
 #define Q_COLOR_DEFAULT QColor(255, 255, 255)
 #define Q_COLOR_PREDICT QColor(255, 173, 173)
@@ -37,30 +39,30 @@ class DockPredictorBTB : public QDockWidget {
 
 public: // Constructors & Destructor
     DockPredictorBTB(QWidget *parent);
-    ~DockPredictorBTB();
 
 private: // Internal functions
     uint8_t init_number_of_bits(const uint8_t b) const;
-    void init_table();
+    QTableWidgetItem* get_btb_cell_item(uint8_t row_index, uint8_t col_index);
     void set_table_color(QColor color);
     void set_row_color(uint16_t row_index, QColor color);
-
+    
 public: // General functions
     void setup(const machine::BranchPredictor *branch_predictor, const machine::Core *core);
 
 public slots:
-    void update_row(
-        uint16_t index,
-        machine::Address instruction_address,
-        machine::Address target_address);
-    void highligh_row_after_prediction(uint16_t index);
+    void update_btb_row(uint16_t row_index, machine::BranchTargetBufferEntry btb_entry);
+    void highligh_row_after_prediction(uint16_t btb_index);
+    void highligh_row_after_update(uint16_t btb_index);
     void reset_colors();
+    void clear_btb();
+    void clear();
 
 private: // Internal variables
-    uint8_t number_of_bits;
-    QTableWidget *btb;
-    QVBoxLayout *layout;
-    QWidget *content;
+    uint8_t number_of_bits{ 0 };
+
+    QT_OWNED QGroupBox *content{ new QGroupBox() };
+    QT_OWNED QVBoxLayout *layout{ new QVBoxLayout() };
+    QT_OWNED QTableWidget *btb{ new QTableWidget() };
 };
 
 #endif // PREDICTOR_BTB_DOCK_H

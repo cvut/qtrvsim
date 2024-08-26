@@ -130,8 +130,9 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     connect(ui->osemu_fs_root, &QLineEdit::textChanged, this, &NewDialog::osemu_fs_root_change);
 
     // Branch predictor
-    connect(ui->group_branch_predictor, QOverload<bool>::of(&QGroupBox::toggled), this, [this] {
-        config->set_bp_enabled(ui->group_branch_predictor->isChecked());
+    connect(ui->group_bp, QOverload<bool>::of(&QGroupBox::toggled), this, [this] {
+        config->set_bp_enabled(ui->group_bp->isChecked());
+        bp_toggle_widgets();
     });
     connect(
         ui->select_bp_type, QOverload<int>::of(&QComboBox::activated), this,
@@ -140,19 +141,23 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
         config->set_bp_init_state(
             ui->select_bp_init_state->currentData().value<machine::PredictorState>());
     });
-    connect(ui->slider_bp_btb_bits, &QAbstractSlider::valueChanged, this, [this] {
-        config->set_bp_btb_bits((uint8_t)ui->slider_bp_btb_bits->value());
+    connect(ui->slider_bp_btb_addr_bits, &QAbstractSlider::valueChanged, this, [this] {
+        config->set_bp_btb_bits((uint8_t)ui->slider_bp_btb_addr_bits->value());
+        ui->text_bp_btb_addr_bits_number->setText(QString::number(config->get_bp_btb_bits()));
         ui->text_bp_btb_bits_number->setText(QString::number(config->get_bp_btb_bits()));
+        ui->text_bp_btb_entries_number->setText(QString::number(qPow(2, config->get_bp_btb_bits())));
     });
-    connect(ui->slider_bp_bhr_bits, &QAbstractSlider::valueChanged, this, [this] {
-        config->set_bp_bhr_bits((uint8_t)ui->slider_bp_bhr_bits->value());
-        ui->text_bp_bhr_bits_number->setText(QString::number(config->get_bp_bhr_bits()));
+    connect(ui->slider_bp_bht_bhr_bits, &QAbstractSlider::valueChanged, this, [this] {
+        config->set_bp_bhr_bits((uint8_t)ui->slider_bp_bht_bhr_bits->value());
+        ui->text_bp_bht_bhr_bits_number->setText(QString::number(config->get_bp_bhr_bits()));
         ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
+        ui->text_bp_bht_entries_number->setText(QString::number(qPow(2, config->get_bp_bht_bits())));
     });
     connect(ui->slider_bp_bht_addr_bits, &QAbstractSlider::valueChanged, this, [this] {
         config->set_bp_bht_addr_bits((uint8_t)ui->slider_bp_bht_addr_bits->value());
         ui->text_bp_bht_addr_bits_number->setText(QString::number(config->get_bp_bht_addr_bits()));
         ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
+        ui->text_bp_bht_entries_number->setText(QString::number(qPow(2, config->get_bp_bht_bits())));
     });
 
     cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d.data());
@@ -391,6 +396,21 @@ void NewDialog::reset_at_compile_change(bool v) {
     config->set_reset_at_compile(v);
 }
 
+void NewDialog::bp_toggle_widgets() {
+    // Enables or disables all branch predictor widgets
+    // depending on the setting
+
+    const machine::PredictorType predictor_type { config->get_bp_type() };
+    const bool is_predictor_dynamic { predictor_type == machine::PredictorType::SMITH_1_BIT
+                                      || predictor_type == machine::PredictorType::SMITH_2_BIT
+                                      || predictor_type == machine::PredictorType::SMITH_2_BIT_HYSTERESIS };
+    const bool is_predictor_enabled { config->get_bp_enabled() };
+
+    ui->group_bp_bht->setEnabled(is_predictor_enabled && is_predictor_dynamic);
+    ui->text_bp_init_state->setEnabled(is_predictor_enabled && is_predictor_dynamic);
+    ui->select_bp_init_state->setEnabled(is_predictor_enabled && is_predictor_dynamic);
+}
+
 void NewDialog::bp_type_change() {
     // Read branch predictor type from GUI and store it in the config
     const machine::PredictorType predictor_type {
@@ -404,8 +424,6 @@ void NewDialog::bp_type_change() {
     // Configure GUI based on predictor selection
     switch (predictor_type) {
     case machine::PredictorType::SMITH_1_BIT: {
-        bp_toggle_history_table_ui(true);
-
         // Add items to the combo box
         ui->select_bp_init_state->addItem(
             predictor_state_to_string(machine::PredictorState::NOT_TAKEN, false).toString(),
@@ -428,8 +446,6 @@ void NewDialog::bp_type_change() {
 
     case machine::PredictorType::SMITH_2_BIT:
     case machine::PredictorType::SMITH_2_BIT_HYSTERESIS: {
-        bp_toggle_history_table_ui(true);
-
         // Add items to the combo box
         ui->select_bp_init_state->addItem(
             predictor_state_to_string(machine::PredictorState::STRONGLY_NOT_TAKEN, false).toString(),
@@ -456,17 +472,10 @@ void NewDialog::bp_type_change() {
         }
     } break;
 
-    default: bp_toggle_history_table_ui(false); break;
+    default:
+        break;
     }
-}
-
-void NewDialog::bp_toggle_history_table_ui(bool enabled) {
-    ui->select_bp_init_state->setEnabled(enabled);
-    ui->slider_bp_bhr_bits->setEnabled(enabled);
-    ui->text_bp_bhr_bits_number->setEnabled(enabled);
-    ui->slider_bp_bht_addr_bits->setEnabled(enabled);
-    ui->text_bp_bht_addr_bits_number->setEnabled(enabled);
-    ui->text_bp_bht_bits_number->setEnabled(enabled);
+    bp_toggle_widgets();
 }
 
 void NewDialog::config_gui() {
@@ -485,7 +494,7 @@ void NewDialog::config_gui() {
         config->hazard_unit() == machine::MachineConfig::HU_STALL_FORWARD);
 
     // Branch predictor
-    ui->group_branch_predictor->setChecked(config->get_bp_enabled());
+    ui->group_bp->setChecked(config->get_bp_enabled());
     ui->select_bp_type->clear();
     ui->select_bp_type->addItem(
         predictor_type_to_string(machine::PredictorType::ALWAYS_NOT_TAKEN).toString(),
@@ -513,17 +522,20 @@ void NewDialog::config_gui() {
             ui->select_bp_type->findData(QVariant::fromValue(machine::PredictorType::SMITH_1_BIT)));
         config->set_bp_type(machine::PredictorType::SMITH_1_BIT);
     }
-    bp_type_change();
-    ui->slider_bp_btb_bits->setMaximum(BP_MAX_BTB_BITS);
-    ui->slider_bp_btb_bits->setValue(config->get_bp_btb_bits());
+    ui->slider_bp_btb_addr_bits->setMaximum(BP_MAX_BTB_BITS);
+    ui->slider_bp_btb_addr_bits->setValue(config->get_bp_btb_bits());
+    ui->text_bp_btb_addr_bits_number->setText(QString::number(config->get_bp_btb_bits()));
     ui->text_bp_btb_bits_number->setText(QString::number(config->get_bp_btb_bits()));
-    ui->slider_bp_bhr_bits->setMaximum(BP_MAX_BHR_BITS);
-    ui->slider_bp_bhr_bits->setValue(config->get_bp_bhr_bits());
-    ui->text_bp_bhr_bits_number->setText(QString::number(config->get_bp_bhr_bits()));
+    ui->text_bp_btb_entries_number->setText(QString::number(qPow(2, config->get_bp_btb_bits())));
+    ui->slider_bp_bht_bhr_bits->setMaximum(BP_MAX_BHR_BITS);
+    ui->slider_bp_bht_bhr_bits->setValue(config->get_bp_bhr_bits());
+    ui->text_bp_bht_bhr_bits_number->setText(QString::number(config->get_bp_bhr_bits()));
     ui->slider_bp_bht_addr_bits->setMaximum(BP_MAX_BHT_ADDR_BITS);
     ui->slider_bp_bht_addr_bits->setValue(config->get_bp_bht_addr_bits());
     ui->text_bp_bht_addr_bits_number->setText(QString::number(config->get_bp_bht_addr_bits()));
     ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
+    ui->text_bp_bht_entries_number->setText(QString::number(qPow(2, config->get_bp_bht_bits())));
+    bp_type_change();
 
     // Memory
     ui->mem_protec_exec->setChecked(config->memory_execute_protection());
