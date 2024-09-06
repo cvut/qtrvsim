@@ -78,6 +78,7 @@ public:
     // This is dummy constructor for qt internal uses only.
     Memory();
     explicit Memory(Endian simulated_machine_endian);
+    Memory(Endian simulated_machine_endian, size_t xlen);
     Memory(const Memory &);
     ~Memory() override;
     void reset(); // Reset whole content of memory (removes old tree and creates
@@ -109,14 +110,16 @@ public:
 private:
     union MemoryTree *mt_root;
     uint32_t change_counter = 0;
+    size_t xlen;
     static union MemoryTree *allocate_section_tree();
-    static void free_section_tree(union MemoryTree *, size_t depth);
+    static void free_section_tree(union MemoryTree *, size_t depth , size_t memory_tree_depth);
     static bool compare_section_tree(
         const union MemoryTree *,
         const union MemoryTree *,
-        size_t depth);
+        size_t depth,
+        size_t memory_tree_depth);
     static union MemoryTree *
-    copy_section_tree(const union MemoryTree *, size_t depth);
+    copy_section_tree(const union MemoryTree *, size_t depth , size_t memory_tree_depth);
     [[nodiscard]] uint32_t get_change_counter() const;
 };
 } // namespace machine

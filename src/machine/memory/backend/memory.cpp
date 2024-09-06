@@ -102,22 +102,22 @@ static_assert(
  *  ```address & generate_mask(8, 0)```
  */
 constexpr uint64_t generate_mask(size_t section_size, size_t unit_size) {
-    return ((1U << section_size) - 1) << unit_size;
+    return ((1ULL << section_size) - 1) << unit_size;
 }
 
 /**
  * Get index in row for given offset and row number i
  */
-constexpr size_t tree_row_bit_offset(size_t i) {
-    return 32 - MEMORY_TREE_BITS - i * MEMORY_TREE_BITS;
+constexpr uint64_t tree_row_bit_offset(size_t i, size_t xlen) {
+    return xlen - MEMORY_TREE_BITS - i * MEMORY_TREE_BITS;
 }
 
 /*
  * Select branch index from memory tree.
  */
-constexpr size_t get_tree_row(size_t offset, size_t i) {
-    return (offset & generate_mask(MEMORY_TREE_BITS, tree_row_bit_offset(i)))
-           >> tree_row_bit_offset(i);
+constexpr uint64_t get_tree_row(uint64_t offset, size_t i, size_t xlen) {
+    return (offset & generate_mask(MEMORY_TREE_BITS, tree_row_bit_offset(i, xlen)))
+           >> tree_row_bit_offset(i, xlen);
 }
 
 Memory::Memory() : BackendMemory(BIG) {
@@ -128,27 +128,61 @@ Memory::Memory() : BackendMemory(BIG) {
 Memory::Memory(Endian simulated_machine_endian)
     : BackendMemory(simulated_machine_endian) {
     this->mt_root = allocate_section_tree();
+    this->xlen = 32;
+}
+
+Memory::Memory(Endian simulated_machine_endian, size_t xlen)
+    : BackendMemory(simulated_machine_endian) {
+    this->mt_root = allocate_section_tree();
+    this->xlen = xlen;
 }
 
 Memory::Memory(const Memory &other)
     : BackendMemory(other.simulated_machine_endian) {
-    this->mt_root = copy_section_tree(other.get_memory_tree_root(), 0);
+    this->xlen = other.xlen;
+    this->mt_root = copy_section_tree(other.get_memory_tree_root(), 0, ((this->xlen - MEMORY_SECTION_BITS) / MEMORY_TREE_BITS));
 }
 
 Memory::~Memory() {
-    free_section_tree(this->mt_root, 0);
+    free_section_tree(this->mt_root, 0, ((this->xlen - MEMORY_SECTION_BITS) / MEMORY_TREE_BITS));
     delete[] this->mt_root;
 }
 
 void Memory::reset() {
-    free_section_tree(this->mt_root, 0);
+    free_section_tree(this->mt_root, 0, ((this->xlen - MEMORY_SECTION_BITS) / MEMORY_TREE_BITS));
     delete[] this->mt_root;
     this->mt_root = allocate_section_tree();
 }
 
 void Memory::reset(const Memory &m) {
-    free_section_tree(this->mt_root, 0);
-    this->mt_root = copy_section_tree(m.get_memory_tree_root(), 0);
+    free_section_tree(this->mt_root, 0, ((this->xlen - MEMORY_SECTION_BITS) / MEMORY_TREE_BITS));
+    if(this->xlen > m.xlen) {
+        union MemoryTree *cmt = allocate_section_tree();
+        const union MemoryTree *mt = m.get_memory_tree_root();
+        this->xlen = m.xlen;
+        for(size_t i = 0; i < MEMORY_TREE_ROW_SIZE; i++) {
+            if (mt[i].subtree != nullptr) {
+                size_t index = i >> 3 ? 15 : 0;
+                union MemoryTree *temp = cmt;
+                for (size_t j = 0; j < 8; j++, temp = temp[index].subtree) {
+                    if (temp[index].subtree == nullptr) {
+                        temp[index].subtree = allocate_section_tree();
+                    }
+                }
+                temp[i].subtree = copy_section_tree(mt[i].subtree, 1, ((this->xlen - MEMORY_SECTION_BITS) / MEMORY_TREE_BITS));
+            }
+        }
+        delete[] this->mt_root;
+        this->mt_root = cmt;
+        this->xlen = 64;
+    }
+    else if (this->xlen < m.xlen) {
+        delete[] this->mt_root;
+        this->mt_root = allocate_section_tree();
+    }
+    else
+        this->mt_root = copy_section_tree(m.get_memory_tree_root(), 0, ((this->xlen - MEMORY_SECTION_BITS) / MEMORY_TREE_BITS));
+
 }
 
 MemorySection *Memory::get_section(size_t offset, bool create) const {
@@ -156,8 +190,9 @@ MemorySection *Memory::get_section(size_t offset, bool create) const {
     size_t row_num;
     // Walk memory tree branch from root to leaf and create new nodes when
     // needed and requested (`create` flag).
-    for (size_t i = 0; i < (MEMORY_TREE_DEPTH - 1); i++) {
-        row_num = get_tree_row(offset, i);
+    size_t memory_tree_depth = ((this->xlen - MEMORY_SECTION_BITS) / MEMORY_TREE_BITS);
+    for (size_t i = 0; i < (memory_tree_depth - 1); i++) {
+        row_num = get_tree_row(offset, i, this->xlen);
         if (w[row_num].subtree == nullptr) {
             // We don't have this tree so allocate it.
             if (!create) {
@@ -168,7 +203,7 @@ MemorySection *Memory::get_section(size_t offset, bool create) const {
         }
         w = w[row_num].subtree;
     }
-    row_num = get_tree_row(offset, MEMORY_TREE_DEPTH - 1);
+    row_num = get_tree_row(offset, memory_tree_depth - 1, this->xlen);
     if (w[row_num].sec == nullptr) {
         if (!create) {
             return nullptr;
@@ -227,7 +262,7 @@ uint32_t Memory::get_change_counter() const {
 }
 
 bool Memory::operator==(const Memory &m) const {
-    return compare_section_tree(this->mt_root, m.get_memory_tree_root(), 0);
+    return compare_section_tree(this->mt_root, m.get_memory_tree_root(), 0 , ((this->xlen - MEMORY_SECTION_BITS) / MEMORY_TREE_BITS));
 }
 
 bool Memory::operator!=(const Memory &m) const {
@@ -244,11 +279,11 @@ union machine::MemoryTree *Memory::allocate_section_tree() {
     return mt;
 }
 
-void Memory::free_section_tree(union MemoryTree *mt, size_t depth) {
-    if (depth < (MEMORY_TREE_DEPTH - 1)) { // Following level is memory tree
+void Memory::free_section_tree(union MemoryTree *mt, size_t depth, size_t memory_tree_depth) {
+    if (depth < (memory_tree_depth - 1)) { // Following level is memory tree
         for (size_t i = 0; i < MEMORY_TREE_ROW_SIZE; i++) {
             if (mt[i].subtree != nullptr) {
-                free_section_tree(mt[i].subtree, depth + 1);
+                free_section_tree(mt[i].subtree, depth + 1, memory_tree_depth);
                 delete[] mt[i].subtree;
             }
         }
@@ -262,14 +297,15 @@ void Memory::free_section_tree(union MemoryTree *mt, size_t depth) {
 bool Memory::compare_section_tree(
     const union MemoryTree *mt1,
     const union MemoryTree *mt2,
-    size_t depth) {
-    if (depth < (MEMORY_TREE_DEPTH - 1)) { // Following level is memory tree
+    size_t depth,
+    size_t memory_tree_depth) { 
+    if (depth < (memory_tree_depth - 1)) { // Following level is memory tree
         for (size_t i = 0; i < MEMORY_TREE_ROW_SIZE; i++) {
             if (((mt1[i].subtree == nullptr || mt2[i].subtree == nullptr)
                  && mt1[i].subtree != mt2[i].subtree)
                 || (mt1[i].subtree != nullptr && mt2[i].subtree != nullptr
                     && !compare_section_tree(
-                        mt1[i].subtree, mt2[i].subtree, depth + 1))) {
+                        mt1[i].subtree, mt2[i].subtree, depth + 1, memory_tree_depth))) {
                 return false;
             }
         }
@@ -287,12 +323,12 @@ bool Memory::compare_section_tree(
 }
 
 union machine::MemoryTree *
-Memory::copy_section_tree(const union MemoryTree *mt, size_t depth) {
+Memory::copy_section_tree(const union MemoryTree *mt, size_t depth, size_t memory_tree_depth) {
     union MemoryTree *nmt = allocate_section_tree();
-    if (depth < (MEMORY_TREE_DEPTH - 1)) { // Following level is memory tree
+    if (depth < (memory_tree_depth - 1)) { // Following level is memory tree
         for (size_t i = 0; i < MEMORY_TREE_ROW_SIZE; i++) {
             if (mt[i].subtree != nullptr) {
-                nmt[i].subtree = copy_section_tree(mt[i].subtree, depth + 1);
+                nmt[i].subtree = copy_section_tree(mt[i].subtree, depth + 1, memory_tree_depth);
             }
         }
     } else { // Following level is memory section

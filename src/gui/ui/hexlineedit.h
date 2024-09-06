@@ -17,10 +17,10 @@ public:
         const QString &prefix = "0x");
 
 public slots:
-    void set_value(uint32_t value);
+    void set_value(uint64_t value);
 
 signals:
-    void value_edit_finished(uint32_t value);
+    void value_edit_finished(uint64_t value);
 
 private slots:
     void on_edit_finished();

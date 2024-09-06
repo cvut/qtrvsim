@@ -32,7 +32,7 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     memory_content->verticalHeader()->hide();
     // memory_content->setHorizontalHeader(memory_model->);
 
-    auto *go_edit = new HexLineEdit(nullptr, 8, 16, "0x");
+    auto *go_edit = new HexLineEdit(nullptr, 16, 16, "0x");
 
     auto *layout_top = new QHBoxLayout;
     layout_top->addWidget(cell_size);
@@ -57,7 +57,7 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
         memory_model, &MemoryModel::cached_access);
     connect(
         go_edit, &HexLineEdit::value_edit_finished, memory_content,
-        [memory_content](uint32_t value) {
+        [memory_content](uint64_t value) {
             memory_content->go_to_address(machine::Address(value));
         });
     connect(

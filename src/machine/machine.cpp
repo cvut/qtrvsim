@@ -15,14 +15,18 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
     if (load_executable) {
         ProgramLoader program(machine_config.elf());
         this->machine_config.set_simulated_endian(program.get_endian());
-        mem_program_only = new Memory(machine_config.get_simulated_endian());
-        program.to_memory(mem_program_only);
 
         if (program.get_architecture_type() == ARCH64)
             this->machine_config.set_simulated_xlen(Xlen::_64);
         else
             this->machine_config.set_simulated_xlen(Xlen::_32);
 
+        if (this->machine_config.get_simulated_xlen() == Xlen::_64)
+            mem_program_only = new Memory(machine_config.get_simulated_endian(), 64);
+        else 
+            mem_program_only = new Memory(machine_config.get_simulated_endian(), 32);
+        program.to_memory(mem_program_only);
+        
         if (load_symtab) {
             symtab = program.get_symbol_table();
         }
@@ -33,12 +37,16 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         }
         mem = new Memory(*mem_program_only);
     } else {
-        mem = new Memory(machine_config.get_simulated_endian());
+        mem = (this->machine_config.get_simulated_xlen() == Xlen::_64 ? new Memory(machine_config.get_simulated_endian(), 64) : new Memory(machine_config.get_simulated_endian(), 32));
     }
 
     data_bus = new MemoryDataBus(machine_config.get_simulated_endian());
-    data_bus->insert_device_to_range(
-        mem, 0x00000000_addr, 0xefffffff_addr, false);
+    if (this->machine_config.get_simulated_xlen() == Xlen::_32)
+        data_bus->insert_device_to_range(
+            mem, 0x00000000_addr, 0xefffffff_addr, false);
+    else
+        data_bus->insert_device_to_range(
+            mem, 0x00000000_addr, 0xefffffffffffffff_addr, false);
 
     setup_serial_port();
     setup_perip_spi_led();
@@ -112,18 +120,34 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
 }
 void Machine::setup_lcd_display() {
     perip_lcd_display = new LcdDisplay(machine_config.get_simulated_endian());
-    memory_bus_insert_range(
-        perip_lcd_display, 0xffe00000_addr, 0xffe4afff_addr, true);
+    if(this->machine_config.get_simulated_xlen() == Xlen::_64){
+        memory_bus_insert_range(
+            perip_lcd_display, 0xffffffffffe00000_addr, 0xffffffffffe4afff_addr, true);
+    }
+    else
+        memory_bus_insert_range(
+            perip_lcd_display, 0xffe00000_addr, 0xffe4afff_addr, true);
 }
 void Machine::setup_perip_spi_led() {
     perip_spi_led = new PeripSpiLed(machine_config.get_simulated_endian());
-    memory_bus_insert_range(
-        perip_spi_led, 0xffffc100_addr, 0xffffc1ff_addr, true);
+    if(this->machine_config.get_simulated_xlen() == Xlen::_64){
+        memory_bus_insert_range(
+            perip_spi_led, 0xffffffffffffc100_addr, 0xffffffffffffc1ff_addr, true);
+    }
+    else
+        memory_bus_insert_range(
+            perip_spi_led, 0xffffc100_addr, 0xffffc1ff_addr, true);
 }
 void Machine::setup_serial_port() {
     ser_port = new SerialPort(machine_config.get_simulated_endian());
-    memory_bus_insert_range(ser_port, 0xffffc000_addr, 0xffffc03f_addr, true);
-    memory_bus_insert_range(ser_port, 0xffff0000_addr, 0xffff003f_addr, false);
+    if(this->machine_config.get_simulated_xlen() == Xlen::_64){
+        memory_bus_insert_range(ser_port, 0xffffffffffffc000_addr, 0xffffffffffffc03f_addr, true);
+        memory_bus_insert_range(ser_port, 0xffffffffffff0000_addr, 0xffffffffffff003f_addr, false);
+    }
+    else{
+        memory_bus_insert_range(ser_port, 0xffffc000_addr, 0xffffc03f_addr, true);
+        memory_bus_insert_range(ser_port, 0xffff0000_addr, 0xffff003f_addr, false);
+    }
     connect(
         ser_port, &SerialPort::signal_interrupt, this,
         &Machine::set_interrupt_signal);
