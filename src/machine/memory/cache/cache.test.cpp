@@ -34,9 +34,9 @@ constexpr array<uint64_t, 1> values { 0x4142434445464748 };
  * Cache configuration parameters for testing
  * (all combinations are tested)
  */
-constexpr array<CacheConfig::ReplacementPolicy, 3> replacement_policies { CacheConfig::RP_RAND,
-                                                                          CacheConfig::RP_LFU,
-                                                                          CacheConfig::RP_LRU };
+constexpr array<CacheConfig::ReplacementPolicy, 4> replacement_policies {
+    CacheConfig::RP_RAND, CacheConfig::RP_LFU, CacheConfig::RP_LRU, CacheConfig::RP_PLRU
+};
 constexpr array<CacheConfig::WritePolicy, 3> write_policies {
     CacheConfig::WP_THROUGH_NOALLOC, // THIS
                                      // IS

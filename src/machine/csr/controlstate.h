@@ -253,7 +253,25 @@ namespace machine { namespace CSR {
         }
     };
 
+    class RegisterMapByName {
+        bool initialized = false;
+        std::unordered_map<std::string, size_t> map;
+
+        void init() {
+            for (size_t i = 0; i < REGISTERS.size(); i++) {
+                map.emplace(std::string(REGISTERS[i].name), i);
+            }
+            initialized = true;
+        }
+    public:
+        size_t at(std::string name) {
+            if (!initialized) init();
+            return map.at(name);
+        }
+    };
+
     static RegisterMap REGISTER_MAP;
+    static RegisterMapByName REGISTER_MAP_BY_NAME;
 }} // namespace machine::CSR
 
 Q_DECLARE_METATYPE(machine::CSR::ControlState)

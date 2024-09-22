@@ -3,6 +3,7 @@
 #include "simulator_exception.h"
 #include "utils.h"
 
+#include <cmath>
 #include <cstddef>
 
 namespace machine {
@@ -19,6 +20,8 @@ CachePolicy::get_policy_instance(const CacheConfig *config) {
         case CacheConfig::RP_LFU:
             return std::make_unique<CachePolicyLFU>(
                 config->associativity(), config->set_count());
+        case CacheConfig::RP_PLRU:
+            return std::make_unique<CachePolicyPLRU>(config->associativity(), config->set_count());
         }
     } else {
         // Disabled cache will never use it.
@@ -127,5 +130,46 @@ void CachePolicyRAND::update_stats(size_t way, size_t row, bool is_valid) {
 size_t CachePolicyRAND::select_way_to_evict(size_t row) const {
     UNUSED(row)
     return std::rand() % associativity; // NOLINT(cert-msc50-cpp)
+}
+
+CachePolicyPLRU::CachePolicyPLRU(size_t associativity, size_t set_count)
+    : associativity(associativity)
+    , associativityCLog2(std::ceil(log2((float)associativity))) {
+    plru_ptr.resize(set_count);
+    for (auto &row : plru_ptr) {
+        row.resize((1 << associativityCLog2) - 1, 0); // Initially point to block 0
+    }
+}
+
+void CachePolicyPLRU::update_stats(size_t way, size_t row, bool is_valid) {
+    UNUSED(is_valid)
+    // PLRU use a set of binary tree structured pointers to keep track of
+    // the least recently used block, the number of pointers for each
+    // row is 2^associativityCLog2 - 1, where associativityCLog2 is the ceil
+    // log2 of associativity, e.x. 1 + 2 + 4 for cache with associativity from
+    // 5 to 8. When doing state update, we have to access one pointer in each
+    // level, therefore we have to ues an index (plru_idx) to track the currently accessing pointer
+    uint32_t plru_idx = 0;            // Index of pointer
+    auto &row_ptr = plru_ptr.at(row); // Pointer of accessed row
+    for (uint32_t i = 0; i < associativityCLog2; i++) {
+        // Toggle the pointer to another direction
+        row_ptr[plru_idx] = ((way >> (associativityCLog2 - 1 - i)) & 1) ? 0 : 1;
+        plru_idx = (1 << (i + 1)) - 1;
+        plru_idx += way >> (associativityCLog2 - 1 - i);
+    }
+}
+
+size_t CachePolicyPLRU::select_way_to_evict(size_t row) const {
+    uint32_t idx = 0;
+    uint32_t plru_idx = 0;
+    auto &row_ptr = plru_ptr.at(row);
+    for (uint32_t i = 0; i < associativityCLog2; i++) {
+        idx <<= 1;
+        uint32_t ptr = row_ptr[plru_idx];
+        idx += ptr;
+        plru_idx = (1 << (i + 1)) - 1;
+        plru_idx += idx;
+    }
+    return (idx >= associativity) ? (associativity - 1) : idx;
 }
 } // namespace machine

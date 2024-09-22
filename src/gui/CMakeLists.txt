@@ -49,6 +49,9 @@ set(gui_SOURCES
         windows/coreview/components/value_handlers.cpp
         windows/coreview/components/cache.cpp
         widgets/hidingtabwidget.cpp
+        windows/predictor/predictor_btb_dock.cpp
+        windows/predictor/predictor_bht_dock.cpp
+        windows/predictor/predictor_info_dock.cpp
         )
 set(gui_HEADERS
         dialogs/about/aboutdialog.h
@@ -92,6 +95,9 @@ set(gui_HEADERS
         windows/coreview/components/cache.h
         helper/async_modal.h
         widgets/hidingtabwidget.h
+        windows/predictor/predictor_btb_dock.h
+        windows/predictor/predictor_bht_dock.h
+        windows/predictor/predictor_info_dock.h
         )
 set(gui_UI
         dialogs/gotosymbol/gotosymboldialog.ui

@@ -3,6 +3,7 @@
 
 #include "common/memory_ownership.h"
 #include "machine/machineconfig.h"
+#include "predictor_types.h"
 #include "ui_NewDialog.h"
 #include "ui_NewDialogCache.h"
 
@@ -53,6 +54,10 @@ private slots:
     void osemu_fs_root_change(QString val);
     void reset_at_compile_change(bool);
 
+    // Branch Predictor
+    void bp_toggle_widgets();
+    void bp_type_change();
+
 private:
     Box<Ui::NewDialog> ui {};
     Box<Ui::NewDialogCache> ui_cache_p {}, ui_cache_d {}, ui_cache_l2 {};
@@ -71,6 +76,7 @@ class NewDialogCacheHandler : public QObject {
     Q_OBJECT
 
     using Super = QObject;
+
 public:
     NewDialogCacheHandler(NewDialog *nd, Ui::NewDialogCache *ui);
 
