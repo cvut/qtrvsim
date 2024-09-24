@@ -7,3 +7,4 @@ Type=Application
 Comment=@GENERIC_NAME@
 Terminal=false
 Categories=System;Emulator;
+Keywords=emulator;RISC-V;education;
