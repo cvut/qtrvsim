@@ -329,6 +329,14 @@ void MachineConfig::preset(enum ConfigPresets p) {
     set_memory_access_time_level2(DF_MEM_ACC_LEVEL2);
     set_memory_access_enable_burst(DF_MEM_ACC_BURST_ENABLE);
 
+    // Branch predictor
+    set_bp_enabled(DFC_BP_ENABLED);
+    set_bp_type(DFC_BP_TYPE);
+    set_bp_init_state(DFC_BP_INIT_STATE);
+    set_bp_btb_bits(DFC_BP_BTB_BITS);
+    set_bp_bhr_bits(DFC_BP_BHR_BITS);
+    set_bp_bht_addr_bits(DFC_BP_BHT_ADDR_BITS);
+
     access_cache_program()->preset(p);
     access_cache_data()->preset(p);
     access_cache_level2()->preset(p);
@@ -624,7 +632,10 @@ uint8_t MachineConfig::get_bp_bht_bits() const {
 bool MachineConfig::operator==(const MachineConfig &c) const {
 #define CMP(GETTER) (GETTER)() == (c.GETTER)()
     return CMP(pipelined) && CMP(delay_slot) && CMP(hazard_unit) && CMP(get_simulated_xlen)
-           && CMP(get_isa_word) && CMP(memory_execute_protection) && CMP(memory_write_protection)
+           && CMP(get_isa_word) && CMP(get_bp_enabled) && CMP(get_bp_type)
+           && CMP(get_bp_init_state) && CMP(get_bp_btb_bits)
+           && CMP(get_bp_bhr_bits) && CMP(get_bp_bht_addr_bits)
+           && CMP(memory_execute_protection) && CMP(memory_write_protection)
            && CMP(memory_access_time_read) && CMP(memory_access_time_write)
            && CMP(memory_access_time_burst) && CMP(memory_access_time_level2)
            && CMP(memory_access_enable_burst) && CMP(elf) && CMP(cache_program) && CMP(cache_data)

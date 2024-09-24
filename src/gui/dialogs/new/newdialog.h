@@ -56,7 +56,12 @@ private slots:
 
     // Branch Predictor
     void bp_toggle_widgets();
-    void bp_type_change();
+    void bp_enabled_change(bool);
+    void bp_type_change(void);
+    void bp_init_state_change(void);
+    void bp_btb_addr_bits_change(int);
+    void bp_bht_bhr_bits_change(int);
+    void bp_bht_addr_bits_change(int);
 
 private:
     Box<Ui::NewDialog> ui {};
@@ -65,6 +70,7 @@ private:
 
     Box<machine::MachineConfig> config;
     void config_gui(); // Apply configuration to gui
+    void bp_bht_bits_texts_update(void);
 
     unsigned preset_number();
     void load_settings();

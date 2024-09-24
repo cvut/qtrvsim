@@ -130,35 +130,23 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     connect(ui->osemu_fs_root, &QLineEdit::textChanged, this, &NewDialog::osemu_fs_root_change);
 
     // Branch predictor
-    connect(ui->group_bp, QOverload<bool>::of(&QGroupBox::toggled), this, [this] {
-        config->set_bp_enabled(ui->group_bp->isChecked());
-        bp_toggle_widgets();
-    });
+    connect(
+        ui->group_bp, QOverload<bool>::of(&QGroupBox::toggled), this,
+        &NewDialog::bp_enabled_change);
     connect(
         ui->select_bp_type, QOverload<int>::of(&QComboBox::activated), this,
         &NewDialog::bp_type_change);
-    connect(ui->select_bp_init_state, QOverload<int>::of(&QComboBox::activated), this, [this] {
-        config->set_bp_init_state(
-            ui->select_bp_init_state->currentData().value<machine::PredictorState>());
-    });
-    connect(ui->slider_bp_btb_addr_bits, &QAbstractSlider::valueChanged, this, [this] {
-        config->set_bp_btb_bits((uint8_t)ui->slider_bp_btb_addr_bits->value());
-        ui->text_bp_btb_addr_bits_number->setText(QString::number(config->get_bp_btb_bits()));
-        ui->text_bp_btb_bits_number->setText(QString::number(config->get_bp_btb_bits()));
-        ui->text_bp_btb_entries_number->setText(QString::number(qPow(2, config->get_bp_btb_bits())));
-    });
-    connect(ui->slider_bp_bht_bhr_bits, &QAbstractSlider::valueChanged, this, [this] {
-        config->set_bp_bhr_bits((uint8_t)ui->slider_bp_bht_bhr_bits->value());
-        ui->text_bp_bht_bhr_bits_number->setText(QString::number(config->get_bp_bhr_bits()));
-        ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
-        ui->text_bp_bht_entries_number->setText(QString::number(qPow(2, config->get_bp_bht_bits())));
-    });
-    connect(ui->slider_bp_bht_addr_bits, &QAbstractSlider::valueChanged, this, [this] {
-        config->set_bp_bht_addr_bits((uint8_t)ui->slider_bp_bht_addr_bits->value());
-        ui->text_bp_bht_addr_bits_number->setText(QString::number(config->get_bp_bht_addr_bits()));
-        ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
-        ui->text_bp_bht_entries_number->setText(QString::number(qPow(2, config->get_bp_bht_bits())));
-    });
+    connect(
+        ui->select_bp_init_state, QOverload<int>::of(&QComboBox::activated), this,
+        &NewDialog::bp_init_state_change);
+    connect(
+        ui->slider_bp_btb_addr_bits, &QAbstractSlider::valueChanged, this,
+        &NewDialog::bp_btb_addr_bits_change);
+    connect(
+        ui->slider_bp_bht_bhr_bits, &QAbstractSlider::valueChanged, this,
+        &NewDialog::bp_bht_bhr_bits_change);
+    connect(ui->slider_bp_bht_addr_bits, &QAbstractSlider::valueChanged, this,
+        &NewDialog::bp_bht_addr_bits_change);
 
     cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d.data());
     cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p.data());
@@ -172,8 +160,10 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
 }
 
 void NewDialog::switch2custom() {
-    ui->preset_custom->setChecked(true);
-    config_gui();
+    if (!ui->preset_custom->isChecked()) {
+        ui->preset_custom->setChecked(true);
+        config_gui();
+    }
 }
 
 void NewDialog::closeEvent(QCloseEvent *) {
@@ -414,6 +404,9 @@ void NewDialog::bp_type_change() {
     const machine::PredictorType predictor_type {
         ui->select_bp_type->currentData().value<machine::PredictorType>()
     };
+
+    bool need_switch2custom = (config->get_bp_type() != predictor_type);
+
     config->set_bp_type(predictor_type);
 
     // Remove all items from init state list
@@ -474,6 +467,58 @@ void NewDialog::bp_type_change() {
         break;
     }
     bp_toggle_widgets();
+
+    if (need_switch2custom)
+        switch2custom();
+}
+
+void NewDialog::bp_enabled_change(bool v) {
+    if (config->get_bp_enabled() != v) {
+        config->set_bp_enabled(v);
+        bp_toggle_widgets();
+        switch2custom();
+    }
+}
+
+void NewDialog::bp_init_state_change(void) {
+    auto v = ui->select_bp_init_state->currentData().value<machine::PredictorState>();
+    if (v != config->get_bp_init_state()) {
+        config->set_bp_init_state(v);
+        switch2custom();
+    }
+}
+
+void NewDialog::bp_btb_addr_bits_change(int v) {
+    if (config->get_bp_btb_bits() != v) {
+        config->set_bp_btb_bits((uint8_t)v);
+        switch2custom();
+    }
+    ui->text_bp_btb_addr_bits_number->setText(QString::number(config->get_bp_btb_bits()));
+    ui->text_bp_btb_bits_number->setText(QString::number(config->get_bp_btb_bits()));
+    ui->text_bp_btb_entries_number->setText(QString::number(qPow(2, config->get_bp_btb_bits())));
+}
+
+void NewDialog::bp_bht_bits_texts_update(void) {
+    ui->text_bp_bht_bhr_bits_number->setText(QString::number(config->get_bp_bhr_bits()));
+    ui->text_bp_bht_addr_bits_number->setText(QString::number(config->get_bp_bht_addr_bits()));
+    ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
+    ui->text_bp_bht_entries_number->setText(QString::number(qPow(2, config->get_bp_bht_bits())));
+}
+
+void NewDialog::bp_bht_bhr_bits_change(int v) {
+    if (config->get_bp_bhr_bits() != v) {
+        config->set_bp_bhr_bits((uint8_t)v);
+        switch2custom();
+    }
+    bp_bht_bits_texts_update();
+}
+
+void NewDialog::bp_bht_addr_bits_change(int v) {
+    if (config->get_bp_bht_addr_bits() != v) {
+        config->set_bp_bht_addr_bits((uint8_t)v);
+        switch2custom();
+    }
+    bp_bht_bits_texts_update();
 }
 
 void NewDialog::config_gui() {
