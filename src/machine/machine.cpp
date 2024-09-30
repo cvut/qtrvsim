@@ -114,16 +114,24 @@ void Machine::setup_lcd_display() {
     perip_lcd_display = new LcdDisplay(machine_config.get_simulated_endian());
     memory_bus_insert_range(
         perip_lcd_display, 0xffe00000_addr, 0xffe4afff_addr, true);
+    if (machine_config.get_simulated_xlen() == Xlen::_64)
+        memory_bus_insert_range(
+            perip_lcd_display, 0xffffffffffe00000_addr, 0xffffffffffe4afff_addr, false);
 }
 void Machine::setup_perip_spi_led() {
     perip_spi_led = new PeripSpiLed(machine_config.get_simulated_endian());
     memory_bus_insert_range(
         perip_spi_led, 0xffffc100_addr, 0xffffc1ff_addr, true);
+    if (machine_config.get_simulated_xlen() == Xlen::_64)
+        memory_bus_insert_range(
+            perip_spi_led, 0xffffffffffffc100_addr, 0xffffffffffffc1ff_addr, false);
 }
 void Machine::setup_serial_port() {
     ser_port = new SerialPort(machine_config.get_simulated_endian());
     memory_bus_insert_range(ser_port, 0xffffc000_addr, 0xffffc03f_addr, true);
     memory_bus_insert_range(ser_port, 0xffff0000_addr, 0xffff003f_addr, false);
+    if (machine_config.get_simulated_xlen() == Xlen::_64)
+        memory_bus_insert_range(ser_port, 0xffffffffffffc000_addr, 0xffffffffffffc03f_addr, false);
     connect(
         ser_port, &SerialPort::signal_interrupt, this,
         &Machine::set_interrupt_signal);
@@ -135,6 +143,11 @@ void Machine::setup_aclint_mtime() {
                             0xfffd0000_addr + aclint::CLINT_MTIMER_OFFSET,
                             0xfffd0000_addr + aclint::CLINT_MTIMER_OFFSET + aclint::CLINT_MTIMER_SIZE - 1,
                             true);
+    if (machine_config.get_simulated_xlen() == Xlen::_64)
+        memory_bus_insert_range(aclint_mtimer,
+                                0xfffffffffffd0000_addr + aclint::CLINT_MTIMER_OFFSET,
+                                0xfffffffffffd0000_addr + aclint::CLINT_MTIMER_OFFSET + aclint::CLINT_MTIMER_SIZE - 1,
+                                false);
     connect(
         aclint_mtimer, &aclint::AclintMtimer::signal_interrupt, this,
         &Machine::set_interrupt_signal);
@@ -146,6 +159,11 @@ void Machine::setup_aclint_mswi() {
                             0xfffd0000_addr + aclint::CLINT_MSWI_OFFSET,
                             0xfffd0000_addr + aclint::CLINT_MSWI_OFFSET + aclint::CLINT_MSWI_SIZE - 1,
                             true);
+    if (machine_config.get_simulated_xlen() == Xlen::_64)
+        memory_bus_insert_range(aclint_mswi,
+                                0xfffffffffffd0000_addr + aclint::CLINT_MSWI_OFFSET,
+                                0xfffffffffffd0000_addr + aclint::CLINT_MSWI_OFFSET + aclint::CLINT_MSWI_SIZE - 1,
+                                false);
     connect(
         aclint_mswi, &aclint::AclintMswi::signal_interrupt, this,
         &Machine::set_interrupt_signal);
@@ -157,6 +175,11 @@ void Machine::setup_aclint_sswi() {
                             0xfffd0000_addr + aclint::CLINT_SSWI_OFFSET,
                             0xfffd0000_addr + aclint::CLINT_SSWI_OFFSET + aclint::CLINT_SSWI_SIZE - 1,
                             true);
+    if (machine_config.get_simulated_xlen() == Xlen::_64)
+        memory_bus_insert_range(aclint_sswi,
+                                0xfffffffffffd0000_addr + aclint::CLINT_SSWI_OFFSET,
+                                0xfffffffffffd0000_addr + aclint::CLINT_SSWI_OFFSET + aclint::CLINT_SSWI_SIZE - 1,
+                                false);
     connect(
         aclint_sswi, &aclint::AclintSswi::signal_interrupt, this,
         &Machine::set_interrupt_signal);
