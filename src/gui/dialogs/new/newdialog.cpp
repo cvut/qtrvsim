@@ -29,6 +29,19 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     ui_cache_l2.reset(new Ui::NewDialogCache());
     ui_cache_l2->setupUi(ui->tab_cache_level2);
 
+    QList<QTreeWidgetItem *> items;
+    for (int i = 0; i < ui->config_pages->count(); ++i) {
+        QString page_id = ui->config_pages->widget(i)->objectName();
+        QString page_name = ui->config_pages->widget(i)->accessibleName();
+        items.append(new QTreeWidgetItem(static_cast<QTreeWidget *>(nullptr),
+                                         QStringList{page_name, page_id}));
+    }
+    ui->page_select_tree->insertTopLevelItems(0, items);
+
+    connect(
+        ui->page_select_tree, &QTreeWidget::currentItemChanged,
+        this, &NewDialog::switch2page);
+
     connect(
         ui->pushButton_example, &QAbstractButton::clicked, this,
         &NewDialog::create_example);
@@ -159,6 +172,14 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     load_settings(); // Also configures gui
 }
 
+void NewDialog::switch2page(QTreeWidgetItem *current, QTreeWidgetItem *previous) {
+    (void)previous;
+    QWidget *page = ui->config_pages->findChild<QWidget *>(current->text(1),
+                                                           Qt::FindDirectChildrenOnly);
+    if (page != nullptr)
+        ui->config_pages->setCurrentWidget(page);
+}
+
 void NewDialog::switch2custom() {
     if (!ui->preset_custom->isChecked()) {
         ui->preset_custom->setChecked(true);
@@ -278,6 +299,7 @@ void NewDialog::isa_multiply_change(bool val) {
 
 void NewDialog::pipelined_change(bool val) {
     config->set_pipelined(val);
+    ui->hazard_unit->setEnabled(config->pipelined());
     switch2custom();
 }
 
