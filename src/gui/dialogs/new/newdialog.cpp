@@ -29,14 +29,14 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     ui_cache_l2.reset(new Ui::NewDialogCache());
     ui_cache_l2->setupUi(ui->tab_cache_level2);
 
-    QList<QTreeWidgetItem *> items;
+    QList<QTreeWidgetItem *> config_pages_items;
     for (int i = 0; i < ui->config_pages->count(); ++i) {
         QString page_id = ui->config_pages->widget(i)->objectName();
         QString page_name = ui->config_pages->widget(i)->accessibleName();
-        items.append(new QTreeWidgetItem(static_cast<QTreeWidget *>(nullptr),
-                                         QStringList{page_name, page_id}));
+        config_pages_items.append(new QTreeWidgetItem(static_cast<QTreeWidget *>(nullptr),
+                                                      QStringList{page_name, page_id}));
     }
-    ui->page_select_tree->insertTopLevelItems(0, items);
+    ui->page_select_tree->insertTopLevelItems(0, config_pages_items);
 
     connect(
         ui->page_select_tree, &QTreeWidget::currentItemChanged,
@@ -170,14 +170,19 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     ui->mem_protec_write->setVisible(false);
 
     load_settings(); // Also configures gui
+
+    ui->config_page_title->setStyleSheet("font-weight: bold");
+    switch2page(config_pages_items.at(0));
 }
 
 void NewDialog::switch2page(QTreeWidgetItem *current, QTreeWidgetItem *previous) {
     (void)previous;
     QWidget *page = ui->config_pages->findChild<QWidget *>(current->text(1),
                                                            Qt::FindDirectChildrenOnly);
-    if (page != nullptr)
+    if (page != nullptr) {
         ui->config_pages->setCurrentWidget(page);
+        ui->config_page_title->setText(current->text(0));
+    }
 }
 
 void NewDialog::switch2custom() {
