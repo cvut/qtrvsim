@@ -53,6 +53,7 @@ private slots:
     void browse_osemu_fs_root();
     void osemu_fs_root_change(QString val);
     void reset_at_compile_change(bool);
+    void switch2page(QTreeWidgetItem *current, QTreeWidgetItem *previous = nullptr);
 
     // Branch Predictor
     void bp_toggle_widgets();
