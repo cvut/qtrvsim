@@ -17,9 +17,14 @@
   </description>
 
   <releases>
-    <release version="@MAIN_PROJECT_VERSION@" date="2024-02-16">
+    <release version="@MAIN_PROJECT_VERSION@" date="2024-10-01">
       <description>
         <p>Current project release.</p>
+      </description>
+    </release>
+    <release version="0.9.7" date="2024-02-16">
+      <description>
+        <p>GUI fix crash when no tab is selected, use bundled LibElf on macOS as Homebrew misses RISC-V</p>
       </description>
     </release>
     <release version="0.9.6" date="2023-12-11">
