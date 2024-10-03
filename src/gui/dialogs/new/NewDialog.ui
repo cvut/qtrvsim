@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>667</width>
+    <width>745</width>
     <height>472</height>
    </rect>
   </property>
@@ -30,6 +30,12 @@
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
       <widget class="QTreeWidget" name="page_select_tree">
+       <property name="minimumSize">
+        <size>
+         <width>135</width>
+         <height>0</height>
+        </size>
+       </property>
        <column>
         <property name="text">
          <string notr="true">Config Pages</string>
