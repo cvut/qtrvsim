@@ -112,9 +112,9 @@ void Reporter::report() {
         if (file.open(QIODevice::WriteOnly)) {
             file.write(bytes);
             file.close();
-            printf("JSON object written to file");
+            printf("JSON object written to file\n");
         } else {
-            printf("Could not open file for writing");
+            printf("Could not open file for writing\n");
         }
     }
 }
