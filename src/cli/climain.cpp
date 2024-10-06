@@ -58,12 +58,14 @@ void CLIMain::create_parser() {
                   "all registers.",
                   "REG" });
     parser.addOption({ "dump-to-json", "Configure reportor dump to json file.", "FNAME" });
+    parser.addOption({ "only-dump", "Do not start the processor." });
     parser.addOption({ "disable-console-dump", "Configure reporter not to dump to console." });
     parser.addOption({ { "dump-registers", "d-regs" }, "Dump registers state at program exit." });
     parser.addOption({ "dump-cache-stats", "Dump cache statistics at program exit." });
     parser.addOption({ "dump-cycles", "Dump number of CPU cycles till program end." });
     parser.addOption({ "dump-range", "Dump memory range.", "START,LENGTH,FNAME" });
     parser.addOption({ "dump-symbol-table", "Dump the symbol table." });
+    parser.addOption({ "initial-pc", "Start execution at specified address (default 0x200). ", "NUMBER" });
     parser.addOption({ "load-range", "Load memory range.", "START,FNAME" });
     parser.addOption({ "expect-fail", "Expect that program causes CPU trap and fail if it doesn't." });
     parser.addOption({ "fail-match",
@@ -95,7 +97,6 @@ void CLIMain::create_parser() {
     parser.addOption({ { "os-fs-root", "osfsroot" }, "Emulated system root/prefix for opened files", "DIR" });
     parser.addOption({ { "isa-variant", "isavariant" }, "Instruction set to emulate (default RV32IMA)", "STR" });
     parser.addOption({ "cycle-limit", "Limit execution to specified maximum clock cycles", "NUMBER" });
-    parser.addOption({ "initial-pc", "Start execution at specified address (default 0x200). ", "NUMBER" });
 }
 
 void CLIMain::configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const QString &which) {
@@ -576,5 +577,9 @@ void CLIMain::start() {
 
     apply_initial_pc(*machine);
 
-    machine->play();
+    if (parser.isSet("only-dump")) {
+        emit machine->program_exit();
+    } else {
+        machine->play();
+    }
 }
