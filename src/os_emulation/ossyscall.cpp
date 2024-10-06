@@ -1055,7 +1055,7 @@ int OsSyscallExceptionHandler::do_sys_openat(
 
     result = 0;
     if (int64_t(a1) != TARGET_AT_FDCWD) {
-        printf("Unimplemented openat argument a1 %" PRId64, a1);
+        printf("Unimplemented openat argument a1 %" PRId64 "\n", a1);
         if (unknown_syscall_stop) { emit core->stop_on_exception_reached(); }
         return TARGET_ENOSYS;
     }

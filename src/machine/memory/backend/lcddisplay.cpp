@@ -76,7 +76,7 @@ bool LcdDisplay::write_raw_pixel(Offset destination, uint16_t value) {
     Q_ASSERT((destination & 1U) == 0); // uint16_t aligned
 
     if (destination + 1 >= get_fb_size_bytes()) {
-        printf("WARNING: LCD display - read out of range.");
+        printf("WARNING: LCD display - read out of range.\n");
         return false;
     }
 
