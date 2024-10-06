@@ -84,6 +84,7 @@ public:
     void set_step_over_exception(enum ExceptionCause excause, bool value);
     bool get_step_over_exception(enum ExceptionCause excause) const;
     enum ExceptionCause get_exception_cause() const;
+    void write_pc(Address address);
 
 public slots:
     void play();

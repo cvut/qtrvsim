@@ -531,3 +531,7 @@ enum ExceptionCause Machine::get_exception_cause() const {
         return (ExceptionCause)val;
     }
 }
+
+void Machine::write_pc(Address address) {
+    regs->write_pc(address);
+}

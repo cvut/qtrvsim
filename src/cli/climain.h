@@ -40,6 +40,7 @@ private:
     void configure_osemu(machine::Machine *machine);
     void load_ranges(machine::Machine &machine, const QStringList &ranges);
     bool assemble(machine::Machine &machine, MsgReport &msgrep, const QString &filename);
+    void apply_initial_pc(machine::Machine& machine);
 
 public:
 

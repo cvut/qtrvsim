@@ -93,6 +93,7 @@ void CLIMain::create_parser() {
     parser.addOption({ { "os-fs-root", "osfsroot" }, "Emulated system root/prefix for opened files", "DIR" });
     parser.addOption({ { "isa-variant", "isavariant" }, "Instruction set to emulate (default RV32IMA)", "STR" });
     parser.addOption({ "cycle-limit", "Limit execution to specified maximum clock cycles", "NUMBER" });
+    parser.addOption({ "initial-pc", "Start execution at specified address (default 0x200). ", "NUMBER" });
 }
 
 void CLIMain::configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const QString &which) {
@@ -509,6 +510,37 @@ bool CLIMain::assemble(Machine &machine, MsgReport &msgrep, const QString &filen
     return assembler.finish();
 }
 
+void CLIMain::apply_initial_pc(Machine& machine) {
+    auto values = parser.values("initial-pc");
+    if (!values.empty()) {
+        bool ok = true;
+        long long unsigned value = values.last().toULongLong(&ok, 0);
+
+        if (ok && value % 4) {
+            ok = false;
+        }
+
+        if (ok && machine.core()->get_xlen() == machine::Xlen::_64) {
+            if ((value & 0xffffffffffffffffu) != value) {
+                ok = false;
+            }
+        }
+
+        if (ok && machine.core()->get_xlen() == machine::Xlen::_32) {
+            if ((value & 0xffffffffu) != value) {
+                ok = false;
+            }
+        }
+
+        if (ok) {
+            machine.write_pc(Address(value));
+        } else {
+            fprintf(stderr, "Initial pc is not a valid address.\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+}
+
 void CLIMain::start() {
     create_parser();
     parser.process(app);
@@ -535,6 +567,8 @@ void CLIMain::start() {
     QObject::connect(tracer, &Tracer::cycle_limit_reached, reporter, &Reporter::cycle_limit_reached);
 
     load_ranges(*machine, parser.values("load-range"));
+
+    apply_initial_pc(*machine);
 
     machine->play();
 }
