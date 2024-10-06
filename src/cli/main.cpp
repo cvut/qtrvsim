@@ -52,6 +52,7 @@ void create_parser(QCommandLineParser &p) {
                   "all registers.",
                   "REG" });
     p.addOption({ "dump-to-json", "Configure reportor dump to json file.", "FNAME" });
+    p.addOption({ "only-dump", "Do not start the processor." });
     p.addOption({ "disable-console-dump", "Configure reporter not to dump to console." });
     p.addOption({ { "dump-registers", "d-regs" }, "Dump registers state at program exit." });
     p.addOption({ "dump-cache-stats", "Dump cache statistics at program exit." });
@@ -548,7 +549,11 @@ int main(int argc, char *argv[]) {
 
     load_ranges(machine, p.values("load-range"));
 
-    // QTimer::singleShot(0, &machine, &Machine::play); alternative
-    QMetaObject::invokeMethod(&machine, &Machine::play, Qt::QueuedConnection);
+    if (p.isSet("only-dump")) {
+        QMetaObject::invokeMethod(&machine, &Machine::program_exit, Qt::QueuedConnection);
+    } else {
+        // QTimer::singleShot(0, &machine, &Machine::play); alternative
+        QMetaObject::invokeMethod(&machine, &Machine::play, Qt::QueuedConnection);
+    }
     return QCoreApplication::exec();
 }
