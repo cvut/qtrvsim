@@ -57,6 +57,7 @@ void create_parser(QCommandLineParser &p) {
     p.addOption({ "dump-cache-stats", "Dump cache statistics at program exit." });
     p.addOption({ "dump-cycles", "Dump number of CPU cycles till program end." });
     p.addOption({ "dump-range", "Dump memory range.", "START,LENGTH,FNAME" });
+    p.addOption({ "dump-symbol-table", "Dump the symbol table." });
     p.addOption({ "load-range", "Load memory range.", "START,FNAME" });
     p.addOption({ "expect-fail", "Expect that program causes CPU trap and fail if it doesn't." });
     p.addOption({ "fail-match",
@@ -298,6 +299,7 @@ void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *s
     if (p.isSet("dump-registers")) { r.enable_regs_reporting(); }
     if (p.isSet("dump-cache-stats")) { r.enable_cache_stats(); }
     if (p.isSet("dump-cycles")) { r.enable_cycles_reporting(); }
+    if (p.isSet("dump-symbol-table")) { r.enable_symbol_table_reporting(); }
 
     QStringList fail = p.values("fail-match");
     for (const auto & i : fail) {

@@ -108,6 +108,26 @@ void Reporter::report() {
         report_range(range);
     }
 
+    if (e_symtab) {
+        QJsonObject symtab_json = {};
+
+        for (const auto &name : machine->symbol_table()->names()) {
+            SymbolValue sym_val;
+            machine->symbol_table()->name_to_value(sym_val, name);
+            QString value = QString::asprintf(machine->core()->get_xlen() == Xlen::_32 ? "0x%08" PRIx64 : "0x%016" PRIx64, sym_val);
+            if (dump_format & DumpFormat::JSON) {
+                symtab_json[name] = value;
+            }
+            if (dump_format & DumpFormat::CONSOLE) {
+                printf("SYM[%s]: %s\n", qPrintable(name), qPrintable(value));
+            }
+        }
+
+        if (dump_format & DumpFormat::JSON) {
+            dump_data_json["symbols"] = symtab_json;
+        }
+    }
+
     if (dump_format & DumpFormat::JSON) {
         QFile file(dump_file_json);
         QByteArray bytes = QJsonDocument(dump_data_json).toJson(QJsonDocument::Indented);
