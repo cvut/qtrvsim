@@ -58,6 +58,7 @@ void CLIMain::create_parser() {
                   "all registers.",
                   "REG" });
     parser.addOption({ "dump-to-json", "Configure reportor dump to json file.", "FNAME" });
+    parser.addOption({ "disable-console-dump", "Configure reporter not to dump to console." });
     parser.addOption({ { "dump-registers", "d-regs" }, "Dump registers state at program exit." });
     parser.addOption({ "dump-cache-stats", "Dump cache statistics at program exit." });
     parser.addOption({ "dump-cycles", "Dump number of CPU cycles till program end." });
@@ -293,6 +294,9 @@ void CLIMain::configure_reporter(Reporter &r, const SymbolTable *symtab) {
     if (parser.isSet("dump-to-json")) {
         r.dump_format = (DumpFormat)(r.dump_format | DumpFormat::JSON);
         r.dump_file_json = parser.value("dump-to-json");
+    }
+    if (parser.isSet("disable-console-dump")) {
+        r.dump_format = (DumpFormat)(r.dump_format & ~(DumpFormat::CONSOLE));
     }
     if (parser.isSet("dump-registers")) { r.enable_regs_reporting(); }
     if (parser.isSet("dump-cache-stats")) { r.enable_cache_stats(); }
