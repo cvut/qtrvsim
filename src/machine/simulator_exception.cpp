@@ -16,13 +16,25 @@ SimulatorException::SimulatorException(
     this->ext = std::move(ext);
     this->file = std::move(file);
     this->line = line;
+    this->cached_what = nullptr;
+}
+
+SimulatorException::~SimulatorException() {
+    if (this->cached_what) {
+        delete[] this->cached_what;
+    }
 }
 
 const char *SimulatorException::what() const noexcept {
+    if (this->cached_what) {
+        return this->cached_what;
+    }
+
     std::string message = this->msg(true).toStdString();
-    char *cstr = new char[message.length() + 1];
-    std::strcpy(cstr, message.c_str());
-    return cstr;
+    this->cached_what = new char[message.length() + 1];
+    std::strcpy(this->cached_what, message.c_str());
+
+    return this->cached_what;
 }
 
 QString SimulatorException::msg(bool pos) const {

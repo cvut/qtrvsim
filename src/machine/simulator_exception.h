@@ -10,12 +10,15 @@ namespace machine {
 class SimulatorException : public std::exception {
 public:
     SimulatorException(QString reason, QString ext, QString file, int line);
+    ~SimulatorException();
     const char *what() const noexcept override;
     QString msg(bool pos) const;
 
 protected:
     QString name, reason, ext, file;
     int line;
+private:
+    mutable char * cached_what;
 };
 
 /* This is list of all QtRvSim specific exceptions
