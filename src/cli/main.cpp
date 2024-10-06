@@ -141,7 +141,7 @@ void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const 
             cacheconf.set_write_policy(CacheConfig::WP_THROUGH_ALLOC);
         } else {
             fprintf(
-                stderr, "Write policy for  %s  cache is incorrect (correct wb/wt/wtna/wta). \n",
+                stderr, "Write policy for %s cache is incorrect (correct wb/wt/wtna/wta).\n",
                 qPrintable(which));
             exit(EXIT_FAILURE);
         }
@@ -163,7 +163,7 @@ void parse_u32_option(
             (config.*setter)(value);
         } else {
             fprintf(
-                stderr, "Value of option %s is not a valid unsigned integer.",
+                stderr, "Value of option %s is not a valid unsigned integer.\n",
                 qPrintable(option_name));
             exit(EXIT_FAILURE);
         }
