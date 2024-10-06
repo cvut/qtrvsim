@@ -84,7 +84,9 @@ void Reporter::machine_trap(SimulatorException &e) {
 }
 
 void Reporter::report() {
-    if (e_regs | e_cycles | e_cycles | e_fail) { printf("Machine state report:\n"); }
+    if (dump_format & DumpFormat::CONSOLE) {
+        if (e_regs | e_cycles | e_cycles | e_fail) { printf("Machine state report:\n"); }
+    }
 
     if (e_regs) { report_regs(); }
     if (e_cache_stats) { report_caches(); }
