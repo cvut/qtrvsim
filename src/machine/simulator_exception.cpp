@@ -19,9 +19,9 @@ SimulatorException::SimulatorException(
 }
 
 const char *SimulatorException::what() const noexcept {
-    QString message = this->msg(true);
+    std::string message = this->msg(true).toStdString();
     char *cstr = new char[message.length() + 1];
-    std::strcpy(cstr, message.toStdString().c_str());
+    std::strcpy(cstr, message.c_str());
     return cstr;
 }
 
