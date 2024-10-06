@@ -63,6 +63,7 @@ void CLIMain::create_parser() {
     parser.addOption({ "dump-cache-stats", "Dump cache statistics at program exit." });
     parser.addOption({ "dump-cycles", "Dump number of CPU cycles till program end." });
     parser.addOption({ "dump-range", "Dump memory range.", "START,LENGTH,FNAME" });
+    parser.addOption({ "dump-symbol-table", "Dump the symbol table." });
     parser.addOption({ "load-range", "Load memory range.", "START,FNAME" });
     parser.addOption({ "expect-fail", "Expect that program causes CPU trap and fail if it doesn't." });
     parser.addOption({ "fail-match",
@@ -301,6 +302,7 @@ void CLIMain::configure_reporter(Reporter &r, const SymbolTable *symtab) {
     if (parser.isSet("dump-registers")) { r.enable_regs_reporting(); }
     if (parser.isSet("dump-cache-stats")) { r.enable_cache_stats(); }
     if (parser.isSet("dump-cycles")) { r.enable_cycles_reporting(); }
+    if (parser.isSet("dump-symbol-table")) { r.enable_symbol_table_reporting(); }
 
     QStringList fail = parser.values("fail-match");
     for (const auto & i : fail) {
