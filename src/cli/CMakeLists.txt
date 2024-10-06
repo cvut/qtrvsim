@@ -8,12 +8,14 @@ set(CMAKE_AUTOMOC ON)
 set(cli_SOURCES
         chariohandler.cpp
         main.cpp
+        climain.cpp
         msgreport.cpp
         reporter.cpp
         tracer.cpp
 )
 set(cli_HEADERS
         chariohandler.h
+        climain.h
         msgreport.h
         reporter.h
         tracer.h
