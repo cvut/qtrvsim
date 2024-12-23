@@ -65,6 +65,12 @@ static const ArgumentDesc arg_desc_list[] = {
     ArgumentDesc('s', 'g', 0, 0x1f, { { { 5, 15 } }, 0 }),
     // Source register 2 (rs2/rt)
     ArgumentDesc('t', 'g', 0, 0x1f, { { { 5, 20 } }, 0 }),
+    // Float destination register (rd)
+    ArgumentDesc('D', 'f', 0, 0x1f, { { { 5, 7 } }, 0 }),
+    // Float source register 1 (rs1/rs)
+    ArgumentDesc('S', 'f', 0, 0x1f, { { { 5, 15 } }, 0 }),
+    // Float source register 1 (rs1/rs)
+    ArgumentDesc('T', 'f', 0, 0x1f, { { { 5, 20 } }, 0 }),
     // I-type immediate for arithmetic instructions (12bits)
     ArgumentDesc('j', 'n', -0x800, 0x7ff, { { { 12, 20 } }, 0 }),
     // Shift for bit shift instructions (5bits)
@@ -369,6 +375,13 @@ static const struct InstructionMap LOAD_map[] = {
     IM_UNKNOWN,
 };
 
+static const struct InstructionMap F_LOAD_map[] = {
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    {"flw", IT_I, { .alu_op=AluOp::ADD }, AC_I32, nullptr, {"D", "o(s)"}, 0x2007, 0x707f, { .flags = FLAGS_ALU_I_LOAD | IMF_ALU_REQ_RD_F }, nullptr}, 
+    {"fld", IT_I, { .alu_op=AluOp::ADD }, AC_I64, nullptr, {"D", "o(s)"}, 0x3007, 0x707f, { .flags = FLAGS_ALU_I_LOAD | IMF_ALU_REQ_RD_F }, nullptr}, 
+};
+
 static const struct InstructionMap SRI_map[] = { // 0xfe00707f mask changed to 0xfc00707f to support RV64I
     {"srli", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x00005013,0xfc00707f, { .flags = FLAGS_ALU_I }, nullptr}, // SRLI
     {"srai", IT_I, { .alu_op=AluOp::SR }, NOMEM, nullptr, {"d", "s", ">"}, 0x40005013,0xfc00707f, { .flags = (FLAGS_ALU_I | IMF_ALU_MOD) }, nullptr}, // SRAI
@@ -394,6 +407,13 @@ static const struct InstructionMap STORE_map[] = {
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
+};
+
+static const struct InstructionMap F_STORE_map[] = {
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    {"fsw", IT_I, { .alu_op=AluOp::ADD }, AC_U32, nullptr, {"T", "q(s)"}, 0x2027, 0x707f, { .flags = FLAGS_ALU_I_STORE | IMF_ALU_REQ_RT_F }, nullptr}, // FSW
+    {"fsd", IT_I, { .alu_op=AluOp::ADD }, AC_U64, nullptr, {"T", "q(s)"}, 0x3027, 0x707f, { .flags = FLAGS_ALU_I_STORE | IMF_ALU_REQ_RT_F }, nullptr}, // FSD
 };
 
 static const struct InstructionMap ADD_map[] = {
@@ -579,9 +599,77 @@ static const struct InstructionMap OP_32_map[] = {
 
 // Full, uncomprese, instructions top level map
 
+static const struct InstructionMap F_sgnj_map[] = {
+    {"fsgnj.s",IT_I, NOALU, NOMEM, nullptr, {}, 0x20000053, 0xfe00707f, {}, nullptr},
+    {"fsgnjn.s",IT_I, NOALU, NOMEM, nullptr, {}, 0x20001053, 0xfe00707f, {}, nullptr},
+    {"fsgnjx.s",IT_I, NOALU, NOMEM, nullptr, {}, 0x20002053, 0xfe00707f, {}, nullptr},
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+};
+
+static const struct InstructionMap F_ex_map[] = {
+    {"fmin.s",IT_I, NOALU, NOMEM, nullptr, {}, 0x28000053, 0xfe00707f, {}, nullptr},
+    {"fmax.s",IT_I, NOALU, NOMEM, nullptr, {}, 0x28001053, 0xfe00707f, {}, nullptr},
+};
+
+static const struct InstructionMap F_cvt_w_s_map[] = {
+    {"fcvt.w.s",IT_I, NOALU, NOMEM, nullptr, {}, 0xc0000053, 0xfff0007f, {}, nullptr},
+    {"fcvt.wu.s",IT_I, NOALU, NOMEM, nullptr, {}, 0xc0100053, 0xfff0007f, {}, nullptr},
+};
+
+static const struct InstructionMap F_cp_map[] = {
+    {"fle.s",IT_I, NOALU, NOMEM, nullptr, {}, 0xa0002053, 0xfe00707f, {}, nullptr},
+    {"flt.s",IT_I, NOALU, NOMEM, nullptr, {}, 0xa0001053, 0xfe00707f, {}, nullptr},
+    {"feq.s",IT_I, NOALU, NOMEM, nullptr, {}, 0xa0000053, 0xfe00707f, {}, nullptr},
+    IM_UNKNOWN,
+};
+
+static const struct InstructionMap F_cvt_s_w_map[] = {
+    {"fcvt.s.w",IT_I, NOALU, NOMEM, nullptr, {}, 0xd0000053, 0xfff0007f, {}, nullptr},
+    {"fcvt.s.wu",IT_I, NOALU, NOMEM, nullptr, {}, 0xd0100053, 0xfff0007f, {}, nullptr},
+};
+
+static const struct InstructionMap F_inst_map[] = {
+    {"fadd.s",IT_I, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"D", "S", "T"}, 0x53, 0xfe00007f, { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_REQ_RT_F | IMF_ALU_REQ_RS_F | IMF_ALU_REQ_RD_F }, nullptr},
+    {"fsub.s",IT_I, NOALU, NOMEM, nullptr, {"D", "S", "T"}, 0x8000053, 0xfe00007f, { .flags = FLAGS_ALU_T_R_STD | IMF_ALU_REQ_RT_F | IMF_ALU_REQ_RS_F | IMF_ALU_REQ_RD_F | IMF_ALU_MOD}, nullptr},
+    {"fmul.s",IT_I, NOALU, NOMEM, nullptr, {}, 0x10000053, 0xfe00007f, {}, nullptr},
+    {"fdiv.s",IT_I, NOALU, NOMEM, nullptr, {}, 0x18000053, 0xfe00007f, {}, nullptr},
+    {"fsgnj",IT_I, NOALU, NOMEM, F_sgnj_map, {}, 0x20000053, 0xfe00007f, { .subfield = {3, 12} }, nullptr},
+    {"f-ex.s",IT_I, NOALU, NOMEM, F_ex_map, {}, 0x28000053, 0xfe00007f, { .subfield = {1, 12} }, nullptr},
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    {"fsqrt.s",IT_I, NOALU, NOMEM, nullptr, {}, 0x58000053, 0xfe00007f, {}, nullptr},
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    {"f-cp",IT_I, NOALU, NOMEM, F_cp_map, {}, 0xa0000053, 0xfe00007f, { .subfield = {2, 12} }, nullptr},
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    {"fcvt-w-s",IT_I, NOALU, NOMEM, F_cvt_w_s_map, {}, 0xc0000053, 0xfe00007f, { .subfield = {1, 20} }, nullptr},
+    IM_UNKNOWN,
+    {"fcvt-s-w",IT_I, NOALU, NOMEM, F_cvt_s_w_map, {}, 0xd0000053, 0xfe00007f, { .subfield = {1, 20} }, nullptr},
+    IM_UNKNOWN,
+    {"fmv.x.w",IT_I, { .alu_op=AluOp::ADD }, AC_I32, nullptr, {"d", "S"}, 0xe0000053, 0xfe00007f, {}, nullptr},
+    IM_UNKNOWN,
+    {"fmv.w.x",IT_I, { .alu_op=AluOp::ADD }, AC_I32, nullptr, {"D", "s"}, 0xf0000053, 0xfe00007f, {}, nullptr},
+    IM_UNKNOWN,
+};
+
 static const struct InstructionMap I_inst_map[] = {
     {"load", IT_I, NOALU, NOMEM, LOAD_map, {}, 0x03, 0x7f, { .subfield = {3, 12} }, nullptr}, // LOAD
-    IM_UNKNOWN, // LOAD-FP
+    {"load-fp", IT_I, NOALU, NOMEM, F_LOAD_map, {}, 0x07, 0x7f, { .subfield = {2, 12} }, nullptr}, // LOAD-FP
     IM_UNKNOWN, // custom-0
     {"misc-mem", IT_I, NOALU, NOMEM, MISC_MEM_map, {}, 0x0f, 0x7f, { .subfield = {3, 12} }, nullptr}, // MISC-MEM
     {"op-imm", IT_I, NOALU, NOMEM, OP_IMM_map, {}, 0x13, 0x7f, { .subfield = {3, 12} }, nullptr}, // OP-IMM
@@ -589,18 +677,18 @@ static const struct InstructionMap I_inst_map[] = {
     {"op-imm-32", IT_I, NOALU, NOMEM, OP_IMM_32_map, {}, 0x1b, 0x7f, { .subfield = {3, 12} }, nullptr}, // OP-IMM-32    IM_UNKNOWN, // OP-IMM-32
     IM_UNKNOWN, // 48b
     {"store", IT_I, NOALU, NOMEM, STORE_map, {}, 0x23, 0x7f, { .subfield = {3, 12} }, nullptr}, // STORE
-    IM_UNKNOWN, // STORE-FP
+    {"store-fp", IT_I, NOALU, NOMEM, F_STORE_map, {}, 0x27, 0x7f, { .subfield = {2, 12} }, nullptr}, // STORE-FP
     IM_UNKNOWN, // custom-1
     {"amo", IT_R, NOALU, NOMEM, AMO_map, {}, 0x2f, 0x7f, { .subfield = {3, 12} }, nullptr}, // OP-32
     {"op", IT_R, NOALU, NOMEM, OP_map, {}, 0x33, 0x7f, { .subfield = {1, 25} }, nullptr}, // OP
     {"lui", IT_U, { .alu_op=AluOp::ADD }, NOMEM, nullptr, {"d", "u"}, 0x37, 0x7f, { .flags = IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE }, nullptr}, // LUI
     {"op-32", IT_R, NOALU, NOMEM, OP_32_map, {}, 0x3b, 0x7f, { .subfield = {1, 25} }, nullptr}, // OP-32
     IM_UNKNOWN, // 64b
-    IM_UNKNOWN, // MADD
-    IM_UNKNOWN, // MSUB
-    IM_UNKNOWN, // NMSUB
-    IM_UNKNOWN, // NMADD
-    IM_UNKNOWN, // OP-FP
+    {"fmadd.s", IT_I, NOALU, NOMEM, nullptr, {}, 0x43, 0x7f, {}, nullptr}, // FMADD.S
+    {"fmsub.s", IT_I, NOALU, NOMEM, nullptr, {}, 0x47, 0x7f, {}, nullptr}, // FMSUB.S
+    {"fnmsub.s", IT_I, NOALU, NOMEM, nullptr, {}, 0x4b, 0x7f, {}, nullptr}, // FNMSUB.S
+    {"fnmadd.s", IT_I, NOALU, NOMEM, nullptr, {}, 0x4f, 0x7f, {}, nullptr}, // FNMADD.S
+    {"op-fp",IT_I, NOALU, NOMEM, F_inst_map, {}, 0x600007f, 0x7f, { .subfield={5,27} }, nullptr}, // OP-FP
     IM_UNKNOWN, // reserved
     IM_UNKNOWN, // custom-2/rv128
     IM_UNKNOWN, // 48b
@@ -802,6 +890,14 @@ QString Instruction::to_str(Address inst_addr) const {
                     res += QString(Rv_regnames[field]);
                 } else {
                     res += "x" + QString::number(field);
+                }
+                break;
+            }
+            case 'f': {
+                if (symbolic_registers_enabled) {
+                    res += QString(Rv_regnames[field]);
+                } else {
+                    res += "f" + QString::number(field);
                 }
                 break;
             }
