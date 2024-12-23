@@ -74,6 +74,8 @@ private:
     void report_gp_reg(unsigned int i, bool last);
     void report_cache(const char *cache_name, const machine::Cache &cache);
 
+    void exit(int retcode);
+
 public:
     DumpFormat dump_format = DumpFormat::CONSOLE;
     QString dump_file_json;

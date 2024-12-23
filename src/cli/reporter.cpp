@@ -24,9 +24,9 @@ void Reporter::machine_exit() {
     report();
     if (e_fail != 0) {
         printf("Machine was expected to fail but it didn't.\n");
-        QCoreApplication::exit(1);
+        exit(1);
     } else {
-        QCoreApplication::exit();
+        exit(0);
     }
 }
 
@@ -62,13 +62,13 @@ void Reporter::machine_exception_reached() {
     ExceptionCause excause = machine->get_exception_cause();
     printf("Machine stopped on %s exception.\n", get_exception_name(excause));
     report();
-    QCoreApplication::exit();
+    exit(0);
 }
 
 void Reporter::cycle_limit_reached() {
     printf("Specified cycle limit reached\n");
     report();
-    QCoreApplication::exit();
+    exit(0);
 }
 
 void Reporter::machine_trap(SimulatorException &e) {
@@ -80,7 +80,7 @@ void Reporter::machine_trap(SimulatorException &e) {
     }
 
     printf("Machine trapped: %s\n", qPrintable(e.msg(false)));
-    QCoreApplication::exit(expected ? 0 : 1);
+    exit(expected ? 0 : 1);
 }
 
 void Reporter::report() {
@@ -218,4 +218,10 @@ void Reporter::report_range(const Reporter::DumpRange &range) {
     if (fclose(out)) {
         fprintf(stderr, "Failure closing %s\n", range.path_to_write.toLocal8Bit().data());
     }
+}
+
+void Reporter::exit(int retcode) {
+    // Exit might not happen immediately, so we need to stop the machine explicitly.
+    machine->pause();
+    QCoreApplication::exit(retcode);
 }
