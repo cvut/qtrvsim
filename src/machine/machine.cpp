@@ -3,6 +3,7 @@
 #include "programloader.h"
 
 #include <QTime>
+#include <qelapsedtimer.h>
 #include <utility>
 
 using namespace machine;
@@ -361,12 +362,12 @@ void Machine::step_internal(bool skip_break) {
     set_status(ST_BUSY);
     emit tick();
     try {
-        // Avoid checking time (expensive) if we don't care about it.
-        QTime start_time = (time_chunk != 0) ? QTime::currentTime() : QTime();
+        QElapsedTimer timer;
+        timer.start();
         do {
             cr->step(skip_break);
         } while (time_chunk != 0 && stat == ST_BUSY && !skip_break
-                 && start_time.msecsTo(QTime::currentTime()) < (int)time_chunk);
+                 && timer.elapsed() < (int)time_chunk);
     } catch (SimulatorException &e) {
         run_t->stop();
         set_status(ST_TRAPPED);
@@ -396,7 +397,7 @@ void Machine::step_timer() {
             step_internal();
         }
     } else {
-        step_internal();
+    step_internal();
     }
 }
 
