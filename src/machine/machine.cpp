@@ -361,7 +361,8 @@ void Machine::step_internal(bool skip_break) {
     set_status(ST_BUSY);
     emit tick();
     try {
-        QTime start_time = QTime::currentTime();
+        // Avoid checking time (expensive) if we don't care about it.
+        QTime start_time = (time_chunk != 0) ? QTime::currentTime() : QTime();
         do {
             cr->step(skip_break);
         } while (time_chunk != 0 && stat == ST_BUSY && !skip_break
