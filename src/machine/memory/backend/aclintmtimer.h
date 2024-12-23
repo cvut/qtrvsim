@@ -6,6 +6,7 @@
 
 #include <QTime>
 #include <cstdint>
+#include <qelapsedtimer.h>
 
 namespace machine { namespace aclint {
 
@@ -63,8 +64,8 @@ namespace machine { namespace aclint {
         unsigned mtimecmp_count;
         uint64_t mtimecmp_value[ACLINT_MTIMECMP_COUNT_MAX] {};
 
+        QElapsedTimer clock;
         const uint8_t mtimer_irq_level;
-        QTime mtime_start_offset;
         uint64_t mtime_user_offset = 0;
         mutable uint64_t mtime_last_current_fetch = 0;
         mutable bool mtimer_irq_active = false;

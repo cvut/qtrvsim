@@ -21,7 +21,7 @@ AclintMtimer::AclintMtimer(Endian simulated_machine_endian)
         value = 0;
     }
 
-    mtime_start_offset = QTime::currentTime();
+    clock.start();
     qt_timer_id = -1;
 }
 
@@ -31,9 +31,7 @@ AclintMtimer::~AclintMtimer() {
 }
 
 uint64_t AclintMtimer::mtime_fetch_current() const {
-    QTime current_time = QTime::currentTime();
-
-    mtime_last_current_fetch = mtime_start_offset.msecsTo(current_time) * (uint64_t)10000;
+    mtime_last_current_fetch = clock.elapsed() * (uint64_t)10000;
 
     return mtime_last_current_fetch;
 }
