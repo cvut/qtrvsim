@@ -391,13 +391,13 @@ void Machine::step() {
 }
 
 void Machine::step_timer() {
-    if (run_t->interval() == 0) {
+    if (run_t->interval() == 0 && time_chunk == 0) {
         // We need to amortize QTimer event loop overhead when running in max speed mode.
         for (size_t i = 0; i < 32 && stat == ST_RUNNING; i++) {
             step_internal();
         }
     } else {
-    step_internal();
+        step_internal();
     }
 }
 
