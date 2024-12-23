@@ -390,15 +390,20 @@ void Machine::step() {
 }
 
 void Machine::step_timer() {
-    step_internal();
+    if (run_t->interval() == 0) {
+        // We need to amortize QTimer event loop overhead when running in max speed mode.
+        for (size_t i = 0; i < 32 && stat == ST_RUNNING; i++) {
+            step_internal();
+        }
+    } else {
+        step_internal();
+    }
 }
 
 void Machine::restart() {
     pause();
     regs->reset();
-    if (mem_program_only != nullptr) {
-        mem->reset(*mem_program_only);
-    }
+    if (mem_program_only != nullptr) { mem->reset(*mem_program_only); }
     cch_program->reset();
     cch_data->reset();
     cch_level2->reset();
