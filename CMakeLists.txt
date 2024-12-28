@@ -3,7 +3,7 @@ cmake_policy(VERSION 3.10)
 
 project(QtRVSim
         LANGUAGES C CXX
-        VERSION 0.9.7
+        VERSION 0.9.8
         DESCRIPTION "RISC-V CPU simulator for education purposes")
 
 set(KAREL_KOCI "Karel Koci <cynerd@email.cz>")
@@ -47,10 +47,15 @@ set(PACKAGE_OUTPUT_PATH "${EXECUTABLE_OUTPUT_PATH}/pkg"
         CACHE STRING "Absolute path to place generated package files.")
 set(FORCE_COLORED_OUTPUT false CACHE BOOL "Always produce ANSI-colored output (GNU/Clang only).")
 set(USE_ALTERNATE_LINKER "" CACHE STRING "Use alternate linker. Leave empty for system default; alternatives are 'gold', 'lld', 'bfd', 'mold'")
+set(QT_VERSION_MAJOR "auto" CACHE STRING "Qt major version to use. 5|6|auto")
 
 # =============================================================================
 # Generated variables
 # =============================================================================
+
+if (NOT "${QT_VERSION_MAJOR}" MATCHES "5|6|auto")
+    message(FATAL_ERROR "Invalid value for QT_VERSION_MAJOR: ${QT_VERSION_MAJOR} (expected 5, 6 or auto)")
+endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     set(WASM true)
@@ -241,7 +246,10 @@ endif ()
 # Based on article https://www.steinzone.de/wordpress/how-to-support-both-qt5-and-qt6-using-cmake/
 # Cannot use version-less approach due to Qt 5.9.5 support constraint.
 
-find_package(QT NAMES Qt5 Qt6 COMPONENTS Core REQUIRED)
+if ("${QT_VERSION_MAJOR}" STREQUAL "auto")
+    find_package(QT NAMES Qt5 Qt6 COMPONENTS Core REQUIRED)
+endif ()
+
 # Normally, we would use variable Qt5 or Qt6 to reference the Qt library. Here we do that through
 # this variable based on detected version major of Qt.
 set(QtLib "Qt${QT_VERSION_MAJOR}")

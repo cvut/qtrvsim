@@ -3,6 +3,7 @@
 #include "programloader.h"
 
 #include <QTime>
+#include <qelapsedtimer.h>
 #include <utility>
 
 using namespace machine;
@@ -78,7 +79,10 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         access_enable_burst);
 
     controlst = new CSR::ControlState(machine_config.get_simulated_xlen(), machine_config.get_isa_word());
-    predictor = new FalsePredictor();
+    predictor = new BranchPredictor(
+        machine_config.get_bp_enabled(), machine_config.get_bp_type(),
+        machine_config.get_bp_init_state(), machine_config.get_bp_btb_bits(),
+        machine_config.get_bp_bhr_bits(), machine_config.get_bp_bht_addr_bits());
 
     if (machine_config.pipelined()) {
         cr = new CorePipelined(
@@ -111,16 +115,24 @@ void Machine::setup_lcd_display() {
     perip_lcd_display = new LcdDisplay(machine_config.get_simulated_endian());
     memory_bus_insert_range(
         perip_lcd_display, 0xffe00000_addr, 0xffe4afff_addr, true);
+    if (machine_config.get_simulated_xlen() == Xlen::_64)
+        memory_bus_insert_range(
+            perip_lcd_display, 0xffffffffffe00000_addr, 0xffffffffffe4afff_addr, false);
 }
 void Machine::setup_perip_spi_led() {
     perip_spi_led = new PeripSpiLed(machine_config.get_simulated_endian());
     memory_bus_insert_range(
         perip_spi_led, 0xffffc100_addr, 0xffffc1ff_addr, true);
+    if (machine_config.get_simulated_xlen() == Xlen::_64)
+        memory_bus_insert_range(
+            perip_spi_led, 0xffffffffffffc100_addr, 0xffffffffffffc1ff_addr, false);
 }
 void Machine::setup_serial_port() {
     ser_port = new SerialPort(machine_config.get_simulated_endian());
     memory_bus_insert_range(ser_port, 0xffffc000_addr, 0xffffc03f_addr, true);
     memory_bus_insert_range(ser_port, 0xffff0000_addr, 0xffff003f_addr, false);
+    if (machine_config.get_simulated_xlen() == Xlen::_64)
+        memory_bus_insert_range(ser_port, 0xffffffffffffc000_addr, 0xffffffffffffc03f_addr, false);
     connect(
         ser_port, &SerialPort::signal_interrupt, this,
         &Machine::set_interrupt_signal);
@@ -132,6 +144,11 @@ void Machine::setup_aclint_mtime() {
                             0xfffd0000_addr + aclint::CLINT_MTIMER_OFFSET,
                             0xfffd0000_addr + aclint::CLINT_MTIMER_OFFSET + aclint::CLINT_MTIMER_SIZE - 1,
                             true);
+    if (machine_config.get_simulated_xlen() == Xlen::_64)
+        memory_bus_insert_range(aclint_mtimer,
+                                0xfffffffffffd0000_addr + aclint::CLINT_MTIMER_OFFSET,
+                                0xfffffffffffd0000_addr + aclint::CLINT_MTIMER_OFFSET + aclint::CLINT_MTIMER_SIZE - 1,
+                                false);
     connect(
         aclint_mtimer, &aclint::AclintMtimer::signal_interrupt, this,
         &Machine::set_interrupt_signal);
@@ -143,6 +160,11 @@ void Machine::setup_aclint_mswi() {
                             0xfffd0000_addr + aclint::CLINT_MSWI_OFFSET,
                             0xfffd0000_addr + aclint::CLINT_MSWI_OFFSET + aclint::CLINT_MSWI_SIZE - 1,
                             true);
+    if (machine_config.get_simulated_xlen() == Xlen::_64)
+        memory_bus_insert_range(aclint_mswi,
+                                0xfffffffffffd0000_addr + aclint::CLINT_MSWI_OFFSET,
+                                0xfffffffffffd0000_addr + aclint::CLINT_MSWI_OFFSET + aclint::CLINT_MSWI_SIZE - 1,
+                                false);
     connect(
         aclint_mswi, &aclint::AclintMswi::signal_interrupt, this,
         &Machine::set_interrupt_signal);
@@ -154,6 +176,11 @@ void Machine::setup_aclint_sswi() {
                             0xfffd0000_addr + aclint::CLINT_SSWI_OFFSET,
                             0xfffd0000_addr + aclint::CLINT_SSWI_OFFSET + aclint::CLINT_SSWI_SIZE - 1,
                             true);
+    if (machine_config.get_simulated_xlen() == Xlen::_64)
+        memory_bus_insert_range(aclint_sswi,
+                                0xfffffffffffd0000_addr + aclint::CLINT_SSWI_OFFSET,
+                                0xfffffffffffd0000_addr + aclint::CLINT_SSWI_OFFSET + aclint::CLINT_SSWI_SIZE - 1,
+                                false);
     connect(
         aclint_sswi, &aclint::AclintSswi::signal_interrupt, this,
         &Machine::set_interrupt_signal);
@@ -335,11 +362,12 @@ void Machine::step_internal(bool skip_break) {
     set_status(ST_BUSY);
     emit tick();
     try {
-        QTime start_time = QTime::currentTime();
+        QElapsedTimer timer;
+        timer.start();
         do {
             cr->step(skip_break);
         } while (time_chunk != 0 && stat == ST_BUSY && !skip_break
-                 && start_time.msecsTo(QTime::currentTime()) < (int)time_chunk);
+                 && timer.elapsed() < (int)time_chunk);
     } catch (SimulatorException &e) {
         run_t->stop();
         set_status(ST_TRAPPED);
@@ -363,15 +391,20 @@ void Machine::step() {
 }
 
 void Machine::step_timer() {
-    step_internal();
+    if (run_t->interval() == 0 && time_chunk == 0) {
+        // We need to amortize QTimer event loop overhead when running in max speed mode.
+        for (size_t i = 0; i < 32 && stat == ST_RUNNING; i++) {
+            step_internal();
+        }
+    } else {
+        step_internal();
+    }
 }
 
 void Machine::restart() {
     pause();
     regs->reset();
-    if (mem_program_only != nullptr) {
-        mem->reset(*mem_program_only);
-    }
+    if (mem_program_only != nullptr) { mem->reset(*mem_program_only); }
     cch_program->reset();
     cch_data->reset();
     cch_level2->reset();

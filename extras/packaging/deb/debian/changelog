@@ -1,3 +1,27 @@
+qtrvsim (0.9.8-1) unstable; urgency=medium
+
+  * Machine: aclintmtimer fix count type
+  * GUI: fix a crash on nonexistent include
+  * Use win32 config of libelf when compiling natively for Windows
+  * CI: Add Windows Clang debug build and macos ARM
+  * CLI: reporter dump to json
+  * Machine: instruction parsing refactor
+  * GUI: make printer settings persistent and scale to fit PDF page size
+  * Assembler: fix immediate parsing
+  * Assembler: implement GAS modifiers - PC rel still basic only
+  * Machine: fix zext.w/h inst parse and fix tokenized for inst.xxx
+  * Machine: fix parse_csr_address and CSR::RegisterMapByName key type
+  * Machine and GUI: Pseudo LRU cache policy
+  * Add 25x speed for teaching convenience
+  * Machien and GUI: Include Jiri Stefan's work on branch predictor
+  * Machien and GUI: BTB, BHT and BHR are implemented
+  * Project: Explicit cmake qt major version option
+  * Packaging: add Keywords entry into desktop file
+  * Machine: add peripherals high/top address aliases for XLEN=64
+  * GUI: switch "New" dialog page selection to tree widget, polishing required
+
+-- Pavel Pisa <pisa@cmp.felk.cvut.cz>  Tue, 01 Oct 2024 20:45:22 +0200
+
 qtrvsim (0.9.7-1) unstable; urgency=medium
 
   * GUI: fix examples button crashes on Windows and sometimes other platforms

@@ -18,7 +18,7 @@ jobs:
           }
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       # CMake will not configure without Qt installed
       - name: Install Qt
@@ -42,7 +42,7 @@ jobs:
         run: make open_build_service_bundle
 
       - name: Store OBS bundle
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: obs-package-bundle
           path: ${{ github.workspace }}/build/target/pkg

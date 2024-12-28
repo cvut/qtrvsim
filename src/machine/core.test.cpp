@@ -5,6 +5,7 @@
 #include "machine/memory/backend/memory.h"
 #include "machine/memory/cache/cache.h"
 #include "machine/memory/memory_bus.h"
+#include "machine/predictor.h"
 
 #include <QVector>
 
@@ -46,7 +47,7 @@ void test_program_with_single_result() {
 
     Memory memory_backend(BIG);
     TrivialBus memory(&memory_backend);
-    FalsePredictor predictor {};
+    BranchPredictor predictor {};
     CSR::ControlState controlst {};
     Core core(&registers, &predictor, &memory, &memory, &controlst, Xlen::_32, config_isa_word_default);
 
@@ -703,7 +704,7 @@ void TestCore::singlecore_alu_forward() {
     Memory mem_res(LITTLE);
     TrivialBus mem_res_frontend(&mem_res);
 
-    FalsePredictor predictor {};
+    BranchPredictor predictor {};
     CSR::ControlState controlst {};
 
     CoreSingle core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst, Xlen::_32, config_isa_word_default);
@@ -719,7 +720,7 @@ void TestCore::pipecore_alu_forward() {
     Memory mem_res(LITTLE);
     TrivialBus mem_res_frontend(&mem_res);
 
-    FalsePredictor predictor {};
+    BranchPredictor predictor {};
     CSR::ControlState controlst {};
 
     CorePipelined core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst,
@@ -736,7 +737,7 @@ void TestCore::pipecorestall_alu_forward() {
     Memory mem_res(LITTLE);
     TrivialBus mem_res_frontend(&mem_res);
 
-    FalsePredictor predictor {};
+    BranchPredictor predictor {};
     CSR::ControlState controlst {};
 
     CorePipelined core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst,
@@ -944,7 +945,7 @@ void TestCore::singlecore_memory_tests() {
     TrivialBus mem_init_frontend(&mem_init);
     TrivialBus mem_res_frontend(&mem_res);
 
-    FalsePredictor predictor {};
+    BranchPredictor predictor {};
     CSR::ControlState controlst {};
 
     CoreSingle core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst, Xlen::_32, config_isa_word_default);
@@ -960,7 +961,7 @@ void TestCore::pipecore_nc_memory_tests() {
     TrivialBus mem_init_frontend(&mem_init);
     TrivialBus mem_res_frontend(&mem_res);
 
-    FalsePredictor predictor {};
+    BranchPredictor predictor {};
     CSR::ControlState controlst {};
 
     CorePipelined core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst, Xlen::_32, config_isa_word_default);
@@ -986,7 +987,7 @@ void TestCore::pipecore_wt_na_memory_tests() {
     Cache i_cache(&mem_init_frontend, &cache_conf);
     Cache d_cache(&mem_init_frontend, &cache_conf);
 
-    FalsePredictor predictor {};
+    BranchPredictor predictor {};
     CSR::ControlState controlst {};
 
     CorePipelined core(&reg_init, &predictor, &i_cache, &d_cache, &controlst, Xlen::_32, config_isa_word_default);
@@ -1011,7 +1012,7 @@ void TestCore::pipecore_wt_a_memory_tests() {
     Cache i_cache(&mem_init_frontend, &cache_conf);
     Cache d_cache(&mem_init_frontend, &cache_conf);
 
-    FalsePredictor predictor {};
+    BranchPredictor predictor {};
     CSR::ControlState controlst {};
 
     CorePipelined core(&reg_init, &predictor, &i_cache, &d_cache, &controlst, Xlen::_32, config_isa_word_default);
@@ -1036,7 +1037,7 @@ void TestCore::pipecore_wb_memory_tests() {
     Cache i_cache(&mem_init_frontend, &cache_conf);
     Cache d_cache(&mem_init_frontend, &cache_conf);
 
-    FalsePredictor predictor {};
+    BranchPredictor predictor {};
     CSR::ControlState controlst {};
 
     CorePipelined core(&reg_init, &predictor, &i_cache, &d_cache, &controlst, Xlen::_32, config_isa_word_default);

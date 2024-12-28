@@ -123,7 +123,7 @@ jobs:
 
       - name: Get official RISC-V tests
         if: ${{ steps.cache-tests.outputs.cache-hit != 'true' }}
-        uses: alehechka/download-tartifact@v1
+        uses: alehechka/download-tartifact@v2
         with:
           name: riscv-official-tests
 

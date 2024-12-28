@@ -17,8 +17,7 @@
    <iconset>
     <normaloff>
            :/icons/gui.png</normaloff>
-    :/icons/gui.png
-   </iconset>
+           :/icons/gui.png</iconset>
   </property>
   <property name="dockNestingEnabled">
    <bool>false</bool>
@@ -54,7 +53,7 @@
      <x>0</x>
      <y>0</y>
      <width>900</width>
-     <height>32</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -88,6 +87,9 @@
     <addaction name="actionProgram_Cache"/>
     <addaction name="actionData_Cache"/>
     <addaction name="actionL2_Cache"/>
+    <addaction name="actionBranch_Predictor_History_table"/>
+    <addaction name="actionBranch_Predictor_Target_table"/>
+    <addaction name="actionBranch_Predictor_Info"/>
     <addaction name="actionPeripherals"/>
     <addaction name="actionTerminal"/>
     <addaction name="actionLcdDisplay"/>
@@ -108,6 +110,7 @@
     <addaction name="ips2"/>
     <addaction name="ips5"/>
     <addaction name="ips10"/>
+    <addaction name="ips25"/>
     <addaction name="ipsUnlimited"/>
     <addaction name="ipsMax"/>
     <addaction name="separator"/>
@@ -164,6 +167,7 @@
    <addaction name="ips2"/>
    <addaction name="ips5"/>
    <addaction name="ips10"/>
+   <addaction name="ips25"/>
    <addaction name="ipsUnlimited"/>
    <addaction name="ipsMax"/>
    <addaction name="actionNew"/>
@@ -405,6 +409,23 @@
     <string>Ctrl+0</string>
    </property>
   </action>
+  <action name="ips25">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>2&amp;5 instructions per second</string>
+   </property>
+   <property name="iconText">
+    <string>25x</string>
+   </property>
+   <property name="toolTip">
+    <string>Run CPU in speed of 25 instructions per second</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F5</string>
+   </property>
+  </action>
   <action name="ipsUnlimited">
    <property name="checkable">
     <bool>true</bool>
@@ -609,6 +630,21 @@
    </property>
    <property name="toolTip">
     <string>Show line number in the code editor.</string>
+   </property>
+  </action>
+  <action name="actionBranch_Predictor_History_table">
+   <property name="text">
+    <string>Branch Predictor (History table)</string>
+   </property>
+  </action>
+  <action name="actionBranch_Predictor_Target_table">
+   <property name="text">
+    <string>Branch Predictor (Target table)</string>
+   </property>
+  </action>
+  <action name="actionBranch_Predictor_Info">
+   <property name="text">
+    <string>Branch Predictor (Info)</string>
    </property>
   </action>
  </widget>

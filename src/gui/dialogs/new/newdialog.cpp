@@ -29,6 +29,19 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     ui_cache_l2.reset(new Ui::NewDialogCache());
     ui_cache_l2->setupUi(ui->tab_cache_level2);
 
+    QList<QTreeWidgetItem *> config_pages_items;
+    for (int i = 0; i < ui->config_pages->count(); ++i) {
+        QString page_id = ui->config_pages->widget(i)->objectName();
+        QString page_name = ui->config_pages->widget(i)->accessibleName();
+        config_pages_items.append(new QTreeWidgetItem(static_cast<QTreeWidget *>(nullptr),
+                                                      QStringList{page_name, page_id}));
+    }
+    ui->page_select_tree->insertTopLevelItems(0, config_pages_items);
+
+    connect(
+        ui->page_select_tree, &QTreeWidget::currentItemChanged,
+        this, &NewDialog::switch2page);
+
     connect(
         ui->pushButton_example, &QAbstractButton::clicked, this,
         &NewDialog::create_example);
@@ -129,6 +142,25 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
         &NewDialog::browse_osemu_fs_root);
     connect(ui->osemu_fs_root, &QLineEdit::textChanged, this, &NewDialog::osemu_fs_root_change);
 
+    // Branch predictor
+    connect(
+        ui->group_bp, QOverload<bool>::of(&QGroupBox::toggled), this,
+        &NewDialog::bp_enabled_change);
+    connect(
+        ui->select_bp_type, QOverload<int>::of(&QComboBox::activated), this,
+        &NewDialog::bp_type_change);
+    connect(
+        ui->select_bp_init_state, QOverload<int>::of(&QComboBox::activated), this,
+        &NewDialog::bp_init_state_change);
+    connect(
+        ui->slider_bp_btb_addr_bits, &QAbstractSlider::valueChanged, this,
+        &NewDialog::bp_btb_addr_bits_change);
+    connect(
+        ui->slider_bp_bht_bhr_bits, &QAbstractSlider::valueChanged, this,
+        &NewDialog::bp_bht_bhr_bits_change);
+    connect(ui->slider_bp_bht_addr_bits, &QAbstractSlider::valueChanged, this,
+        &NewDialog::bp_bht_addr_bits_change);
+
     cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d.data());
     cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p.data());
     cache_handler_l2 = new NewDialogCacheHandler(this, ui_cache_l2.data());
@@ -138,11 +170,26 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     ui->mem_protec_write->setVisible(false);
 
     load_settings(); // Also configures gui
+
+    ui->config_page_title->setStyleSheet("font-weight: bold");
+    switch2page(config_pages_items.at(0));
+}
+
+void NewDialog::switch2page(QTreeWidgetItem *current, QTreeWidgetItem *previous) {
+    (void)previous;
+    QWidget *page = ui->config_pages->findChild<QWidget *>(current->text(1),
+                                                           Qt::FindDirectChildrenOnly);
+    if (page != nullptr) {
+        ui->config_pages->setCurrentWidget(page);
+        ui->config_page_title->setText(current->text(0));
+    }
 }
 
 void NewDialog::switch2custom() {
-    ui->preset_custom->setChecked(true);
-    config_gui();
+    if (!ui->preset_custom->isChecked()) {
+        ui->preset_custom->setChecked(true);
+        config_gui();
+    }
 }
 
 void NewDialog::closeEvent(QCloseEvent *) {
@@ -257,6 +304,7 @@ void NewDialog::isa_multiply_change(bool val) {
 
 void NewDialog::pipelined_change(bool val) {
     config->set_pipelined(val);
+    ui->hazard_unit->setEnabled(config->pipelined());
     switch2custom();
 }
 
@@ -365,6 +413,141 @@ void NewDialog::reset_at_compile_change(bool v) {
     config->set_reset_at_compile(v);
 }
 
+void NewDialog::bp_toggle_widgets() {
+    // Enables or disables all branch predictor widgets
+    // depending on the setting
+
+    const machine::PredictorType predictor_type { config->get_bp_type() };
+    const bool is_predictor_dynamic { machine::is_predictor_type_dynamic(predictor_type) };
+    const bool is_predictor_enabled { config->get_bp_enabled() };
+
+    ui->group_bp_bht->setEnabled(is_predictor_enabled && is_predictor_dynamic);
+    ui->text_bp_init_state->setEnabled(is_predictor_enabled && is_predictor_dynamic);
+    ui->select_bp_init_state->setEnabled(is_predictor_enabled && is_predictor_dynamic);
+}
+
+void NewDialog::bp_type_change() {
+    // Read branch predictor type from GUI and store it in the config
+    const machine::PredictorType predictor_type {
+        ui->select_bp_type->currentData().value<machine::PredictorType>()
+    };
+
+    bool need_switch2custom = (config->get_bp_type() != predictor_type);
+
+    config->set_bp_type(predictor_type);
+
+    // Remove all items from init state list
+    ui->select_bp_init_state->clear();
+
+    // Configure GUI based on predictor selection
+    switch (predictor_type) {
+    case machine::PredictorType::SMITH_1_BIT: {
+        // Add items to the combo box
+        ui->select_bp_init_state->addItem(
+            predictor_state_to_string(machine::PredictorState::NOT_TAKEN, false).toString(),
+            QVariant::fromValue(machine::PredictorState::NOT_TAKEN));
+        ui->select_bp_init_state->addItem(
+            predictor_state_to_string(machine::PredictorState::TAKEN, false).toString(),
+            QVariant::fromValue(machine::PredictorState::TAKEN));
+
+        // Set selected value, or set default if not found
+        const int index { ui->select_bp_init_state->findData(
+            QVariant::fromValue(config->get_bp_init_state())) };
+        if (index >= 0) {
+            ui->select_bp_init_state->setCurrentIndex(index);
+        } else {
+            ui->select_bp_init_state->setCurrentIndex(ui->select_bp_init_state->findData(
+                QVariant::fromValue(machine::PredictorState::NOT_TAKEN)));
+            config->set_bp_init_state(machine::PredictorState::NOT_TAKEN);
+        }
+    } break;
+
+    case machine::PredictorType::SMITH_2_BIT:
+    case machine::PredictorType::SMITH_2_BIT_HYSTERESIS: {
+        // Add items to the combo box
+        ui->select_bp_init_state->addItem(
+            predictor_state_to_string(machine::PredictorState::STRONGLY_NOT_TAKEN, false).toString(),
+            QVariant::fromValue(machine::PredictorState::STRONGLY_NOT_TAKEN));
+        ui->select_bp_init_state->addItem(
+            predictor_state_to_string(machine::PredictorState::WEAKLY_NOT_TAKEN, false).toString(),
+            QVariant::fromValue(machine::PredictorState::WEAKLY_NOT_TAKEN));
+        ui->select_bp_init_state->addItem(
+            predictor_state_to_string(machine::PredictorState::WEAKLY_TAKEN, false).toString(),
+            QVariant::fromValue(machine::PredictorState::WEAKLY_TAKEN));
+        ui->select_bp_init_state->addItem(
+            predictor_state_to_string(machine::PredictorState::STRONGLY_TAKEN, false).toString(),
+            QVariant::fromValue(machine::PredictorState::STRONGLY_TAKEN));
+
+        // Set selected value, or set default if not found
+        const int index { ui->select_bp_init_state->findData(
+            QVariant::fromValue(config->get_bp_init_state())) };
+        if (index >= 0) {
+            ui->select_bp_init_state->setCurrentIndex(index);
+        } else {
+            ui->select_bp_init_state->setCurrentIndex(ui->select_bp_init_state->findData(
+                QVariant::fromValue(machine::PredictorState::WEAKLY_NOT_TAKEN)));
+            config->set_bp_init_state(machine::PredictorState::WEAKLY_NOT_TAKEN);
+        }
+    } break;
+
+    default:
+        break;
+    }
+    bp_toggle_widgets();
+
+    if (need_switch2custom)
+        switch2custom();
+}
+
+void NewDialog::bp_enabled_change(bool v) {
+    if (config->get_bp_enabled() != v) {
+        config->set_bp_enabled(v);
+        bp_toggle_widgets();
+        switch2custom();
+    }
+}
+
+void NewDialog::bp_init_state_change(void) {
+    auto v = ui->select_bp_init_state->currentData().value<machine::PredictorState>();
+    if (v != config->get_bp_init_state()) {
+        config->set_bp_init_state(v);
+        switch2custom();
+    }
+}
+
+void NewDialog::bp_btb_addr_bits_change(int v) {
+    if (config->get_bp_btb_bits() != v) {
+        config->set_bp_btb_bits((uint8_t)v);
+        switch2custom();
+    }
+    ui->text_bp_btb_addr_bits_number->setText(QString::number(config->get_bp_btb_bits()));
+    ui->text_bp_btb_bits_number->setText(QString::number(config->get_bp_btb_bits()));
+    ui->text_bp_btb_entries_number->setText(QString::number(qPow(2, config->get_bp_btb_bits())));
+}
+
+void NewDialog::bp_bht_bits_texts_update(void) {
+    ui->text_bp_bht_bhr_bits_number->setText(QString::number(config->get_bp_bhr_bits()));
+    ui->text_bp_bht_addr_bits_number->setText(QString::number(config->get_bp_bht_addr_bits()));
+    ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
+    ui->text_bp_bht_entries_number->setText(QString::number(qPow(2, config->get_bp_bht_bits())));
+}
+
+void NewDialog::bp_bht_bhr_bits_change(int v) {
+    if (config->get_bp_bhr_bits() != v) {
+        config->set_bp_bhr_bits((uint8_t)v);
+        switch2custom();
+    }
+    bp_bht_bits_texts_update();
+}
+
+void NewDialog::bp_bht_addr_bits_change(int v) {
+    if (config->get_bp_bht_addr_bits() != v) {
+        config->set_bp_bht_addr_bits((uint8_t)v);
+        switch2custom();
+    }
+    bp_bht_bits_texts_update();
+}
+
 void NewDialog::config_gui() {
     // Basic
     ui->elf_file->setText(config->elf());
@@ -379,6 +562,51 @@ void NewDialog::config_gui() {
     ui->hazard_stall->setChecked(config->hazard_unit() == machine::MachineConfig::HU_STALL);
     ui->hazard_stall_forward->setChecked(
         config->hazard_unit() == machine::MachineConfig::HU_STALL_FORWARD);
+
+    // Branch predictor
+    ui->group_bp->setChecked(config->get_bp_enabled());
+    ui->select_bp_type->clear();
+    ui->select_bp_type->addItem(
+        predictor_type_to_string(machine::PredictorType::ALWAYS_NOT_TAKEN).toString(),
+        QVariant::fromValue(machine::PredictorType::ALWAYS_NOT_TAKEN));
+    ui->select_bp_type->addItem(
+        predictor_type_to_string(machine::PredictorType::ALWAYS_TAKEN).toString(),
+        QVariant::fromValue(machine::PredictorType::ALWAYS_TAKEN));
+    ui->select_bp_type->addItem(
+        predictor_type_to_string(machine::PredictorType::BTFNT).toString(),
+        QVariant::fromValue(machine::PredictorType::BTFNT));
+    ui->select_bp_type->addItem(
+        predictor_type_to_string(machine::PredictorType::SMITH_1_BIT).toString(),
+        QVariant::fromValue(machine::PredictorType::SMITH_1_BIT));
+    ui->select_bp_type->addItem(
+        predictor_type_to_string(machine::PredictorType::SMITH_2_BIT).toString(),
+        QVariant::fromValue(machine::PredictorType::SMITH_2_BIT));
+    ui->select_bp_type->addItem(
+        predictor_type_to_string(machine::PredictorType::SMITH_2_BIT_HYSTERESIS).toString(),
+        QVariant::fromValue(machine::PredictorType::SMITH_2_BIT_HYSTERESIS));
+    const int index { ui->select_bp_type->findData(QVariant::fromValue(config->get_bp_type())) };
+    if (index >= 0) {
+        ui->select_bp_type->setCurrentIndex(index);
+    } else {
+        ui->select_bp_type->setCurrentIndex(
+            ui->select_bp_type->findData(QVariant::fromValue(machine::PredictorType::SMITH_1_BIT)));
+        config->set_bp_type(machine::PredictorType::SMITH_1_BIT);
+    }
+    ui->slider_bp_btb_addr_bits->setMaximum(BP_MAX_BTB_BITS);
+    ui->slider_bp_btb_addr_bits->setValue(config->get_bp_btb_bits());
+    ui->text_bp_btb_addr_bits_number->setText(QString::number(config->get_bp_btb_bits()));
+    ui->text_bp_btb_bits_number->setText(QString::number(config->get_bp_btb_bits()));
+    ui->text_bp_btb_entries_number->setText(QString::number(qPow(2, config->get_bp_btb_bits())));
+    ui->slider_bp_bht_bhr_bits->setMaximum(BP_MAX_BHR_BITS);
+    ui->slider_bp_bht_bhr_bits->setValue(config->get_bp_bhr_bits());
+    ui->text_bp_bht_bhr_bits_number->setText(QString::number(config->get_bp_bhr_bits()));
+    ui->slider_bp_bht_addr_bits->setMaximum(BP_MAX_BHT_ADDR_BITS);
+    ui->slider_bp_bht_addr_bits->setValue(config->get_bp_bht_addr_bits());
+    ui->text_bp_bht_addr_bits_number->setText(QString::number(config->get_bp_bht_addr_bits()));
+    ui->text_bp_bht_bits_number->setText(QString::number(config->get_bp_bht_bits()));
+    ui->text_bp_bht_entries_number->setText(QString::number(qPow(2, config->get_bp_bht_bits())));
+    bp_type_change();
+
     // Memory
     ui->mem_protec_exec->setChecked(config->memory_execute_protection());
     ui->mem_protec_write->setChecked(config->memory_write_protection());

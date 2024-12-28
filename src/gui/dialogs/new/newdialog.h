@@ -3,6 +3,7 @@
 
 #include "common/memory_ownership.h"
 #include "machine/machineconfig.h"
+#include "predictor_types.h"
 #include "ui_NewDialog.h"
 #include "ui_NewDialogCache.h"
 
@@ -52,6 +53,16 @@ private slots:
     void browse_osemu_fs_root();
     void osemu_fs_root_change(QString val);
     void reset_at_compile_change(bool);
+    void switch2page(QTreeWidgetItem *current, QTreeWidgetItem *previous = nullptr);
+
+    // Branch Predictor
+    void bp_toggle_widgets();
+    void bp_enabled_change(bool);
+    void bp_type_change(void);
+    void bp_init_state_change(void);
+    void bp_btb_addr_bits_change(int);
+    void bp_bht_bhr_bits_change(int);
+    void bp_bht_addr_bits_change(int);
 
 private:
     Box<Ui::NewDialog> ui {};
@@ -60,6 +71,7 @@ private:
 
     Box<machine::MachineConfig> config;
     void config_gui(); // Apply configuration to gui
+    void bp_bht_bits_texts_update(void);
 
     unsigned preset_number();
     void load_settings();
@@ -71,6 +83,7 @@ class NewDialogCacheHandler : public QObject {
     Q_OBJECT
 
     using Super = QObject;
+
 public:
     NewDialogCacheHandler(NewDialog *nd, Ui::NewDialogCache *ui);
 

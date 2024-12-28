@@ -38,8 +38,9 @@ __start:
 _start:
 	addi  a7, zero, __NR_write        // load syscall number
 	addi  a0, zero, 1                 // load file descriptor
-	addi  a1, zero, text_1            // load text address
-	addi  a2, zero, text_1_e - text_1 // load text length
+	la    a1, text_1                  // load text start address
+	la    a2, text_1_e                // load text end address
+	sub   a2, a2, a1                  // compute text length
 	ecall                             // print the text
 
 	addi  a7, zero, __NR_exit         // load syscall numver
@@ -57,3 +58,12 @@ data_1:	.word	1, 2, 3, 4
 
 text_1:	.ascii	"Hello world.\n"	// store ASCII text, no termination
 text_1_e:
+
+// The sample can be compiled by full-featured riscv64-unknown-elf GNU tool-chain
+// for RV32IMA use
+// riscv64-unknown-elf-gcc -c -march=rv64ima -mabi=lp64 template-os.S
+// riscv64-unknown-elf-gcc -march=rv64ima -mabi=lp64 -nostartfiles -nostdlib template-os.o
+// for RV64IMA use
+// riscv64-unknown-elf-gcc -c -march=rv32ima -mabi=ilp32 template-os.S
+// riscv64-unknown-elf-gcc -march=rv32ima -mabi=ilp32 -nostartfiles -nostdlib template-os.o
+// add "-o template-os" to change default "a.out" output file name
