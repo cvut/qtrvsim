@@ -80,11 +80,18 @@ void ProgramDock::setup(machine::Machine *machine) {
     machine::Address pc;
     emit machine_setup(machine);
     if (machine == nullptr) { return; }
+    pipeline_handle = &machine->core()->get_state();
     pc = machine->registers()->read_pc();
     for (machine::Address &address : follow_addr) {
         address = pc;
     }
     update_follow_position();
+}
+
+void ProgramDock::showEvent(QShowEvent *event) {
+    QDockWidget::showEvent(event);
+    update_follow_position();
+    if (pipeline_handle != nullptr) { update_pipeline_addrs(*pipeline_handle); }
 }
 
 void ProgramDock::set_follow_inst(int follow) {
@@ -94,6 +101,7 @@ void ProgramDock::set_follow_inst(int follow) {
 }
 
 void ProgramDock::update_pipeline_addrs(const machine::CoreState &s) {
+    if (isHidden()) { return; }
     const machine::Pipeline &p = s.pipeline;
     fetch_inst_addr(p.fetch.result.inst_addr);
     decode_inst_addr(p.decode.result.inst_addr);
