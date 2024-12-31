@@ -60,6 +60,7 @@ public:
 
     RegisterValue read_gp(RegisterId reg) const;        // Read general-purpose
                                                         // register
+    RegisterValue read_gp_internal(RegisterId reg) const; // For use from GUI.
     void write_gp(RegisterId reg, RegisterValue value); // Write general-purpose
                                                         // register
 

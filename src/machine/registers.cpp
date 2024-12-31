@@ -40,9 +40,16 @@ RegisterValue Registers::read_gp(RegisterId reg) const {
         return { 0 }; // $0 always reads as 0
     }
 
-    RegisterValue value = this->gp.at(reg);
+    RegisterValue value = read_gp_internal(reg);
     emit gp_read(reg, value);
     return value;
+}
+
+RegisterValue Registers::read_gp_internal(RegisterId reg) const {
+    if (reg == 0) {
+        return { 0 }; // $0 always reads as 0
+    }
+    return gp.at(reg);
 }
 
 void Registers::write_gp(RegisterId reg, RegisterValue value) {
