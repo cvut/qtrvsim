@@ -132,6 +132,8 @@ if (NOT "${BUILD_DEBUG}")
     add_definitions(-DQT_NO_DEBUG_OUTPUT=1)
 endif ()
 
+add_compile_definitions(QT_USE_QSTRINGBUILDER)
+
 # Profiling flags
 if (NOT "${WASM}" AND NOT "${WIN32}")
     set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer")
