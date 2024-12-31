@@ -23,6 +23,8 @@ public:
 
     void connectToMachine(machine::Machine *machine);
 
+    void showEvent(QShowEvent *event) override;
+
 private slots:
     void pc_changed(machine::Address val);
     void gp_changed(machine::RegisterId i, machine::RegisterValue val);
@@ -30,7 +32,12 @@ private slots:
     void clear_highlights();
 
 private:
+    // Do full update of all registers. Clear all highlights.
+    void reload();
+
     machine::Xlen xlen;
+    // Used for batch updates when registers are shown.
+    const machine::Registers *regs_handle;
 
     const char *sizeHintText();
 

@@ -18,6 +18,7 @@ public:
     explicit CsrDock(QWidget *parent);
 
     void setup(machine::Machine *machine);
+    void reload();
 
 private slots:
     void csr_changed(std::size_t internal_reg_id, machine::RegisterValue val);
@@ -25,7 +26,12 @@ private slots:
     void clear_highlights();
 
 private:
+    void showEvent(QShowEvent *event) override;
+
+private:
     machine::Xlen xlen;
+    // We keep this handle for batch updates when this widget was hidden.
+    const machine::CSR::ControlState *csr_handle;
 
     const char *sizeHintText();
 

@@ -18,6 +18,8 @@ public:
 
     void setup(machine::Machine *machine);
 
+    void showEvent(QShowEvent *event) override;
+
 signals:
     void machine_setup(machine::Machine *machine);
     void jump_to_pc(machine::Address);
@@ -51,6 +53,7 @@ private:
     enum FollowSource follow_source;
     machine::Address follow_addr[FOLLOWSRC_COUNT] {};
     QSettings *settings;
+    const machine::CoreState *pipeline_handle;
 };
 
 #endif // PROGRAMDOCK_H
