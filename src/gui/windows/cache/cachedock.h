@@ -16,6 +16,8 @@ public:
 
     void setup(const machine::Cache *cache, bool cache_after_cache = false);
 
+    void paintEvent(QPaintEvent *event) override;
+
 private slots:
     void hit_update(unsigned);
     void miss_update(unsigned);
@@ -35,6 +37,15 @@ private:
     QLabel *l_m_reads, *l_m_writes;
     GraphicsView *graphicsview;
     CacheViewScene *cachescene;
+
+    // Statistics
+    unsigned memory_reads = 0;
+    unsigned memory_writes = 0;
+    unsigned hit = 0;
+    unsigned miss = 0;
+    unsigned stalled = 0;
+    double speed_improv = 0.0;
+    double hit_rate = 0.0;
 };
 
 #endif // CACHEDOCK_H
