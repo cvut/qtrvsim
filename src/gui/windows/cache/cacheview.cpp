@@ -2,9 +2,8 @@
 
 #include "fontsize.h"
 
-#include <cmath>
-
 #include <QtAlgorithms>
+#include <cmath>
 
 //////////////////////
 #define ROW_HEIGHT 14
@@ -27,9 +26,13 @@ static inline unsigned int bitsToRepresent(quint32 range_max_val) {
 CacheAddressBlock::CacheAddressBlock(const machine::Cache *cache, unsigned width) {
     rows = cache->get_config().set_count();
     columns = cache->get_config().block_size();
-    s_row = cache->get_config().set_count() > 1 ? bitsToRepresent(cache->get_config().set_count() - 1) : 0;
+    s_row = cache->get_config().set_count() > 1
+                ? bitsToRepresent(cache->get_config().set_count() - 1)
+                : 0;
     this->width = width;
-    s_col = cache->get_config().block_size() > 1 ? bitsToRepresent(cache->get_config().block_size() - 1) : 0;
+    s_col = cache->get_config().block_size() > 1
+                ? bitsToRepresent(cache->get_config().block_size() - 1)
+                : 0;
     s_tag = 30 - s_row - s_col; // 32 bits - 2 unused and then every bit used
                                 // for different index
     this->width = width;
@@ -353,14 +356,15 @@ void CacheViewBlock::cache_update(
     validity[set]->setText(valid ? "1" : "0");
     if (this->dirty) { this->dirty[set]->setText(valid ? (dirty ? "1" : "0") : ""); }
     // TODO calculate correct size of tag
-    this->tag[set]->setText(valid ? QString("0x") + QString("%1").arg(tag, 8, 16, QChar('0')) : "");
+    this->tag[set]->setText(
+        valid ? QString("0x") + QString("%1").arg(tag, 8, 16, QChar('0')) : QString(""));
     for (unsigned i = 0; i < columns; i++) {
         this->data[set][i]->setText(
             valid ? QString("0x")
                         + QString("%1").arg(
                             byteswap_if(data[i], simulated_machine_endian != NATIVE_ENDIAN), 8, 16,
                             QChar('0'))
-                  : "");
+                  : QString(""));
         //  TODO Use cache API
     }
 
