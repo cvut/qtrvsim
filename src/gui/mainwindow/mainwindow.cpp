@@ -1,10 +1,4 @@
-#include "windows/editor/editordock.h"
-#include "windows/editor/editortab.h"
-
-#include <QProcessEnvironment>
-#include <QtWidgets>
-#include <qactiongroup.h>
-#include <qwidget.h>
+#include "mainwindow.h"
 
 #include "assembler/fixmatheval.h"
 #include "assembler/simpleasm.h"
@@ -13,15 +7,19 @@
 #include "dialogs/savechanged/savechangeddialog.h"
 #include "extprocess.h"
 #include "helper/async_modal.h"
-#include "mainwindow.h"
 #include "os_emulation/ossyscall.h"
 #include "textsignalaction.h"
-#include "common/logging.h"
+#include "windows/editor/editordock.h"
+#include "windows/editor/editortab.h"
 
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QMetaObject>
+#include <QProcessEnvironment>
 #include <QTextDocument>
+#include <QtWidgets>
+#include <qactiongroup.h>
+#include <qwidget.h>
 
 LOG_CATEGORY("gui.mainwindow");
 
@@ -45,6 +43,9 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     ui->setupUi(this);
     setWindowTitle(APP_NAME);
     setDockNestingEnabled(true);
+
+    frequency_label.reset(new QLabel(this));
+    ui->statusBar->addPermanentWidget(frequency_label.data());
 
     // Setup central widget
 
@@ -168,9 +169,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(
         ui->actionBranch_Predictor_Target_table, &QAction::triggered, this,
         &MainWindow::show_bp_btb);
-    connect(
-        ui->actionBranch_Predictor_Info, &QAction::triggered, this,
-        &MainWindow::show_bp_info);
+    connect(ui->actionBranch_Predictor_Info, &QAction::triggered, this, &MainWindow::show_bp_info);
 
     connect(ui->actionPeripherals, &QAction::triggered, this, &MainWindow::show_peripherals);
     connect(ui->actionTerminal, &QAction::triggered, this, &MainWindow::show_terminal);
@@ -286,8 +285,9 @@ void MainWindow::create_core(
 
     set_speed(); // Update machine speed to current settings
 
-    const static machine::ExceptionCause ecall_variats[] = {machine::EXCAUSE_ECALL_ANY,
-        machine::EXCAUSE_ECALL_M, machine::EXCAUSE_ECALL_S, machine::EXCAUSE_ECALL_U};
+    const static machine::ExceptionCause ecall_variats[]
+        = { machine::EXCAUSE_ECALL_ANY, machine::EXCAUSE_ECALL_M, machine::EXCAUSE_ECALL_S,
+            machine::EXCAUSE_ECALL_U };
 
     if (config.osemu_enable()) {
         auto *osemu_handler = new osemu::OsSyscallExceptionHandler(
@@ -320,6 +320,9 @@ void MainWindow::create_core(
     connect(machine.data(), &machine::Machine::status_change, this, &MainWindow::machine_status);
     connect(machine.data(), &machine::Machine::program_exit, this, &MainWindow::machine_exit);
     connect(machine.data(), &machine::Machine::program_trap, this, &MainWindow::machine_trap);
+    connect(
+        machine.data(), &machine::Machine::report_core_frequency, this,
+        &MainWindow::update_core_frequency);
     // Connect signal from break to machine pause
     connect(
         machine->core(), &machine::Core::stop_on_exception_reached, machine.data(),
@@ -434,13 +437,13 @@ void MainWindow::print_action() {
     void MainWindow::show_##NAME() {                                                               \
         show_dockwidget(&*NAME, DEFAULT_AREA, true, false);                                        \
     }                                                                                              \
-void MainWindow::reset_state_##NAME() {                                                            \
-    show_dockwidget(&*NAME, DEFAULT_AREA, DEFAULT_VISIBLE, true);                                  \
-}
+    void MainWindow::reset_state_##NAME() {                                                        \
+        show_dockwidget(&*NAME, DEFAULT_AREA, DEFAULT_VISIBLE, true);                              \
+    }
 
 SHOW_HANDLER(registers, Qt::TopDockWidgetArea, true)
 SHOW_HANDLER(program, Qt::LeftDockWidgetArea, true)
-SHOW_HANDLER(memory, Qt::RightDockWidgetArea, true )
+SHOW_HANDLER(memory, Qt::RightDockWidgetArea, true)
 SHOW_HANDLER(cache_program, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(cache_data, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(cache_level2, Qt::RightDockWidgetArea, false)
@@ -558,8 +561,11 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     }
 }
 
-void MainWindow::show_dockwidget(QDockWidget *dw, Qt::DockWidgetArea area,
-                                 bool defaultVisible, bool resetState) {
+void MainWindow::show_dockwidget(
+    QDockWidget *dw,
+    Qt::DockWidgetArea area,
+    bool defaultVisible,
+    bool resetState) {
     if (dw == nullptr) { return; }
     if (resetState) {
         if (dw->isFloating()) {
@@ -651,8 +657,7 @@ void MainWindow::message_selected(
     central_widget_tabs->setCurrentWidget(editor_tabs.data());
     if (!editor_tabs->set_cursor_to(file, line, column)) {
         editor_tabs->open_file_if_not_open(file, false);
-        if (!editor_tabs->set_cursor_to(file, line, column))
-            return;
+        if (!editor_tabs->set_cursor_to(file, line, column)) return;
     }
 
     // Highlight the line
@@ -665,8 +670,12 @@ void MainWindow::message_selected(
     editor->setExtraSelections({ selection });
 }
 
+void MainWindow::update_core_frequency(double frequency) {
+    frequency_label->setText(QString("Core frequency: %1 kHz").arg(frequency / 1000.0, 0, 'f', 3));
+}
+
 bool SimpleAsmWithEditorCheck::process_file(const QString &filename, QString *error_ptr) {
-    EditorTab* tab = mainwindow->editor_tabs->find_tab_by_filename(filename);
+    EditorTab *tab = mainwindow->editor_tabs->find_tab_by_filename(filename);
     if (tab == nullptr) { return Super::process_file(filename, error_ptr); }
     SrcEditor *editor = tab->get_editor();
     QTextDocument *doc = editor->document();

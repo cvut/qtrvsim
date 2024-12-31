@@ -220,6 +220,10 @@ const MachineConfig &Machine::config() {
 void Machine::set_speed(unsigned int ips, unsigned int time_chunk) {
     this->time_chunk = time_chunk;
     run_t->setInterval(ips);
+    if (run_t->isActive()) {
+        // Clock settings changed.
+        start_core_clock();
+    }
 }
 
 const Registers *Machine::registers() {
@@ -344,8 +348,9 @@ bool Machine::exited() {
 void Machine::play() {
     CTL_GUARD;
     set_status(ST_RUNNING);
-    run_t->start();
+    start_core_clock();
     step_internal(true);
+    emit play_initiated();
 }
 
 void Machine::pause() {
@@ -353,7 +358,8 @@ void Machine::pause() {
         CTL_GUARD;
     }
     set_status(ST_READY);
-    run_t->stop();
+    stop_core_clock();
+    emit play_paused();
 }
 
 void Machine::step_internal(bool skip_break) {
@@ -369,21 +375,39 @@ void Machine::step_internal(bool skip_break) {
         } while (time_chunk != 0 && stat == ST_BUSY && !skip_break
                  && timer.elapsed() < (int)time_chunk);
     } catch (SimulatorException &e) {
-        run_t->stop();
+        stop_core_clock();
         set_status(ST_TRAPPED);
         emit program_trap(e);
         return;
     }
     if (regs->read_pc() >= program_end) {
-        run_t->stop();
+        stop_core_clock();
         set_status(ST_EXIT);
         emit program_exit();
     } else {
-        if (stat == ST_BUSY) {
-            set_status(stat_prev);
-        }
+        if (stat == ST_BUSY) { set_status(stat_prev); }
     }
     emit post_tick();
+}
+
+void Machine::start_core_clock() {
+    // Handle frequency measurement.
+    last_cycle_count = cr->get_cycle_count();
+    if (run_t->interval() == 0) {
+        // The clock is not fixed, we need to measure it.
+        frequency_timer.start();
+    } else {
+        // Clocked is fixed.
+        emit report_core_frequency(1e3 / (double)run_t->interval());
+    }
+
+    run_t->start();
+}
+
+void Machine::stop_core_clock() {
+    run_t->stop();
+    frequency_timer.invalidate();
+    emit report_core_frequency(0.0);
 }
 
 void Machine::step() {
@@ -398,6 +422,16 @@ void Machine::step_timer() {
         }
     } else {
         step_internal();
+    }
+    // Compute core frequency each 0x100 cycles
+    auto total_cycle_count = cr->get_cycle_count();
+    auto cycle_count = total_cycle_count - last_cycle_count;
+    if (cycle_count >= 0x2000) {
+        double period_ns = (double)(frequency_timer.nsecsElapsed()) / cycle_count;
+        if (period_ns < 0.01) { return; }
+        last_cycle_count = cr->get_cycle_count();
+        emit frequency_timer.start();
+        report_core_frequency(1e9 / period_ns);
     }
 }
 

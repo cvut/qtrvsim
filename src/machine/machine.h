@@ -98,12 +98,19 @@ signals:
     void tick();      // Time tick
     void post_tick(); // Emitted after tick to allow updates
     void set_interrupt_signal(uint irq_num, bool active);
+    void play_initiated();
+    void play_paused();
+    void report_core_frequency(double);
 
 private slots:
     void step_timer();
 
 private:
     void step_internal(bool skip_break = false);
+
+    void start_core_clock();
+    void stop_core_clock();
+
     MachineConfig machine_config;
 
     Registers *regs = nullptr;
@@ -130,6 +137,10 @@ private:
 
     QTimer *run_t = nullptr;
     unsigned int time_chunk = { 0 };
+
+    // Used to monitor the real CPU frequency
+    QElapsedTimer frequency_timer;
+    uint64_t last_cycle_count = 0;
 
     SymbolTable *symtab = nullptr;
     Address program_end = 0xffff0000_addr;

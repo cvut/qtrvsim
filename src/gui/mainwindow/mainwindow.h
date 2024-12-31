@@ -121,12 +121,16 @@ public slots:
         int column,
         const QString &text,
         const QString &hint);
+    // Update data
+    void update_core_frequency(double frequency);
 
 protected:
     void closeEvent(QCloseEvent *cancel) override;
 
 private:
     Box<Ui::MainWindow> ui {};
+    // Placed right on bottom status bar.
+    Box<QLabel> frequency_label {};
 
     Box<NewDialog> ndialog {};
     Box<HidingTabWidget> central_widget_tabs {};
