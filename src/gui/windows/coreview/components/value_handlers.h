@@ -20,6 +20,40 @@
 #include <utility>
 #include <vector>
 
+/**
+ * Proxy for a value that can be fetched from a reference and compared to previous value.
+ */
+template<typename T>
+class ValueProxy {
+public:
+    ValueProxy(const T &data) : data(data), last_value(data) {}
+
+    /**
+     * Fetch new value and return true if it changed from last time this function was called.
+     */
+    bool fetch_and_compare() {
+        if (data != last_value) {
+            last_value = data;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Get the last fetched value.
+     */
+    const T &get() const { return last_value; }
+
+    /**
+     * Get remote value directly.
+     */
+    const T &get_direct() const { return data; }
+
+private:
+    const T &data;
+    T last_value;
+};
+
 class BoolValue {
 public:
     BoolValue(svgscene::SimpleTextItem *element, const bool &data);
@@ -28,7 +62,10 @@ public:
 
 private:
     BORROWED svgscene::SimpleTextItem *const element;
-    const bool &data;
+    ValueProxy<bool> data;
+
+    static const QString TRUE_STRING;
+    static const QString FALSE_STRING;
 };
 
 class PCValue : public QObject {
@@ -47,7 +84,8 @@ public:
 
 private:
     BORROWED svgscene::SimpleTextItem *const element;
-    const machine::Address &data;
+    ValueProxy<machine::Address> data;
+    QString buffer { "0x00000000" };
 };
 
 class RegValue {
@@ -58,7 +96,8 @@ public:
 
 private:
     BORROWED svgscene::SimpleTextItem *const element;
-    const machine::RegisterValue &data;
+    ValueProxy<machine::RegisterValue> data;
+    QString buffer { "00000000" };
 };
 
 class RegIdValue {
@@ -66,10 +105,11 @@ public:
     RegIdValue(svgscene::SimpleTextItem *element, const machine::RegisterId &data);
     void update();
     static const QString COMPONENT_NAME;
+    QString buffer { "00" };
 
 private:
     BORROWED svgscene::SimpleTextItem *const element;
-    const machine::RegisterId &data;
+    ValueProxy<machine::RegisterId> data;
 };
 
 class DebugValue {
@@ -80,7 +120,8 @@ public:
 
 private:
     BORROWED svgscene::SimpleTextItem *const element;
-    const unsigned &data;
+    ValueProxy<unsigned> data;
+    QString buffer { "0" };
 };
 
 class MultiTextValue {
@@ -95,6 +136,7 @@ public:
 private:
     BORROWED svgscene::SimpleTextItem *const element;
     const unsigned &current_text_index;
+    unsigned last_text_index;
     Source &text_table;
     QBrush originalBrush;
 };
@@ -109,8 +151,8 @@ public:
 
 private:
     BORROWED svgscene::SimpleTextItem *const element;
-    const machine::Instruction &instruction_data;
-    const machine::Address &address_data;
+    ValueProxy<machine::Instruction> instruction_data;
+    ValueProxy<machine::Address> address_data;
 };
 
 template<typename SOURCE>
@@ -120,25 +162,23 @@ public:
         std::vector<BORROWED QGraphicsPathItem *> connections,
         const SOURCE &active_connection)
         : connections(std::move(connections))
-        , active_connection(active_connection)
-        , current_active_connection(0) {
+        , active_connection(active_connection) {
         // Hide all but first
         for (size_t i = 1; i < this->connections.size(); ++i) {
             this->connections.at(i)->hide();
         }
     }
     void update() {
-        if (current_active_connection != active_connection) {
-            connections.at(static_cast<unsigned>(current_active_connection))->hide();
-            connections.at(static_cast<unsigned>(active_connection))->show();
-            current_active_connection = active_connection;
+        auto old_connection = active_connection.get();
+        if (active_connection.fetch_and_compare()) {
+            connections.at(static_cast<unsigned>(old_connection))->hide();
+            connections.at(static_cast<unsigned>(active_connection.get()))->show();
         }
     }
 
 private:
     const std::vector<BORROWED QGraphicsPathItem *> connections;
-    const SOURCE &active_connection;
-    SOURCE current_active_connection;
+    ValueProxy<SOURCE> active_connection;
 };
 
 #endif // QTRVSIM_VALUE_HANDLERS_H
