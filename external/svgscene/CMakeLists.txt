@@ -1,8 +1,16 @@
 cmake_minimum_required(VERSION 3.10)
 project(svgscene)
 
+set(QT_VERSION_MAJOR "auto" CACHE STRING "Qt major version to use. 5|6|auto")
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
+if (NOT "${QT_VERSION_MAJOR}" MATCHES "5|6|auto")
+    message(FATAL_ERROR "Invalid value for QT_VERSION_MAJOR: ${QT_VERSION_MAJOR} (expected 5, 6 or auto)")
+endif ()
+
+if ("${QT_VERSION_MAJOR}" STREQUAL "auto")
+    find_package(QT NAMES Qt5 Qt6 COMPONENTS Core REQUIRED)
+endif ()
+
 # Normally, we would use variable Qt5 or Qt6 to reference the Qt library. Here we do that through
 # this variable based on detected version major of Qt.
 set(QtLib "Qt${QT_VERSION_MAJOR}")
