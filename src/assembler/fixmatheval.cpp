@@ -318,7 +318,7 @@ bool FmeExpression::parse(const QString &expression, QString &error) {
                     break;
                 }
             } else {
-                error = QString("Unknow character \"%1\" in expression.").arg(ch);
+                error = QString("Unknown character \"%1\" in expression.").arg(ch);
                 ok = false;
                 break;
             }
