@@ -276,7 +276,7 @@ jobs:
 
       - name: Store created artifacts
         # Use of tar significantly improves performance as artifact upload has significant per file penalty
-        uses: alehechka/upload-tartifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: riscv-official-tests
           path: tests/riscv-official/isa
