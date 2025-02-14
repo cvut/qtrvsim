@@ -126,6 +126,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: riscv-official-tests
+          path: tests/riscv-official/isa
 
       - name: Official RISC-V tests (single cycle)
         # The testing python script does not support Ubuntu 18
