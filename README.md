@@ -537,8 +537,8 @@ Please reference above article, if you use QtRvSim in education or research rela
 ## Copyright
 
 - Copyright (c) 2017-2019 Karel Koci <cynerd@email.cz>
-- Copyright (c) 2019-2024 Pavel Pisa <pisa@cmp.felk.cvut.cz>
-- Copyright (c) 2020-2024 Jakub Dupak <dev@jakubdupak.com>
+- Copyright (c) 2019-2025 Pavel Pisa <pisa@cmp.felk.cvut.cz>
+- Copyright (c) 2020-2025 Jakub Dupak <dev@jakubdupak.com>
 - Copyright (c) 2020-2021 Max Hollmann <hollmmax@fel.cvut.cz>
 
 ## License
