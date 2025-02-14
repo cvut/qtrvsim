@@ -69,13 +69,13 @@ jobs:
       - run: git submodule update --recursive --init
 
       - name: Ccache
-        uses: hendrikmuhs/ccache-action@v1.2.11 # https://github.com/hendrikmuhs/ccache-action/issues/181
+        uses: hendrikmuhs/ccache-action@v1
         with:
           key: ${{ github.ref_name }}-${{ matrix.config.name }}
 
       - name: Install specified Qt version
         if: matrix.config.qt_version != 'native'
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           version: ${{ matrix.config.qt_version }}
           cache: true
@@ -89,7 +89,7 @@ jobs:
 
       -  name: Setup Ninja
          if: matrix.config.build_system == 'Ninja'
-         uses: seanmiddleditch/gha-setup-ninja@v4
+         uses: seanmiddleditch/gha-setup-ninja@v6
 
       - name: Create Build Environment
         run: cmake -E make_directory ${{ github.workspace }}/build
