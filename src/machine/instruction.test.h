@@ -6,9 +6,11 @@
 class TestInstruction : public QObject {
     Q_OBJECT
 
-public slots:
+private slots:
     void instruction();
     void instruction_access();
+    void instruction_to_str();
+    void instruction_code_from_str();
 };
 
 #endif // INSTRUCTION_TEST_H
