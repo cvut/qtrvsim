@@ -12,18 +12,25 @@ CacheDock::CacheDock(QWidget *parent, const QString &type)
     layout_top_form = new QFormLayout(top_form);
 
     l_hit = new QLabel("0", top_form);
+    l_hit->setTextFormat(Qt::PlainText);
     layout_top_form->addRow("Hit:", l_hit);
     l_miss = new QLabel("0", top_form);
+    l_miss->setTextFormat(Qt::PlainText);
     layout_top_form->addRow("Miss:", l_miss);
     l_m_reads = new QLabel("0", top_form);
+    l_m_reads->setTextFormat(Qt::PlainText);
     layout_top_form->addRow("Memory reads:", l_m_reads);
     l_m_writes = new QLabel("0", top_form);
+    l_m_writes->setTextFormat(Qt::PlainText);
     layout_top_form->addRow("Memory writes:", l_m_writes);
     l_stalled = new QLabel("0", top_form);
+    l_stalled->setTextFormat(Qt::PlainText);
     layout_top_form->addRow("Memory stall cycles:", l_stalled);
     l_hit_rate = new QLabel("0.000%", top_form);
+    l_hit_rate->setTextFormat(Qt::PlainText);
     layout_top_form->addRow("Hit rate:", l_hit_rate);
     l_speed = new QLabel("100%", top_form);
+    l_speed->setTextFormat(Qt::PlainText);
     layout_top_form->addRow("Improved speed:", l_speed);
 
     graphicsview = new GraphicsView(top_widget);
