@@ -34,6 +34,7 @@ const char *RegistersDock::sizeHintText() {
 
 QLabel *RegistersDock::addRegisterLabel(const QString &title) {
     auto *data_label = new QLabel(sizeHintText(), table_widget.data());
+    data_label->setTextFormat(Qt::PlainText);
     data_label->setFixedSize(data_label->sizeHint());
     data_label->setText("");
     data_label->setPalette(pal_normal);

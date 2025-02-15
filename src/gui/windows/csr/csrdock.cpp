@@ -13,6 +13,7 @@ CsrDock::CsrDock(QWidget *parent)
     for (size_t i = 0; i < machine::CSR::REGISTERS.size(); i++) {
         auto &desc = machine::CSR::REGISTERS.at(i);
         csr_view[i] = new QLabel(sizeHintText(), widg);
+        csr_view[i]->setTextFormat(Qt::PlainText);
         csr_view[i]->setFixedSize(csr_view[i]->sizeHint());
         csr_view[i]->setText("");
         csr_view[i]->setTextInteractionFlags(Qt::TextSelectableByMouse);
