@@ -15,6 +15,7 @@ namespace machine {
 enum class AluComponent {
     ALU, //> RV32/64I
     MUL, //> RV32/64M
+    FALU, //> RV32/64F
     PASS, //> Pass operand A without change (used for AMO)
 };
 
@@ -73,6 +74,22 @@ union AluCombinedOp {
  *                  to arbitrary implementation of RegisterValue
  */
 [[gnu::const]] int32_t alu32_operate(AluOp op, bool modified, RegisterValue a, RegisterValue b);
+
+/**
+ * RV32F for OP and OP-IMM instructions and RV64F OP-32 and OP-IMM-32
+ *
+ * ALU conforming to Base Integer Instruction Set, Version 2.0.
+ *
+ * @param op        operation specifier (funct3 in instruction)
+ * @param modified  modifies behavior of ADD (to SUB) and SRL (to SRA)
+ *                  encoded by bit 30 if applicable
+ * @param a         operand 1
+ * @param b         operand 2
+ * @return          result of specified ALU operation (always, no traps)
+ *                  integer type is returned to ensure correct signe extension
+ *                  to arbitrary implementation of RegisterValue
+ */
+[[gnu::const]] int32_t alu32f_operate(AluOp op, bool modified, RegisterValue a, RegisterValue b);
 
 /**
  * RV64 "M" for OP instructions

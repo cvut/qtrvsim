@@ -28,7 +28,7 @@ enum ConfigPresets {
 };
 
 constexpr ConfigIsaWord config_isa_word_default = ConfigIsaWord::byChar('E') | ConfigIsaWord::byChar('I') |
-        ConfigIsaWord::byChar('A') |ConfigIsaWord::byChar('M');
+        ConfigIsaWord::byChar('A') | ConfigIsaWord::byChar('M') | ConfigIsaWord::byChar('F');
 
 constexpr ConfigIsaWord config_isa_word_fixed = ConfigIsaWord::byChar('E') | ConfigIsaWord::byChar('I');
 
