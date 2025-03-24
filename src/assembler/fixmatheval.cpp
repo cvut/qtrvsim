@@ -251,7 +251,7 @@ bool FmeExpression::parse(const QString &expression, QString &error) {
                     i += 2;
                     optxtx = QStringLiteral("%hi");
                     unary_op = [](FmeValue &a, machine::Address) -> FmeValue {
-                        return get_bits(a, 31, 12);
+                        return get_bits(a + 0x800, 31, 12);
                     };
                 } else if (expr.startsWith(QStringLiteral("lo("))) {
                     i += 2;
