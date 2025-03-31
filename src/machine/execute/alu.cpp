@@ -17,6 +17,9 @@ RegisterValue alu_combined_operate(
                              : alu64_operate(op.alu_op, modified, a, b);
     case AluComponent::MUL:
         return (w_operation) ? mul32_operate(op.mul_op, a, b) : mul64_operate(op.mul_op, a, b);
+    case AluComponent::FALU:
+        // return (w_operation) ? alu32f_operate(op.alu_op, modified, a, b) : alu64f_operate(op.alu_op, modified, a, b);
+        return alu32f_operate(op.alu_op, modified, a, b);
     case AluComponent::PASS:
         return a;
     default: qDebug("ERROR, unknown alu component: %hhx", uint8_t(component)); return 0;
@@ -72,6 +75,17 @@ int32_t alu32_operate(AluOp op, bool modified, RegisterValue a, RegisterValue b)
         return ((modified) ? ~_a : _a) & _b; // Modified: clear bits of b using mask in a
     default: qDebug("ERROR, unknown alu operation: %hhx", uint8_t(op)); return 0;
     }
+}
+
+int32_t alu32f_operate(AluOp op, bool modified, RegisterValue a, RegisterValue b) {
+    return alu32_operate(op, modified, a, b);
+    // switch (op) {
+    //     case AluOp::ADD: {
+    //         float result = (a.as_f32()) + ((modified) ? - (b.as_f32()) : (b.as_f32()));
+    //         return *reinterpret_cast<int32_t*>(&result);
+    //     }
+    //     default: qDebug("ERROR, unknown alu operation: %hhx", uint8_t(op)); return 0;
+    // }
 }
 
 int64_t mul64_operate(MulOp op, RegisterValue a, RegisterValue b) {
