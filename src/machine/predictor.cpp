@@ -341,7 +341,7 @@ PredictorAlwaysTaken::PredictorAlwaysTaken() : Predictor(0, 0, PredictorState::U
 
 BranchResult PredictorAlwaysTaken::predict(PredictionInput input) {
     UNUSED(input);
-    return BranchResult::NOT_TAKEN;
+    return BranchResult::TAKEN;
 }
 
 void PredictorAlwaysTaken::update(PredictionFeedback feedback) {
