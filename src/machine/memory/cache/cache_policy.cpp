@@ -22,6 +22,8 @@ CachePolicy::get_policy_instance(const CacheConfig *config) {
                 config->associativity(), config->set_count());
         case CacheConfig::RP_PLRU:
             return std::make_unique<CachePolicyPLRU>(config->associativity(), config->set_count());
+        case CacheConfig::RP_NMRU:
+            return std::make_unique<CachePolicyNMRU>(config->associativity(), config->set_count());
         }
     } else {
         // Disabled cache will never use it.
@@ -171,5 +173,30 @@ size_t CachePolicyPLRU::select_way_to_evict(size_t row) const {
         plru_idx += idx;
     }
     return (idx >= associativity) ? (associativity - 1) : idx;
+}
+
+CachePolicyNMRU::CachePolicyNMRU(size_t associativity, size_t set_count)
+    : associativity(associativity) {
+    mru_ptr.resize(set_count);
+    for (auto &row : mru_ptr) {
+        row = 0; // Initially point to block 0
+    }
+    std::srand(1); // NOLINT(cert-msc51-cpp)
+}
+
+void CachePolicyNMRU::update_stats(size_t way, size_t row, bool is_valid) {
+    UNUSED(is_valid)
+    auto &row_ptr = mru_ptr.at(row); // Set currently accessed block to most recently used
+    row_ptr = way;
+}
+
+size_t CachePolicyNMRU::select_way_to_evict(size_t row) const {
+    if(associativity == 1) {
+        return 0;
+    }
+    uint32_t idx = std::rand() % (associativity - 1);
+    auto &row_ptr = mru_ptr.at(row);
+    idx = (idx < row_ptr) ? idx : idx + 1;
+    return idx;
 }
 } // namespace machine
