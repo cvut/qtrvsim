@@ -34,6 +34,7 @@ const char *RegistersDock::sizeHintText() {
 
 QLabel *RegistersDock::addRegisterLabel(const QString &title) {
     auto *data_label = new QLabel(sizeHintText(), table_widget.data());
+    data_label->setTextFormat(Qt::PlainText);
     data_label->setFixedSize(data_label->sizeHint());
     data_label->setText("");
     data_label->setPalette(pal_normal);
@@ -58,36 +59,42 @@ void RegistersDock::connectToMachine(machine::Machine *machine) {
         return;
     }
 
-    const machine::Registers *regs = machine->registers();
+    regs_handle = machine->registers();
 
     // if xlen changes adjust space to show full value
     if (xlen != machine->config().get_simulated_xlen()) {
         xlen = machine->config().get_simulated_xlen();
         auto *dumy_data_label = new QLabel(sizeHintText(), table_widget.data());
-        for (auto & i : gp) {
+        for (auto &i : gp) {
             i->setFixedSize(dumy_data_label->sizeHint());
         }
         pc->setFixedSize(dumy_data_label->sizeHint());
         delete dumy_data_label;
     }
 
-    // Load values
-    setRegisterValueToLabel(pc, regs->read_pc().get_raw());
-    for (size_t i = 0; i < gp.size(); i++) {
-        setRegisterValueToLabel(gp[i], regs->read_gp(i));
-    }
+    if (regs_handle == nullptr) { return; }
 
-    connect(regs, &machine::Registers::pc_update, this, &RegistersDock::pc_changed);
-    connect(regs, &machine::Registers::gp_update, this, &RegistersDock::gp_changed);
-    connect(regs, &machine::Registers::gp_read, this, &RegistersDock::gp_read);
+    reload();
+
+    connect(regs_handle, &machine::Registers::pc_update, this, &RegistersDock::pc_changed);
+    connect(regs_handle, &machine::Registers::gp_update, this, &RegistersDock::gp_changed);
+    connect(regs_handle, &machine::Registers::gp_read, this, &RegistersDock::gp_read);
     connect(machine, &machine::Machine::tick, this, &RegistersDock::clear_highlights);
 }
 
+void RegistersDock::showEvent(QShowEvent *event) {
+    reload();
+    QDockWidget::showEvent(event);
+}
+
 void RegistersDock::pc_changed(machine::Address val) {
+    if (isHidden()) { return; }
     setRegisterValueToLabel(pc, val.get_raw());
 }
 
 void RegistersDock::gp_changed(machine::RegisterId i, machine::RegisterValue val) {
+    if (isHidden()) { return; }
+
     setRegisterValueToLabel(gp[i], val);
     gp[i]->setPalette(pal_updated);
     gp_highlighted[i] = true;
@@ -95,6 +102,9 @@ void RegistersDock::gp_changed(machine::RegisterId i, machine::RegisterValue val
 
 void RegistersDock::gp_read(machine::RegisterId i, machine::RegisterValue val) {
     Q_UNUSED(val)
+
+    if (isHidden()) { return; }
+
     if (!(gp_highlighted[i])) {
         gp[i]->setPalette(pal_read);
         gp_highlighted[i] = true;
@@ -108,6 +118,14 @@ void RegistersDock::clear_highlights() {
         }
     }
     gp_highlighted.reset();
+}
+void RegistersDock::reload() {
+    if (regs_handle == nullptr) { return; }
+    setRegisterValueToLabel(pc, regs_handle->read_pc().get_raw());
+    for (size_t i = 0; i < gp.size(); i++) {
+        setRegisterValueToLabel(gp[i], regs_handle->read_gp_internal(i));
+    }
+    clear_highlights();
 }
 
 void RegistersDock::setRegisterValueToLabel(QLabel *label, machine::RegisterValue value) {

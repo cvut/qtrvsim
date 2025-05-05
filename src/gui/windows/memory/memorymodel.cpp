@@ -64,7 +64,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
         if (index.column() == 0) {
             t = QString::number(address.get_raw(), 16);
             s.fill('0', 8 - t.count());
-            return "0x" + s + t;
+            return { QString("0x") + s + t };
         }
         if (machine == nullptr) { return QString(""); }
         mem = mem_access();
