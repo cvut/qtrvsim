@@ -775,7 +775,7 @@ void MainWindow::compile_source() {
         return;
     }
     SymbolTableDb symtab(machine->symbol_table_rw(true));
-    machine::FrontendMemory *mem = machine->memory_data_bus_rw();
+    machine::FrontendMemory *mem = machine->data_frontend();
     if (mem == nullptr) {
         showAsyncCriticalBox(
             this, "Simulator Error", tr("No physical addresspace to store program."));
@@ -793,7 +793,12 @@ void MainWindow::compile_source() {
 
     connect(&sasm, &SimpleAsm::report_message, this, &MainWindow::report_message);
 
-    sasm.setup(mem, &symtab, machine::Address(0x00000200), machine->core()->get_xlen());
+    const uint32_t addr = (machine->config().get_vm_enabled()
+                           && machine->config().get_vm_mode() == machine::MachineConfig::VM_SV32)
+                              ? machine->config().get_kernel_virt_base()
+                              : 0x00000200;
+    sasm.setup(
+        mem, machine->config(), &symtab, machine::Address(addr), machine->core()->get_xlen());
 
     int ln = 1;
     for (QTextBlock block = content->begin(); block.isValid(); block = block.next(), ln++) {

@@ -1,0 +1,25 @@
+{
+	"BUILD_DIR" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/gui/gui_autogen",
+	"CMAKE_BINARY_DIR" : "/home/tux/qtrvsim/cmake-build-release-wsl",
+	"CMAKE_CURRENT_BINARY_DIR" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/gui",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/home/tux/qtrvsim/src/gui",
+	"CMAKE_SOURCE_DIR" : "/home/tux/qtrvsim",
+	"GENERATOR" : "Unix Makefiles",
+	"INCLUDE_DIR" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/gui/gui_autogen/include",
+	"INPUTS" : 
+	[
+		"/home/tux/qtrvsim/src/gui/windows/coreview/schemas/pipeline.svg",
+		"/home/tux/qtrvsim/src/gui/windows/coreview/schemas/forwarding.svg",
+		"/home/tux/qtrvsim/src/gui/windows/coreview/schemas/simple.svg"
+	],
+	"LOCK_FILE" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/gui/CMakeFiles/gui_autogen.dir/AutoRcc_schemas_HOZFTWX64X_Lock.lock",
+	"MULTI_CONFIG" : false,
+	"OPTIONS" : [ "-name", "schemas" ],
+	"OUTPUT_CHECKSUM" : "HOZFTWX64X",
+	"OUTPUT_NAME" : "qrc_schemas.cpp",
+	"RCC_EXECUTABLE" : "/usr/lib/qt5/bin/rcc",
+	"RCC_LIST_OPTIONS" : [ "--list" ],
+	"SETTINGS_FILE" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/gui/CMakeFiles/gui_autogen.dir/AutoRcc_schemas_HOZFTWX64X_Used.txt",
+	"SOURCE" : "/home/tux/qtrvsim/src/gui/windows/coreview/schemas/schemas.qrc",
+	"VERBOSITY" : 0
+}

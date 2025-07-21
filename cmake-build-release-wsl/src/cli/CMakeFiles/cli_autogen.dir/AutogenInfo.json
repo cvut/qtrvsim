@@ -1,0 +1,114 @@
+{
+	"BUILD_DIR" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/cli/cli_autogen",
+	"CMAKE_BINARY_DIR" : "/home/tux/qtrvsim/cmake-build-release-wsl",
+	"CMAKE_CURRENT_BINARY_DIR" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/cli",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/home/tux/qtrvsim/src/cli",
+	"CMAKE_EXECUTABLE" : "/usr/bin/cmake",
+	"CMAKE_LIST_FILES" : 
+	[
+		"/home/tux/qtrvsim/src/cli/CMakeLists.txt",
+		"/home/tux/qtrvsim/cmake/TestingTools.cmake"
+	],
+	"CMAKE_SOURCE_DIR" : "/home/tux/qtrvsim",
+	"DEP_FILE" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/cli/cli_autogen/deps",
+	"DEP_FILE_RULE_NAME" : "cli_autogen/timestamp",
+	"HEADERS" : 
+	[
+		[
+			"/home/tux/qtrvsim/src/cli/chariohandler.h",
+			"Mu",
+			"EWIEGA46WW/moc_chariohandler.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/cli/msgreport.h",
+			"Mu",
+			"EWIEGA46WW/moc_msgreport.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/cli/reporter.h",
+			"Mu",
+			"EWIEGA46WW/moc_reporter.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/cli/tracer.h",
+			"Mu",
+			"EWIEGA46WW/moc_tracer.cpp",
+			null
+		]
+	],
+	"HEADER_EXTENSIONS" : [ "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" ],
+	"INCLUDE_DIR" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/cli/cli_autogen/include",
+	"MOC_COMPILATION_FILE" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/cli/cli_autogen/mocs_compilation.cpp",
+	"MOC_DEFINITIONS" : 
+	[
+		"APP_NAME=\"QtRVSim\"",
+		"APP_ORGANIZATION=\"FEE CTU\"",
+		"APP_ORGANIZATION_DOMAIN=\"https://github.com/cvut/qtrvsim\"",
+		"APP_VERSION=\"0.9.8\"",
+		"ENV_CONFIG_FILE_NAME=\"QTRVSIM_CONFIG_FILE\"",
+		"QT_CORE_LIB",
+		"QT_DISABLE_DEPRECATED_BEFORE=0x050905",
+		"QT_NO_DEBUG",
+		"QT_NO_DEBUG_OUTPUT=1",
+		"QT_USE_QSTRINGBUILDER"
+	],
+	"MOC_DEPEND_FILTERS" : 
+	[
+		[
+			"Q_PLUGIN_METADATA",
+			"[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\([^\\)]*FILE[ \t]*\"([^\"]+)\""
+		]
+	],
+	"MOC_INCLUDES" : 
+	[
+		"/home/tux/qtrvsim/cmake-build-release-wsl/src/cli",
+		"/home/tux/qtrvsim/src/cli",
+		"/home/tux/qtrvsim/src",
+		"/home/tux/qtrvsim/src/machine",
+		"/usr/include/x86_64-linux-gnu/qt5",
+		"/usr/include/x86_64-linux-gnu/qt5/QtCore",
+		"/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++",
+		"/usr/include",
+		"/usr/include/c++/13",
+		"/usr/include/x86_64-linux-gnu/c++/13",
+		"/usr/include/c++/13/backward",
+		"/usr/lib/gcc/x86_64-linux-gnu/13/include",
+		"/usr/local/include",
+		"/usr/include/x86_64-linux-gnu"
+	],
+	"MOC_MACRO_NAMES" : [ "Q_OBJECT", "Q_GADGET", "Q_NAMESPACE", "Q_NAMESPACE_EXPORT" ],
+	"MOC_OPTIONS" : [],
+	"MOC_PATH_PREFIX" : false,
+	"MOC_PREDEFS_CMD" : 
+	[
+		"/usr/bin/c++",
+		"-std=gnu++17",
+		"-dM",
+		"-E",
+		"-c",
+		"/usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp"
+	],
+	"MOC_PREDEFS_FILE" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/cli/cli_autogen/moc_predefs.h",
+	"MOC_RELAXED_MODE" : false,
+	"MOC_SKIP" : [],
+	"MULTI_CONFIG" : false,
+	"PARALLEL" : 6,
+	"PARSE_CACHE_FILE" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/cli/CMakeFiles/cli_autogen.dir/ParseCache.txt",
+	"QT_MOC_EXECUTABLE" : "/usr/lib/qt5/bin/moc",
+	"QT_UIC_EXECUTABLE" : "",
+	"QT_VERSION_MAJOR" : 5,
+	"QT_VERSION_MINOR" : 15,
+	"SETTINGS_FILE" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/cli/CMakeFiles/cli_autogen.dir/AutogenUsed.txt",
+	"SOURCES" : 
+	[
+		[ "/home/tux/qtrvsim/src/cli/chariohandler.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/cli/main.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/cli/msgreport.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/cli/reporter.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/cli/tracer.cpp", "Mu", null ]
+	],
+	"VERBOSITY" : 0
+}

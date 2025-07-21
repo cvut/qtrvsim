@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2022 David Heidelberg -->
+<component type="desktop-application">
+  <id>cz.cvut.edu.comparch.qtrvsim</id>
+  <name>RISC-V CPU simulator</name>
+  <developer_name>Czech Technical University in Prague</developer_name>
+  <summary>RISC-V CPU simulator for education purposes</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <launchable type="desktop-id">qtrvsim.desktop</launchable>
+  <content_rating type="oars-1.1"/>
+
+  <description>
+    <p>
+      RISC-V processor architecture simulator for education purposes with pipeline and cache visualization.
+    </p>
+  </description>
+
+  <releases>
+    <release version="0.9.8" date="2024-10-01">
+      <description>
+        <p>Current project release.</p>
+      </description>
+    </release>
+    <release version="0.9.7" date="2024-02-16">
+      <description>
+        <p>GUI fix crash when no tab is selected, use bundled LibElf on macOS as Homebrew misses RISC-V</p>
+      </description>
+    </release>
+    <release version="0.9.6" date="2023-12-11">
+      <description>
+        <p>RISC-V A extension, ACLINT MTIMER, IRQ support, L2 cache, GUI editor tabs</p>
+      </description>
+    </release>
+    <release version="0.9.5" date="2023-01-16">
+      <description>
+        <p>More CSR updates, fix branch range, CLI OS emulation, coreview diagrams updates, RV64IM in CI</p>
+      </description>
+    </release>
+    <release version="0.9.4" date="2022-10-26">
+      <description>
+        <p>Support for 64-bit RV64IM target and official tests in CI</p>
+      </description>
+    </release>
+    <release version="0.9.3" date="2022-04-22">
+      <description>
+        <p>Corrected peripherals, LCD endianness and memory stalls.</p>
+      </description>
+    </release>
+    <release version="0.9.2" date="2022-03-14">
+      <description>
+        <p>Initial Flatpak release.</p>
+      </description>
+    </release>
+  </releases>
+
+  <screenshots>
+    <screenshot type="default" width="1526" height="888">
+      <image>https://raw.githubusercontent.com/cvut/qtrvsim/master/data/screenshots/0.png</image>
+    </screenshot>
+    <screenshot type="default" width="1526" height="888">
+      <image>https://raw.githubusercontent.com/cvut/qtrvsim/master/data/screenshots/1.png</image>
+    </screenshot>
+  </screenshots>
+
+  <url type="homepage">https://github.com/cvut/qtrvsim</url>
+  <url type="bugtracker">https://github.com/cvut/qtrvsim/issues</url>
+
+  <requires>
+    <display_length compare="ge">768</display_length>
+  </requires>
+
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </recommends>
+
+  <kudos>
+    <kudo>ModernToolkit</kudo>
+  </kudos>
+
+  <update_contact>david_AT_ixit.cz</update_contact>
+
+  <custom>
+    <value key="Purism::form_factor">workstation</value>
+  </custom>
+</component>

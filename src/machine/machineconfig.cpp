@@ -1,8 +1,11 @@
 #include "machineconfig.h"
 
 #include "common/endian.h"
+#include "machine.h"
 
 #include <QMap>
+#include <iostream>
+#include <ostream>
 #include <utility>
 
 using namespace machine;
@@ -27,6 +30,10 @@ using namespace machine;
 #define DFC_BP_BTB_BITS 2
 #define DFC_BP_BHR_BITS 0
 #define DFC_BP_BHT_ADDR_BITS 2
+/// Default config of Virtual Memory
+#define DFC_VM_ENABLED false
+#define DFC_KERNEL_VIRT_BASE 0x80000000u
+#define DFC_ROOT_PPN 0x00010000u
 //////////////////////////////////////////////////////////////////////////////
 /// Default config of CacheConfig
 #define DFC_EN false
@@ -186,6 +193,11 @@ MachineConfig::MachineConfig() {
     bp_bhr_bits = DFC_BP_BHR_BITS;
     bp_bht_addr_bits = DFC_BP_BHT_ADDR_BITS;
     bp_bht_bits = bp_bhr_bits + bp_bht_addr_bits;
+
+    // Virtual Memory
+    vm_enabled = DFC_VM_ENABLED;
+    kernel_virt_base = DFC_KERNEL_VIRT_BASE;
+    vm_root_ppn = DFC_ROOT_PPN;
 }
 
 MachineConfig::MachineConfig(const MachineConfig *config) {
@@ -222,6 +234,11 @@ MachineConfig::MachineConfig(const MachineConfig *config) {
     bp_bhr_bits = config->get_bp_bhr_bits();
     bp_bht_addr_bits = config->get_bp_bht_addr_bits();
     bp_bht_bits = bp_bhr_bits + bp_bht_addr_bits;
+
+    // Virtual Memory
+    vm_enabled = config->get_vm_enabled();
+    vm_mode = config->get_vm_mode();
+    kernel_virt_base = config->get_kernel_virt_base();
 }
 
 #define N(STR) (prefix + QString(STR))
@@ -266,6 +283,11 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     bp_bhr_bits = sts->value(N("BranchPredictor_BitsBHR"), DFC_BP_BHR_BITS).toUInt();
     bp_bht_addr_bits = sts->value(N("BranchPredictor_BitsBHTAddr"), DFC_BP_BHT_ADDR_BITS).toUInt();
     bp_bht_bits = bp_bhr_bits + bp_bht_addr_bits;
+
+    // Virtual Memory
+    vm_enabled = sts->value(N("VMEnabled"), DFC_VM_ENABLED).toBool();
+    kernel_virt_base = sts->value(N("KernelVirtBase"), DFC_KERNEL_VIRT_BASE).toUInt();
+    vm_root_ppn = sts->value(N("RootPPN"), DFC_ROOT_PPN).toUInt();
 }
 
 void MachineConfig::store(QSettings *sts, const QString &prefix) {
@@ -629,12 +651,47 @@ uint8_t MachineConfig::get_bp_bht_bits() const {
     return bp_bht_bits;
 }
 
+bool MachineConfig::get_vm_enabled() const {
+    return vm_enabled;
+}
+
+void MachineConfig::set_vm_enabled(bool e) {
+    vm_enabled = e;
+}
+
+void MachineConfig::set_vm_mode(VmMode m) {
+    vm_mode = m;
+}
+MachineConfig::VmMode MachineConfig::get_vm_mode() const {
+    return vm_mode;
+}
+
+void MachineConfig::set_vm_root_ppn(uint32_t p) {
+    vm_root_ppn = p;
+}
+uint32_t MachineConfig::get_vm_root_ppn() const {
+    return vm_root_ppn;
+}
+
+void MachineConfig::set_vm_asid(uint32_t a) {
+    vm_asid = a;
+}
+uint32_t MachineConfig::get_vm_asid() const {
+    return vm_asid;
+}
+
+void MachineConfig::set_kernel_virt_base(uint32_t v) {
+    kernel_virt_base = v;
+}
+uint32_t MachineConfig::get_kernel_virt_base() const {
+    return kernel_virt_base;
+}
+
 bool MachineConfig::operator==(const MachineConfig &c) const {
 #define CMP(GETTER) (GETTER)() == (c.GETTER)()
     return CMP(pipelined) && CMP(delay_slot) && CMP(hazard_unit) && CMP(get_simulated_xlen)
-           && CMP(get_isa_word) && CMP(get_bp_enabled) && CMP(get_bp_type)
-           && CMP(get_bp_init_state) && CMP(get_bp_btb_bits)
-           && CMP(get_bp_bhr_bits) && CMP(get_bp_bht_addr_bits)
+           && CMP(get_isa_word) && CMP(get_bp_enabled) && CMP(get_bp_type) && CMP(get_bp_init_state)
+           && CMP(get_bp_btb_bits) && CMP(get_bp_bhr_bits) && CMP(get_bp_bht_addr_bits)
            && CMP(memory_execute_protection) && CMP(memory_write_protection)
            && CMP(memory_access_time_read) && CMP(memory_access_time_write)
            && CMP(memory_access_time_burst) && CMP(memory_access_time_level2)

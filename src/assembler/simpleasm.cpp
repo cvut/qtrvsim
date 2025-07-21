@@ -69,10 +69,12 @@ void SimpleAsm::clear() {
 
 void SimpleAsm::setup(
     machine::FrontendMemory *mem,
+    machine::MachineConfig config,
     SymbolTableDb *symtab,
     machine::Address address,
     machine::Xlen xlen) {
     this->mem = mem;
+    this->config = config;
     this->symtab = symtab;
     this->address = address;
     this->symtab->setSymbol("XLEN", static_cast<uint64_t>(xlen), sizeof(uint64_t));
@@ -286,7 +288,12 @@ bool SimpleAsm::process_line(
             if (error_ptr != nullptr) { *error_ptr = error; }
             return false;
         }
-        address = machine::Address(value);
+        qint64 offset = qint64(value);
+        qint64 base = 0;
+        if (config.get_vm_enabled() && config.get_vm_mode() == machine::MachineConfig::VM_SV32) {
+            base = config.get_kernel_virt_base();
+        }
+        address = machine::Address(base + offset);
         return true;
     }
     if ((op == ".space") || (op == ".skip")) {

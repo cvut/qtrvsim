@@ -53,6 +53,7 @@ public:
     void clear();
     void setup(
         machine::FrontendMemory *mem,
+        machine::MachineConfig config,
         SymbolTableDb *symtab,
         machine::Address address,
         machine::Xlen xlen);
@@ -79,6 +80,7 @@ protected:
 private:
     QStringList include_stack;
     machine::FrontendMemory *mem {};
+    machine::MachineConfig config {};
     machine::RelocExpressionList reloc;
 };
 

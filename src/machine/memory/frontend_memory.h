@@ -7,6 +7,7 @@
 #include "memory/memory_utils.h"
 #include "register_value.h"
 #include "simulator_exception.h"
+#include "virtual_address.h"
 
 #include <QObject>
 #include <cstdint>
@@ -119,6 +120,22 @@ public:
         Address source,
         size_t size,
         ReadOptions options) const = 0;
+
+    virtual WriteResult write_vaddr(
+        VirtualAddress vaddr,
+        const void *source,
+        size_t size,
+        WriteOptions options) {
+        return write(Address{uint64_t(vaddr)}, source, size, options);
+    }
+
+    virtual ReadResult read_vaddr(
+        void *destination,
+        VirtualAddress vaddr,
+        size_t size,
+        ReadOptions options) const {
+        return read(destination, Address{uint64_t(vaddr)}, size, options);
+    }
 
     /**
      * Endian of the simulated CPU/memory system.

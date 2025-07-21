@@ -3,15 +3,16 @@
 
 #include "core.h"
 #include "machineconfig.h"
+#include "memory/backend/aclintmswi.h"
+#include "memory/backend/aclintmtimer.h"
+#include "memory/backend/aclintsswi.h"
 #include "memory/backend/lcddisplay.h"
 #include "memory/backend/peripheral.h"
 #include "memory/backend/peripspiled.h"
 #include "memory/backend/serialport.h"
-#include "memory/backend/aclintmtimer.h"
-#include "memory/backend/aclintmswi.h"
-#include "memory/backend/aclintsswi.h"
 #include "memory/cache/cache.h"
 #include "memory/memory_bus.h"
+#include "memory/tlb.h"
 #include "predictor.h"
 #include "registers.h"
 #include "simulator_exception.h"
@@ -20,6 +21,13 @@
 #include <QObject>
 #include <QTimer>
 #include <cstdint>
+#include <iostream>
+#include <optional>
+#include <ostream>
+
+namespace machine {
+    class PageTableManager;
+}
 
 namespace machine {
 
@@ -41,6 +49,8 @@ public:
     const Cache *cache_level2();
     Cache *cache_data_rw();
     void cache_sync();
+    FrontendMemory *instr_frontend() { return instr_if_; }
+    FrontendMemory *data_frontend() { return data_if_; }
     const MemoryDataBus *memory_data_bus();
     MemoryDataBus *memory_data_bus_rw();
     SerialPort *serial_port();
@@ -85,6 +95,10 @@ public:
     bool get_step_over_exception(enum ExceptionCause excause) const;
     enum ExceptionCause get_exception_cause() const;
 
+    uint32_t allocate_page() {
+        return next_free_ppn++;
+    }
+
 public slots:
     void play();
     void pause();
@@ -128,6 +142,11 @@ private:
     aclint::AclintMtimer *aclint_mtimer = nullptr;
     aclint::AclintMswi *aclint_mswi = nullptr;
     aclint::AclintSswi *aclint_sswi = nullptr;
+    std::optional<TLB> tlb_program;
+    std::optional<TLB> tlb_data;
+    FrontendMemory *instr_if_;
+    FrontendMemory *data_if_;
+    uint32_t next_free_ppn;
     Cache *cch_program = nullptr;
     Cache *cch_data = nullptr;
     Cache *cch_level2 = nullptr;

@@ -1,0 +1,392 @@
+{
+	"BUILD_DIR" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen",
+	"CMAKE_BINARY_DIR" : "/home/tux/qtrvsim/cmake-build-release-wsl",
+	"CMAKE_CURRENT_BINARY_DIR" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/machine",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/home/tux/qtrvsim/src/machine",
+	"CMAKE_EXECUTABLE" : "/usr/bin/cmake",
+	"CMAKE_LIST_FILES" : [ "/home/tux/qtrvsim/src/machine/CMakeLists.txt" ],
+	"CMAKE_SOURCE_DIR" : "/home/tux/qtrvsim",
+	"DEP_FILE" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/deps",
+	"DEP_FILE_RULE_NAME" : "machine_autogen/timestamp",
+	"HEADERS" : 
+	[
+		[
+			"/home/tux/qtrvsim/src/machine/config_isa.h",
+			"Mu",
+			"EWIEGA46WW/moc_config_isa.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/core.h",
+			"Mu",
+			"EWIEGA46WW/moc_core.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/core/core_state.h",
+			"Mu",
+			"TAC5DWH4SE/moc_core_state.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/csr/address.h",
+			"Mu",
+			"3NQYEYHW4V/moc_address.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/csr/controlstate.h",
+			"Mu",
+			"3NQYEYHW4V/moc_controlstate.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/execute/alu.h",
+			"Mu",
+			"O2NWNYKJMR/moc_alu.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/execute/alu_op.h",
+			"Mu",
+			"O2NWNYKJMR/moc_alu_op.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/execute/mul_op.h",
+			"Mu",
+			"O2NWNYKJMR/moc_mul_op.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/instruction.h",
+			"Mu",
+			"EWIEGA46WW/moc_instruction.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/machine.h",
+			"Mu",
+			"EWIEGA46WW/moc_machine.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/machineconfig.h",
+			"Mu",
+			"EWIEGA46WW/moc_machineconfig.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/machinedefs.h",
+			"Mu",
+			"EWIEGA46WW/moc_machinedefs.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/address.h",
+			"Mu",
+			"X5JWOZW5QK/moc_address.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/address_range.h",
+			"Mu",
+			"X5JWOZW5QK/moc_address_range.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/backend/aclintmswi.h",
+			"Mu",
+			"IGU7FALVOE/moc_aclintmswi.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/backend/aclintmtimer.h",
+			"Mu",
+			"IGU7FALVOE/moc_aclintmtimer.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/backend/aclintsswi.h",
+			"Mu",
+			"IGU7FALVOE/moc_aclintsswi.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/backend/backend_memory.h",
+			"Mu",
+			"IGU7FALVOE/moc_backend_memory.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/backend/lcddisplay.h",
+			"Mu",
+			"IGU7FALVOE/moc_lcddisplay.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/backend/memory.h",
+			"Mu",
+			"IGU7FALVOE/moc_memory.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/backend/peripheral.h",
+			"Mu",
+			"IGU7FALVOE/moc_peripheral.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/backend/peripspiled.h",
+			"Mu",
+			"IGU7FALVOE/moc_peripspiled.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/backend/serialport.h",
+			"Mu",
+			"IGU7FALVOE/moc_serialport.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/cache/cache.h",
+			"Mu",
+			"JYITRSJ7MH/moc_cache.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/cache/cache_policy.h",
+			"Mu",
+			"JYITRSJ7MH/moc_cache_policy.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/cache/cache_types.h",
+			"Mu",
+			"JYITRSJ7MH/moc_cache_types.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/frontend_memory.h",
+			"Mu",
+			"X5JWOZW5QK/moc_frontend_memory.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/memory_bus.h",
+			"Mu",
+			"X5JWOZW5QK/moc_memory_bus.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/memory_utils.h",
+			"Mu",
+			"X5JWOZW5QK/moc_memory_utils.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/page_table_walker.h",
+			"Mu",
+			"X5JWOZW5QK/moc_page_table_walker.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/sv32.h",
+			"Mu",
+			"X5JWOZW5QK/moc_sv32.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/tlb.h",
+			"Mu",
+			"X5JWOZW5QK/moc_tlb.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/virtual_address.h",
+			"Mu",
+			"X5JWOZW5QK/moc_virtual_address.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/pipeline.h",
+			"Mu",
+			"EWIEGA46WW/moc_pipeline.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/predictor.h",
+			"Mu",
+			"EWIEGA46WW/moc_predictor.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/predictor_types.h",
+			"Mu",
+			"EWIEGA46WW/moc_predictor_types.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/programloader.h",
+			"Mu",
+			"EWIEGA46WW/moc_programloader.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/register_value.h",
+			"Mu",
+			"EWIEGA46WW/moc_register_value.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/registers.h",
+			"Mu",
+			"EWIEGA46WW/moc_registers.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/simulator_exception.h",
+			"Mu",
+			"EWIEGA46WW/moc_simulator_exception.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/symboltable.h",
+			"Mu",
+			"EWIEGA46WW/moc_symboltable.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/utils.h",
+			"Mu",
+			"EWIEGA46WW/moc_utils.cpp",
+			null
+		]
+	],
+	"HEADER_EXTENSIONS" : [ "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" ],
+	"INCLUDE_DIR" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/include",
+	"MOC_COMPILATION_FILE" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/mocs_compilation.cpp",
+	"MOC_DEFINITIONS" : 
+	[
+		"QT_CORE_LIB",
+		"QT_DISABLE_DEPRECATED_BEFORE=0x050905",
+		"QT_NO_DEBUG",
+		"QT_NO_DEBUG_OUTPUT=1",
+		"QT_USE_QSTRINGBUILDER"
+	],
+	"MOC_DEPEND_FILTERS" : 
+	[
+		[
+			"Q_PLUGIN_METADATA",
+			"[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\([^\\)]*FILE[ \t]*\"([^\"]+)\""
+		]
+	],
+	"MOC_INCLUDES" : 
+	[
+		"/home/tux/qtrvsim/cmake-build-release-wsl/src/machine",
+		"/home/tux/qtrvsim/src/machine",
+		"/home/tux/qtrvsim/src",
+		"/usr/include/x86_64-linux-gnu/qt5",
+		"/usr/include/x86_64-linux-gnu/qt5/QtCore",
+		"/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++",
+		"/usr/include",
+		"/usr/include/c++/13",
+		"/usr/include/x86_64-linux-gnu/c++/13",
+		"/usr/include/c++/13/backward",
+		"/usr/lib/gcc/x86_64-linux-gnu/13/include",
+		"/usr/local/include",
+		"/usr/include/x86_64-linux-gnu"
+	],
+	"MOC_MACRO_NAMES" : [ "Q_OBJECT", "Q_GADGET", "Q_NAMESPACE", "Q_NAMESPACE_EXPORT" ],
+	"MOC_OPTIONS" : [],
+	"MOC_PATH_PREFIX" : false,
+	"MOC_PREDEFS_CMD" : 
+	[
+		"/usr/bin/c++",
+		"-std=gnu++17",
+		"-dM",
+		"-E",
+		"-c",
+		"/usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp"
+	],
+	"MOC_PREDEFS_FILE" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/moc_predefs.h",
+	"MOC_RELAXED_MODE" : false,
+	"MOC_SKIP" : [],
+	"MULTI_CONFIG" : false,
+	"PARALLEL" : 6,
+	"PARSE_CACHE_FILE" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/machine/CMakeFiles/machine_autogen.dir/ParseCache.txt",
+	"QT_MOC_EXECUTABLE" : "/usr/lib/qt5/bin/moc",
+	"QT_UIC_EXECUTABLE" : "",
+	"QT_VERSION_MAJOR" : 5,
+	"QT_VERSION_MINOR" : 15,
+	"SETTINGS_FILE" : "/home/tux/qtrvsim/cmake-build-release-wsl/src/machine/CMakeFiles/machine_autogen.dir/AutogenUsed.txt",
+	"SOURCES" : 
+	[
+		[ "/home/tux/qtrvsim/src/machine/core.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/machine/csr/controlstate.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/machine/execute/alu.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/machine/instruction.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/machine/machine.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/machine/machineconfig.cpp", "Mu", null ],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/backend/aclintmswi.cpp",
+			"Mu",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/backend/aclintmtimer.cpp",
+			"Mu",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/backend/aclintsswi.cpp",
+			"Mu",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/backend/lcddisplay.cpp",
+			"Mu",
+			null
+		],
+		[ "/home/tux/qtrvsim/src/machine/memory/backend/memory.cpp", "Mu", null ],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/backend/peripheral.cpp",
+			"Mu",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/backend/peripspiled.cpp",
+			"Mu",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/backend/serialport.cpp",
+			"Mu",
+			null
+		],
+		[ "/home/tux/qtrvsim/src/machine/memory/cache/cache.cpp", "Mu", null ],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/cache/cache_policy.cpp",
+			"Mu",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/frontend_memory.cpp",
+			"Mu",
+			null
+		],
+		[ "/home/tux/qtrvsim/src/machine/memory/memory_bus.cpp", "Mu", null ],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/page_table_walker.cpp",
+			"Mu",
+			null
+		],
+		[ "/home/tux/qtrvsim/src/machine/memory/tlb.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/machine/predictor.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/machine/programloader.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/machine/registers.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/machine/simulator_exception.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/machine/symboltable.cpp", "Mu", null ]
+	],
+	"VERBOSITY" : 0
+}

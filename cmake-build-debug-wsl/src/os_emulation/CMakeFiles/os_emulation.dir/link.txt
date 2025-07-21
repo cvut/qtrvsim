@@ -1,0 +1,2 @@
+/usr/bin/ar qc libos_emulation.a CMakeFiles/os_emulation.dir/os_emulation_autogen/mocs_compilation.cpp.o CMakeFiles/os_emulation.dir/ossyscall.cpp.o
+/usr/bin/ranlib libos_emulation.a

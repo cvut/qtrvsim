@@ -1,0 +1,214 @@
+{
+	"BUILD_DIR" : "/home/tux/qtrvsim/cmake-build-debug-wsl/external/svgscene/svgscene_autogen",
+	"CMAKE_BINARY_DIR" : "/home/tux/qtrvsim/cmake-build-debug-wsl",
+	"CMAKE_CURRENT_BINARY_DIR" : "/home/tux/qtrvsim/cmake-build-debug-wsl/external/svgscene",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/home/tux/qtrvsim/external/svgscene",
+	"CMAKE_EXECUTABLE" : "/usr/bin/cmake",
+	"CMAKE_LIST_FILES" : 
+	[
+		"/home/tux/qtrvsim/external/svgscene/CMakeLists.txt",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt5/Qt5ConfigVersion.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt5/Qt5Config.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt5/Qt5ModuleLocation.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt5Core/Qt5CoreConfigVersion.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt5Core/Qt5CoreConfig.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets/Qt5WidgetsConfigVersion.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets/Qt5WidgetsConfig.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt5Gui/Qt5GuiConfigVersion.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt5Gui/Qt5GuiConfig.cmake"
+	],
+	"CMAKE_SOURCE_DIR" : "/home/tux/qtrvsim",
+	"DEP_FILE" : "/home/tux/qtrvsim/cmake-build-debug-wsl/external/svgscene/svgscene_autogen/deps",
+	"DEP_FILE_RULE_NAME" : "svgscene_autogen/timestamp",
+	"HEADERS" : 
+	[
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/components/groupitem.h",
+			"MU",
+			"OVCMBRDRIM/moc_groupitem.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/components/hyperlinkitem.h",
+			"MU",
+			"OVCMBRDRIM/moc_hyperlinkitem.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/components/simpletextitem.h",
+			"MU",
+			"OVCMBRDRIM/moc_simpletextitem.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/graphicsview/svggraphicsview.h",
+			"MU",
+			"J3QGBQDLL5/moc_svggraphicsview.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/polyfills/qt5/qstringview.h",
+			"MU",
+			"OMR4WTIMV3/moc_qstringview.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/polyfills/qt5/qwheelevent.h",
+			"MU",
+			"OMR4WTIMV3/moc_qwheelevent.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/svgdocument.h",
+			"MU",
+			"OWAQZC3XRN/moc_svgdocument.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/svggraphicsscene.h",
+			"MU",
+			"OWAQZC3XRN/moc_svggraphicsscene.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/svghandler.h",
+			"MU",
+			"OWAQZC3XRN/moc_svghandler.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/svgmetadata.h",
+			"MU",
+			"OWAQZC3XRN/moc_svgmetadata.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/svgspec.h",
+			"MU",
+			"OWAQZC3XRN/moc_svgspec.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/utils/logging.h",
+			"MU",
+			"THVCVUBA4R/moc_logging.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/utils/memory_ownership.h",
+			"MU",
+			"THVCVUBA4R/moc_memory_ownership.cpp",
+			null
+		]
+	],
+	"HEADER_EXTENSIONS" : [ "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" ],
+	"INCLUDE_DIR" : "/home/tux/qtrvsim/cmake-build-debug-wsl/external/svgscene/svgscene_autogen/include",
+	"MOC_COMPILATION_FILE" : "/home/tux/qtrvsim/cmake-build-debug-wsl/external/svgscene/svgscene_autogen/mocs_compilation.cpp",
+	"MOC_DEFINITIONS" : 
+	[
+		"QT_CORE_LIB",
+		"QT_DISABLE_DEPRECATED_BEFORE=0x050905",
+		"QT_GUI_LIB",
+		"QT_USE_QSTRINGBUILDER",
+		"QT_WIDGETS_LIB"
+	],
+	"MOC_DEPEND_FILTERS" : 
+	[
+		[
+			"Q_PLUGIN_METADATA",
+			"[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\([^\\)]*FILE[ \t]*\"([^\"]+)\""
+		]
+	],
+	"MOC_INCLUDES" : 
+	[
+		"/home/tux/qtrvsim/cmake-build-debug-wsl/external/svgscene",
+		"/home/tux/qtrvsim/external/svgscene",
+		"/home/tux/qtrvsim/src",
+		"/home/tux/qtrvsim/src/machine",
+		"/home/tux/qtrvsim/external/svgscene/src",
+		"/home/tux/qtrvsim/external/svgscene/src/svgscene",
+		"/usr/include/x86_64-linux-gnu/qt5",
+		"/usr/include/x86_64-linux-gnu/qt5/QtCore",
+		"/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++",
+		"/usr/include/x86_64-linux-gnu/qt5/QtGui",
+		"/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
+		"/usr/include/c++/13",
+		"/usr/include/x86_64-linux-gnu/c++/13",
+		"/usr/include/c++/13/backward",
+		"/usr/lib/gcc/x86_64-linux-gnu/13/include",
+		"/usr/local/include",
+		"/usr/include/x86_64-linux-gnu",
+		"/usr/include"
+	],
+	"MOC_MACRO_NAMES" : [ "Q_OBJECT", "Q_GADGET", "Q_NAMESPACE", "Q_NAMESPACE_EXPORT" ],
+	"MOC_OPTIONS" : [],
+	"MOC_PATH_PREFIX" : false,
+	"MOC_PREDEFS_CMD" : 
+	[
+		"/usr/bin/c++",
+		"-std=gnu++17",
+		"-dM",
+		"-E",
+		"-c",
+		"/usr/share/cmake-3.28/Modules/CMakeCXXCompilerABI.cpp"
+	],
+	"MOC_PREDEFS_FILE" : "/home/tux/qtrvsim/cmake-build-debug-wsl/external/svgscene/svgscene_autogen/moc_predefs.h",
+	"MOC_RELAXED_MODE" : false,
+	"MOC_SKIP" : [],
+	"MULTI_CONFIG" : false,
+	"PARALLEL" : 6,
+	"PARSE_CACHE_FILE" : "/home/tux/qtrvsim/cmake-build-debug-wsl/external/svgscene/CMakeFiles/svgscene_autogen.dir/ParseCache.txt",
+	"QT_MOC_EXECUTABLE" : "/usr/lib/qt5/bin/moc",
+	"QT_UIC_EXECUTABLE" : "/usr/lib/qt5/bin/uic",
+	"QT_VERSION_MAJOR" : 5,
+	"QT_VERSION_MINOR" : 15,
+	"SETTINGS_FILE" : "/home/tux/qtrvsim/cmake-build-debug-wsl/external/svgscene/CMakeFiles/svgscene_autogen.dir/AutogenUsed.txt",
+	"SOURCES" : 
+	[
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/components/groupitem.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/components/hyperlinkitem.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/components/simpletextitem.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/graphicsview/svggraphicsview.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/svgdocument.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/svggraphicsscene.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/svghandler.cpp",
+			"MU",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/external/svgscene/src/svgscene/svgmetadata.cpp",
+			"MU",
+			null
+		]
+	],
+	"UIC_OPTIONS" : [],
+	"UIC_SEARCH_PATHS" : [],
+	"UIC_SKIP" : [],
+	"UIC_UI_FILES" : [],
+	"VERBOSITY" : 0
+}

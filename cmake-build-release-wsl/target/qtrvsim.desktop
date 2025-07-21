@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=QtRVSim
+GenericName=RISC-V CPU simulator
+Exec=qtrvsim_gui
+Icon=qtrvsim_gui
+Type=Application
+Comment=RISC-V CPU simulator
+Terminal=false
+Categories=System;Emulator;
+Keywords=emulator;RISC-V;education;

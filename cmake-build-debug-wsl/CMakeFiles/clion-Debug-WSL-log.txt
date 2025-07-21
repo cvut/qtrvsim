@@ -1,0 +1,7 @@
+/usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "Unix Makefiles" -S /home/tux/qtrvsim -B /home/tux/qtrvsim/cmake-build-debug-wsl
+-- Using system libelf
+-- Qt5 version: 5.15.13
+-- Qt5 print support: 1
+-- Configuring done (0.3s)
+-- Generating done (0.2s)
+-- Build files have been written to: /home/tux/qtrvsim/cmake-build-debug-wsl

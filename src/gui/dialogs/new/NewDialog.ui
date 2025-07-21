@@ -66,6 +66,9 @@
        </item>
        <item>
         <widget class="QStackedWidget" name="config_pages">
+         <property name="currentIndex">
+          <number>3</number>
+         </property>
          <widget class="QWidget" name="tab_preset_load">
           <property name="accessibleName">
            <string>Presets and ELF File</string>
@@ -263,6 +266,9 @@
           <layout class="QVBoxLayout" name="verticalLayout_10">
            <item>
             <widget class="QGroupBox" name="group_bp">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <property name="title">
               <string>Branch Predictor</string>
              </property>
@@ -656,6 +662,159 @@
            </item>
           </layout>
          </widget>
+         <widget class="QWidget" name="tab_virtual_memory">
+          <property name="accessibleName">
+           <string>Virtual Memory</string>
+          </property>
+          <widget class="QGroupBox" name="group_vm">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>10</y>
+             <width>471</width>
+             <height>181</height>
+            </rect>
+           </property>
+           <property name="title">
+            <string>Virtual Memory</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <widget class="QRadioButton" name="radioButton_bare">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>50</y>
+              <width>99</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Bare</string>
+            </property>
+           </widget>
+           <widget class="QRadioButton" name="radioButton_sv32">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>70</y>
+              <width>99</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Sv32</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_mode">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>30</y>
+              <width>57</width>
+              <height>14</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>MODE</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="lineEdit_kernel_base">
+            <property name="geometry">
+             <rect>
+              <x>360</x>
+              <y>100</y>
+              <width>91</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>0x80000000</string>
+            </property>
+           </widget>
+           <widget class="BigSlider" name="horizontalSlider_kernel_base">
+            <property name="geometry">
+             <rect>
+              <x>200</x>
+              <y>100</y>
+              <width>131</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::TicksBothSides</enum>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_kernel_base">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>100</y>
+              <width>171</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Kernel Virtual Base Address</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="lineEdit_root_ppn">
+            <property name="geometry">
+             <rect>
+              <x>360</x>
+              <y>140</y>
+              <width>91</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>0x80000000</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_root_ppn">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>140</y>
+              <width>171</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Page‑Table Base (PPN)</string>
+            </property>
+           </widget>
+           <widget class="BigSlider" name="horizontalSlider_root_ppn">
+            <property name="geometry">
+             <rect>
+              <x>200</x>
+              <y>140</y>
+              <width>131</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::TicksBothSides</enum>
+            </property>
+           </widget>
+          </widget>
+         </widget>
          <widget class="QWidget" name="tab_memory">
           <property name="accessibleName">
            <string>Memory Timings</string>
@@ -955,6 +1114,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>BigSlider</class>
+   <extends>QSlider</extends>
+   <header>gui/dialogs/new/bigslider.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
