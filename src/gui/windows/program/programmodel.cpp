@@ -1,5 +1,7 @@
 #include "programmodel.h"
 
+#include "machine/machine.h"
+
 #include <QtGui/qbrush.h>
 
 using ae = machine::AccessEffects; // For enum values, the type is obvious from context.
@@ -18,14 +20,14 @@ ProgramModel::ProgramModel(QObject *parent) : Super(parent), data_font("Monospac
 
 const machine::FrontendMemory *ProgramModel::mem_access() const {
     if (machine == nullptr) { return nullptr; }
-    if (machine->memory_data_bus() != nullptr) { return machine->memory_data_bus(); }
+    return machine->instr_frontend();
     throw std::logic_error("Use of backend memory in frontend."); // TODO
     //    return machine->memory();
 }
 
 machine::FrontendMemory *ProgramModel::mem_access_rw() const {
     if (machine == nullptr) { return nullptr; }
-    if (machine->memory_data_bus_rw() != nullptr) { return machine->memory_data_bus_rw(); }
+    return machine->instr_frontend();
     throw std::logic_error("Use of backend memory in frontend."); // TODO
     //    return machine->memory_rw();
 }
@@ -129,15 +131,19 @@ QVariant ProgramModel::data(const QModelIndex &index, int role) const {
 
 void ProgramModel::setup(machine::Machine *machine) {
     this->machine = machine;
+    if (machine && machine->config().get_vm_enabled()
+        && machine->config().get_vm_mode() == machine::MachineConfig::VM_SV32) {
+        index0_offset = machine::Address(machine->config().get_kernel_virt_base());
+    } else {
+        index0_offset = machine::Address(0x00000200);
+    }
     for (auto &i : stage_addr) {
         i = machine::STAGEADDR_NONE;
     }
     if (machine != nullptr) {
         connect(machine, &machine::Machine::post_tick, this, &ProgramModel::check_for_updates);
-    }
-    if (mem_access() != nullptr) {
         connect(
-            mem_access(), &machine::FrontendMemory::external_change_notify, this,
+            machine->instr_frontend(), &machine::FrontendMemory::external_change_notify, this,
             &ProgramModel::check_for_updates);
     }
     emit update_all();

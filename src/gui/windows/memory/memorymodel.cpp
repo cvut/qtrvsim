@@ -43,7 +43,7 @@ QVariant MemoryModel::headerData(int section, Qt::Orientation orientation, int r
     if (orientation == Qt::Horizontal) {
         if (role == Qt::DisplayRole) {
             if (section == 0) {
-                return tr("Address");
+                return isVirtualMode() ? tr("Virt Addr") : tr("Phys Addr");
             } else {
                 uint32_t addr = (section - 1) * cellSizeBytes();
                 QString ret = "+" + QString::number(addr, 10);
@@ -59,7 +59,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
         QString s, t;
         machine::Address address;
         uint32_t data;
-        const machine::FrontendMemory *mem;
+        const machine::FrontendMemory *mem = nullptr;
         if (!get_row_address(address, index.row())) { return QString(""); }
         if (index.column() == 0) {
             t = QString::number(address.get_raw(), 16);
@@ -67,11 +67,17 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
             return { QString("0x") + s + t };
         }
         if (machine == nullptr) { return QString(""); }
-        mem = mem_access();
-        if (mem == nullptr) { return QString(""); }
-        if ((access_through_cache > 0) && (machine->cache_data() != nullptr)) {
-            mem = machine->cache_data();
+        if (machine->config().get_vm_enabled()) {
+            if (showVirtual) {
+                mem = machine->data_frontend();
+            } else {
+                mem = mem_access_phys();
+            }
+        } else {
+            mem = mem_access();
+            if (access_through_cache > 0 && machine->cache_data()) { mem = machine->cache_data(); }
         }
+        if (!mem) { return QString(""); }
         address += cellSizeBytes() * (index.column() - 1);
         if (address < index0_offset) { return QString(""); }
         switch (cell_size) {
@@ -198,6 +204,13 @@ void MemoryModel::cached_access(int cached) {
     update_all();
 }
 
+void MemoryModel::setVirtualMode(bool on) {
+    if (showVirtual == on) return;
+    showVirtual = on;
+    emit setup_done();
+    layoutChanged();
+}
+
 Qt::ItemFlags MemoryModel::flags(const QModelIndex &index) const {
     if (index.column() == 0) {
         return QAbstractTableModel::flags(index);
@@ -207,26 +220,56 @@ Qt::ItemFlags MemoryModel::flags(const QModelIndex &index) const {
 }
 
 bool MemoryModel::setData(const QModelIndex &index, const QVariant &value, int role) {
-    if (role == Qt::EditRole) {
-        bool ok;
-        machine::Address address;
-        machine::FrontendMemory *mem;
-        uint32_t data = value.toString().toULong(&ok, 16);
-        if (!ok) { return false; }
-        if (!get_row_address(address, index.row())) { return false; }
-        if (index.column() == 0 || machine == nullptr) { return false; }
+    if (role != Qt::EditRole) return false;
+
+    bool ok;
+    machine::Address address;
+    uint32_t data = value.toString().toULong(&ok, 16);
+    if (!ok) return false;
+
+    if (!get_row_address(address, index.row()) || index.column() == 0 || machine == nullptr) {
+        return false;
+    }
+
+    machine::FrontendMemory *mem = nullptr;
+    if (machine->config().get_vm_enabled()) {
+        if (showVirtual) {
+            mem = machine->data_frontend();
+        } else {
+            mem = mem_access_phys_rw();
+        }
+    } else {
         mem = mem_access_rw();
-        if (mem == nullptr) { return false; }
-        if ((access_through_cache > 0) && (machine->cache_data_rw() != nullptr)) {
+        if (access_through_cache > 0 && machine->cache_data_rw()) {
             mem = machine->cache_data_rw();
         }
-        address += cellSizeBytes() * (index.column() - 1);
-        switch (cell_size) {
-        case CELLSIZE_BYTE: mem->write_u8(address, data, ae::INTERNAL); break;
-        case CELLSIZE_HWORD: mem->write_u16(address, data, ae::INTERNAL); break;
-        default:
-        case CELLSIZE_WORD: mem->write_u32(address, data, ae::INTERNAL); break;
-        }
+    }
+    if (!mem) return false;
+
+    // Compute the byte/halfword/word offset
+    address += cellSizeBytes() * (index.column() - 1);
+    switch (cell_size) {
+    case CELLSIZE_BYTE: mem->write_u8(address, data, ae::INTERNAL); break;
+    case CELLSIZE_HWORD: mem->write_u16(address, data, ae::INTERNAL); break;
+    default: // CELLSIZE_WORD
+        mem->write_u32(address, data, ae::INTERNAL);
+        break;
     }
     return true;
+}
+
+const machine::FrontendMemory *MemoryModel::mem_access_phys() const {
+    if (!machine) return nullptr;
+    if (access_through_cache > 0 && machine->cache_data()) {
+        return machine->cache_data();
+    } else
+        return machine->memory_data_bus();
+}
+
+machine::FrontendMemory *MemoryModel::mem_access_phys_rw() const {
+    if (!machine) return nullptr;
+    if (access_through_cache > 0 && machine->cache_data_rw()) {
+        return machine->cache_data_rw();
+    } else
+        return machine->memory_data_bus_rw();
 }

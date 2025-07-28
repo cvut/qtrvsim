@@ -99,6 +99,14 @@ public:
         return next_free_ppn++;
     }
 
+    Address virtualToPhysical(Address v) {
+        if (tlb_data) {
+            return tlb_data->translate_virtual_to_physical(v);
+        } else {
+            return v;
+        }
+    }
+
 public slots:
     void play();
     void pause();

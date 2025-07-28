@@ -35,6 +35,8 @@ public:
 
     uint32_t get_change_counter() const override;
 
+    bool reverse_lookup(Address paddr, VirtualAddress &out_va) const;
+
     signals:
       void firstWrite(VirtualAddress va);
 

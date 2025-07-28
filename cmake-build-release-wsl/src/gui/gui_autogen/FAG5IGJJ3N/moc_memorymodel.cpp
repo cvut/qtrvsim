@@ -22,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MemoryModel_t {
-    QByteArrayData data[12];
-    char stringdata0[133];
+    QByteArrayData data[14];
+    char stringdata0[151];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -43,13 +43,16 @@ QT_MOC_LITERAL(7, 74, 13), // "set_cell_size"
 QT_MOC_LITERAL(8, 88, 5), // "index"
 QT_MOC_LITERAL(9, 94, 17), // "check_for_updates"
 QT_MOC_LITERAL(10, 112, 13), // "cached_access"
-QT_MOC_LITERAL(11, 126, 6) // "cached"
+QT_MOC_LITERAL(11, 126, 6), // "cached"
+QT_MOC_LITERAL(12, 133, 14), // "setVirtualMode"
+QT_MOC_LITERAL(13, 148, 2) // "on"
 
     },
     "MemoryModel\0cell_size_changed\0\0"
     "setup_done\0setup\0machine::Machine*\0"
     "machine\0set_cell_size\0index\0"
-    "check_for_updates\0cached_access\0cached"
+    "check_for_updates\0cached_access\0cached\0"
+    "setVirtualMode\0on"
 };
 #undef QT_MOC_LITERAL
 
@@ -59,7 +62,7 @@ static const uint qt_meta_data_MemoryModel[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-       6,   14, // methods
+       7,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -67,14 +70,15 @@ static const uint qt_meta_data_MemoryModel[] = {
        2,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    0,   44,    2, 0x06 /* Public */,
-       3,    0,   45,    2, 0x06 /* Public */,
+       1,    0,   49,    2, 0x06 /* Public */,
+       3,    0,   50,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       4,    1,   46,    2, 0x0a /* Public */,
-       7,    1,   49,    2, 0x0a /* Public */,
-       9,    0,   52,    2, 0x0a /* Public */,
-      10,    1,   53,    2, 0x0a /* Public */,
+       4,    1,   51,    2, 0x0a /* Public */,
+       7,    1,   54,    2, 0x0a /* Public */,
+       9,    0,   57,    2, 0x0a /* Public */,
+      10,    1,   58,    2, 0x0a /* Public */,
+      12,    1,   61,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void,
@@ -85,6 +89,7 @@ static const uint qt_meta_data_MemoryModel[] = {
     QMetaType::Void, QMetaType::Int,    8,
     QMetaType::Void,
     QMetaType::Void, QMetaType::Int,   11,
+    QMetaType::Void, QMetaType::Bool,   13,
 
        0        // eod
 };
@@ -101,6 +106,7 @@ void MemoryModel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         case 3: _t->set_cell_size((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 4: _t->check_for_updates(); break;
         case 5: _t->cached_access((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 6: _t->setVirtualMode((*reinterpret_cast< bool(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -162,13 +168,13 @@ int MemoryModel::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 6)
+        if (_id < 7)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 6;
+        _id -= 7;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 6)
+        if (_id < 7)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 6;
+        _id -= 7;
     }
     return _id;
 }

@@ -156,4 +156,18 @@ Address TLB::translate_virtual_to_physical(Address vaddr) {
     return Address { phys_base + page_off };
 }
 
+bool TLB::reverse_lookup(Address paddr, VirtualAddress &out_va) const {
+    uint64_t search_ppn = paddr.get_raw() >> 12;
+    uint64_t page_off = paddr.get_raw() & 0xFFF;
+    for (auto const &it : cache) {
+        uint64_t phys_ppn = it.second.phys.get_raw() >> 12;
+        if (phys_ppn == search_ppn) {
+            uint64_t vpn = it.first & 0x0000FFFFFFFFFFFFULL;
+            out_va = VirtualAddress { (vpn << 12) | page_off };
+            return true;
+        }
+    }
+    return false;
+}
+
 } // namespace machine

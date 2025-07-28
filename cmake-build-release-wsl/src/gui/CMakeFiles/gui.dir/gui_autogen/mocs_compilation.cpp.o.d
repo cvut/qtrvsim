@@ -688,6 +688,7 @@ src/gui/CMakeFiles/gui.dir/gui_autogen/mocs_compilation.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt5/QtGui/qimage.h \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/QBoxLayout \
  /home/tux/qtrvsim/src/gui/windows/memory/memorydock.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtWidgets/QCheckBox \
  /usr/include/x86_64-linux-gnu/qt5/QtWidgets/QComboBox \
  /home/tux/qtrvsim/src/gui/windows/messages/messagesdock.h \
  /home/tux/qtrvsim/src/gui/windows/messages/messagesmodel.h \

@@ -807,7 +807,15 @@ void MainWindow::compile_source() {
     }
     if (!sasm.finish()) { error_occured = true; }
 
-    if (error_occured) { show_messages(); }
+    if (error_occured) {
+        show_messages();
+    } else {
+        program->setup(machine.data());
+        machine::Address start_addr(addr);
+        program->fetch_inst_addr(start_addr);
+        show_program();
+        program->request_update_all();
+    }
 }
 
 void MainWindow::build_execute() {
