@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/mulh64_test.dir/mulh64_test_autogen/mocs_compilation.cpp.o CMakeFiles/mulh64_test.dir/mulh64.test.cpp.o -o ../../../target/mulh64_test  /usr/lib/x86_64-linux-gnu/libQt5Test.so.5.15.13 /usr/lib/x86_64-linux-gnu/libQt5Core.so.5.15.13 

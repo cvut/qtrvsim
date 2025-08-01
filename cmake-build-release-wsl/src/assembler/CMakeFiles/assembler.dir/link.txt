@@ -1,2 +1,0 @@
-/usr/bin/ar qc libassembler.a CMakeFiles/assembler.dir/assembler_autogen/mocs_compilation.cpp.o CMakeFiles/assembler.dir/fixmatheval.cpp.o CMakeFiles/assembler.dir/simpleasm.cpp.o
-/usr/bin/ranlib libassembler.a
