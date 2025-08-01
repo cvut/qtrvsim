@@ -1,38 +1,26 @@
 #include "memory/frontend_memory.h"
 
 #include "common/endian.h"
-#include "tlb.h"
+#include "tlb/tlb.h"
 
 #include <iostream>
 #include <ostream>
 
 namespace machine {
 
-bool FrontendMemory::write_u8(
-    Address address,
-    uint8_t value,
-    AccessEffects type) {
+bool FrontendMemory::write_u8(Address address, uint8_t value, AccessEffects type) {
     return write_generic<typeof(value)>(address, value, type);
 }
 
-bool FrontendMemory::write_u16(
-    Address address,
-    uint16_t value,
-    AccessEffects type) {
+bool FrontendMemory::write_u16(Address address, uint16_t value, AccessEffects type) {
     return write_generic<typeof(value)>(address, value, type);
 }
 
-bool FrontendMemory::write_u32(
-    Address address,
-    uint32_t value,
-    AccessEffects type) {
+bool FrontendMemory::write_u32(Address address, uint32_t value, AccessEffects type) {
     return write_generic<typeof(value)>(address, value, type);
 }
 
-bool FrontendMemory::write_u64(
-    Address address,
-    uint64_t value,
-    AccessEffects type) {
+bool FrontendMemory::write_u64(Address address, uint64_t value, AccessEffects type) {
     return write_generic<typeof(value)>(address, value, type);
 }
 
@@ -52,10 +40,7 @@ uint64_t FrontendMemory::read_u64(Address address, AccessEffects type) const {
     return read_generic<uint64_t>(address, type);
 }
 
-void FrontendMemory::write_ctl(
-    enum AccessControl ctl,
-    Address offset,
-    RegisterValue value) {
+void FrontendMemory::write_ctl(enum AccessControl ctl, Address offset, RegisterValue value) {
     switch (ctl) {
     case AC_NONE: {
         break;
@@ -88,8 +73,7 @@ void FrontendMemory::write_ctl(
     }
 }
 
-RegisterValue
-FrontendMemory::read_ctl(enum AccessControl ctl, Address address) const {
+RegisterValue FrontendMemory::read_ctl(enum AccessControl ctl, Address address) const {
     switch (ctl) {
     case AC_NONE: return 0;
     case AC_I8: return (int8_t)read_u8(address);
@@ -146,16 +130,15 @@ T FrontendMemory::read_generic(Address address, AccessEffects type) const {
 }
 
 template<typename T>
-bool FrontendMemory::write_generic(
-    Address address,
-    const T value,
-    AccessEffects type) {
+bool FrontendMemory::write_generic(Address address, const T value, AccessEffects type) {
     // See example in read_generic for byteswap explanation.
-    const T swapped_value
-        = byteswap_if(value, this->simulated_machine_endian != NATIVE_ENDIAN);
+    const T swapped_value = byteswap_if(value, this->simulated_machine_endian != NATIVE_ENDIAN);
 
-    if (auto tlb = dynamic_cast<TLB*>(this)) {
-        return tlb->write_vaddr(VirtualAddress{ address.get_raw() }, &swapped_value, sizeof(T), { .type = type }).changed;
+    if (auto tlb = dynamic_cast<TLB *>(this)) {
+        return tlb
+            ->write_vaddr(
+                VirtualAddress { address.get_raw() }, &swapped_value, sizeof(T), { .type = type })
+            .changed;
     }
 
     return write(address, &swapped_value, sizeof(T), { .type = type }).changed;

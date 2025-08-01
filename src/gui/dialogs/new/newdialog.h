@@ -67,8 +67,10 @@ private slots:
     // Virtual Memory
     void vm_mode_changed();
     void vm_enabled_change(bool);
-    void kernel_virt_base_changed(qint64 new_base);
-    void root_ppn_changed(qint64 new_root_ppn);
+    void va_base_addr_changed(qint64 new_base);
+    void tlb_num_sets_changed(int);
+    void tlb_assoc_changed(int);
+    void tlb_policy_changed(int);
 
 private:
     Box<Ui::NewDialog> ui {};

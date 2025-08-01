@@ -263,32 +263,42 @@ src/machine/CMakeFiles/machine.dir/programloader.cpp.o: \
  /usr/include/c++/13/ctime /usr/include/c++/13/bits/parse_numbers.h \
  /home/tux/qtrvsim/src/machine/simulator_exception.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qstring.h \
+ /home/tux/qtrvsim/src/machine/memory/frontend_memory.h \
+ /home/tux/qtrvsim/src/machine/register_value.h \
+ /home/tux/qtrvsim/src/machine/machineconfig.h \
+ /home/tux/qtrvsim/src/machine/config_isa.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QtGlobal \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qglobal.h \
+ /home/tux/qtrvsim/src/machine/predictor_types.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QSettings \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qsettings.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qobject.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qvariant.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qmap.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qhash.h \
+ /usr/include/c++/13/variant \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QString \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qstring.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
  /home/tux/qtrvsim/src/machine/symboltable.h \
  /home/tux/qtrvsim/src/machine/utils.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QMap \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qmap.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QMultiMap \
- /usr/include/x86_64-linux-gnu/qt5/QtCore/QString \
- /usr/include/x86_64-linux-gnu/qt5/QtCore/qstring.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QStringList \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qstringlist.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QFile \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qfile.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qfiledevice.h \
- /usr/include/x86_64-linux-gnu/qt5/QtCore/qiodevice.h \
- /usr/include/x86_64-linux-gnu/qt5/QtCore/qobject.h /usr/include/gelf.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qiodevice.h /usr/include/gelf.h \
  /usr/include/libelf.h /usr/include/elf.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qvector.h \
  /home/tux/qtrvsim/src/common/logging.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QLoggingCategory \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qloggingcategory.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qdebug.h \
- /usr/include/x86_64-linux-gnu/qt5/QtCore/qhash.h \
- /usr/include/x86_64-linux-gnu/qt5/QtCore/qmap.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qtextstream.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qlocale.h \
- /usr/include/x86_64-linux-gnu/qt5/QtCore/qvariant.h \
- /usr/include/c++/13/variant \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qshareddata.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qset.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qcontiguouscache.h \

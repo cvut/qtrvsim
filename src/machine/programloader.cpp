@@ -21,34 +21,29 @@ ProgramLoader::ProgramLoader(const QString &file) : elf_file(file) {
     const GElf_Ehdr *elf_ehdr;
     // Initialize elf library
     if (elf_version(EV_CURRENT) == EV_NONE) {
-        throw SIMULATOR_EXCEPTION(
-            Input, "Elf library initialization failed", elf_errmsg(-1));
+        throw SIMULATOR_EXCEPTION(Input, "Elf library initialization failed", elf_errmsg(-1));
     }
     // Open source file - option QIODevice::ExistingOnly cannot be used on Qt
     // <5.11
     if (!elf_file.open(QIODevice::ReadOnly | QIODevice::Unbuffered)) {
         throw SIMULATOR_EXCEPTION(
             Input,
-            QString("Can't open input elf file for reading (") + QString(file)
-                + QString(")"),
+            QString("Can't open input elf file for reading (") + QString(file) + QString(")"),
             std::strerror(errno));
     }
     // Initialize elf
     if (!(this->elf = elf_begin(elf_file.handle(), ELF_C_READ, nullptr))) {
-        throw SIMULATOR_EXCEPTION(
-            Input, "Elf read begin failed", elf_errmsg(-1));
+        throw SIMULATOR_EXCEPTION(Input, "Elf read begin failed", elf_errmsg(-1));
     }
     // Check elf kind
     if (elf_kind(this->elf) != ELF_K_ELF) {
         throw SIMULATOR_EXCEPTION(
-            Input, "Invalid input file elf format, plain elf file expected",
-            "");
+            Input, "Invalid input file elf format, plain elf file expected", "");
     }
 
     elf_ehdr = gelf_getehdr(this->elf, &this->hdr);
     if (!elf_ehdr) {
-        throw SIMULATOR_EXCEPTION(
-            Input, "Getting elf file header failed", elf_errmsg(-1));
+        throw SIMULATOR_EXCEPTION(Input, "Getting elf file header failed", elf_errmsg(-1));
     }
 
     executable_entry = Address(elf_ehdr->e_entry);
@@ -65,13 +60,11 @@ ProgramLoader::ProgramLoader(const QString &file) : elf_file(file) {
     // Check elf file class, only 32bit architecture is supported.
     int elf_class;
     if ((elf_class = gelf_getclass(this->elf)) == ELFCLASSNONE) {
-        throw SIMULATOR_EXCEPTION(
-            Input, "Getting elf class failed", elf_errmsg(-1));
+        throw SIMULATOR_EXCEPTION(Input, "Getting elf class failed", elf_errmsg(-1));
     }
     // Get number of program sections in elf file
     if (elf_getphdrnum(this->elf, &this->n_secs)) {
-        throw SIMULATOR_EXCEPTION(
-            Input, "Elf program sections count query failed", elf_errmsg(-1));
+        throw SIMULATOR_EXCEPTION(Input, "Elf program sections count query failed", elf_errmsg(-1));
     }
 
     if (elf_class == ELFCLASS32) {
@@ -110,8 +103,7 @@ ProgramLoader::ProgramLoader(const QString &file) : elf_file(file) {
     }
 }
 
-ProgramLoader::ProgramLoader(const char *file)
-    : ProgramLoader(QString::fromLocal8Bit(file)) {}
+ProgramLoader::ProgramLoader(const char *file) : ProgramLoader(QString::fromLocal8Bit(file)) {}
 
 ProgramLoader::~ProgramLoader() {
     // Close elf
@@ -176,9 +168,7 @@ SymbolTable *ProgramLoader::get_symbol_table() {
     elf_version(EV_CURRENT);
 
     while (true) {
-        if ((scn = elf_nextscn(this->elf, scn)) == nullptr) {
-            return p_st;
-        }
+        if ((scn = elf_nextscn(this->elf, scn)) == nullptr) { return p_st; }
         gelf_getshdr(scn, &shdr);
         if (shdr.sh_type == SHT_SYMTAB) {
             /* found a symbol table, go print it. */
@@ -194,8 +184,8 @@ SymbolTable *ProgramLoader::get_symbol_table() {
         GElf_Sym sym;
         gelf_getsym(data, ii, &sym);
         p_st->add_symbol(
-            elf_strptr(elf, shdr.sh_link, sym.st_name), sym.st_value,
-            sym.st_size, sym.st_info, sym.st_other);
+            elf_strptr(elf, shdr.sh_link, sym.st_name), sym.st_value, sym.st_size, sym.st_info,
+            sym.st_other);
     }
 
     return p_st;
@@ -218,4 +208,23 @@ Endian ProgramLoader::get_endian() const {
 }
 ArchitectureType ProgramLoader::get_architecture_type() const {
     return architecture_type;
+}
+
+std::vector<LoadSegment> ProgramLoader::get_load_segments() const {
+    std::vector<LoadSegment> segs;
+    if (architecture_type == ARCH32) {
+        for (size_t idx : indexes_of_load_sections) {
+            auto &ph = sections_headers.arch32[idx];
+            segs.push_back({
+                (uint32_t)ph.p_vaddr, (uint32_t)ph.p_filesz,
+                (uint32_t)ph.p_flags // PF_R|PF_W|PF_X
+            });
+        }
+    } else {
+        for (size_t idx : indexes_of_load_sections) {
+            auto &ph = sections_headers.arch64[idx];
+            segs.push_back({ (uint32_t)ph.p_vaddr, (uint32_t)ph.p_filesz, (uint32_t)ph.p_flags });
+        }
+    }
+    return segs;
 }

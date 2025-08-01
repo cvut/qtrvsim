@@ -288,6 +288,6 @@ src/machine/CMakeFiles/machine.dir/memory/cache/cache.cpp.o: \
  /home/tux/qtrvsim/src/machine/machineconfig.h \
  /home/tux/qtrvsim/src/machine/simulator_exception.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qstring.h \
- /home/tux/qtrvsim/src/machine/memory/virtual_address.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QObject \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qobject.h

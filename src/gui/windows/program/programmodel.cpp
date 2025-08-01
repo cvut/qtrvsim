@@ -133,7 +133,7 @@ void ProgramModel::setup(machine::Machine *machine) {
     this->machine = machine;
     if (machine && machine->config().get_vm_enabled()
         && machine->config().get_vm_mode() == machine::MachineConfig::VM_SV32) {
-        index0_offset = machine::Address(machine->config().get_kernel_virt_base());
+        index0_offset = machine::Address(machine->config().get_va_base_addr());
     } else {
         index0_offset = machine::Address(0x00000200);
     }

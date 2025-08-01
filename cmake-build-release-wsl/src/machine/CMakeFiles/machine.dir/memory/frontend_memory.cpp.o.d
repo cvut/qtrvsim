@@ -275,10 +275,10 @@ src/machine/CMakeFiles/machine.dir/memory/frontend_memory.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qstring.h \
  /home/tux/qtrvsim/src/machine/simulator_exception.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qstring.h \
- /home/tux/qtrvsim/src/machine/memory/virtual_address.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QObject \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qobject.h \
- /home/tux/qtrvsim/src/machine/memory/tlb.h \
+ /home/tux/qtrvsim/src/machine/memory/tlb/tlb.h \
  /home/tux/qtrvsim/src/common/logging.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QLoggingCategory \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qloggingcategory.h \
@@ -300,9 +300,70 @@ src/machine/CMakeFiles/machine.dir/memory/frontend_memory.cpp.o: \
  /usr/include/c++/13/bits/shared_ptr_atomic.h \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/page_fault_handler.h \
+ /home/tux/qtrvsim/src/machine/core.h \
+ /home/tux/qtrvsim/src/common/memory_ownership.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QScopedPointer \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qscopedpointer.h \
+ /home/tux/qtrvsim/src/machine/core/core_state.h \
+ /home/tux/qtrvsim/src/machine/pipeline.h \
+ /home/tux/qtrvsim/src/machine/instruction.h \
+ /home/tux/qtrvsim/src/machine/bitfield.h \
+ /home/tux/qtrvsim/src/common/containers/cvector.h \
+ /home/tux/qtrvsim/src/machine/csr/address.h \
+ /home/tux/qtrvsim/src/common/math/bit_ops.h \
+ /home/tux/qtrvsim/src/machine/execute/alu.h \
+ /home/tux/qtrvsim/src/machine/execute/alu_op.h \
+ /home/tux/qtrvsim/src/machine/execute/mul_op.h \
+ /home/tux/qtrvsim/src/machine/machinedefs.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QStringList \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qstringlist.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QVector \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qvector.h \
+ /home/tux/qtrvsim/src/machine/registers.h \
+ /home/tux/qtrvsim/src/machine/register_value.h \
+ /home/tux/qtrvsim/src/machine/simulator_exception.h \
+ /home/tux/qtrvsim/src/machine/memory/address_range.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QMap \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qmap.h \
+ /home/tux/qtrvsim/src/machine/machineconfig.h \
+ /home/tux/qtrvsim/src/machine/csr/controlstate.h \
+ /home/tux/qtrvsim/src/machine/csr/address.h \
+ /home/tux/qtrvsim/src/machine/bitfield.h \
+ /home/tux/qtrvsim/src/machine/config_isa.h \
+ /home/tux/qtrvsim/src/machine/machineconfig.h \
  /home/tux/qtrvsim/src/machine/memory/frontend_memory.h \
- /home/tux/qtrvsim/src/machine/memory/page_table_walker.h \
- /home/tux/qtrvsim/src/machine/memory/sv32.h /usr/include/inttypes.h \
+ /home/tux/qtrvsim/src/machine/pipeline.h \
+ /home/tux/qtrvsim/src/machine/predictor.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QtMath \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qmath.h \
+ /usr/include/c++/13/cmath /usr/include/math.h \
+ /usr/include/x86_64-linux-gnu/bits/math-vector.h \
+ /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
+ /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h \
+ /usr/include/x86_64-linux-gnu/bits/fp-logb.h \
+ /usr/include/x86_64-linux-gnu/bits/fp-fast.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h \
+ /usr/include/x86_64-linux-gnu/bits/iscanonical.h \
+ /usr/include/c++/13/bits/specfun.h /usr/include/c++/13/tr1/gamma.tcc \
+ /usr/include/c++/13/tr1/special_function_util.h \
+ /usr/include/c++/13/tr1/bessel_function.tcc \
+ /usr/include/c++/13/tr1/beta_function.tcc \
+ /usr/include/c++/13/tr1/ell_integral.tcc \
+ /usr/include/c++/13/tr1/exp_integral.tcc \
+ /usr/include/c++/13/tr1/hypergeometric.tcc \
+ /usr/include/c++/13/tr1/legendre_function.tcc \
+ /usr/include/c++/13/tr1/modified_bessel_func.tcc \
+ /usr/include/c++/13/tr1/poly_hermite.tcc \
+ /usr/include/c++/13/tr1/poly_laguerre.tcc \
+ /usr/include/c++/13/tr1/riemann_zeta.tcc \
+ /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/page_table_walker.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/sv32.h \
+ /usr/include/inttypes.h \
+ /home/tux/qtrvsim/src/machine/memory/tlb/tlb_policy.h \
  /usr/include/c++/13/iostream /usr/include/c++/13/ostream \
  /usr/include/c++/13/ios /usr/include/c++/13/bits/basic_ios.h \
  /usr/include/c++/13/bits/locale_facets.h /usr/include/c++/13/cwctype \

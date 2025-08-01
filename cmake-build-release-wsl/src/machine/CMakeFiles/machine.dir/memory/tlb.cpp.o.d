@@ -289,6 +289,7 @@ src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.o: \
  /home/tux/qtrvsim/src/machine/config_isa.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QtGlobal \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qglobal.h \
+ /home/tux/qtrvsim/src/machine/memory/tlb_policy.h \
  /home/tux/qtrvsim/src/machine/predictor_types.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QSettings \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qsettings.h \
@@ -299,15 +300,7 @@ src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.o: \
  /home/tux/qtrvsim/src/machine/memory/virtual_address.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QObject \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qobject.h \
- /home/tux/qtrvsim/src/machine/memory/page_table_walker.h \
- /home/tux/qtrvsim/src/machine/memory/sv32.h /usr/include/inttypes.h \
- /home/tux/qtrvsim/src/machine/csr/controlstate.h \
- /home/tux/qtrvsim/src/common/math/bit_ops.h \
- /home/tux/qtrvsim/src/machine/csr/address.h \
- /home/tux/qtrvsim/src/machine/bitfield.h \
- /home/tux/qtrvsim/src/common/containers/cvector.h \
- /home/tux/qtrvsim/src/machine/config_isa.h \
- /home/tux/qtrvsim/src/machine/machine.h \
+ /home/tux/qtrvsim/src/machine/memory/page_fault_handler.h \
  /home/tux/qtrvsim/src/machine/core.h \
  /home/tux/qtrvsim/src/common/memory_ownership.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QScopedPointer \
@@ -316,7 +309,9 @@ src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.o: \
  /home/tux/qtrvsim/src/machine/pipeline.h \
  /home/tux/qtrvsim/src/machine/instruction.h \
  /home/tux/qtrvsim/src/machine/bitfield.h \
+ /home/tux/qtrvsim/src/common/containers/cvector.h \
  /home/tux/qtrvsim/src/machine/csr/address.h \
+ /home/tux/qtrvsim/src/common/math/bit_ops.h \
  /home/tux/qtrvsim/src/machine/execute/alu.h \
  /home/tux/qtrvsim/src/machine/execute/alu_op.h \
  /home/tux/qtrvsim/src/machine/execute/mul_op.h \
@@ -333,6 +328,9 @@ src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qmap.h \
  /home/tux/qtrvsim/src/machine/machineconfig.h \
  /home/tux/qtrvsim/src/machine/csr/controlstate.h \
+ /home/tux/qtrvsim/src/machine/csr/address.h \
+ /home/tux/qtrvsim/src/machine/bitfield.h \
+ /home/tux/qtrvsim/src/machine/config_isa.h \
  /home/tux/qtrvsim/src/machine/machineconfig.h \
  /home/tux/qtrvsim/src/machine/memory/frontend_memory.h \
  /home/tux/qtrvsim/src/machine/pipeline.h \
@@ -361,6 +359,12 @@ src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.o: \
  /usr/include/c++/13/tr1/poly_hermite.tcc \
  /usr/include/c++/13/tr1/poly_laguerre.tcc \
  /usr/include/c++/13/tr1/riemann_zeta.tcc \
+ /home/tux/qtrvsim/src/machine/memory/page_table_walker.h \
+ /home/tux/qtrvsim/src/machine/memory/sv32.h /usr/include/inttypes.h \
+ /home/tux/qtrvsim/src/machine/memory/tlb_policy.h \
+ /home/tux/qtrvsim/src/machine/csr/controlstate.h \
+ /home/tux/qtrvsim/src/machine/machine.h \
+ /home/tux/qtrvsim/src/machine/core.h \
  /home/tux/qtrvsim/src/machine/memory/backend/aclintmswi.h \
  /home/tux/qtrvsim/src/machine/memory/backend/backend_memory.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QTime \
@@ -381,8 +385,15 @@ src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.o: \
  /home/tux/qtrvsim/src/machine/memory/memory_bus.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QMultiMap \
  /home/tux/qtrvsim/src/machine/memory/tlb.h \
+ /home/tux/qtrvsim/src/machine/programloader.h \
+ /home/tux/qtrvsim/src/machine/memory/backend/memory.h \
  /home/tux/qtrvsim/src/machine/symboltable.h \
  /home/tux/qtrvsim/src/machine/utils.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QFile \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qfile.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qfiledevice.h \
+ /usr/include/gelf.h /usr/include/libelf.h /usr/include/elf.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qvector.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QTimer \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qtimer.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qbasictimer.h \

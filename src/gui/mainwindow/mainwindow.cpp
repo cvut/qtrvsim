@@ -795,7 +795,7 @@ void MainWindow::compile_source() {
 
     const uint32_t addr = (machine->config().get_vm_enabled()
                            && machine->config().get_vm_mode() == machine::MachineConfig::VM_SV32)
-                              ? machine->config().get_kernel_virt_base()
+                              ? machine->config().get_va_base_addr()
                               : 0x00000200;
     sasm.setup(
         mem, machine->config(), &symtab, machine::Address(addr), machine->core()->get_xlen());

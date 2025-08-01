@@ -292,7 +292,7 @@ src/gui/CMakeFiles/gui.dir/windows/coreview/components/cache.cpp.o: \
  /home/tux/qtrvsim/src/machine/machineconfig.h \
  /home/tux/qtrvsim/src/machine/simulator_exception.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qstring.h \
- /home/tux/qtrvsim/src/machine/memory/virtual_address.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
  /home/tux/qtrvsim/external/svgscene/src/svgscene/components/simpletextitem.h \
  /home/tux/qtrvsim/external/svgscene/src/svgscene/svghandler.h \
  /home/tux/qtrvsim/external/svgscene/src/svgscene/svgdocument.h \

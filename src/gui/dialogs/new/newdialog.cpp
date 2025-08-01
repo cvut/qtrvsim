@@ -126,78 +126,53 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
         &NewDialog::vm_enabled_change);
     connect(ui->radioButton_bare, &QRadioButton::clicked, this, &NewDialog::vm_mode_changed);
     connect(ui->radioButton_sv32, &QRadioButton::clicked, this, &NewDialog::vm_mode_changed);
+    connect(
+        ui->tlb_number_of_sets, QOverload<int>::of(&QSpinBox::valueChanged), this,
+        &NewDialog::tlb_num_sets_changed);
+    connect(
+        ui->tlb_degree_of_associativity, QOverload<int>::of(&QSpinBox::valueChanged), this,
+        &NewDialog::tlb_assoc_changed);
+    connect(
+        ui->tlb_replacement_policy, QOverload<int>::of(&QComboBox::activated), this,
+        &NewDialog::tlb_policy_changed);
 
-    ui->horizontalSlider_kernel_base->setRange64(0, 0xFFFFFFFFULL);
+    ui->horizontalSlider_va_base_addr->setRange64(0, 0xFFFFFFFFULL);
 
-    auto updateKernelBaseEdit = [this]() {
-        qint64 v = ui->horizontalSlider_kernel_base->value64();
+    auto updateVABaseAddrEdit = [this]() {
+        qint64 v = ui->horizontalSlider_va_base_addr->value64();
         QString hexText = QString("0x%1").arg(v, 8, 16, QChar('0')).toUpper();
-        QSignalBlocker block(ui->lineEdit_kernel_base);
-        ui->lineEdit_kernel_base->setText(hexText);
+        QSignalBlocker block(ui->lineEdit_va_base_addr);
+        ui->lineEdit_va_base_addr->setText(hexText);
     };
 
     connect(
-        ui->horizontalSlider_kernel_base, &BigSlider::value64Changed, this, updateKernelBaseEdit);
+        ui->horizontalSlider_va_base_addr, &BigSlider::value64Changed, this, updateVABaseAddrEdit);
 
     connect(
-        ui->horizontalSlider_kernel_base, &BigSlider::value64Changed, this,
-        &NewDialog::kernel_virt_base_changed);
+        ui->horizontalSlider_va_base_addr, &BigSlider::value64Changed, this,
+        &NewDialog::va_base_addr_changed);
 
-    connect(ui->lineEdit_kernel_base, &QLineEdit::editingFinished, this, [this]() {
-        QString txt = ui->lineEdit_kernel_base->text().trimmed();
+    connect(ui->lineEdit_va_base_addr, &QLineEdit::editingFinished, this, [this]() {
+        QString txt = ui->lineEdit_va_base_addr->text().trimmed();
         if (txt.startsWith(QLatin1String("0x"), Qt::CaseInsensitive)) txt = txt.mid(2);
         bool ok = false;
         quint64 v = txt.toULongLong(&ok, 16);
         if (!ok) {
-            qint64 cur = ui->horizontalSlider_kernel_base->value64();
-            ui->lineEdit_kernel_base->setText(
+            qint64 cur = ui->horizontalSlider_va_base_addr->value64();
+            ui->lineEdit_va_base_addr->setText(
                 QString("0x%1").arg(cur, 8, 16, QChar('0')).toUpper());
             return;
         }
 
         quint64 vclamped = qBound<quint64>(
-            ui->horizontalSlider_kernel_base->value64() /*dummy*/, v,
-            static_cast<quint64>(0xFFFFFFFFULL));
+            ui->horizontalSlider_va_base_addr->value64() /*dummy*/, v, 0xFFFFFFFFULL);
 
-        qint64 align = ui->horizontalSlider_kernel_base->alignment64();
+        qint64 align = ui->horizontalSlider_va_base_addr->alignment64();
         vclamped = (vclamped / align) * align;
-        ui->horizontalSlider_kernel_base->setValue64(static_cast<qint64>(vclamped));
+        ui->horizontalSlider_va_base_addr->setValue64(static_cast<qint64>(vclamped));
     });
 
-    updateKernelBaseEdit();
-
-    ui->horizontalSlider_root_ppn->setRange64(0, 0x003FFFFFULL);
-
-    auto updateRootPpnEdit = [this]() {
-        qint64 ppn = ui->horizontalSlider_root_ppn->value64();
-        QString hexText = QString("0x%1").arg(ppn, 6, 16, QChar('0')).toUpper();
-        QSignalBlocker blocker(ui->lineEdit_root_ppn);
-        ui->lineEdit_root_ppn->setText(hexText);
-    };
-
-    connect(ui->horizontalSlider_root_ppn, &BigSlider::value64Changed, this, updateRootPpnEdit);
-
-    connect(
-        ui->horizontalSlider_root_ppn, &BigSlider::value64Changed, this,
-        &NewDialog::root_ppn_changed);
-
-    connect(ui->lineEdit_root_ppn, &QLineEdit::editingFinished, this, [this]() {
-        QString txt = ui->lineEdit_root_ppn->text().trimmed();
-        if (txt.startsWith(QLatin1String("0x"), Qt::CaseInsensitive)) txt = txt.mid(2);
-        bool ok = false;
-        quint64 val = txt.toULongLong(&ok, 16);
-        if (!ok) {
-            qint64 cur = ui->horizontalSlider_root_ppn->value64();
-            ui->lineEdit_root_ppn->setText(QString("0x%1").arg(cur, 6, 16, QChar('0')).toUpper());
-            return;
-        }
-        quint64 clamped = qBound<quint64>((quint64)0, val, (quint64)0x003FFFFFULL);
-        qint64 align = ui->horizontalSlider_root_ppn->alignment64();
-        clamped = (clamped / align) * align;
-        ui->horizontalSlider_root_ppn->setValue64((qint64)clamped);
-    });
-
-    updateRootPpnEdit();
+    updateVABaseAddrEdit();
 
     cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d.data());
     cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p.data());
@@ -597,15 +572,24 @@ void NewDialog::vm_mode_changed() {
     switch2custom();
 }
 
-void NewDialog::kernel_virt_base_changed(qint64 new_base) {
-    uint32_t v = static_cast<uint32_t>(qBound<qint64>(0, new_base, 0xFFFFFFFFULL));
-    config->set_kernel_virt_base(v);
+void NewDialog::va_base_addr_changed(qint64 new_base) {
+    auto v = static_cast<uint32_t>(qBound<qint64>(0, new_base, 0xFFFFFFFFULL));
+    config->set_va_base_addr(v);
     switch2custom();
 }
 
-void NewDialog::root_ppn_changed(qint64 new_root_ppn) {
-    uint32_t v = static_cast<uint32_t>(qBound<qint64>(0, new_root_ppn, 0x003FFFFFULL));
-    config->set_vm_root_ppn(v);
+void NewDialog::tlb_num_sets_changed(int v) {
+    config->set_tlb_num_sets(static_cast<unsigned>(v));
+    switch2custom();
+}
+
+void NewDialog::tlb_assoc_changed(int v) {
+    config->set_tlb_associativity(static_cast<unsigned>(v));
+    switch2custom();
+}
+
+void NewDialog::tlb_policy_changed(int idx) {
+    config->set_tlb_replacement_policy(static_cast<machine::MachineConfig::TLBPolicy>(idx));
     switch2custom();
 }
 
@@ -670,11 +654,8 @@ void NewDialog::config_gui() {
 
     // Virtual
     ui->group_vm->setChecked(config->get_vm_enabled());
-    // ui->group_vm->setChecked(config->get_vm_mode() != machine::MachineConfig::VM_BARE);
     ui->radioButton_bare->setChecked(config->get_vm_mode() == machine::MachineConfig::VM_BARE);
     ui->radioButton_sv32->setChecked(config->get_vm_mode() == machine::MachineConfig::VM_SV32);
-    // ui->spinVmAsid->setValue((int)config->get_vm_asid());
-    // ui->spinVmPpn->setValue((int)config->get_vm_root_ppn());
 
     // Memory
     ui->mem_protec_exec->setChecked(config->memory_execute_protection());

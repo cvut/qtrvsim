@@ -3,5 +3,5 @@
 -- Qt5 version: 5.15.13
 -- Qt5 print support: 1
 -- Configuring done (0.3s)
--- Generating done (0.2s)
+-- Generating done (0.1s)
 -- Build files have been written to: /home/tux/qtrvsim/cmake-build-debug-wsl

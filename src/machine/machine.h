@@ -12,8 +12,9 @@
 #include "memory/backend/serialport.h"
 #include "memory/cache/cache.h"
 #include "memory/memory_bus.h"
-#include "memory/tlb.h"
+#include "memory/tlb/tlb.h"
 #include "predictor.h"
+#include "programloader.h"
 #include "registers.h"
 #include "simulator_exception.h"
 #include "symboltable.h"
@@ -95,8 +96,15 @@ public:
     bool get_step_over_exception(enum ExceptionCause excause) const;
     enum ExceptionCause get_exception_cause() const;
 
+    void map_elf_segments(ProgramLoader &program, Memory *mem, uint32_t root_ppn, uint32_t base_va);
+
     uint32_t allocate_page() {
-        return next_free_ppn++;
+        uint32_t ppn = next_free_ppn++;
+        constexpr uint32_t PAGE_SIZE = 1u << PAGE_SHIFT;
+        uint64_t phys_base = uint64_t(ppn) << PAGE_SHIFT;
+        std::vector<uint8_t> zeros(PAGE_SIZE, 0);
+        memory_rw()->write( Offset(phys_base), zeros.data(), PAGE_SIZE, { .type = ae::INTERNAL } );
+        return ppn;
     }
 
     Address virtualToPhysical(Address v) {
@@ -154,7 +162,7 @@ private:
     std::optional<TLB> tlb_data;
     FrontendMemory *instr_if_;
     FrontendMemory *data_if_;
-    uint32_t next_free_ppn;
+    uint32_t next_free_ppn = 0;
     Cache *cch_program = nullptr;
     Cache *cch_data = nullptr;
     Cache *cch_level2 = nullptr;

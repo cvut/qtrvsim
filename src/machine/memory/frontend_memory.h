@@ -7,7 +7,7 @@
 #include "memory/memory_utils.h"
 #include "register_value.h"
 #include "simulator_exception.h"
-#include "virtual_address.h"
+#include "virtual/virtual_address.h"
 
 #include <QObject>
 #include <cstdint>

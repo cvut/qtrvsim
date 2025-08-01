@@ -33,7 +33,8 @@ using namespace machine;
 /// Default config of Virtual Memory
 #define DFC_VM_ENABLED false
 #define DFC_KERNEL_VIRT_BASE 0x80000000u
-#define DFC_ROOT_PPN 0x00010000u
+#define DFC_TLB_SETS 64
+#define DFC_TLB_ASSOC 4
 //////////////////////////////////////////////////////////////////////////////
 /// Default config of CacheConfig
 #define DFC_EN false
@@ -196,8 +197,10 @@ MachineConfig::MachineConfig() {
 
     // Virtual Memory
     vm_enabled = DFC_VM_ENABLED;
-    kernel_virt_base = DFC_KERNEL_VIRT_BASE;
-    vm_root_ppn = DFC_ROOT_PPN;
+    va_base_addr = DFC_KERNEL_VIRT_BASE;
+    tlb_num_sets = DFC_TLB_SETS;
+    tlb_associativity = DFC_TLB_ASSOC;
+    tlb_policy = TP_LRU;
 }
 
 MachineConfig::MachineConfig(const MachineConfig *config) {
@@ -238,7 +241,10 @@ MachineConfig::MachineConfig(const MachineConfig *config) {
     // Virtual Memory
     vm_enabled = config->get_vm_enabled();
     vm_mode = config->get_vm_mode();
-    kernel_virt_base = config->get_kernel_virt_base();
+    va_base_addr = config->get_va_base_addr();
+    tlb_num_sets = config->get_tlb_num_sets();
+    tlb_associativity = config->get_tlb_associativity();
+    tlb_policy = config->get_tlb_replacement_policy();
 }
 
 #define N(STR) (prefix + QString(STR))
@@ -286,8 +292,10 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
 
     // Virtual Memory
     vm_enabled = sts->value(N("VMEnabled"), DFC_VM_ENABLED).toBool();
-    kernel_virt_base = sts->value(N("KernelVirtBase"), DFC_KERNEL_VIRT_BASE).toUInt();
-    vm_root_ppn = sts->value(N("RootPPN"), DFC_ROOT_PPN).toUInt();
+    va_base_addr = sts->value(N("KernelVirtBase"), DFC_KERNEL_VIRT_BASE).toUInt();
+    tlb_num_sets = sts->value(N("TLB_NumSets"), 64).toUInt();
+    tlb_associativity = sts->value(N("TLB_Associativity"), 4).toUInt();
+    tlb_policy = TLBPolicy(sts->value(N("TLB_Policy"), (int)TP_LRU).toInt());
 }
 
 void MachineConfig::store(QSettings *sts, const QString &prefix) {
@@ -320,6 +328,13 @@ void MachineConfig::store(QSettings *sts, const QString &prefix) {
     sts->setValue(N("BranchPredictor_BitsBTB"), get_bp_btb_bits());
     sts->setValue(N("BranchPredictor_BitsBHR"), get_bp_bhr_bits());
     sts->setValue(N("BranchPredictor_BitsBHTAddr"), get_bp_bht_addr_bits());
+
+    // Virtual memory
+    sts->setValue(N("VMEnabled"), get_vm_enabled());
+    sts->setValue(N("KernelVirtBase"), get_va_base_addr());
+    sts->setValue(N("TLB_NumSets"), get_tlb_num_sets());
+    sts->setValue(N("TLB_Associativity"), get_tlb_associativity());
+    sts->setValue(N("TLB_Policy"), int(get_tlb_replacement_policy()));
 }
 
 #undef N
@@ -666,13 +681,6 @@ MachineConfig::VmMode MachineConfig::get_vm_mode() const {
     return vm_mode;
 }
 
-void MachineConfig::set_vm_root_ppn(uint32_t p) {
-    vm_root_ppn = p;
-}
-uint32_t MachineConfig::get_vm_root_ppn() const {
-    return vm_root_ppn;
-}
-
 void MachineConfig::set_vm_asid(uint32_t a) {
     vm_asid = a;
 }
@@ -680,11 +688,31 @@ uint32_t MachineConfig::get_vm_asid() const {
     return vm_asid;
 }
 
-void MachineConfig::set_kernel_virt_base(uint32_t v) {
-    kernel_virt_base = v;
+void MachineConfig::set_va_base_addr(uint32_t v) {
+    va_base_addr = v;
 }
-uint32_t MachineConfig::get_kernel_virt_base() const {
-    return kernel_virt_base;
+uint32_t MachineConfig::get_va_base_addr() const {
+    return va_base_addr;
+}
+
+void MachineConfig::set_tlb_num_sets(unsigned v) {
+    tlb_num_sets = v > 0 ? v : 1;
+}
+void MachineConfig::set_tlb_associativity(unsigned v) {
+    tlb_associativity = v > 0 ? v : 1;
+}
+void MachineConfig::set_tlb_replacement_policy(MachineConfig::TLBPolicy p) {
+    tlb_policy = p;
+}
+
+unsigned MachineConfig::get_tlb_num_sets() const {
+    return tlb_num_sets;
+}
+unsigned MachineConfig::get_tlb_associativity() const {
+    return tlb_associativity;
+}
+MachineConfig::TLBPolicy MachineConfig::get_tlb_replacement_policy() const {
+    return tlb_policy;
 }
 
 bool MachineConfig::operator==(const MachineConfig &c) const {

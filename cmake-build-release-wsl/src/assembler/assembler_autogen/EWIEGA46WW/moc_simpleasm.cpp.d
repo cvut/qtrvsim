@@ -39,13 +39,16 @@
   /home/tux/qtrvsim/src/machine/memory/frontend_memory.h \
   /home/tux/qtrvsim/src/machine/memory/memory_bus.h \
   /home/tux/qtrvsim/src/machine/memory/memory_utils.h \
-  /home/tux/qtrvsim/src/machine/memory/page_table_walker.h \
-  /home/tux/qtrvsim/src/machine/memory/sv32.h \
-  /home/tux/qtrvsim/src/machine/memory/tlb.h \
-  /home/tux/qtrvsim/src/machine/memory/virtual_address.h \
+  /home/tux/qtrvsim/src/machine/memory/tlb/tlb.h \
+  /home/tux/qtrvsim/src/machine/memory/tlb/tlb_policy.h \
+  /home/tux/qtrvsim/src/machine/memory/virtual/page_fault_handler.h \
+  /home/tux/qtrvsim/src/machine/memory/virtual/page_table_walker.h \
+  /home/tux/qtrvsim/src/machine/memory/virtual/sv32.h \
+  /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
   /home/tux/qtrvsim/src/machine/pipeline.h \
   /home/tux/qtrvsim/src/machine/predictor.h \
   /home/tux/qtrvsim/src/machine/predictor_types.h \
+  /home/tux/qtrvsim/src/machine/programloader.h \
   /home/tux/qtrvsim/src/machine/register_value.h \
   /home/tux/qtrvsim/src/machine/registers.h \
   /home/tux/qtrvsim/src/machine/simulator_exception.h \
@@ -226,10 +229,14 @@
   /usr/include/c++/13/utility \
   /usr/include/c++/13/vector \
   /usr/include/ctype.h \
+  /usr/include/elf.h \
+  /usr/include/endian.h \
   /usr/include/errno.h \
   /usr/include/features-time64.h \
   /usr/include/features.h \
+  /usr/include/gelf.h \
   /usr/include/inttypes.h \
+  /usr/include/libelf.h \
   /usr/include/linux/errno.h \
   /usr/include/locale.h \
   /usr/include/pthread.h \
@@ -247,6 +254,7 @@
   /usr/include/x86_64-linux-gnu/asm/unistd.h \
   /usr/include/x86_64-linux-gnu/asm/unistd_64.h \
   /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h \
+  /usr/include/x86_64-linux-gnu/bits/byteswap.h \
   /usr/include/x86_64-linux-gnu/bits/confname.h \
   /usr/include/x86_64-linux-gnu/bits/cpu-set.h \
   /usr/include/x86_64-linux-gnu/bits/endian.h \
@@ -265,7 +273,9 @@
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
   /usr/include/x86_64-linux-gnu/bits/sched.h \
+  /usr/include/x86_64-linux-gnu/bits/select.h \
   /usr/include/x86_64-linux-gnu/bits/setjmp.h \
+  /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -289,6 +299,7 @@
   /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h \
+  /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
   /usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h \
   /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h \
@@ -300,6 +311,7 @@
   /usr/include/x86_64-linux-gnu/bits/types/timer_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
   /usr/include/x86_64-linux-gnu/bits/typesizes.h \
+  /usr/include/x86_64-linux-gnu/bits/uintn-identity.h \
   /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
   /usr/include/x86_64-linux-gnu/bits/wchar.h \
   /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
@@ -316,6 +328,7 @@
   /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs.h \
+  /usr/include/x86_64-linux-gnu/qt5/QtCore/QFile \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/QLoggingCategory \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/QMap \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/QMetaType \
@@ -347,6 +360,8 @@
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qdatetime.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qdebug.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qelapsedtimer.h \
+  /usr/include/x86_64-linux-gnu/qt5/QtCore/qfile.h \
+  /usr/include/x86_64-linux-gnu/qt5/QtCore/qfiledevice.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qflags.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qgenericatomic.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qglobal.h \
@@ -396,7 +411,9 @@
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qvector.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qversiontagging.h \
   /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+  /usr/include/x86_64-linux-gnu/sys/select.h \
   /usr/include/x86_64-linux-gnu/sys/syscall.h \
+  /usr/include/x86_64-linux-gnu/sys/types.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/limits.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stdarg.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h \

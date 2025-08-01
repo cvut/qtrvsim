@@ -11,7 +11,7 @@
   /home/tux/qtrvsim/src/machine/memory/cache/cache_types.h \
   /home/tux/qtrvsim/src/machine/memory/frontend_memory.h \
   /home/tux/qtrvsim/src/machine/memory/memory_utils.h \
-  /home/tux/qtrvsim/src/machine/memory/virtual_address.h \
+  /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
   /home/tux/qtrvsim/src/machine/predictor_types.h \
   /home/tux/qtrvsim/src/machine/register_value.h \
   /home/tux/qtrvsim/src/machine/simulator_exception.h \

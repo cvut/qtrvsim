@@ -1,20 +1,38 @@
 /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/X5JWOZW5QK/moc_tlb.cpp: /home/tux/qtrvsim/src/machine/memory/tlb.h \
   /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/moc_predefs.h \
+  /home/tux/qtrvsim/src/common/containers/cvector.h \
   /home/tux/qtrvsim/src/common/endian.h \
   /home/tux/qtrvsim/src/common/logging.h \
+  /home/tux/qtrvsim/src/common/math/bit_ops.h \
+  /home/tux/qtrvsim/src/common/memory_ownership.h \
   /home/tux/qtrvsim/src/common/polyfills/byteswap.h \
   /home/tux/qtrvsim/src/common/polyfills/endian_detection.h \
+  /home/tux/qtrvsim/src/machine/bitfield.h \
   /home/tux/qtrvsim/src/machine/config_isa.h \
+  /home/tux/qtrvsim/src/machine/core.h \
+  /home/tux/qtrvsim/src/machine/core/core_state.h \
+  /home/tux/qtrvsim/src/machine/csr/address.h \
+  /home/tux/qtrvsim/src/machine/csr/controlstate.h \
+  /home/tux/qtrvsim/src/machine/execute/alu.h \
+  /home/tux/qtrvsim/src/machine/execute/alu_op.h \
+  /home/tux/qtrvsim/src/machine/execute/mul_op.h \
+  /home/tux/qtrvsim/src/machine/instruction.h \
   /home/tux/qtrvsim/src/machine/machineconfig.h \
   /home/tux/qtrvsim/src/machine/machinedefs.h \
   /home/tux/qtrvsim/src/machine/memory/address.h \
+  /home/tux/qtrvsim/src/machine/memory/address_range.h \
   /home/tux/qtrvsim/src/machine/memory/frontend_memory.h \
   /home/tux/qtrvsim/src/machine/memory/memory_utils.h \
+  /home/tux/qtrvsim/src/machine/memory/page_fault_handler.h \
   /home/tux/qtrvsim/src/machine/memory/page_table_walker.h \
   /home/tux/qtrvsim/src/machine/memory/sv32.h \
+  /home/tux/qtrvsim/src/machine/memory/tlb_policy.h \
   /home/tux/qtrvsim/src/machine/memory/virtual_address.h \
+  /home/tux/qtrvsim/src/machine/pipeline.h \
+  /home/tux/qtrvsim/src/machine/predictor.h \
   /home/tux/qtrvsim/src/machine/predictor_types.h \
   /home/tux/qtrvsim/src/machine/register_value.h \
+  /home/tux/qtrvsim/src/machine/registers.h \
   /home/tux/qtrvsim/src/machine/simulator_exception.h \
   /home/tux/qtrvsim/src/machine/utils.h \
   /usr/include/alloca.h \
@@ -89,6 +107,7 @@
   /usr/include/c++/13/bits/shared_ptr.h \
   /usr/include/c++/13/bits/shared_ptr_atomic.h \
   /usr/include/c++/13/bits/shared_ptr_base.h \
+  /usr/include/c++/13/bits/specfun.h \
   /usr/include/c++/13/bits/std_abs.h \
   /usr/include/c++/13/bits/std_function.h \
   /usr/include/c++/13/bits/std_mutex.h \
@@ -128,6 +147,7 @@
   /usr/include/c++/13/cerrno \
   /usr/include/c++/13/climits \
   /usr/include/c++/13/clocale \
+  /usr/include/c++/13/cmath \
   /usr/include/c++/13/compare \
   /usr/include/c++/13/concepts \
   /usr/include/c++/13/cstddef \
@@ -168,6 +188,18 @@
   /usr/include/c++/13/streambuf \
   /usr/include/c++/13/string \
   /usr/include/c++/13/string_view \
+  /usr/include/c++/13/tr1/bessel_function.tcc \
+  /usr/include/c++/13/tr1/beta_function.tcc \
+  /usr/include/c++/13/tr1/ell_integral.tcc \
+  /usr/include/c++/13/tr1/exp_integral.tcc \
+  /usr/include/c++/13/tr1/gamma.tcc \
+  /usr/include/c++/13/tr1/hypergeometric.tcc \
+  /usr/include/c++/13/tr1/legendre_function.tcc \
+  /usr/include/c++/13/tr1/modified_bessel_func.tcc \
+  /usr/include/c++/13/tr1/poly_hermite.tcc \
+  /usr/include/c++/13/tr1/poly_laguerre.tcc \
+  /usr/include/c++/13/tr1/riemann_zeta.tcc \
+  /usr/include/c++/13/tr1/special_function_util.h \
   /usr/include/c++/13/tuple \
   /usr/include/c++/13/type_traits \
   /usr/include/c++/13/typeinfo \
@@ -286,11 +318,16 @@
   /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/QLoggingCategory \
+  /usr/include/x86_64-linux-gnu/qt5/QtCore/QMap \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/QMetaType \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/QObject \
+  /usr/include/x86_64-linux-gnu/qt5/QtCore/QScopedPointer \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/QSettings \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/QString \
+  /usr/include/x86_64-linux-gnu/qt5/QtCore/QStringList \
+  /usr/include/x86_64-linux-gnu/qt5/QtCore/QVector \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/QtGlobal \
+  /usr/include/x86_64-linux-gnu/qt5/QtCore/QtMath \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qalgorithms.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qarraydata.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qatomic.h \
@@ -318,6 +355,7 @@
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qlogging.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qloggingcategory.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qmap.h \
+  /usr/include/x86_64-linux-gnu/qt5/QtCore/qmath.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qmetatype.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qnamespace.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qnumeric.h \

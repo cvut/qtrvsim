@@ -675,7 +675,7 @@
              <x>10</x>
              <y>10</y>
              <width>471</width>
-             <height>181</height>
+             <height>341</height>
             </rect>
            </property>
            <property name="title">
@@ -687,131 +687,185 @@
            <property name="checked">
             <bool>true</bool>
            </property>
-           <widget class="QRadioButton" name="radioButton_bare">
+           <widget class="QLineEdit" name="lineEdit_va_base_addr">
             <property name="geometry">
              <rect>
-              <x>10</x>
-              <y>50</y>
-              <width>99</width>
-              <height>20</height>
+              <x>360</x>
+              <y>40</y>
+              <width>91</width>
+              <height>22</height>
              </rect>
             </property>
             <property name="text">
-             <string>Bare</string>
+             <string>0x80000000</string>
             </property>
            </widget>
-           <widget class="QRadioButton" name="radioButton_sv32">
+           <widget class="BigSlider" name="horizontalSlider_va_base_addr">
             <property name="geometry">
              <rect>
-              <x>10</x>
-              <y>70</y>
-              <width>99</width>
+              <x>210</x>
+              <y>40</y>
+              <width>141</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="tickPosition">
+             <enum>QSlider::TicksBothSides</enum>
+            </property>
+           </widget>
+           <widget class="QLabel" name="labe_va_base_addr">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>40</y>
+              <width>191</width>
               <height>20</height>
              </rect>
             </property>
             <property name="text">
-             <string>Sv32</string>
+             <string>Virtual Memory Base Address:</string>
             </property>
-            <property name="checked">
+           </widget>
+           <widget class="QGroupBox" name="tlb_groupBox">
+            <property name="enabled">
              <bool>true</bool>
             </property>
-           </widget>
-           <widget class="QLabel" name="label_mode">
             <property name="geometry">
              <rect>
-              <x>10</x>
-              <y>30</y>
-              <width>57</width>
-              <height>14</height>
+              <x>20</x>
+              <y>190</y>
+              <width>431</width>
+              <height>131</height>
              </rect>
             </property>
-            <property name="text">
-             <string>MODE</string>
+            <property name="title">
+             <string>Translation Lookaside Buffer (TLB)</string>
             </property>
+            <property name="checkable">
+             <bool>false</bool>
+            </property>
+            <layout class="QFormLayout" name="formLayout_2">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>Number of sets:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QSpinBox" name="tlb_number_of_sets">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>1024</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Degree of associativity:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="tlb_degree_of_associativity">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>Replacement policy:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QComboBox" name="tlb_replacement_policy">
+               <item>
+                <property name="text">
+                 <string>Random</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Least Recently Used (LRU)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Least Frequently Used (LFU)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Pseudo Least Recently Used (PLRU)</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
            </widget>
-           <widget class="QLineEdit" name="lineEdit_kernel_base">
+           <widget class="QGroupBox" name="satp_groupBox">
             <property name="geometry">
              <rect>
-              <x>360</x>
-              <y>100</y>
-              <width>91</width>
-              <height>22</height>
+              <x>20</x>
+              <y>90</y>
+              <width>431</width>
+              <height>81</height>
              </rect>
             </property>
-            <property name="text">
-             <string>0x80000000</string>
+            <property name="title">
+             <string>Supervisor Address Translation and Protection (SATP)</string>
             </property>
-           </widget>
-           <widget class="BigSlider" name="horizontalSlider_kernel_base">
-            <property name="geometry">
-             <rect>
-              <x>200</x>
-              <y>100</y>
-              <width>131</width>
-              <height>21</height>
-             </rect>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="tickPosition">
-             <enum>QSlider::TicksBothSides</enum>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_kernel_base">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
-              <y>100</y>
-              <width>171</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Kernel Virtual Base Address</string>
-            </property>
-           </widget>
-           <widget class="QLineEdit" name="lineEdit_root_ppn">
-            <property name="geometry">
-             <rect>
-              <x>360</x>
-              <y>140</y>
-              <width>91</width>
-              <height>22</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>0x80000000</string>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_root_ppn">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
-              <y>140</y>
-              <width>171</width>
-              <height>20</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Page‑Table Base (PPN)</string>
-            </property>
-           </widget>
-           <widget class="BigSlider" name="horizontalSlider_root_ppn">
-            <property name="geometry">
-             <rect>
-              <x>200</x>
-              <y>140</y>
-              <width>131</width>
-              <height>21</height>
-             </rect>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="tickPosition">
-             <enum>QSlider::TicksBothSides</enum>
-            </property>
+            <widget class="QRadioButton" name="radioButton_sv32">
+             <property name="geometry">
+              <rect>
+               <x>60</x>
+               <y>50</y>
+               <width>99</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Sv32</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+            <widget class="QRadioButton" name="radioButton_bare">
+             <property name="geometry">
+              <rect>
+               <x>60</x>
+               <y>30</y>
+               <width>99</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Bare</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="mode_label">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>30</y>
+               <width>51</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>MODE:</string>
+             </property>
+            </widget>
            </widget>
           </widget>
          </widget>

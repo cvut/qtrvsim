@@ -1,6 +1,7 @@
 #include "machine.h"
 
-#include "memory/tlb.h"
+#include "memory/tlb/tlb.h"
+#include "memory/virtual/page_fault_handler.h"
 #include "programloader.h"
 
 #include <QTime>
@@ -18,6 +19,10 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
     , stat(ST_READY) {
     regs = new Registers();
 
+    controlst
+        = new CSR::ControlState(machine_config.get_simulated_xlen(), machine_config.get_isa_word());
+
+    uint32_t sv32_root_ppn = 0;
     if (load_executable) {
         ProgramLoader program(machine_config.elf());
         this->machine_config.set_simulated_endian(program.get_endian());
@@ -29,10 +34,31 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
             this->machine_config.set_simulated_xlen(Xlen::_32);
         if (load_symtab) { symtab = program.get_symbol_table(); }
         program_end = program.end();
+        if (machine_config.get_vm_enabled()
+            && machine_config.get_vm_mode() == MachineConfig::VM_SV32) {
+            uint32_t base_va = machine_config.get_va_base_addr();
+            program_end = Address { program_end.get_raw() + base_va };
+        }
+
         if (program.get_executable_entry() != 0x0_addr) {
-            regs->write_pc(program.get_executable_entry());
+            uint32_t base_va = 0;
+            if (machine_config.get_vm_enabled()
+                && machine_config.get_vm_mode() == MachineConfig::VM_SV32) {
+                base_va = machine_config.get_va_base_addr();
+            }
+            regs->write_pc(Address { program.get_executable_entry().get_raw() + base_va });
         }
         mem = new Memory(*mem_program_only);
+
+        if (machine_config.get_vm_enabled()
+            && machine_config.get_vm_mode() == MachineConfig::VM_SV32) {
+            sv32_root_ppn = allocate_page();
+            uint32_t asid = machine_config.get_vm_asid() & 0x1FFu;
+            uint32_t satp = (1u << 31) | (asid << 22) | sv32_root_ppn;
+            controlst->write_internal(CSR::Id::SATP, satp);
+            uint32_t base_va = machine_config.get_va_base_addr();
+            map_elf_segments(program, mem, sv32_root_ppn, base_va);
+        }
     } else {
         mem = new Memory(machine_config.get_simulated_endian());
     }
@@ -67,26 +93,21 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         cch_level2, &machine_config.cache_data(), access_time_read, access_time_write,
         access_time_burst, access_enable_burst);
 
-    controlst
-        = new CSR::ControlState(machine_config.get_simulated_xlen(), machine_config.get_isa_word());
-
     if (machine_config.get_vm_enabled() && machine_config.get_vm_mode() == MachineConfig::VM_SV32) {
-        const uint32_t KERNEL_VIRT_BASE = machine_config.get_kernel_virt_base();
-        next_free_ppn = PHYS_PPN_START;
+        uint32_t asid = machine_config.get_vm_asid() & 0x1FFu;
+        uint32_t satp = (1u << 31) | (asid << 22) | sv32_root_ppn;
+
         tlb_program.emplace(cch_program, PROGRAM, this);
         tlb_data.emplace(cch_data, DATA, this);
 
-        constexpr uint32_t PAGE_SHIFT = 12;
-        uint32_t root_ppn_ba = machine_config.get_vm_root_ppn();
-        uint32_t root_ppn = root_ppn_ba >> PAGE_SHIFT;
-        uint32_t asid = machine_config.get_vm_asid();
-        uint32_t entry_va = KERNEL_VIRT_BASE;
-
-        uint32_t satp = (1u << 31) | ((asid & 0x1FFu) << 22) | (root_ppn & 0x003FFFFFu);
         controlst->write_internal(CSR::Id::SATP, satp);
         tlb_program->on_csr_write(CSR::Id::SATP, satp);
         tlb_data->on_csr_write(CSR::Id::SATP, satp);
-        regs->write_pc(Address { uint64_t(entry_va) });
+
+        auto *pfh_data = new PageFaultHandler(this, *tlb_data);
+        tlb_data->set_page_fault_handler(pfh_data);
+        auto *pfh_instr = new PageFaultHandler(this, *tlb_program);
+        tlb_program->set_page_fault_handler(pfh_instr);
 
         connect(&*tlb_data, &TLB::firstWrite, this, [this](VirtualAddress va) {
             regs->write_pc(Address { va.get_raw() });
@@ -512,5 +533,73 @@ enum ExceptionCause Machine::get_exception_cause() const {
         return EXCAUSE_INT;
     } else {
         return (ExceptionCause)val;
+    }
+}
+
+void Machine::map_elf_segments(
+    ProgramLoader &program,
+    Memory *mem,
+    uint32_t root_ppn,
+    uint32_t base_va) {
+    constexpr unsigned PAGE_SHIFT = 12;
+    constexpr unsigned PAGE_SIZE = 1u << PAGE_SHIFT;
+    constexpr unsigned VPN1_SHIFT = PAGE_SHIFT + 10;
+    constexpr unsigned VPN0_SHIFT = PAGE_SHIFT;
+    constexpr unsigned VPN_MASK = (1u << 10) - 1;
+
+    auto rd32 = [&](uint64_t a) {
+        uint32_t v;
+        mem->read(&v, Offset { a }, sizeof(v), { .type = ae::INTERNAL });
+        return v;
+    };
+    auto wr32 = [&](uint64_t a, uint32_t v) {
+        mem->write(Offset { a }, &v, sizeof(v), { .type = ae::INTERNAL });
+    };
+
+    for (auto seg : program.get_load_segments()) {
+        uint32_t vbase = seg.vaddr + base_va;
+        uint32_t fsize = seg.size;
+        uint32_t perms = seg.flags;
+        uint32_t npages = (fsize + PAGE_SIZE - 1) / PAGE_SIZE;
+
+        for (uint32_t i = 0; i < npages; i++) {
+            uint32_t va_page = vbase + i * PAGE_SIZE;
+            uint32_t vpn1 = (va_page >> VPN1_SHIFT) & VPN_MASK;
+            uint32_t vpn0 = (va_page >> VPN0_SHIFT) & VPN_MASK;
+            uint32_t current_ppn = root_ppn;
+            uint64_t pte_addr = 0;
+
+            for (int lvl = 1; lvl >= 0; --lvl) {
+                uint32_t idx = (lvl == 1 ? vpn1 : vpn0);
+                pte_addr = (uint64_t(current_ppn) << PAGE_SHIFT) + idx * 4;
+                Sv32Pte pte = Sv32Pte::from_uint(rd32(pte_addr));
+
+                if (!pte.is_valid()) {
+                    uint32_t new_ppn = allocate_page();
+                    Sv32Pte npte {};
+                    npte.v = 1;
+                    npte.ppn = new_ppn;
+                    wr32(pte_addr, npte.to_uint());
+                    current_ppn = new_ppn;
+                } else if (pte.is_leaf()) {
+                    throw SIMULATOR_EXCEPTION(
+                        PageFault, "map_elf_segments: unexpected leaf PTE",
+                        QString::number(pte_addr, 16));
+                } else {
+                    current_ppn = pte.ppn;
+                }
+            }
+
+            uint32_t phys_ppn = seg.vaddr >> PAGE_SHIFT;
+            Sv32Pte leaf {};
+            leaf.v = 1;
+            leaf.r = (perms & PF_R) ? 1 : 0;
+            leaf.w = (perms & PF_W) ? 1 : 0;
+            leaf.x = (perms & PF_X) ? 1 : 0;
+            leaf.a = 1;
+            leaf.d = 1;
+            leaf.ppn = phys_ppn;
+            wr32(pte_addr, leaf.to_uint());
+        }
     }
 }

@@ -68,12 +68,16 @@ set(machine_HEADERS
 		utils.h
 		execute/alu_op.h
 		execute/mul_op.h
-		memory/virtual_address.h
-		memory/tlb.h
-                memory/tlb.cpp
-		memory/page_table_walker.h
-                memory/page_table_walker.cpp
-		memory/sv32.h
+		memory/virtual/virtual_address.h
+        memory/tlb/tlb.h
+        memory/tlb/tlb.cpp
+		memory/virtual/page_table_walker.h
+		memory/virtual/page_table_walker.cpp
+		memory/virtual/sv32.h
+		memory/virtual/page_fault_handler.h
+		memory/virtual/page_fault_handler.cpp
+        memory/tlb/tlb_policy.h
+        memory/tlb/tlb_policy.cpp
 )
 
 # Object library is preferred, because the library archive is never really

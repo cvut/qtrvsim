@@ -306,7 +306,7 @@ src/machine/CMakeFiles/machine.dir/core.cpp.o: \
  /home/tux/qtrvsim/src/machine/memory/frontend_memory.h \
  /home/tux/qtrvsim/src/machine/memory/memory_utils.h \
  /usr/include/c++/13/cstring \
- /home/tux/qtrvsim/src/machine/memory/virtual_address.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
  /home/tux/qtrvsim/src/machine/pipeline.h \
  /home/tux/qtrvsim/src/machine/predictor.h \
  /home/tux/qtrvsim/src/common/logging.h \
@@ -355,4 +355,14 @@ src/machine/CMakeFiles/machine.dir/core.cpp.o: \
  /usr/include/c++/13/tr1/poly_laguerre.tcc \
  /usr/include/c++/13/tr1/riemann_zeta.tcc \
  /home/tux/qtrvsim/src/machine/utils.h /usr/include/c++/13/cinttypes \
- /usr/include/inttypes.h
+ /usr/include/inttypes.h /usr/include/c++/13/iostream \
+ /usr/include/c++/13/ostream /usr/include/c++/13/ios \
+ /usr/include/c++/13/bits/basic_ios.h \
+ /usr/include/c++/13/bits/locale_facets.h /usr/include/c++/13/cwctype \
+ /usr/include/wctype.h /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
+ /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_base.h \
+ /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_inline.h \
+ /usr/include/c++/13/bits/locale_facets.tcc \
+ /usr/include/c++/13/bits/basic_ios.tcc \
+ /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
+ /usr/include/c++/13/bits/istream.tcc

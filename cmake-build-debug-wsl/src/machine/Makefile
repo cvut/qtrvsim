@@ -1268,6 +1268,30 @@ memory/memory_bus.cpp.s:
 	cd /home/tux/qtrvsim/cmake-build-debug-wsl && $(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/core_test.dir/build.make src/machine/CMakeFiles/core_test.dir/memory/memory_bus.cpp.s
 .PHONY : memory/memory_bus.cpp.s
 
+memory/page_fault_handler.o: memory/page_fault_handler.cpp.o
+.PHONY : memory/page_fault_handler.o
+
+# target to build an object file
+memory/page_fault_handler.cpp.o:
+	cd /home/tux/qtrvsim/cmake-build-debug-wsl && $(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine.dir/build.make src/machine/CMakeFiles/machine.dir/memory/page_fault_handler.cpp.o
+.PHONY : memory/page_fault_handler.cpp.o
+
+memory/page_fault_handler.i: memory/page_fault_handler.cpp.i
+.PHONY : memory/page_fault_handler.i
+
+# target to preprocess a source file
+memory/page_fault_handler.cpp.i:
+	cd /home/tux/qtrvsim/cmake-build-debug-wsl && $(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine.dir/build.make src/machine/CMakeFiles/machine.dir/memory/page_fault_handler.cpp.i
+.PHONY : memory/page_fault_handler.cpp.i
+
+memory/page_fault_handler.s: memory/page_fault_handler.cpp.s
+.PHONY : memory/page_fault_handler.s
+
+# target to generate assembly for a file
+memory/page_fault_handler.cpp.s:
+	cd /home/tux/qtrvsim/cmake-build-debug-wsl && $(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine.dir/build.make src/machine/CMakeFiles/machine.dir/memory/page_fault_handler.cpp.s
+.PHONY : memory/page_fault_handler.cpp.s
+
 memory/page_table_walker.o: memory/page_table_walker.cpp.o
 .PHONY : memory/page_table_walker.o
 
@@ -1292,29 +1316,53 @@ memory/page_table_walker.cpp.s:
 	cd /home/tux/qtrvsim/cmake-build-debug-wsl && $(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine.dir/build.make src/machine/CMakeFiles/machine.dir/memory/page_table_walker.cpp.s
 .PHONY : memory/page_table_walker.cpp.s
 
-memory/tlb.o: memory/tlb.cpp.o
-.PHONY : memory/tlb.o
+memory/tlb/tlb.o: memory/tlb/tlb.cpp.o
+.PHONY : memory/tlb/tlb.o
 
 # target to build an object file
-memory/tlb.cpp.o:
-	cd /home/tux/qtrvsim/cmake-build-debug-wsl && $(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine.dir/build.make src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.o
-.PHONY : memory/tlb.cpp.o
+memory/tlb/tlb.cpp.o:
+	cd /home/tux/qtrvsim/cmake-build-debug-wsl && $(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine.dir/build.make src/machine/CMakeFiles/machine.dir/memory/tlb/tlb.cpp.o
+.PHONY : memory/tlb/tlb.cpp.o
 
-memory/tlb.i: memory/tlb.cpp.i
-.PHONY : memory/tlb.i
+memory/tlb/tlb.i: memory/tlb/tlb.cpp.i
+.PHONY : memory/tlb/tlb.i
 
 # target to preprocess a source file
-memory/tlb.cpp.i:
-	cd /home/tux/qtrvsim/cmake-build-debug-wsl && $(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine.dir/build.make src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.i
-.PHONY : memory/tlb.cpp.i
+memory/tlb/tlb.cpp.i:
+	cd /home/tux/qtrvsim/cmake-build-debug-wsl && $(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine.dir/build.make src/machine/CMakeFiles/machine.dir/memory/tlb/tlb.cpp.i
+.PHONY : memory/tlb/tlb.cpp.i
 
-memory/tlb.s: memory/tlb.cpp.s
-.PHONY : memory/tlb.s
+memory/tlb/tlb.s: memory/tlb/tlb.cpp.s
+.PHONY : memory/tlb/tlb.s
 
 # target to generate assembly for a file
-memory/tlb.cpp.s:
-	cd /home/tux/qtrvsim/cmake-build-debug-wsl && $(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine.dir/build.make src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.s
-.PHONY : memory/tlb.cpp.s
+memory/tlb/tlb.cpp.s:
+	cd /home/tux/qtrvsim/cmake-build-debug-wsl && $(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine.dir/build.make src/machine/CMakeFiles/machine.dir/memory/tlb/tlb.cpp.s
+.PHONY : memory/tlb/tlb.cpp.s
+
+memory/tlb/tlb_policy.o: memory/tlb/tlb_policy.cpp.o
+.PHONY : memory/tlb/tlb_policy.o
+
+# target to build an object file
+memory/tlb/tlb_policy.cpp.o:
+	cd /home/tux/qtrvsim/cmake-build-debug-wsl && $(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine.dir/build.make src/machine/CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.o
+.PHONY : memory/tlb/tlb_policy.cpp.o
+
+memory/tlb/tlb_policy.i: memory/tlb/tlb_policy.cpp.i
+.PHONY : memory/tlb/tlb_policy.i
+
+# target to preprocess a source file
+memory/tlb/tlb_policy.cpp.i:
+	cd /home/tux/qtrvsim/cmake-build-debug-wsl && $(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine.dir/build.make src/machine/CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.i
+.PHONY : memory/tlb/tlb_policy.cpp.i
+
+memory/tlb/tlb_policy.s: memory/tlb/tlb_policy.cpp.s
+.PHONY : memory/tlb/tlb_policy.s
+
+# target to generate assembly for a file
+memory/tlb/tlb_policy.cpp.s:
+	cd /home/tux/qtrvsim/cmake-build-debug-wsl && $(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine.dir/build.make src/machine/CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.s
+.PHONY : memory/tlb/tlb_policy.cpp.s
 
 memory_test_autogen/mocs_compilation.o: memory_test_autogen/mocs_compilation.cpp.o
 .PHONY : memory_test_autogen/mocs_compilation.o
@@ -1711,12 +1759,18 @@ help:
 	@echo "... memory/memory_bus.o"
 	@echo "... memory/memory_bus.i"
 	@echo "... memory/memory_bus.s"
+	@echo "... memory/page_fault_handler.o"
+	@echo "... memory/page_fault_handler.i"
+	@echo "... memory/page_fault_handler.s"
 	@echo "... memory/page_table_walker.o"
 	@echo "... memory/page_table_walker.i"
 	@echo "... memory/page_table_walker.s"
-	@echo "... memory/tlb.o"
-	@echo "... memory/tlb.i"
-	@echo "... memory/tlb.s"
+	@echo "... memory/tlb/tlb.o"
+	@echo "... memory/tlb/tlb.i"
+	@echo "... memory/tlb/tlb.s"
+	@echo "... memory/tlb/tlb_policy.o"
+	@echo "... memory/tlb/tlb_policy.i"
+	@echo "... memory/tlb/tlb_policy.s"
 	@echo "... memory_test_autogen/mocs_compilation.o"
 	@echo "... memory_test_autogen/mocs_compilation.i"
 	@echo "... memory_test_autogen/mocs_compilation.s"

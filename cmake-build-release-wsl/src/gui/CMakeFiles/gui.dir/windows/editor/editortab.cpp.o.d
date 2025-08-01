@@ -358,7 +358,7 @@ src/gui/CMakeFiles/gui.dir/windows/editor/editortab.cpp.o: \
  /home/tux/qtrvsim/src/machine/memory/frontend_memory.h \
  /home/tux/qtrvsim/src/machine/memory/memory_utils.h \
  /usr/include/c++/13/cstring \
- /home/tux/qtrvsim/src/machine/memory/virtual_address.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
  /home/tux/qtrvsim/src/machine/pipeline.h \
  /home/tux/qtrvsim/src/machine/predictor.h \
  /home/tux/qtrvsim/src/common/logging.h \
@@ -412,12 +412,23 @@ src/gui/CMakeFiles/gui.dir/windows/editor/editortab.cpp.o: \
  /home/tux/qtrvsim/src/machine/memory/frontend_memory.h \
  /home/tux/qtrvsim/src/machine/memory/memory_bus.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QMultiMap \
- /home/tux/qtrvsim/src/machine/memory/tlb.h \
- /home/tux/qtrvsim/src/machine/memory/frontend_memory.h \
- /home/tux/qtrvsim/src/machine/memory/page_table_walker.h \
- /home/tux/qtrvsim/src/machine/memory/sv32.h /usr/include/inttypes.h \
+ /home/tux/qtrvsim/src/machine/memory/tlb/tlb.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/page_fault_handler.h \
+ /home/tux/qtrvsim/src/machine/core.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/page_table_walker.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/sv32.h \
+ /usr/include/inttypes.h \
+ /home/tux/qtrvsim/src/machine/memory/tlb/tlb_policy.h \
+ /home/tux/qtrvsim/src/machine/programloader.h \
+ /home/tux/qtrvsim/src/machine/memory/backend/memory.h \
  /home/tux/qtrvsim/src/machine/symboltable.h \
  /home/tux/qtrvsim/src/machine/utils.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QFile \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qfile.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qfiledevice.h \
+ /usr/include/gelf.h /usr/include/libelf.h /usr/include/elf.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qvector.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QTimer \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qtimer.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qbasictimer.h \
@@ -442,7 +453,6 @@ src/gui/CMakeFiles/gui.dir/windows/editor/editortab.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qcoreevent.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qurl.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qfile.h \
- /usr/include/x86_64-linux-gnu/qt5/QtCore/qfiledevice.h \
  /usr/include/x86_64-linux-gnu/qt5/QtGui/qvector2d.h \
  /usr/include/x86_64-linux-gnu/qt5/QtGui/qtouchdevice.h \
  /usr/include/x86_64-linux-gnu/qt5/QtGui/qglyphrun.h \

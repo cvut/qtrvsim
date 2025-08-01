@@ -185,27 +185,39 @@
 			null
 		],
 		[
-			"/home/tux/qtrvsim/src/machine/memory/page_table_walker.h",
+			"/home/tux/qtrvsim/src/machine/memory/tlb/tlb.h",
 			"Mu",
-			"X5JWOZW5QK/moc_page_table_walker.cpp",
+			"QDPESVP6RL/moc_tlb.cpp",
 			null
 		],
 		[
-			"/home/tux/qtrvsim/src/machine/memory/sv32.h",
+			"/home/tux/qtrvsim/src/machine/memory/tlb/tlb_policy.h",
 			"Mu",
-			"X5JWOZW5QK/moc_sv32.cpp",
+			"QDPESVP6RL/moc_tlb_policy.cpp",
 			null
 		],
 		[
-			"/home/tux/qtrvsim/src/machine/memory/tlb.h",
+			"/home/tux/qtrvsim/src/machine/memory/virtual/page_fault_handler.h",
 			"Mu",
-			"X5JWOZW5QK/moc_tlb.cpp",
+			"DY63RRAMBK/moc_page_fault_handler.cpp",
 			null
 		],
 		[
-			"/home/tux/qtrvsim/src/machine/memory/virtual_address.h",
+			"/home/tux/qtrvsim/src/machine/memory/virtual/page_table_walker.h",
 			"Mu",
-			"X5JWOZW5QK/moc_virtual_address.cpp",
+			"DY63RRAMBK/moc_page_table_walker.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/virtual/sv32.h",
+			"Mu",
+			"DY63RRAMBK/moc_sv32.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h",
+			"Mu",
+			"DY63RRAMBK/moc_virtual_address.cpp",
 			null
 		],
 		[
@@ -376,12 +388,18 @@
 			null
 		],
 		[ "/home/tux/qtrvsim/src/machine/memory/memory_bus.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/machine/memory/tlb/tlb.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/machine/memory/tlb/tlb_policy.cpp", "Mu", null ],
 		[
-			"/home/tux/qtrvsim/src/machine/memory/page_table_walker.cpp",
+			"/home/tux/qtrvsim/src/machine/memory/virtual/page_fault_handler.cpp",
 			"Mu",
 			null
 		],
-		[ "/home/tux/qtrvsim/src/machine/memory/tlb.cpp", "Mu", null ],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/virtual/page_table_walker.cpp",
+			"Mu",
+			null
+		],
 		[ "/home/tux/qtrvsim/src/machine/predictor.cpp", "Mu", null ],
 		[ "/home/tux/qtrvsim/src/machine/programloader.cpp", "Mu", null ],
 		[ "/home/tux/qtrvsim/src/machine/registers.cpp", "Mu", null ],

@@ -185,6 +185,12 @@
 			null
 		],
 		[
+			"/home/tux/qtrvsim/src/machine/memory/page_fault_handler.h",
+			"Mu",
+			"X5JWOZW5QK/moc_page_fault_handler.cpp",
+			null
+		],
+		[
 			"/home/tux/qtrvsim/src/machine/memory/page_table_walker.h",
 			"Mu",
 			"X5JWOZW5QK/moc_page_table_walker.cpp",
@@ -197,9 +203,15 @@
 			null
 		],
 		[
-			"/home/tux/qtrvsim/src/machine/memory/tlb.h",
+			"/home/tux/qtrvsim/src/machine/memory/tlb/tlb.h",
 			"Mu",
-			"X5JWOZW5QK/moc_tlb.cpp",
+			"QDPESVP6RL/moc_tlb.cpp",
+			null
+		],
+		[
+			"/home/tux/qtrvsim/src/machine/memory/tlb/tlb_policy.h",
+			"Mu",
+			"QDPESVP6RL/moc_tlb_policy.cpp",
 			null
 		],
 		[
@@ -375,11 +387,17 @@
 		],
 		[ "/home/tux/qtrvsim/src/machine/memory/memory_bus.cpp", "Mu", null ],
 		[
+			"/home/tux/qtrvsim/src/machine/memory/page_fault_handler.cpp",
+			"Mu",
+			null
+		],
+		[
 			"/home/tux/qtrvsim/src/machine/memory/page_table_walker.cpp",
 			"Mu",
 			null
 		],
-		[ "/home/tux/qtrvsim/src/machine/memory/tlb.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/machine/memory/tlb/tlb.cpp", "Mu", null ],
+		[ "/home/tux/qtrvsim/src/machine/memory/tlb/tlb_policy.cpp", "Mu", null ],
 		[ "/home/tux/qtrvsim/src/machine/predictor.cpp", "Mu", null ],
 		[ "/home/tux/qtrvsim/src/machine/programloader.cpp", "Mu", null ],
 		[ "/home/tux/qtrvsim/src/machine/registers.cpp", "Mu", null ],

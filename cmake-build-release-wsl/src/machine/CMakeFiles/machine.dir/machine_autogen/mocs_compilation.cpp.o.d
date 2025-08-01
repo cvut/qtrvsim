@@ -320,7 +320,7 @@ src/machine/CMakeFiles/machine.dir/machine_autogen/mocs_compilation.cpp.o: \
  /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/memory/frontend_memory.h \
  /home/tux/qtrvsim/src/machine/memory/memory_utils.h \
  /usr/include/c++/13/cstring \
- /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/memory/virtual_address.h \
+ /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/memory/virtual/virtual_address.h \
  /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/pipeline.h \
  /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/predictor.h \
  /home/tux/qtrvsim/src/common/logging.h \
@@ -387,13 +387,23 @@ src/machine/CMakeFiles/machine.dir/machine_autogen/mocs_compilation.cpp.o: \
  /home/tux/qtrvsim/src/machine/memory/frontend_memory.h \
  /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/memory/memory_bus.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QMultiMap \
- /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/memory/tlb.h \
- /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/memory/frontend_memory.h \
- /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/memory/page_table_walker.h \
- /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/memory/sv32.h \
+ /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/memory/tlb/tlb.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/page_fault_handler.h \
+ /home/tux/qtrvsim/src/machine/core.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/page_table_walker.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/sv32.h \
  /usr/include/inttypes.h \
+ /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/memory/tlb/tlb_policy.h \
+ /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/programloader.h \
+ /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/memory/backend/memory.h \
  /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/symboltable.h \
  /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/utils.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QFile \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qfile.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qfiledevice.h \
+ /usr/include/gelf.h /usr/include/libelf.h /usr/include/elf.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qvector.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QTimer \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qtimer.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qbasictimer.h \
@@ -431,8 +441,8 @@ src/machine/CMakeFiles/machine.dir/machine_autogen/mocs_compilation.cpp.o: \
  /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/X5JWOZW5QK/../../../../../src/machine/memory/frontend_memory.h \
  /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/X5JWOZW5QK/moc_memory_bus.cpp \
  /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/X5JWOZW5QK/../../../../../src/machine/memory/memory_bus.h \
- /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/X5JWOZW5QK/moc_tlb.cpp \
- /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/X5JWOZW5QK/../../../../../src/machine/memory/tlb.h \
+ /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/QDPESVP6RL/moc_tlb.cpp \
+ /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/QDPESVP6RL/../../../../../src/machine/memory/tlb/tlb.h \
  /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/moc_predictor.cpp \
  /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/../../../../../src/machine/predictor.h \
  /home/tux/qtrvsim/cmake-build-release-wsl/src/machine/machine_autogen/EWIEGA46WW/moc_predictor_types.cpp \

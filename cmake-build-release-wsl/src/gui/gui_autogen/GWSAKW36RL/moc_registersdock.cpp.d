@@ -38,13 +38,16 @@
   /home/tux/qtrvsim/src/machine/memory/frontend_memory.h \
   /home/tux/qtrvsim/src/machine/memory/memory_bus.h \
   /home/tux/qtrvsim/src/machine/memory/memory_utils.h \
-  /home/tux/qtrvsim/src/machine/memory/page_table_walker.h \
-  /home/tux/qtrvsim/src/machine/memory/sv32.h \
-  /home/tux/qtrvsim/src/machine/memory/tlb.h \
-  /home/tux/qtrvsim/src/machine/memory/virtual_address.h \
+  /home/tux/qtrvsim/src/machine/memory/tlb/tlb.h \
+  /home/tux/qtrvsim/src/machine/memory/tlb/tlb_policy.h \
+  /home/tux/qtrvsim/src/machine/memory/virtual/page_fault_handler.h \
+  /home/tux/qtrvsim/src/machine/memory/virtual/page_table_walker.h \
+  /home/tux/qtrvsim/src/machine/memory/virtual/sv32.h \
+  /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
   /home/tux/qtrvsim/src/machine/pipeline.h \
   /home/tux/qtrvsim/src/machine/predictor.h \
   /home/tux/qtrvsim/src/machine/predictor_types.h \
+  /home/tux/qtrvsim/src/machine/programloader.h \
   /home/tux/qtrvsim/src/machine/register_value.h \
   /home/tux/qtrvsim/src/machine/registers.h \
   /home/tux/qtrvsim/src/machine/simulator_exception.h \
@@ -226,11 +229,14 @@
   /usr/include/c++/13/utility \
   /usr/include/c++/13/vector \
   /usr/include/ctype.h \
+  /usr/include/elf.h \
   /usr/include/endian.h \
   /usr/include/errno.h \
   /usr/include/features-time64.h \
   /usr/include/features.h \
+  /usr/include/gelf.h \
   /usr/include/inttypes.h \
+  /usr/include/libelf.h \
   /usr/include/limits.h \
   /usr/include/linux/errno.h \
   /usr/include/linux/limits.h \
@@ -336,6 +342,7 @@
   /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs.h \
+  /usr/include/x86_64-linux-gnu/qt5/QtCore/QFile \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/QList \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/QLoggingCategory \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/QMap \
@@ -369,6 +376,8 @@
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qdatetime.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qdebug.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qelapsedtimer.h \
+  /usr/include/x86_64-linux-gnu/qt5/QtCore/qfile.h \
+  /usr/include/x86_64-linux-gnu/qt5/QtCore/qfiledevice.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qflags.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qgenericatomic.h \
   /usr/include/x86_64-linux-gnu/qt5/QtCore/qglobal.h \

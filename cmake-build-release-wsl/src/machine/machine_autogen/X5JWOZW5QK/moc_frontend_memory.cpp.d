@@ -8,7 +8,7 @@
   /home/tux/qtrvsim/src/machine/machinedefs.h \
   /home/tux/qtrvsim/src/machine/memory/address.h \
   /home/tux/qtrvsim/src/machine/memory/memory_utils.h \
-  /home/tux/qtrvsim/src/machine/memory/virtual_address.h \
+  /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
   /home/tux/qtrvsim/src/machine/predictor_types.h \
   /home/tux/qtrvsim/src/machine/register_value.h \
   /home/tux/qtrvsim/src/machine/simulator_exception.h \

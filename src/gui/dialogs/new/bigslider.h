@@ -3,6 +3,8 @@
 
 #include <QSlider>
 
+// Qt widget subclass exposing 64-bit slider range/value and custom painting,
+// designed for selecting a base virtual memory address from 0X00000000 up to 0XFFFFF000.
 class BigSlider : public QSlider {
     Q_OBJECT
 

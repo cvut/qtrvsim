@@ -291,7 +291,7 @@ bool SimpleAsm::process_line(
         qint64 offset = qint64(value);
         qint64 base = 0;
         if (config.get_vm_enabled() && config.get_vm_mode() == machine::MachineConfig::VM_SV32) {
-            base = config.get_kernel_virt_base();
+            base = config.get_va_base_addr();
         }
         address = machine::Address(base + offset);
         return true;

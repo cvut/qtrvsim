@@ -299,12 +299,12 @@ external/svgscene/CMakeFiles/svgscene.dir/all: external/svgscene/CMakeFiles/svgs
 external/svgscene/CMakeFiles/svgscene.dir/all: external/svgscene/CMakeFiles/svgscene_autogen.dir/all
 	$(MAKE) $(MAKESILENT) -f external/svgscene/CMakeFiles/svgscene.dir/build.make external/svgscene/CMakeFiles/svgscene.dir/depend
 	$(MAKE) $(MAKESILENT) -f external/svgscene/CMakeFiles/svgscene.dir/build.make external/svgscene/CMakeFiles/svgscene.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=91,92,93,94,95,96 "Built target svgscene"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=92,93,94,95,96 "Built target svgscene"
 .PHONY : external/svgscene/CMakeFiles/svgscene.dir/all
 
 # Build rule for subdir invocation for target.
 external/svgscene/CMakeFiles/svgscene.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 7
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 6
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 external/svgscene/CMakeFiles/svgscene.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : external/svgscene/CMakeFiles/svgscene.dir/rule
@@ -327,12 +327,12 @@ external/svgscene/CMakeFiles/svgscene-example.dir/all: external/svgscene/CMakeFi
 external/svgscene/CMakeFiles/svgscene-example.dir/all: external/svgscene/CMakeFiles/svgscene-example_autogen.dir/all
 	$(MAKE) $(MAKESILENT) -f external/svgscene/CMakeFiles/svgscene-example.dir/build.make external/svgscene/CMakeFiles/svgscene-example.dir/depend
 	$(MAKE) $(MAKESILENT) -f external/svgscene/CMakeFiles/svgscene-example.dir/build.make external/svgscene/CMakeFiles/svgscene-example.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=97,98 "Built target svgscene-example"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=97,98,99 "Built target svgscene-example"
 .PHONY : external/svgscene/CMakeFiles/svgscene-example.dir/all
 
 # Build rule for subdir invocation for target.
 external/svgscene/CMakeFiles/svgscene-example.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 10
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 9
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 external/svgscene/CMakeFiles/svgscene-example.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : external/svgscene/CMakeFiles/svgscene-example.dir/rule
@@ -410,7 +410,7 @@ external/svgscene/CMakeFiles/svgscene-example_autogen_timestamp_deps.dir/all: ex
 
 # Build rule for subdir invocation for target.
 external/svgscene/CMakeFiles/svgscene-example_autogen_timestamp_deps.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 7
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 6
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 external/svgscene/CMakeFiles/svgscene-example_autogen_timestamp_deps.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : external/svgscene/CMakeFiles/svgscene-example_autogen_timestamp_deps.dir/rule
@@ -431,12 +431,12 @@ external/svgscene/CMakeFiles/svgscene-example_autogen_timestamp_deps.dir/clean:
 external/svgscene/CMakeFiles/svgscene-example_autogen.dir/all: external/svgscene/CMakeFiles/svgscene-example_autogen_timestamp_deps.dir/all
 	$(MAKE) $(MAKESILENT) -f external/svgscene/CMakeFiles/svgscene-example_autogen.dir/build.make external/svgscene/CMakeFiles/svgscene-example_autogen.dir/depend
 	$(MAKE) $(MAKESILENT) -f external/svgscene/CMakeFiles/svgscene-example_autogen.dir/build.make external/svgscene/CMakeFiles/svgscene-example_autogen.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=99 "Built target svgscene-example_autogen"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num= "Built target svgscene-example_autogen"
 .PHONY : external/svgscene/CMakeFiles/svgscene-example_autogen.dir/all
 
 # Build rule for subdir invocation for target.
 external/svgscene/CMakeFiles/svgscene-example_autogen.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 6
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 external/svgscene/CMakeFiles/svgscene-example_autogen.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : external/svgscene/CMakeFiles/svgscene-example_autogen.dir/rule
@@ -462,7 +462,7 @@ src/common/CMakeFiles/common_unit_tests.dir/all: src/common/polyfills/CMakeFiles
 
 # Build rule for subdir invocation for target.
 src/common/CMakeFiles/common_unit_tests.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/common/CMakeFiles/common_unit_tests.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/common/CMakeFiles/common_unit_tests.dir/rule
@@ -484,12 +484,12 @@ src/common/polyfills/CMakeFiles/mulh64_test.dir/all: src/common/polyfills/CMakeF
 src/common/polyfills/CMakeFiles/mulh64_test.dir/all: src/common/polyfills/CMakeFiles/mulh64_test_autogen.dir/all
 	$(MAKE) $(MAKESILENT) -f src/common/polyfills/CMakeFiles/mulh64_test.dir/build.make src/common/polyfills/CMakeFiles/mulh64_test.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/common/polyfills/CMakeFiles/mulh64_test.dir/build.make src/common/polyfills/CMakeFiles/mulh64_test.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=77,78 "Built target mulh64_test"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=78,79 "Built target mulh64_test"
 .PHONY : src/common/polyfills/CMakeFiles/mulh64_test.dir/all
 
 # Build rule for subdir invocation for target.
 src/common/polyfills/CMakeFiles/mulh64_test.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/common/polyfills/CMakeFiles/mulh64_test.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/common/polyfills/CMakeFiles/mulh64_test.dir/rule
@@ -536,12 +536,12 @@ src/common/polyfills/CMakeFiles/mulh64_test_autogen_timestamp_deps.dir/clean:
 src/common/polyfills/CMakeFiles/mulh64_test_autogen.dir/all: src/common/polyfills/CMakeFiles/mulh64_test_autogen_timestamp_deps.dir/all
 	$(MAKE) $(MAKESILENT) -f src/common/polyfills/CMakeFiles/mulh64_test_autogen.dir/build.make src/common/polyfills/CMakeFiles/mulh64_test_autogen.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/common/polyfills/CMakeFiles/mulh64_test_autogen.dir/build.make src/common/polyfills/CMakeFiles/mulh64_test_autogen.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=79 "Built target mulh64_test_autogen"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num= "Built target mulh64_test_autogen"
 .PHONY : src/common/polyfills/CMakeFiles/mulh64_test_autogen.dir/all
 
 # Build rule for subdir invocation for target.
 src/common/polyfills/CMakeFiles/mulh64_test_autogen.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/common/polyfills/CMakeFiles/mulh64_test_autogen.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/common/polyfills/CMakeFiles/mulh64_test_autogen.dir/rule
@@ -563,7 +563,7 @@ src/machine/CMakeFiles/machine.dir/all: src/machine/CMakeFiles/machine_autogen_t
 src/machine/CMakeFiles/machine.dir/all: src/machine/CMakeFiles/machine_autogen.dir/all
 	$(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine.dir/build.make src/machine/CMakeFiles/machine.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine.dir/build.make src/machine/CMakeFiles/machine.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=58,59,60,61,62,63,64,65,66,67,68,69,70,71 "Built target machine"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=58,59,60,61,62,63,64,65,66,67,68,69,70,71,72 "Built target machine"
 .PHONY : src/machine/CMakeFiles/machine.dir/all
 
 # Build rule for subdir invocation for target.
@@ -622,7 +622,7 @@ src/machine/CMakeFiles/registers_test.dir/all: src/machine/CMakeFiles/registers_
 
 # Build rule for subdir invocation for target.
 src/machine/CMakeFiles/registers_test.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 4
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/machine/CMakeFiles/registers_test.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/machine/CMakeFiles/registers_test.dir/rule
@@ -649,7 +649,7 @@ src/machine/CMakeFiles/memory_test.dir/all: src/machine/CMakeFiles/memory_test_a
 
 # Build rule for subdir invocation for target.
 src/machine/CMakeFiles/memory_test.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 4
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 5
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/machine/CMakeFiles/memory_test.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/machine/CMakeFiles/memory_test.dir/rule
@@ -698,7 +698,7 @@ src/machine/CMakeFiles/instruction_test.dir/all: src/machine/CMakeFiles/instruct
 src/machine/CMakeFiles/instruction_test.dir/all: src/machine/CMakeFiles/instruction_test_autogen.dir/all
 	$(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/instruction_test.dir/build.make src/machine/CMakeFiles/instruction_test.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/instruction_test.dir/build.make src/machine/CMakeFiles/instruction_test.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=54,55,56,57 "Built target instruction_test"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=54,55,56 "Built target instruction_test"
 .PHONY : src/machine/CMakeFiles/instruction_test.dir/all
 
 # Build rule for subdir invocation for target.
@@ -725,12 +725,12 @@ src/machine/CMakeFiles/program_loader_test.dir/all: src/machine/CMakeFiles/progr
 src/machine/CMakeFiles/program_loader_test.dir/all: src/machine/CMakeFiles/program_loader_test_autogen.dir/all
 	$(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/program_loader_test.dir/build.make src/machine/CMakeFiles/program_loader_test.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/program_loader_test.dir/build.make src/machine/CMakeFiles/program_loader_test.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=82,83,84,85,86 "Built target program_loader_test"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=83,84,85,86,87 "Built target program_loader_test"
 .PHONY : src/machine/CMakeFiles/program_loader_test.dir/all
 
 # Build rule for subdir invocation for target.
 src/machine/CMakeFiles/program_loader_test.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 6
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 5
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/machine/CMakeFiles/program_loader_test.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/machine/CMakeFiles/program_loader_test.dir/rule
@@ -789,7 +789,7 @@ src/machine/CMakeFiles/machine_unit_tests.dir/all: src/machine/CMakeFiles/core_t
 
 # Build rule for subdir invocation for target.
 src/machine/CMakeFiles/machine_unit_tests.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 35
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 36
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/machine/CMakeFiles/machine_unit_tests.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/machine/CMakeFiles/machine_unit_tests.dir/rule
@@ -836,12 +836,12 @@ src/machine/CMakeFiles/machine_autogen_timestamp_deps.dir/clean:
 src/machine/CMakeFiles/machine_autogen.dir/all: src/machine/CMakeFiles/machine_autogen_timestamp_deps.dir/all
 	$(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine_autogen.dir/build.make src/machine/CMakeFiles/machine_autogen.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/machine_autogen.dir/build.make src/machine/CMakeFiles/machine_autogen.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=72 "Built target machine_autogen"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num= "Built target machine_autogen"
 .PHONY : src/machine/CMakeFiles/machine_autogen.dir/all
 
 # Build rule for subdir invocation for target.
 src/machine/CMakeFiles/machine_autogen.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/machine/CMakeFiles/machine_autogen.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/machine/CMakeFiles/machine_autogen.dir/rule
@@ -940,12 +940,12 @@ src/machine/CMakeFiles/registers_test_autogen_timestamp_deps.dir/clean:
 src/machine/CMakeFiles/registers_test_autogen.dir/all: src/machine/CMakeFiles/registers_test_autogen_timestamp_deps.dir/all
 	$(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/registers_test_autogen.dir/build.make src/machine/CMakeFiles/registers_test_autogen.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/registers_test_autogen.dir/build.make src/machine/CMakeFiles/registers_test_autogen.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num= "Built target registers_test_autogen"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=91 "Built target registers_test_autogen"
 .PHONY : src/machine/CMakeFiles/registers_test_autogen.dir/all
 
 # Build rule for subdir invocation for target.
 src/machine/CMakeFiles/registers_test_autogen.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 1
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/machine/CMakeFiles/registers_test_autogen.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/machine/CMakeFiles/registers_test_autogen.dir/rule
@@ -992,12 +992,12 @@ src/machine/CMakeFiles/memory_test_autogen_timestamp_deps.dir/clean:
 src/machine/CMakeFiles/memory_test_autogen.dir/all: src/machine/CMakeFiles/memory_test_autogen_timestamp_deps.dir/all
 	$(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/memory_test_autogen.dir/build.make src/machine/CMakeFiles/memory_test_autogen.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/memory_test_autogen.dir/build.make src/machine/CMakeFiles/memory_test_autogen.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num= "Built target memory_test_autogen"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=77 "Built target memory_test_autogen"
 .PHONY : src/machine/CMakeFiles/memory_test_autogen.dir/all
 
 # Build rule for subdir invocation for target.
 src/machine/CMakeFiles/memory_test_autogen.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 1
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/machine/CMakeFiles/memory_test_autogen.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/machine/CMakeFiles/memory_test_autogen.dir/rule
@@ -1096,12 +1096,12 @@ src/machine/CMakeFiles/instruction_test_autogen_timestamp_deps.dir/clean:
 src/machine/CMakeFiles/instruction_test_autogen.dir/all: src/machine/CMakeFiles/instruction_test_autogen_timestamp_deps.dir/all
 	$(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/instruction_test_autogen.dir/build.make src/machine/CMakeFiles/instruction_test_autogen.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/instruction_test_autogen.dir/build.make src/machine/CMakeFiles/instruction_test_autogen.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num= "Built target instruction_test_autogen"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=57 "Built target instruction_test_autogen"
 .PHONY : src/machine/CMakeFiles/instruction_test_autogen.dir/all
 
 # Build rule for subdir invocation for target.
 src/machine/CMakeFiles/instruction_test_autogen.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 1
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/machine/CMakeFiles/instruction_test_autogen.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/machine/CMakeFiles/instruction_test_autogen.dir/rule
@@ -1148,12 +1148,12 @@ src/machine/CMakeFiles/program_loader_test_autogen_timestamp_deps.dir/clean:
 src/machine/CMakeFiles/program_loader_test_autogen.dir/all: src/machine/CMakeFiles/program_loader_test_autogen_timestamp_deps.dir/all
 	$(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/program_loader_test_autogen.dir/build.make src/machine/CMakeFiles/program_loader_test_autogen.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/machine/CMakeFiles/program_loader_test_autogen.dir/build.make src/machine/CMakeFiles/program_loader_test_autogen.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=87 "Built target program_loader_test_autogen"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num= "Built target program_loader_test_autogen"
 .PHONY : src/machine/CMakeFiles/program_loader_test_autogen.dir/all
 
 # Build rule for subdir invocation for target.
 src/machine/CMakeFiles/program_loader_test_autogen.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/machine/CMakeFiles/program_loader_test_autogen.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/machine/CMakeFiles/program_loader_test_autogen.dir/rule
@@ -1311,7 +1311,7 @@ src/os_emulation/CMakeFiles/os_emulation.dir/all: src/os_emulation/CMakeFiles/os
 
 # Build rule for subdir invocation for target.
 src/os_emulation/CMakeFiles/os_emulation.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 3
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/os_emulation/CMakeFiles/os_emulation.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/os_emulation/CMakeFiles/os_emulation.dir/rule
@@ -1358,12 +1358,12 @@ src/os_emulation/CMakeFiles/os_emulation_autogen_timestamp_deps.dir/clean:
 src/os_emulation/CMakeFiles/os_emulation_autogen.dir/all: src/os_emulation/CMakeFiles/os_emulation_autogen_timestamp_deps.dir/all
 	$(MAKE) $(MAKESILENT) -f src/os_emulation/CMakeFiles/os_emulation_autogen.dir/build.make src/os_emulation/CMakeFiles/os_emulation_autogen.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/os_emulation/CMakeFiles/os_emulation_autogen.dir/build.make src/os_emulation/CMakeFiles/os_emulation_autogen.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num= "Built target os_emulation_autogen"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=82 "Built target os_emulation_autogen"
 .PHONY : src/os_emulation/CMakeFiles/os_emulation_autogen.dir/all
 
 # Build rule for subdir invocation for target.
 src/os_emulation/CMakeFiles/os_emulation_autogen.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 1
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/os_emulation/CMakeFiles/os_emulation_autogen.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/os_emulation/CMakeFiles/os_emulation_autogen.dir/rule
@@ -1389,7 +1389,7 @@ src/gui/CMakeFiles/gui.dir/all: src/gui/CMakeFiles/gui_autogen_timestamp_deps.di
 src/gui/CMakeFiles/gui.dir/all: src/gui/CMakeFiles/gui_autogen.dir/all
 	$(MAKE) $(MAKESILENT) -f src/gui/CMakeFiles/gui.dir/build.make src/gui/CMakeFiles/gui.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/gui/CMakeFiles/gui.dir/build.make src/gui/CMakeFiles/gui.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53 "Built target gui"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52 "Built target gui"
 .PHONY : src/gui/CMakeFiles/gui.dir/all
 
 # Build rule for subdir invocation for target.
@@ -1444,12 +1444,12 @@ src/gui/CMakeFiles/gui_autogen_timestamp_deps.dir/clean:
 src/gui/CMakeFiles/gui_autogen.dir/all: src/gui/CMakeFiles/gui_autogen_timestamp_deps.dir/all
 	$(MAKE) $(MAKESILENT) -f src/gui/CMakeFiles/gui_autogen.dir/build.make src/gui/CMakeFiles/gui_autogen.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/gui/CMakeFiles/gui_autogen.dir/build.make src/gui/CMakeFiles/gui_autogen.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num= "Built target gui_autogen"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles --progress-num=53 "Built target gui_autogen"
 .PHONY : src/gui/CMakeFiles/gui_autogen.dir/all
 
 # Build rule for subdir invocation for target.
 src/gui/CMakeFiles/gui_autogen.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 27
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 28
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/gui/CMakeFiles/gui_autogen.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/gui/CMakeFiles/gui_autogen.dir/rule
@@ -1479,7 +1479,7 @@ src/cli/CMakeFiles/cli.dir/all: src/cli/CMakeFiles/cli_autogen.dir/all
 
 # Build rule for subdir invocation for target.
 src/cli/CMakeFiles/cli.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 24
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 25
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/cli/CMakeFiles/cli.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/cli/CMakeFiles/cli.dir/rule
@@ -1505,7 +1505,7 @@ src/cli/CMakeFiles/cli_test_stalls.dir/all: src/cli/CMakeFiles/cli.dir/all
 
 # Build rule for subdir invocation for target.
 src/cli/CMakeFiles/cli_test_stalls.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 24
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 25
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/cli/CMakeFiles/cli_test_stalls.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/cli/CMakeFiles/cli_test_stalls.dir/rule
@@ -1531,7 +1531,7 @@ src/cli/CMakeFiles/cli_test_asm_error.dir/all: src/cli/CMakeFiles/cli.dir/all
 
 # Build rule for subdir invocation for target.
 src/cli/CMakeFiles/cli_test_asm_error.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 24
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 25
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/cli/CMakeFiles/cli_test_asm_error.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/cli/CMakeFiles/cli_test_asm_error.dir/rule
@@ -1557,7 +1557,7 @@ src/cli/CMakeFiles/cli_test_modifiers.dir/all: src/cli/CMakeFiles/cli.dir/all
 
 # Build rule for subdir invocation for target.
 src/cli/CMakeFiles/cli_test_modifiers.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 24
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 25
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/cli/CMakeFiles/cli_test_modifiers.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/cli/CMakeFiles/cli_test_modifiers.dir/rule
@@ -1583,7 +1583,7 @@ src/cli/CMakeFiles/cli_test_modifiers-pcrel.dir/all: src/cli/CMakeFiles/cli.dir/
 
 # Build rule for subdir invocation for target.
 src/cli/CMakeFiles/cli_test_modifiers-pcrel.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 24
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 25
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/cli/CMakeFiles/cli_test_modifiers-pcrel.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/cli/CMakeFiles/cli_test_modifiers-pcrel.dir/rule
@@ -1611,7 +1611,7 @@ src/cli/CMakeFiles/cli_autogen_timestamp_deps.dir/all: src/os_emulation/CMakeFil
 
 # Build rule for subdir invocation for target.
 src/cli/CMakeFiles/cli_autogen_timestamp_deps.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 20
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 21
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/cli/CMakeFiles/cli_autogen_timestamp_deps.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/cli/CMakeFiles/cli_autogen_timestamp_deps.dir/rule
@@ -1637,7 +1637,7 @@ src/cli/CMakeFiles/cli_autogen.dir/all: src/cli/CMakeFiles/cli_autogen_timestamp
 
 # Build rule for subdir invocation for target.
 src/cli/CMakeFiles/cli_autogen.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 20
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 21
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/cli/CMakeFiles/cli_autogen.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/tux/qtrvsim/cmake-build-debug-wsl/CMakeFiles 0
 .PHONY : src/cli/CMakeFiles/cli_autogen.dir/rule

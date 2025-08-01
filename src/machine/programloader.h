@@ -3,6 +3,7 @@
 
 #include "common/endian.h"
 #include "memory/backend/memory.h"
+#include "memory/frontend_memory.h"
 #include "symboltable.h"
 
 #include <QFile>
@@ -18,6 +19,12 @@ enum ArchitectureType {
     ARCH64,
 };
 
+struct LoadSegment {
+    uint32_t vaddr;
+    uint32_t size;
+    uint32_t flags; // ELF PF_R / PF_W / PF_X bits
+};
+
 class ProgramLoader {
 public:
     explicit ProgramLoader(const char *file);
@@ -26,6 +33,8 @@ public:
 
     void to_memory(Memory *mem); // Writes all loaded sections to memory TODO:
                                  // really to memory ???
+    std::vector<LoadSegment> get_load_segments() const;
+
     Address end(); // Return address after which there is no more code for
                    // sure
     Address get_executable_entry() const;

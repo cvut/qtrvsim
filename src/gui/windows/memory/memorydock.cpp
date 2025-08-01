@@ -103,14 +103,17 @@ void MemoryDock::setup(machine::Machine *machine) {
 
     bool vm_on = machine->config().get_vm_enabled();
     vm_toggle_->setVisible(vm_on);
-    if (!vm_on) {
-        vm_toggle_->setChecked(false);
-    } else {
-        vm_toggle_->setChecked(true);
-    }
+    vm_toggle_->setChecked(vm_on);
 
-    QTimer::singleShot(0, this, [this, machine]() {
-        machine::Address pc = machine->registers()->read_pc();
-        this->focus_addr(pc);
+    QTimer::singleShot(0, this, [this]() {
+        if (!machinePtr) return;
+        machine::Address pc = machinePtr->registers()->read_pc();
+        if (machinePtr->config().get_vm_enabled() && vm_toggle_->isChecked()) {
+            this->focus_addr(pc);
+        } else if (machinePtr->config().get_vm_enabled()) {
+            this->focus_addr(machinePtr->virtualToPhysical(pc));
+        } else {
+            this->focus_addr(pc);
+        }
     });
 }

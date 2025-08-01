@@ -293,7 +293,7 @@ src/gui/CMakeFiles/gui.dir/windows/coreview/scene.cpp.o: \
  /home/tux/qtrvsim/src/machine/machineconfig.h \
  /home/tux/qtrvsim/src/machine/simulator_exception.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qstring.h \
- /home/tux/qtrvsim/src/machine/memory/virtual_address.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
  /home/tux/qtrvsim/external/svgscene/src/svgscene/components/simpletextitem.h \
  /home/tux/qtrvsim/external/svgscene/src/svgscene/svghandler.h \
  /home/tux/qtrvsim/external/svgscene/src/svgscene/svgdocument.h \
@@ -459,12 +459,20 @@ src/gui/CMakeFiles/gui.dir/windows/coreview/scene.cpp.o: \
  /home/tux/qtrvsim/src/machine/memory/cache/cache.h \
  /home/tux/qtrvsim/src/machine/memory/memory_bus.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QMultiMap \
- /home/tux/qtrvsim/src/machine/memory/tlb.h \
- /home/tux/qtrvsim/src/machine/memory/frontend_memory.h \
- /home/tux/qtrvsim/src/machine/memory/page_table_walker.h \
- /home/tux/qtrvsim/src/machine/memory/sv32.h /usr/include/inttypes.h \
+ /home/tux/qtrvsim/src/machine/memory/tlb/tlb.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/page_fault_handler.h \
+ /home/tux/qtrvsim/src/machine/core.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/page_table_walker.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/sv32.h \
+ /usr/include/inttypes.h \
+ /home/tux/qtrvsim/src/machine/memory/tlb/tlb_policy.h \
+ /home/tux/qtrvsim/src/machine/programloader.h \
+ /home/tux/qtrvsim/src/machine/memory/backend/memory.h \
  /home/tux/qtrvsim/src/machine/symboltable.h \
- /home/tux/qtrvsim/src/machine/utils.h \
+ /home/tux/qtrvsim/src/machine/utils.h /usr/include/gelf.h \
+ /usr/include/libelf.h /usr/include/elf.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qvector.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QTimer \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qtimer.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qbasictimer.h \

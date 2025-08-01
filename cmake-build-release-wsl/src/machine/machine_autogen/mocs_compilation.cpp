@@ -14,7 +14,7 @@
 #include "JYITRSJ7MH/moc_cache.cpp"
 #include "X5JWOZW5QK/moc_frontend_memory.cpp"
 #include "X5JWOZW5QK/moc_memory_bus.cpp"
-#include "X5JWOZW5QK/moc_tlb.cpp"
+#include "QDPESVP6RL/moc_tlb.cpp"
 #include "EWIEGA46WW/moc_predictor.cpp"
 #include "EWIEGA46WW/moc_predictor_types.cpp"
 #include "EWIEGA46WW/moc_registers.cpp"

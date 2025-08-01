@@ -115,15 +115,21 @@ public:
     QSpacerItem *verticalSpacer_5;
     QWidget *tab_virtual_memory;
     QGroupBox *group_vm;
-    QRadioButton *radioButton_bare;
+    QLineEdit *lineEdit_va_base_addr;
+    BigSlider *horizontalSlider_va_base_addr;
+    QLabel *labe_va_base_addr;
+    QGroupBox *tlb_groupBox;
+    QFormLayout *formLayout_2;
+    QLabel *label_2;
+    QSpinBox *tlb_number_of_sets;
+    QLabel *label_5;
+    QSpinBox *tlb_degree_of_associativity;
+    QLabel *label_6;
+    QComboBox *tlb_replacement_policy;
+    QGroupBox *satp_groupBox;
     QRadioButton *radioButton_sv32;
-    QLabel *label_mode;
-    QLineEdit *lineEdit_kernel_base;
-    BigSlider *horizontalSlider_kernel_base;
-    QLabel *label_kernel_base;
-    QLineEdit *lineEdit_root_ppn;
-    QLabel *label_root_ppn;
-    BigSlider *horizontalSlider_root_ppn;
+    QRadioButton *radioButton_bare;
+    QLabel *mode_label;
     QWidget *tab_memory;
     QVBoxLayout *verticalLayout_4;
     QCheckBox *mem_protec_write;
@@ -558,41 +564,77 @@ public:
         group_vm = new QGroupBox(tab_virtual_memory);
         group_vm->setObjectName(QString::fromUtf8("group_vm"));
         group_vm->setEnabled(true);
-        group_vm->setGeometry(QRect(10, 10, 471, 181));
+        group_vm->setGeometry(QRect(10, 10, 471, 341));
         group_vm->setCheckable(true);
         group_vm->setChecked(true);
-        radioButton_bare = new QRadioButton(group_vm);
-        radioButton_bare->setObjectName(QString::fromUtf8("radioButton_bare"));
-        radioButton_bare->setGeometry(QRect(10, 50, 99, 20));
-        radioButton_sv32 = new QRadioButton(group_vm);
+        lineEdit_va_base_addr = new QLineEdit(group_vm);
+        lineEdit_va_base_addr->setObjectName(QString::fromUtf8("lineEdit_va_base_addr"));
+        lineEdit_va_base_addr->setGeometry(QRect(360, 40, 91, 22));
+        horizontalSlider_va_base_addr = new BigSlider(group_vm);
+        horizontalSlider_va_base_addr->setObjectName(QString::fromUtf8("horizontalSlider_va_base_addr"));
+        horizontalSlider_va_base_addr->setGeometry(QRect(210, 40, 141, 21));
+        horizontalSlider_va_base_addr->setOrientation(Qt::Horizontal);
+        horizontalSlider_va_base_addr->setTickPosition(QSlider::TicksBothSides);
+        labe_va_base_addr = new QLabel(group_vm);
+        labe_va_base_addr->setObjectName(QString::fromUtf8("labe_va_base_addr"));
+        labe_va_base_addr->setGeometry(QRect(20, 40, 191, 20));
+        tlb_groupBox = new QGroupBox(group_vm);
+        tlb_groupBox->setObjectName(QString::fromUtf8("tlb_groupBox"));
+        tlb_groupBox->setEnabled(true);
+        tlb_groupBox->setGeometry(QRect(20, 190, 431, 131));
+        tlb_groupBox->setCheckable(false);
+        formLayout_2 = new QFormLayout(tlb_groupBox);
+        formLayout_2->setObjectName(QString::fromUtf8("formLayout_2"));
+        label_2 = new QLabel(tlb_groupBox);
+        label_2->setObjectName(QString::fromUtf8("label_2"));
+
+        formLayout_2->setWidget(0, QFormLayout::LabelRole, label_2);
+
+        tlb_number_of_sets = new QSpinBox(tlb_groupBox);
+        tlb_number_of_sets->setObjectName(QString::fromUtf8("tlb_number_of_sets"));
+        tlb_number_of_sets->setMinimum(1);
+        tlb_number_of_sets->setMaximum(1024);
+
+        formLayout_2->setWidget(0, QFormLayout::FieldRole, tlb_number_of_sets);
+
+        label_5 = new QLabel(tlb_groupBox);
+        label_5->setObjectName(QString::fromUtf8("label_5"));
+
+        formLayout_2->setWidget(1, QFormLayout::LabelRole, label_5);
+
+        tlb_degree_of_associativity = new QSpinBox(tlb_groupBox);
+        tlb_degree_of_associativity->setObjectName(QString::fromUtf8("tlb_degree_of_associativity"));
+        tlb_degree_of_associativity->setMinimum(1);
+
+        formLayout_2->setWidget(1, QFormLayout::FieldRole, tlb_degree_of_associativity);
+
+        label_6 = new QLabel(tlb_groupBox);
+        label_6->setObjectName(QString::fromUtf8("label_6"));
+
+        formLayout_2->setWidget(2, QFormLayout::LabelRole, label_6);
+
+        tlb_replacement_policy = new QComboBox(tlb_groupBox);
+        tlb_replacement_policy->addItem(QString());
+        tlb_replacement_policy->addItem(QString());
+        tlb_replacement_policy->addItem(QString());
+        tlb_replacement_policy->addItem(QString());
+        tlb_replacement_policy->setObjectName(QString::fromUtf8("tlb_replacement_policy"));
+
+        formLayout_2->setWidget(2, QFormLayout::FieldRole, tlb_replacement_policy);
+
+        satp_groupBox = new QGroupBox(group_vm);
+        satp_groupBox->setObjectName(QString::fromUtf8("satp_groupBox"));
+        satp_groupBox->setGeometry(QRect(20, 90, 431, 81));
+        radioButton_sv32 = new QRadioButton(satp_groupBox);
         radioButton_sv32->setObjectName(QString::fromUtf8("radioButton_sv32"));
-        radioButton_sv32->setGeometry(QRect(10, 70, 99, 20));
+        radioButton_sv32->setGeometry(QRect(60, 50, 99, 21));
         radioButton_sv32->setChecked(true);
-        label_mode = new QLabel(group_vm);
-        label_mode->setObjectName(QString::fromUtf8("label_mode"));
-        label_mode->setGeometry(QRect(10, 30, 57, 14));
-        lineEdit_kernel_base = new QLineEdit(group_vm);
-        lineEdit_kernel_base->setObjectName(QString::fromUtf8("lineEdit_kernel_base"));
-        lineEdit_kernel_base->setGeometry(QRect(360, 100, 91, 22));
-        horizontalSlider_kernel_base = new BigSlider(group_vm);
-        horizontalSlider_kernel_base->setObjectName(QString::fromUtf8("horizontalSlider_kernel_base"));
-        horizontalSlider_kernel_base->setGeometry(QRect(200, 100, 131, 21));
-        horizontalSlider_kernel_base->setOrientation(Qt::Horizontal);
-        horizontalSlider_kernel_base->setTickPosition(QSlider::TicksBothSides);
-        label_kernel_base = new QLabel(group_vm);
-        label_kernel_base->setObjectName(QString::fromUtf8("label_kernel_base"));
-        label_kernel_base->setGeometry(QRect(10, 100, 171, 20));
-        lineEdit_root_ppn = new QLineEdit(group_vm);
-        lineEdit_root_ppn->setObjectName(QString::fromUtf8("lineEdit_root_ppn"));
-        lineEdit_root_ppn->setGeometry(QRect(360, 140, 91, 22));
-        label_root_ppn = new QLabel(group_vm);
-        label_root_ppn->setObjectName(QString::fromUtf8("label_root_ppn"));
-        label_root_ppn->setGeometry(QRect(10, 140, 171, 20));
-        horizontalSlider_root_ppn = new BigSlider(group_vm);
-        horizontalSlider_root_ppn->setObjectName(QString::fromUtf8("horizontalSlider_root_ppn"));
-        horizontalSlider_root_ppn->setGeometry(QRect(200, 140, 131, 21));
-        horizontalSlider_root_ppn->setOrientation(Qt::Horizontal);
-        horizontalSlider_root_ppn->setTickPosition(QSlider::TicksBothSides);
+        radioButton_bare = new QRadioButton(satp_groupBox);
+        radioButton_bare->setObjectName(QString::fromUtf8("radioButton_bare"));
+        radioButton_bare->setGeometry(QRect(60, 30, 99, 21));
+        mode_label = new QLabel(satp_groupBox);
+        mode_label->setObjectName(QString::fromUtf8("mode_label"));
+        mode_label->setGeometry(QRect(10, 30, 51, 21));
         config_pages->addWidget(tab_virtual_memory);
         tab_memory = new QWidget();
         tab_memory->setObjectName(QString::fromUtf8("tab_memory"));
@@ -858,13 +900,21 @@ public:
         tab_virtual_memory->setAccessibleName(QCoreApplication::translate("NewDialog", "Virtual Memory", nullptr));
 #endif // QT_CONFIG(accessibility)
         group_vm->setTitle(QCoreApplication::translate("NewDialog", "Virtual Memory", nullptr));
-        radioButton_bare->setText(QCoreApplication::translate("NewDialog", "Bare", nullptr));
+        lineEdit_va_base_addr->setText(QCoreApplication::translate("NewDialog", "0x80000000", nullptr));
+        labe_va_base_addr->setText(QCoreApplication::translate("NewDialog", "Virtual Memory Base Address:", nullptr));
+        tlb_groupBox->setTitle(QCoreApplication::translate("NewDialog", "Translation Lookaside Buffer (TLB)", nullptr));
+        label_2->setText(QCoreApplication::translate("NewDialog", "Number of sets:", nullptr));
+        label_5->setText(QCoreApplication::translate("NewDialog", "Degree of associativity:", nullptr));
+        label_6->setText(QCoreApplication::translate("NewDialog", "Replacement policy:", nullptr));
+        tlb_replacement_policy->setItemText(0, QCoreApplication::translate("NewDialog", "Random", nullptr));
+        tlb_replacement_policy->setItemText(1, QCoreApplication::translate("NewDialog", "Least Recently Used (LRU)", nullptr));
+        tlb_replacement_policy->setItemText(2, QCoreApplication::translate("NewDialog", "Least Frequently Used (LFU)", nullptr));
+        tlb_replacement_policy->setItemText(3, QCoreApplication::translate("NewDialog", "Pseudo Least Recently Used (PLRU)", nullptr));
+
+        satp_groupBox->setTitle(QCoreApplication::translate("NewDialog", "Supervisor Address Translation and Protection (SATP)", nullptr));
         radioButton_sv32->setText(QCoreApplication::translate("NewDialog", "Sv32", nullptr));
-        label_mode->setText(QCoreApplication::translate("NewDialog", "MODE", nullptr));
-        lineEdit_kernel_base->setText(QCoreApplication::translate("NewDialog", "0x80000000", nullptr));
-        label_kernel_base->setText(QCoreApplication::translate("NewDialog", "Kernel Virtual Base Address", nullptr));
-        lineEdit_root_ppn->setText(QCoreApplication::translate("NewDialog", "0x80000000", nullptr));
-        label_root_ppn->setText(QCoreApplication::translate("NewDialog", "Page\342\200\221Table Base (PPN)", nullptr));
+        radioButton_bare->setText(QCoreApplication::translate("NewDialog", "Bare", nullptr));
+        mode_label->setText(QCoreApplication::translate("NewDialog", "MODE:", nullptr));
 #if QT_CONFIG(accessibility)
         tab_memory->setAccessibleName(QCoreApplication::translate("NewDialog", "Memory Timings", nullptr));
 #endif // QT_CONFIG(accessibility)

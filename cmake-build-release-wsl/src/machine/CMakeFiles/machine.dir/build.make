@@ -411,33 +411,61 @@ src/machine/CMakeFiles/machine.dir/symboltable.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/machine.dir/symboltable.cpp.s"
 	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/tux/qtrvsim/src/machine/symboltable.cpp -o CMakeFiles/machine.dir/symboltable.cpp.s
 
-src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.o: src/machine/CMakeFiles/machine.dir/flags.make
-src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.o: /home/tux/qtrvsim/src/machine/memory/tlb.cpp
-src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.o: src/machine/CMakeFiles/machine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/tux/qtrvsim/cmake-build-release-wsl/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.o"
-	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.o -MF CMakeFiles/machine.dir/memory/tlb.cpp.o.d -o CMakeFiles/machine.dir/memory/tlb.cpp.o -c /home/tux/qtrvsim/src/machine/memory/tlb.cpp
+src/machine/CMakeFiles/machine.dir/memory/tlb/tlb.cpp.o: src/machine/CMakeFiles/machine.dir/flags.make
+src/machine/CMakeFiles/machine.dir/memory/tlb/tlb.cpp.o: /home/tux/qtrvsim/src/machine/memory/tlb/tlb.cpp
+src/machine/CMakeFiles/machine.dir/memory/tlb/tlb.cpp.o: src/machine/CMakeFiles/machine.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/tux/qtrvsim/cmake-build-release-wsl/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object src/machine/CMakeFiles/machine.dir/memory/tlb/tlb.cpp.o"
+	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/machine/CMakeFiles/machine.dir/memory/tlb/tlb.cpp.o -MF CMakeFiles/machine.dir/memory/tlb/tlb.cpp.o.d -o CMakeFiles/machine.dir/memory/tlb/tlb.cpp.o -c /home/tux/qtrvsim/src/machine/memory/tlb/tlb.cpp
 
-src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/machine.dir/memory/tlb.cpp.i"
-	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/tux/qtrvsim/src/machine/memory/tlb.cpp > CMakeFiles/machine.dir/memory/tlb.cpp.i
+src/machine/CMakeFiles/machine.dir/memory/tlb/tlb.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/machine.dir/memory/tlb/tlb.cpp.i"
+	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/tux/qtrvsim/src/machine/memory/tlb/tlb.cpp > CMakeFiles/machine.dir/memory/tlb/tlb.cpp.i
 
-src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/machine.dir/memory/tlb.cpp.s"
-	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/tux/qtrvsim/src/machine/memory/tlb.cpp -o CMakeFiles/machine.dir/memory/tlb.cpp.s
+src/machine/CMakeFiles/machine.dir/memory/tlb/tlb.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/machine.dir/memory/tlb/tlb.cpp.s"
+	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/tux/qtrvsim/src/machine/memory/tlb/tlb.cpp -o CMakeFiles/machine.dir/memory/tlb/tlb.cpp.s
 
-src/machine/CMakeFiles/machine.dir/memory/page_table_walker.cpp.o: src/machine/CMakeFiles/machine.dir/flags.make
-src/machine/CMakeFiles/machine.dir/memory/page_table_walker.cpp.o: /home/tux/qtrvsim/src/machine/memory/page_table_walker.cpp
-src/machine/CMakeFiles/machine.dir/memory/page_table_walker.cpp.o: src/machine/CMakeFiles/machine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/tux/qtrvsim/cmake-build-release-wsl/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building CXX object src/machine/CMakeFiles/machine.dir/memory/page_table_walker.cpp.o"
-	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/machine/CMakeFiles/machine.dir/memory/page_table_walker.cpp.o -MF CMakeFiles/machine.dir/memory/page_table_walker.cpp.o.d -o CMakeFiles/machine.dir/memory/page_table_walker.cpp.o -c /home/tux/qtrvsim/src/machine/memory/page_table_walker.cpp
+src/machine/CMakeFiles/machine.dir/memory/virtual/page_table_walker.cpp.o: src/machine/CMakeFiles/machine.dir/flags.make
+src/machine/CMakeFiles/machine.dir/memory/virtual/page_table_walker.cpp.o: /home/tux/qtrvsim/src/machine/memory/virtual/page_table_walker.cpp
+src/machine/CMakeFiles/machine.dir/memory/virtual/page_table_walker.cpp.o: src/machine/CMakeFiles/machine.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/tux/qtrvsim/cmake-build-release-wsl/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building CXX object src/machine/CMakeFiles/machine.dir/memory/virtual/page_table_walker.cpp.o"
+	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/machine/CMakeFiles/machine.dir/memory/virtual/page_table_walker.cpp.o -MF CMakeFiles/machine.dir/memory/virtual/page_table_walker.cpp.o.d -o CMakeFiles/machine.dir/memory/virtual/page_table_walker.cpp.o -c /home/tux/qtrvsim/src/machine/memory/virtual/page_table_walker.cpp
 
-src/machine/CMakeFiles/machine.dir/memory/page_table_walker.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/machine.dir/memory/page_table_walker.cpp.i"
-	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/tux/qtrvsim/src/machine/memory/page_table_walker.cpp > CMakeFiles/machine.dir/memory/page_table_walker.cpp.i
+src/machine/CMakeFiles/machine.dir/memory/virtual/page_table_walker.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/machine.dir/memory/virtual/page_table_walker.cpp.i"
+	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/tux/qtrvsim/src/machine/memory/virtual/page_table_walker.cpp > CMakeFiles/machine.dir/memory/virtual/page_table_walker.cpp.i
 
-src/machine/CMakeFiles/machine.dir/memory/page_table_walker.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/machine.dir/memory/page_table_walker.cpp.s"
-	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/tux/qtrvsim/src/machine/memory/page_table_walker.cpp -o CMakeFiles/machine.dir/memory/page_table_walker.cpp.s
+src/machine/CMakeFiles/machine.dir/memory/virtual/page_table_walker.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/machine.dir/memory/virtual/page_table_walker.cpp.s"
+	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/tux/qtrvsim/src/machine/memory/virtual/page_table_walker.cpp -o CMakeFiles/machine.dir/memory/virtual/page_table_walker.cpp.s
+
+src/machine/CMakeFiles/machine.dir/memory/virtual/page_fault_handler.cpp.o: src/machine/CMakeFiles/machine.dir/flags.make
+src/machine/CMakeFiles/machine.dir/memory/virtual/page_fault_handler.cpp.o: /home/tux/qtrvsim/src/machine/memory/virtual/page_fault_handler.cpp
+src/machine/CMakeFiles/machine.dir/memory/virtual/page_fault_handler.cpp.o: src/machine/CMakeFiles/machine.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/tux/qtrvsim/cmake-build-release-wsl/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building CXX object src/machine/CMakeFiles/machine.dir/memory/virtual/page_fault_handler.cpp.o"
+	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/machine/CMakeFiles/machine.dir/memory/virtual/page_fault_handler.cpp.o -MF CMakeFiles/machine.dir/memory/virtual/page_fault_handler.cpp.o.d -o CMakeFiles/machine.dir/memory/virtual/page_fault_handler.cpp.o -c /home/tux/qtrvsim/src/machine/memory/virtual/page_fault_handler.cpp
+
+src/machine/CMakeFiles/machine.dir/memory/virtual/page_fault_handler.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/machine.dir/memory/virtual/page_fault_handler.cpp.i"
+	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/tux/qtrvsim/src/machine/memory/virtual/page_fault_handler.cpp > CMakeFiles/machine.dir/memory/virtual/page_fault_handler.cpp.i
+
+src/machine/CMakeFiles/machine.dir/memory/virtual/page_fault_handler.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/machine.dir/memory/virtual/page_fault_handler.cpp.s"
+	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/tux/qtrvsim/src/machine/memory/virtual/page_fault_handler.cpp -o CMakeFiles/machine.dir/memory/virtual/page_fault_handler.cpp.s
+
+src/machine/CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.o: src/machine/CMakeFiles/machine.dir/flags.make
+src/machine/CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.o: /home/tux/qtrvsim/src/machine/memory/tlb/tlb_policy.cpp
+src/machine/CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.o: src/machine/CMakeFiles/machine.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/tux/qtrvsim/cmake-build-release-wsl/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building CXX object src/machine/CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.o"
+	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/machine/CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.o -MF CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.o.d -o CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.o -c /home/tux/qtrvsim/src/machine/memory/tlb/tlb_policy.cpp
+
+src/machine/CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.i"
+	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/tux/qtrvsim/src/machine/memory/tlb/tlb_policy.cpp > CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.i
+
+src/machine/CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.s"
+	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/tux/qtrvsim/src/machine/memory/tlb/tlb_policy.cpp -o CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.s
 
 # Object files for target machine
 machine_OBJECTS = \
@@ -465,8 +493,10 @@ machine_OBJECTS = \
 "CMakeFiles/machine.dir/registers.cpp.o" \
 "CMakeFiles/machine.dir/simulator_exception.cpp.o" \
 "CMakeFiles/machine.dir/symboltable.cpp.o" \
-"CMakeFiles/machine.dir/memory/tlb.cpp.o" \
-"CMakeFiles/machine.dir/memory/page_table_walker.cpp.o"
+"CMakeFiles/machine.dir/memory/tlb/tlb.cpp.o" \
+"CMakeFiles/machine.dir/memory/virtual/page_table_walker.cpp.o" \
+"CMakeFiles/machine.dir/memory/virtual/page_fault_handler.cpp.o" \
+"CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.o"
 
 # External object files for target machine
 machine_EXTERNAL_OBJECTS =
@@ -495,11 +525,13 @@ src/machine/libmachine.a: src/machine/CMakeFiles/machine.dir/predictor.cpp.o
 src/machine/libmachine.a: src/machine/CMakeFiles/machine.dir/registers.cpp.o
 src/machine/libmachine.a: src/machine/CMakeFiles/machine.dir/simulator_exception.cpp.o
 src/machine/libmachine.a: src/machine/CMakeFiles/machine.dir/symboltable.cpp.o
-src/machine/libmachine.a: src/machine/CMakeFiles/machine.dir/memory/tlb.cpp.o
-src/machine/libmachine.a: src/machine/CMakeFiles/machine.dir/memory/page_table_walker.cpp.o
+src/machine/libmachine.a: src/machine/CMakeFiles/machine.dir/memory/tlb/tlb.cpp.o
+src/machine/libmachine.a: src/machine/CMakeFiles/machine.dir/memory/virtual/page_table_walker.cpp.o
+src/machine/libmachine.a: src/machine/CMakeFiles/machine.dir/memory/virtual/page_fault_handler.cpp.o
+src/machine/libmachine.a: src/machine/CMakeFiles/machine.dir/memory/tlb/tlb_policy.cpp.o
 src/machine/libmachine.a: src/machine/CMakeFiles/machine.dir/build.make
 src/machine/libmachine.a: src/machine/CMakeFiles/machine.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/tux/qtrvsim/cmake-build-release-wsl/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Linking CXX static library libmachine.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/tux/qtrvsim/cmake-build-release-wsl/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Linking CXX static library libmachine.a"
 	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && $(CMAKE_COMMAND) -P CMakeFiles/machine.dir/cmake_clean_target.cmake
 	cd /home/tux/qtrvsim/cmake-build-release-wsl/src/machine && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/machine.dir/link.txt --verbose=$(VERBOSE)
 

@@ -279,6 +279,6 @@ src/machine/CMakeFiles/machine.dir/memory/memory_bus.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qstring.h \
  /home/tux/qtrvsim/src/machine/simulator_exception.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qstring.h \
- /home/tux/qtrvsim/src/machine/memory/virtual_address.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QMultiMap \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qmap.h

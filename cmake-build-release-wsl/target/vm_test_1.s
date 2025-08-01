@@ -11,5 +11,4 @@ _start:
     .data
 data1:
     .word 0x12345678
-
-
+    

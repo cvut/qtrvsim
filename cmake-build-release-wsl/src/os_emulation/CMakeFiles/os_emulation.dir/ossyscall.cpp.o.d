@@ -308,7 +308,7 @@ src/os_emulation/CMakeFiles/os_emulation.dir/ossyscall.cpp.o: \
  /home/tux/qtrvsim/src/machine/memory/frontend_memory.h \
  /home/tux/qtrvsim/src/machine/memory/memory_utils.h \
  /usr/include/c++/13/cstring \
- /home/tux/qtrvsim/src/machine/memory/virtual_address.h \
+ /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
  /home/tux/qtrvsim/src/machine/pipeline.h \
  /home/tux/qtrvsim/src/machine/predictor.h \
  /home/tux/qtrvsim/src/common/logging.h \

@@ -184,14 +184,19 @@ public:
     void set_vm_mode(VmMode m);
     VmMode get_vm_mode() const;
 
-    void set_vm_root_ppn(uint32_t p);
-    uint32_t get_vm_root_ppn() const;
-
     void set_vm_asid(uint32_t a);
     uint32_t get_vm_asid() const;
 
-    void set_kernel_virt_base(uint32_t v);
-    uint32_t get_kernel_virt_base() const;
+    void set_va_base_addr(uint32_t v);
+    uint32_t get_va_base_addr() const;
+
+    enum TLBPolicy { TP_RAND=0, TP_LRU, TP_LFU, TP_PLRU };
+    void set_tlb_num_sets(unsigned);
+    void set_tlb_associativity(unsigned);
+    void set_tlb_replacement_policy(TLBPolicy);
+    unsigned get_tlb_num_sets() const;
+    unsigned get_tlb_associativity() const;
+    TLBPolicy get_tlb_replacement_policy() const;
 
     CacheConfig *access_cache_program();
     CacheConfig *access_cache_data();
@@ -227,11 +232,13 @@ private:
 
     // Virtual Memory
     bool vm_enabled;
-    VmMode vm_mode;
-    uint32_t vm_root_ppn;
+    uint32_t va_base_addr;
+    unsigned tlb_num_sets;
+    unsigned tlb_associativity;
+    TLBPolicy tlb_policy;
 
+    VmMode vm_mode = VM_BARE;
     uint32_t vm_asid = 0;
-    uint32_t kernel_virt_base;
 };
 
 } // namespace machine

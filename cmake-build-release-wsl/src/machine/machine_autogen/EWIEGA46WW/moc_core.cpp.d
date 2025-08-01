@@ -22,7 +22,7 @@
   /home/tux/qtrvsim/src/machine/memory/address_range.h \
   /home/tux/qtrvsim/src/machine/memory/frontend_memory.h \
   /home/tux/qtrvsim/src/machine/memory/memory_utils.h \
-  /home/tux/qtrvsim/src/machine/memory/virtual_address.h \
+  /home/tux/qtrvsim/src/machine/memory/virtual/virtual_address.h \
   /home/tux/qtrvsim/src/machine/pipeline.h \
   /home/tux/qtrvsim/src/machine/predictor.h \
   /home/tux/qtrvsim/src/machine/predictor_types.h \

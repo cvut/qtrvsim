@@ -380,9 +380,20 @@ src/machine/CMakeFiles/machine.dir/memory/page_table_walker.cpp.o: \
  /home/tux/qtrvsim/src/machine/memory/frontend_memory.h \
  /home/tux/qtrvsim/src/machine/memory/memory_bus.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QMultiMap \
- /home/tux/qtrvsim/src/machine/memory/tlb.h \
+ /home/tux/qtrvsim/src/machine/memory/tlb/tlb.h \
+ /home/tux/qtrvsim/src/machine/memory/page_fault_handler.h \
+ /home/tux/qtrvsim/src/machine/core.h \
+ /home/tux/qtrvsim/src/machine/memory/page_table_walker.h \
+ /home/tux/qtrvsim/src/machine/memory/tlb/tlb_policy.h \
+ /home/tux/qtrvsim/src/machine/programloader.h \
+ /home/tux/qtrvsim/src/machine/memory/backend/memory.h \
  /home/tux/qtrvsim/src/machine/symboltable.h \
  /home/tux/qtrvsim/src/machine/utils.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/QFile \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qfile.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qfiledevice.h \
+ /usr/include/gelf.h /usr/include/libelf.h /usr/include/elf.h \
+ /usr/include/x86_64-linux-gnu/qt5/QtCore/qvector.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/QTimer \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qtimer.h \
  /usr/include/x86_64-linux-gnu/qt5/QtCore/qbasictimer.h \
