@@ -46,8 +46,8 @@ jobs:
             # Cached aqt is faster that brew.
           }
           - {
-            name: "Windows 2019 MinGW",
-            os: windows-2019,
+            name: "Windows 2022 MinGW",
+            os: windows-2022,
             build_type: "Debug",
             cc: "gcc", cxx: "g++", build_system: "MinGW Makefiles",
             # Older Qt releases do not have 64bit mingw release
