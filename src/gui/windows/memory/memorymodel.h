@@ -69,12 +69,14 @@ public:
         }
         return true;
     }
+    bool isVirtualMode() const { return showVirtual; }
 
 public slots:
     void setup(machine::Machine *machine);
     void set_cell_size(int index);
     void check_for_updates();
     void cached_access(int cached);
+    void setVirtualMode(bool on);
 
 signals:
     void cell_size_changed();
@@ -83,6 +85,8 @@ signals:
 private:
     [[nodiscard]] const machine::FrontendMemory *mem_access() const;
     [[nodiscard]] machine::FrontendMemory *mem_access_rw() const;
+    [[nodiscard]] const machine::FrontendMemory *mem_access_phys() const;
+    [[nodiscard]] machine::FrontendMemory *mem_access_phys_rw() const;
     enum MemoryCellSize cell_size;
     unsigned int cells_per_row;
     machine::Address index0_offset;
@@ -91,6 +95,7 @@ private:
     uint32_t memory_change_counter;
     uint32_t cache_data_change_counter;
     int access_through_cache;
+    bool showVirtual = false;
 };
 
 #endif // MEMORYMODEL_H

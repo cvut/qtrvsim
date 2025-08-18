@@ -55,7 +55,6 @@ public:
         WP_THROUGH_ALLOC,   // Write through
         WP_BACK             // Write back
     };
-
     // If cache should be used or not
     void set_enabled(bool);
     void set_set_count(unsigned);     // Number of sets
@@ -93,6 +92,8 @@ public:
     void preset(enum ConfigPresets);
 
     enum HazardUnit { HU_NONE, HU_STALL, HU_STALL_FORWARD };
+
+    enum VmMode { VM_BARE = 0, VM_SV32 = 1 };
 
     // Configure if CPU is pipelined
     // In default disabled.
@@ -177,6 +178,27 @@ public:
     uint8_t get_bp_bht_addr_bits() const;
     uint8_t get_bp_bht_bits() const;
 
+    // Virtual Memory
+    bool get_vm_enabled() const;
+    void set_vm_enabled(bool e);
+
+    void set_vm_mode(VmMode m);
+    VmMode get_vm_mode() const;
+
+    void set_vm_asid(uint32_t a);
+    uint32_t get_vm_asid() const;
+
+    void set_va_base_addr(uint32_t v);
+    uint32_t get_va_base_addr() const;
+
+    enum TLBPolicy { TP_RAND=0, TP_LRU, TP_LFU, TP_PLRU };
+    void set_tlb_num_sets(unsigned);
+    void set_tlb_associativity(unsigned);
+    void set_tlb_replacement_policy(TLBPolicy);
+    unsigned get_tlb_num_sets() const;
+    unsigned get_tlb_associativity() const;
+    TLBPolicy get_tlb_replacement_policy() const;
+
     CacheConfig *access_cache_program();
     CacheConfig *access_cache_data();
     CacheConfig *access_cache_level2();
@@ -208,6 +230,16 @@ private:
     uint8_t bp_bhr_bits;
     uint8_t bp_bht_addr_bits;
     uint8_t bp_bht_bits; // = bp_bhr_bits + bp_bht_addr_bits
+
+    // Virtual Memory
+    bool vm_enabled;
+    uint32_t va_base_addr;
+    unsigned tlb_num_sets;
+    unsigned tlb_associativity;
+    TLBPolicy tlb_policy;
+
+    VmMode vm_mode = VM_BARE;
+    uint32_t vm_asid = 0;
 };
 
 } // namespace machine

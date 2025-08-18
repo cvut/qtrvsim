@@ -1,8 +1,11 @@
 #include "machineconfig.h"
 
 #include "common/endian.h"
+#include "machine.h"
 
 #include <QMap>
+#include <iostream>
+#include <ostream>
 #include <utility>
 
 using namespace machine;
@@ -27,6 +30,11 @@ using namespace machine;
 #define DFC_BP_BTB_BITS 2
 #define DFC_BP_BHR_BITS 0
 #define DFC_BP_BHT_ADDR_BITS 2
+/// Default config of Virtual Memory
+#define DFC_VM_ENABLED false
+#define DFC_KERNEL_VIRT_BASE 0x80000000u
+#define DFC_TLB_SETS 64
+#define DFC_TLB_ASSOC 4
 //////////////////////////////////////////////////////////////////////////////
 /// Default config of CacheConfig
 #define DFC_EN false
@@ -186,6 +194,13 @@ MachineConfig::MachineConfig() {
     bp_bhr_bits = DFC_BP_BHR_BITS;
     bp_bht_addr_bits = DFC_BP_BHT_ADDR_BITS;
     bp_bht_bits = bp_bhr_bits + bp_bht_addr_bits;
+
+    // Virtual Memory
+    vm_enabled = DFC_VM_ENABLED;
+    va_base_addr = DFC_KERNEL_VIRT_BASE;
+    tlb_num_sets = DFC_TLB_SETS;
+    tlb_associativity = DFC_TLB_ASSOC;
+    tlb_policy = TP_LRU;
 }
 
 MachineConfig::MachineConfig(const MachineConfig *config) {
@@ -222,6 +237,14 @@ MachineConfig::MachineConfig(const MachineConfig *config) {
     bp_bhr_bits = config->get_bp_bhr_bits();
     bp_bht_addr_bits = config->get_bp_bht_addr_bits();
     bp_bht_bits = bp_bhr_bits + bp_bht_addr_bits;
+
+    // Virtual Memory
+    vm_enabled = config->get_vm_enabled();
+    vm_mode = config->get_vm_mode();
+    va_base_addr = config->get_va_base_addr();
+    tlb_num_sets = config->get_tlb_num_sets();
+    tlb_associativity = config->get_tlb_associativity();
+    tlb_policy = config->get_tlb_replacement_policy();
 }
 
 #define N(STR) (prefix + QString(STR))
@@ -266,6 +289,13 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     bp_bhr_bits = sts->value(N("BranchPredictor_BitsBHR"), DFC_BP_BHR_BITS).toUInt();
     bp_bht_addr_bits = sts->value(N("BranchPredictor_BitsBHTAddr"), DFC_BP_BHT_ADDR_BITS).toUInt();
     bp_bht_bits = bp_bhr_bits + bp_bht_addr_bits;
+
+    // Virtual Memory
+    vm_enabled = sts->value(N("VMEnabled"), DFC_VM_ENABLED).toBool();
+    va_base_addr = sts->value(N("KernelVirtBase"), DFC_KERNEL_VIRT_BASE).toUInt();
+    tlb_num_sets = sts->value(N("TLB_NumSets"), 64).toUInt();
+    tlb_associativity = sts->value(N("TLB_Associativity"), 4).toUInt();
+    tlb_policy = TLBPolicy(sts->value(N("TLB_Policy"), (int)TP_LRU).toInt());
 }
 
 void MachineConfig::store(QSettings *sts, const QString &prefix) {
@@ -298,6 +328,13 @@ void MachineConfig::store(QSettings *sts, const QString &prefix) {
     sts->setValue(N("BranchPredictor_BitsBTB"), get_bp_btb_bits());
     sts->setValue(N("BranchPredictor_BitsBHR"), get_bp_bhr_bits());
     sts->setValue(N("BranchPredictor_BitsBHTAddr"), get_bp_bht_addr_bits());
+
+    // Virtual memory
+    sts->setValue(N("VMEnabled"), get_vm_enabled());
+    sts->setValue(N("KernelVirtBase"), get_va_base_addr());
+    sts->setValue(N("TLB_NumSets"), get_tlb_num_sets());
+    sts->setValue(N("TLB_Associativity"), get_tlb_associativity());
+    sts->setValue(N("TLB_Policy"), int(get_tlb_replacement_policy()));
 }
 
 #undef N
@@ -629,12 +666,60 @@ uint8_t MachineConfig::get_bp_bht_bits() const {
     return bp_bht_bits;
 }
 
+bool MachineConfig::get_vm_enabled() const {
+    return vm_enabled;
+}
+
+void MachineConfig::set_vm_enabled(bool e) {
+    vm_enabled = e;
+}
+
+void MachineConfig::set_vm_mode(VmMode m) {
+    vm_mode = m;
+}
+MachineConfig::VmMode MachineConfig::get_vm_mode() const {
+    return vm_mode;
+}
+
+void MachineConfig::set_vm_asid(uint32_t a) {
+    vm_asid = a;
+}
+uint32_t MachineConfig::get_vm_asid() const {
+    return vm_asid;
+}
+
+void MachineConfig::set_va_base_addr(uint32_t v) {
+    va_base_addr = v;
+}
+uint32_t MachineConfig::get_va_base_addr() const {
+    return va_base_addr;
+}
+
+void MachineConfig::set_tlb_num_sets(unsigned v) {
+    tlb_num_sets = v > 0 ? v : 1;
+}
+void MachineConfig::set_tlb_associativity(unsigned v) {
+    tlb_associativity = v > 0 ? v : 1;
+}
+void MachineConfig::set_tlb_replacement_policy(MachineConfig::TLBPolicy p) {
+    tlb_policy = p;
+}
+
+unsigned MachineConfig::get_tlb_num_sets() const {
+    return tlb_num_sets;
+}
+unsigned MachineConfig::get_tlb_associativity() const {
+    return tlb_associativity;
+}
+MachineConfig::TLBPolicy MachineConfig::get_tlb_replacement_policy() const {
+    return tlb_policy;
+}
+
 bool MachineConfig::operator==(const MachineConfig &c) const {
 #define CMP(GETTER) (GETTER)() == (c.GETTER)()
     return CMP(pipelined) && CMP(delay_slot) && CMP(hazard_unit) && CMP(get_simulated_xlen)
-           && CMP(get_isa_word) && CMP(get_bp_enabled) && CMP(get_bp_type)
-           && CMP(get_bp_init_state) && CMP(get_bp_btb_bits)
-           && CMP(get_bp_bhr_bits) && CMP(get_bp_bht_addr_bits)
+           && CMP(get_isa_word) && CMP(get_bp_enabled) && CMP(get_bp_type) && CMP(get_bp_init_state)
+           && CMP(get_bp_btb_bits) && CMP(get_bp_bhr_bits) && CMP(get_bp_bht_addr_bits)
            && CMP(memory_execute_protection) && CMP(memory_write_protection)
            && CMP(memory_access_time_read) && CMP(memory_access_time_write)
            && CMP(memory_access_time_burst) && CMP(memory_access_time_level2)

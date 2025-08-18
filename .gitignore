@@ -16,3 +16,5 @@ compile_commands.json
 /src/project_info.h
 # Local settings template
 .dev-config.mk
+/cmake-build-debug-wsl/
+/cmake-build-release-wsl/

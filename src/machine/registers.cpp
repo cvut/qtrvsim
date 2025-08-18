@@ -77,5 +77,5 @@ void Registers::reset() {
         write_gp(i, 0);
     }
     write_gp(2_reg, SP_INIT.get_raw()); // initialize to safe RAM area -
-                                         // corresponds to Linux
+                                        // corresponds to Linux
 }

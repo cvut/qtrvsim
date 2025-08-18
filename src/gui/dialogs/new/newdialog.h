@@ -64,6 +64,14 @@ private slots:
     void bp_bht_bhr_bits_change(int);
     void bp_bht_addr_bits_change(int);
 
+    // Virtual Memory
+    void vm_mode_changed();
+    void vm_enabled_change(bool);
+    void va_base_addr_changed(qint64 new_base);
+    void tlb_num_sets_changed(int);
+    void tlb_assoc_changed(int);
+    void tlb_policy_changed(int);
+
 private:
     Box<Ui::NewDialog> ui {};
     Box<Ui::NewDialogCache> ui_cache_p {}, ui_cache_d {}, ui_cache_l2 {};

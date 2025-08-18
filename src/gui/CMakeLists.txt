@@ -129,7 +129,9 @@ add_executable(gui
         ${gui_SOURCES}
         ${gui_HEADERS}
         ${gui_UI}
-        ${gui_RESOURCES})
+        ${gui_RESOURCES}
+        dialogs/new/bigslider.h
+        dialogs/new/bigslider.cpp)
 target_include_directories(gui PUBLIC . windows/coreview)
 target_link_libraries(gui
         PRIVATE ${QtLib}::Core ${QtLib}::Widgets ${QtLib}::Gui

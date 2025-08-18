@@ -58,6 +58,7 @@ private:
     EXCEPTION(UnalignedJump, Runtime)                                                              \
     EXCEPTION(UnknownMemoryControl, Runtime)                                                       \
     EXCEPTION(OutOfMemoryAccess, Runtime)                                                          \
+    EXCEPTION(PageFault, Runtime)                                                                  \
     EXCEPTION(Sanity, )                                                                            \
     EXCEPTION(SyscallUnknown, Runtime)
 

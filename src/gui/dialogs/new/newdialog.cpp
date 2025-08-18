@@ -33,79 +33,40 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     for (int i = 0; i < ui->config_pages->count(); ++i) {
         QString page_id = ui->config_pages->widget(i)->objectName();
         QString page_name = ui->config_pages->widget(i)->accessibleName();
-        config_pages_items.append(new QTreeWidgetItem(static_cast<QTreeWidget *>(nullptr),
-                                                      QStringList{page_name, page_id}));
+        config_pages_items.append(new QTreeWidgetItem(
+            static_cast<QTreeWidget *>(nullptr), QStringList { page_name, page_id }));
     }
     ui->page_select_tree->insertTopLevelItems(0, config_pages_items);
 
+    connect(ui->page_select_tree, &QTreeWidget::currentItemChanged, this, &NewDialog::switch2page);
+
+    connect(ui->pushButton_example, &QAbstractButton::clicked, this, &NewDialog::create_example);
+    connect(ui->pushButton_start_empty, &QAbstractButton::clicked, this, &NewDialog::create_empty);
+    connect(ui->pushButton_load, &QAbstractButton::clicked, this, &NewDialog::create);
+    connect(ui->pushButton_cancel, &QAbstractButton::clicked, this, &NewDialog::cancel);
+    connect(ui->pushButton_browse, &QAbstractButton::clicked, this, &NewDialog::browse_elf);
+    connect(ui->elf_file, &QLineEdit::textChanged, this, &NewDialog::elf_change);
+    connect(ui->preset_no_pipeline, &QAbstractButton::toggled, this, &NewDialog::set_preset);
+    connect(ui->preset_no_pipeline_cache, &QAbstractButton::toggled, this, &NewDialog::set_preset);
+    connect(ui->preset_pipelined_bare, &QAbstractButton::toggled, this, &NewDialog::set_preset);
+    connect(ui->preset_pipelined, &QAbstractButton::toggled, this, &NewDialog::set_preset);
     connect(
-        ui->page_select_tree, &QTreeWidget::currentItemChanged,
-        this, &NewDialog::switch2page);
+        ui->reset_at_compile, &QAbstractButton::clicked, this, &NewDialog::reset_at_compile_change);
+
+    connect(ui->xlen_64bit, &QAbstractButton::clicked, this, &NewDialog::xlen_64bit_change);
+    connect(ui->isa_atomic, &QAbstractButton::clicked, this, &NewDialog::isa_atomic_change);
+    connect(ui->isa_multiply, &QAbstractButton::clicked, this, &NewDialog::isa_multiply_change);
+    connect(ui->pipelined, &QAbstractButton::clicked, this, &NewDialog::pipelined_change);
+    connect(ui->delay_slot, &QAbstractButton::clicked, this, &NewDialog::delay_slot_change);
+    connect(ui->hazard_unit, &QGroupBox::clicked, this, &NewDialog::hazard_unit_change);
+    connect(ui->hazard_stall, &QAbstractButton::clicked, this, &NewDialog::hazard_unit_change);
+    connect(
+        ui->hazard_stall_forward, &QAbstractButton::clicked, this, &NewDialog::hazard_unit_change);
 
     connect(
-        ui->pushButton_example, &QAbstractButton::clicked, this,
-        &NewDialog::create_example);
+        ui->mem_protec_exec, &QAbstractButton::clicked, this, &NewDialog::mem_protec_exec_change);
     connect(
-        ui->pushButton_start_empty, &QAbstractButton::clicked, this,
-        &NewDialog::create_empty);
-    connect(
-        ui->pushButton_load, &QAbstractButton::clicked, this,
-        &NewDialog::create);
-    connect(
-        ui->pushButton_cancel, &QAbstractButton::clicked, this,
-        &NewDialog::cancel);
-    connect(
-        ui->pushButton_browse, &QAbstractButton::clicked, this,
-        &NewDialog::browse_elf);
-    connect(
-        ui->elf_file, &QLineEdit::textChanged, this, &NewDialog::elf_change);
-    connect(
-        ui->preset_no_pipeline, &QAbstractButton::toggled, this,
-        &NewDialog::set_preset);
-    connect(
-        ui->preset_no_pipeline_cache, &QAbstractButton::toggled, this,
-        &NewDialog::set_preset);
-    connect(
-        ui->preset_pipelined_bare, &QAbstractButton::toggled, this,
-        &NewDialog::set_preset);
-    connect(
-        ui->preset_pipelined, &QAbstractButton::toggled, this,
-        &NewDialog::set_preset);
-    connect(
-        ui->reset_at_compile, &QAbstractButton::clicked, this,
-        &NewDialog::reset_at_compile_change);
-
-    connect(
-        ui->xlen_64bit, &QAbstractButton::clicked, this,
-        &NewDialog::xlen_64bit_change);
-    connect(
-        ui->isa_atomic, &QAbstractButton::clicked, this,
-        &NewDialog::isa_atomic_change);
-    connect(
-        ui->isa_multiply, &QAbstractButton::clicked, this,
-        &NewDialog::isa_multiply_change);
-    connect(
-        ui->pipelined, &QAbstractButton::clicked, this,
-        &NewDialog::pipelined_change);
-    connect(
-        ui->delay_slot, &QAbstractButton::clicked, this,
-        &NewDialog::delay_slot_change);
-    connect(
-        ui->hazard_unit, &QGroupBox::clicked, this,
-        &NewDialog::hazard_unit_change);
-    connect(
-        ui->hazard_stall, &QAbstractButton::clicked, this,
-        &NewDialog::hazard_unit_change);
-    connect(
-        ui->hazard_stall_forward, &QAbstractButton::clicked, this,
-        &NewDialog::hazard_unit_change);
-
-    connect(
-        ui->mem_protec_exec, &QAbstractButton::clicked, this,
-        &NewDialog::mem_protec_exec_change);
-    connect(
-        ui->mem_protec_write, &QAbstractButton::clicked, this,
-        &NewDialog::mem_protec_write_change);
+        ui->mem_protec_write, &QAbstractButton::clicked, this, &NewDialog::mem_protec_write_change);
     connect(
         ui->mem_time_read, QOverload<int>::of(&QSpinBox::valueChanged), this,
         &NewDialog::mem_time_read_change);
@@ -113,8 +74,7 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
         ui->mem_time_write, QOverload<int>::of(&QSpinBox::valueChanged), this,
         &NewDialog::mem_time_write_change);
     connect(
-        ui->mem_enable_burst, &QAbstractButton::clicked, this,
-        &NewDialog::mem_enable_burst_change);
+        ui->mem_enable_burst, &QAbstractButton::clicked, this, &NewDialog::mem_enable_burst_change);
     connect(
         ui->mem_time_burst, QOverload<int>::of(&QSpinBox::valueChanged), this,
         &NewDialog::mem_time_burst_change);
@@ -122,9 +82,7 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
         ui->mem_time_level2, QOverload<int>::of(&QSpinBox::valueChanged), this,
         &NewDialog::mem_time_level2_change);
 
-    connect(
-        ui->osemu_enable, &QAbstractButton::clicked, this,
-        &NewDialog::osemu_enable_change);
+    connect(ui->osemu_enable, &QAbstractButton::clicked, this, &NewDialog::osemu_enable_change);
     connect(
         ui->osemu_known_syscall_stop, &QAbstractButton::clicked, this,
         &NewDialog::osemu_known_syscall_stop_change);
@@ -158,8 +116,63 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
     connect(
         ui->slider_bp_bht_bhr_bits, &QAbstractSlider::valueChanged, this,
         &NewDialog::bp_bht_bhr_bits_change);
-    connect(ui->slider_bp_bht_addr_bits, &QAbstractSlider::valueChanged, this,
+    connect(
+        ui->slider_bp_bht_addr_bits, &QAbstractSlider::valueChanged, this,
         &NewDialog::bp_bht_addr_bits_change);
+
+    // Virtual Memory
+    connect(
+        ui->group_vm, QOverload<bool>::of(&QGroupBox::toggled), this,
+        &NewDialog::vm_enabled_change);
+    connect(ui->radioButton_bare, &QRadioButton::clicked, this, &NewDialog::vm_mode_changed);
+    connect(ui->radioButton_sv32, &QRadioButton::clicked, this, &NewDialog::vm_mode_changed);
+    connect(
+        ui->tlb_number_of_sets, QOverload<int>::of(&QSpinBox::valueChanged), this,
+        &NewDialog::tlb_num_sets_changed);
+    connect(
+        ui->tlb_degree_of_associativity, QOverload<int>::of(&QSpinBox::valueChanged), this,
+        &NewDialog::tlb_assoc_changed);
+    connect(
+        ui->tlb_replacement_policy, QOverload<int>::of(&QComboBox::activated), this,
+        &NewDialog::tlb_policy_changed);
+
+    ui->horizontalSlider_va_base_addr->setRange64(0, 0xFFFFFFFFULL);
+
+    auto updateVABaseAddrEdit = [this]() {
+        qint64 v = ui->horizontalSlider_va_base_addr->value64();
+        QString hexText = QString("0x%1").arg(v, 8, 16, QChar('0')).toUpper();
+        QSignalBlocker block(ui->lineEdit_va_base_addr);
+        ui->lineEdit_va_base_addr->setText(hexText);
+    };
+
+    connect(
+        ui->horizontalSlider_va_base_addr, &BigSlider::value64Changed, this, updateVABaseAddrEdit);
+
+    connect(
+        ui->horizontalSlider_va_base_addr, &BigSlider::value64Changed, this,
+        &NewDialog::va_base_addr_changed);
+
+    connect(ui->lineEdit_va_base_addr, &QLineEdit::editingFinished, this, [this]() {
+        QString txt = ui->lineEdit_va_base_addr->text().trimmed();
+        if (txt.startsWith(QLatin1String("0x"), Qt::CaseInsensitive)) txt = txt.mid(2);
+        bool ok = false;
+        quint64 v = txt.toULongLong(&ok, 16);
+        if (!ok) {
+            qint64 cur = ui->horizontalSlider_va_base_addr->value64();
+            ui->lineEdit_va_base_addr->setText(
+                QString("0x%1").arg(cur, 8, 16, QChar('0')).toUpper());
+            return;
+        }
+
+        quint64 vclamped = qBound<quint64>(
+            ui->horizontalSlider_va_base_addr->value64() /*dummy*/, v, 0xFFFFFFFFULL);
+
+        qint64 align = ui->horizontalSlider_va_base_addr->alignment64();
+        vclamped = (vclamped / align) * align;
+        ui->horizontalSlider_va_base_addr->setValue64(static_cast<qint64>(vclamped));
+    });
+
+    updateVABaseAddrEdit();
 
     cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d.data());
     cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p.data());
@@ -177,8 +190,8 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
 
 void NewDialog::switch2page(QTreeWidgetItem *current, QTreeWidgetItem *previous) {
     (void)previous;
-    QWidget *page = ui->config_pages->findChild<QWidget *>(current->text(1),
-                                                           Qt::FindDirectChildrenOnly);
+    QWidget *page
+        = ui->config_pages->findChild<QWidget *>(current->text(1), Qt::FindDirectChildrenOnly);
     if (page != nullptr) {
         ui->config_pages->setCurrentWidget(page);
         ui->config_page_title->setText(current->text(0));
@@ -196,9 +209,7 @@ void NewDialog::closeEvent(QCloseEvent *) {
     load_settings(); // Reset from settings
     // Close the main window if not already configured
     auto *prnt = (MainWindow *)parent();
-    if (!prnt->configured()) {
-        prnt->close();
-    }
+    if (!prnt->configured()) { prnt->close(); }
 }
 
 void NewDialog::cancel() {
@@ -285,7 +296,7 @@ void NewDialog::xlen_64bit_change(bool val) {
 }
 
 void NewDialog::isa_atomic_change(bool val) {
-    auto isa_mask =  machine::ConfigIsaWord::byChar('A');
+    auto isa_mask = machine::ConfigIsaWord::byChar('A');
     if (val)
         config->modify_isa_word(isa_mask, isa_mask);
     else
@@ -294,7 +305,7 @@ void NewDialog::isa_atomic_change(bool val) {
 }
 
 void NewDialog::isa_multiply_change(bool val) {
-    auto isa_mask =  machine::ConfigIsaWord::byChar('M');
+    auto isa_mask = machine::ConfigIsaWord::byChar('M');
     if (val)
         config->modify_isa_word(isa_mask, isa_mask);
     else
@@ -316,9 +327,8 @@ void NewDialog::delay_slot_change(bool val) {
 void NewDialog::hazard_unit_change() {
     if (ui->hazard_unit->isChecked()) {
         config->set_hazard_unit(
-            ui->hazard_stall->isChecked()
-                ? machine::MachineConfig::HU_STALL
-                : machine::MachineConfig::HU_STALL_FORWARD);
+            ui->hazard_stall->isChecked() ? machine::MachineConfig::HU_STALL
+                                          : machine::MachineConfig::HU_STALL_FORWARD);
     } else {
         config->set_hazard_unit(machine::MachineConfig::HU_NONE);
     }
@@ -490,13 +500,11 @@ void NewDialog::bp_type_change() {
         }
     } break;
 
-    default:
-        break;
+    default: break;
     }
     bp_toggle_widgets();
 
-    if (need_switch2custom)
-        switch2custom();
+    if (need_switch2custom) switch2custom();
 }
 
 void NewDialog::bp_enabled_change(bool v) {
@@ -546,6 +554,43 @@ void NewDialog::bp_bht_addr_bits_change(int v) {
         switch2custom();
     }
     bp_bht_bits_texts_update();
+}
+
+void NewDialog::vm_enabled_change(bool v) {
+    if (config->get_vm_enabled() != v) {
+        config->set_vm_enabled(v);
+        switch2custom();
+    }
+}
+
+void NewDialog::vm_mode_changed() {
+    if (!ui->group_vm->isChecked() || ui->radioButton_bare->isChecked()) {
+        config->set_vm_mode(machine::MachineConfig::VM_BARE);
+    } else {
+        config->set_vm_mode(machine::MachineConfig::VM_SV32);
+    }
+    switch2custom();
+}
+
+void NewDialog::va_base_addr_changed(qint64 new_base) {
+    auto v = static_cast<uint32_t>(qBound<qint64>(0, new_base, 0xFFFFFFFFULL));
+    config->set_va_base_addr(v);
+    switch2custom();
+}
+
+void NewDialog::tlb_num_sets_changed(int v) {
+    config->set_tlb_num_sets(static_cast<unsigned>(v));
+    switch2custom();
+}
+
+void NewDialog::tlb_assoc_changed(int v) {
+    config->set_tlb_associativity(static_cast<unsigned>(v));
+    switch2custom();
+}
+
+void NewDialog::tlb_policy_changed(int idx) {
+    config->set_tlb_replacement_policy(static_cast<machine::MachineConfig::TLBPolicy>(idx));
+    switch2custom();
 }
 
 void NewDialog::config_gui() {
@@ -607,6 +652,11 @@ void NewDialog::config_gui() {
     ui->text_bp_bht_entries_number->setText(QString::number(qPow(2, config->get_bp_bht_bits())));
     bp_type_change();
 
+    // Virtual
+    ui->group_vm->setChecked(config->get_vm_enabled());
+    ui->radioButton_bare->setChecked(config->get_vm_mode() == machine::MachineConfig::VM_BARE);
+    ui->radioButton_sv32->setChecked(config->get_vm_mode() == machine::MachineConfig::VM_SV32);
+
     // Memory
     ui->mem_protec_exec->setChecked(config->memory_execute_protection());
     ui->mem_protec_write->setChecked(config->memory_write_protection());
@@ -660,15 +710,9 @@ void NewDialog::load_settings() {
         auto p = (enum machine::ConfigPresets)(preset - 1);
         config->preset(p);
         switch (p) {
-        case machine::CP_SINGLE:
-            ui->preset_no_pipeline->setChecked(true);
-            break;
-        case machine::CP_SINGLE_CACHE:
-            ui->preset_no_pipeline_cache->setChecked(true);
-            break;
-        case machine::CP_PIPE_NO_HAZARD:
-            ui->preset_pipelined_bare->setChecked(true);
-            break;
+        case machine::CP_SINGLE: ui->preset_no_pipeline->setChecked(true); break;
+        case machine::CP_SINGLE_CACHE: ui->preset_no_pipeline_cache->setChecked(true); break;
+        case machine::CP_PIPE_NO_HAZARD: ui->preset_pipelined_bare->setChecked(true); break;
         case machine::CP_PIPE: ui->preset_pipelined->setChecked(true); break;
         }
     } else {
@@ -689,14 +733,11 @@ void NewDialog::store_settings() {
     }
 }
 
-NewDialogCacheHandler::NewDialogCacheHandler(NewDialog *nd,
-    Ui::NewDialogCache *cui) : Super(nd) {
+NewDialogCacheHandler::NewDialogCacheHandler(NewDialog *nd, Ui::NewDialogCache *cui) : Super(nd) {
     this->nd = nd;
     this->ui = cui;
     this->config = nullptr;
-    connect(
-        ui->enabled, &QGroupBox::clicked, this,
-        &NewDialogCacheHandler::enabled);
+    connect(ui->enabled, &QGroupBox::clicked, this, &NewDialogCacheHandler::enabled);
     connect(
         ui->number_of_sets, &QAbstractSpinBox::editingFinished, this,
         &NewDialogCacheHandler::numsets);
@@ -748,8 +789,7 @@ void NewDialogCacheHandler::degreeassociativity() {
 }
 
 void NewDialogCacheHandler::replacement(int val) {
-    config->set_replacement_policy(
-        (enum machine::CacheConfig::ReplacementPolicy)val);
+    config->set_replacement_policy((enum machine::CacheConfig::ReplacementPolicy)val);
     nd->switch2custom();
 }
 
