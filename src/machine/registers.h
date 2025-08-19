@@ -17,6 +17,11 @@ namespace machine {
 constexpr size_t REGISTER_COUNT = 32;
 
 /**
+ * Float register count
+ */
+constexpr size_t FLOAT_REGISTER_COUNT = 32;
+
+/**
  * General-purpose register identifier
  */
 class RegisterId {
@@ -64,6 +69,9 @@ public:
     void write_gp(RegisterId reg, RegisterValue value); // Write general-purpose
                                                         // register
 
+    RegisterValue read_fp(RegisterId reg) const;        // Read floating-point register
+    void write_fp(RegisterId reg, RegisterValue value); // Write floating-point register
+
     bool operator==(const Registers &c) const;
     bool operator!=(const Registers &c) const;
 
@@ -73,6 +81,7 @@ signals:
     void pc_update(Address val);
     void gp_update(RegisterId reg, RegisterValue val);
     void gp_read(RegisterId reg, RegisterValue val) const;
+    void fp_update(RegisterId reg, RegisterValue val);
 
 private:
     /**
@@ -82,6 +91,10 @@ private:
      * Getters and setters will never try to read or write zero register.
      */
     std::array<RegisterValue, REGISTER_COUNT> gp {};
+    /**
+     * Float registers
+     */
+    std::array<RegisterValue, FLOAT_REGISTER_COUNT> fp {};
     Address pc {}; // program counter
 };
 
