@@ -90,6 +90,10 @@ public:
 struct RelocExpression;
 typedef QVector<RelocExpression *> RelocExpressionList;
 
+inline int32_t extend(uint32_t value, uint32_t used_bits) {
+    return value | ~((value & (1 << (used_bits - 1))) - 1);
+}
+
 class Instruction {
 public:
     Instruction();
@@ -208,7 +212,6 @@ private:
         RelocExpressionList *reloc,
         Modifier pseudo_mod = Modifier::NONE,
         uint64_t initial_immediate_value = 0);
-    inline int32_t extend(uint32_t value, uint32_t used_bits) const;
     static uint32_t parse_field(
         QString &field_token,
         const QString &arg,
