@@ -92,6 +92,14 @@ public:
     bool get_step_over_exception(enum ExceptionCause excause) const;
     enum ExceptionCause get_exception_cause() const;
 
+    Address virtual_to_physical(Address v) {
+        if (tlb_data) {
+            return tlb_data->translate_virtual_to_physical(v);
+        } else {
+            return v;
+        }
+    }
+
 public slots:
     void play();
     void pause();
