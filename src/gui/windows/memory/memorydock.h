@@ -6,7 +6,6 @@
 
 #include <QComboBox>
 #include <QDockWidget>
-#include <QLabel>
 
 class MemoryDock : public QDockWidget {
     Q_OBJECT
@@ -23,6 +22,7 @@ signals:
     void focus_addr(machine::Address);
 
 private:
+    machine::Machine *machinePtr;
 };
 
 #endif // MEMORYDOCK_H

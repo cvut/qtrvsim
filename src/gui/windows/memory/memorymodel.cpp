@@ -12,7 +12,7 @@ MemoryModel::MemoryModel(QObject *parent) : Super(parent), data_font("Monospace"
     machine = nullptr;
     memory_change_counter = 0;
     cache_data_change_counter = 0;
-    access_through_cache = 0;
+    mem_access_kind = MEM_ACC_AS_CPU;
 }
 
 const machine::FrontendMemory *MemoryModel::mem_access() const {
@@ -59,7 +59,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
         QString s, t;
         machine::Address address;
         uint32_t data;
-        const machine::FrontendMemory *mem;
+        const machine::FrontendMemory *mem = nullptr;
         if (!get_row_address(address, index.row())) { return QString(""); }
         if (index.column() == 0) {
             t = QString::number(address.get_raw(), 16);
@@ -67,11 +67,20 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
             return { QString("0x") + s + t };
         }
         if (machine == nullptr) { return QString(""); }
-        mem = mem_access();
-        if (mem == nullptr) { return QString(""); }
-        if ((access_through_cache > 0) && (machine->cache_data() != nullptr)) {
-            mem = machine->cache_data();
+        bool vm_enabled = machine->config().get_vm_enabled();
+        if (!vm_enabled) {
+            mem = mem_access();
+            if ((mem_access_kind > MEM_ACC_AS_CPU) && (machine->cache_data() != nullptr)) {
+                mem = machine->cache_data();
+            }
+        } else {
+            if (mem_access_kind == MEM_ACC_PHYS_ADDR) {
+                mem = machine->get_tlb_data();
+            } else {
+                mem = mem_access_phys();
+            }
         }
+        if (mem == nullptr) { return QString(""); }
         address += cellSizeBytes() * (index.column() - 1);
         if (address < index0_offset) { return QString(""); }
         switch (cell_size) {
@@ -192,12 +201,10 @@ bool MemoryModel::adjustRowAndOffset(int &row, machine::Address address) {
     }
     return get_row_for_address(row, address);
 }
-
 void MemoryModel::cached_access(int cached) {
-    access_through_cache = cached;
+    mem_access_kind = cached;
     update_all();
 }
-
 Qt::ItemFlags MemoryModel::flags(const QModelIndex &index) const {
     if (index.column() == 0) {
         return QAbstractTableModel::flags(index);
@@ -215,9 +222,20 @@ bool MemoryModel::setData(const QModelIndex &index, const QVariant &value, int r
         if (!ok) { return false; }
         if (!get_row_address(address, index.row())) { return false; }
         if (index.column() == 0 || machine == nullptr) { return false; }
-        mem = mem_access_rw();
+        if (machine->config().get_vm_enabled()) {
+            if (mem_access_kind == MEM_ACC_PHYS_ADDR) {
+                mem = machine->get_tlb_data_rw();
+            } else {
+                mem = mem_access_phys_rw();
+            }
+        } else {
+            mem = mem_access_rw();
+            if (mem_access_kind > MEM_ACC_AS_CPU && machine->cache_data_rw()) {
+                mem = machine->cache_data_rw();
+            }
+        }
         if (mem == nullptr) { return false; }
-        if ((access_through_cache > 0) && (machine->cache_data_rw() != nullptr)) {
+        if ((mem_access_kind > MEM_ACC_AS_CPU) && (machine->cache_data_rw() != nullptr)) {
             mem = machine->cache_data_rw();
         }
         address += cellSizeBytes() * (index.column() - 1);
@@ -229,4 +247,22 @@ bool MemoryModel::setData(const QModelIndex &index, const QVariant &value, int r
         }
     }
     return true;
+}
+
+const machine::FrontendMemory *MemoryModel::mem_access_phys() const {
+    if (!machine) return nullptr;
+    if (mem_access_kind > MEM_ACC_AS_CPU && machine->cache_data()) {
+        return machine->cache_data();
+    } else {
+        return machine->memory_data_bus();
+    }
+}
+
+machine::FrontendMemory *MemoryModel::mem_access_phys_rw() const {
+    if (!machine) return nullptr;
+    if (mem_access_kind > MEM_ACC_AS_CPU && machine->cache_data_rw()) {
+        return machine->cache_data_rw();
+    } else {
+        return machine->memory_data_bus_rw();
+    }
 }
