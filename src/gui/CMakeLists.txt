@@ -25,6 +25,7 @@ set(gui_SOURCES
         windows/messages/messagesview.cpp
         dialogs/new/newdialog.cpp
         ui/hexlineedit.cpp
+        ui/pow2spinbox.cpp
         windows/editor/highlighterasm.cpp
         windows/editor/highlighterc.cpp
         windows/editor/linenumberarea.cpp
@@ -71,6 +72,7 @@ set(gui_HEADERS
         windows/messages/messagesview.h
         dialogs/new/newdialog.h
         ui/hexlineedit.h
+        ui/pow2spinbox.h
         windows/editor/highlighterasm.h
         windows/editor/highlighterc.h
         windows/editor/linenumberarea.h

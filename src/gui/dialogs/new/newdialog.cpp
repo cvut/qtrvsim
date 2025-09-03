@@ -120,6 +120,29 @@ NewDialog::NewDialog(QWidget *parent, QSettings *settings) : QDialog(parent) {
         ui->slider_bp_bht_addr_bits, &QAbstractSlider::valueChanged, this,
         &NewDialog::bp_bht_addr_bits_change);
 
+    // Virtual Memory
+    connect(
+        ui->group_vm, QOverload<bool>::of(&QGroupBox::toggled), this,
+        &NewDialog::vm_enabled_change);
+    connect(
+        ui->itlb_number_of_sets, QOverload<int>::of(&QSpinBox::valueChanged), this,
+        &NewDialog::itlb_num_sets_changed);
+    connect(
+        ui->itlb_degree_of_associativity, QOverload<int>::of(&QSpinBox::valueChanged), this,
+        &NewDialog::itlb_assoc_changed);
+    connect(
+        ui->itlb_replacement_policy, QOverload<int>::of(&QComboBox::activated), this,
+        &NewDialog::itlb_policy_changed);
+    connect(
+        ui->dtlb_number_of_sets, QOverload<int>::of(&QSpinBox::valueChanged), this,
+        &NewDialog::dtlb_num_sets_changed);
+    connect(
+        ui->dtlb_degree_of_associativity, QOverload<int>::of(&QSpinBox::valueChanged), this,
+        &NewDialog::dtlb_assoc_changed);
+    connect(
+        ui->dtlb_replacement_policy, QOverload<int>::of(&QComboBox::activated), this,
+        &NewDialog::dtlb_policy_changed);
+
     cache_handler_d = new NewDialogCacheHandler(this, ui_cache_d.data());
     cache_handler_p = new NewDialogCacheHandler(this, ui_cache_p.data());
     cache_handler_l2 = new NewDialogCacheHandler(this, ui_cache_l2.data());
@@ -144,9 +167,10 @@ void NewDialog::switch2page(QTreeWidgetItem *current, QTreeWidgetItem *previous)
     }
 }
 
-void NewDialog::switch2custom() {
+void NewDialog::switch_to_custom() {
     if (!ui->preset_custom->isChecked()) {
-        ui->preset_custom->setChecked(true);
+        ui->preset_custom->setChecked(true); // Select "Custom" preset and refresh GUI (no-op if
+                                             // already selected).
         config_gui();
     }
 }
@@ -238,7 +262,7 @@ void NewDialog::xlen_64bit_change(bool val) {
         config->set_simulated_xlen(machine::Xlen::_64);
     else
         config->set_simulated_xlen(machine::Xlen::_32);
-    switch2custom();
+    switch_to_custom();
 }
 
 void NewDialog::isa_atomic_change(bool val) {
@@ -247,7 +271,7 @@ void NewDialog::isa_atomic_change(bool val) {
         config->modify_isa_word(isa_mask, isa_mask);
     else
         config->modify_isa_word(isa_mask, machine::ConfigIsaWord::empty());
-    switch2custom();
+    switch_to_custom();
 }
 
 void NewDialog::isa_multiply_change(bool val) {
@@ -256,18 +280,18 @@ void NewDialog::isa_multiply_change(bool val) {
         config->modify_isa_word(isa_mask, isa_mask);
     else
         config->modify_isa_word(isa_mask, machine::ConfigIsaWord::empty());
-    switch2custom();
+    switch_to_custom();
 }
 
 void NewDialog::pipelined_change(bool val) {
     config->set_pipelined(val);
     ui->hazard_unit->setEnabled(config->pipelined());
-    switch2custom();
+    switch_to_custom();
 }
 
 void NewDialog::delay_slot_change(bool val) {
     config->set_delay_slot(val);
-    switch2custom();
+    switch_to_custom();
 }
 
 void NewDialog::hazard_unit_change() {
@@ -278,51 +302,51 @@ void NewDialog::hazard_unit_change() {
     } else {
         config->set_hazard_unit(machine::MachineConfig::HU_NONE);
     }
-    switch2custom();
+    switch_to_custom();
 }
 
 void NewDialog::mem_protec_exec_change(bool v) {
     config->set_memory_execute_protection(v);
-    switch2custom();
+    switch_to_custom();
 }
 
 void NewDialog::mem_protec_write_change(bool v) {
     config->set_memory_write_protection(v);
-    switch2custom();
+    switch_to_custom();
 }
 
 void NewDialog::mem_time_read_change(int v) {
     if (config->memory_access_time_read() != (unsigned)v) {
         config->set_memory_access_time_read(v);
-        switch2custom();
+        switch_to_custom();
     }
 }
 
 void NewDialog::mem_time_write_change(int v) {
     if (config->memory_access_time_write() != (unsigned)v) {
         config->set_memory_access_time_write(v);
-        switch2custom();
+        switch_to_custom();
     }
 }
 
 void NewDialog::mem_enable_burst_change(bool v) {
     if (config->memory_access_enable_burst() != v) {
         config->set_memory_access_enable_burst(v);
-        switch2custom();
+        switch_to_custom();
     }
 }
 
 void NewDialog::mem_time_burst_change(int v) {
     if (config->memory_access_time_burst() != (unsigned)v) {
         config->set_memory_access_time_burst(v);
-        switch2custom();
+        switch_to_custom();
     }
 }
 
 void NewDialog::mem_time_level2_change(int v) {
     if (config->memory_access_time_level2() != (unsigned)v) {
         config->set_memory_access_time_level2(v);
-        switch2custom();
+        switch_to_custom();
     }
 }
 
@@ -450,14 +474,14 @@ void NewDialog::bp_type_change() {
     }
     bp_toggle_widgets();
 
-    if (need_switch2custom) switch2custom();
+    if (need_switch2custom) switch_to_custom();
 }
 
 void NewDialog::bp_enabled_change(bool v) {
     if (config->get_bp_enabled() != v) {
         config->set_bp_enabled(v);
         bp_toggle_widgets();
-        switch2custom();
+        switch_to_custom();
     }
 }
 
@@ -465,14 +489,14 @@ void NewDialog::bp_init_state_change(void) {
     auto v = ui->select_bp_init_state->currentData().value<machine::PredictorState>();
     if (v != config->get_bp_init_state()) {
         config->set_bp_init_state(v);
-        switch2custom();
+        switch_to_custom();
     }
 }
 
 void NewDialog::bp_btb_addr_bits_change(int v) {
     if (config->get_bp_btb_bits() != v) {
         config->set_bp_btb_bits((uint8_t)v);
-        switch2custom();
+        switch_to_custom();
     }
     ui->text_bp_btb_addr_bits_number->setText(QString::number(config->get_bp_btb_bits()));
     ui->text_bp_btb_bits_number->setText(QString::number(config->get_bp_btb_bits()));
@@ -489,7 +513,7 @@ void NewDialog::bp_bht_bits_texts_update(void) {
 void NewDialog::bp_bht_bhr_bits_change(int v) {
     if (config->get_bp_bhr_bits() != v) {
         config->set_bp_bhr_bits((uint8_t)v);
-        switch2custom();
+        switch_to_custom();
     }
     bp_bht_bits_texts_update();
 }
@@ -497,9 +521,66 @@ void NewDialog::bp_bht_bhr_bits_change(int v) {
 void NewDialog::bp_bht_addr_bits_change(int v) {
     if (config->get_bp_bht_addr_bits() != v) {
         config->set_bp_bht_addr_bits((uint8_t)v);
-        switch2custom();
+        switch_to_custom();
     }
     bp_bht_bits_texts_update();
+}
+
+void NewDialog::vm_enabled_change(bool v) {
+    if (config->get_vm_enabled() != v) {
+        config->set_vm_enabled(v);
+        switch_to_custom();
+    }
+}
+
+void NewDialog::itlb_num_sets_changed(int v) {
+    unsigned u = v >= 0 ? v : 0;
+    if (config->access_tlb_program()->get_tlb_num_sets() != u) {
+        config->access_tlb_program()->set_tlb_num_sets(u);
+        switch_to_custom();
+    }
+}
+
+void NewDialog::itlb_assoc_changed(int v) {
+    unsigned u = v >= 0 ? v : 0;
+    if (config->access_tlb_program()->get_tlb_associativity() != u) {
+        config->access_tlb_program()->set_tlb_associativity(u);
+        switch_to_custom();
+    }
+}
+
+void NewDialog::itlb_policy_changed(int idx) {
+    machine::TLBConfig::ReplacementPolicy pol;
+    pol = static_cast<machine::TLBConfig::ReplacementPolicy>(idx);
+    if (config->access_tlb_program()->get_tlb_replacement_policy() != pol) {
+        config->access_tlb_program()->set_tlb_replacement_policy(pol);
+        switch_to_custom();
+    }
+}
+
+void NewDialog::dtlb_num_sets_changed(int v) {
+    unsigned u = v >= 0 ? v : 0;
+    if (config->access_tlb_data()->get_tlb_num_sets() != u) {
+        config->access_tlb_data()->set_tlb_num_sets(u);
+        switch_to_custom();
+    }
+}
+
+void NewDialog::dtlb_assoc_changed(int v) {
+    unsigned u = v >= 0 ? v : 0;
+    if (config->access_tlb_data()->get_tlb_associativity() != u) {
+        config->access_tlb_data()->set_tlb_associativity(u);
+        switch_to_custom();
+    }
+}
+
+void NewDialog::dtlb_policy_changed(int idx) {
+    machine::TLBConfig::ReplacementPolicy pol;
+    pol = static_cast<machine::TLBConfig::ReplacementPolicy>(idx);
+    if (config->access_tlb_data()->get_tlb_replacement_policy() != pol) {
+        config->access_tlb_data()->set_tlb_replacement_policy(pol);
+        switch_to_custom();
+    }
 }
 
 void NewDialog::config_gui() {
@@ -561,6 +642,16 @@ void NewDialog::config_gui() {
     ui->text_bp_bht_entries_number->setText(QString::number(qPow(2, config->get_bp_bht_bits())));
     bp_type_change();
 
+    // Virtual
+    ui->group_vm->setChecked(config->get_vm_enabled());
+    ui->itlb_number_of_sets->setValue(config->tlbc_program().get_tlb_num_sets());
+    ui->itlb_degree_of_associativity->setValue(config->tlbc_program().get_tlb_associativity());
+    ui->itlb_replacement_policy->setCurrentIndex(
+        (int)config->tlbc_program().get_tlb_replacement_policy());
+    ui->dtlb_number_of_sets->setValue(config->tlbc_data().get_tlb_num_sets());
+    ui->dtlb_degree_of_associativity->setValue(config->tlbc_data().get_tlb_associativity());
+    ui->dtlb_replacement_policy->setCurrentIndex(
+        (int)config->tlbc_data().get_tlb_replacement_policy());
     // Memory
     ui->mem_protec_exec->setChecked(config->memory_execute_protection());
     ui->mem_protec_write->setChecked(config->memory_write_protection());
@@ -674,30 +765,30 @@ void NewDialogCacheHandler::config_gui() {
 
 void NewDialogCacheHandler::enabled(bool val) {
     config->set_enabled(val);
-    nd->switch2custom();
+    nd->switch_to_custom();
 }
 
 void NewDialogCacheHandler::numsets() {
     config->set_set_count(ui->number_of_sets->value());
-    nd->switch2custom();
+    nd->switch_to_custom();
 }
 
 void NewDialogCacheHandler::blocksize() {
     config->set_block_size(ui->block_size->value());
-    nd->switch2custom();
+    nd->switch_to_custom();
 }
 
 void NewDialogCacheHandler::degreeassociativity() {
     config->set_associativity(ui->degree_of_associativity->value());
-    nd->switch2custom();
+    nd->switch_to_custom();
 }
 
 void NewDialogCacheHandler::replacement(int val) {
     config->set_replacement_policy((enum machine::CacheConfig::ReplacementPolicy)val);
-    nd->switch2custom();
+    nd->switch_to_custom();
 }
 
 void NewDialogCacheHandler::writeback(int val) {
     config->set_write_policy((enum machine::CacheConfig::WritePolicy)val);
-    nd->switch2custom();
+    nd->switch_to_custom();
 }
