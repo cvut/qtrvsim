@@ -3,6 +3,8 @@
 #include "common/logging.h"
 #include "execute/alu.h"
 #include "utils.h"
+#include <iostream>
+#include <ostream>
 
 #include <cinttypes>
 
@@ -61,6 +63,8 @@ void Core::reset() {
     state.cycle_count = 0;
     state.stall_count = 0;
     do_reset();
+    state.current_privilege = CSR::PrivilegeLevel::MACHINE;
+    state.current_privilege_u = static_cast<unsigned>(state.current_privilege);
 }
 
 unsigned Core::get_cycle_count() const {
@@ -158,7 +162,10 @@ bool Core::handle_exception(
         control_state->update_exception_cause(excause);
         if (control_state->read_internal(CSR::Id::MTVEC) != 0
             && !get_step_over_exception(excause)) {
-            control_state->exception_initiate(CSR::PrivilegeLevel::MACHINE, CSR::PrivilegeLevel::MACHINE);
+            control_state->exception_initiate(
+            state.current_privilege, CSR::PrivilegeLevel::MACHINE);
+            state.current_privilege = CSR::PrivilegeLevel::MACHINE;
+            state.current_privilege_u = static_cast<unsigned>(state.current_privilege);
             regs->write_pc(control_state->exception_pc_address());
         }
     }
@@ -523,7 +530,9 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
             csr_written = true;
         }
         if (dt.xret) {
-            control_state->exception_return(CSR::PrivilegeLevel::MACHINE);
+            CSR::PrivilegeLevel restored = control_state->exception_return(state.current_privilege);
+            state.current_privilege = restored;
+            state.current_privilege_u = static_cast<unsigned>(state.current_privilege);
             if (this->xlen == Xlen::_32)
                 computed_next_inst_addr = Address(control_state->read_internal(CSR::Id::MEPC).as_u32());
             else
