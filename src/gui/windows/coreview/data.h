@@ -52,6 +52,13 @@ static const std::unordered_map<unsigned, QString> STALL_TEXT_TABLE = {
     { 2, QStringLiteral("FORWARD") },
 };
 
+static const std::unordered_map<unsigned, QString> PRIVILEGE_TEXT_TABLE = {
+    { static_cast<unsigned>(machine::CSR::PrivilegeLevel::UNPRIVILEGED), QStringLiteral("UNPRIV") },
+    { static_cast<unsigned>(machine::CSR::PrivilegeLevel::SUPERVISOR), QStringLiteral("SUPERV") },
+    { static_cast<unsigned>(machine::CSR::PrivilegeLevel::HYPERVISOR), QStringLiteral("HYPERV") },
+    { static_cast<unsigned>(machine::CSR::PrivilegeLevel::MACHINE), QStringLiteral("MACHINE") },
+};
+
 /**
  * Link targets available for use in the SVG.
  *
@@ -175,6 +182,8 @@ const struct {
               MULTITEXT_LENS(pipeline.memory.internal.excause_num, EXCEPTION_NAME_TABLE) },
             { QStringLiteral("hazard"),
               MULTITEXT_LENS(pipeline.execute.internal.stall_status, STALL_TEXT_TABLE) },
+            { QStringLiteral("Privilege"),
+              MULTITEXT_LENS(current_privilege_u, PRIVILEGE_TEXT_TABLE) },
         };
 
     const unordered_map<QStringView, LensPair<CoreState, Instruction, Address>> INSTRUCTION {

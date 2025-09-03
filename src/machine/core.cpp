@@ -126,11 +126,11 @@ Xlen Core::get_xlen() const {
 }
 
 void Core::set_current_privilege(CSR::PrivilegeLevel privilege) {
-    state.current_privilege = privilege;
+    state.set_current_privilege(privilege);
 }
 
 CSR::PrivilegeLevel Core::get_current_privilege() const {
-    return state.current_privilege;
+    return state.current_privilege();
 };
 
 void Core::register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler) {
