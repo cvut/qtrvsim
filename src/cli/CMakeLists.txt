@@ -77,3 +77,43 @@ add_cli_test(
         --asm "${CMAKE_SOURCE_DIR}/tests/cli/modifiers-pcrel/program.S"
         EXPECTED_OUTPUT "tests/cli/modifiers-pcrel/stdout.txt"
 )
+
+add_cli_test(
+        NAME virtual_memory_template
+        ARGS
+        --asm "${CMAKE_SOURCE_DIR}/tests/cli/virtual_memory/template/program.S"
+        --dump-registers
+        EXPECTED_OUTPUT "tests/cli/virtual_memory/template/stdout.txt"
+)
+
+add_cli_test(
+        NAME virtual_memory_dtlb
+        ARGS
+        --asm "${CMAKE_SOURCE_DIR}/tests/cli/virtual_memory/dtlb/program.S"
+        --dump-registers
+        EXPECTED_OUTPUT "tests/cli/virtual_memory/dtlb/stdout.txt"
+)
+
+add_cli_test(
+        NAME virtual_memory_itlb
+        ARGS
+        --asm "${CMAKE_SOURCE_DIR}/tests/cli/virtual_memory/itlb/program.S"
+        --dump-registers
+        EXPECTED_OUTPUT "tests/cli/virtual_memory/itlb/stdout.txt"
+)
+
+add_cli_test(
+        NAME virtual_memory_memrw
+        ARGS
+        --asm "${CMAKE_SOURCE_DIR}/tests/cli/virtual_memory/memrw/program.S"
+        --dump-registers
+        EXPECTED_OUTPUT "tests/cli/virtual_memory/memrw/stdout.txt"
+)
+
+add_cli_test(
+        NAME virtual_memory_exec
+        ARGS
+        --asm "${CMAKE_SOURCE_DIR}/tests/cli/virtual_memory/exec/program.S"
+        --dump-registers
+        EXPECTED_OUTPUT "tests/cli/virtual_memory/exec/stdout.txt"
+)
