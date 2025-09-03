@@ -58,6 +58,8 @@ public:
     bool get_stop_on_exception(enum ExceptionCause excause) const;
     void set_step_over_exception(enum ExceptionCause excause, bool value);
     bool get_step_over_exception(enum ExceptionCause excause) const;
+    void set_current_privilege(CSR::PrivilegeLevel privilege);
+    CSR::PrivilegeLevel get_current_privilege() const;
 
     /**
      * Abstracts XLEN from code flow. XLEN core will obtain XLEN value from register value.
