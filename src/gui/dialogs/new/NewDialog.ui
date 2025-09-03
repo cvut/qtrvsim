@@ -66,6 +66,9 @@
        </item>
        <item>
         <widget class="QStackedWidget" name="config_pages">
+         <property name="currentIndex">
+          <number>3</number>
+         </property>
          <widget class="QWidget" name="tab_preset_load">
           <property name="accessibleName">
            <string>Presets and ELF File</string>
@@ -263,6 +266,9 @@
           <layout class="QVBoxLayout" name="verticalLayout_10">
            <item>
             <widget class="QGroupBox" name="group_bp">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <property name="title">
               <string>Branch Predictor</string>
              </property>
@@ -656,6 +662,134 @@
            </item>
           </layout>
          </widget>
+<widget class="QWidget" name="tab_virtual_memory">
+          <property name="accessibleName">
+           <string>Virtual Memory</string>
+          </property>
+          <widget class="QGroupBox" name="group_vm">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>10</y>
+             <width>471</width>
+             <height>181</height>
+            </rect>
+           </property>
+           <property name="title">
+            <string>Virtual Memory</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <widget class="QGroupBox" name="tlb_groupBox">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>30</y>
+              <width>431</width>
+              <height>131</height>
+             </rect>
+            </property>
+            <property name="title">
+             <string>Translation Lookaside Buffer (TLB)</string>
+            </property>
+            <property name="checkable">
+             <bool>false</bool>
+            </property>
+            <layout class="QFormLayout" name="formLayout_2">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>Number of sets:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="Pow2SpinBox" name="tlb_number_of_sets">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>1024</number>
+               </property>
+               <property name="singleStep">
+                <number>1</number>
+               </property>
+               <property name="stepType">
+                <enum>QAbstractSpinBox::DefaultStepType</enum>
+               </property>
+               <property name="value">
+                <number>1</number>
+               </property>
+               <property name="displayIntegerBase">
+                <number>10</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Degree of associativity:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="tlb_degree_of_associativity">
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="singleStep">
+                <number>1</number>
+               </property>
+               <property name="value">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>Replacement policy:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QComboBox" name="tlb_replacement_policy">
+               <item>
+                <property name="text">
+                 <string>Random</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Least Recently Used (LRU)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Least Frequently Used (LFU)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Pseudo Least Recently Used (PLRU)</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </widget>
          <widget class="QWidget" name="tab_memory">
           <property name="accessibleName">
            <string>Memory Timings</string>
@@ -955,6 +1089,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Pow2SpinBox</class>
+   <extends>QSpinBox</extends>
+   <header>ui/pow2spinbox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
