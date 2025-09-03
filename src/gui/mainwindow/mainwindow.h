@@ -28,6 +28,7 @@
 #include "windows/program/programdock.h"
 #include "windows/registers/registersdock.h"
 #include "windows/terminal/terminaldock.h"
+#include "windows/tlb/tlbdock.h"
 
 #include <QMainWindow>
 #include <QPointer>
@@ -78,6 +79,8 @@ public slots:
     void reset_state_cache_program();
     void reset_state_cache_data();
     void reset_state_cache_level2();
+    void reset_state_tlb_program();
+    void reset_state_tlb_data();
     void reset_state_peripherals();
     void reset_state_terminal();
     void reset_state_lcd_display();
@@ -89,6 +92,8 @@ public slots:
     void show_cache_data();
     void show_cache_program();
     void show_cache_level2();
+    void show_tlb_program();
+    void show_tlb_data();
     void show_peripherals();
     void show_terminal();
     void show_lcd_display();
@@ -143,6 +148,7 @@ private:
     Box<ProgramDock> program {};
     Box<MemoryDock> memory {};
     Box<CacheDock> cache_program {}, cache_data {}, cache_level2 {};
+    Box<TLBDock> tlb_program {}, tlb_data {};
 
     // Branch predictor
     Box<DockPredictorBTB> bp_btb {};
