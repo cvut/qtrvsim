@@ -56,8 +56,8 @@ void Core::step(bool skip_break) {
 void Core::reset() {
     state.cycle_count = 0;
     state.stall_count = 0;
-    state.current_privilege = CSR::PrivilegeLevel::MACHINE;
     do_reset();
+    state.set_current_privilege(CSR::PrivilegeLevel::MACHINE);
 }
 
 unsigned Core::get_cycle_count() const {
@@ -156,8 +156,8 @@ bool Core::handle_exception(
         if (control_state->read_internal(CSR::Id::MTVEC) != 0
             && !get_step_over_exception(excause)) {
             control_state->exception_initiate(
-                state.current_privilege, CSR::PrivilegeLevel::MACHINE);
-            state.current_privilege = CSR::PrivilegeLevel::MACHINE;
+                state.current_privilege(), CSR::PrivilegeLevel::MACHINE);
+            state.set_current_privilege(CSR::PrivilegeLevel::MACHINE);
             regs->write_pc(control_state->exception_pc_address());
         }
     }
@@ -519,8 +519,9 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
             csr_written = true;
         }
         if (dt.xret) {
-            CSR::PrivilegeLevel restored = control_state->exception_return(state.current_privilege);
-            state.current_privilege = restored;
+            CSR::PrivilegeLevel restored
+                = control_state->exception_return(state.current_privilege());
+            state.set_current_privilege(restored);
             if (this->xlen == Xlen::_32)
                 computed_next_inst_addr
                     = Address(control_state->read_internal(CSR::Id::MEPC).as_u32());
