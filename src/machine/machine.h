@@ -12,6 +12,7 @@
 #include "memory/backend/aclintsswi.h"
 #include "memory/cache/cache.h"
 #include "memory/memory_bus.h"
+#include "memory/tlb/tlb.h"
 #include "predictor.h"
 #include "registers.h"
 #include "simulator_exception.h"
@@ -20,6 +21,9 @@
 #include <QObject>
 #include <QTimer>
 #include <cstdint>
+#include <iostream>
+#include <optional>
+#include <ostream>
 
 namespace machine {
 
@@ -41,6 +45,13 @@ public:
     const Cache *cache_level2();
     Cache *cache_data_rw();
     void cache_sync();
+    const TLB *get_tlb_program() const;
+    const TLB *get_tlb_data() const;
+    TLB *get_tlb_program_rw();
+    TLB *get_tlb_data_rw();
+    void tlb_sync();
+    FrontendMemory *instr_frontend() { return instr_if_; }
+    FrontendMemory *data_frontend() { return data_if_; }
     const MemoryDataBus *memory_data_bus();
     MemoryDataBus *memory_data_bus_rw();
     SerialPort *serial_port();
@@ -131,6 +142,10 @@ private:
     Cache *cch_program = nullptr;
     Cache *cch_data = nullptr;
     Cache *cch_level2 = nullptr;
+    std::optional<TLB> tlb_program;
+    std::optional<TLB> tlb_data;
+    FrontendMemory *instr_if_;
+    FrontendMemory *data_if_;
     CSR::ControlState *controlst = nullptr;
     BranchPredictor *predictor = nullptr;
     Core *cr = nullptr;

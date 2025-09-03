@@ -1,5 +1,7 @@
 #include "memory/frontend_memory.h"
 
+#include "tlb/tlb.h"
+
 #include "common/endian.h"
 
 namespace machine {
@@ -149,6 +151,9 @@ bool FrontendMemory::write_generic(
     // See example in read_generic for byteswap explanation.
     const T swapped_value
         = byteswap_if(value, this->simulated_machine_endian != NATIVE_ENDIAN);
+    if (auto tlb = dynamic_cast<TLB *>(this)) {
+        return tlb->write(address, &swapped_value, sizeof(T), { .type = type }).changed;
+    }
     return write(address, &swapped_value, sizeof(T), { .type = type }).changed;
 }
 FrontendMemory::FrontendMemory(Endian simulated_endian)
