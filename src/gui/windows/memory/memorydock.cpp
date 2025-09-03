@@ -24,6 +24,7 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     auto *cached_access = new QComboBox();
     cached_access->addItem("Direct", 0);
     cached_access->addItem("Cached", 1);
+    cached_access->addItem("As CPU (VMA)", 2);
 
     auto *memory_content = new MemoryTableView(nullptr, settings);
     // memory_content->setSizePolicy();
@@ -37,7 +38,6 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     auto *layout_top = new QHBoxLayout;
     layout_top->addWidget(cell_size);
     layout_top->addWidget(cached_access);
-
     auto *layout = new QVBoxLayout;
     layout->addLayout(layout_top);
     layout->addWidget(memory_content);
@@ -47,14 +47,14 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
 
     setWidget(content);
 
+    connect(this, &MemoryDock::machine_setup, memory_model, &MemoryModel::setup);
+    connect(this, &MemoryDock::machine_setup, memory_model, &MemoryModel::setup);
     connect(
-        this, &MemoryDock::machine_setup, memory_model, &MemoryModel::setup);
+        cell_size, QOverload<int>::of(&QComboBox::currentIndexChanged), memory_content,
+        &MemoryTableView::set_cell_size);
     connect(
-        cell_size, QOverload<int>::of(&QComboBox::currentIndexChanged),
-        memory_content, &MemoryTableView::set_cell_size);
-    connect(
-        cached_access, QOverload<int>::of(&QComboBox::currentIndexChanged),
-        memory_model, &MemoryModel::cached_access);
+        cached_access, QOverload<int>::of(&QComboBox::currentIndexChanged), memory_model,
+        &MemoryModel::cached_access);
     connect(
         go_edit, &HexLineEdit::value_edit_finished, memory_content,
         [memory_content](uint32_t value) {
@@ -62,12 +62,8 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
         });
     connect(
         memory_content, &MemoryTableView::address_changed, go_edit,
-        [go_edit](machine::Address addr) {
-            go_edit->set_value(addr.get_raw());
-        });
-    connect(
-        this, &MemoryDock::focus_addr, memory_content,
-        &MemoryTableView::focus_address);
+        [go_edit](machine::Address addr) { go_edit->set_value(addr.get_raw()); });
+    connect(this, &MemoryDock::focus_addr, memory_content, &MemoryTableView::focus_address);
     connect(
         memory_model, &MemoryModel::setup_done, memory_content,
         &MemoryTableView::recompute_columns);
