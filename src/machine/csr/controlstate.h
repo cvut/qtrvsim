@@ -46,7 +46,20 @@ namespace machine { namespace CSR {
             // ...
             MCYCLE,
             MINSTRET,
-            _COUNT,
+            // Supervisor Trap Setup
+            SSTATUS,
+            // ...
+            STVEC,
+            // ...
+            // Supervisor Trap Handling
+            SSCRATCH,
+            SEPC,
+            SCAUSE,
+            STVAL,
+            // ...
+            // Supervisor Protection and Translation
+            SATP,
+            _COUNT
         };
     };
 
@@ -170,6 +183,10 @@ namespace machine { namespace CSR {
             const RegisterDesc &desc,
             RegisterValue &reg,
             RegisterValue val);
+        void sstatus_wlrl_write_handler(
+            const RegisterDesc &desc,
+            RegisterValue &reg,
+            RegisterValue val);
     };
 
     struct RegisterDesc {
@@ -201,6 +218,13 @@ namespace machine { namespace CSR {
             static constexpr const RegisterFieldDesc *fields[] = { &SIE, &MIE, &SPIE, &MPIE, &SPP, &MPP, &UXL, &SXL};
             static constexpr unsigned count = sizeof(fields) / sizeof(fields[0]);
         }
+        namespace satp {
+            static constexpr RegisterFieldDesc MODE = { "MODE", Id::SATP, {1, 31}, "Address translation mode" };
+            static constexpr RegisterFieldDesc ASID = { "ASID", Id::SATP, {9, 22}, "Address-space ID" };
+            static constexpr RegisterFieldDesc PPN = { "PPN",  Id::SATP, {22, 0}, "Root page-table physical page number" };
+            static constexpr const RegisterFieldDesc *fields[] = { &MODE, &ASID, &PPN };
+            static constexpr unsigned count = sizeof(fields)/sizeof(fields[0]);
+        }
     }
 
     /** Definitions of supported CSR registers */
@@ -231,6 +255,14 @@ namespace machine { namespace CSR {
         [Id::MCYCLE] = { "mcycle", 0xB00_csr, "Machine cycle counter.",
                         0, (register_storage_t)0xffffffffffffffff, &ControlState::mcycle_wlrl_write_handler},
         [Id::MINSTRET] = { "minstret", 0xB02_csr, "Machine instructions-retired counter."},
+        // Supervisor-level CSRs
+        [Id::SSTATUS] = { "sstatus",  0x100_csr, "Supervisor status register.", 0, 0xffffffff, &ControlState::sstatus_wlrl_write_handler },
+        [Id::STVEC] = { "stvec",    0x105_csr, "Supervisor trap-handler base address." },
+        [Id::SSCRATCH] = { "sscratch", 0x140_csr, "Scratch register for supervisor trap handlers." },
+        [Id::SEPC] = { "sepc",     0x141_csr, "Supervisor exception program counter." },
+        [Id::SCAUSE] = { "scause",   0x142_csr, "Supervisor trap cause." },
+        [Id::STVAL] = { "stval",    0x143_csr, "Supervisor bad address or instruction." },
+        [Id::SATP] = { "satp", 0x180_csr, "Supervisor address translation and protection", 0, 0xffffffff, &ControlState::default_wlrl_write_handler, { Field::satp::fields, Field::satp::count } }
     } };
 
     /** Lookup from CSR address (value used in instruction) to internal id (index in continuous

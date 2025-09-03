@@ -1,4 +1,3 @@
-#include <cinttypes>
 #include "controlstate.h"
 
 #include "common/logging.h"
@@ -6,6 +5,7 @@
 #include "simulator_exception.h"
 
 #include <QtAlgorithms>
+#include <cinttypes>
 
 LOG_CATEGORY("machine.csr.control_state");
 
@@ -20,7 +20,8 @@ namespace machine { namespace CSR {
 
     ControlState::ControlState(const ControlState &other)
         : QObject(this->parent())
-        , xlen(other.xlen), register_data(other.register_data) {}
+        , xlen(other.xlen)
+        , register_data(other.register_data) {}
 
     void ControlState::reset() {
         std::transform(
@@ -83,14 +84,13 @@ namespace machine { namespace CSR {
         uint64_t u;
         u = val.as_u64() & desc.write_mask.as_u64();
         u |= reg.as_u64() & ~desc.write_mask.as_u64();
-        if  (xlen == Xlen::_32)
-            u &= 0xffffffff;
+        if (xlen == Xlen::_32) u &= 0xffffffff;
         reg = u;
     }
     void ControlState::mstatus_wlrl_write_handler(
         const RegisterDesc &desc,
         RegisterValue &reg,
-            RegisterValue val) {
+        RegisterValue val) {
         default_wlrl_write_handler(desc, reg, val);
     }
 
@@ -102,6 +102,27 @@ namespace machine { namespace CSR {
         reg = val;
         register_data[Id::CYCLE] = val;
         write_signal(Id::CYCLE, register_data[Id::CYCLE]);
+    }
+
+    void ControlState::sstatus_wlrl_write_handler(
+        const RegisterDesc &desc,
+        RegisterValue &reg,
+        RegisterValue val) {
+        uint64_t s_mask
+            = Field::mstatus::SIE.mask() | Field::mstatus::SPIE.mask() | Field::mstatus::SPP.mask();
+
+        if (xlen == Xlen::_64) {
+            s_mask |= Field::mstatus::UXL.mask();
+            s_mask |= Field::mstatus::SXL.mask();
+        }
+        uint64_t write_val = val.as_u64() & desc.write_mask.as_u64();
+        uint64_t mstatus_val = register_data[Id::MSTATUS].as_u64();
+        mstatus_val = (mstatus_val & ~s_mask) | (write_val & s_mask);
+        register_data[Id::MSTATUS] = mstatus_val;
+        uint64_t new_sstatus = mstatus_val & s_mask;
+        if (xlen == Xlen::_32) new_sstatus &= 0xffffffff;
+        reg = new_sstatus;
+        emit write_signal(Id::MSTATUS, register_data[Id::MSTATUS]);
     }
 
     bool ControlState::operator==(const ControlState &other) const {
@@ -128,8 +149,7 @@ namespace machine { namespace CSR {
                 irq_to_signal = 63 - qCountLeadingZeroBits(irqs & (~irqs + 1));
             }
 
-            value = (uint64_t)(irq_to_signal |
-                    ((uint64_t)1 << ((xlen == Xlen::_32)? 31: 63)));
+            value = (uint64_t)(irq_to_signal | ((uint64_t)1 << ((xlen == Xlen::_32) ? 31 : 63)));
         }
         emit write_signal(Id::MCAUSE, value);
     }
@@ -173,14 +193,41 @@ namespace machine { namespace CSR {
     PrivilegeLevel ControlState::exception_return(enum PrivilegeLevel act_privlev) {
         size_t reg_id = Id::MSTATUS;
         RegisterValue &reg = register_data[reg_id];
-        PrivilegeLevel restored_privlev;
-        Q_UNUSED(act_privlev)
-
-        write_field(Field::mstatus::MIE, read_field(Field::mstatus::MPIE).as_u32());
-        write_field(Field::mstatus::MPIE, (uint64_t)1);
-
-        restored_privlev = static_cast<PrivilegeLevel>(read_field(Field::mstatus::MPP).as_u32());
-        write_field(Field::mstatus::MPP, (uint64_t)0);
+        PrivilegeLevel restored_privlev = PrivilegeLevel::MACHINE;
+        if (act_privlev == PrivilegeLevel::MACHINE) {
+            // MRET semantics:
+            //   MIE  <- MPIE
+            //   MPIE <- 1
+            //   restored_privlev <- MPP
+            //   MPP  <- 0
+            write_field(Field::mstatus::MIE, read_field(Field::mstatus::MPIE).as_u32());
+            write_field(Field::mstatus::MPIE, (uint64_t)1);
+            uint32_t raw_mpp
+                = static_cast<uint32_t>(read_field(Field::mstatus::MPP).as_u32()) & 0x3;
+            switch (raw_mpp) {
+            case 0: restored_privlev = PrivilegeLevel::UNPRIVILEGED; break;
+            case 1: restored_privlev = PrivilegeLevel::SUPERVISOR; break;
+            case 2: restored_privlev = PrivilegeLevel::HYPERVISOR; break;
+            case 3: restored_privlev = PrivilegeLevel::MACHINE; break;
+            default: restored_privlev = PrivilegeLevel::UNPRIVILEGED; break;
+            }
+            write_field(Field::mstatus::MPP, (uint64_t)0); // clear MPP per spec
+        } else if (act_privlev == PrivilegeLevel::SUPERVISOR) {
+            // SRET semantics:
+            //   SIE  <- SPIE
+            //   SPIE <- 1
+            //   restored_privlev <- SPP
+            //   SPP  <- 0
+            write_field(Field::mstatus::SIE, read_field(Field::mstatus::SPIE).as_u32());
+            write_field(Field::mstatus::SPIE, (uint64_t)1);
+            uint32_t raw_spp
+                = static_cast<uint32_t>(read_field(Field::mstatus::SPP).as_u32()) & 0x1;
+            restored_privlev
+                = (raw_spp == 1) ? PrivilegeLevel::SUPERVISOR : PrivilegeLevel::UNPRIVILEGED;
+            write_field(Field::mstatus::SPP, (uint64_t)0);
+        } else {
+            restored_privlev = PrivilegeLevel::UNPRIVILEGED;
+        }
 
         emit write_signal(reg_id, reg);
 
