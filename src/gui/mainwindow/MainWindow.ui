@@ -53,7 +53,7 @@
      <x>0</x>
      <y>0</y>
      <width>900</width>
-     <height>20</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -87,6 +87,8 @@
     <addaction name="actionProgram_Cache"/>
     <addaction name="actionData_Cache"/>
     <addaction name="actionL2_Cache"/>
+    <addaction name="actionInstruction_TLB"/>
+    <addaction name="actionData_TLB"/>
     <addaction name="actionBranch_Predictor_History_table"/>
     <addaction name="actionBranch_Predictor_Target_table"/>
     <addaction name="actionBranch_Predictor_Info"/>
@@ -645,6 +647,22 @@
   <action name="actionBranch_Predictor_Info">
    <property name="text">
     <string>Branch Predictor (Info)</string>
+   </property>
+  </action>
+<action name="actionData_TLB">
+   <property name="text">
+    <string>&amp;Data TLB</string>
+   </property>
+   <property name="toolTip">
+    <string>Data TLB</string>
+   </property>
+  </action>
+  <action name="actionInstruction_TLB">
+   <property name="text">
+    <string>Instruction TLB</string>
+   </property>
+   <property name="toolTip">
+    <string>Instruction TLB</string>
    </property>
   </action>
  </widget>

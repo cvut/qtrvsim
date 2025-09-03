@@ -115,6 +115,10 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     cache_data->hide();
     cache_level2.reset(new CacheDock(this, "L2"));
     cache_level2->hide();
+    tlb_program.reset(new TLBDock(this, "Instruction"));
+    tlb_program->hide();
+    tlb_data.reset(new TLBDock(this, "Data"));
+    tlb_data->hide();
     bp_btb.reset(new DockPredictorBTB(this));
     bp_btb->hide();
     bp_bht.reset(new DockPredictorBHT(this));
@@ -161,7 +165,8 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(ui->actionProgram_Cache, &QAction::triggered, this, &MainWindow::show_cache_program);
     connect(ui->actionData_Cache, &QAction::triggered, this, &MainWindow::show_cache_data);
     connect(ui->actionL2_Cache, &QAction::triggered, this, &MainWindow::show_cache_level2);
-
+    connect(ui->actionInstruction_TLB, &QAction::triggered, this, &MainWindow::show_tlb_program);
+    connect(ui->actionData_TLB, &QAction::triggered, this, &MainWindow::show_tlb_data);
     // Branch predictor
     connect(
         ui->actionBranch_Predictor_History_table, &QAction::triggered, this,
@@ -336,6 +341,8 @@ void MainWindow::create_core(
     cache_data->setup(machine->cache_data());
     bool cache_after_cache = config.cache_data().enabled() || config.cache_program().enabled();
     cache_level2->setup(machine->cache_level2(), cache_after_cache);
+    tlb_program->setup(machine->get_tlb_program_rw());
+    tlb_data->setup(machine->get_tlb_data_rw());
 
     // Branch predictor
     bp_btb->setup(machine->core()->get_predictor(), machine->core());
@@ -447,6 +454,8 @@ SHOW_HANDLER(memory, Qt::RightDockWidgetArea, true)
 SHOW_HANDLER(cache_program, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(cache_data, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(cache_level2, Qt::RightDockWidgetArea, false)
+SHOW_HANDLER(tlb_program, Qt::RightDockWidgetArea, false)
+SHOW_HANDLER(tlb_data, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(bp_btb, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(bp_bht, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(bp_info, Qt::RightDockWidgetArea, false)
@@ -783,6 +792,7 @@ void MainWindow::compile_source() {
     }
 
     machine->cache_sync();
+    machine->tlb_sync();
 
     auto editor = editor_tabs->get_current_editor();
     auto filename = editor->filename().isEmpty() ? "Unknown" : editor->filename();
