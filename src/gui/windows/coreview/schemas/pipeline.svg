@@ -915,6 +915,23 @@
                 <text x="662" y="89">Stalls:</text>
             </g>
         </g>
+<g id="cell-Haz_PrivilegeLabel"
+           content="&lt;UserObject label=&quot;Privilege:&quot; tags=&quot;simple pipeline forwarding&quot;/&gt;"
+           data-label="Privilege:" data-tags="simple pipeline forwarding">
+            <rect x="642" y="99" width="41" height="8" fill="none" stroke="none"/>
+            <g fill="rgb(0, 0, 0)" font-family="sans-serif" font-weight="bold" text-anchor="middle" font-size="6px">
+                <text x="662" y="104">Privilege:</text>
+            </g>
+        </g>
+        <g id="cell-uWEq7-PrivilegeValue"
+           content="&lt;object label=&quot;MACHINE&quot; component=&quot;multi-text-value&quot; source=&quot;Privilege&quot; tags=&quot;simple hazardunit pipeline forwarding&quot;/&gt;"
+           data-label="MACHINE" data-component="multi-text-value" data-source="Privilege"
+           data-tags="simple hazardunit pipeline forwarding">
+            <rect x="679" y="96" width="40" height="10" fill="none" stroke="none"/>
+            <g fill="#000000" font-family="sans-serif" font-weight="bold" font-size="9px">
+                <text x="678.5" y="103.5">MACHINE</text>
+            </g>
+        </g>
         <g id="cell-uWEq7-W_z53UrtFael4O-78"
            content="&lt;object label=&quot;0&quot; component=&quot;debug-value&quot; source=&quot;CycleCount&quot; tags=&quot;simple hazardunit pipeline forwarding&quot;/&gt;"
            data-label="0" data-component="debug-value" data-source="CycleCount"

@@ -15,7 +15,7 @@
             <mxGeometry relative="1" as="geometry">
               <mxPoint x="232" y="258" as="targetPoint" />
               <Array as="points">
-                <mxPoint x="301" y="266" t />
+                <mxPoint x="301" y="266" />
                 <mxPoint x="301" y="258" />
               </Array>
             </mxGeometry>
@@ -966,6 +966,16 @@
         <object label="0" component="debug-value" source="CycleCount" tags="simple hazardunit pipeline forwarding" id="uWEq7-W_z53UrtFael4O-78">
           <mxCell style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=sans-serif;fontSize=9;fontColor=#000000;fontStyle=1;spacing=0;spacingBottom=1;" parent="i2To6XwWsyNyerFe5G8K-6" vertex="1">
             <mxGeometry x="37" width="40" height="10" as="geometry" />
+          </mxCell>
+        </object>
+        <UserObject label="Privilege:" tags="simple pipeline forwarding" id="Haz_PrivilegeLabel">
+          <mxCell style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=6;fontFamily=sans-serif;fontStyle=1;spacing=0;labelPosition=center;verticalLabelPosition=middle;labelBackgroundColor=none;spacingBottom=1;" parent="i2To6XwWsyNyerFe5G8K-6" vertex="1">
+            <mxGeometry x="2" y="30" width="41" height="8" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <object label="MACHINE" component="multi-text-value" source="Privilege" tags="simple hazardunit pipeline forwarding" id="uWEq7-PrivilegeValue">
+          <mxCell style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=sans-serif;fontSize=9;fontColor=#000000;fontStyle=1;spacing=0;spacingBottom=1;" parent="i2To6XwWsyNyerFe5G8K-6" vertex="1">
+            <mxGeometry x="37" y="27" width="40" height="10" as="geometry" />
           </mxCell>
         </object>
         <object label="0" component="debug-value" source="StallCount" tags="simple hazardunit pipeline forwarding" id="uWEq7-W_z53UrtFael4O-79">
