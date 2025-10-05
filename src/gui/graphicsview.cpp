@@ -28,14 +28,9 @@ void GraphicsView::update_scale() {
     prev_height = width();
     prev_width = height();
 
-    qreal scale = 1;
-    if (height() > h && width() > w) {
-        if (height() > width()) {
-            scale = (qreal)width() / w;
-        } else {
-            scale = (qreal)height() / h;
-        }
-    }
+    qreal scale_x = (qreal)width() / w;
+    qreal scale_y = (qreal)height() / h;
+    qreal scale = qMin(scale_x, scale_y);
     QTransform t;
     t.scale(scale, scale);
     setTransform(t, false);
