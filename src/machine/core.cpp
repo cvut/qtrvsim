@@ -3,10 +3,9 @@
 #include "common/logging.h"
 #include "execute/alu.h"
 #include "utils.h"
-#include <iostream>
-#include <ostream>
 
 #include <cinttypes>
+#include <ostream>
 
 LOG_CATEGORY("machine.core");
 
@@ -63,8 +62,7 @@ void Core::reset() {
     state.cycle_count = 0;
     state.stall_count = 0;
     do_reset();
-    state.current_privilege = CSR::PrivilegeLevel::MACHINE;
-    state.current_privilege_u = static_cast<unsigned>(state.current_privilege);
+    state.set_current_privilege(CSR::PrivilegeLevel::MACHINE);
 }
 
 unsigned Core::get_cycle_count() const {
@@ -163,9 +161,8 @@ bool Core::handle_exception(
         if (control_state->read_internal(CSR::Id::MTVEC) != 0
             && !get_step_over_exception(excause)) {
             control_state->exception_initiate(
-            state.current_privilege, CSR::PrivilegeLevel::MACHINE);
-            state.current_privilege = CSR::PrivilegeLevel::MACHINE;
-            state.current_privilege_u = static_cast<unsigned>(state.current_privilege);
+                state.current_privilege(), CSR::PrivilegeLevel::MACHINE);
+            state.set_current_privilege(CSR::PrivilegeLevel::MACHINE);
             regs->write_pc(control_state->exception_pc_address());
         }
     }
@@ -199,16 +196,16 @@ static int32_t amo32_operations(enum AccessControl memctl, int32_t a, int32_t b)
 }
 
 static int64_t amo64_operations(enum AccessControl memctl, int64_t a, int64_t b) {
-    switch(memctl) {
+    switch (memctl) {
     case AC_AMOSWAP64: return b;
-    case AC_AMOADD64:  return a + b;
-    case AC_AMOXOR64:  return a ^ b;
-    case AC_AMOAND64:  return a & b;
-    case AC_AMOOR64:   return a | b;
-    case AC_AMOMIN64:  return a < b? a: b;
-    case AC_AMOMAX64:  return a < b? b: a;
-    case AC_AMOMINU64: return (uint64_t)a < (uint64_t)b? a: b;
-    case AC_AMOMAXU64: return (uint64_t)a < (uint64_t)b? b: a;
+    case AC_AMOADD64: return a + b;
+    case AC_AMOXOR64: return a ^ b;
+    case AC_AMOAND64: return a & b;
+    case AC_AMOOR64: return a | b;
+    case AC_AMOMIN64: return a < b ? a : b;
+    case AC_AMOMAX64: return a < b ? b : a;
+    case AC_AMOMINU64: return (uint64_t)a < (uint64_t)b ? a : b;
+    case AC_AMOMAXU64: return (uint64_t)a < (uint64_t)b ? b : a;
     default: break;
     }
     return 0;
@@ -259,8 +256,7 @@ enum ExceptionCause Core::memory_special(
             towrite_val = 1;
         }
         break;
-    case AC_FISRT_AMO_MODIFY32 ... AC_LAST_AMO_MODIFY32:
-    {
+    case AC_FISRT_AMO_MODIFY32 ... AC_LAST_AMO_MODIFY32: {
         if (!memread || !memwrite) { break; }
         int32_t fetched_value;
         fetched_value = (int32_t)(mem_data->read_u32(mem_addr));
@@ -269,8 +265,7 @@ enum ExceptionCause Core::memory_special(
         towrite_val = fetched_value;
         break;
     }
-    case AC_FISRT_AMO_MODIFY64 ... AC_LAST_AMO_MODIFY64:
-    {
+    case AC_FISRT_AMO_MODIFY64 ... AC_LAST_AMO_MODIFY64: {
         if (!memread || !memwrite) { break; }
         int64_t fetched_value;
         fetched_value = (int64_t)(mem_data->read_u64(mem_addr));
@@ -294,9 +289,7 @@ FetchState Core::fetch(PCInterstage pc, bool skip_break) {
 
     if (!skip_break && hw_breaks.contains(inst_addr)) { excause = EXCAUSE_HWBREAK; }
 
-    if (control_state != nullptr) {
-        control_state->increment_internal(CSR::Id::MCYCLE, 1);
-    }
+    if (control_state != nullptr) { control_state->increment_internal(CSR::Id::MCYCLE, 1); }
 
     if (control_state != nullptr && excause == EXCAUSE_NONE) {
         if (control_state->core_interrupt_request()) { excause = EXCAUSE_INT; }
@@ -322,9 +315,7 @@ DecodeState Core::decode(const FetchInterstage &dt) {
 
     dt.inst.flags_alu_op_mem_ctl(flags, alu_op, mem_ctl);
 
-    if ((flags ^ check_inst_flags_val) & check_inst_flags_mask) {
-        excause = EXCAUSE_INSN_ILLEGAL;
-    }
+    if ((flags ^ check_inst_flags_val) & check_inst_flags_mask) { excause = EXCAUSE_INSN_ILLEGAL; }
 
     RegisterId num_rs = (flags & (IMF_ALU_REQ_RS | IMF_ALU_RS_ID)) ? dt.inst.rs() : 0;
     RegisterId num_rt = (flags & IMF_ALU_REQ_RT) ? dt.inst.rt() : 0;
@@ -350,8 +341,7 @@ DecodeState Core::decode(const FetchInterstage &dt) {
             // TODO: EXCAUSE_ECALL_S, EXCAUSE_ECALL_U
         }
     }
-    if (flags & IMF_FORCE_W_OP)
-        w_operation = true;
+    if (flags & IMF_FORCE_W_OP) w_operation = true;
 
     return { DecodeInternalState {
                  .alu_op_num = static_cast<unsigned>(alu_op.alu_op),
@@ -373,8 +363,9 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .excause = excause,
                                 .ff_rs = FORWARD_NONE,
                                 .ff_rt = FORWARD_NONE,
-                                .alu_component = (flags & IMF_AMO) ? AluComponent::PASS :
-                                                 (flags & IMF_MUL) ? AluComponent::MUL : AluComponent::ALU,
+                                .alu_component = (flags & IMF_AMO)   ? AluComponent::PASS
+                                                 : (flags & IMF_MUL) ? AluComponent::MUL
+                                                                     : AluComponent::ALU,
                                 .aluop = alu_op,
                                 .memctl = mem_ctl,
                                 .num_rs = num_rs,
@@ -416,7 +407,8 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
     }();
     const RegisterValue alu_val = [=] {
         if (excause != EXCAUSE_NONE) return RegisterValue(0);
-        return alu_combined_operate(dt.aluop, dt.alu_component, dt.w_operation, dt.alu_mod, alu_fst, alu_sec);
+        return alu_combined_operate(
+            dt.aluop, dt.alu_component, dt.w_operation, dt.alu_mod, alu_fst, alu_sec);
     }();
     const Address branch_jal_target = dt.inst_addr + dt.immediate_val.as_i64();
 
@@ -509,11 +501,13 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
     // Predictor update
     if (dt.branch_jal) {
         // JAL Jump instruction (J-type (alternative to U-type with different immediate bit order))
-        predictor->update(dt.inst, dt.inst_addr, dt.branch_jal_target, BranchType::JUMP, BranchResult::TAKEN);
+        predictor->update(
+            dt.inst, dt.inst_addr, dt.branch_jal_target, BranchType::JUMP, BranchResult::TAKEN);
     } else if (dt.branch_jalr) {
         // JALR Jump register instruction (I-type)
         predictor->update(
-            dt.inst, dt.inst_addr, Address(get_xlen_from_reg(dt.alu_val)), BranchType::JUMP, BranchResult::TAKEN);
+            dt.inst, dt.inst_addr, Address(get_xlen_from_reg(dt.alu_val)), BranchType::JUMP,
+            BranchResult::TAKEN);
     } else if (dt.branch_bxx) {
         // BXX Conditional branch instruction (B-type (alternative to S-type with different
         // immediate bit order))
@@ -530,13 +524,15 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
             csr_written = true;
         }
         if (dt.xret) {
-            CSR::PrivilegeLevel restored = control_state->exception_return(state.current_privilege);
-            state.current_privilege = restored;
-            state.current_privilege_u = static_cast<unsigned>(state.current_privilege);
+            CSR::PrivilegeLevel restored
+                = control_state->exception_return(state.current_privilege());
+            state.set_current_privilege(restored);
             if (this->xlen == Xlen::_32)
-                computed_next_inst_addr = Address(control_state->read_internal(CSR::Id::MEPC).as_u32());
+                computed_next_inst_addr
+                    = Address(control_state->read_internal(CSR::Id::MEPC).as_u32());
             else
-                computed_next_inst_addr = Address(control_state->read_internal(CSR::Id::MEPC).as_u64());
+                computed_next_inst_addr
+                    = Address(control_state->read_internal(CSR::Id::MEPC).as_u64());
             csr_written = true;
         }
     }
@@ -586,7 +582,7 @@ WritebackState Core::writeback(const MemoryInterstage &dt) {
     if (dt.regwrite) { regs->write_gp(dt.num_rd, dt.towrite_val); }
 
     return WritebackState { WritebackInternalState {
-        .inst = (dt.excause == EXCAUSE_NONE)? dt.inst: Instruction::NOP,
+        .inst = (dt.excause == EXCAUSE_NONE) ? dt.inst : Instruction::NOP,
         .inst_addr = dt.inst_addr,
         .value = dt.towrite_val,
         .num_rd = dt.num_rd,
