@@ -21,7 +21,6 @@
 #include <QObject>
 #include <QTimer>
 #include <cstdint>
-#include <iostream>
 #include <optional>
 #include <ostream>
 
@@ -50,8 +49,6 @@ public:
     TLB *get_tlb_program_rw();
     TLB *get_tlb_data_rw();
     void tlb_sync();
-    FrontendMemory *instr_frontend() { return instr_if_; }
-    FrontendMemory *data_frontend() { return data_if_; }
     const MemoryDataBus *memory_data_bus();
     MemoryDataBus *memory_data_bus_rw();
     SerialPort *serial_port();
@@ -150,10 +147,8 @@ private:
     Cache *cch_program = nullptr;
     Cache *cch_data = nullptr;
     Cache *cch_level2 = nullptr;
-    std::optional<TLB> tlb_program;
-    std::optional<TLB> tlb_data;
-    FrontendMemory *instr_if_;
-    FrontendMemory *data_if_;
+    TLB *tlb_program = nullptr;
+    TLB *tlb_data = nullptr;
     CSR::ControlState *controlst = nullptr;
     BranchPredictor *predictor = nullptr;
     Core *cr = nullptr;

@@ -22,6 +22,7 @@ public:
         FrontendMemory *memory,
         TLBType type,
         const TLBConfig *config,
+        bool vm_enabled = true,
         uint32_t memory_access_penalty_r = 1,
         uint32_t memory_access_penalty_w = 1,
         uint32_t memory_access_penalty_b = 0,
@@ -93,6 +94,7 @@ private:
     TLBType type;
     const TLBConfig tlb_config;
     uint32_t current_satp_raw = 0;
+    const bool vm_enabled;
 
     size_t num_sets_;
     size_t associativity_;

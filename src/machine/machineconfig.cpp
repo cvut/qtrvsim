@@ -4,9 +4,8 @@
 #include "machine.h"
 
 #include <QMap>
-#include <utility>
-#include <iostream>
 #include <ostream>
+#include <utility>
 
 using namespace machine;
 
@@ -344,7 +343,6 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     bp_bhr_bits = sts->value(N("BranchPredictor_BitsBHR"), DFC_BP_BHR_BITS).toUInt();
     bp_bht_addr_bits = sts->value(N("BranchPredictor_BitsBHTAddr"), DFC_BP_BHT_ADDR_BITS).toUInt();
     bp_bht_bits = bp_bhr_bits + bp_bht_addr_bits;
-
 
     // Virtual memory
     vm_enabled = sts->value(N("VMEnabled"), DFC_VM_ENABLED).toBool();

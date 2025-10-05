@@ -12,8 +12,6 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
     : machine_config(std::move(config))
     , stat(ST_READY) {
     regs = new Registers();
-    controlst
-        = new CSR::ControlState(machine_config.get_simulated_xlen(), machine_config.get_isa_word());
     if (load_executable) {
         ProgramLoader program(machine_config.elf());
         this->machine_config.set_simulated_endian(program.get_endian());
@@ -79,19 +77,16 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         access_time_burst,
         access_enable_burst);
 
-    controlst = new CSR::ControlState(machine_config.get_simulated_xlen(), machine_config.get_isa_word());
-    if (machine_config.get_vm_enabled()) {
-        tlb_program.emplace(cch_program, PROGRAM, machine_config.access_tlb_program());
-        tlb_data.emplace(cch_data, DATA, machine_config.access_tlb_data());
-        controlst->write_internal(CSR::Id::SATP, 0);
-        tlb_program->on_csr_write(CSR::Id::SATP, 0);
-        tlb_data->on_csr_write(CSR::Id::SATP, 0);
-    }
+    controlst
+        = new CSR::ControlState(machine_config.get_simulated_xlen(), machine_config.get_isa_word());
 
-    instr_if_ = tlb_program ? static_cast<FrontendMemory *>(&*tlb_program)
-                            : static_cast<FrontendMemory *>(cch_program);
-    data_if_ = tlb_data ? static_cast<FrontendMemory *>(&*tlb_data)
-                        : static_cast<FrontendMemory *>(cch_data);
+    tlb_program = new TLB(
+        cch_program, PROGRAM, machine_config.access_tlb_program(), machine_config.get_vm_enabled());
+    tlb_data = new TLB(
+        cch_data, DATA, machine_config.access_tlb_data(), machine_config.get_vm_enabled());
+    controlst->write_internal(CSR::Id::SATP, 0);
+    tlb_program->on_csr_write(CSR::Id::SATP, 0);
+    tlb_data->on_csr_write(CSR::Id::SATP, 0);
 
     predictor = new BranchPredictor(
         machine_config.get_bp_enabled(), machine_config.get_bp_type(),
@@ -100,11 +95,12 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
 
     if (machine_config.pipelined()) {
         cr = new CorePipelined(
-                    regs, predictor, instr_if_, data_if_, controlst,
-                    machine_config.get_simulated_xlen(), machine_config.get_isa_word(), machine_config.hazard_unit());
+            regs, predictor, tlb_program, tlb_data, controlst, machine_config.get_simulated_xlen(),
+            machine_config.get_isa_word(), machine_config.hazard_unit());
     } else {
-        cr = new CoreSingle(regs, predictor, instr_if_, data_if_, controlst,
-                            machine_config.get_simulated_xlen(), machine_config.get_isa_word());
+        cr = new CoreSingle(
+            regs, predictor, tlb_program, tlb_data, controlst, machine_config.get_simulated_xlen(),
+            machine_config.get_isa_word());
     }
     connect(
         this, &Machine::set_interrupt_signal, controlst, &CSR::ControlState::set_interrupt_signal);
@@ -211,14 +207,16 @@ Machine::~Machine() {
     regs = nullptr;
     delete mem;
     mem = nullptr;
+    delete tlb_program;
+    tlb_program = nullptr;
+    delete tlb_data;
+    tlb_data = nullptr;
     delete cch_program;
     cch_program = nullptr;
     delete cch_data;
     cch_data = nullptr;
     delete cch_level2;
     cch_level2 = nullptr;
-    tlb_program.reset();
-    tlb_data.reset();
     delete data_bus;
     data_bus = nullptr;
     delete mem_program_only;

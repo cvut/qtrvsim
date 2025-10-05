@@ -24,6 +24,7 @@ TLB::TLB(
     FrontendMemory *memory,
     TLBType type_,
     const TLBConfig *config,
+    bool vm_enabled,
     uint32_t memory_access_penalty_r,
     uint32_t memory_access_penalty_w,
     uint32_t memory_access_penalty_b,
@@ -32,6 +33,7 @@ TLB::TLB(
     , mem(memory)
     , type(type_)
     , tlb_config(config)
+    , vm_enabled(vm_enabled)
     , access_pen_r(memory_access_penalty_r)
     , access_pen_w(memory_access_penalty_w)
     , access_pen_b(memory_access_penalty_b)
@@ -118,6 +120,8 @@ void TLB::sync() {
 Address TLB::translate_virtual_to_physical(Address vaddr) {
     uint64_t virt = vaddr.get_raw();
     if (is_mmio_region(virt)) { return bypass_mmio(vaddr); }
+
+    if (!vm_enabled) { return vaddr; }
 
     constexpr unsigned PAGE_SHIFT = 12;
     constexpr uint64_t PAGE_MASK = (1ULL << PAGE_SHIFT) - 1;
