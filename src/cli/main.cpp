@@ -542,6 +542,7 @@ int main(int argc, char *argv[]) {
 
     load_ranges(machine, p.values("load-range"));
 
-    machine.play();
+    // QTimer::singleShot(0, &machine, &Machine::play); alternative
+    QMetaObject::invokeMethod(&machine, &Machine::play, Qt::QueuedConnection);
     return QCoreApplication::exec();
 }
