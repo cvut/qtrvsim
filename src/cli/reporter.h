@@ -31,6 +31,7 @@ public:
     void enable_regs_reporting() { e_regs = true; };
     void enable_cache_stats() { e_cache_stats = true; };
     void enable_cycles_reporting() { e_cycles = true; };
+    void enable_symbol_table_reporting() { e_symtab = true; };
 
     enum FailReason {
         FR_NONE = 0,
@@ -63,6 +64,7 @@ private:
     bool e_regs = false;
     bool e_cache_stats = false;
     bool e_cycles = false;
+    bool e_symtab = false;
     FailReason e_fail = FR_NONE;
 
     void report();

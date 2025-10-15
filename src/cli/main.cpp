@@ -52,10 +52,13 @@ void create_parser(QCommandLineParser &p) {
                   "all registers.",
                   "REG" });
     p.addOption({ "dump-to-json", "Configure reportor dump to json file.", "FNAME" });
+    p.addOption({ "only-dump", "Do not start the processor." });
+    p.addOption({ "disable-console-dump", "Configure reporter not to dump to console." });
     p.addOption({ { "dump-registers", "d-regs" }, "Dump registers state at program exit." });
     p.addOption({ "dump-cache-stats", "Dump cache statistics at program exit." });
     p.addOption({ "dump-cycles", "Dump number of CPU cycles till program end." });
     p.addOption({ "dump-range", "Dump memory range.", "START,LENGTH,FNAME" });
+    p.addOption({ "dump-symbol-table", "Dump the symbol table." });
     p.addOption({ "load-range", "Load memory range.", "START,FNAME" });
     p.addOption({ "expect-fail", "Expect that program causes CPU trap and fail if it doesn't." });
     p.addOption({ "fail-match",
@@ -139,7 +142,7 @@ void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const 
             cacheconf.set_write_policy(CacheConfig::WP_THROUGH_ALLOC);
         } else {
             fprintf(
-                stderr, "Write policy for  %s  cache is incorrect (correct wb/wt/wtna/wta). \n",
+                stderr, "Write policy for %s cache is incorrect (correct wb/wt/wtna/wta).\n",
                 qPrintable(which));
             exit(EXIT_FAILURE);
         }
@@ -161,7 +164,7 @@ void parse_u32_option(
             (config.*setter)(value);
         } else {
             fprintf(
-                stderr, "Value of option %s is not a valid unsigned integer.",
+                stderr, "Value of option %s is not a valid unsigned integer.\n",
                 qPrintable(option_name));
             exit(EXIT_FAILURE);
         }
@@ -291,9 +294,13 @@ void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *s
         r.dump_format = (DumpFormat)(r.dump_format | DumpFormat::JSON);
         r.dump_file_json = p.value("dump-to-json");
     }
+    if (p.isSet("disable-console-dump")) {
+        r.dump_format = (DumpFormat)(r.dump_format & ~(DumpFormat::CONSOLE));
+    }
     if (p.isSet("dump-registers")) { r.enable_regs_reporting(); }
     if (p.isSet("dump-cache-stats")) { r.enable_cache_stats(); }
     if (p.isSet("dump-cycles")) { r.enable_cycles_reporting(); }
+    if (p.isSet("dump-symbol-table")) { r.enable_symbol_table_reporting(); }
 
     QStringList fail = p.values("fail-match");
     for (const auto & i : fail) {
@@ -542,6 +549,11 @@ int main(int argc, char *argv[]) {
 
     load_ranges(machine, p.values("load-range"));
 
-    machine.play();
+    if (p.isSet("only-dump")) {
+        QMetaObject::invokeMethod(&machine, &Machine::program_exit, Qt::QueuedConnection);
+    } else {
+        // QTimer::singleShot(0, &machine, &Machine::play); alternative
+        QMetaObject::invokeMethod(&machine, &Machine::play, Qt::QueuedConnection);
+    }
     return QCoreApplication::exec();
 }
