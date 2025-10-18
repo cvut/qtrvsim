@@ -22,6 +22,9 @@ set(machine_SOURCES
 		memory/cache/cache_policy.cpp
 		memory/frontend_memory.cpp
 		memory/memory_bus.cpp
+        memory/tlb/tlb.cpp
+        memory/tlb/tlb_policy.cpp
+        memory/virtual/page_table_walker.cpp
 		programloader.cpp
 		predictor.cpp
 		registers.cpp
@@ -68,6 +71,11 @@ set(machine_HEADERS
 		utils.h
 		execute/alu_op.h
 		execute/mul_op.h
+        memory/virtual/virtual_address.h
+        memory/tlb/tlb.h
+        memory/virtual/sv32.h
+        memory/tlb/tlb_policy.h
+        memory/virtual/page_table_walker.h
 		)
 
 # Object library is preferred, because the library archive is never really
@@ -106,6 +114,8 @@ if(NOT ${WASM})
 	add_test(NAME registers COMMAND registers_test)
 
 	add_executable(memory_test
+                        machineconfig.cpp
+                        machineconfig.h
 			memory/backend/backend_memory.h
 			memory/backend/memory.cpp
 			memory/backend/memory.h
@@ -113,6 +123,12 @@ if(NOT ${WASM})
 			memory/backend/memory.test.h
 			memory/frontend_memory.cpp
 			memory/frontend_memory.h
+            memory/tlb/tlb.h
+            memory/tlb/tlb.cpp
+            memory/tlb/tlb_policy.h
+            memory/tlb/tlb_policy.cpp
+            memory/virtual/page_table_walker.h
+            memory/virtual/page_table_walker.cpp
 			memory/memory_bus.cpp
 			memory/memory_bus.h
 			simulator_exception.cpp
@@ -138,6 +154,12 @@ if(NOT ${WASM})
 			memory/cache/cache_policy.h
 			memory/frontend_memory.cpp
 			memory/frontend_memory.h
+            memory/tlb/tlb.h
+            memory/tlb/tlb.cpp
+            memory/tlb/tlb_policy.h
+            memory/tlb/tlb_policy.cpp
+            memory/virtual/page_table_walker.h
+            memory/virtual/page_table_walker.cpp
 			memory/memory_bus.cpp
 			memory/memory_bus.h
 			simulator_exception.cpp
@@ -205,6 +227,12 @@ if(NOT ${WASM})
 			memory/cache/cache_policy.h
 			memory/frontend_memory.cpp
 			memory/frontend_memory.h
+            memory/tlb/tlb.h
+            memory/tlb/tlb.cpp
+            memory/tlb/tlb_policy.h
+            memory/tlb/tlb_policy.cpp
+            memory/virtual/page_table_walker.h
+			memory/virtual/page_table_walker.cpp
 			memory/memory_bus.cpp
 			memory/memory_bus.h
 			registers.cpp
