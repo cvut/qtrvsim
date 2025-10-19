@@ -12,7 +12,6 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
     : machine_config(std::move(config))
     , stat(ST_READY) {
     regs = new Registers();
-
     if (load_executable) {
         ProgramLoader program(machine_config.elf());
         this->machine_config.set_simulated_endian(program.get_endian());
@@ -68,6 +67,15 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
 
     controlst
         = new CSR::ControlState(machine_config.get_simulated_xlen(), machine_config.get_isa_word());
+
+    tlb_program = new TLB(
+        cch_program, PROGRAM, machine_config.access_tlb_program(), machine_config.get_vm_enabled());
+    tlb_data = new TLB(
+        cch_data, DATA, machine_config.access_tlb_data(), machine_config.get_vm_enabled());
+    controlst->write_internal(CSR::Id::SATP, 0);
+    tlb_program->on_csr_write(CSR::Id::SATP, 0);
+    tlb_data->on_csr_write(CSR::Id::SATP, 0);
+
     predictor = new BranchPredictor(
         machine_config.get_bp_enabled(), machine_config.get_bp_type(),
         machine_config.get_bp_init_state(), machine_config.get_bp_btb_bits(),
@@ -75,11 +83,11 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
 
     if (machine_config.pipelined()) {
         cr = new CorePipelined(
-            regs, predictor, cch_program, cch_data, controlst, machine_config.get_simulated_xlen(),
+            regs, predictor, tlb_program, tlb_data, controlst, machine_config.get_simulated_xlen(),
             machine_config.get_isa_word(), machine_config.hazard_unit());
     } else {
         cr = new CoreSingle(
-            regs, predictor, cch_program, cch_data, controlst, machine_config.get_simulated_xlen(),
+            regs, predictor, tlb_program, tlb_data, controlst, machine_config.get_simulated_xlen(),
             machine_config.get_isa_word());
     }
     connect(
@@ -176,6 +184,10 @@ Machine::~Machine() {
     regs = nullptr;
     delete mem;
     mem = nullptr;
+    delete tlb_program;
+    tlb_program = nullptr;
+    delete tlb_data;
+    tlb_data = nullptr;
     delete cch_program;
     cch_program = nullptr;
     delete cch_data;
@@ -241,6 +253,27 @@ void Machine::cache_sync() {
     if (cch_program != nullptr) { cch_program->sync(); }
     if (cch_data != nullptr) { cch_data->sync(); }
     if (cch_level2 != nullptr) { cch_level2->sync(); }
+}
+
+void Machine::tlb_sync() {
+    if (tlb_program) { tlb_program->sync(); }
+    if (tlb_data) { tlb_data->sync(); }
+}
+
+const TLB *Machine::get_tlb_program() const {
+    return tlb_program ? &*tlb_program : nullptr;
+}
+
+const TLB *Machine::get_tlb_data() const {
+    return tlb_data ? &*tlb_data : nullptr;
+}
+
+TLB *Machine::get_tlb_program_rw() {
+    return tlb_program ? &*tlb_program : nullptr;
+}
+
+TLB *Machine::get_tlb_data_rw() {
+    return tlb_data ? &*tlb_data : nullptr;
 }
 
 const MemoryDataBus *Machine::memory_data_bus() {
