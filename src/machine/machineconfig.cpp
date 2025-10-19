@@ -27,6 +27,11 @@ using namespace machine;
 #define DFC_BP_BTB_BITS      2
 #define DFC_BP_BHR_BITS      0
 #define DFC_BP_BHT_ADDR_BITS 2
+/// Default config of Virtual Memory
+#define DFC_VM_ENABLED false
+#define DFC_TLB_SETS   16
+#define DFC_TLB_ASSOC  1
+#define DFC_TLB_REPLAC RP_LRU
 //////////////////////////////////////////////////////////////////////////////
 /// Default config of CacheConfig
 #define DFC_EN     false
@@ -151,6 +156,104 @@ bool CacheConfig::operator==(const CacheConfig &c) const {
 bool CacheConfig::operator!=(const CacheConfig &c) const {
     return !operator==(c);
 }
+//////////////////////////////////////////////////////////////////////////////
+
+TLBConfig::TLBConfig() {
+    vm_asid = 0;
+    n_sets = DFC_TLB_SETS;
+    d_associativity = DFC_TLB_ASSOC;
+    replac_pol = (enum ReplacementPolicy)DFC_TLB_REPLAC;
+}
+
+TLBConfig::TLBConfig(const TLBConfig *tc) {
+    if (tc == nullptr) {
+        vm_asid = 0;
+        n_sets = DFC_TLB_SETS;
+        d_associativity = DFC_TLB_ASSOC;
+        replac_pol = (enum ReplacementPolicy)DFC_TLB_REPLAC;
+        return;
+    }
+    vm_asid = tc->get_vm_asid();
+    n_sets = tc->get_tlb_num_sets();
+    d_associativity = tc->get_tlb_associativity();
+    replac_pol = tc->get_tlb_replacement_policy();
+}
+
+#define N(STR) (prefix + QString(STR))
+
+TLBConfig::TLBConfig(const QSettings *sts, const QString &prefix) {
+    vm_asid = sts->value(N("VM_ASID"), 0u).toUInt();
+    n_sets = sts->value(N("NumSets"), DFC_TLB_SETS).toUInt();
+    d_associativity = sts->value(N("Associativity"), DFC_TLB_ASSOC).toUInt();
+    replac_pol = (enum ReplacementPolicy)sts->value(N("Policy"), DFC_TLB_REPLAC).toUInt();
+}
+
+void TLBConfig::store(QSettings *sts, const QString &prefix) const {
+    sts->setValue(N("VM_ASID"), get_vm_asid());
+    sts->setValue(N("NumSets"), get_tlb_num_sets());
+    sts->setValue(N("Associativity"), get_tlb_associativity());
+    sts->setValue(N("Policy"), (unsigned)get_tlb_replacement_policy());
+}
+
+#undef N
+
+void TLBConfig::preset(enum ConfigPresets p) {
+    switch (p) {
+    case CP_PIPE:
+    case CP_SINGLE_CACHE:
+    case CP_SINGLE:
+    case CP_PIPE_NO_HAZARD:
+        vm_asid = 0;
+        n_sets = DFC_TLB_SETS;
+        d_associativity = DFC_TLB_ASSOC;
+        replac_pol = (enum ReplacementPolicy)DFC_TLB_REPLAC;
+    }
+}
+
+void TLBConfig::set_vm_asid(uint32_t a) {
+    vm_asid = a;
+}
+
+uint32_t TLBConfig::get_vm_asid() const {
+    return vm_asid;
+}
+
+void TLBConfig::set_tlb_num_sets(unsigned v) {
+    n_sets = v > 0 ? v : 1;
+}
+
+void TLBConfig::set_tlb_associativity(unsigned v) {
+    d_associativity = v > 0 ? v : 1;
+}
+
+void TLBConfig::set_tlb_replacement_policy(TLBConfig::ReplacementPolicy p) {
+    replac_pol = p;
+}
+
+unsigned TLBConfig::get_tlb_num_sets() const {
+    return n_sets;
+}
+
+unsigned TLBConfig::get_tlb_associativity() const {
+    return d_associativity;
+}
+
+TLBConfig::ReplacementPolicy TLBConfig::get_tlb_replacement_policy() const {
+    return replac_pol;
+}
+
+bool TLBConfig::operator==(const TLBConfig &c) const {
+#define CMP(GETTER) (GETTER)() == (c.GETTER)()
+    return CMP(get_vm_asid) && CMP(get_tlb_num_sets) && CMP(get_tlb_associativity)
+           && CMP(get_tlb_replacement_policy);
+#undef CMP
+}
+
+bool TLBConfig::operator!=(const TLBConfig &c) const {
+    return !operator==(c);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 MachineConfig::MachineConfig() {
     simulated_endian = LITTLE;
@@ -186,6 +289,11 @@ MachineConfig::MachineConfig() {
     bp_bhr_bits = DFC_BP_BHR_BITS;
     bp_bht_addr_bits = DFC_BP_BHT_ADDR_BITS;
     bp_bht_bits = bp_bhr_bits + bp_bht_addr_bits;
+
+    // Virtual memory
+    vm_enabled = DFC_VM_ENABLED;
+    tlb_program = TLBConfig();
+    tlb_data = TLBConfig();
 }
 
 MachineConfig::MachineConfig(const MachineConfig *config) {
@@ -222,6 +330,11 @@ MachineConfig::MachineConfig(const MachineConfig *config) {
     bp_bhr_bits = config->get_bp_bhr_bits();
     bp_bht_addr_bits = config->get_bp_bht_addr_bits();
     bp_bht_bits = bp_bhr_bits + bp_bht_addr_bits;
+
+    // Virtual memory
+    vm_enabled = config->get_vm_enabled();
+    tlb_program = config->tlbc_program();
+    tlb_data = config->tlbc_data();
 }
 
 #define N(STR) (prefix + QString(STR))
@@ -266,6 +379,11 @@ MachineConfig::MachineConfig(const QSettings *sts, const QString &prefix) {
     bp_bhr_bits = sts->value(N("BranchPredictor_BitsBHR"), DFC_BP_BHR_BITS).toUInt();
     bp_bht_addr_bits = sts->value(N("BranchPredictor_BitsBHTAddr"), DFC_BP_BHT_ADDR_BITS).toUInt();
     bp_bht_bits = bp_bhr_bits + bp_bht_addr_bits;
+
+    // Virtual memory
+    vm_enabled = sts->value(N("VMEnabled"), DFC_VM_ENABLED).toBool();
+    tlb_data = TLBConfig(sts, N("DataTLB_"));
+    tlb_program = TLBConfig(sts, N("ProgramTLB_"));
 }
 
 void MachineConfig::store(QSettings *sts, const QString &prefix) {
@@ -298,6 +416,11 @@ void MachineConfig::store(QSettings *sts, const QString &prefix) {
     sts->setValue(N("BranchPredictor_BitsBTB"), get_bp_btb_bits());
     sts->setValue(N("BranchPredictor_BitsBHR"), get_bp_bhr_bits());
     sts->setValue(N("BranchPredictor_BitsBHTAddr"), get_bp_bht_addr_bits());
+
+    // Virtual memory
+    sts->setValue(N("VMEnabled"), get_vm_enabled());
+    tlbc_program().store(sts, N("ProgramTLB_"));
+    tlbc_data().store(sts, N("DataTLB_"));
 }
 
 #undef N
@@ -340,6 +463,10 @@ void MachineConfig::preset(enum ConfigPresets p) {
     access_cache_program()->preset(p);
     access_cache_data()->preset(p);
     access_cache_level2()->preset(p);
+
+    set_vm_enabled(DFC_VM_ENABLED);
+    access_tlb_program()->preset(p);
+    access_tlb_data()->preset(p);
 
     set_simulated_xlen(Xlen::_32);
     set_isa_word(config_isa_word_default);
@@ -558,6 +685,22 @@ CacheConfig *MachineConfig::access_cache_level2() {
     return &cch_level2;
 }
 
+TLBConfig *MachineConfig::access_tlb_program() {
+    return &tlb_program;
+}
+
+TLBConfig *MachineConfig::access_tlb_data() {
+    return &tlb_data;
+}
+
+const TLBConfig &MachineConfig::tlbc_program() const {
+    return tlb_program;
+}
+
+const TLBConfig &MachineConfig::tlbc_data() const {
+    return tlb_data;
+}
+
 Endian MachineConfig::get_simulated_endian() const {
     return simulated_endian;
 }
@@ -629,6 +772,14 @@ uint8_t MachineConfig::get_bp_bht_bits() const {
     return bp_bht_bits;
 }
 
+void MachineConfig::set_vm_enabled(bool v) {
+    vm_enabled = v;
+}
+
+bool MachineConfig::get_vm_enabled() const {
+    return vm_enabled;
+}
+
 bool MachineConfig::operator==(const MachineConfig &c) const {
 #define CMP(GETTER) (GETTER)() == (c.GETTER)()
     return CMP(pipelined) && CMP(delay_slot) && CMP(hazard_unit) && CMP(get_simulated_xlen)
@@ -638,7 +789,7 @@ bool MachineConfig::operator==(const MachineConfig &c) const {
            && CMP(memory_access_time_read) && CMP(memory_access_time_write)
            && CMP(memory_access_time_burst) && CMP(memory_access_time_level2)
            && CMP(memory_access_enable_burst) && CMP(elf) && CMP(cache_program) && CMP(cache_data)
-           && CMP(cache_level2);
+           && CMP(cache_level2) && CMP(get_vm_enabled) && CMP(tlbc_data) && CMP(tlbc_program);
 #undef CMP
 }
 
