@@ -108,7 +108,7 @@ public:
     constexpr inline int64_t operator-(const Address &other) const;
 };
 
-constexpr Address operator"" _addr(unsigned long long literal) {
+constexpr Address operator""_addr(unsigned long long literal) {
     return Address(literal);
 }
 
