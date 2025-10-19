@@ -102,8 +102,10 @@ struct DecodeInterstage {
     bool memwrite = false;                          // If memory should write input
     bool alusrc = false;      // If second value to alu is immediate value (rt used otherwise)
     bool regwrite = false;    // If output should be written back to register
+    bool regwrite_fp = false; // If output should be written back to floating point register
     bool alu_req_rs = false;  // requires rs value for ALU
     bool alu_req_rt = false;  // requires rt value for ALU or SW
+    bool alu_fp = false;      // ALU operation is floating point
     bool branch_bxx = false;  // branch instruction
     bool branch_jal = false;  // jump
     bool branch_val = false;  // negate branch condition
@@ -170,6 +172,8 @@ struct ExecuteInterstage {
     bool memread = false;
     bool memwrite = false;
     bool regwrite = false;
+    bool regwrite_fp = false;
+    bool alu_fp = false;
     bool is_valid = false;
     bool branch_bxx = false;
     bool branch_jal = false;
@@ -243,6 +247,7 @@ struct MemoryInterstage {
     RegisterId num_rd = 0;
     bool memtoreg = false;
     bool regwrite = false;
+    bool regwrite_fp = false;
     bool is_valid = false;
     bool csr_written = false;
 
