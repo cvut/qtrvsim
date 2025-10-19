@@ -22,6 +22,9 @@ set(machine_SOURCES
 		memory/cache/cache_policy.cpp
 		memory/frontend_memory.cpp
 		memory/memory_bus.cpp
+		memory/tlb/tlb.cpp
+		memory/tlb/tlb_policy.cpp
+		memory/virtual/page_table_walker.cpp
 		programloader.cpp
 		predictor.cpp
 		registers.cpp
@@ -68,6 +71,11 @@ set(machine_HEADERS
 		utils.h
 		execute/alu_op.h
 		execute/mul_op.h
+		memory/virtual/virtual_address.h
+		memory/tlb/tlb.h
+		memory/virtual/sv32.h
+		memory/tlb/tlb_policy.h
+		memory/virtual/page_table_walker.h
 		)
 
 # Object library is preferred, because the library archive is never really
@@ -79,7 +87,7 @@ target_link_libraries(machine
 		PRIVATE ${QtLib}::Core
 		PUBLIC libelf)
 
-if(NOT ${WASM})
+if (NOT ${WASM})
 	# Machine tests (not available on WASM)
 
 	add_executable(alu_test
@@ -87,7 +95,7 @@ if(NOT ${WASM})
 			execute/alu.test.h
 			execute/alu.cpp
 			execute/alu.h
-			)
+	)
 	target_link_libraries(alu_test
 			PRIVATE ${QtLib}::Core ${QtLib}::Test)
 	add_test(NAME alu COMMAND alu_test)
@@ -100,12 +108,14 @@ if(NOT ${WASM})
 			registers.test.h
 			simulator_exception.cpp
 			simulator_exception.h
-			)
+	)
 	target_link_libraries(registers_test
 			PRIVATE ${QtLib}::Core ${QtLib}::Test)
 	add_test(NAME registers COMMAND registers_test)
 
 	add_executable(memory_test
+			machineconfig.cpp
+			machineconfig.h
 			memory/backend/backend_memory.h
 			memory/backend/memory.cpp
 			memory/backend/memory.h
@@ -113,6 +123,12 @@ if(NOT ${WASM})
 			memory/backend/memory.test.h
 			memory/frontend_memory.cpp
 			memory/frontend_memory.h
+			memory/tlb/tlb.h
+			memory/tlb/tlb.cpp
+			memory/tlb/tlb_policy.h
+			memory/tlb/tlb_policy.cpp
+			memory/virtual/page_table_walker.h
+			memory/virtual/page_table_walker.cpp
 			memory/memory_bus.cpp
 			memory/memory_bus.h
 			simulator_exception.cpp
@@ -138,6 +154,12 @@ if(NOT ${WASM})
 			memory/cache/cache_policy.h
 			memory/frontend_memory.cpp
 			memory/frontend_memory.h
+			memory/tlb/tlb.h
+			memory/tlb/tlb.cpp
+			memory/tlb/tlb_policy.h
+			memory/tlb/tlb_policy.cpp
+			memory/virtual/page_table_walker.h
+			memory/virtual/page_table_walker.cpp
 			memory/memory_bus.cpp
 			memory/memory_bus.h
 			simulator_exception.cpp
@@ -158,7 +180,7 @@ if(NOT ${WASM})
 			instruction.test.h
 			simulator_exception.cpp
 			simulator_exception.h
-			)
+	)
 	target_link_libraries(instruction_test
 			PRIVATE ${QtLib}::Core ${QtLib}::Test)
 	add_test(NAME instruction COMMAND instruction_test)
@@ -179,7 +201,7 @@ if(NOT ${WASM})
 			simulator_exception.h
 			symboltable.cpp
 			symboltable.h
-			)
+	)
 	target_link_libraries(program_loader_test
 			PRIVATE ${QtLib}::Core ${QtLib}::Test libelf)
 	add_test(NAME program_loader COMMAND program_loader_test)
@@ -205,6 +227,12 @@ if(NOT ${WASM})
 			memory/cache/cache_policy.h
 			memory/frontend_memory.cpp
 			memory/frontend_memory.h
+			memory/tlb/tlb.h
+			memory/tlb/tlb.cpp
+			memory/tlb/tlb_policy.h
+			memory/tlb/tlb_policy.cpp
+			memory/virtual/page_table_walker.h
+			memory/virtual/page_table_walker.cpp
 			memory/memory_bus.cpp
 			memory/memory_bus.h
 			registers.cpp
@@ -222,4 +250,4 @@ if(NOT ${WASM})
 
 	add_custom_target(machine_unit_tests
 			DEPENDS alu_test registers_test memory_test cache_test instruction_test program_loader_test core_test)
-endif()
+endif ()

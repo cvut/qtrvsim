@@ -27,10 +27,12 @@ enum ConfigPresets {
     CP_PIPE            // Full pipelined cpu
 };
 
-constexpr ConfigIsaWord config_isa_word_default = ConfigIsaWord::byChar('E') | ConfigIsaWord::byChar('I') |
-        ConfigIsaWord::byChar('A') |ConfigIsaWord::byChar('M');
+constexpr ConfigIsaWord config_isa_word_default
+    = ConfigIsaWord::byChar('E') | ConfigIsaWord::byChar('I') | ConfigIsaWord::byChar('A')
+      | ConfigIsaWord::byChar('M');
 
-constexpr ConfigIsaWord config_isa_word_fixed = ConfigIsaWord::byChar('E') | ConfigIsaWord::byChar('I');
+constexpr ConfigIsaWord config_isa_word_fixed
+    = ConfigIsaWord::byChar('E') | ConfigIsaWord::byChar('I');
 
 class CacheConfig {
 public:
@@ -80,6 +82,41 @@ private:
     unsigned n_sets, n_blocks, d_associativity;
     enum ReplacementPolicy replac_pol;
     enum WritePolicy write_pol;
+};
+
+class TLBConfig {
+public:
+    TLBConfig();
+    explicit TLBConfig(const TLBConfig *cc);
+    explicit TLBConfig(const QSettings *, const QString &prefix = "");
+
+    enum VmMode { VM_BARE, VM_SV32 };
+
+    enum ReplacementPolicy {
+        RP_RAND, // Random
+        RP_LRU,  // Least recently used
+        RP_LFU,  // Least frequently used
+        RP_PLRU  // Pseudo Least recently used
+    };
+
+    // Virtual Memory
+    void set_vm_asid(uint32_t a);
+    uint32_t get_vm_asid() const;
+
+    void set_tlb_num_sets(unsigned);
+    void set_tlb_associativity(unsigned);
+    void set_tlb_replacement_policy(ReplacementPolicy);
+
+    unsigned get_tlb_num_sets() const;
+    unsigned get_tlb_associativity() const;
+    ReplacementPolicy get_tlb_replacement_policy() const;
+
+private:
+    bool vm_enabled = false;
+    uint32_t vm_asid = 0;
+    unsigned n_sets = 1;
+    unsigned d_associativity = 1;
+    enum ReplacementPolicy replac_pol = RP_RAND;
 };
 
 class MachineConfig {
@@ -161,6 +198,12 @@ public:
     Xlen get_simulated_xlen() const;
     ConfigIsaWord get_isa_word() const;
 
+    // Virtual memory
+    void set_vm_enabled(bool v);
+    bool get_vm_enabled() const;
+    const TLBConfig &tlbc_program() const;
+    const TLBConfig &tlbc_data() const;
+
     // Branch predictor - Setters
     void set_bp_enabled(bool e);
     void set_bp_type(PredictorType t);
@@ -180,6 +223,9 @@ public:
     CacheConfig *access_cache_program();
     CacheConfig *access_cache_data();
     CacheConfig *access_cache_level2();
+
+    TLBConfig *access_tlb_program();
+    TLBConfig *access_tlb_data();
 
     bool operator==(const MachineConfig &c) const;
     bool operator!=(const MachineConfig &c) const;
@@ -208,6 +254,10 @@ private:
     uint8_t bp_bhr_bits;
     uint8_t bp_bht_addr_bits;
     uint8_t bp_bht_bits; // = bp_bhr_bits + bp_bht_addr_bits
+
+    // Virtual memory
+    bool vm_enabled;
+    TLBConfig tlb_program, tlb_data;
 };
 
 } // namespace machine
