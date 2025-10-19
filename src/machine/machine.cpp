@@ -12,7 +12,6 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
     : machine_config(std::move(config))
     , stat(ST_READY) {
     regs.reset(new Registers());
-
     if (load_executable) {
         ProgramLoader program(machine_config.elf());
         this->machine_config.set_simulated_endian(program.get_endian());
@@ -68,6 +67,16 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
 
     controlst.reset(
         new CSR::ControlState(machine_config.get_simulated_xlen(), machine_config.get_isa_word()));
+
+    tlb_program.reset(new TLB(
+        cch_program.data(), PROGRAM, machine_config.access_tlb_program(),
+        machine_config.get_vm_enabled()));
+    tlb_data.reset(new TLB(
+        cch_data.data(), DATA, machine_config.access_tlb_data(), machine_config.get_vm_enabled()));
+    controlst->write_internal(CSR::Id::SATP, 0);
+    tlb_program->on_csr_write(CSR::Id::SATP, 0);
+    tlb_data->on_csr_write(CSR::Id::SATP, 0);
+
     predictor.reset(new BranchPredictor(
         machine_config.get_bp_enabled(), machine_config.get_bp_type(),
         machine_config.get_bp_init_state(), machine_config.get_bp_btb_bits(),
@@ -75,12 +84,12 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
 
     if (machine_config.pipelined()) {
         cr.reset(new CorePipelined(
-            regs.data(), predictor.data(), cch_program.data(), cch_data.data(), controlst.data(),
+            regs.data(), predictor.data(), tlb_program.data(), tlb_data.data(), controlst.data(),
             machine_config.get_simulated_xlen(), machine_config.get_isa_word(),
             machine_config.hazard_unit()));
     } else {
         cr.reset(new CoreSingle(
-            regs.data(), predictor.data(), cch_program.data(), cch_data.data(), controlst.data(),
+            regs.data(), predictor.data(), tlb_program.data(), tlb_data.data(), controlst.data(),
             machine_config.get_simulated_xlen(), machine_config.get_isa_word()));
     }
     connect(
@@ -168,15 +177,26 @@ void Machine::setup_aclint_sswi() {
 }
 
 Machine::~Machine() {
-    stop_core_clock();
+    run_t.reset();
+    cr.reset();
+    controlst.reset();
+    regs.reset();
+    mem.reset();
+    cch_program.reset();
+    cch_data.reset();
+    cch_level2.reset();
+    data_bus.reset();
+    mem_program_only.reset();
+    symtab.reset();
+    predictor.reset();
 }
 
 const MachineConfig &Machine::config() {
     return machine_config;
 }
 
-void Machine::set_speed(unsigned int ips, unsigned int time_chunk) {
-    this->time_chunk = time_chunk;
+void Machine::set_speed(unsigned int ips, unsigned int time_chunk_ms) {
+    this->time_chunk = time_chunk_ms;
     run_t->setInterval(ips);
     if (run_t->isActive()) {
         // Clock settings changed.
@@ -220,6 +240,27 @@ void Machine::cache_sync() {
     if (!cch_program.isNull()) { cch_program->sync(); }
     if (!cch_data.isNull()) { cch_data->sync(); }
     if (!cch_level2.isNull()) { cch_level2->sync(); }
+}
+
+void Machine::tlb_sync() {
+    if (tlb_program) { tlb_program->sync(); }
+    if (tlb_data) { tlb_data->sync(); }
+}
+
+const TLB *Machine::get_tlb_program() const {
+    return tlb_program ? &*tlb_program : nullptr;
+}
+
+const TLB *Machine::get_tlb_data() const {
+    return tlb_data ? &*tlb_data : nullptr;
+}
+
+TLB *Machine::get_tlb_program_rw() {
+    return tlb_program ? &*tlb_program : nullptr;
+}
+
+TLB *Machine::get_tlb_data_rw() {
+    return tlb_data ? &*tlb_data : nullptr;
 }
 
 const MemoryDataBus *Machine::memory_data_bus() {

@@ -12,6 +12,7 @@
 #include "memory/backend/serialport.h"
 #include "memory/cache/cache.h"
 #include "memory/memory_bus.h"
+#include "memory/tlb/tlb.h"
 #include "predictor.h"
 #include "registers.h"
 #include "simulator_exception.h"
@@ -20,6 +21,7 @@
 #include <QObject>
 #include <QTimer>
 #include <cstdint>
+#include <optional>
 
 namespace machine {
 
@@ -41,6 +43,11 @@ public:
     const Cache *cache_level2();
     Cache *cache_data_rw();
     void cache_sync();
+    const TLB *get_tlb_program() const;
+    const TLB *get_tlb_data() const;
+    TLB *get_tlb_program_rw();
+    TLB *get_tlb_data_rw();
+    void tlb_sync();
     const MemoryDataBus *memory_data_bus();
     MemoryDataBus *memory_data_bus_rw();
     SerialPort *serial_port();
@@ -132,6 +139,8 @@ private:
     Box<Cache> cch_level2;
     Box<Cache> cch_program;
     Box<Cache> cch_data;
+    Box<TLB> tlb_data;
+    Box<TLB> tlb_program;
     Box<CSR::ControlState> controlst;
     Box<BranchPredictor> predictor;
     Box<Core> cr;

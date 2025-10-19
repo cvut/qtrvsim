@@ -49,6 +49,17 @@ private:
  *  As we are simulating whole 32bit memory address space then this is most
  * probably QtRvSim bug if raised not program. Sanity: This is sanity check
  * exception
+ * PageFault:
+ *  A page-fault occurs during virtual memory translation when the requested
+ *  access cannot be satisfied. Typical causes:
+ *   - No PTE present for the accessed virtual page (page not mapped).
+ *   - PTE is present but not valid (V == 0).
+ *   - Permissions violation (access type not allowed by PTE: read/write/execute).
+ *   - Malformed or unexpected PTE contents (e.g. non-leaf with R/W/X set).
+ *   - Wrong privilege level or ASID mismatch.
+ *  PageFault is a runtime exception raised by the page-table walker and
+ *  is recoverable after the page-fault handler allocates pages or installs
+ *  mappings (demand paging).
  */
 #define SIMULATOR_EXCEPTIONS                                                                       \
     EXCEPTION(Input, )                                                                             \
@@ -59,6 +70,7 @@ private:
     EXCEPTION(UnalignedJump, Runtime)                                                              \
     EXCEPTION(UnknownMemoryControl, Runtime)                                                       \
     EXCEPTION(OutOfMemoryAccess, Runtime)                                                          \
+    EXCEPTION(PageFault, Runtime)                                                                  \
     EXCEPTION(Sanity, )                                                                            \
     EXCEPTION(SyscallUnknown, Runtime)
 
