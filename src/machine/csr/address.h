@@ -55,7 +55,7 @@ namespace machine { namespace CSR {
         bool operator!=(const Address &rhs) const { return data != rhs.data; }
     };
 
-    constexpr Address operator"" _csr(unsigned long long literal) {
+    constexpr Address operator""_csr(unsigned long long literal) {
         return Address(literal);
     }
 }} // namespace machine::CSR

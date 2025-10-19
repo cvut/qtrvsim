@@ -42,7 +42,7 @@ inline constexpr RegisterId::RegisterId(uint8_t value) : data(value) {
 }
 inline RegisterId::RegisterId() : RegisterId(0) {}
 
-inline RegisterId operator"" _reg(unsigned long long value) {
+inline RegisterId operator""_reg(unsigned long long value) {
     return { static_cast<uint8_t>(value) };
 }
 
