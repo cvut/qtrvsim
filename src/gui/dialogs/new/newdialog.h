@@ -19,7 +19,7 @@ class NewDialog : public QDialog {
 public:
     NewDialog(QWidget *parent, QSettings *settings);
 
-    void switch2custom();
+    void switch_to_custom();
 
 protected:
     void closeEvent(QCloseEvent *) override;
@@ -63,6 +63,13 @@ private slots:
     void bp_btb_addr_bits_change(int);
     void bp_bht_bhr_bits_change(int);
     void bp_bht_addr_bits_change(int);
+
+
+    // Virtual Memory
+    void vm_enabled_change(bool);
+    void tlb_num_sets_changed(int);
+    void tlb_assoc_changed(int);
+    void tlb_policy_changed(int);
 
 private:
     Box<Ui::NewDialog> ui {};

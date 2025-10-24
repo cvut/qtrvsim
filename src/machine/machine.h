@@ -3,15 +3,16 @@
 
 #include "core.h"
 #include "machineconfig.h"
+#include "memory/backend/aclintmswi.h"
+#include "memory/backend/aclintmtimer.h"
+#include "memory/backend/aclintsswi.h"
 #include "memory/backend/lcddisplay.h"
 #include "memory/backend/peripheral.h"
 #include "memory/backend/peripspiled.h"
 #include "memory/backend/serialport.h"
-#include "memory/backend/aclintmtimer.h"
-#include "memory/backend/aclintmswi.h"
-#include "memory/backend/aclintsswi.h"
 #include "memory/cache/cache.h"
 #include "memory/memory_bus.h"
+#include "memory/tlb/tlb.h"
 #include "predictor.h"
 #include "registers.h"
 #include "simulator_exception.h"
@@ -20,6 +21,7 @@
 #include <QObject>
 #include <QTimer>
 #include <cstdint>
+#include <optional>
 
 namespace machine {
 
@@ -41,6 +43,11 @@ public:
     const Cache *cache_level2();
     Cache *cache_data_rw();
     void cache_sync();
+    const TLB *get_tlb_program() const;
+    const TLB *get_tlb_data() const;
+    TLB *get_tlb_program_rw();
+    TLB *get_tlb_data_rw();
+    void tlb_sync();
     const MemoryDataBus *memory_data_bus();
     MemoryDataBus *memory_data_bus_rw();
     SerialPort *serial_port();
@@ -84,6 +91,14 @@ public:
     void set_step_over_exception(enum ExceptionCause excause, bool value);
     bool get_step_over_exception(enum ExceptionCause excause) const;
     enum ExceptionCause get_exception_cause() const;
+
+    Address virtual_to_physical(Address v) {
+        if (tlb_data) {
+            return tlb_data->translate_virtual_to_physical(v);
+        } else {
+            return v;
+        }
+    }
 
 public slots:
     void play();
@@ -131,6 +146,8 @@ private:
     Cache *cch_program = nullptr;
     Cache *cch_data = nullptr;
     Cache *cch_level2 = nullptr;
+    TLB *tlb_program = nullptr;
+    TLB *tlb_data = nullptr;
     CSR::ControlState *controlst = nullptr;
     BranchPredictor *predictor = nullptr;
     Core *cr = nullptr;
