@@ -17,8 +17,9 @@ public:
 protected:
     QString name, reason, ext, file;
     int line;
+
 private:
-    mutable char * cached_what;
+    mutable char *cached_what;
 };
 
 /* This is list of all QtRvSim specific exceptions

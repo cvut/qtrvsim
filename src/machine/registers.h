@@ -58,11 +58,11 @@ public:
     Address read_pc() const;        // Return current value of program counter
     void write_pc(Address address); // Absolute jump in program counter
 
-    RegisterValue read_gp(RegisterId reg) const;        // Read general-purpose
-                                                        // register
+    RegisterValue read_gp(RegisterId reg) const;          // Read general-purpose
+                                                          // register
     RegisterValue read_gp_internal(RegisterId reg) const; // For use from GUI.
-    void write_gp(RegisterId reg, RegisterValue value); // Write general-purpose
-                                                        // register
+    void write_gp(RegisterId reg, RegisterValue value);   // Write general-purpose
+                                                          // register
 
     bool operator==(const Registers &c) const;
     bool operator!=(const Registers &c) const;

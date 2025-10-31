@@ -120,14 +120,14 @@ static inline constexpr uint64_t mulhsu64(int64_t a, uint64_t b) {
 
     #include <intrin.h>
     // https://docs.microsoft.com/en-gb/cpp/intrinsics/umulh
-    #define mulhu64 __umulh
+    #define mulhu64  __umulh
     // https://docs.microsoft.com/en-gb/cpp/intrinsics/mulh
-    #define mulh64 __mulh
+    #define mulh64   __mulh
     // Not provided by MVSC
     #define mulhsu64 mulhsu64_fallback
 #else
-    #define mulh64 mulh64_fallback
-    #define mulhu64 mulhu64_fallback
+    #define mulh64   mulh64_fallback
+    #define mulhu64  mulhu64_fallback
     #define mulhsu64 mulhsu64_fallback
 #endif
 

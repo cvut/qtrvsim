@@ -34,9 +34,10 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
     QString versionText;
     versionText = "Version " APP_VERSION "\n";
 
-    vl->addWidget(new QLabel("<span style='font-size:x-large; font-weight:bold;"
-                             "'>" APP_NAME " "
-                             "- RISC-V Architecture Simulator</span>"));
+    vl->addWidget(new QLabel(
+        "<span style='font-size:x-large; font-weight:bold;"
+        "'>" APP_NAME " "
+        "- RISC-V Architecture Simulator</span>"));
     lbl = new QLabel(versionText);
     lbl->setAlignment(Qt::AlignHCenter);
     lbl->setOpenExternalLinks(true);
@@ -44,19 +45,20 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
     vl->addWidget(new QLabel(COPYRIGHT_HTML));
 
     QString supportText;
-    supportText = "Home Page : <a "
-                  "href=\"" APP_GIT "\">" APP_GIT "</a><br/>"
-                  "Implemented for <a "
-                  "href=\"https://cw.fel.cvut.cz/wiki/courses/b35apo/"
-                  "start\">Computer Architectures</a> and <a "
-                  "href=\"https://cw.fel.cvut.cz/wiki/courses/b4m35pap/"
-                  "start\">Advanced Computer Architectures</a> courses "
-                  "at <a href=\"https://www.cvut.cz/\">Czech Technical "
-                  "University in Prague</a>"
-                  " <a href=\"https://www.fel.cvut.cz/\">Faculty of Electrical "
-                  "Engineering</a><br/>"
-                  "QtRvSim on-line version and links to course materials at<br/>"
-                  "<a href=\"https://comparch.edu.cvut.cz/\">https://comparch.edu.cvut.cz/</a><br/>";
+    supportText
+        = "Home Page : <a "
+          "href=\"" APP_GIT "\">" APP_GIT "</a><br/>"
+          "Implemented for <a "
+          "href=\"https://cw.fel.cvut.cz/wiki/courses/b35apo/"
+          "start\">Computer Architectures</a> and <a "
+          "href=\"https://cw.fel.cvut.cz/wiki/courses/b4m35pap/"
+          "start\">Advanced Computer Architectures</a> courses "
+          "at <a href=\"https://www.cvut.cz/\">Czech Technical "
+          "University in Prague</a>"
+          " <a href=\"https://www.fel.cvut.cz/\">Faculty of Electrical "
+          "Engineering</a><br/>"
+          "QtRvSim on-line version and links to course materials at<br/>"
+          "<a href=\"https://comparch.edu.cvut.cz/\">https://comparch.edu.cvut.cz/</a><br/>";
 
     auto *supportBrowser = new QTextBrowser;
     supportBrowser->setOpenExternalLinks(true);

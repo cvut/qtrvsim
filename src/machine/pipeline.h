@@ -116,7 +116,7 @@ struct DecodeInterstage {
     bool csr = false;         // Zicsr, implies csr read and csr write
     bool csr_to_alu = false;
     bool csr_write = false;
-    bool xret = false;        // Return from exception, MRET and SRET
+    bool xret = false; // Return from exception, MRET and SRET
     bool insert_stall_before = false;
 
 public:

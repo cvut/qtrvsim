@@ -49,7 +49,8 @@ void test_program_with_single_result() {
     TrivialBus memory(&memory_backend);
     BranchPredictor predictor {};
     CSR::ControlState controlst {};
-    Core core(&registers, &predictor, &memory, &memory, &controlst, Xlen::_32, config_isa_word_default);
+    Core core(
+        &registers, &predictor, &memory, &memory, &controlst, Xlen::_32, config_isa_word_default);
 
     size_t instruction_count = compile_simple_program(memory, 0x200_addr, instructions);
     if (typeid(Core) == typeid(CorePipelined)) { instruction_count += 3; } // finish pipeline
@@ -471,7 +472,8 @@ static void core_alu_forward_data() {
     {
         QVector<uint32_t> code {
             // objdump --disassembler-options=no-aliases,numeric -d test-hazards
-            // sed -n -e 's/^[ \t]*[^ \t]\+:[ \t]\+\([0-9a-f]\+\)[ \t]\+\([^ \t].*\)$/0x\1, \/\/ \2/p'
+            // sed -n -e 's/^[ \t]*[^ \t]\+:[ \t]\+\([0-9a-f]\+\)[ \t]\+\([^ \t].*\)$/0x\1, \/\/
+            // \2/p'
             0x00100113, // addi     x2,x0,1
             0x11100093, // addi     x1,x0,273
             0x22200093, // addi     x1,x0,546
@@ -486,16 +488,16 @@ static void core_alu_forward_data() {
             0x00000063, // beq      x0,x0,10080 <loop>
         };
         Registers regs_init;
-                regs_init.write_pc(0x200_addr);
-                Registers regs_res(regs_init);
-                regs_res.write_gp(1, 0x222);
-                regs_res.write_gp(2, 3);
-                regs_res.write_gp(3, 0x223);
-                regs_res.write_gp(4, 0x223);
-                regs_res.write_gp(5, 0x225);
-                regs_res.write_gp(6, 0x225);
-                regs_res.write_pc(regs_init.read_pc() + 4 * code.length() - 4);
-                QTest::newRow("alu_forward_1") << code << regs_init << regs_res;
+        regs_init.write_pc(0x200_addr);
+        Registers regs_res(regs_init);
+        regs_res.write_gp(1, 0x222);
+        regs_res.write_gp(2, 3);
+        regs_res.write_gp(3, 0x223);
+        regs_res.write_gp(4, 0x223);
+        regs_res.write_gp(5, 0x225);
+        regs_res.write_gp(6, 0x225);
+        regs_res.write_pc(regs_init.read_pc() + 4 * code.length() - 4);
+        QTest::newRow("alu_forward_1") << code << regs_init << regs_res;
     }
 
     // Test forwarding in JR and JALR
@@ -536,9 +538,9 @@ static void core_alu_forward_data() {
         Registers regs_init;
         regs_init.write_pc(0x200_addr);
         Registers regs_res(regs_init);
-        regs_res.write_gp( 1, 0x00000234);
-        regs_res.write_gp( 5, 0x00000250);
-        regs_res.write_gp( 9, 0x000002cd);
+        regs_res.write_gp(1, 0x00000234);
+        regs_res.write_gp(5, 0x00000250);
+        regs_res.write_gp(9, 0x000002cd);
         regs_res.write_gp(10, 0x000002cd);
         regs_res.write_gp(11, 0x02222000);
         regs_res.write_gp(12, 0x03333000);
@@ -669,7 +671,6 @@ static void run_code_fragment(
     Memory &mem_init,
     Memory &mem_res,
     QVector<uint32_t> &code) {
-
     uint64_t addr = reg_init.read_pc().get_raw();
 
     foreach (uint32_t i, code) {
@@ -707,7 +708,9 @@ void TestCore::singlecore_alu_forward() {
     BranchPredictor predictor {};
     CSR::ControlState controlst {};
 
-    CoreSingle core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst, Xlen::_32, config_isa_word_default);
+    CoreSingle core(
+        &reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst, Xlen::_32,
+        config_isa_word_default);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -723,8 +726,9 @@ void TestCore::pipecore_alu_forward() {
     BranchPredictor predictor {};
     CSR::ControlState controlst {};
 
-    CorePipelined core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst,
-                       Xlen::_32, config_isa_word_default, MachineConfig::HazardUnit::HU_STALL_FORWARD);
+    CorePipelined core(
+        &reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst, Xlen::_32,
+        config_isa_word_default, MachineConfig::HazardUnit::HU_STALL_FORWARD);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -740,8 +744,9 @@ void TestCore::pipecorestall_alu_forward() {
     BranchPredictor predictor {};
     CSR::ControlState controlst {};
 
-    CorePipelined core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst,
-                       Xlen::_32, config_isa_word_default, MachineConfig::HazardUnit::HU_STALL);
+    CorePipelined core(
+        &reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst, Xlen::_32,
+        config_isa_word_default, MachineConfig::HazardUnit::HU_STALL);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -758,7 +763,8 @@ static void core_memory_tests_data() {
     {
         QVector<uint32_t> code {
             // objdump --disassembler-options=no-aliases,numeric -d test-hazards
-            // sed -n -e 's/^[ \t]*[^ \t]\+:[ \t]\+\([0-9a-f]\+\)[ \t]\+\([^ \t].*\)$/0x\1, \/\/ \2/p'
+            // sed -n -e 's/^[ \t]*[^ \t]\+:[ \t]\+\([0-9a-f]\+\)[ \t]\+\([^ \t].*\)$/0x\1, \/\/
+            // \2/p'
 
             // _start:
             0x40000513, // addi     x10,x0,1024
@@ -802,14 +808,14 @@ static void core_memory_tests_data() {
         Registers regs_init;
         regs_init.write_pc(0x200_addr);
         Registers regs_res(regs_init);
-        regs_res.write_gp( 5, 0x438);
-        regs_res.write_gp( 8,  0x3c);
-        regs_res.write_gp( 9,  0x3c);
+        regs_res.write_gp(5, 0x438);
+        regs_res.write_gp(8, 0x3c);
+        regs_res.write_gp(9, 0x3c);
         regs_res.write_gp(10, 0x400);
-        regs_res.write_gp(18,  0x3c);
-        regs_res.write_gp(19,  0x38);
-        regs_res.write_gp(20,   0xf);
-        regs_res.write_gp(21,   0xf);
+        regs_res.write_gp(18, 0x3c);
+        regs_res.write_gp(19, 0x38);
+        regs_res.write_gp(20, 0xf);
+        regs_res.write_gp(21, 0xf);
         regs_res.write_pc(regs_init.read_pc() + 4 * code.length() - 4);
         uint32_t addr;
         Memory mem_init(LITTLE);
@@ -948,7 +954,9 @@ void TestCore::singlecore_memory_tests() {
     BranchPredictor predictor {};
     CSR::ControlState controlst {};
 
-    CoreSingle core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst, Xlen::_32, config_isa_word_default);
+    CoreSingle core(
+        &reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst, Xlen::_32,
+        config_isa_word_default);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -964,7 +972,9 @@ void TestCore::pipecore_nc_memory_tests() {
     BranchPredictor predictor {};
     CSR::ControlState controlst {};
 
-    CorePipelined core(&reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst, Xlen::_32, config_isa_word_default);
+    CorePipelined core(
+        &reg_init, &predictor, &mem_init_frontend, &mem_init_frontend, &controlst, Xlen::_32,
+        config_isa_word_default);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -990,7 +1000,8 @@ void TestCore::pipecore_wt_na_memory_tests() {
     BranchPredictor predictor {};
     CSR::ControlState controlst {};
 
-    CorePipelined core(&reg_init, &predictor, &i_cache, &d_cache, &controlst, Xlen::_32, config_isa_word_default);
+    CorePipelined core(
+        &reg_init, &predictor, &i_cache, &d_cache, &controlst, Xlen::_32, config_isa_word_default);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -1015,7 +1026,8 @@ void TestCore::pipecore_wt_a_memory_tests() {
     BranchPredictor predictor {};
     CSR::ControlState controlst {};
 
-    CorePipelined core(&reg_init, &predictor, &i_cache, &d_cache, &controlst, Xlen::_32, config_isa_word_default);
+    CorePipelined core(
+        &reg_init, &predictor, &i_cache, &d_cache, &controlst, Xlen::_32, config_isa_word_default);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 
@@ -1040,7 +1052,8 @@ void TestCore::pipecore_wb_memory_tests() {
     BranchPredictor predictor {};
     CSR::ControlState controlst {};
 
-    CorePipelined core(&reg_init, &predictor, &i_cache, &d_cache, &controlst, Xlen::_32, config_isa_word_default);
+    CorePipelined core(
+        &reg_init, &predictor, &i_cache, &d_cache, &controlst, Xlen::_32, config_isa_word_default);
     run_code_fragment(core, reg_init, reg_res, mem_init, mem_res, code);
 }
 

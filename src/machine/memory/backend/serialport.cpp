@@ -27,8 +27,7 @@ SerialPort::SerialPort(Endian simulated_machine_endian)
     : BackendMemory(simulated_machine_endian)
     , tx_irq_level(17) // The second platform HW interrupt
     , rx_irq_level(16) // The first platform HW interrupt
-    , tx_st_reg(SERP_TX_ST_REG_READY_m)
-{}
+    , tx_st_reg(SERP_TX_ST_REG_READY_m) {}
 
 SerialPort::~SerialPort() = default;
 
@@ -47,11 +46,8 @@ void SerialPort::pool_rx_byte() const {
     }
 }
 
-WriteResult SerialPort::write(
-    Offset destination,
-    const void *source,
-    size_t size,
-    WriteOptions options) {
+WriteResult
+SerialPort::write(Offset destination, const void *source, size_t size, WriteOptions options) {
     UNUSED(options)
     return write_by_u32(
         destination, source, size,
@@ -60,21 +56,15 @@ WriteResult SerialPort::write(
             return 0;
         },
         [&](Offset src, uint32_t value) {
-            return write_reg(
-                src, byteswap_if(
-                         value, internal_endian != simulated_machine_endian));
+            return write_reg(src, byteswap_if(value, internal_endian != simulated_machine_endian));
         });
 }
 
-ReadResult SerialPort::read(
-    void *destination,
-    Offset source,
-    size_t size,
-    ReadOptions options) const {
+ReadResult
+SerialPort::read(void *destination, Offset source, size_t size, ReadOptions options) const {
     return read_by_u32(destination, source, size, [&](Offset src) {
         return byteswap_if(
-            read_reg(src, options.type),
-            internal_endian != simulated_machine_endian);
+            read_reg(src, options.type), internal_endian != simulated_machine_endian);
     });
 }
 
@@ -88,9 +78,7 @@ void SerialPort::update_rx_irq() const {
 }
 
 void SerialPort::rx_queue_check_internal() const {
-    if (rx_st_reg & SERP_RX_ST_REG_IE_m) {
-        pool_rx_byte();
-    }
+    if (rx_st_reg & SERP_RX_ST_REG_IE_m) { pool_rx_byte(); }
     update_rx_irq();
 }
 

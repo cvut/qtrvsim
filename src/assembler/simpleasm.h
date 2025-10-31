@@ -48,8 +48,7 @@ public:
     ~SimpleAsm() override;
 
 public:
-    static uint64_t
-    string_to_uint64(const QString &str, int base, int *chars_taken = nullptr);
+    static uint64_t string_to_uint64(const QString &str, int base, int *chars_taken = nullptr);
     void clear();
     void setup(
         machine::FrontendMemory *mem,
@@ -61,8 +60,7 @@ public:
         const QString &filename = "",
         int line_number = 0,
         QString *error_ptr = nullptr);
-    virtual bool
-    process_file(const QString &filename, QString *error_ptr = nullptr);
+    virtual bool process_file(const QString &filename, QString *error_ptr = nullptr);
     bool finish(QString *error_ptr = nullptr);
 
 protected:

@@ -27,10 +27,12 @@ enum ConfigPresets {
     CP_PIPE            // Full pipelined cpu
 };
 
-constexpr ConfigIsaWord config_isa_word_default = ConfigIsaWord::byChar('E') | ConfigIsaWord::byChar('I') |
-        ConfigIsaWord::byChar('A') |ConfigIsaWord::byChar('M');
+constexpr ConfigIsaWord config_isa_word_default
+    = ConfigIsaWord::byChar('E') | ConfigIsaWord::byChar('I') | ConfigIsaWord::byChar('A')
+      | ConfigIsaWord::byChar('M');
 
-constexpr ConfigIsaWord config_isa_word_fixed = ConfigIsaWord::byChar('E') | ConfigIsaWord::byChar('I');
+constexpr ConfigIsaWord config_isa_word_fixed
+    = ConfigIsaWord::byChar('E') | ConfigIsaWord::byChar('I');
 
 class CacheConfig {
 public:

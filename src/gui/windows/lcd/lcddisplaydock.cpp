@@ -5,8 +5,7 @@
 #include <QString>
 #include <QTextBlock>
 
-LcdDisplayDock::LcdDisplayDock(QWidget *parent, QSettings *settings)
-    : Super(parent) {
+LcdDisplayDock::LcdDisplayDock(QWidget *parent, QSettings *settings) : Super(parent) {
     (void)settings;
     lcd_display_widget.reset(new LcdDisplayView(this));
     auto *fill_widget = new QWidget(this);

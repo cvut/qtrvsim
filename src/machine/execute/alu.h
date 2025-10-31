@@ -13,8 +13,8 @@ namespace machine {
  * Components available in combined ALU.
  */
 enum class AluComponent {
-    ALU, //> RV32/64I
-    MUL, //> RV32/64M
+    ALU,  //> RV32/64I
+    MUL,  //> RV32/64M
     PASS, //> Pass operand A without change (used for AMO)
 };
 

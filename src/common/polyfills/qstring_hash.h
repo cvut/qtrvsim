@@ -9,17 +9,13 @@
 namespace std {
 template<>
 struct hash<QString> {
-    std::size_t operator()(const QString &s) const noexcept {
-        return qHash(s);
-    }
+    std::size_t operator()(const QString &s) const noexcept { return qHash(s); }
 };
     #if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
 
 template<>
 struct hash<QStringView> {
-    std::size_t operator()(const QStringView &s) const noexcept {
-        return qHash(s);
-    }
+    std::size_t operator()(const QStringView &s) const noexcept { return qHash(s); }
 };
     #endif
 

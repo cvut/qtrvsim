@@ -11,8 +11,7 @@
 #include <QWidget>
 #include <utility>
 
-MessagesDock::MessagesDock(QWidget *parent, QSettings *settings)
-    : Super(parent) {
+MessagesDock::MessagesDock(QWidget *parent, QSettings *settings) : Super(parent) {
     setObjectName("Messages");
     setWindowTitle("Messages");
 
@@ -31,18 +30,13 @@ MessagesDock::MessagesDock(QWidget *parent, QSettings *settings)
 
     setWidget(content);
 
+    connect(this, &MessagesDock::report_message, messages_model, &MessagesModel::insert_line);
     connect(
-        this, &MessagesDock::report_message, messages_model,
-        &MessagesModel::insert_line);
+        this, &MessagesDock::pass_clear_messages, messages_model, &MessagesModel::clear_messages);
     connect(
-        this, &MessagesDock::pass_clear_messages, messages_model,
-        &MessagesModel::clear_messages);
+        messages_content, &QAbstractItemView::activated, messages_model, &MessagesModel::activated);
     connect(
-        messages_content, &QAbstractItemView::activated, messages_model,
-        &MessagesModel::activated);
-    connect(
-        messages_model, &MessagesModel::message_selected, this,
-        &MessagesDock::message_selected);
+        messages_model, &MessagesModel::message_selected, this, &MessagesDock::message_selected);
 }
 
 void MessagesDock::insert_line(
@@ -52,8 +46,7 @@ void MessagesDock::insert_line(
     int column,
     QString text,
     QString hint) {
-    report_message(
-        type, std::move(file), line, column, std::move(text), std::move(hint));
+    report_message(type, std::move(file), line, column, std::move(text), std::move(hint));
 }
 
 void MessagesDock::clear_messages() {

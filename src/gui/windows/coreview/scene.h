@@ -102,7 +102,7 @@ protected:
     Box<Cache> data_cache;
 
     /** Reference to current PC value to be used to focus PC in program memory on lick */
-    const machine::Address& program_counter_value;
+    const machine::Address &program_counter_value;
 };
 
 class CoreViewSceneSimple : public CoreViewScene {
