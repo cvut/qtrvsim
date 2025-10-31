@@ -26,7 +26,7 @@ SymbolTable::~SymbolTable() {
     auto iter = map_value_to_symbol.begin();
     while (iter != map_value_to_symbol.end()) {
         const SymbolTableEntry *p_entry = iter.value();
-        iter = map_value_to_symbol .erase(iter); // Advances iterator.
+        iter = map_value_to_symbol.erase(iter); // Advances iterator.
         delete p_entry;
     }
 }
@@ -44,9 +44,7 @@ void SymbolTable::add_symbol(
 
 void SymbolTable::remove_symbol(const QString &name) {
     auto *p_entry = map_name_to_symbol.take(name);
-    if (p_entry == nullptr) {
-        return;
-    }
+    if (p_entry == nullptr) { return; }
     map_value_to_symbol.remove(p_entry->value, p_entry);
     delete p_entry;
 }

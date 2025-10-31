@@ -58,10 +58,10 @@ private: // Internal variables
 /////////////////////////////
 
 struct BranchTargetBufferEntry {
-    bool entry_valid{ false };
-    Address instruction_address{ Address::null() };
-    Address target_address{ Address::null() };
-    BranchType branch_type{ BranchType::UNDEFINED };
+    bool entry_valid { false };
+    Address instruction_address { Address::null() };
+    Address target_address { Address::null() };
+    BranchType branch_type { BranchType::UNDEFINED };
 };
 
 class BranchTargetBuffer final : public QObject {
@@ -77,7 +77,10 @@ public: // General functions
     uint8_t get_number_of_bits() const;
     uint16_t calculate_index(const Address instruction_address) const;
     BranchTargetBufferEntry get_entry(const Address instruction_address) const;
-    void update(const Address instruction_address, const Address target_address, const BranchType branch_type);
+    void update(
+        const Address instruction_address,
+        const Address target_address,
+        const BranchType branch_type);
     void clear();
 
 signals:
@@ -136,14 +139,14 @@ protected: // Internal functions
     BranchResult convert_state_to_prediction(PredictorState state) const;
     void update_stats(bool prediction_was_correct);
     void update_bht_stats(uint16_t bht_index, bool prediction_was_correct);
-    
+
 public: // General functions
     uint16_t calculate_bht_index(const uint16_t bhr_value, const Address instruction_address) const;
     virtual PredictorType get_type() const = 0;
-    virtual BranchResult predict(PredictionInput input) = 0; // Function which handles all actions ties
-                                                             // to making a branch prediction
-    virtual void update(PredictionFeedback feedback) = 0;    // Update predictor based on jump / branch
-                                                             // result
+    virtual BranchResult predict(PredictionInput input) = 0; // Function which handles all actions
+                                                             // ties to making a branch prediction
+    virtual void update(PredictionFeedback feedback) = 0; // Update predictor based on jump / branch
+                                                          // result
     void clear_stats();
     void clear_bht_stats();
     void clear_bht_state();
@@ -154,12 +157,12 @@ signals:
     void stats_updated(PredictionStatistics stats) const;
     void bht_row_updated(uint16_t index, BranchHistoryTableEntry entry) const;
 
-protected: // Internal variables
+protected:                                 // Internal variables
     const uint8_t number_of_bht_addr_bits; // Number of Branch History Table (BHT) bits taken from
                                            // instruction address
     const uint8_t number_of_bht_bits;      // Number of Branch History Table (BHT) bits
     const PredictorState initial_state;
-    PredictionStatistics stats; // Total predictor statistics
+    PredictionStatistics stats;               // Total predictor statistics
     std::vector<BranchHistoryTableEntry> bht; // Branch History Table (BHT)
 };
 
@@ -260,7 +263,6 @@ private: // Internal functions
     uint8_t init_number_of_bhr_bits(const uint8_t b) const;
     uint8_t init_number_of_bht_addr_bits(const uint8_t b) const;
     uint8_t init_number_of_bht_bits(const uint8_t b_bhr, const uint8_t b_addr) const;
-    
 
 public: // General functions
     bool get_enabled() const;
@@ -273,7 +275,8 @@ public: // General functions
     uint8_t get_number_of_bht_bits() const;
     void increment_jumps();
     void increment_mispredictions();
-    Address predict_next_pc_address(const Instruction instruction, const Address instruction_address) const;
+    Address
+    predict_next_pc_address(const Instruction instruction, const Address instruction_address) const;
     void update(
         const Instruction instruction,
         const Address instruction_address,
@@ -285,7 +288,12 @@ public: // General functions
 
 signals:
     void total_stats_updated(PredictionStatistics total_stats);
-    void prediction_done(uint16_t btb_index, uint16_t bht_index, PredictionInput input, BranchResult result, BranchType branch_type) const;
+    void prediction_done(
+        uint16_t btb_index,
+        uint16_t bht_index,
+        PredictionInput input,
+        BranchResult result,
+        BranchType branch_type) const;
     void update_done(uint16_t btb_index, uint16_t bht_index, PredictionFeedback feedback) const;
     void predictor_stats_updated(PredictionStatistics stats) const;
     void predictor_bht_row_updated(uint16_t index, BranchHistoryTableEntry entry) const;
@@ -295,7 +303,7 @@ signals:
     void flushed() const; // Only BHT state and BTB rows were reset
 
 private: // Internal variables
-    bool enabled{ false };
+    bool enabled { false };
     PredictionStatistics total_stats;
     Predictor *predictor;
     BranchHistoryRegister *bhr;

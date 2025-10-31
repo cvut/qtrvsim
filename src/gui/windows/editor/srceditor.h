@@ -5,10 +5,10 @@
 #include "linenumberarea.h"
 #include "machine/machine.h"
 
+#include <QMimeData>
 #include <QString>
 #include <QSyntaxHighlighter>
 #include <QTextEdit>
-#include <QMimeData>
 #include <qplaintextedit.h>
 #include <qwidget.h>
 

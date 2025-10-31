@@ -1,10 +1,10 @@
 #ifndef QTRVSIM_CORE_STATE_H
 #define QTRVSIM_CORE_STATE_H
 
-#include "machinedefs.h"
-#include "pipeline.h"
 #include "common/memory_ownership.h"
+#include "machinedefs.h"
 #include "memory/address_range.h"
+#include "pipeline.h"
 
 #include <QMap>
 #include <cstdint>

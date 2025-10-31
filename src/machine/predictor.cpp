@@ -52,20 +52,16 @@ QString machine::addr_to_hex_str(const machine::Address address) {
 }
 
 bool machine::is_predictor_type_dynamic(const PredictorType type) {
-    switch (type)
-    {
+    switch (type) {
     case PredictorType::ALWAYS_NOT_TAKEN:
     case PredictorType::ALWAYS_TAKEN:
-    case PredictorType::BTFNT:
-        return false;
+    case PredictorType::BTFNT: return false;
 
     case PredictorType::SMITH_1_BIT:
     case PredictorType::SMITH_2_BIT:
-    case PredictorType::SMITH_2_BIT_HYSTERESIS:
-        return true;
+    case PredictorType::SMITH_2_BIT_HYSTERESIS: return true;
 
-    default:
-        return false;
+    default: return false;
     }
 }
 
@@ -167,7 +163,10 @@ BranchTargetBufferEntry BranchTargetBuffer::get_entry(const Address instruction_
 }
 
 // Update BTB entry with given values, at index computed from the instruction address
-void BranchTargetBuffer::update(const Address instruction_address, const Address target_address, const BranchType branch_type) {
+void BranchTargetBuffer::update(
+    const Address instruction_address,
+    const Address target_address,
+    const BranchType branch_type) {
     // Get index from instruction address
     const uint16_t btb_index { calculate_index(instruction_address) };
 
@@ -178,12 +177,10 @@ void BranchTargetBuffer::update(const Address instruction_address, const Address
     }
 
     // Write new entry to the table
-    const BranchTargetBufferEntry btb_entry = { 
-        .entry_valid = true,
-        .instruction_address = instruction_address, 
-        .target_address = target_address,
-        .branch_type = branch_type
-    };
+    const BranchTargetBufferEntry btb_entry = { .entry_valid = true,
+                                                .instruction_address = instruction_address,
+                                                .target_address = target_address,
+                                                .branch_type = branch_type };
     btb.at(btb_index) = btb_entry;
 
     // Send signal with the data
@@ -276,14 +273,14 @@ void Predictor::update_bht_stats(uint16_t bht_index, bool prediction_was_correct
     } else {
         bht.at(bht_index).stats.wrong += 1;
     }
-    bht.at(bht_index).stats.accuracy = ((bht.at(bht_index).stats.correct * 100) / bht.at(bht_index).stats.total);
+    bht.at(bht_index).stats.accuracy
+        = ((bht.at(bht_index).stats.correct * 100) / bht.at(bht_index).stats.total);
     emit bht_row_updated(bht_index, bht.at(bht_index));
 }
 
 // Calculate index for addressing Branch History Table from BHR and instruction address
-uint16_t Predictor::calculate_bht_index(
-    const uint16_t bhr_value,
-    const Address instruction_address) const {
+uint16_t
+Predictor::calculate_bht_index(const uint16_t bhr_value, const Address instruction_address) const {
     const uint16_t bhr_part = bhr_value << number_of_bht_addr_bits;
     const uint16_t address_mask = (1 << number_of_bht_addr_bits) - 1;
     const uint16_t address_part = ((uint16_t)(instruction_address.get_raw() >> 2)) & address_mask;
@@ -558,31 +555,27 @@ BranchPredictor::BranchPredictor(
     , number_of_bhr_bits(init_number_of_bhr_bits(number_of_bhr_bits))
     , number_of_bht_addr_bits(init_number_of_bht_addr_bits(number_of_bht_addr_bits))
     , number_of_bht_bits(init_number_of_bht_bits(number_of_bhr_bits, number_of_bht_addr_bits)) {
-    
     // Create predicotr
     switch (predictor_type) {
-    case PredictorType::ALWAYS_NOT_TAKEN:
-        predictor = new PredictorAlwaysNotTaken();
-        break;
+    case PredictorType::ALWAYS_NOT_TAKEN: predictor = new PredictorAlwaysNotTaken(); break;
 
-    case PredictorType::ALWAYS_TAKEN:
-        predictor = new PredictorAlwaysTaken();
-        break;
+    case PredictorType::ALWAYS_TAKEN: predictor = new PredictorAlwaysTaken(); break;
 
-    case PredictorType::BTFNT:
-        predictor = new PredictorBTFNT();
-        break;
+    case PredictorType::BTFNT: predictor = new PredictorBTFNT(); break;
 
     case PredictorType::SMITH_1_BIT:
-        predictor = new PredictorSmith1Bit(number_of_bht_addr_bits, number_of_bht_bits, initial_state);
+        predictor
+            = new PredictorSmith1Bit(number_of_bht_addr_bits, number_of_bht_bits, initial_state);
         break;
 
     case PredictorType::SMITH_2_BIT:
-        predictor = new PredictorSmith2Bit(number_of_bht_addr_bits, number_of_bht_bits, initial_state);
+        predictor
+            = new PredictorSmith2Bit(number_of_bht_addr_bits, number_of_bht_bits, initial_state);
         break;
 
     case PredictorType::SMITH_2_BIT_HYSTERESIS:
-        predictor = new PredictorSmith2BitHysteresis(number_of_bht_addr_bits, number_of_bht_bits, initial_state);
+        predictor = new PredictorSmith2BitHysteresis(
+            number_of_bht_addr_bits, number_of_bht_bits, initial_state);
         break;
 
     default: throw std::invalid_argument("Invalid predictor type selected");
@@ -595,26 +588,17 @@ BranchPredictor::BranchPredictor(
 
     if (enabled) {
         // Pass through BTB signals
-        connect(
-            btb, &BranchTargetBuffer::btb_row_updated,
-            this, &BranchPredictor::btb_row_updated
-        );
+        connect(btb, &BranchTargetBuffer::btb_row_updated, this, &BranchPredictor::btb_row_updated);
 
         // Pass through BHR signals
-        connect(
-            bhr, &BranchHistoryRegister::bhr_updated,
-            this, &BranchPredictor::bhr_updated
-        );
+        connect(bhr, &BranchHistoryRegister::bhr_updated, this, &BranchPredictor::bhr_updated);
 
         // Pass through predictor signals
         connect(
-            predictor, &Predictor::stats_updated,
-            this, &BranchPredictor::predictor_stats_updated
-        );
+            predictor, &Predictor::stats_updated, this, &BranchPredictor::predictor_stats_updated);
         connect(
-            predictor, &Predictor::bht_row_updated,
-            this, &BranchPredictor::predictor_bht_row_updated
-        );
+            predictor, &Predictor::bht_row_updated, this,
+            &BranchPredictor::predictor_bht_row_updated);
     }
 }
 
@@ -748,19 +732,17 @@ Address BranchPredictor::predict_next_pc_address(
         .instruction_address = instruction_address,
         .target_address = btb_entry.target_address,
     };
-    BranchResult predicted_result{ BranchResult::UNDEFINED };
+    BranchResult predicted_result { BranchResult::UNDEFINED };
     if (btb_entry.branch_type == BranchType::BRANCH) {
         predicted_result = predictor->predict(prediction_input);
     } else {
         predicted_result = BranchResult::TAKEN;
     }
-    
+
     emit prediction_done(
         btb->calculate_index(instruction_address),
-        predictor->calculate_bht_index(bhr->get_value(), instruction_address),
-        prediction_input,
-        predicted_result,
-        btb_entry.branch_type);
+        predictor->calculate_bht_index(bhr->get_value(), instruction_address), prediction_input,
+        predicted_result, btb_entry.branch_type);
 
     // If the branch was predicted Taken
     if (predicted_result == BranchResult::TAKEN) { return btb_entry.target_address; }
@@ -783,24 +765,19 @@ void BranchPredictor::update(
     btb->update(instruction_address, target_address, branch_type);
 
     // Update predictor only for conditional branches
-    const PredictionFeedback prediction_feedback { 
-        .instruction = instruction,
-        .bhr_value = bhr->get_value(),
-        .instruction_address = instruction_address,
-        .target_address = target_address,
-        .result = result,
-        .branch_type = branch_type
-    };
-    if (branch_type == BranchType::BRANCH) {
-        predictor->update(prediction_feedback);
-    }
+    const PredictionFeedback prediction_feedback { .instruction = instruction,
+                                                   .bhr_value = bhr->get_value(),
+                                                   .instruction_address = instruction_address,
+                                                   .target_address = target_address,
+                                                   .result = result,
+                                                   .branch_type = branch_type };
+    if (branch_type == BranchType::BRANCH) { predictor->update(prediction_feedback); }
 
     increment_jumps();
 
     emit update_done(
         btb->calculate_index(instruction_address),
-        predictor->calculate_bht_index(bhr->get_value(), instruction_address),
-        prediction_feedback);
+        predictor->calculate_bht_index(bhr->get_value(), instruction_address), prediction_feedback);
 
     // Update global branch history
     bhr->update(result);

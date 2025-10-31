@@ -103,17 +103,16 @@ bool argdesbycode_filled = fill_argdesbycode();
     (IMF_SUPPORTED | IMF_ALUSRC | IMF_REGWRITE | IMF_MEMREAD | IMF_MEM | IMF_ALU_REQ_RS)
 #define FLAGS_ALU_I_STORE                                                                          \
     (IMF_SUPPORTED | IMF_ALUSRC | IMF_MEMWRITE | IMF_MEM | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
-#define FLAGS_ALU_T_R_D (IMF_SUPPORTED | IMF_REGWRITE)
+#define FLAGS_ALU_T_R_D   (IMF_SUPPORTED | IMF_REGWRITE)
 #define FLAGS_ALU_T_R_STD (FLAGS_ALU_T_R_D | IMF_ALU_REQ_RS | IMF_ALU_REQ_RT)
 
 #define FLAGS_AMO_LOAD (FLAGS_ALU_I_LOAD | IMF_AMO)
 // FLAGS_AMO_STORE for store conditional requires IMF_MEMREAD to ensure stalling because
 // forwarding is not possible from memory stage after memory read, TODO to solve better way
-#define FLAGS_AMO_STORE (FLAGS_ALU_I_STORE | FLAGS_ALU_T_R_D | IMF_AMO | IMF_MEMREAD)
+#define FLAGS_AMO_STORE  (FLAGS_ALU_I_STORE | FLAGS_ALU_T_R_D | IMF_AMO | IMF_MEMREAD)
 #define FLAGS_AMO_MODIFY (FLAGS_ALU_I_LOAD | FLAGS_AMO_STORE | IMF_AMO)
 
-#define NOALU                                                                                      \
-    { .alu_op = AluOp::ADD }
+#define NOALU { .alu_op = AluOp::ADD }
 #define NOMEM .mem_ctl = AC_NONE
 
 // TODO NOTE: if unknown is defined as all 0, instruction map can be significantly simplified
@@ -138,14 +137,14 @@ struct InstructionMap {
     const InstructionMap *aliases = nullptr;
 };
 
-#define IT_R Instruction::R
-#define IT_I Instruction::I
-#define IT_S Instruction::S
-#define IT_B Instruction::B
-#define IT_U Instruction::U
-#define IT_J Instruction::J
-#define IT_AMO Instruction::AMO
-#define IT_ZICSR Instruction::ZICSR
+#define IT_R       Instruction::R
+#define IT_I       Instruction::I
+#define IT_S       Instruction::S
+#define IT_B       Instruction::B
+#define IT_U       Instruction::U
+#define IT_J       Instruction::J
+#define IT_AMO     Instruction::AMO
+#define IT_ZICSR   Instruction::ZICSR
 #define IT_UNKNOWN Instruction::UNKNOWN
 
 // clang-format off

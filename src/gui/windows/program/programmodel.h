@@ -15,26 +15,18 @@ public:
     explicit ProgramModel(QObject *parent);
     [[nodiscard]] int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     [[nodiscard]] int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role)
-        const override;
     [[nodiscard]] QVariant
-    data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    headerData(int section, Qt::Orientation orientation, int role) const override;
+    [[nodiscard]] QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     [[nodiscard]] Qt::ItemFlags flags(const QModelIndex &index) const override;
-    bool
-    setData(const QModelIndex &index, const QVariant &value, int role) override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
     bool adjustRowAndOffset(int &row, machine::Address address);
 
-    [[nodiscard]] inline const QFont *getFont() const {
-        return &data_font;
-    }
+    [[nodiscard]] inline const QFont *getFont() const { return &data_font; }
 
-    [[nodiscard]] inline machine::Address getIndex0Offset() const {
-        return index0_offset;
-    }
+    [[nodiscard]] inline machine::Address getIndex0Offset() const { return index0_offset; }
 
-    [[nodiscard]] static inline unsigned int cellSizeBytes() {
-        return 4;
-    }
+    [[nodiscard]] static inline unsigned int cellSizeBytes() { return 4; }
     inline bool get_row_address(machine::Address &address, int row) const {
         address = index0_offset + row * cellSizeBytes();
         return address >= index0_offset;

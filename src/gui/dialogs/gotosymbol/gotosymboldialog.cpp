@@ -2,19 +2,13 @@
 
 #include "ui_gotosymboldialog.h"
 
-GoToSymbolDialog::GoToSymbolDialog(
-    QWidget *parent,
-    const QStringList &symbol_names)
+GoToSymbolDialog::GoToSymbolDialog(QWidget *parent, const QStringList &symbol_names)
     : QDialog(parent)
     , ui(new Ui::GoToSymbolDialog) {
     ui->setupUi(this);
 
-    connect(
-        ui->pushShowProg, &QAbstractButton::clicked, this,
-        &GoToSymbolDialog::show_prog);
-    connect(
-        ui->pushShowMem, &QAbstractButton::clicked, this,
-        &GoToSymbolDialog::show_mem);
+    connect(ui->pushShowProg, &QAbstractButton::clicked, this, &GoToSymbolDialog::show_prog);
+    connect(ui->pushShowMem, &QAbstractButton::clicked, this, &GoToSymbolDialog::show_mem);
     connect(ui->pushClose, &QAbstractButton::clicked, this, &QWidget::close);
 
     ui->listSymbols->addItems(symbol_names);

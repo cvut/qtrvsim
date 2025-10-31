@@ -5,23 +5,19 @@ namespace machine {
 Q_NAMESPACE
 
 // Should not exceed 16, because uint16_t is used for addressing
-#define BP_MAX_BTB_BITS 8
-#define BP_MAX_BHR_BITS 8
+#define BP_MAX_BTB_BITS      8
+#define BP_MAX_BHR_BITS      8
 #define BP_MAX_BHT_ADDR_BITS 8
-#define BP_MAX_BHT_BITS (BP_MAX_BHT_ADDR_BITS + BP_MAX_BHT_ADDR_BITS)
+#define BP_MAX_BHT_BITS      (BP_MAX_BHT_ADDR_BITS + BP_MAX_BHT_ADDR_BITS)
 
 enum class BranchType {
-    JUMP, // JAL, JALR - Unconditional
-    BRANCH,   // BXX - Conditional
+    JUMP,   // JAL, JALR - Unconditional
+    BRANCH, // BXX - Conditional
     UNDEFINED
 };
 Q_ENUM_NS(machine::BranchType)
 
-enum class BranchResult { 
-    NOT_TAKEN,
-    TAKEN,
-    UNDEFINED
-};
+enum class BranchResult { NOT_TAKEN, TAKEN, UNDEFINED };
 Q_ENUM_NS(machine::BranchResult)
 
 enum class PredictorType {

@@ -9,32 +9,32 @@ using namespace machine;
 
 //////////////////////////////////////////////////////////////////////////////
 /// Default config of MachineConfig
-#define DF_PIPELINE false
-#define DF_DELAYSLOT true
-#define DF_HUNIT HU_STALL_FORWARD
-#define DF_EXEC_PROTEC false
-#define DF_WRITE_PROTEC false
-#define DF_MEM_ACC_READ 10
-#define DF_MEM_ACC_WRITE 10
-#define DF_MEM_ACC_BURST 0
-#define DF_MEM_ACC_LEVEL2 2
+#define DF_PIPELINE             false
+#define DF_DELAYSLOT            true
+#define DF_HUNIT                HU_STALL_FORWARD
+#define DF_EXEC_PROTEC          false
+#define DF_WRITE_PROTEC         false
+#define DF_MEM_ACC_READ         10
+#define DF_MEM_ACC_WRITE        10
+#define DF_MEM_ACC_BURST        0
+#define DF_MEM_ACC_LEVEL2       2
 #define DF_MEM_ACC_BURST_ENABLE false
-#define DF_ELF QString("")
+#define DF_ELF                  QString("")
 /// Default config of branch predictor
-#define DFC_BP_ENABLED false
-#define DFC_BP_TYPE PredictorType::SMITH_1_BIT
-#define DFC_BP_INIT_STATE PredictorState::NOT_TAKEN
-#define DFC_BP_BTB_BITS 2
-#define DFC_BP_BHR_BITS 0
+#define DFC_BP_ENABLED       false
+#define DFC_BP_TYPE          PredictorType::SMITH_1_BIT
+#define DFC_BP_INIT_STATE    PredictorState::NOT_TAKEN
+#define DFC_BP_BTB_BITS      2
+#define DFC_BP_BHR_BITS      0
 #define DFC_BP_BHT_ADDR_BITS 2
 //////////////////////////////////////////////////////////////////////////////
 /// Default config of CacheConfig
-#define DFC_EN false
-#define DFC_SETS 1
+#define DFC_EN     false
+#define DFC_SETS   1
 #define DFC_BLOCKS 1
-#define DFC_ASSOC 1
+#define DFC_ASSOC  1
 #define DFC_REPLAC RP_RAND
-#define DFC_WRITE WP_THROUGH_NOALLOC
+#define DFC_WRITE  WP_THROUGH_NOALLOC
 //////////////////////////////////////////////////////////////////////////////
 
 CacheConfig::CacheConfig() {
@@ -632,9 +632,8 @@ uint8_t MachineConfig::get_bp_bht_bits() const {
 bool MachineConfig::operator==(const MachineConfig &c) const {
 #define CMP(GETTER) (GETTER)() == (c.GETTER)()
     return CMP(pipelined) && CMP(delay_slot) && CMP(hazard_unit) && CMP(get_simulated_xlen)
-           && CMP(get_isa_word) && CMP(get_bp_enabled) && CMP(get_bp_type)
-           && CMP(get_bp_init_state) && CMP(get_bp_btb_bits)
-           && CMP(get_bp_bhr_bits) && CMP(get_bp_bht_addr_bits)
+           && CMP(get_isa_word) && CMP(get_bp_enabled) && CMP(get_bp_type) && CMP(get_bp_init_state)
+           && CMP(get_bp_btb_bits) && CMP(get_bp_bhr_bits) && CMP(get_bp_bht_addr_bits)
            && CMP(memory_execute_protection) && CMP(memory_write_protection)
            && CMP(memory_access_time_read) && CMP(memory_access_time_write)
            && CMP(memory_access_time_burst) && CMP(memory_access_time_level2)

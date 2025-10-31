@@ -26,9 +26,7 @@ struct BitField {
     [[nodiscard]] T encode(T val) const {
         return ((val & (((uint64_t)1 << count) - 1)) << offset);
     }
-    [[nodiscard]] uint64_t mask() const {
-        return (((uint64_t)1 << count) - 1) << offset;
-    }
+    [[nodiscard]] uint64_t mask() const { return (((uint64_t)1 << count) - 1) << offset; }
 };
 
 template<size_t MAX_FIELD_PARTS>

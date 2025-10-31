@@ -29,17 +29,11 @@ signals:
     void read_notification(Offset address, size_t size) const;
 
 public:
-    WriteResult write(
-        Offset destination,
-        const void *source,
-        size_t size,
-        WriteOptions options) override;
+    WriteResult
+    write(Offset destination, const void *source, size_t size, WriteOptions options) override;
 
-    ReadResult read(
-        void *destination,
-        Offset source,
-        size_t size,
-        ReadOptions options) const override;
+    ReadResult
+    read(void *destination, Offset source, size_t size, ReadOptions options) const override;
 
     [[nodiscard]] LocationStatus location_status(Offset offset) const override;
 };
