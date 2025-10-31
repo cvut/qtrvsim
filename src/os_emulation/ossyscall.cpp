@@ -2,9 +2,9 @@
 
 #include "machine/core.h"
 #include "machine/utils.h"
+#include "posix_polyfill.h"
 #include "syscall_nr.h"
 #include "target_errno.h"
-#include "posix_polyfill.h"
 
 #include <cerrno>
 #include <cinttypes>
@@ -17,27 +17,27 @@ using namespace osemu;
 
 // The copied from musl-libc
 
-#define TARGET_O_CREAT        0100
-#define TARGET_O_EXCL         0200
-#define TARGET_O_NOCTTY       0400
-#define TARGET_O_TRUNC       01000
-#define TARGET_O_APPEND      02000
-#define TARGET_O_NONBLOCK    04000
-#define TARGET_O_DSYNC      010000
-#define TARGET_O_SYNC     04010000
-#define TARGET_O_RSYNC    04010000
+#define TARGET_O_CREAT     0100
+#define TARGET_O_EXCL      0200
+#define TARGET_O_NOCTTY    0400
+#define TARGET_O_TRUNC     01000
+#define TARGET_O_APPEND    02000
+#define TARGET_O_NONBLOCK  04000
+#define TARGET_O_DSYNC     010000
+#define TARGET_O_SYNC      04010000
+#define TARGET_O_RSYNC     04010000
 #define TARGET_O_DIRECTORY 0200000
 #define TARGET_O_NOFOLLOW  0400000
-#define TARGET_O_CLOEXEC  02000000
+#define TARGET_O_CLOEXEC   02000000
 
 #define TARGET_O_PATH 010000000
 
 #define TARGET_O_SYNC1 040000
 
 #define TARGET_O_ACCMODE (03 | TARGET_O_PATH)
-#define TARGET_O_RDONLY 00
-#define TARGET_O_WRONLY 01
-#define TARGET_O_RDWR 02
+#define TARGET_O_RDONLY  00
+#define TARGET_O_WRONLY  01
+#define TARGET_O_RDWR    02
 
 #define TARGET_AT_FDCWD -100
 
@@ -570,11 +570,9 @@ bool OsSyscallExceptionHandler::handle_exception(
 #if 1
     printf(
         "Exception cause %d instruction PC 0x%08" PRIx64 " next PC 0x%08" PRIx64 " jump branch "
-        "PC 0x%08" PRIx64
-        "registers PC 0x%08" PRIx64 " mem ref 0x%08" PRIx64 "\n",
-        excause, inst_addr.get_raw(), next_addr.get_raw(),
-        jump_branch_pc.get_raw(), regs->read_pc().get_raw(),
-        mem_ref_addr.get_raw());
+        "PC 0x%08" PRIx64 "registers PC 0x%08" PRIx64 " mem ref 0x%08" PRIx64 "\n",
+        excause, inst_addr.get_raw(), next_addr.get_raw(), jump_branch_pc.get_raw(),
+        regs->read_pc().get_raw(), mem_ref_addr.get_raw());
 #else
     (void)excause;
     (void)inst_addr;
@@ -606,7 +604,8 @@ bool OsSyscallExceptionHandler::handle_exception(
 
 #if 1
     printf(
-        "Syscall %s number %" PRId64 "/0x%" PRIx64 " a1=%" PRIu64 " a2=%" PRIu64 " a3=%" PRIu64 " a4=%" PRIu64 "\n",
+        "Syscall %s number %" PRId64 "/0x%" PRIx64 " a1=%" PRIu64 " a2=%" PRIu64 " a3=%" PRIu64
+        " a4=%" PRIu64 "\n",
         sdesc->name, syscall_num, syscall_num, a1.as_u64(), a2.as_u64(), a3.as_u64(), a4.as_u64());
 
 #endif
@@ -786,9 +785,9 @@ int OsSyscallExceptionHandler::syscall_default_handler(
     const rv_syscall_desc_t *sdesc = &rv_syscall_args[syscall_num];
 #if 1
     printf(
-        "Unimplemented syscall %s number %" PRId64 "/0x%" PRIx64 " a1 %" PRId64
-        " a2 %" PRId64 " a3 %" PRId64 " a4 %" PRId64 "\n", sdesc->name,
-        syscall_num, syscall_num, a1, a2, a3, a4);
+        "Unimplemented syscall %s number %" PRId64 "/0x%" PRIx64 " a1 %" PRId64 " a2 %" PRId64
+        " a3 %" PRId64 " a4 %" PRId64 "\n",
+        sdesc->name, syscall_num, syscall_num, a1, a2, a3, a4);
 
 #endif
     (void)core;
@@ -1138,9 +1137,7 @@ int OsSyscallExceptionHandler::do_sys_ftruncate(
     result = 0;
     int fd = a1;
     uint64_t length = core->get_xlen_from_reg(a2);
-    if (core->get_xlen() == Xlen::_32) {
-        length |= core->get_xlen_from_reg(a3) << 32;
-    }
+    if (core->get_xlen() == Xlen::_32) { length |= core->get_xlen_from_reg(a3) << 32; }
 
     printf("sys_ftruncate fd %d\n", fd);
 

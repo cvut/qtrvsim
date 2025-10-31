@@ -51,14 +51,10 @@ public:
      */
     explicit FrontendMemory(Endian simulated_endian);
 
-    bool
-    write_u8(Address address, uint8_t value, AccessEffects type = ae::REGULAR);
-    bool
-    write_u16(Address address, uint16_t value, AccessEffects type = ae::REGULAR);
-    bool
-    write_u32(Address address, uint32_t value, AccessEffects type = ae::REGULAR);
-    bool
-    write_u64(Address address, uint64_t value, AccessEffects type = ae::REGULAR);
+    bool write_u8(Address address, uint8_t value, AccessEffects type = ae::REGULAR);
+    bool write_u16(Address address, uint16_t value, AccessEffects type = ae::REGULAR);
+    bool write_u32(Address address, uint32_t value, AccessEffects type = ae::REGULAR);
+    bool write_u64(Address address, uint64_t value, AccessEffects type = ae::REGULAR);
 
     [[nodiscard]] uint8_t read_u8(Address address, AccessEffects type = ae::REGULAR) const;
     [[nodiscard]] uint16_t read_u16(Address address, AccessEffects type = ae::REGULAR) const;
@@ -72,10 +68,7 @@ public:
      * REGULAR.
      * @param control_signal    CPU control unit signal
      */
-    void write_ctl(
-        AccessControl control_signal,
-        Address destination,
-        RegisterValue value);
+    void write_ctl(AccessControl control_signal, Address destination, RegisterValue value);
 
     /**
      * Read with size specified by the CPU control unit.
@@ -98,11 +91,8 @@ public:
      * @param size         number of bytes to be written
      * @return              true when memory before and after write differs
      */
-    virtual WriteResult write(
-        Address destination,
-        const void *source,
-        size_t size,
-        WriteOptions options)
+    virtual WriteResult
+    write(Address destination, const void *source, size_t size, WriteOptions options)
         = 0;
 
     /**
@@ -114,11 +104,9 @@ public:
      * @param options       additional option like debug mode, see type
      *                      definition
      */
-    virtual ReadResult read(
-        void *destination,
-        Address source,
-        size_t size,
-        ReadOptions options) const = 0;
+    virtual ReadResult
+    read(void *destination, Address source, size_t size, ReadOptions options) const
+        = 0;
 
     /**
      * Endian of the simulated CPU/memory system.

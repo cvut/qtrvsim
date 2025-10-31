@@ -4,17 +4,16 @@
 #include "common/endian.h"
 #include "memory/backend/backend_memory.h"
 
-#include <cstdint>
-
 #include <QTime>
+#include <cstdint>
 
 namespace machine::aclint {
 
-constexpr Offset CLINT_SSWI_OFFSET    = 0xc000u;
-constexpr Offset CLINT_SSWI_SIZE      = 0x4000u;
+constexpr Offset CLINT_SSWI_OFFSET = 0xc000u;
+constexpr Offset CLINT_SSWI_SIZE = 0x4000u;
 
-constexpr Offset ACLINT_SSWI_OFFSET     =   0;
-constexpr Offset ACLINT_SSWI_COUNT_MAX  =   1;
+constexpr Offset ACLINT_SSWI_OFFSET = 0;
+constexpr Offset ACLINT_SSWI_COUNT_MAX = 1;
 
 // Timer interrupts
 // mip.MTIP and mie.MTIE are bit 7
@@ -36,17 +35,11 @@ signals:
     void signal_interrupt(uint irq_level, bool active) const;
 
 public:
-    WriteResult write(
-        Offset destination,
-        const void *source,
-        size_t size,
-        WriteOptions options) override;
+    WriteResult
+    write(Offset destination, const void *source, size_t size, WriteOptions options) override;
 
-    ReadResult read(
-        void *destination,
-        Offset source,
-        size_t size,
-        ReadOptions options) const override;
+    ReadResult
+    read(void *destination, Offset source, size_t size, ReadOptions options) const override;
 
     [[nodiscard]] LocationStatus location_status(Offset offset) const override;
 
@@ -62,6 +55,6 @@ private:
     const uint8_t sswi_irq_level;
 };
 
-} // namespace machine aclint
+} // namespace machine::aclint
 
 #endif // ACLINTSSWI_H

@@ -33,8 +33,7 @@ inline constexpr Endian get_native_endian() {
 #elif (defined(__LITTLE_ENDIAN__))
     return LITTLE;
 #else
-    static_assert(
-        false, "Could not detect endian or endian is neither big nor little.");
+    static_assert(false, "Could not detect endian or endian is neither big nor little.");
 #endif
 }
 
@@ -46,8 +45,7 @@ constexpr Endian NATIVE_ENDIAN = get_native_endian();
  */
 template<typename T>
 inline T byteswap(T val) {
-    static_assert(
-        sizeof(T) <= 8, "Byteswap of large types is implementation dependant.");
+    static_assert(sizeof(T) <= 8, "Byteswap of large types is implementation dependant.");
 
     union U {
         T val;

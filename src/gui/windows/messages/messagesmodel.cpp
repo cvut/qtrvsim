@@ -27,8 +27,7 @@ public:
     QString hint;
 };
 
-MessagesModel::MessagesModel(QObject *parent) : Super(parent) {
-}
+MessagesModel::MessagesModel(QObject *parent) : Super(parent) {}
 
 MessagesModel::~MessagesModel() {
     clear_messages();
@@ -42,10 +41,7 @@ int MessagesModel::columnCount(const QModelIndex & /*parent*/) const {
     return 1;
 }
 
-QVariant MessagesModel::headerData(
-    int section,
-    Qt::Orientation orientation,
-    int role) const {
+QVariant MessagesModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (orientation == Qt::Horizontal) {
         if (role == Qt::DisplayRole) {
             switch (section) {
@@ -62,22 +58,14 @@ QVariant MessagesModel::headerData(
 }
 
 QVariant MessagesModel::data(const QModelIndex &index, int role) const {
-    if (index.row() >= rowCount()) {
-        return {};
-    }
+    if (index.row() >= rowCount()) { return {}; }
 
     if (role == Qt::DisplayRole || role == Qt::EditRole) {
         MessagesEntry *ent = messages.at(index.row());
         QString ret = "";
-        if (!ent->file.isEmpty()) {
-            ret += ent->file + ":";
-        }
-        if (ent->line) {
-            ret += QString::number(ent->line) + ":";
-        }
-        if (ent->column) {
-            ret += QString::number(ent->column) + ":";
-        }
+        if (!ent->file.isEmpty()) { ret += ent->file + ":"; }
+        if (ent->line) { ret += QString::number(ent->line) + ":"; }
+        if (ent->column) { ret += QString::number(ent->column) + ":"; }
         ret += ent->text;
         return ret;
     }
@@ -115,11 +103,8 @@ void MessagesModel::clear_messages() {
 }
 
 void MessagesModel::activated(QModelIndex index) {
-    if (index.row() >= rowCount()) {
-        return;
-    }
+    if (index.row() >= rowCount()) { return; }
 
     MessagesEntry *ent = messages.at(index.row());
-    emit message_selected(
-        ent->type, ent->file, ent->line, ent->column, ent->text, ent->hint);
+    emit message_selected(ent->type, ent->file, ent->line, ent->column, ent->text, ent->hint);
 }

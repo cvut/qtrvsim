@@ -149,9 +149,7 @@ void DockPredictorInfo::set_predict_widget_color(QString color_stylesheet) {
     value_event_predict_instruction->setStyleSheet(color_stylesheet);
     value_event_predict_address->setStyleSheet(color_stylesheet);
     value_event_predict_index_btb->setStyleSheet(color_stylesheet);
-    if (is_predictor_dynamic) {
-        value_event_predict_index_bht->setStyleSheet(color_stylesheet);
-    }
+    if (is_predictor_dynamic) { value_event_predict_index_bht->setStyleSheet(color_stylesheet); }
     value_event_predict_result->setStyleSheet(color_stylesheet);
 }
 
@@ -159,16 +157,13 @@ void DockPredictorInfo::set_update_widget_color(QString color_stylesheet) {
     value_event_update_instruction->setStyleSheet(color_stylesheet);
     value_event_update_address->setStyleSheet(color_stylesheet);
     value_event_update_index_btb->setStyleSheet(color_stylesheet);
-    if (is_predictor_dynamic) {
-        value_event_update_index_bht->setStyleSheet(color_stylesheet);
-    }
+    if (is_predictor_dynamic) { value_event_update_index_bht->setStyleSheet(color_stylesheet); }
     value_event_update_result->setStyleSheet(color_stylesheet);
 }
 
 void DockPredictorInfo::setup(
     const machine::BranchPredictor *branch_predictor,
     const machine::Core *core) {
-
     clear();
 
     number_of_bhr_bits = branch_predictor->get_number_of_bhr_bits();
@@ -179,22 +174,20 @@ void DockPredictorInfo::setup(
 
     if (is_predictor_enabled) {
         connect(
-            branch_predictor, &machine::BranchPredictor::total_stats_updated,
-            this, &DockPredictorInfo::update_stats);
+            branch_predictor, &machine::BranchPredictor::total_stats_updated, this,
+            &DockPredictorInfo::update_stats);
         connect(
-            branch_predictor, &machine::BranchPredictor::prediction_done,
-            this, &DockPredictorInfo::show_new_prediction);
+            branch_predictor, &machine::BranchPredictor::prediction_done, this,
+            &DockPredictorInfo::show_new_prediction);
+        connect(core, &machine::Core::step_started, this, &DockPredictorInfo::reset_colors);
         connect(
-            core, &machine::Core::step_started,
-            this, &DockPredictorInfo::reset_colors);
-        connect(
-            branch_predictor, &machine::BranchPredictor::update_done,
-            this, &DockPredictorInfo::show_new_update);
+            branch_predictor, &machine::BranchPredictor::update_done, this,
+            &DockPredictorInfo::show_new_update);
 
         if (is_predictor_dynamic) {
             connect(
-                branch_predictor, &machine::BranchPredictor::bhr_updated,
-                this, &DockPredictorInfo::update_bhr);
+                branch_predictor, &machine::BranchPredictor::bhr_updated, this,
+                &DockPredictorInfo::update_bhr);
         }
     }
 
@@ -270,7 +263,7 @@ void DockPredictorInfo::show_new_update(
     value_event_update_index_btb->setText(QString::number(btb_index));
     if (!is_predictor_dynamic) {
         value_event_update_index_bht->setText("");
-    } else if (feedback.branch_type == machine::BranchType::BRANCH ) {
+    } else if (feedback.branch_type == machine::BranchType::BRANCH) {
         value_event_update_index_bht->setText(QString::number(bht_index));
     } else {
         value_event_update_index_bht->setText("N/A");

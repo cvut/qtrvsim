@@ -1,7 +1,6 @@
 #include "cachedock.h"
 
-CacheDock::CacheDock(QWidget *parent, const QString &type)
-    : QDockWidget(parent) {
+CacheDock::CacheDock(QWidget *parent, const QString &type) : QDockWidget(parent) {
     top_widget = new QWidget(this);
     setWidget(top_widget);
     layout_box = new QVBoxLayout(top_widget);
@@ -106,10 +105,7 @@ void CacheDock::memory_writes_update(unsigned val) {
     memory_writes = val;
 }
 
-void CacheDock::statistics_update(
-    unsigned stalled_cycles,
-    double speed_improv,
-    double hit_rate) {
+void CacheDock::statistics_update(unsigned stalled_cycles, double speed_improv, double hit_rate) {
     this->stalled = stalled_cycles;
     this->hit = hit_rate;
     this->speed_improv = speed_improv;

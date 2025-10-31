@@ -351,8 +351,8 @@ void TestMemory::memory_memtest() {
 
     uint64_t range_to_test = 128 * 1024;
 
-    if (frontend_address.get_raw() < 0x100000000 &&
-        0x100000000 - range_to_test < frontend_address.get_raw())
+    if (frontend_address.get_raw() < 0x100000000
+        && 0x100000000 - range_to_test < frontend_address.get_raw())
         range_to_test = uint64_t(Address(0x100000000) - frontend_address);
 
     for (uint64_t o = 0; o < range_to_test; o += 4) {

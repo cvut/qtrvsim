@@ -3,8 +3,8 @@
 #include "common/logging.h"
 #include "common/logging_format_colors.h"
 #include "machine/machineconfig.h"
-#include "os_emulation/ossyscall.h"
 #include "msgreport.h"
+#include "os_emulation/ossyscall.h"
 #include "reporter.h"
 #include "tracer.h"
 
@@ -34,23 +34,29 @@ void create_parser(QCommandLineParser &p) {
     p.addOption({ "no-delay-slot", "Disable jump delay slot." });
     p.addOption(
         { "hazard-unit", "Specify hazard unit implementation [none|stall|forward].", "HUKIND" });
-    p.addOption({ { "trace-fetch", "tr-fetch" },
-                  "Trace fetched instruction (for both pipelined and not core)." });
-    p.addOption({ { "trace-decode", "tr-decode" },
-                  "Trace instruction in decode stage. (only for pipelined core)" });
-    p.addOption({ { "trace-execute", "tr-execute" },
-                  "Trace instruction in execute stage. (only for pipelined core)" });
-    p.addOption({ { "trace-memory", "tr-memory" },
-                  "Trace instruction in memory stage. (only for pipelined core)" });
-    p.addOption({ { "trace-writeback", "tr-writeback" },
-                  "Trace instruction in write back stage. (only for pipelined core)" });
+    p.addOption(
+        { { "trace-fetch", "tr-fetch" },
+          "Trace fetched instruction (for both pipelined and not core)." });
+    p.addOption(
+        { { "trace-decode", "tr-decode" },
+          "Trace instruction in decode stage. (only for pipelined core)" });
+    p.addOption(
+        { { "trace-execute", "tr-execute" },
+          "Trace instruction in execute stage. (only for pipelined core)" });
+    p.addOption(
+        { { "trace-memory", "tr-memory" },
+          "Trace instruction in memory stage. (only for pipelined core)" });
+    p.addOption(
+        { { "trace-writeback", "tr-writeback" },
+          "Trace instruction in write back stage. (only for pipelined core)" });
     p.addOption({ { "trace-pc", "tr-pc" }, "Print program counter register changes." });
     p.addOption({ { "trace-wrmem", "tr-wr" }, "Trace writes into memory." });
     p.addOption({ { "trace-rdmem", "tr-rd" }, "Trace reads from memory." });
-    p.addOption({ { "trace-gp", "tr-gp" },
-                  "Print general purpose register changes. You can use * for "
-                  "all registers.",
-                  "REG" });
+    p.addOption(
+        { { "trace-gp", "tr-gp" },
+          "Print general purpose register changes. You can use * for "
+          "all registers.",
+          "REG" });
     p.addOption({ "dump-to-json", "Configure reportor dump to json file.", "FNAME" });
     p.addOption({ "only-dump", "Do not start the processor." });
     p.addOption({ "disable-console-dump", "Configure reporter not to dump to console." });
@@ -61,24 +67,28 @@ void create_parser(QCommandLineParser &p) {
     p.addOption({ "dump-symbol-table", "Dump the symbol table." });
     p.addOption({ "load-range", "Load memory range.", "START,FNAME" });
     p.addOption({ "expect-fail", "Expect that program causes CPU trap and fail if it doesn't." });
-    p.addOption({ "fail-match",
-                  "Program should exit with exactly this CPU TRAP. Possible values are "
-                  "I(unsupported Instruction), A(Unsupported ALU operation), "
-                  "O(Overflow/underflow) and J(Unaligned Jump). You can freely combine "
-                  "them. Using this implies expect-fail option.",
-                  "TRAP" });
-    p.addOption({ "d-cache",
-                  "Data cache. Format policy,sets,words_in_blocks,associativity where "
-                  "policy is random/lru/lfu",
-                  "DCACHE" });
-    p.addOption({ "i-cache",
-                  "Instruction cache. Format policy,sets,words_in_blocks,associativity "
-                  "where policy is random/lru/lfu",
-                  "ICACHE" });
-    p.addOption({ "l2-cache",
-                  "L2 cache. Format policy,sets,words_in_blocks,associativity where "
-                  "policy is random/lru/lfu",
-                  "L2CACHE" });
+    p.addOption(
+        { "fail-match",
+          "Program should exit with exactly this CPU TRAP. Possible values are "
+          "I(unsupported Instruction), A(Unsupported ALU operation), "
+          "O(Overflow/underflow) and J(Unaligned Jump). You can freely combine "
+          "them. Using this implies expect-fail option.",
+          "TRAP" });
+    p.addOption(
+        { "d-cache",
+          "Data cache. Format policy,sets,words_in_blocks,associativity where "
+          "policy is random/lru/lfu",
+          "DCACHE" });
+    p.addOption(
+        { "i-cache",
+          "Instruction cache. Format policy,sets,words_in_blocks,associativity "
+          "where policy is random/lru/lfu",
+          "ICACHE" });
+    p.addOption(
+        { "l2-cache",
+          "L2 cache. Format policy,sets,words_in_blocks,associativity where "
+          "policy is random/lru/lfu",
+          "L2CACHE" });
     p.addOption({ "read-time", "Memory read access time (cycles).", "RTIME" });
     p.addOption({ "write-time", "Memory read access time (cycles).", "WTIME" });
     p.addOption({ "burst-time", "Memory read access time (cycles).", "BTIME" });
@@ -86,9 +96,12 @@ void create_parser(QCommandLineParser &p) {
     p.addOption(
         { { "serial-out", "serout" }, "File connected to the serial port output.", "FNAME" });
     p.addOption({ { "os-emulation", "osemu" }, "Operating system emulation." });
-    p.addOption({ { "std-out", "stdout" }, "File connected to the syscall standard output.", "FNAME" });
-    p.addOption({ { "os-fs-root", "osfsroot" }, "Emulated system root/prefix for opened files", "DIR" });
-    p.addOption({ { "isa-variant", "isavariant" }, "Instruction set to emulate (default RV32IMA)", "STR" });
+    p.addOption(
+        { { "std-out", "stdout" }, "File connected to the syscall standard output.", "FNAME" });
+    p.addOption(
+        { { "os-fs-root", "osfsroot" }, "Emulated system root/prefix for opened files", "DIR" });
+    p.addOption(
+        { { "isa-variant", "isavariant" }, "Instruction set to emulate (default RV32IMA)", "STR" });
     p.addOption({ "cycle-limit", "Limit execution to specified maximum clock cycles", "NUMBER" });
 }
 
@@ -205,8 +218,7 @@ void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
     int siz = parser.values("os-fs-root").size();
     if (siz >= 1) {
         QString osemu_fs_root = parser.values("os-fs-root").at(siz - 1);
-        if (osemu_fs_root.length() > 0)
-            config.set_osemu_fs_root(osemu_fs_root);
+        if (osemu_fs_root.length() > 0) { config.set_osemu_fs_root(osemu_fs_root); }
     }
     siz = parser.values("isa-variant").size();
     for (int i = 0; i < siz; i++) {
@@ -214,10 +226,10 @@ void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
         bool first = true;
         bool subtract = false;
         QString isa_str = parser.values("isa-variant").at(i).toUpper();
-        if (isa_str.startsWith ("RV32")) {
+        if (isa_str.startsWith("RV32")) {
             config.set_simulated_xlen(machine::Xlen::_32);
             pos = 4;
-        } else if (isa_str.startsWith ("RV64")) {
+        } else if (isa_str.startsWith("RV64")) {
             config.set_simulated_xlen(machine::Xlen::_64);
             pos = 4;
         }
@@ -231,10 +243,10 @@ void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
                 continue;
             }
             auto flag = machine::ConfigIsaWord::byChar(ch);
-            if (flag.isEmpty())
-                continue;
+            if (flag.isEmpty()) continue;
             if (first)
-                config.modify_isa_word(~machine::ConfigIsaWord::empty(), machine::ConfigIsaWord::empty());
+                config.modify_isa_word(
+                    ~machine::ConfigIsaWord::empty(), machine::ConfigIsaWord::empty());
             if (subtract)
                 config.modify_isa_word(flag, machine::ConfigIsaWord::empty());
             else
@@ -256,7 +268,7 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
     if (p.isSet("trace-gp")) { tr.trace_regs_gp = true; }
 
     QStringList gps = p.values("trace-gp");
-    for (const auto & gp : gps) {
+    for (const auto &gp : gps) {
         if (gp == "*") {
             tr.regs_to_trace.fill(true);
         } else {
@@ -265,8 +277,7 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
             if (res && num <= machine::REGISTER_COUNT) {
                 tr.regs_to_trace.at(num) = true;
             } else {
-                fprintf(
-                    stderr, "Unknown register number given for trace-gp: %s\n", qPrintable(gp));
+                fprintf(stderr, "Unknown register number given for trace-gp: %s\n", qPrintable(gp));
                 exit(EXIT_FAILURE);
             }
         }
@@ -280,8 +291,7 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
         bool ok;
         tr.cycle_limit = clim.at(clim.size() - 1).toLong(&ok);
         if (!ok) {
-            fprintf(
-                stderr, "Cycle limit parse error\n");
+            fprintf(stderr, "Cycle limit parse error\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -303,7 +313,7 @@ void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *s
     if (p.isSet("dump-symbol-table")) { r.enable_symbol_table_reporting(); }
 
     QStringList fail = p.values("fail-match");
-    for (const auto & i : fail) {
+    for (const auto &i : fail) {
         for (int y = 0; y < i.length(); y++) {
             enum Reporter::FailReason reason;
             switch (tolower(i.toStdString()[y])) {
@@ -420,8 +430,9 @@ void configure_osemu(QCommandLineParser &p, MachineConfig &config, Machine *mach
             exit(EXIT_FAILURE);
         }
     }
-    const static machine::ExceptionCause ecall_variats[] = {machine::EXCAUSE_ECALL_ANY,
-        machine::EXCAUSE_ECALL_M, machine::EXCAUSE_ECALL_S, machine::EXCAUSE_ECALL_U};
+    const static machine::ExceptionCause ecall_variats[]
+        = { machine::EXCAUSE_ECALL_ANY, machine::EXCAUSE_ECALL_M, machine::EXCAUSE_ECALL_S,
+            machine::EXCAUSE_ECALL_U };
 
     if (config.osemu_enable()) {
         auto *osemu_handler = new osemu::OsSyscallExceptionHandler(
@@ -429,8 +440,8 @@ void configure_osemu(QCommandLineParser &p, MachineConfig &config, Machine *mach
             config.osemu_fs_root());
         if (std_out) {
             machine::Machine::connect(
-                osemu_handler, &osemu::OsSyscallExceptionHandler::char_written,
-                std_out, QOverload<int, unsigned>::of(&CharIOHandler::writeByte));
+                osemu_handler, &osemu::OsSyscallExceptionHandler::char_written, std_out,
+                QOverload<int, unsigned>::of(&CharIOHandler::writeByte));
         }
         /*connect(
             osemu_handler, &osemu::OsSyscallExceptionHandler::rx_byte_pool, terminal,
@@ -475,9 +486,7 @@ void load_ranges(Machine &machine, const QStringList &ranges) {
         Address addr = start;
         for (std::string line; getline(in, line);) {
             size_t end_pos = line.find_last_not_of(" \t\n");
-            if (std::string::npos == end_pos) {
-                continue;
-            }
+            if (std::string::npos == end_pos) { continue; }
 
             size_t start_pos = line.find_first_not_of(" \t\n");
             line = line.substr(0, end_pos + 1);
@@ -507,9 +516,7 @@ bool assemble(Machine &machine, MsgReport &msgrep, const QString &filename) {
 
     assembler.setup(mem, &symbol_table_db, 0x00000200_addr, machine.core()->get_xlen());
 
-    if (!assembler.process_file(filename)) {
-        return false;
-    }
+    if (!assembler.process_file(filename)) { return false; }
 
     return assembler.finish();
 }

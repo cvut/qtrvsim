@@ -210,7 +210,7 @@ int StaticTableLayout::layout_size(int &row_h, QList<QList<int>> &row_w, int cou
         w += bhspace - shspace; // subtract latest small spacing and add big
                                 // spacing
     }
-    w -= bhspace;               // subtract latest big spacing
+    w -= bhspace; // subtract latest big spacing
     return w;
 }
 

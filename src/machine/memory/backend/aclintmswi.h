@@ -4,17 +4,16 @@
 #include "common/endian.h"
 #include "memory/backend/backend_memory.h"
 
-#include <cstdint>
-
 #include <QTime>
+#include <cstdint>
 
 namespace machine::aclint {
 
-constexpr Offset CLINT_MSWI_OFFSET    = 0x0000u;
-constexpr Offset CLINT_MSWI_SIZE      = 0x4000u;
+constexpr Offset CLINT_MSWI_OFFSET = 0x0000u;
+constexpr Offset CLINT_MSWI_SIZE = 0x4000u;
 
-constexpr Offset ACLINT_MSWI_OFFSET     =   0;
-constexpr Offset ACLINT_MSWI_COUNT_MAX  =   1;
+constexpr Offset ACLINT_MSWI_OFFSET = 0;
+constexpr Offset ACLINT_MSWI_COUNT_MAX = 1;
 
 // Timer interrupts
 // mip.MTIP and mie.MTIE are bit 7
@@ -36,17 +35,11 @@ signals:
     void signal_interrupt(uint irq_level, bool active) const;
 
 public:
-    WriteResult write(
-        Offset destination,
-        const void *source,
-        size_t size,
-        WriteOptions options) override;
+    WriteResult
+    write(Offset destination, const void *source, size_t size, WriteOptions options) override;
 
-    ReadResult read(
-        void *destination,
-        Offset source,
-        size_t size,
-        ReadOptions options) const override;
+    ReadResult
+    read(void *destination, Offset source, size_t size, ReadOptions options) const override;
 
     [[nodiscard]] LocationStatus location_status(Offset offset) const override;
 
@@ -60,12 +53,12 @@ private:
     bool update_mswi_irq();
 
     unsigned mswi_count;
-    bool mswi_value[ACLINT_MSWI_COUNT_MAX]{};
+    bool mswi_value[ACLINT_MSWI_COUNT_MAX] {};
 
     const uint8_t mswi_irq_level;
     bool mswi_irq_active = false;
 };
 
-} // namespace machine aclint
+} // namespace machine::aclint
 
 #endif // ACLINTMSWI_H

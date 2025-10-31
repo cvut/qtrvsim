@@ -47,11 +47,8 @@ public:
      *
      * @see MemoryDataBus::write_single
      */
-    WriteResult write(
-        Address destination,
-        const void *source,
-        size_t size,
-        WriteOptions options) override;
+    WriteResult
+    write(Address destination, const void *source, size_t size, WriteOptions options) override;
 
     /**
      * Read method that repeats write single (for each affected range) until
@@ -59,11 +56,8 @@ public:
      *
      * @see MemoryDataBus:read_single
      */
-    ReadResult read(
-        void *destination,
-        Address source,
-        size_t size,
-        ReadOptions options) const override;
+    ReadResult
+    read(void *destination, Address source, size_t size, ReadOptions options) const override;
 
     /**
      * Number of writes and external changes recorded.
@@ -138,11 +132,8 @@ private:
      * that was written.
      * API corresponds to `BackendMemory` interface method `write`.
      */
-    WriteResult write_single(
-        Address destination,
-        const void *source,
-        size_t size,
-        WriteOptions options);
+    WriteResult
+    write_single(Address destination, const void *source, size_t size, WriteOptions options);
 
     /**
      * Helper to read from single range. Used by `read` from Backend memory
@@ -152,11 +143,8 @@ private:
      * size, that was written.
      * API corresponds to `BackendMemory` interface method `read`.
      */
-    ReadResult read_single(
-        void *destination,
-        Address source,
-        size_t size,
-        ReadOptions options) const;
+    ReadResult
+    read_single(void *destination, Address source, size_t size, ReadOptions options) const;
 
     /**
      * Get range (or nullptr) for arbitrary address (not just start or last).
@@ -169,11 +157,7 @@ private:
  */
 class MemoryDataBus::RangeDesc {
 public:
-    RangeDesc(
-        BackendMemory *device,
-        Address start_addr,
-        Address last_addr,
-        bool owns_device);
+    RangeDesc(BackendMemory *device, Address start_addr, Address last_addr, bool owns_device);
 
     /**
      * Tells, whether given address belongs to this range.
@@ -204,17 +188,11 @@ class TrivialBus final : public FrontendMemory {
 public:
     explicit TrivialBus(BackendMemory *backend_memory);
 
-    WriteResult write(
-        Address destination,
-        const void *source,
-        size_t size,
-        WriteOptions options) override;
+    WriteResult
+    write(Address destination, const void *source, size_t size, WriteOptions options) override;
 
-    ReadResult read(
-        void *destination,
-        Address source,
-        size_t size,
-        ReadOptions options) const override;
+    ReadResult
+    read(void *destination, Address source, size_t size, ReadOptions options) const override;
 
     uint32_t get_change_counter() const override;
 

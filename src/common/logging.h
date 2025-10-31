@@ -29,8 +29,8 @@
 #else
     #define DEBUG(...) qCDebug(_loging_category_, __VA_ARGS__)
 #endif
-#define LOG(...) qCInfo(_loging_category_, __VA_ARGS__)
-#define WARN(...) qCWarning(_loging_category_, __VA_ARGS__)
+#define LOG(...)   qCInfo(_loging_category_, __VA_ARGS__)
+#define WARN(...)  qCWarning(_loging_category_, __VA_ARGS__)
 #define ERROR(...) qCCritical(_loging_category_, __VA_ARGS__)
 
 #endif

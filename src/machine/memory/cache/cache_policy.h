@@ -32,8 +32,7 @@ public:
 
     virtual ~CachePolicy() = default;
 
-    static std::unique_ptr<CachePolicy>
-    get_policy_instance(const CacheConfig *config);
+    static std::unique_ptr<CachePolicy> get_policy_instance(const CacheConfig *config);
 };
 
 /**

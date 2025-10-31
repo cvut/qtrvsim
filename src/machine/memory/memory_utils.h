@@ -15,9 +15,9 @@ namespace machine {
  * Determines what effects should memory access cause.
  */
 enum class AccessEffects {
-    REGULAR, //> All (memory, simulation counters, simulation flags, allocation
-             // on read miss (write allocation is necessary)). For accessed
-             // requested by simulated program.
+    REGULAR,        //> All (memory, simulation counters, simulation flags, allocation
+                    // on read miss (write allocation is necessary)). For accessed
+                    // requested by simulated program.
     INTERNAL,       //> Only memory. Internal access performed for visualization,
                     // control and debugging.
     EXTERNAL_ASYNC, //> Used for DMA.
@@ -105,16 +105,12 @@ struct WriteResult {
  * @return                  size to be used from aligned access
  */
 template<typename STORAGE_TYPE>
-inline void partial_access_parameters(
-        size_t &data_offset,
-        size_t &partial_size,
-        uintptr_t ptr,
-        size_t size) {
+inline void
+partial_access_parameters(size_t &data_offset, size_t &partial_size, uintptr_t ptr, size_t size) {
     data_offset = ptr % sizeof(STORAGE_TYPE);
     partial_size = sizeof(STORAGE_TYPE);
     partial_size -= data_offset;
-    if (partial_size > size)
-        partial_size = size;
+    if (partial_size > size) partial_size = size;
 }
 
 /**
@@ -225,8 +221,7 @@ write_by_u32(size_t dst, const void *src, size_t size, FUNC1 data_getter, FUNC2 
         size_t partial_size = std::min(sizeof(uint32_t) - data_offset, remaining_size);
         uint32_t data = 0;
 
-        if (partial_size < sizeof(data))
-            data = data_getter(current_dst & ~3u);
+        if (partial_size < sizeof(data)) data = data_getter(current_dst & ~3u);
 
         memcpy((byte *)&data + data_offset, current_src, partial_size);
 
@@ -254,8 +249,7 @@ write_by_u16(size_t dst, const void *src, size_t size, FUNC1 data_getter, FUNC2 
         size_t partial_size = std::min(sizeof(uint16_t) - data_offset, remaining_size);
         uint16_t data = 0;
 
-        if (partial_size < sizeof(data))
-            data = data_getter(current_dst & ~1u);
+        if (partial_size < sizeof(data)) data = data_getter(current_dst & ~1u);
 
         memcpy((byte *)&data + data_offset, current_src, partial_size);
 
@@ -283,8 +277,7 @@ write_by_u64(size_t dst, const void *src, size_t size, FUNC1 data_getter, FUNC2 
         size_t partial_size = std::min(sizeof(uint64_t) - data_offset, remaining_size);
         uint64_t data = 0;
 
-        if (partial_size < sizeof(data))
-            data = data_getter(current_dst & ~7u);
+        if (partial_size < sizeof(data)) data = data_getter(current_dst & ~7u);
 
         memcpy((byte *)&data + data_offset, current_src, partial_size);
 

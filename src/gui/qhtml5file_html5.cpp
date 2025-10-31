@@ -55,21 +55,18 @@
 std::function<void(char *, size_t, const char *)> g_qtFileDataReadyCallback;
 extern "C" EMSCRIPTEN_KEEPALIVE void
 qt_callFileDataReady(char *content, size_t contentSize, const char *fileName) {
-    if (g_qtFileDataReadyCallback == nullptr) {
-        return;
-    }
+    if (g_qtFileDataReadyCallback == nullptr) { return; }
 
     g_qtFileDataReadyCallback(content, contentSize, fileName);
     g_qtFileDataReadyCallback = nullptr;
 }
 
 namespace {
-void loadFile(
-    const char *accept,
-    std::function<void(char *, size_t, const char *)> fileDataReady) {
+void loadFile(const char *accept, std::function<void(char *, size_t, const char *)> fileDataReady) {
     if (::g_qtFileDataReadyCallback) {
-        puts("Warning: Concurrent loadFile() calls are not supported. "
-             "Cancelling earlier call");
+        puts(
+            "Warning: Concurrent loadFile() calls are not supported. "
+            "Cancelling earlier call");
     }
 
     // Call qt_callFileDataReady to make sure the emscripten linker does not
@@ -115,8 +112,8 @@ void loadFile(
                         // the C++ side.
 
                         const heapPointer = _malloc(contentSize);
-                        const heapBytes = new Uint8Array(
-                            Module.HEAPU8.buffer, heapPointer, contentSize);
+                        const heapBytes
+                            = new Uint8Array(Module.HEAPU8.buffer, heapPointer, contentSize);
                         heapBytes.set(contentArray);
 
                         // Null out the first data copy to enable GC
@@ -125,8 +122,7 @@ void loadFile(
 
                         // Call the C++ file data ready callback
                         ccall(
-                            "qt_callFileDataReady", null,
-                            [ "number", "number", "string" ],
+                            "qt_callFileDataReady", null, [ "number", "number", "string" ],
                             [ heapPointer, contentSize, name ]);
                     };
                     reader.readAsArrayBuffer(file);
@@ -143,10 +139,7 @@ void loadFile(
         accept);
 }
 
-void saveFile(
-    const char *contentPointer,
-    size_t contentLength,
-    const char *fileNameHint) {
+void saveFile(const char *contentPointer, size_t contentLength, const char *fileNameHint) {
     EM_ASM_(
         {
             // Make the file contents and file name hint accessible to
@@ -155,8 +148,8 @@ void saveFile(
             const contentPointer = $0;
             const contentLength = $1;
             const fileNameHint = UTF8ToString($2);
-            const fileContent = Module.HEAPU8.subarray(
-                contentPointer, contentPointer + contentLength);
+            const fileContent
+                = Module.HEAPU8.subarray(contentPointer, contentPointer + contentLength);
 
             // Create a hidden download link and click it programatically
             const fileblob = new Blob([fileContent], {
@@ -193,19 +186,17 @@ void saveFile(
 void QHtml5File::load(
     const QString &accept,
     std::function<void(const QByteArray &, const QString &)> fileDataReady) {
-    loadFile(
-        accept.toUtf8().constData(),
-        [=](char *content, size_t size, const char *fileName) {
-            // Copy file data into QByteArray and free buffer that was allocated
-            // on the JavaScript side. We could have used
-            // QByteArray::fromRawData() to avoid the copy here, but that would
-            // make memory management awkward.
-            QByteArray qtFileContent(content, size);
-            free(content);
+    loadFile(accept.toUtf8().constData(), [=](char *content, size_t size, const char *fileName) {
+        // Copy file data into QByteArray and free buffer that was allocated
+        // on the JavaScript side. We could have used
+        // QByteArray::fromRawData() to avoid the copy here, but that would
+        // make memory management awkward.
+        QByteArray qtFileContent(content, size);
+        free(content);
 
-            // Call user-supplied data ready callback
-            fileDataReady(qtFileContent, QString::fromUtf8(fileName));
-        });
+        // Call user-supplied data ready callback
+        fileDataReady(qtFileContent, QString::fromUtf8(fileName));
+    });
 }
 
 /*!
@@ -220,6 +211,5 @@ void QHtml5File::load(
 */
 void QHtml5File::save(const QByteArray &content, const QString &fileNameHint) {
     // Convert to C types and save
-    saveFile(
-        content.constData(), content.size(), fileNameHint.toUtf8().constData());
+    saveFile(content.constData(), content.size(), fileNameHint.toUtf8().constData());
 }

@@ -7,10 +7,10 @@
 
 //////////////////////
 #define ROW_HEIGHT 14
-#define VD_WIDTH 10
+#define VD_WIDTH   10
 #define DATA_WIDTH 72
-#define PENW 1
-#define LETTERW 7
+#define PENW       1
+#define LETTERW    7
 //////////////////////
 
 #include "common/endian.h"

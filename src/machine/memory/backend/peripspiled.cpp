@@ -17,34 +17,24 @@ PeripSpiLed::PeripSpiLed(Endian simulated_machine_endian)
 
 PeripSpiLed::~PeripSpiLed() = default;
 
-WriteResult PeripSpiLed::write(
-    Offset destination,
-    const void *source,
-    size_t size,
-    WriteOptions options) {
+WriteResult
+PeripSpiLed::write(Offset destination, const void *source, size_t size, WriteOptions options) {
     UNUSED(options)
     return write_by_u32(
         destination, source, size,
         [&](Offset src) {
-            return byteswap_if(
-                read_reg(src), internal_endian != simulated_machine_endian);
+            return byteswap_if(read_reg(src), internal_endian != simulated_machine_endian);
         },
         [&](Offset src, uint32_t value) {
-            return write_reg(
-                src, byteswap_if(
-                         value, internal_endian != simulated_machine_endian));
+            return write_reg(src, byteswap_if(value, internal_endian != simulated_machine_endian));
         });
 }
 
-ReadResult PeripSpiLed::read(
-    void *destination,
-    Offset source,
-    size_t size,
-    ReadOptions options) const {
+ReadResult
+PeripSpiLed::read(void *destination, Offset source, size_t size, ReadOptions options) const {
     UNUSED(options)
     return read_by_u32(destination, source, size, [&](Offset src) {
-        return byteswap_if(
-            read_reg(src), internal_endian != simulated_machine_endian);
+        return byteswap_if(read_reg(src), internal_endian != simulated_machine_endian);
     });
 }
 
@@ -56,8 +46,7 @@ uint32_t PeripSpiLed::read_reg(Offset source) const {
         case SPILED_REG_LED_RGB1_o: return spiled_reg_led_rgb1;
         case SPILED_REG_LED_RGB2_o: return spiled_reg_led_rgb2;
         case SPILED_REG_LED_KBDWR_DIRECT_o: return spiled_reg_led_kbdwr_direct;
-        case SPILED_REG_KBDRD_KNOBS_DIRECT_o:
-            return spiled_reg_kbdrd_knobs_direct;
+        case SPILED_REG_KBDRD_KNOBS_DIRECT_o: return spiled_reg_kbdrd_knobs_direct;
         case SPILED_REG_KNOBS_8BIT_o: return spiled_reg_knobs_8bit;
         default:
             // Todo show this to user as this is failure of supplied program
@@ -114,9 +103,7 @@ void PeripSpiLed::knob_update_notify(uint32_t val, uint32_t mask, size_t shift) 
     mask <<= shift;
     val <<= shift;
 
-    if (!((spiled_reg_knobs_8bit ^ val) & mask)) {
-        return;
-    }
+    if (!((spiled_reg_knobs_8bit ^ val) & mask)) { return; }
 
     spiled_reg_knobs_8bit &= ~mask;
     spiled_reg_knobs_8bit |= val;

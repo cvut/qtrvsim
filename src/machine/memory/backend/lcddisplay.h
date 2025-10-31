@@ -24,33 +24,23 @@ signals:
     void pixel_update(size_t x, size_t y, uint r, uint g, uint b);
 
 public:
-    WriteResult write(
-        Offset destination,
-        const void *source,
-        size_t size,
-        WriteOptions options) override;
+    WriteResult
+    write(Offset destination, const void *source, size_t size, WriteOptions options) override;
 
-    ReadResult read(
-        void *destination,
-        Offset source,
-        size_t size,
-        ReadOptions options) const override;
+    ReadResult
+    read(void *destination, Offset source, size_t size, ReadOptions options) const override;
 
     [[nodiscard]] LocationStatus location_status(Offset offset) const override;
 
     /**
      * @return  framebuffer width in pixels
      */
-    [[nodiscard]] inline constexpr size_t get_width() const {
-        return fb_width;
-    }
+    [[nodiscard]] inline constexpr size_t get_width() const { return fb_width; }
 
     /**
      * @return  framebuffer height in pixels
      */
-    [[nodiscard]] inline constexpr size_t get_height() const {
-        return fb_height;
-    }
+    [[nodiscard]] inline constexpr size_t get_height() const { return fb_height; }
 
 private:
     /** Endian internal registers of the periphery (framebuffer) use. */

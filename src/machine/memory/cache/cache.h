@@ -58,17 +58,11 @@ public:
 
     ~Cache() override;
 
-    WriteResult write(
-        Address destination,
-        const void *source,
-        size_t size,
-        WriteOptions options) override;
+    WriteResult
+    write(Address destination, const void *source, size_t size, WriteOptions options) override;
 
-    ReadResult read(
-        void *destination,
-        Address source,
-        size_t size,
-        ReadOptions options) const override;
+    ReadResult
+    read(void *destination, Address source, size_t size, ReadOptions options) const override;
 
     uint32_t get_change_counter() const override;
 
@@ -94,10 +88,7 @@ public:
 signals:
     void hit_update(uint32_t) const;
     void miss_update(uint32_t) const;
-    void statistics_update(
-        uint32_t stalled_cycles,
-        double speed_improv,
-        double hit_rate) const;
+    void statistics_update(uint32_t stalled_cycles, double speed_improv, double hit_rate) const;
     void cache_update(
         size_t way,
         size_t row,
@@ -121,17 +112,12 @@ private:
 
     mutable std::vector<std::vector<CacheLine>> dt;
 
-    mutable uint32_t hit_read = 0, miss_read = 0, hit_write = 0, miss_write = 0,
-                     mem_reads = 0, mem_writes = 0, burst_reads = 0,
-                     burst_writes = 0, change_counter = 0;
+    mutable uint32_t hit_read = 0, miss_read = 0, hit_write = 0, miss_write = 0, mem_reads = 0,
+                     mem_writes = 0, burst_reads = 0, burst_writes = 0, change_counter = 0;
 
     void internal_read(Address source, void *destination, size_t size) const;
 
-    bool access(
-        Address address,
-        void *buffer,
-        size_t size,
-        AccessType access_type) const;
+    bool access(Address address, void *buffer, size_t size, AccessType access_type) const;
 
     void kick(size_t way, size_t row) const;
 
@@ -158,9 +144,7 @@ private:
      * This functions calculated the size, that will have to be performed by
      * repeated access (recursive call of `access` method).
      */
-    size_t calculate_overflow_to_next_blocks(
-        size_t access_size,
-        const CacheLocation &loc) const;
+    size_t calculate_overflow_to_next_blocks(size_t access_size, const CacheLocation &loc) const;
 };
 
 } // namespace machine

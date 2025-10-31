@@ -2,30 +2,22 @@
 
 #include "ui_peripheralsview.h"
 
-PeripheralsView::PeripheralsView(QWidget *parent)
-    : QWidget(parent)
-    , ui(new Ui::PeripheralsView) {
+PeripheralsView::PeripheralsView(QWidget *parent) : QWidget(parent), ui(new Ui::PeripheralsView) {
     ui->setupUi(this);
 
     ui->dialRed->setStyleSheet("QDial { background-color: red }");
     ui->dialGreen->setStyleSheet("QDial { background-color: green }");
     ui->dialBlue->setStyleSheet("QDial { background-color: blue }");
 
-    connect(
-        ui->dialRed, &QAbstractSlider::valueChanged, ui->spinRed,
-        &QSpinBox::setValue);
-    connect(
-        ui->dialGreen, &QAbstractSlider::valueChanged, ui->spinGreen,
-        &QSpinBox::setValue);
-    connect(
-        ui->dialBlue, &QAbstractSlider::valueChanged, ui->spinBlue,
-        &QSpinBox::setValue);
+    connect(ui->dialRed, &QAbstractSlider::valueChanged, ui->spinRed, &QSpinBox::setValue);
+    connect(ui->dialGreen, &QAbstractSlider::valueChanged, ui->spinGreen, &QSpinBox::setValue);
+    connect(ui->dialBlue, &QAbstractSlider::valueChanged, ui->spinBlue, &QSpinBox::setValue);
     connect(
         ui->spinRed, QOverload<int>::of(&QSpinBox::valueChanged), ui->dialRed,
         &QAbstractSlider::setValue);
     connect(
-        ui->spinGreen, QOverload<int>::of(&QSpinBox::valueChanged),
-        ui->dialGreen, &QAbstractSlider::setValue);
+        ui->spinGreen, QOverload<int>::of(&QSpinBox::valueChanged), ui->dialGreen,
+        &QAbstractSlider::setValue);
     connect(
         ui->spinBlue, QOverload<int>::of(&QSpinBox::valueChanged), ui->dialBlue,
         &QAbstractSlider::setValue);
@@ -38,11 +30,11 @@ void PeripheralsView::setup(const machine::PeripSpiLed *perip_spi_led) {
         ui->spinRed, QOverload<int>::of(&QSpinBox::valueChanged), perip_spi_led,
         &machine::PeripSpiLed::red_knob_update);
     connect(
-        ui->spinGreen, QOverload<int>::of(&QSpinBox::valueChanged),
-        perip_spi_led, &machine::PeripSpiLed::green_knob_update);
+        ui->spinGreen, QOverload<int>::of(&QSpinBox::valueChanged), perip_spi_led,
+        &machine::PeripSpiLed::green_knob_update);
     connect(
-        ui->spinBlue, QOverload<int>::of(&QSpinBox::valueChanged),
-        perip_spi_led, &machine::PeripSpiLed::blue_knob_update);
+        ui->spinBlue, QOverload<int>::of(&QSpinBox::valueChanged), perip_spi_led,
+        &machine::PeripSpiLed::blue_knob_update);
 
     val = ui->spinRed->value();
     ui->spinRed->setValue(val - 1);

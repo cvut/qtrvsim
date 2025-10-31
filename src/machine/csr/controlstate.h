@@ -1,13 +1,13 @@
 #ifndef CONTROLSTATE_H
 #define CONTROLSTATE_H
 
+#include "bitfield.h"
 #include "common/math/bit_ops.h"
+#include "config_isa.h"
 #include "csr/address.h"
 #include "machinedefs.h"
 #include "register_value.h"
 #include "simulator_exception.h"
-#include "bitfield.h"
-#include "config_isa.h"
 
 #include <QObject>
 #include <QString>
@@ -17,7 +17,7 @@
 namespace machine { namespace CSR {
     /** CSR register names mapping the registers to continuous locations in internal buffer */
     struct Id {
-        enum IdxType{
+        enum IdxType {
             // Unprivileged Counter/Timers
             CYCLE,
             // Machine Information Registers
@@ -53,15 +53,9 @@ namespace machine { namespace CSR {
     struct RegisterDesc;
 
     struct RegisterFieldDesc {
-        uint64_t decode(uint64_t val) const {
-            return field.decode(val);
-        }
-        uint64_t encode(uint64_t val) const {
-            return field.encode(val);
-        }
-        uint64_t mask() const {
-            return field.mask();
-        }
+        uint64_t decode(uint64_t val) const { return field.decode(val); }
+        uint64_t encode(uint64_t val) const { return field.encode(val); }
+        uint64_t mask() const { return field.mask(); }
         uint64_t update(uint64_t orig, uint64_t val) const {
             return field.encode(val) | (orig & ~mask());
         }
@@ -158,18 +152,12 @@ namespace machine { namespace CSR {
         std::array<RegisterValue, Id::_COUNT> register_data;
 
     public:
-        void default_wlrl_write_handler(
-            const RegisterDesc &desc,
-            RegisterValue &reg,
-            RegisterValue val);
-        void mstatus_wlrl_write_handler(
-            const RegisterDesc &desc,
-            RegisterValue &reg,
-            RegisterValue val);
-        void mcycle_wlrl_write_handler(
-            const RegisterDesc &desc,
-            RegisterValue &reg,
-            RegisterValue val);
+        void
+        default_wlrl_write_handler(const RegisterDesc &desc, RegisterValue &reg, RegisterValue val);
+        void
+        mstatus_wlrl_write_handler(const RegisterDesc &desc, RegisterValue &reg, RegisterValue val);
+        void
+        mcycle_wlrl_write_handler(const RegisterDesc &desc, RegisterValue &reg, RegisterValue val);
     };
 
     struct RegisterDesc {
@@ -183,54 +171,64 @@ namespace machine { namespace CSR {
         RegisterValue write_mask = (register_storage_t)0xffffffffffffffff;
         WriteHandlerFn write_handler = &ControlState::default_wlrl_write_handler;
         struct {
-            const RegisterFieldDesc * const *array;
+            const RegisterFieldDesc *const *array;
             const unsigned count;
-        } fields = {nullptr, 0};
+        } fields = { nullptr, 0 };
     };
 
-    namespace Field {
-        namespace mstatus {
-            static constexpr RegisterFieldDesc SIE = { "SIE", Id::MSTATUS, {1, 1}, "System global interrupt-enable"};
-            static constexpr RegisterFieldDesc MIE = { "MIE", Id::MSTATUS, {1, 3}, "Machine global interrupt-enable"};
-            static constexpr RegisterFieldDesc SPIE = { "SPIE", Id::MSTATUS, {1, 5}, "Previous SIE before the trap"};
-            static constexpr RegisterFieldDesc MPIE = { "MPIE", Id::MSTATUS, {1, 7}, "Previous MIE before the trap"};
-            static constexpr RegisterFieldDesc SPP = { "SPP", Id::MSTATUS, {1, 8}, "System previous privilege mode"};
-            static constexpr RegisterFieldDesc MPP = { "MPP", Id::MSTATUS, {2, 11}, "Machine previous privilege mode"};
-            static constexpr RegisterFieldDesc UXL = { "UXL", Id::MSTATUS, {2, 32}, "User mode XLEN (RV64 only)"};
-            static constexpr RegisterFieldDesc SXL = { "SXL", Id::MSTATUS, {2, 34}, "Supervisor mode XLEN (RV64 only)"};
-            static constexpr const RegisterFieldDesc *fields[] = { &SIE, &MIE, &SPIE, &MPIE, &SPP, &MPP, &UXL, &SXL};
-            static constexpr unsigned count = sizeof(fields) / sizeof(fields[0]);
-        }
-    }
+    namespace Field { namespace mstatus {
+        static constexpr RegisterFieldDesc SIE
+            = { "SIE", Id::MSTATUS, { 1, 1 }, "System global interrupt-enable" };
+        static constexpr RegisterFieldDesc MIE
+            = { "MIE", Id::MSTATUS, { 1, 3 }, "Machine global interrupt-enable" };
+        static constexpr RegisterFieldDesc SPIE
+            = { "SPIE", Id::MSTATUS, { 1, 5 }, "Previous SIE before the trap" };
+        static constexpr RegisterFieldDesc MPIE
+            = { "MPIE", Id::MSTATUS, { 1, 7 }, "Previous MIE before the trap" };
+        static constexpr RegisterFieldDesc SPP
+            = { "SPP", Id::MSTATUS, { 1, 8 }, "System previous privilege mode" };
+        static constexpr RegisterFieldDesc MPP
+            = { "MPP", Id::MSTATUS, { 2, 11 }, "Machine previous privilege mode" };
+        static constexpr RegisterFieldDesc UXL
+            = { "UXL", Id::MSTATUS, { 2, 32 }, "User mode XLEN (RV64 only)" };
+        static constexpr RegisterFieldDesc SXL
+            = { "SXL", Id::MSTATUS, { 2, 34 }, "Supervisor mode XLEN (RV64 only)" };
+        static constexpr const RegisterFieldDesc *fields[]
+            = { &SIE, &MIE, &SPIE, &MPIE, &SPP, &MPP, &UXL, &SXL };
+        static constexpr unsigned count = sizeof(fields) / sizeof(fields[0]);
+    }} // namespace Field::mstatus
 
     /** Definitions of supported CSR registers */
     inline constexpr std::array<RegisterDesc, Id::_COUNT> REGISTERS { {
         // Unprivileged Counter/Timers
-        [Id::CYCLE] = { "cycle", 0xC00_csr, "Cycle counter for RDCYCLE instruction.", 0, 0},
+        [Id::CYCLE] = { "cycle", 0xC00_csr, "Cycle counter for RDCYCLE instruction.", 0, 0 },
         // Priviledged Machine Mode Registers
-        [Id::MVENDORID] = { "mvendorid", 0xF11_csr, "Vendor ID.", 0, 0},
-        [Id::MARCHID] = { "marchid", 0xF12_csr, "Architecture ID.", 0, 0},
-        [Id::MIMPID] = { "mimpid", 0xF13_csr, "Implementation ID.", 0, 0},
+        [Id::MVENDORID] = { "mvendorid", 0xF11_csr, "Vendor ID.", 0, 0 },
+        [Id::MARCHID] = { "marchid", 0xF12_csr, "Architecture ID.", 0, 0 },
+        [Id::MIMPID] = { "mimpid", 0xF13_csr, "Implementation ID.", 0, 0 },
         [Id::MHARTID] = { "mhardid", 0xF14_csr, "Hardware thread ID." },
-        [Id::MSTATUS] = { "mstatus", 0x300_csr, "Machine status register.",
-                        0, 0x007FFFEA, &ControlState::mstatus_wlrl_write_handler,
-                        {Field::mstatus::fields, Field::mstatus::count} },
-        [Id::MISA] = { "misa", 0x301_csr, "Machine ISA Register.", 0, 0},
-        [Id::MIE] = { "mie", 0x304_csr, "Machine interrupt-enable register.",
-                        0, 0x00ff0AAA},
-        [Id::MTVEC] = { "mtvec", 0x305_csr, "Machine trap-handler base address."},
+        [Id::MSTATUS] = { "mstatus",
+                          0x300_csr,
+                          "Machine status register.",
+                          0,
+                          0x007FFFEA,
+                          &ControlState::mstatus_wlrl_write_handler,
+                          { Field::mstatus::fields, Field::mstatus::count } },
+        [Id::MISA] = { "misa", 0x301_csr, "Machine ISA Register.", 0, 0 },
+        [Id::MIE] = { "mie", 0x304_csr, "Machine interrupt-enable register.", 0, 0x00ff0AAA },
+        [Id::MTVEC] = { "mtvec", 0x305_csr, "Machine trap-handler base address." },
         [Id::MSCRATCH] = { "mscratch", 0x340_csr, "Scratch register for machine trap handlers." },
         [Id::MEPC] = { "mepc", 0x341_csr, "Machine exception program counter." },
         [Id::MCAUSE] = { "mcause", 0x342_csr, "Machine trap cause." },
         [Id::MTVAL] = { "mtval", 0x343_csr, "Machine bad address or instruction." },
-        [Id::MIP] = { "mip", 0x344_csr, "Machine interrupt pending.",
-                        0, 0x00000222},
+        [Id::MIP] = { "mip", 0x344_csr, "Machine interrupt pending.", 0, 0x00000222 },
         [Id::MTINST] = { "mtinst", 0x34A_csr, "Machine trap instruction (transformed)." },
         [Id::MTVAL2] = { "mtval2", 0x34B_csr, "Machine bad guest physical address." },
         // Machine Counter/Timers
-        [Id::MCYCLE] = { "mcycle", 0xB00_csr, "Machine cycle counter.",
-                        0, (register_storage_t)0xffffffffffffffff, &ControlState::mcycle_wlrl_write_handler},
-        [Id::MINSTRET] = { "minstret", 0xB02_csr, "Machine instructions-retired counter."},
+        [Id::MCYCLE]
+        = { "mcycle", 0xB00_csr, "Machine cycle counter.", 0,
+            (register_storage_t)0xffffffffffffffff, &ControlState::mcycle_wlrl_write_handler },
+        [Id::MINSTRET] = { "minstret", 0xB02_csr, "Machine instructions-retired counter." },
     } };
 
     /** Lookup from CSR address (value used in instruction) to internal id (index in continuous
@@ -263,6 +261,7 @@ namespace machine { namespace CSR {
             }
             initialized = true;
         }
+
     public:
         size_t at(std::string name) {
             if (!initialized) init();

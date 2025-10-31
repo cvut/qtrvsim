@@ -33,7 +33,7 @@ public:
     void addItem(QLayoutItem *item) override;
     QLayoutItem *itemAt(int index) const override;
     QLayoutItem *takeAt(int index) override;
-    int count() const override;                      // This returns number of item blocks
+    int count() const override; // This returns number of item blocks
 
     void addRow(const QList<QWidget *> &);           // This adds a row of widgets
     void insertRow(const QList<QWidget *> &, int i); // Insert row to given position while shifting

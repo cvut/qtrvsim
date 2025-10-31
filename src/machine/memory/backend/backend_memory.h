@@ -61,11 +61,8 @@ public:
      * @param size         	number of bytes to be written
      * @return              true when memory before and after write differs
      */
-    virtual WriteResult write(
-        Offset destination,
-        const void *source,
-        size_t size,
-        WriteOptions options)
+    virtual WriteResult
+    write(Offset destination, const void *source, size_t size, WriteOptions options)
         = 0;
 
     /**
@@ -77,11 +74,8 @@ public:
      * @param options       additional option like debug mode, see type
      *                      definition
      */
-    virtual ReadResult read(
-        void *destination,
-        Offset source,
-        size_t size,
-        ReadOptions options) const = 0;
+    virtual ReadResult read(void *destination, Offset source, size_t size, ReadOptions options) const
+        = 0;
 
     /**
      * Determine status of given address.

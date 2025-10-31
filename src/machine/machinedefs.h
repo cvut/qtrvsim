@@ -82,8 +82,8 @@ enum ExceptionCause {
     EXCAUSE_STORE_PAGE_FAULT = 15, // Store/AMO page fault
     // Simulator specific exception cause codes, alliases
     EXCAUSE_HWBREAK = 16,
-    EXCAUSE_ECALL_ANY = 17,        // sythetic exception to mark ECALL instruction
-    EXCAUSE_INT = 18,              // External/asynchronous interrupt, bit 32 or 63
+    EXCAUSE_ECALL_ANY = 17, // sythetic exception to mark ECALL instruction
+    EXCAUSE_INT = 18,       // External/asynchronous interrupt, bit 32 or 63
     EXCAUSE_COUNT = 19,
 };
 

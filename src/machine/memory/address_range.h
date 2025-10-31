@@ -1,13 +1,11 @@
 #ifndef ADDRESS_RANGE_H
 #define ADDRESS_RANGE_H
 
+#include "memory/address.h"
 #include "utils.h"
 
 #include <QMetaType>
 #include <cstdint>
-
-#include "memory/address.h"
-
 
 namespace machine {
 
@@ -21,18 +19,18 @@ namespace machine {
 class AddressRange {
 public:
     Address first; //> The first valid location of the range
-    Address last; //> The last valid location of the range
+    Address last;  //> The last valid location of the range
 
     /**
      *  Default constructor results for empty range.
      */
     constexpr AddressRange() : first(1), last(0) {};
 
-    constexpr AddressRange(const AddressRange &range) = default;    //> Copy constructor
-    constexpr AddressRange(const Address &afirst, const Address &alast) :
-               first(afirst), last(alast) {};
-    constexpr AddressRange(const Address &asingleAddr) :
-               first(asingleAddr), last(asingleAddr) {};
+    constexpr AddressRange(const AddressRange &range) = default; //> Copy constructor
+    constexpr AddressRange(const Address &afirst, const Address &alast)
+        : first(afirst)
+        , last(alast) {};
+    constexpr AddressRange(const Address &asingleAddr) : first(asingleAddr), last(asingleAddr) {};
     constexpr AddressRange &operator=(const AddressRange &address) = default; //> Assign constructor
 
     /**
@@ -42,12 +40,10 @@ public:
 
     /* Eq */
     constexpr inline bool operator==(const AddressRange &other) const {
-        return (first == other.first && last == other.last) ||
-               (is_empty() && other.is_empty());
+        return (first == other.first && last == other.last) || (is_empty() && other.is_empty());
     };
     constexpr inline bool operator!=(const AddressRange &other) const {
-        return !((first == other.first && last == other.last) ||
-               (is_empty() && other.is_empty()));
+        return !((first == other.first && last == other.last) || (is_empty() && other.is_empty()));
     };
 
     constexpr bool within(const AddressRange &other) const {
@@ -59,8 +55,7 @@ public:
     };
 
     constexpr bool overlaps(const AddressRange &other) const {
-        return (first <= other.last) && (last >= other.first) &&
-                !is_empty() && !other.is_empty();
+        return (first <= other.last) && (last >= other.first) && !is_empty() && !other.is_empty();
     };
 
     void reset() {

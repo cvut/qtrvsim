@@ -14,6 +14,5 @@ QSize HintTableDelegate::sizeHintForText(
     opt.features |= QStyleOptionViewItem::HasDisplay;
     opt.text = str;
 
-    return style->sizeFromContents(
-        QStyle::CT_ItemViewItem, &opt, QSize(), widget);
+    return style->sizeFromContents(QStyle::CT_ItemViewItem, &opt, QSize(), widget);
 }

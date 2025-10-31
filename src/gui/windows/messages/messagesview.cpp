@@ -9,8 +9,7 @@
 #include <QKeyEvent>
 #include <QScrollBar>
 
-MessagesView::MessagesView(QWidget *parent, QSettings *settings)
-    : Super(parent) {
+MessagesView::MessagesView(QWidget *parent, QSettings *settings) : Super(parent) {
     this->settings = settings;
 }
 

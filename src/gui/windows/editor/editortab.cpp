@@ -47,7 +47,8 @@ void EditorTab::resizeEvent(QResizeEvent *event) {
 void EditorTab::elide_file_name() {
     auto filename = editor->filename().isEmpty() ? "Unknown" : editor->filename();
     QFontMetrics metrics(status_bar_path->font());
-    int width = status_bar_layout->geometry().width() - status_bar_location->geometry().width() - 10;
+    int width
+        = status_bar_layout->geometry().width() - status_bar_location->geometry().width() - 10;
     QString clippedText = metrics.elidedText(filename, Qt::ElideMiddle, width);
     status_bar_path->setText(clippedText);
 }

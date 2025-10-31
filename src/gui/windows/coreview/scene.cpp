@@ -87,7 +87,8 @@ CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &core_svg_
                     core_state);
             } else if (component_name == QStringLiteral("mux2")) {
                 const QString &source_name = component.getAttrValueOr("data-source");
-                // Draw.io does not allow tagging the paths, to I use this style identification hack.
+                // Draw.io does not allow tagging the paths, to I use this style identification
+                // hack.
                 auto conn_trees = component.findAll<QGraphicsPathItem>("stroke-linecap", "round");
                 if (conn_trees.size() != 2) {
                     WARN(
@@ -110,7 +111,8 @@ CoreViewScene::CoreViewScene(machine::Machine *machine, const QString &core_svg_
                 }
             } else if (component_name == QStringLiteral("mux3")) {
                 const QString &source_name = component.getAttrValueOr("data-source");
-                // Draw.io does not allow tagging the paths, to I use this style identification hack.
+                // Draw.io does not allow tagging the paths, to I use this style identification
+                // hack.
                 auto conn_trees = component.findAll<QGraphicsPathItem>("stroke-linecap", "round");
                 if (conn_trees.size() != 3) {
                     WARN(
@@ -245,7 +247,7 @@ CoreViewSceneSimple::CoreViewSceneSimple(machine::Machine *machine)
 
 CoreViewScenePipelined::CoreViewScenePipelined(machine::Machine *machine)
     : CoreViewScene(
-        machine,
-        (machine->config().hazard_unit() == machine::MachineConfig::HU_STALL_FORWARD)
-            ? "forwarding"
-            : "pipeline") {}
+          machine,
+          (machine->config().hazard_unit() == machine::MachineConfig::HU_STALL_FORWARD)
+              ? "forwarding"
+              : "pipeline") {}

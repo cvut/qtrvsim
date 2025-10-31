@@ -1,4 +1,3 @@
-#include <cinttypes>
 #include "controlstate.h"
 
 #include "common/logging.h"
@@ -6,6 +5,7 @@
 #include "simulator_exception.h"
 
 #include <QtAlgorithms>
+#include <cinttypes>
 
 LOG_CATEGORY("machine.csr.control_state");
 
@@ -20,7 +20,8 @@ namespace machine { namespace CSR {
 
     ControlState::ControlState(const ControlState &other)
         : QObject(this->parent())
-        , xlen(other.xlen), register_data(other.register_data) {}
+        , xlen(other.xlen)
+        , register_data(other.register_data) {}
 
     void ControlState::reset() {
         std::transform(
@@ -83,14 +84,13 @@ namespace machine { namespace CSR {
         uint64_t u;
         u = val.as_u64() & desc.write_mask.as_u64();
         u |= reg.as_u64() & ~desc.write_mask.as_u64();
-        if  (xlen == Xlen::_32)
-            u &= 0xffffffff;
+        if (xlen == Xlen::_32) u &= 0xffffffff;
         reg = u;
     }
     void ControlState::mstatus_wlrl_write_handler(
         const RegisterDesc &desc,
         RegisterValue &reg,
-            RegisterValue val) {
+        RegisterValue val) {
         default_wlrl_write_handler(desc, reg, val);
     }
 
@@ -128,8 +128,7 @@ namespace machine { namespace CSR {
                 irq_to_signal = 63 - qCountLeadingZeroBits(irqs & (~irqs + 1));
             }
 
-            value = (uint64_t)(irq_to_signal |
-                    ((uint64_t)1 << ((xlen == Xlen::_32)? 31: 63)));
+            value = (uint64_t)(irq_to_signal | ((uint64_t)1 << ((xlen == Xlen::_32) ? 31 : 63)));
         }
         emit write_signal(Id::MCAUSE, value);
     }

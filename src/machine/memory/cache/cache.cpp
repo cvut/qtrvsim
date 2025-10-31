@@ -27,27 +27,21 @@ Cache::Cache(
     , access_ena_b(memory_access_enable_b)
     , replacement_policy(CachePolicy::get_policy_instance(config)) {
     // Skip memory allocation if cache is disabled
-    if (!config->enabled()) {
-        return;
-    }
+    if (!config->enabled()) { return; }
 
     dt.resize(
         config->associativity(),
         std::vector<CacheLine>(
-            config->set_count(),
-            { .valid = false,
-              .dirty = false,
-              .tag = 0,
-              .data = std::vector<uint32_t>(config->block_size()) }));
+            config->set_count(), { .valid = false,
+                                   .dirty = false,
+                                   .tag = 0,
+                                   .data = std::vector<uint32_t>(config->block_size()) }));
 }
 
 Cache::~Cache() = default;
 
-WriteResult Cache::write(
-    Address destination,
-    const void *source,
-    size_t size,
-    WriteOptions options) {
+WriteResult
+Cache::write(Address destination, const void *source, size_t size, WriteOptions options) {
     if (!cache_config.enabled() || is_in_uncached_area(destination)
         || is_in_uncached_area(destination + size)) {
         mem_writes++;
@@ -59,8 +53,7 @@ WriteResult Cache::write(
     // FIXME: Get rid of the cast
     // access is mostly the same for read and write but one needs to write
     // to the address
-    const bool changed
-        = access(destination, const_cast<void *>(source), size, WRITE);
+    const bool changed = access(destination, const_cast<void *>(source), size, WRITE);
 
     if (cache_config.write_policy() != CacheConfig::WP_BACK) {
         mem_writes++;
@@ -72,11 +65,7 @@ WriteResult Cache::write(
     return { .n_bytes = size, .changed = changed };
 }
 
-ReadResult Cache::read(
-    void *destination,
-    Address source,
-    size_t size,
-    ReadOptions options) const {
+ReadResult Cache::read(void *destination, Address source, size_t size, ReadOptions options) const {
     if (!cache_config.enabled() || is_in_uncached_area(source)
         || is_in_uncached_area(source + size)) {
         mem_reads++;
@@ -103,18 +92,13 @@ bool Cache::is_in_uncached_area(Address source) const {
 }
 
 void Cache::flush() {
-    if (!cache_config.enabled()) {
-        return;
-    }
+    if (!cache_config.enabled()) { return; }
 
-    for (size_t assoc_index = 0; assoc_index < cache_config.associativity();
-         assoc_index += 1) {
-        for (size_t set_index = 0; set_index < cache_config.set_count();
-             set_index += 1) {
+    for (size_t assoc_index = 0; assoc_index < cache_config.associativity(); assoc_index += 1) {
+        for (size_t set_index = 0; set_index < cache_config.set_count(); set_index += 1) {
             if (dt[assoc_index][set_index].valid) {
                 kick(assoc_index, set_index);
-                emit cache_update(
-                    assoc_index, set_index, 0, false, false, 0, nullptr, false);
+                emit cache_update(assoc_index, set_index, 0, false, false, 0, nullptr, false);
             }
         }
     }
@@ -154,12 +138,9 @@ void Cache::reset() {
     update_all_statistics();
 
     if (cache_config.enabled()) {
-        for (size_t assoc_index = 0; assoc_index < cache_config.associativity();
-             assoc_index++) {
-            for (size_t set_index = 0; set_index < cache_config.set_count();
-                 set_index++) {
-                emit cache_update(
-                    assoc_index, set_index, 0, false, false, 0, nullptr, false);
+        for (size_t assoc_index = 0; assoc_index < cache_config.associativity(); assoc_index++) {
+            for (size_t set_index = 0; set_index < cache_config.set_count(); set_index++) {
+                emit cache_update(assoc_index, set_index, 0, false, false, 0, nullptr, false);
             }
         }
     }
@@ -167,32 +148,22 @@ void Cache::reset() {
 
 void Cache::internal_read(Address source, void *destination, size_t size) const {
     CacheLocation loc = compute_location(source);
-    for (size_t assoc_index = 0; assoc_index < cache_config.associativity();
-         assoc_index++) {
-        if (dt[assoc_index][loc.row].valid
-            && dt[assoc_index][loc.row].tag == loc.tag) {
-            memcpy(
-                destination,
-                (byte *)&dt[assoc_index][loc.row].data[loc.col] + loc.byte,
-                size);
+    for (size_t assoc_index = 0; assoc_index < cache_config.associativity(); assoc_index++) {
+        if (dt[assoc_index][loc.row].valid && dt[assoc_index][loc.row].tag == loc.tag) {
+            memcpy(destination, (byte *)&dt[assoc_index][loc.row].data[loc.col] + loc.byte, size);
             return;
         }
     }
     memset(destination, 0, size); // TODO is this correct
 }
 
-bool Cache::access(
-    Address address,
-    void *buffer,
-    size_t size,
-    AccessType access_type) const {
+bool Cache::access(Address address, void *buffer, size_t size, AccessType access_type) const {
     const CacheLocation loc = compute_location(address);
     size_t way = find_block_index(loc);
 
     // check for zero because else last_affected_col can became
     // ULONG_MAX / BLOCK_ITEM_SIZE and update can take forever
-    if (size == 0)
-        return false;
+    if (size == 0) return false;
 
     // search failed - cache miss
     if (way >= cache_config.associativity()) {
@@ -204,13 +175,11 @@ bool Cache::access(
             emit miss_update(get_miss_count());
             update_all_statistics();
 
-            const size_t size_overflow
-                = calculate_overflow_to_next_blocks(size, loc);
+            const size_t size_overflow = calculate_overflow_to_next_blocks(size, loc);
             if (size_overflow > 0) {
                 const size_t size_within_block = size - size_overflow;
                 return access(
-                    address + size_within_block,
-                    (byte *)buffer + size_within_block, size_overflow,
+                    address + size_within_block, (byte *)buffer + size_within_block, size_overflow,
                     access_type);
             } else {
                 return false;
@@ -221,8 +190,7 @@ bool Cache::access(
         kick(way, loc.row);
 
         SANITY_ASSERT(
-            way < cache_config.associativity(),
-            "Probably unimplemented replacement policy");
+            way < cache_config.associativity(), "Probably unimplemented replacement policy");
     }
 
     struct CacheLine &cd = dt[way][loc.row];
@@ -246,8 +214,7 @@ bool Cache::access(
 
         mem->read(
             cd.data.data(), calc_base_address(loc.tag, loc.row),
-            cache_config.block_size() * BLOCK_ITEM_SIZE,
-            { .type = ae::REGULAR });
+            cache_config.block_size() * BLOCK_ITEM_SIZE, { .type = ae::REGULAR });
 
         cd.valid = true;
         cd.dirty = false;
@@ -271,14 +238,9 @@ bool Cache::access(
         memcpy(buffer, (byte *)&cd.data[loc.col] + loc.byte, size_within_block);
     } else if (access_type == WRITE) {
         cd.dirty = true;
-        changed = memcmp(
-                      (byte *)&cd.data[loc.col] + loc.byte, buffer,
-                      size_within_block)
-                  != 0;
+        changed = memcmp((byte *)&cd.data[loc.col] + loc.byte, buffer, size_within_block) != 0;
         if (changed) {
-            memcpy(
-                ((byte *)&cd.data[loc.col]) + loc.byte, buffer,
-                size_within_block);
+            memcpy(((byte *)&cd.data[loc.col]) + loc.byte, buffer, size_within_block);
             change_counter++;
         }
     }
@@ -286,22 +248,19 @@ bool Cache::access(
         = (loc.col * BLOCK_ITEM_SIZE + loc.byte + size_within_block - 1) / BLOCK_ITEM_SIZE;
     for (auto col = loc.col; col <= last_affected_col; col++) {
         emit cache_update(
-            way, loc.row, col, cd.valid, cd.dirty, cd.tag, cd.data.data(),
-            access_type);
+            way, loc.row, col, cd.valid, cd.dirty, cd.tag, cd.data.data(), access_type);
     }
 
     if (size_overflow > 0) {
         // If access overlaps single cache row, perform access to next row.
         changed |= access(
-            address + size_within_block, (byte *)buffer + size_within_block,
-            size_overflow, access_type);
+            address + size_within_block, (byte *)buffer + size_within_block, size_overflow,
+            access_type);
     }
 
     return changed;
 }
-size_t Cache::calculate_overflow_to_next_blocks(
-    size_t access_size,
-    const CacheLocation &loc) const {
+size_t Cache::calculate_overflow_to_next_blocks(size_t access_size, const CacheLocation &loc) const {
     return std::max(
         (ptrdiff_t)(loc.col * BLOCK_ITEM_SIZE + loc.byte + access_size)
             - (ptrdiff_t)(cache_config.block_size() * BLOCK_ITEM_SIZE),
@@ -310,9 +269,8 @@ size_t Cache::calculate_overflow_to_next_blocks(
 
 size_t Cache::find_block_index(const CacheLocation &loc) const {
     uint32_t index = 0;
-    while (
-        index < cache_config.associativity()
-        and (!dt[index][loc.row].valid or dt[index][loc.row].tag != loc.tag)) {
+    while (index < cache_config.associativity()
+           and (!dt[index][loc.row].valid or dt[index][loc.row].tag != loc.tag)) {
         index++;
     }
     return index;
@@ -337,14 +295,12 @@ void Cache::kick(size_t way, size_t row) const {
 }
 
 void Cache::update_all_statistics() const {
-    emit statistics_update(
-        get_stall_count(), get_speed_improvement(), get_hit_rate());
+    emit statistics_update(get_stall_count(), get_speed_improvement(), get_hit_rate());
 }
 
 Address Cache::calc_base_address(size_t tag, size_t row) const {
     return Address(
-        (tag * cache_config.set_count() + row) * cache_config.block_size()
-        * BLOCK_ITEM_SIZE);
+        (tag * cache_config.set_count() + row) * cache_config.block_size() * BLOCK_ITEM_SIZE);
 }
 
 CacheLocation Cache::compute_location(Address address) const {
@@ -374,10 +330,8 @@ enum LocationStatus Cache::location_status(Address address) const {
             auto const &block = set[loc.row];
 
             if (block.valid && block.tag == loc.tag) {
-                if (block.dirty
-                    && cache_config.write_policy() == CacheConfig::WP_BACK) {
-                    return (enum LocationStatus)(
-                        LOCSTAT_CACHED | LOCSTAT_DIRTY);
+                if (block.dirty && cache_config.write_policy() == CacheConfig::WP_BACK) {
+                    return (enum LocationStatus)(LOCSTAT_CACHED | LOCSTAT_DIRTY);
                 } else {
                     return LOCSTAT_CACHED;
                 }
@@ -412,8 +366,7 @@ uint32_t Cache::get_write_count() const {
 }
 
 uint32_t Cache::get_stall_count() const {
-    uint32_t st_cycles
-        = mem_reads * (access_pen_r - 1) + mem_writes * (access_pen_w - 1);
+    uint32_t st_cycles = mem_reads * (access_pen_r - 1) + mem_writes * (access_pen_w - 1);
     st_cycles += (miss_read + miss_write) * cache_config.block_size();
     if (access_ena_b) {
         st_cycles -= burst_reads * (access_pen_r - access_pen_b)
@@ -426,9 +379,7 @@ double Cache::get_speed_improvement() const {
     uint32_t lookup_time;
     uint32_t mem_access_time;
     uint32_t comp = hit_read + hit_write + miss_read + miss_write;
-    if (comp == 0) {
-        return 100.0;
-    }
+    if (comp == 0) { return 100.0; }
     lookup_time = hit_read + miss_read;
     if (cache_config.write_policy() == CacheConfig::WP_BACK) {
         lookup_time += hit_write + miss_write;
@@ -445,9 +396,7 @@ double Cache::get_speed_improvement() const {
 
 double Cache::get_hit_rate() const {
     uint32_t comp = hit_read + hit_write + miss_read + miss_write;
-    if (comp == 0) {
-        return 0.0;
-    }
+    if (comp == 0) { return 0.0; }
     return (double)(hit_read + hit_write) / (double)comp * 100.0;
 }
 

@@ -1,18 +1,19 @@
 #ifndef MACHINE_CONFIG_ISA_H
 #define MACHINE_CONFIG_ISA_H
 
-#include <QtGlobal>
 #include <QMetaType>
+#include <QtGlobal>
 
 namespace machine {
 
 struct ConfigIsaWord {
     constexpr ConfigIsaWord() : bits(0) {};
     constexpr ConfigIsaWord(const quint64 &abits) : bits(abits) {};
-    constexpr ConfigIsaWord(const ConfigIsaWord &isaWord) = default;    //> Copy constructor
-    constexpr ConfigIsaWord &operator=(const ConfigIsaWord &isaWord) = default; //> Assign constructor
+    constexpr ConfigIsaWord(const ConfigIsaWord &isaWord) = default;            //> Copy constructor
+    constexpr ConfigIsaWord &operator=(const ConfigIsaWord &isaWord) = default; //> Assign
+                                                                                // constructor
 
-    constexpr static ConfigIsaWord empty() {return ConfigIsaWord(); };
+    constexpr static ConfigIsaWord empty() { return ConfigIsaWord(); };
 
     constexpr ConfigIsaWord &operator&=(const ConfigIsaWord &isaWord) {
         bits &= isaWord.bits;
@@ -26,17 +27,15 @@ struct ConfigIsaWord {
         ConfigIsaWord ans(~bits);
         return ans;
     }
-    friend constexpr ConfigIsaWord operator|(ConfigIsaWord lhs, const ConfigIsaWord& rhs)
-    {
+    friend constexpr ConfigIsaWord operator|(ConfigIsaWord lhs, const ConfigIsaWord &rhs) {
         lhs |= rhs; // reuse compound assignment
         return lhs; // return the result by value (uses move constructor)
     }
-    friend constexpr ConfigIsaWord operator&(ConfigIsaWord lhs, const ConfigIsaWord& rhs)
-    {
+    friend constexpr ConfigIsaWord operator&(ConfigIsaWord lhs, const ConfigIsaWord &rhs) {
         lhs &= rhs; // reuse compound assignment
         return lhs; // return the result by value (uses move constructor)
     }
-    constexpr friend bool operator==(const ConfigIsaWord& lhs, const ConfigIsaWord& rhs) {
+    constexpr friend bool operator==(const ConfigIsaWord &lhs, const ConfigIsaWord &rhs) {
         return lhs.bits == rhs.bits;
     }
 
@@ -51,17 +50,11 @@ struct ConfigIsaWord {
         return ConfigIsaWord(abits);
     };
 
-    constexpr bool isEmpty() const {
-        return bits == 0;
-    };
+    constexpr bool isEmpty() const { return bits == 0; };
 
-    constexpr bool contains(char ch) const {
-        return !(*this & byChar(ch)).isEmpty();
-    };
+    constexpr bool contains(char ch) const { return !(*this & byChar(ch)).isEmpty(); };
 
-    constexpr bool contains(ConfigIsaWord &isaWord) const {
-        return (*this & isaWord) == isaWord;
-    };
+    constexpr bool contains(ConfigIsaWord &isaWord) const { return (*this & isaWord) == isaWord; };
 
     ConfigIsaWord &modify(ConfigIsaWord &mask, ConfigIsaWord &val) {
         (*this) &= ~mask | val;
@@ -69,14 +62,12 @@ struct ConfigIsaWord {
         return *this;
     }
 
-    constexpr auto toUnsigned() const {
-        return bits;
-    };
+    constexpr auto toUnsigned() const { return bits; };
 
     quint64 bits;
 };
 
-}
+} // namespace machine
 
 Q_DECLARE_METATYPE(machine::ConfigIsaWord)
 

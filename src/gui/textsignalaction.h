@@ -12,14 +12,8 @@ class TextSignalAction : public QAction {
 public:
     explicit TextSignalAction(QObject *parent = nullptr);
     explicit TextSignalAction(const QString &text, QObject *parent = nullptr);
-    TextSignalAction(
-        const QString &text,
-        QString signal_text,
-        QObject *parent = nullptr);
-    TextSignalAction(
-        const QIcon &icon,
-        const QString &text,
-        QObject *parent = nullptr);
+    TextSignalAction(const QString &text, QString signal_text, QObject *parent = nullptr);
+    TextSignalAction(const QIcon &icon, const QString &text, QObject *parent = nullptr);
     TextSignalAction(
         const QIcon &icon,
         const QString &text,

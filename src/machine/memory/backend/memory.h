@@ -24,17 +24,11 @@ public:
     MemorySection(const MemorySection &other);
     ~MemorySection() override = default;
 
-    WriteResult write(
-        Offset destination,
-        const void *source,
-        size_t total_size,
-        WriteOptions options) override;
+    WriteResult
+    write(Offset destination, const void *source, size_t total_size, WriteOptions options) override;
 
-    ReadResult read(
-        void *destination,
-        Offset source,
-        size_t size,
-        ReadOptions options) const override;
+    ReadResult
+    read(void *destination, Offset source, size_t size, ReadOptions options) const override;
 
     [[nodiscard]] LocationStatus location_status(Offset offset) const override;
 
@@ -60,8 +54,7 @@ constexpr size_t MEMORY_SECTION_SIZE = (1u << MEMORY_SECTION_BITS);
 // Size of one memory row
 constexpr size_t MEMORY_TREE_ROW_SIZE = (1u << MEMORY_TREE_BITS);
 // Depth of tree
-constexpr size_t MEMORY_TREE_DEPTH
-    = ((32 - MEMORY_SECTION_BITS) / MEMORY_TREE_BITS);
+constexpr size_t MEMORY_TREE_DEPTH = ((32 - MEMORY_SECTION_BITS) / MEMORY_TREE_BITS);
 
 union MemoryTree {
     union MemoryTree *subtree;
@@ -87,17 +80,11 @@ public:
     // returns section containing given address
     [[nodiscard]] MemorySection *get_section(size_t offset, bool create) const;
 
-    WriteResult write(
-        Offset destination,
-        const void *source,
-        size_t size,
-        WriteOptions options) override;
+    WriteResult
+    write(Offset destination, const void *source, size_t size, WriteOptions options) override;
 
-    ReadResult read(
-        void *destination,
-        Offset source,
-        size_t size,
-        ReadOptions options) const override;
+    ReadResult
+    read(void *destination, Offset source, size_t size, ReadOptions options) const override;
 
     [[nodiscard]] LocationStatus location_status(Offset offset) const override;
 
@@ -111,12 +98,9 @@ private:
     uint32_t change_counter = 0;
     static union MemoryTree *allocate_section_tree();
     static void free_section_tree(union MemoryTree *, size_t depth);
-    static bool compare_section_tree(
-        const union MemoryTree *,
-        const union MemoryTree *,
-        size_t depth);
-    static union MemoryTree *
-    copy_section_tree(const union MemoryTree *, size_t depth);
+    static bool
+    compare_section_tree(const union MemoryTree *, const union MemoryTree *, size_t depth);
+    static union MemoryTree *copy_section_tree(const union MemoryTree *, size_t depth);
     [[nodiscard]] uint32_t get_change_counter() const;
 };
 } // namespace machine

@@ -5,8 +5,7 @@
 
 using namespace machine;
 
-MemoryDataBus::MemoryDataBus(Endian simulated_endian)
-    : FrontendMemory(simulated_endian) {};
+MemoryDataBus::MemoryDataBus(Endian simulated_endian) : FrontendMemory(simulated_endian) {};
 
 MemoryDataBus::~MemoryDataBus() {
     ranges_by_addr.clear(); // No stored values are owned.
@@ -14,22 +13,18 @@ MemoryDataBus::~MemoryDataBus() {
     while (iter != ranges_by_device.end()) {
         const RangeDesc *range = iter.value();
         iter = ranges_by_device.erase(iter); // Advances the iterator.
-        if (range->owns_device) {
-            delete range->device;
-        }
+        if (range->owns_device) { delete range->device; }
         delete range;
     }
 }
 
-WriteResult MemoryDataBus::write(
-    Address destination,
-    const void *source,
-    size_t size,
-    WriteOptions options) {
+WriteResult
+MemoryDataBus::write(Address destination, const void *source, size_t size, WriteOptions options) {
     return repeat_access_until_completed<WriteResult>(
         destination, source, size, options,
-        [this](Address dst, const void *src, size_t s, WriteOptions opt)
-            -> WriteResult { return write_single(dst, src, s, opt); });
+        [this](Address dst, const void *src, size_t s, WriteOptions opt) -> WriteResult {
+            return write_single(dst, src, s, opt);
+        });
 }
 
 WriteResult MemoryDataBus::write_single(
@@ -44,25 +39,21 @@ WriteResult MemoryDataBus::write_single(
         // just ignore the write.
         return (WriteResult) { .n_bytes = 0, .changed = false };
     }
-    WriteResult result = range->device->write(
-        destination - range->start_addr, source, size, options);
+    WriteResult result
+        = range->device->write(destination - range->start_addr, source, size, options);
 
-    if (result.changed) {
-        change_counter++;
-    }
+    if (result.changed) { change_counter++; }
 
     return result;
 }
 
-ReadResult MemoryDataBus::read(
-    void *destination,
-    Address source,
-    size_t size,
-    ReadOptions options) const {
+ReadResult
+MemoryDataBus::read(void *destination, Address source, size_t size, ReadOptions options) const {
     return repeat_access_until_completed<ReadResult>(
         destination, source, size, options,
-        [this](void *dst, Address src, size_t s, ReadOptions opt)
-            -> ReadResult { return read_single(dst, src, s, opt); });
+        [this](void *dst, Address src, size_t s, ReadOptions opt) -> ReadResult {
+            return read_single(dst, src, s, opt);
+        });
 }
 
 ReadResult MemoryDataBus::read_single(
@@ -79,8 +70,7 @@ ReadResult MemoryDataBus::read_single(
         return (ReadResult) { .n_bytes = size };
     }
 
-    return p_range->device->read(
-        destination, source - p_range->start_addr, size, options);
+    return p_range->device->read(destination, source - p_range->start_addr, size, options);
 }
 
 uint32_t MemoryDataBus::get_change_counter() const {
@@ -89,26 +79,19 @@ uint32_t MemoryDataBus::get_change_counter() const {
 
 enum LocationStatus MemoryDataBus::location_status(Address address) const {
     const RangeDesc *range = find_range(address);
-    if (range == nullptr) {
-        return LOCSTAT_ILLEGAL;
-    }
+    if (range == nullptr) { return LOCSTAT_ILLEGAL; }
     return range->device->location_status(address - range->start_addr);
 }
 
-const MemoryDataBus::RangeDesc *
-MemoryDataBus::find_range(Address address) const {
+const MemoryDataBus::RangeDesc *MemoryDataBus::find_range(Address address) const {
     // lowerBound finds range what has highest key (which is range->last_addr)
     // less then or equal to address.
     // See comment in insert_device_to_range for description, why this works.
     auto iter = ranges_by_addr.lowerBound(address);
-    if (iter == ranges_by_addr.end()) {
-        return nullptr;
-    }
+    if (iter == ranges_by_addr.end()) { return nullptr; }
 
     const RangeDesc *range = iter.value();
-    if (address >= range->start_addr && address <= range->last_addr) {
-        return range;
-    }
+    if (address >= range->start_addr && address <= range->last_addr) { return range; }
 
     return nullptr;
 }
@@ -119,8 +102,7 @@ bool MemoryDataBus::insert_device_to_range(
     Address last_addr,
     bool move_ownership) {
     auto iter = ranges_by_addr.lowerBound(start_addr);
-    if (iter != ranges_by_addr.end()
-        && iter.value()->overlaps(start_addr, last_addr)) {
+    if (iter != ranges_by_addr.end() && iter.value()->overlaps(start_addr, last_addr)) {
         // Some part of requested range in already taken.
         return false;
     }
@@ -150,17 +132,14 @@ bool MemoryDataBus::remove_device(BackendMemory *device) {
     }
 
     ranges_by_addr.remove(range->last_addr);
-    if (range->owns_device) {
-        delete range->device;
-    }
+    if (range->owns_device) { delete range->device; }
     delete range;
 
     return true;
 }
 
 void MemoryDataBus::clean_range(Address start_addr, Address last_addr) {
-    for (auto iter = ranges_by_addr.lowerBound(start_addr);
-         iter != ranges_by_addr.end(); iter++) {
+    for (auto iter = ranges_by_addr.lowerBound(start_addr); iter != ranges_by_addr.end(); iter++) {
         const RangeDesc *range = iter.value();
         if (range->start_addr <= last_addr) {
             remove_device(range->device);
@@ -210,20 +189,14 @@ TrivialBus::TrivialBus(BackendMemory *backend_memory)
     : FrontendMemory(backend_memory->simulated_machine_endian)
     , device(backend_memory) {}
 
-WriteResult TrivialBus::write(
-    Address destination,
-    const void *source,
-    size_t size,
-    WriteOptions options) {
+WriteResult
+TrivialBus::write(Address destination, const void *source, size_t size, WriteOptions options) {
     change_counter += 1; // Counter is mandatory by the frontend interface.
     return device->write(destination.get_raw(), source, size, options);
 }
 
-ReadResult TrivialBus::read(
-    void *destination,
-    Address source,
-    size_t size,
-    ReadOptions options) const {
+ReadResult
+TrivialBus::read(void *destination, Address source, size_t size, ReadOptions options) const {
     return device->read(destination, source.get_raw(), size, options);
 }
 

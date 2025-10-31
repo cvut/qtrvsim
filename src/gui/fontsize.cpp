@@ -1,9 +1,10 @@
 #include "fontsize.h"
 
+#include "common/logging.h"
+
 #include <QApplication>
 #include <QFont>
 #include <QFontMetrics>
-#include "common/logging.h"
 
 LOG_CATEGORY("gui.font");
 

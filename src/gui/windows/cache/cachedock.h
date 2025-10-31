@@ -23,10 +23,7 @@ private slots:
     void miss_update(unsigned);
     void memory_reads_update(unsigned val);
     void memory_writes_update(unsigned val);
-    void statistics_update(
-        unsigned stalled_cycles,
-        double speed_improv,
-        double hit_rate);
+    void statistics_update(unsigned stalled_cycles, double speed_improv, double hit_rate);
 
 private:
     QVBoxLayout *layout_box;

@@ -8,18 +8,15 @@
 
 namespace machine {
 
-std::unique_ptr<CachePolicy>
-CachePolicy::get_policy_instance(const CacheConfig *config) {
+std::unique_ptr<CachePolicy> CachePolicy::get_policy_instance(const CacheConfig *config) {
     if (config->enabled()) {
         switch (config->replacement_policy()) {
         case CacheConfig::RP_RAND:
             return std::make_unique<CachePolicyRAND>(config->associativity());
         case CacheConfig::RP_LRU:
-            return std::make_unique<CachePolicyLRU>(
-                config->associativity(), config->set_count());
+            return std::make_unique<CachePolicyLRU>(config->associativity(), config->set_count());
         case CacheConfig::RP_LFU:
-            return std::make_unique<CachePolicyLFU>(
-                config->associativity(), config->set_count());
+            return std::make_unique<CachePolicyLFU>(config->associativity(), config->set_count());
         case CacheConfig::RP_PLRU:
             return std::make_unique<CachePolicyPLRU>(config->associativity(), config->set_count());
         case CacheConfig::RP_NMRU:
@@ -115,8 +112,7 @@ size_t CachePolicyLFU::select_way_to_evict(size_t row) const {
     return index;
 }
 
-CachePolicyRAND::CachePolicyRAND(size_t associativity)
-    : associativity(associativity) {
+CachePolicyRAND::CachePolicyRAND(size_t associativity) : associativity(associativity) {
     // Reset random generator to make result reproducible.
     // Random is by default seeded by 1 (by cpp standard), so this makes it
     // consistent across multiple runs.
@@ -191,9 +187,7 @@ void CachePolicyNMRU::update_stats(size_t way, size_t row, bool is_valid) {
 }
 
 size_t CachePolicyNMRU::select_way_to_evict(size_t row) const {
-    if(associativity == 1) {
-        return 0;
-    }
+    if (associativity == 1) { return 0; }
     uint32_t idx = std::rand() % (associativity - 1);
     auto &row_ptr = mru_ptr.at(row);
     idx = (idx < row_ptr) ? idx : idx + 1;

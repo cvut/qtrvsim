@@ -7,9 +7,7 @@ using namespace std;
 
 ExtProcess::ExtProcess(QObject *parent) : Super(parent) {
     setProcessChannelMode(QProcess::MergedChannels);
-    connect(
-        this, &QProcess::readyReadStandardOutput, this,
-        &ExtProcess::process_output);
+    connect(this, &QProcess::readyReadStandardOutput, this, &ExtProcess::process_output);
     connect(
         this, QOverload<int, ExitStatus>::of(&QProcess::finished), this,
         &ExtProcess::report_finished);
@@ -20,18 +18,15 @@ void ExtProcess::report_finished(int exitCode, QProcess::ExitStatus exitStatus) 
     if ((exitStatus != QProcess::NormalExit) || (exitCode != 0)) {
         report_message(
             messagetype::MSG_FINISH, "", 0, 0,
-            program() + ": failed - exit code " + QString::number(exitCode),
-            "");
+            program() + ": failed - exit code " + QString::number(exitCode), "");
     } else {
-        report_message(
-            messagetype::MSG_FINISH, "", 0, 0, program() + ": finished", "");
+        report_message(messagetype::MSG_FINISH, "", 0, 0, program() + ": finished", "");
     }
     deleteLater();
 }
 
 void ExtProcess::report_started() {
-    report_message(
-        messagetype::MSG_START, "", 0, 0, program() + ": started", "");
+    report_message(messagetype::MSG_START, "", 0, 0, program() + ": started", "");
 }
 
 void ExtProcess::process_output() {
@@ -43,10 +38,7 @@ void ExtProcess::process_output() {
     while (canReadLine()) {
         QString line = QString::fromLocal8Bit(readLine());
         while (line.count() > 0) {
-            if (line.at(line.count() - 1) != '\n'
-                && line.at(line.count() - 1) != '\r') {
-                break;
-            }
+            if (line.at(line.count() - 1) != '\n' && line.at(line.count() - 1) != '\r') { break; }
             line.truncate(line.count() - 1);
         }
 
@@ -71,12 +63,8 @@ void ExtProcess::process_output() {
             line = line.mid(pos + 1);
         }
 
-        if (line.startsWith(' ')) {
-            line = line.mid(1);
-        }
-        if (line.startsWith('\t')) {
-            line = line.mid(1);
-        }
+        if (line.startsWith(' ')) { line = line.mid(1); }
+        if (line.startsWith('\t')) { line = line.mid(1); }
         if (line.startsWith("error:", Qt::CaseInsensitive)) {
             type = messagetype::MSG_ERROR;
         } else if (line.startsWith("warning:", Qt::CaseInsensitive)) {

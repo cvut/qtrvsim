@@ -13,9 +13,7 @@ void GraphicsView::setScene(QGraphicsScene *scene) {
 
 void GraphicsView::resizeEvent(QResizeEvent *event) {
     Super::resizeEvent(event);
-    if ((width() != prev_height) || (height() != prev_width)) {
-        update_scale();
-    }
+    if ((width() != prev_height) || (height() != prev_width)) { update_scale(); }
 }
 
 void GraphicsView::update_scale() {
@@ -67,9 +65,7 @@ void GraphicsView::keyPressEvent(QKeyEvent *event) {
     if (event->matches(QKeySequence::ZoomIn) || (event->key() == Qt::Key_Equal)
         || (event->key() == Qt::Key_Plus)) {
         scale(factor, factor);
-    } else if (
-        event->matches(QKeySequence::ZoomOut)
-        || (event->key() == Qt::Key_Minus)) {
+    } else if (event->matches(QKeySequence::ZoomOut) || (event->key() == Qt::Key_Minus)) {
         scale(1 / factor, 1 / factor);
     } else {
         Super::keyPressEvent(event);
