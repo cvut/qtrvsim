@@ -2,6 +2,7 @@
 #define TLB_H
 
 #include "common/logging.h"
+#include "csr/address.h"
 #include "memory/frontend_memory.h"
 #include "memory/virtual/sv32.h"
 #include "memory/virtual/virtual_address.h"
@@ -83,6 +84,9 @@ signals:
     void memory_reads_update(uint32_t val);
     void memory_writes_update(uint32_t val);
 
+public slots:
+    void on_privilege_changed(CSR::PrivilegeLevel new_priv);
+
 private:
     struct Entry {
         bool valid = false;
@@ -96,6 +100,7 @@ private:
     TLBType type;
     const TLBConfig tlb_config;
     uint32_t current_satp_raw = 0;
+    CSR::PrivilegeLevel current_priv_ = CSR::PrivilegeLevel::MACHINE;
     const bool vm_enabled;
 
     size_t num_sets_;
