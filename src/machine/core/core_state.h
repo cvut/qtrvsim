@@ -19,6 +19,7 @@ struct CoreState {
     uint32_t stall_count = 0;
     uint32_t cycle_count = 0;
     unsigned current_privilege_u = static_cast<unsigned>(CSR::PrivilegeLevel::MACHINE);
+    unsigned current_asid_u = 0u;
 
     [[nodiscard]] CSR::PrivilegeLevel current_privilege() const noexcept {
         return static_cast<CSR::PrivilegeLevel>(current_privilege_u);
@@ -26,6 +27,14 @@ struct CoreState {
 
     void set_current_privilege(CSR::PrivilegeLevel p) noexcept {
         current_privilege_u = static_cast<unsigned>(p);
+    }
+
+    [[nodiscard]] uint16_t current_asid() const noexcept {
+        return static_cast<uint16_t>(current_asid_u & 0x1FFu);
+    }
+
+    void set_current_asid(uint16_t a) noexcept {
+        current_asid_u = static_cast<unsigned>(a & 0x1FFu);
     }
 };
 

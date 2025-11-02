@@ -11,6 +11,8 @@
 #include <QObject>
 #include <cstdint>
 
+#include "csr/address.h"
+
 // Shortcut for enum class values, type is obvious from context.
 using ae = machine::AccessEffects;
 
@@ -68,7 +70,7 @@ public:
      * REGULAR.
      * @param control_signal    CPU control unit signal
      */
-    void write_ctl(AccessControl control_signal, Address destination, RegisterValue value);
+    void write_ctl(AccessControl control_signal, Address destination, RegisterValue value,  uint32_t ctrl_info = 0);
 
     /**
      * Read with size specified by the CPU control unit.
@@ -77,11 +79,20 @@ public:
      * ae::REGULAR.
      * @param control_signal    CPU control unit signal
      */
-    [[nodiscard]] RegisterValue read_ctl(enum AccessControl ctl, Address source) const;
+    [[nodiscard]] RegisterValue read_ctl(enum AccessControl ctl, Address source,  uint32_t ctrl_info = 0) const;
+
+    virtual void handle_control_signal(uint32_t ctrl_info) { Q_UNUSED(ctrl_info); }
 
     virtual void sync();
     [[nodiscard]] virtual LocationStatus location_status(Address address) const;
     [[nodiscard]] virtual uint32_t get_change_counter() const = 0;
+
+    static inline CSR::PrivilegeLevel unpack_priv(uint32_t token) {
+        return static_cast<CSR::PrivilegeLevel>(token & 0x3u);
+    }
+    static inline uint16_t unpack_asid(uint32_t token) {
+        return static_cast<uint16_t>((token >> 2) & 0x1FFu);
+    }
 
     /**
      * Write byte sequence to memory

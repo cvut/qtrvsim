@@ -3,7 +3,6 @@
 #include "csr/controlstate.h"
 #include "machine.h"
 #include "memory/virtual/page_table_walker.h"
-#include "memory/virtual/sv32.h"
 
 LOG_CATEGORY("machine.TLB");
 
@@ -64,6 +63,8 @@ void TLB::on_csr_write(size_t internal_id, RegisterValue val) {
     update_all_statistics();
 }
 
+
+
 void TLB::flush_single(VirtualAddress va, uint16_t asid) {
     uint64_t vpn = va.get_raw() >> 12;
     size_t s = set_index(vpn);
@@ -111,7 +112,9 @@ void TLB::sync() {
 Address TLB::translate_virtual_to_physical(Address vaddr) {
     uint64_t virt = vaddr.get_raw();
 
-    if (!vm_enabled) { return vaddr; }
+    if (!vm_enabled || !translation_enabled || is_in_uncached_area(vaddr)) {
+        return vaddr;
+    }
 
     constexpr unsigned PAGE_SHIFT = 12;
     constexpr uint64_t PAGE_MASK = (1ULL << PAGE_SHIFT) - 1;
@@ -191,6 +194,20 @@ bool TLB::reverse_lookup(Address paddr, VirtualAddress &out_va) const {
     }
     return false;
 }
+
+void TLB::handle_control_signal(uint32_t ctrl_info) {
+    CSR::PrivilegeLevel priv = unpack_priv(ctrl_info);
+    uint16_t asid = unpack_asid(ctrl_info);
+
+    bool satp_mode_on = is_mode_enabled_in_satp(current_satp_raw);
+    bool should_translate = vm_enabled && satp_mode_on && (priv != CSR::PrivilegeLevel::MACHINE);
+
+    if (translation_enabled != should_translate) {
+        translation_enabled = should_translate;
+        LOG("TLB: translation_enabled -> %d (ASID=%u)", (int)translation_enabled, asid);
+    }
+}
+
 bool TLB::is_in_uncached_area(Address source) const {
     return (source >= uncached_start && source <= uncached_last);
 }
