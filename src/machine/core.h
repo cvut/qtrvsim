@@ -116,8 +116,8 @@ protected:
         Address mem_ref_addr);
 
     const Xlen xlen;
-    const InstructionFlags check_inst_flags_val;
-    const InstructionFlags check_inst_flags_mask;
+    InstructionFlags check_inst_flags_val;
+    InstructionFlags check_inst_flags_mask;
     BORROWED Registers *const regs;
     BORROWED CSR::ControlState *const control_state;
     BORROWED BranchPredictor *const predictor;

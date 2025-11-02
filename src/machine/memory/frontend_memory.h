@@ -2,6 +2,7 @@
 #define FRONTEND_MEMORY_H
 
 #include "common/endian.h"
+#include "csr/address.h"
 #include "machinedefs.h"
 #include "memory/address.h"
 #include "memory/memory_utils.h"
