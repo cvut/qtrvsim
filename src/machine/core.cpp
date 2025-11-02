@@ -480,8 +480,8 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
             excause = memory_special(
                 dt.memctl, dt.inst.rt(), memread, memwrite, towrite_val, dt.val_rt, mem_addr);
         } else if (is_regular_access(dt.memctl)) {
-            if (memwrite) { mem_data->write_ctl(dt.memctl, mem_addr, dt.val_rt); }
-            if (memread) { towrite_val = mem_data->read_ctl(dt.memctl, mem_addr); }
+            if (memwrite) { mem_data->write_ctl(dt.memctl, mem_addr, dt.val_rt, make_ctrl_info(state)); }
+            if (memread) { towrite_val = mem_data->read_ctl(dt.memctl, mem_addr, make_ctrl_info(state)); }
         } else {
             Q_ASSERT(dt.memctl == AC_NONE);
             // AC_NONE is memory NOP

@@ -2,6 +2,7 @@
 #define TLB_H
 
 #include "common/logging.h"
+#include "csr/address.h"
 #include "memory/frontend_memory.h"
 #include "memory/virtual/sv32.h"
 #include "memory/virtual/virtual_address.h"
@@ -67,6 +68,7 @@ public:
 
     void reset();
     void update_all_statistics();
+    void handle_control_signal(uint32_t ctrl_info) override;
 
 signals:
     void tlb_update(
@@ -98,6 +100,7 @@ private:
     TLBType type;
     const TLBConfig tlb_config;
     uint32_t current_satp_raw = 0;
+    bool translation_enabled = false;
     const bool vm_enabled;
 
     size_t num_sets_;
@@ -122,6 +125,7 @@ private:
     WriteResult translate_and_write(Address dst, const void *src, size_t sz, WriteOptions opts);
     ReadResult translate_and_read(void *dst, Address src, size_t sz, ReadOptions opts);
     inline size_t set_index(uint64_t vpn) const { return vpn & (num_sets_ - 1); }
+    inline bool is_mode_enabled_in_satp(uint32_t satp_raw) { return (satp_raw & (1u << 31)) != 0; }
 };
 
 } // namespace machine
