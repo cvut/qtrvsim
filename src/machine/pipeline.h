@@ -117,6 +117,7 @@ struct DecodeInterstage {
     bool csr_to_alu = false;
     bool csr_write = false;
     bool xret = false; // Return from exception, MRET and SRET
+    CSR::PrivilegeLevel xret_privlev = CSR::PrivilegeLevel::UNPRIVILEGED;
     bool insert_stall_before = false;
 
 public:
@@ -179,6 +180,7 @@ struct ExecuteInterstage {
     bool csr = false;
     bool csr_write = false;
     bool xret = false;
+    CSR::PrivilegeLevel xret_privlev = CSR::PrivilegeLevel::UNPRIVILEGED;
 
 public:
     /** Reset to value corresponding to NOP. */
@@ -245,6 +247,7 @@ struct MemoryInterstage {
     bool regwrite = false;
     bool is_valid = false;
     bool csr_written = false;
+    CSR::PrivilegeLevel xret_privlev = CSR::PrivilegeLevel::UNPRIVILEGED;
 
 public:
     /** Reset to value corresponding to NOP. */

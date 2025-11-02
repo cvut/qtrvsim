@@ -2,6 +2,7 @@
 #define FRONTEND_MEMORY_H
 
 #include "common/endian.h"
+#include "csr/address.h"
 #include "machinedefs.h"
 #include "memory/address.h"
 #include "memory/memory_utils.h"
@@ -10,8 +11,6 @@
 
 #include <QObject>
 #include <cstdint>
-
-#include "csr/address.h"
 
 // Shortcut for enum class values, type is obvious from context.
 using ae = machine::AccessEffects;
@@ -70,7 +69,11 @@ public:
      * REGULAR.
      * @param control_signal    CPU control unit signal
      */
-    void write_ctl(AccessControl control_signal, Address destination, RegisterValue value,  uint32_t ctrl_info = 0);
+    void write_ctl(
+        AccessControl control_signal,
+        Address destination,
+        RegisterValue value,
+        uint32_t ctrl_info = 0);
 
     /**
      * Read with size specified by the CPU control unit.
@@ -79,7 +82,8 @@ public:
      * ae::REGULAR.
      * @param control_signal    CPU control unit signal
      */
-    [[nodiscard]] RegisterValue read_ctl(enum AccessControl ctl, Address source,  uint32_t ctrl_info = 0) const;
+    [[nodiscard]] RegisterValue
+    read_ctl(enum AccessControl ctl, Address source, uint32_t ctrl_info = 0) const;
 
     virtual void handle_control_signal(uint32_t ctrl_info) { Q_UNUSED(ctrl_info); }
 

@@ -63,8 +63,6 @@ void TLB::on_csr_write(size_t internal_id, RegisterValue val) {
     update_all_statistics();
 }
 
-
-
 void TLB::flush_single(VirtualAddress va, uint16_t asid) {
     uint64_t vpn = va.get_raw() >> 12;
     size_t s = set_index(vpn);
@@ -112,9 +110,7 @@ void TLB::sync() {
 Address TLB::translate_virtual_to_physical(Address vaddr) {
     uint64_t virt = vaddr.get_raw();
 
-    if (!vm_enabled || !translation_enabled || is_in_uncached_area(vaddr)) {
-        return vaddr;
-    }
+    if (!vm_enabled || !translation_enabled || is_in_uncached_area(vaddr)) { return vaddr; }
 
     constexpr unsigned PAGE_SHIFT = 12;
     constexpr uint64_t PAGE_MASK = (1ULL << PAGE_SHIFT) - 1;

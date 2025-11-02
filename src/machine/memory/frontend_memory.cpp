@@ -37,7 +37,11 @@ uint64_t FrontendMemory::read_u64(Address address, AccessEffects type) const {
     return read_generic<uint64_t>(address, type);
 }
 
-void FrontendMemory::write_ctl(enum AccessControl ctl, Address offset, RegisterValue value,  uint32_t ctrl_info ) {
+void FrontendMemory::write_ctl(
+    enum AccessControl ctl,
+    Address offset,
+    RegisterValue value,
+    uint32_t ctrl_info) {
     switch (ctl) {
     case AC_NONE: {
         break;
@@ -71,7 +75,8 @@ void FrontendMemory::write_ctl(enum AccessControl ctl, Address offset, RegisterV
     handle_control_signal(ctrl_info);
 }
 
-RegisterValue FrontendMemory::read_ctl(enum AccessControl ctl, Address address,  uint32_t ctrl_info ) const {
+RegisterValue
+FrontendMemory::read_ctl(enum AccessControl ctl, Address address, uint32_t ctrl_info) const {
     switch (ctl) {
     case AC_NONE: return 0;
     case AC_I8: return (int8_t)read_u8(address);

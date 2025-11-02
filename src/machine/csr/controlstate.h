@@ -93,7 +93,7 @@ namespace machine { namespace CSR {
         ControlState(const ControlState &);
 
         /** Read CSR register with ISA specified address. */
-        [[nodiscard]] RegisterValue read(Address address) const;
+        [[nodiscard]] RegisterValue read(Address address, PrivilegeLevel current_priv) const;
 
         /**
          * Read CSR register with an internal id.
@@ -104,7 +104,7 @@ namespace machine { namespace CSR {
         [[nodiscard]] RegisterValue read_internal(size_t internal_id) const;
 
         /** Write value to CSR register by ISA specified address and receive the previous value. */
-        void write(Address address, RegisterValue value);
+        void write(Address address, RegisterValue value, PrivilegeLevel current_priv);
 
         /** Used for writes occurring as a side-effect (instruction count update...) and
          * internally by the write method. */
@@ -144,7 +144,8 @@ namespace machine { namespace CSR {
     public slots:
         void set_interrupt_signal(uint irq_num, bool active);
         void exception_initiate(PrivilegeLevel act_privlev, PrivilegeLevel to_privlev);
-        PrivilegeLevel exception_return(enum PrivilegeLevel act_privlev);
+        PrivilegeLevel
+        exception_return(enum PrivilegeLevel act_privlev, enum PrivilegeLevel xret_privlev);
 
     private:
         static size_t get_register_internal_id(Address address);
@@ -201,6 +202,8 @@ namespace machine { namespace CSR {
                 = { "SPIE", Id::MSTATUS, { 1, 5 }, "Previous SIE before the trap" };
             static constexpr RegisterFieldDesc MPIE
                 = { "MPIE", Id::MSTATUS, { 1, 7 }, "Previous MIE before the trap" };
+            static constexpr RegisterFieldDesc MPRV
+                = { "MPRV", Id::MSTATUS, { 1, 17 }, "Modify privilege for loads/stores/fetches" };
             static constexpr RegisterFieldDesc SPP
                 = { "SPP", Id::MSTATUS, { 1, 8 }, "System previous privilege mode" };
             static constexpr RegisterFieldDesc MPP
