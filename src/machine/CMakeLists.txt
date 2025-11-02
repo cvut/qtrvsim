@@ -76,7 +76,8 @@ set(machine_HEADERS
 		memory/virtual/sv32.h
 		memory/tlb/tlb_policy.h
 		memory/virtual/page_table_walker.h
-		)
+		memory/address_with_mode.h
+)
 
 # Object library is preferred, because the library archive is never really
 # needed. This option skips the archive creation and links directly .o files.

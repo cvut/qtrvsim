@@ -73,9 +73,15 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         machine_config.get_vm_enabled()));
     tlb_data.reset(new TLB(
         cch_data.data(), DATA, machine_config.access_tlb_data(), machine_config.get_vm_enabled()));
-    controlst->write_internal(CSR::Id::SATP, 0);
     tlb_program->on_csr_write(CSR::Id::SATP, 0);
     tlb_data->on_csr_write(CSR::Id::SATP, 0);
+    connect(
+        controlst.data(), &CSR::ControlState::write_signal, tlb_program.data(),
+        &machine::TLB::on_csr_write);
+    connect(
+        controlst.data(), &CSR::ControlState::write_signal, tlb_data.data(),
+        &machine::TLB::on_csr_write);
+    controlst->write_internal(CSR::Id::SATP, 0);
 
     predictor.reset(new BranchPredictor(
         machine_config.get_bp_enabled(), machine_config.get_bp_type(),

@@ -48,7 +48,7 @@ public:
      * @see MemoryDataBus::write_single
      */
     WriteResult
-    write(Address destination, const void *source, size_t size, WriteOptions options) override;
+    write(AddressWithMode destination, const void *source, size_t size, WriteOptions options) override;
 
     /**
      * Read method that repeats write single (for each affected range) until
@@ -57,7 +57,7 @@ public:
      * @see MemoryDataBus:read_single
      */
     ReadResult
-    read(void *destination, Address source, size_t size, ReadOptions options) const override;
+    read(void *destination, AddressWithMode source, size_t size, ReadOptions options) const override;
 
     /**
      * Number of writes and external changes recorded.
@@ -189,10 +189,10 @@ public:
     explicit TrivialBus(BackendMemory *backend_memory);
 
     WriteResult
-    write(Address destination, const void *source, size_t size, WriteOptions options) override;
+    write(AddressWithMode destination, const void *source, size_t size, WriteOptions options) override;
 
     ReadResult
-    read(void *destination, Address source, size_t size, ReadOptions options) const override;
+    read(void *destination, AddressWithMode source, size_t size, ReadOptions options) const override;
 
     uint32_t get_change_counter() const override;
 

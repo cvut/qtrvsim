@@ -41,7 +41,7 @@ Cache::Cache(
 Cache::~Cache() = default;
 
 WriteResult
-Cache::write(Address destination, const void *source, size_t size, WriteOptions options) {
+Cache::write(AddressWithMode destination, const void *source, size_t size, WriteOptions options) {
     if (!cache_config.enabled() || is_in_uncached_area(destination)
         || is_in_uncached_area(destination + size)) {
         mem_writes++;
@@ -65,7 +65,7 @@ Cache::write(Address destination, const void *source, size_t size, WriteOptions 
     return { .n_bytes = size, .changed = changed };
 }
 
-ReadResult Cache::read(void *destination, Address source, size_t size, ReadOptions options) const {
+ReadResult Cache::read(void *destination, AddressWithMode source, size_t size, ReadOptions options) const {
     if (!cache_config.enabled() || is_in_uncached_area(source)
         || is_in_uncached_area(source + size)) {
         mem_reads++;

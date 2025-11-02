@@ -2,6 +2,7 @@
 #define TLB_H
 
 #include "common/logging.h"
+#include "csr/address.h"
 #include "memory/frontend_memory.h"
 #include "memory/virtual/sv32.h"
 #include "memory/virtual/virtual_address.h"
@@ -36,14 +37,11 @@ public:
 
     void sync() override;
 
-    Address translate_virtual_to_physical(Address va);
+    Address translate_virtual_to_physical(AddressWithMode vaddr);
 
-    WriteResult write(Address dst, const void *src, size_t sz, WriteOptions opts) override {
-        return translate_and_write(dst, src, sz, opts);
-    }
-    ReadResult read(void *dst, Address src, size_t sz, ReadOptions opts) const override {
-        return const_cast<TLB *>(this)->translate_and_read(dst, src, sz, opts);
-    }
+    WriteResult write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts) override;
+
+    ReadResult read(void *dst, AddressWithMode src, size_t sz, ReadOptions opts) const override;
 
     uint32_t get_change_counter() const override { return mem->get_change_counter(); }
 
@@ -116,15 +114,10 @@ private:
     mutable uint32_t burst_writes = 0;
     mutable uint32_t change_counter = 0;
 
-<<<<<<< ours
-    bool is_in_uncached_area(Address source) const;
-    WriteResult translate_and_write(Address dst, const void *src, size_t sz, WriteOptions opts);
-    ReadResult translate_and_read(void *dst, Address src, size_t sz, ReadOptions opts);
-=======
     WriteResult translate_and_write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts);
     ReadResult translate_and_read(void *dst, AddressWithMode src, size_t sz, ReadOptions opts);
->>>>>>> theirs
     inline size_t set_index(uint64_t vpn) const { return vpn & (num_sets_ - 1); }
+    inline bool is_mode_enabled_in_satp(uint32_t satp_raw) { return (satp_raw & (1u << 31)) != 0; }
 };
 
 } // namespace machine

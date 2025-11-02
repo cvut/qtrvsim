@@ -286,7 +286,7 @@ enum ExceptionCause Core::memory_special(
 FetchState Core::fetch(PCInterstage pc, bool skip_break) {
     if (pc.stop_if) { return {}; }
 
-    const Address inst_addr = Address(regs->read_pc());
+    const AddressWithMode inst_addr = AddressWithMode(regs->read_pc(), make_access_mode(state));
     const Instruction inst(mem_program->read_u32(inst_addr));
     ExceptionCause excause = EXCAUSE_NONE;
 
@@ -468,7 +468,7 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
 
 MemoryState Core::memory(const ExecuteInterstage &dt) {
     RegisterValue towrite_val = dt.alu_val;
-    auto mem_addr = Address(get_xlen_from_reg(dt.alu_val));
+    auto mem_addr = AddressWithMode(get_xlen_from_reg(dt.alu_val), make_access_mode(state));
     bool memread = dt.memread;
     bool memwrite = dt.memwrite;
     bool regwrite = dt.regwrite;

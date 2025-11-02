@@ -106,12 +106,9 @@ void TLB::sync() {
     flush();
 }
 
-Address TLB::translate_virtual_to_physical(Address vaddr) {
+Address TLB::translate_virtual_to_physical(AddressWithMode vaddr) {
     uint64_t virt = vaddr.get_raw();
 
-<<<<<<< ours
-    if (!vm_enabled) { return vaddr; }
-=======
     AccessMode mode = vaddr.access_mode();
     CSR::PrivilegeLevel priv = mode.priv();
     uint16_t asid = mode.asid();
@@ -122,7 +119,6 @@ Address TLB::translate_virtual_to_physical(Address vaddr) {
     if (!should_translate) {
         return vaddr;
     }
->>>>>>> theirs
 
     constexpr unsigned PAGE_SHIFT = 12;
     constexpr uint64_t PAGE_MASK = (1ULL << PAGE_SHIFT) - 1;
@@ -131,7 +127,6 @@ Address TLB::translate_virtual_to_physical(Address vaddr) {
     uint64_t vpn = virt >> PAGE_SHIFT;
     size_t s = set_index(vpn);
     const char *tag = (type == PROGRAM ? "I" : "D");
-    uint16_t asid = (current_satp_raw >> 22) & 0x1FF;
 
     // Check TLB hit
     for (size_t w = 0; w < associativity_; w++) {
@@ -178,12 +173,20 @@ Address TLB::translate_virtual_to_physical(Address vaddr) {
     return Address { phys_base + off };
 }
 
-WriteResult TLB::translate_and_write(Address dst, const void *src, size_t sz, WriteOptions opts) {
+WriteResult TLB::write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts) {
+    return translate_and_write(dst, src, sz, opts);
+}
+
+ReadResult TLB::read(void *dst, AddressWithMode src, size_t sz, ReadOptions opts) const {
+    return const_cast<TLB *>(this)->translate_and_read(dst, src, sz, opts);
+}
+
+WriteResult TLB::translate_and_write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts) {
     Address pa = translate_virtual_to_physical(dst);
     return mem->write(pa, src, sz, opts);
 }
 
-ReadResult TLB::translate_and_read(void *dst, Address src, size_t sz, ReadOptions opts) {
+ReadResult TLB::translate_and_read(void *dst, AddressWithMode src, size_t sz, ReadOptions opts) {
     Address pa = translate_virtual_to_physical(src);
     return mem->read(dst, pa, sz, opts);
 }
@@ -202,12 +205,6 @@ bool TLB::reverse_lookup(Address paddr, VirtualAddress &out_va) const {
     }
     return false;
 }
-<<<<<<< ours
-bool TLB::is_in_uncached_area(Address source) const {
-    return (source >= uncached_start && source <= uncached_last);
-}
-=======
->>>>>>> theirs
 
 double TLB::get_hit_rate() const {
     unsigned comp = hit_count_ + miss_count_;

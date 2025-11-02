@@ -60,6 +60,12 @@ public:
     bool get_step_over_exception(enum ExceptionCause excause) const;
     void set_current_privilege(CSR::PrivilegeLevel privilege);
     CSR::PrivilegeLevel get_current_privilege() const;
+    static inline AccessMode make_access_mode(const CoreState &st) {
+        CSR::PrivilegeLevel priv = st.current_privilege();
+        uint16_t asid = st.current_asid();
+        bool uncached = false;
+        return AccessMode::pack(asid, priv, uncached);
+    }
 
     /**
      * Abstracts XLEN from code flow. XLEN core will obtain XLEN value from register value.
