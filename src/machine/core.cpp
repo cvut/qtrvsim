@@ -19,6 +19,33 @@ static InstructionFlags unsupported_inst_flags_to_check(Xlen xlen, ConfigIsaWord
     return InstructionFlags(flags_to_check);
 }
 
+static CSR::PrivilegeLevel decode_xret_type_from_inst(const Instruction &inst) {
+    // bits [6:0]   = opcode (SYSTEM opcode == 0x73)
+    // bits [31:20] = funct12 (distinguishes MRET/SRET/URET)
+    const uint32_t w = inst.data();
+    const uint32_t OPCODE_MASK = 0x7Fu; // bits 6:0
+    const uint32_t FUNCT12_SHIFT = 20u; // funct12 starts at bit 20
+    const uint32_t FUNCT12_MASK = 0xFFFu; // 12 bits
+
+    const uint32_t opcode = w & OPCODE_MASK;
+    if (opcode != 0x73u) { // not a SYSTEM-family instruction
+        return CSR::PrivilegeLevel::UNPRIVILEGED;
+    }
+
+    const uint32_t funct12 = (w >> FUNCT12_SHIFT) & FUNCT12_MASK;
+
+    constexpr uint32_t MRET_FUNCT12 = 0x302u;
+    constexpr uint32_t SRET_FUNCT12 = 0x102u;
+    constexpr uint32_t URET_FUNCT12 = 0x002u;
+
+    switch (funct12) {
+        case MRET_FUNCT12: return CSR::PrivilegeLevel::MACHINE; // MRET
+        case SRET_FUNCT12: return CSR::PrivilegeLevel::SUPERVISOR; // SRET
+        case URET_FUNCT12: return CSR::PrivilegeLevel::UNPRIVILEGED; // URET
+        default: return CSR::PrivilegeLevel::UNPRIVILEGED;
+    }
+}
+
 Core::Core(
     Registers *regs,
     BranchPredictor *predictor,
@@ -324,6 +351,14 @@ DecodeState Core::decode(const FetchInterstage &dt) {
     ExceptionCause excause = dt.excause;
 
     dt.inst.flags_alu_op_mem_ctl(flags, alu_op, mem_ctl);
+    CSR::PrivilegeLevel inst_xret_priv = CSR::PrivilegeLevel::UNPRIVILEGED;
+    if (flags & IMF_XRET) {
+        inst_xret_priv = decode_xret_type_from_inst(dt.inst);
+        // Mark illegal if current privilege is lower than encoded xRET type (e.g. MRET executed in S-mode)
+        if (state.current_privilege() < inst_xret_priv) {
+            excause = EXCAUSE_INSN_ILLEGAL;
+        }
+    }
 
     if ((flags ^ check_inst_flags_val) & check_inst_flags_mask) { excause = EXCAUSE_INSN_ILLEGAL; }
 
@@ -400,6 +435,7 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .csr_to_alu = bool(flags & IMF_CSR_TO_ALU),
                                 .csr_write = csr_write,
                                 .xret = bool(flags & IMF_XRET),
+                                .xret_privlev = inst_xret_priv,
                                 .insert_stall_before = bool(flags & IMF_CSR) } };
 }
 
@@ -470,6 +506,7 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
                  .csr = dt.csr,
                  .csr_write = dt.csr_write,
                  .xret = dt.xret,
+                 .xret_privlev = dt.xret_privlev,
              } };
 }
 
@@ -534,7 +571,8 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
             csr_written = true;
         }
         if (dt.xret) {
-            CSR::PrivilegeLevel restored = control_state->exception_return(get_current_privilege());
+            CSR::PrivilegeLevel restored =
+                control_state->exception_return(get_current_privilege(), dt.xret_privlev);
             set_current_privilege(restored);
             if (auto prog_tlb = dynamic_cast<TLB *>(mem_program)) {
                 prog_tlb->on_privilege_changed(restored);
@@ -590,6 +628,7 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
                  .regwrite = regwrite,
                  .is_valid = dt.is_valid,
                  .csr_written = csr_written,
+                 .xret_privlev = dt.xret_privlev,
              } };
 }
 

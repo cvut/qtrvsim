@@ -150,7 +150,7 @@ namespace machine { namespace CSR {
     public slots:
         void set_interrupt_signal(uint irq_num, bool active);
         void exception_initiate(PrivilegeLevel act_privlev, PrivilegeLevel to_privlev);
-        PrivilegeLevel exception_return(enum PrivilegeLevel act_privlev);
+        PrivilegeLevel exception_return(enum PrivilegeLevel act_privlev, enum PrivilegeLevel xret_privlev);
 
     private:
         static size_t get_register_internal_id(Address address);
@@ -211,6 +211,7 @@ namespace machine { namespace CSR {
             static constexpr RegisterFieldDesc MIE = { "MIE", Id::MSTATUS, {1, 3}, "Machine global interrupt-enable"};
             static constexpr RegisterFieldDesc SPIE = { "SPIE", Id::MSTATUS, {1, 5}, "Previous SIE before the trap"};
             static constexpr RegisterFieldDesc MPIE = { "MPIE", Id::MSTATUS, {1, 7}, "Previous MIE before the trap"};
+            static constexpr RegisterFieldDesc MPRV = { "MPRV", Id::MSTATUS, {1, 17}, "Modify privilege for loads/stores/fetches" };
             static constexpr RegisterFieldDesc SPP = { "SPP", Id::MSTATUS, {1, 8}, "System previous privilege mode"};
             static constexpr RegisterFieldDesc MPP = { "MPP", Id::MSTATUS, {2, 11}, "Machine previous privilege mode"};
             static constexpr RegisterFieldDesc UXL = { "UXL", Id::MSTATUS, {2, 32}, "User mode XLEN (RV64 only)"};
