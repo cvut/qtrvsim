@@ -97,15 +97,21 @@ _start:                                                                 \
         slli a1, a1, 8;                                                 \
         addi a1, a1, 0xd;                                               \
         slli a1, a1, 12;                                                \
+        addi a0, zero, 0;                                               \
+        addi a7, zero, 93;                                              \
         ecall
 
 #define TESTNUM gp
 
 #define RVTEST_FAIL                                                     \
-        addi a1,a1,0xBA;                                                \
-        slli a1,a1,4;                                                   \
+        addi a1, a1, 0xBA;                                              \
+        slli a1, a1, 4;                                                 \
         addi a1, a1, 0xD;                                               \
         slli a1, a1, 16;                                                \
+        addi a0, TESTNUM, -1;                                           \
+        sra  a0, a0, 31;                                                \
+        or   a0, a0, TESTNUM;                                           \
+        addi a7, zero, 93;                                              \
         ecall
 
 #define RVTEST_ARCH_CHECK_FAIL                                          \
@@ -113,6 +119,8 @@ _start:                                                                 \
         slli a1,a1,4;                                                   \
         addi a1, a1, 0xF;                                               \
         slli a1, a1, 16;                                                \
+        addi a0, zero, 2000;                                            \
+        addi a7, zero, 93;                                              \
         ecall
 
 //-----------------------------------------------------------------------
