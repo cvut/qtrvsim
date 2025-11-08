@@ -1,0 +1,77 @@
+Symbol table '.dynsym':
+   Num: Value            Size  Type    Binding Index Name
+     0: 0000000000000000     0 notype  local   undef 
+     1: 0000000000000000     0 func    global  undef __libc_start_main
+     2: 0000000000000000     0 notype  weak    undef __gmon_start__
+Symbol table '.symtab':
+   Num: Value            Size  Type    Binding Index Name
+     0: 0000000000000000     0 notype  local   undef 
+     1: 0000000000400200     0 section local       1 
+     2: 000000000040021c     0 section local       2 
+     3: 000000000040023c     0 section local       3 
+     4: 0000000000400260     0 section local       4 
+     5: 0000000000400280     0 section local       5 
+     6: 00000000004002c8     0 section local       6 
+     7: 0000000000400300     0 section local       7 
+     8: 0000000000400308     0 section local       8 
+     9: 0000000000400328     0 section local       9 
+    10: 0000000000400340     0 section local      10 
+    11: 0000000000400370     0 section local      11 
+    12: 0000000000400390     0 section local      12 
+    13: 00000000004003c0     0 section local      13 
+    14: 0000000000400584     0 section local      14 
+    15: 0000000000400590     0 section local      15 
+    16: 0000000000400594     0 section local      16 
+    17: 00000000004005d0     0 section local      17 
+    18: 00000000006006e8     0 section local      18 
+    19: 00000000006006f0     0 section local      19 
+    20: 00000000006006f8     0 section local      20 
+    21: 0000000000600700     0 section local      21 
+    22: 00000000006008d0     0 section local      22 
+    23: 00000000006008d8     0 section local      23 
+    24: 0000000000600900     0 section local      24 
+    25: 0000000000600910     0 section local      25 
+    26: 0000000000000000     0 section local      26 
+    27: 0000000000000000     0 section local      27 
+    28: 0000000000000000     0 section local      28 
+    29: 0000000000000000     0 section local      29 
+    30: 0000000000000000     0 section local      30 
+    31: 0000000000000000     0 section local      31 
+    32: 0000000000000000     0 file    local     abs crtstuff.c
+    33: 00000000006006f8     0 object  local      20 __JCR_LIST__
+    34: 00000000004003f0     0 func    local      13 deregister_tm_clones
+    35: 0000000000400430     0 func    local      13 register_tm_clones
+    36: 0000000000400470     0 func    local      13 __do_global_dtors_aux
+    37: 0000000000600910     1 object  local      25 completed.6661
+    38: 00000000006006f0     0 object  local      19 __do_global_dtors_aux_fini_array_entry
+    39: 0000000000400490     0 func    local      13 frame_dummy
+    40: 00000000006006e8     0 object  local      18 __frame_dummy_init_array_entry
+    41: 0000000000000000     0 file    local     abs example.c
+    42: 0000000000000000     0 file    local     abs crtstuff.c
+    43: 00000000004006e0     0 object  local      17 __FRAME_END__
+    44: 00000000006006f8     0 object  local      20 __JCR_END__
+    45: 0000000000000000     0 file    local     abs 
+    46: 00000000006006f0     0 notype  local      18 __init_array_end
+    47: 0000000000600700     0 object  local      21 _DYNAMIC
+    48: 00000000006006e8     0 notype  local      18 __init_array_start
+    49: 00000000006008d8     0 object  local      23 _GLOBAL_OFFSET_TABLE_
+    50: 0000000000400580     2 func    global     13 __libc_csu_fini
+    51: 0000000000000000     0 notype  weak    undef _ITM_deregisterTMCloneTable
+    52: 0000000000600900     0 notype  weak       24 data_start
+    53: 0000000000600910     0 notype  global     24 _edata
+    54: 0000000000400584     0 func    global     14 _fini
+    55: 0000000000000000     0 func    global  undef __libc_start_main@@GLIBC_2.2.5
+    56: 0000000000600900     0 notype  global     24 __data_start
+    57: 0000000000000000     0 notype  weak    undef __gmon_start__
+    58: 0000000000600908     0 object  global     24 __dso_handle
+    59: 0000000000400590     4 object  global     15 _IO_stdin_used
+    60: 0000000000400510   101 func    global     13 __libc_csu_init
+    61: 0000000000600918     0 notype  global     25 _end
+    62: 00000000004003c0     0 func    global     13 _start
+    63: 0000000000600910     0 notype  global     25 __bss_start
+    64: 00000000004004f2    27 func    global     13 main
+    65: 00000000004004b6    60 func    global     13 fib
+    66: 0000000000000000     0 notype  weak    undef _Jv_RegisterClasses
+    67: 0000000000600910     0 object  global     24 __TMC_END__
+    68: 0000000000000000     0 notype  weak    undef _ITM_registerTMCloneTable
+    69: 0000000000400370     0 func    global     11 _init

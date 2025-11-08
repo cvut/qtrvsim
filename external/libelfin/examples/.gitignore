@@ -1,0 +1,8 @@
+*.o
+.*.d
+dump-sections
+dump-segments
+dump-syms
+dump-lines
+dump-tree
+find-pc

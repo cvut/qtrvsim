@@ -77,7 +77,7 @@ add_library(machine STATIC
 		${machine_HEADERS})
 target_link_libraries(machine
 		PRIVATE ${QtLib}::Core
-		PUBLIC libelf)
+		PUBLIC elf++)
 
 if(NOT ${WASM})
 	# Machine tests (not available on WASM)
@@ -181,7 +181,7 @@ if(NOT ${WASM})
 			symboltable.h
 			)
 	target_link_libraries(program_loader_test
-			PRIVATE ${QtLib}::Core ${QtLib}::Test libelf)
+			PRIVATE ${QtLib}::Core ${QtLib}::Test elf++)
 	add_test(NAME program_loader COMMAND program_loader_test)
 
 
@@ -217,7 +217,7 @@ if(NOT ${WASM})
 			machineconfig.cpp
 			)
 	target_link_libraries(core_test
-			PRIVATE ${QtLib}::Core ${QtLib}::Test libelf)
+			PRIVATE ${QtLib}::Core ${QtLib}::Test elf++)
 	add_test(NAME core COMMAND core_test)
 
 	add_custom_target(machine_unit_tests

@@ -1,0 +1,5 @@
+Built with
+
+$ gcc -o golden-gcc-4.9.2/example -g -fdebug-prefix-map=$PWD=x example.c
+
+where gcc is version 4.9.2 from Debian.

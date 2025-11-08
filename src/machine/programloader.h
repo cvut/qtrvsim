@@ -7,9 +7,10 @@
 
 #include <QFile>
 #include <cstdint>
-#include <gelf.h>
 #include <qstring.h>
 #include <qvector.h>
+#include <memory>
+#include <elf++.hh>
 
 namespace machine {
 
@@ -26,8 +27,8 @@ public:
 
     void to_memory(Memory *mem); // Writes all loaded sections to memory TODO:
                                  // really to memory ???
-    Address end(); // Return address after which there is no more code for
-                   // sure
+    Address end();               // Return address after which there is no more code for
+                                 // sure
     Address get_executable_entry() const;
     SymbolTable *get_symbol_table();
 
@@ -38,18 +39,12 @@ public:
 
 private:
     QFile elf_file;
-    Elf *elf;
-    GElf_Ehdr hdr {}; // elf file header
+    std::unique_ptr<elf::elf> elf_parser;
+    uint64_t entry_point {};
     size_t n_secs {}; // number of sections in elf program header
     ArchitectureType architecture_type;
-
-private:
-    union {
-        Elf32_Phdr *arch32;
-        Elf64_Phdr *arch64;
-    } sections_headers{};
-    QVector<size_t> indexes_of_load_sections; // external index to sections_headers index
-    Address executable_entry;
+    Endian endianness;
+    bool is_64bit {};
 };
 
 } // namespace machine
