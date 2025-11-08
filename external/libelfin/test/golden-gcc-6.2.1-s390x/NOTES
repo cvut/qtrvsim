@@ -1,0 +1,6 @@
+Built with
+
+$ gcc -o golden-gcc-6.2.1-s390x/example -g -fdebug-prefix-map=$PWD=x example.c
+
+using gcc 6.2.1 from Debian on s390x. This binary uses big-endian ELF
+and DWARF.
