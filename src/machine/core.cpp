@@ -351,6 +351,17 @@ DecodeState Core::decode(const FetchInterstage &dt) {
     ExceptionCause excause = dt.excause;
 
     dt.inst.flags_alu_op_mem_ctl(flags, alu_op, mem_ctl);
+    auto current_priv = state.current_privilege();
+    if ((flags & IMF_PRIV_M) && current_priv < CSR::PrivilegeLevel::MACHINE) {
+        excause = EXCAUSE_INSN_ILLEGAL;
+    }
+    if ((flags & IMF_PRIV_H) && current_priv < CSR::PrivilegeLevel::HYPERVISOR) {
+        excause = EXCAUSE_INSN_ILLEGAL;
+    }
+    if ((flags & IMF_PRIV_S) && current_priv < CSR::PrivilegeLevel::SUPERVISOR) {
+        excause = EXCAUSE_INSN_ILLEGAL;
+    }
+
     CSR::PrivilegeLevel inst_xret_priv = CSR::PrivilegeLevel::UNPRIVILEGED;
     if (flags & IMF_XRET) {
         inst_xret_priv = decode_xret_type_from_inst(dt.inst);
