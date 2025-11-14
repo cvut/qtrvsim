@@ -61,7 +61,6 @@ public:
         }
         return true;
     }
-
 public slots:
     void setup(machine::Machine *machine);
     void set_cell_size(int index);
@@ -75,6 +74,8 @@ signals:
 private:
     [[nodiscard]] const machine::FrontendMemory *mem_access() const;
     [[nodiscard]] machine::FrontendMemory *mem_access_rw() const;
+    [[nodiscard]] const machine::FrontendMemory *mem_access_phys() const;
+    [[nodiscard]] machine::FrontendMemory *mem_access_phys_rw() const;
     enum MemoryCellSize cell_size;
     unsigned int cells_per_row;
     machine::Address index0_offset;

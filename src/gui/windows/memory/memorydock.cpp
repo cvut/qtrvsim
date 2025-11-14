@@ -24,6 +24,7 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     auto *cached_access = new QComboBox();
     cached_access->addItem("Direct", 0);
     cached_access->addItem("Cached", 1);
+    cached_access->addItem("As CPU (VMA)", 2);
 
     auto *memory_content = new MemoryTableView(nullptr, settings);
     // memory_content->setSizePolicy();
@@ -37,7 +38,6 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     auto *layout_top = new QHBoxLayout;
     layout_top->addWidget(cell_size);
     layout_top->addWidget(cached_access);
-
     auto *layout = new QVBoxLayout;
     layout->addLayout(layout_top);
     layout->addWidget(memory_content);
@@ -47,6 +47,7 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
 
     setWidget(content);
 
+    connect(this, &MemoryDock::machine_setup, memory_model, &MemoryModel::setup);
     connect(this, &MemoryDock::machine_setup, memory_model, &MemoryModel::setup);
     connect(
         cell_size, QOverload<int>::of(&QComboBox::currentIndexChanged), memory_content,

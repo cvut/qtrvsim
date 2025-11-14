@@ -749,6 +749,27 @@ void Instruction::flags_alu_op_mem_ctl(
     flags = (enum InstructionFlags)im.flags;
     alu_op = im.alu;
     mem_ctl = im.mem_ctl;
+    if (flags & IMF_CSR) {
+        machine::CSR::Address csr = csr_address();
+        uint32_t csr12 = csr.data & 0xfffu;
+        uint32_t min_bits = (csr12 >> 8) & 0x3u; // csr[9:8]
+        switch (min_bits) {
+            case 0u:
+                // User (no extra flag required)
+                break;
+            case 1u:
+                flags = InstructionFlags(flags | IMF_PRIV_S);
+                break;
+            case 2u:
+                flags = InstructionFlags(flags | IMF_PRIV_H);
+                break;
+            case 3u:
+                flags = InstructionFlags(flags | IMF_PRIV_M);
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 bool Instruction::operator==(const Instruction &c) const {
