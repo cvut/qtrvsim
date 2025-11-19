@@ -25,6 +25,9 @@ set(gui_SOURCES
         windows/messages/messagesview.cpp
         dialogs/new/newdialog.cpp
         ui/hexlineedit.cpp
+        ui/pow2spinbox.cpp
+        windows/tlb/tlbview.cpp
+        windows/tlb/tlbdock.cpp
         windows/editor/highlighterasm.cpp
         windows/editor/highlighterc.cpp
         windows/editor/linenumberarea.cpp
@@ -52,7 +55,7 @@ set(gui_SOURCES
         windows/predictor/predictor_btb_dock.cpp
         windows/predictor/predictor_bht_dock.cpp
         windows/predictor/predictor_info_dock.cpp
-        )
+)
 set(gui_HEADERS
         dialogs/about/aboutdialog.h
         windows/cache/cachedock.h
@@ -71,6 +74,9 @@ set(gui_HEADERS
         windows/messages/messagesview.h
         dialogs/new/newdialog.h
         ui/hexlineedit.h
+        ui/pow2spinbox.h
+        windows/tlb/tlbview.h
+        windows/tlb/tlbdock.h
         windows/editor/highlighterasm.h
         windows/editor/highlighterc.h
         windows/editor/linenumberarea.h
@@ -98,19 +104,19 @@ set(gui_HEADERS
         windows/predictor/predictor_btb_dock.h
         windows/predictor/predictor_bht_dock.h
         windows/predictor/predictor_info_dock.h
-        )
+)
 set(gui_UI
         dialogs/gotosymbol/gotosymboldialog.ui
         dialogs/new/NewDialog.ui
         windows/peripherals/peripheralsview.ui
         mainwindow/MainWindow.ui
         dialogs/new/NewDialogCache.ui
-        )
+)
 set(gui_RESOURCES
         resources/icons/icons.qrc
         resources/samples/samples.qrc
         windows/coreview/schemas/schemas.qrc
-        )
+)
 
 
 if ("${WASM}")
@@ -160,7 +166,7 @@ set_target_properties(gui PROPERTIES
         MACOSX_BUNDLE_BUNDLE_VERSION "${MAIN_PROJECT_VERSION}"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "${MAIN_PROJECT_VERSION}"
         MACOSX_BUNDLE_ICONFILE ${ICON_NAME}
-        )
+)
 # END MACOS
 
 # =============================================================================
@@ -174,5 +180,5 @@ set_target_properties(gui PROPERTIES
 install(TARGETS gui
         RUNTIME DESTINATION bin
         BUNDLE DESTINATION ${EXECUTABLE_OUTPUT_PATH}
-        )
+)
 
