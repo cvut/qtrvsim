@@ -35,6 +35,11 @@ public:
         machine::Address next_addr,
         machine::Address jump_branch_pc,
         machine::Address mem_ref_addr) override;
+    /**
+     * Map target fd 0 (stdin) to a host file opened from @hostpath.
+     * Returns true on success (host file opened and mapped), false on error.
+     */
+    bool map_stdin_to_hostfile(const QString &hostpath);
     OSSYCALL_HANDLER_DECLARE(syscall_default_handler);
     OSSYCALL_HANDLER_DECLARE(do_sys_exit);
     OSSYCALL_HANDLER_DECLARE(do_sys_set_thread_area);
