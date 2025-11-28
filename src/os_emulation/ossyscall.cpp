@@ -623,6 +623,25 @@ bool OsSyscallExceptionHandler::handle_exception(
     return true;
 }
 
+bool OsSyscallExceptionHandler::map_stdin_to_hostfile(const QString &hostpath) {
+    if (hostpath.isEmpty()) return false;
+    int hostfd = open(hostpath.toLatin1().data(), O_RDONLY);
+    if (hostfd < 0) {
+        fprintf(stderr, "map_stdin_to_hostfile: failed to open host file '%s' errno=%d", hostpath.toLatin1().data(), errno);
+        return false;
+    }
+    if (fd_mapping.size() <= 0) {
+        fd_mapping.push_back(FD_UNUSED);
+    }
+    // If there is an existing host fd mapped at target fd 0, close it (but don't close FD_TERMINAL/FD_UNUSED/FD_INVALID)
+    int prev = fd_mapping[0];
+    if (prev >= 0 && prev != FD_TERMINAL && prev != FD_UNUSED && prev != FD_INVALID) {
+        close(prev);
+    }
+    fd_mapping[0] = hostfd;
+    return true;
+}
+
 int32_t OsSyscallExceptionHandler::write_mem(
     machine::FrontendMemory *mem,
     Address addr,

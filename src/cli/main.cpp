@@ -97,6 +97,8 @@ void create_parser(QCommandLineParser &p) {
         { { "serial-out", "serout" }, "File connected to the serial port output.", "FNAME" });
     p.addOption({ { "os-emulation", "osemu" }, "Operating system emulation." });
     p.addOption(
+        { { "std-in", "stdin" }, "File connected to the syscall standard input.", "FNAME" });
+    p.addOption(
         { { "std-out", "stdout" }, "File connected to the syscall standard output.", "FNAME" });
     p.addOption(
         { { "os-fs-root", "osfsroot" }, "Emulated system root/prefix for opened files", "DIR" });
@@ -419,8 +421,13 @@ void configure_serial_port(QCommandLineParser &p, SerialPort *ser_port) {
 
 void configure_osemu(QCommandLineParser &p, MachineConfig &config, Machine *machine) {
     CharIOHandler *std_out = nullptr;
+    QScopedPointer<QString> std_in_path;
     int siz;
 
+    siz = p.values("std-in").size();
+    if (siz >= 1) {
+        std_in_path.reset(new QString(p.values("std-in").at(siz - 1)));
+    }
     siz = p.values("std-out").size();
     if (siz >= 1) {
         auto *qf = new QFile(p.values("std-out").at(siz - 1));
@@ -438,6 +445,12 @@ void configure_osemu(QCommandLineParser &p, MachineConfig &config, Machine *mach
         auto *osemu_handler = new osemu::OsSyscallExceptionHandler(
             config.osemu_known_syscall_stop(), config.osemu_unknown_syscall_stop(),
             config.osemu_fs_root());
+        if (!std_in_path.isNull() && !std_in_path->isEmpty()) {
+            if (!osemu_handler->map_stdin_to_hostfile(*std_in_path)) {
+                fprintf(stderr, "Failed to map stdin to host file '%s'\n", std_in_path->toLatin1().data());
+                exit(EXIT_FAILURE);
+            }
+        }
         if (std_out) {
             machine::Machine::connect(
                 osemu_handler, &osemu::OsSyscallExceptionHandler::char_written, std_out,
