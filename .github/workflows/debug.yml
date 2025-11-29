@@ -5,7 +5,7 @@ on: [ push, workflow_dispatch, pull_request, merge_group ]
 jobs:
   build:
     name: ${{ matrix.config.name }}
-    needs: [ build-riscv-tests ]
+    needs: [ build-riscv-tests, build-stud-support-tests ]
     # Avoid duplicate builds on PR from the same repository
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ${{ matrix.config.os }}
@@ -156,6 +156,32 @@ jobs:
         #run: python qtrvsim_tester.py --no-64  ${{ github.workspace }}/build/target/qtrvsim_cli
         run: python qtrvsim_tester.py -M -A --pipeline --cache ${{ github.workspace }}/build/target/qtrvsim_cli
 
+      - name: Get stud-support tests
+        uses: actions/download-artifact@v4
+        with:
+          name: stud-support-tests
+          path: tests/stud-support/elfs
+
+      - name: Stud-support tests (single cycle)
+        if: matrix.config.os != 'ubuntu-18.04'
+        working-directory: ${{ github.workspace }}/tests/stud-support
+        run: python run_tests.py --qtrvsim-cli ${{ github.workspace }}/build/target/qtrvsim_cli --build-dir elfs --stud-support-path .
+
+      - name: Stud-support tests (pipelined)
+        if: matrix.config.os != 'ubuntu-18.04'
+        working-directory: ${{ github.workspace }}/tests/stud-support
+        run: python run_tests.py --qtrvsim-cli ${{ github.workspace }}/build/target/qtrvsim_cli --build-dir elfs --stud-support-path . --pipeline
+
+      - name: Stud-support tests (single cycle, cached)
+        if: matrix.config.os != 'ubuntu-18.04'
+        working-directory: ${{ github.workspace }}/tests/stud-support
+        run: python run_tests.py --qtrvsim-cli ${{ github.workspace }}/build/target/qtrvsim_cli --build-dir elfs --stud-support-path . --cache
+
+      - name: Stud-support tests (pipelined, cached)
+        if: matrix.config.os != 'ubuntu-18.04'
+        working-directory: ${{ github.workspace }}/tests/stud-support
+        run: python run_tests.py --qtrvsim-cli ${{ github.workspace }}/build/target/qtrvsim_cli --build-dir elfs --stud-support-path . --pipeline --cache
+
       - name: Store created artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -281,3 +307,46 @@ jobs:
         with:
           name: riscv-official-tests
           path: tests/riscv-official/isa
+
+  build-stud-support-tests:
+    name: Build stud-support tests
+    # Avoid duplicate builds on PR from the same repository
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-22.04
+    env:
+      STUD_SUPPORT_REV: 53c684c05dc990e6043fcc3c9a346b2173610731
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          
+      - name: Cache stud-support tests
+        id: cache-stud-support
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/tests/stud-support/elfs
+          key: stud-support-tests-${{ env.STUD_SUPPORT_REV }}
+
+      - name: Checkout stud-support
+        if: ${{ steps.cache-stud-support.outputs.cache-hit != 'true' }}
+        run: |
+          git clone https://gitlab.fel.cvut.cz/b35apo/stud-support.git stud-support
+          cd stud-support
+          git checkout ${{ env.STUD_SUPPORT_REV }}
+
+      - name: Install RISC-V toolchain for stud-support
+        if: ${{ steps.cache-stud-support.outputs.cache-hit != 'true' }}
+        run: |
+          sudo apt-get update &&
+          sudo apt-get install -y gcc-riscv64-unknown-elf
+
+      - name: Build stud-support tests
+        if: ${{ steps.cache-stud-support.outputs.cache-hit != 'true' }}
+        working-directory: ${{ github.workspace }}/tests/stud-support
+        run: python build_tests.py --stud-support-path ../../stud-support
+
+      - name: Store stud-support artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: stud-support-tests
+          path: tests/stud-support/elfs
