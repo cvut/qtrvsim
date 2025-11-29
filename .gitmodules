@@ -1,3 +1,6 @@
 [submodule "riscv-tests"]
 	path = tests/riscv-official/riscv-tests
 	url = https://github.com/riscv-software-src/riscv-tests.git
+[submodule "external/libelfin"]
+	path = external/libelfin
+	url = https://github.com/mortbopet/libelfin
