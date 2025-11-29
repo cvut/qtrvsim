@@ -16,7 +16,7 @@ constexpr int EM_RISCV = 243;
 
 class MemLoader : public elf::loader {
 public:
-    MemLoader(const QString &fname) : file(fname) {
+    MemLoader(const QString &fname) : file(fname), mapped(nullptr), size(0) {
         if (!file.open(QIODevice::ReadOnly | QIODevice::Unbuffered)) {
             throw SIMULATOR_EXCEPTION(
                 Input, QString("Can't open input elf file for reading (") + fname + QString(")"),
@@ -28,6 +28,16 @@ public:
             throw SIMULATOR_EXCEPTION(
                 Input, QString("Can't mmap input elf file (") + fname + QString(")"),
                 file.errorString());
+        }
+    }
+
+    ~MemLoader() override {
+        if (mapped != nullptr) {
+            file.unmap(mapped);
+            mapped = nullptr;
+        }
+        if (file.isOpen()) {
+            file.close();
         }
     }
 

@@ -207,6 +207,8 @@ jobs:
           }
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Ccache
         uses: hendrikmuhs/ccache-action@v1.2.11 # https://github.com/hendrikmuhs/ccache-action/issues/181
