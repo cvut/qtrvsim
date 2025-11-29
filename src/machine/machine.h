@@ -113,36 +113,37 @@ private:
 
     MachineConfig machine_config;
 
-    Registers *regs = nullptr;
-    Memory *mem = nullptr;
+    Box<Registers> regs;
+    Box<Memory> mem;
     /**
      * Memory with loaded program only.
      * It is not used for execution, only for quick
      * simulation reset without repeated ELF file loading.
      */
-    Memory *mem_program_only = nullptr;
-    MemoryDataBus *data_bus = nullptr;
+    Box<Memory> mem_program_only;
+    Box<MemoryDataBus> data_bus;
+    // Peripherals are owned by data_bus
     SerialPort *ser_port = nullptr;
     PeripSpiLed *perip_spi_led = nullptr;
     LcdDisplay *perip_lcd_display = nullptr;
     aclint::AclintMtimer *aclint_mtimer = nullptr;
     aclint::AclintMswi *aclint_mswi = nullptr;
     aclint::AclintSswi *aclint_sswi = nullptr;
-    Cache *cch_program = nullptr;
-    Cache *cch_data = nullptr;
-    Cache *cch_level2 = nullptr;
-    CSR::ControlState *controlst = nullptr;
-    BranchPredictor *predictor = nullptr;
-    Core *cr = nullptr;
+    Box<Cache> cch_level2;
+    Box<Cache> cch_program;
+    Box<Cache> cch_data;
+    Box<CSR::ControlState> controlst;
+    Box<BranchPredictor> predictor;
+    Box<Core> cr;
 
-    QTimer *run_t = nullptr;
+    Box<QTimer> run_t;
     unsigned int time_chunk = { 0 };
 
     // Used to monitor the real CPU frequency
     QElapsedTimer frequency_timer;
     uint64_t last_cycle_count = 0;
 
-    SymbolTable *symtab = nullptr;
+    Box<SymbolTable> symtab;
     Address program_end = 0xffff0000_addr;
     enum Status stat = ST_READY;
     void set_status(enum Status st);

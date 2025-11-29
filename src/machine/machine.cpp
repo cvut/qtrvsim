@@ -11,32 +11,32 @@ using namespace machine;
 Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
     : machine_config(std::move(config))
     , stat(ST_READY) {
-    regs = new Registers();
+    regs.reset(new Registers());
 
     if (load_executable) {
         ProgramLoader program(machine_config.elf());
         this->machine_config.set_simulated_endian(program.get_endian());
-        mem_program_only = new Memory(machine_config.get_simulated_endian());
-        program.to_memory(mem_program_only);
+        mem_program_only.reset(new Memory(machine_config.get_simulated_endian()));
+        program.to_memory(mem_program_only.data());
 
         if (program.get_architecture_type() == ARCH64)
             this->machine_config.set_simulated_xlen(Xlen::_64);
         else
             this->machine_config.set_simulated_xlen(Xlen::_32);
 
-        if (load_symtab) { symtab = program.get_symbol_table(); }
+        if (load_symtab) { symtab.reset(program.get_symbol_table()); }
 
         program_end = program.end();
         if (program.get_executable_entry() != 0x0_addr) {
             regs->write_pc(program.get_executable_entry());
         }
-        mem = new Memory(*mem_program_only);
+        mem.reset(new Memory(*mem_program_only));
     } else {
-        mem = new Memory(machine_config.get_simulated_endian());
+        mem.reset(new Memory(machine_config.get_simulated_endian()));
     }
 
-    data_bus = new MemoryDataBus(machine_config.get_simulated_endian());
-    data_bus->insert_device_to_range(mem, 0x00000000_addr, 0xefffffff_addr, false);
+    data_bus.reset(new MemoryDataBus(machine_config.get_simulated_endian()));
+    data_bus->insert_device_to_range(mem.data(), 0x00000000_addr, 0xefffffff_addr, false);
 
     setup_serial_port();
     setup_perip_spi_led();
@@ -50,44 +50,46 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
     unsigned access_time_burst = machine_config.memory_access_time_burst();
     bool access_enable_burst = machine_config.memory_access_enable_burst();
 
-    cch_level2 = new Cache(
-        data_bus, &machine_config.cache_level2(), access_time_read, access_time_write,
-        access_time_burst, access_enable_burst);
+    cch_level2.reset(new Cache(
+        data_bus.data(), &machine_config.cache_level2(), access_time_read, access_time_write,
+        access_time_burst, access_enable_burst));
     if (machine_config.cache_level2().enabled()) {
         access_time_read = machine_config.memory_access_time_level2();
         access_time_write = machine_config.memory_access_time_level2();
         access_time_burst = 0;
         access_enable_burst = true;
     }
-    cch_program = new Cache(
-        cch_level2, &machine_config.cache_program(), access_time_read, access_time_write,
-        access_time_burst, access_enable_burst);
-    cch_data = new Cache(
-        cch_level2, &machine_config.cache_data(), access_time_read, access_time_write,
-        access_time_burst, access_enable_burst);
+    cch_program.reset(new Cache(
+        cch_level2.data(), &machine_config.cache_program(), access_time_read, access_time_write,
+        access_time_burst, access_enable_burst));
+    cch_data.reset(new Cache(
+        cch_level2.data(), &machine_config.cache_data(), access_time_read, access_time_write,
+        access_time_burst, access_enable_burst));
 
-    controlst
-        = new CSR::ControlState(machine_config.get_simulated_xlen(), machine_config.get_isa_word());
-    predictor = new BranchPredictor(
+    controlst.reset(
+        new CSR::ControlState(machine_config.get_simulated_xlen(), machine_config.get_isa_word()));
+    predictor.reset(new BranchPredictor(
         machine_config.get_bp_enabled(), machine_config.get_bp_type(),
         machine_config.get_bp_init_state(), machine_config.get_bp_btb_bits(),
-        machine_config.get_bp_bhr_bits(), machine_config.get_bp_bht_addr_bits());
+        machine_config.get_bp_bhr_bits(), machine_config.get_bp_bht_addr_bits()));
 
     if (machine_config.pipelined()) {
-        cr = new CorePipelined(
-            regs, predictor, cch_program, cch_data, controlst, machine_config.get_simulated_xlen(),
-            machine_config.get_isa_word(), machine_config.hazard_unit());
+        cr.reset(new CorePipelined(
+            regs.data(), predictor.data(), cch_program.data(), cch_data.data(), controlst.data(),
+            machine_config.get_simulated_xlen(), machine_config.get_isa_word(),
+            machine_config.hazard_unit()));
     } else {
-        cr = new CoreSingle(
-            regs, predictor, cch_program, cch_data, controlst, machine_config.get_simulated_xlen(),
-            machine_config.get_isa_word());
+        cr.reset(new CoreSingle(
+            regs.data(), predictor.data(), cch_program.data(), cch_data.data(), controlst.data(),
+            machine_config.get_simulated_xlen(), machine_config.get_isa_word()));
     }
     connect(
-        this, &Machine::set_interrupt_signal, controlst, &CSR::ControlState::set_interrupt_signal);
+        this, &Machine::set_interrupt_signal, controlst.data(),
+        &CSR::ControlState::set_interrupt_signal);
 
-    run_t = new QTimer(this);
+    run_t.reset(new QTimer(this));
     set_speed(0); // In default run as fast as possible
-    connect(run_t, &QTimer::timeout, this, &Machine::step_timer);
+    connect(run_t.data(), &QTimer::timeout, this, &Machine::step_timer);
 
     for (int i = 0; i < EXCAUSE_COUNT; i++) {
         if (i != EXCAUSE_INT && i != EXCAUSE_BREAK && i != EXCAUSE_HWBREAK) {
@@ -166,30 +168,7 @@ void Machine::setup_aclint_sswi() {
 }
 
 Machine::~Machine() {
-    delete run_t;
-    run_t = nullptr;
-    delete cr;
-    cr = nullptr;
-    delete controlst;
-    controlst = nullptr;
-    delete regs;
-    regs = nullptr;
-    delete mem;
-    mem = nullptr;
-    delete cch_program;
-    cch_program = nullptr;
-    delete cch_data;
-    cch_data = nullptr;
-    delete cch_level2;
-    cch_level2 = nullptr;
-    delete data_bus;
-    data_bus = nullptr;
-    delete mem_program_only;
-    mem_program_only = nullptr;
-    delete symtab;
-    symtab = nullptr;
-    delete predictor;
-    predictor = nullptr;
+    stop_core_clock();
 }
 
 const MachineConfig &Machine::config() {
@@ -206,49 +185,49 @@ void Machine::set_speed(unsigned int ips, unsigned int time_chunk) {
 }
 
 const Registers *Machine::registers() {
-    return regs;
+    return regs.data();
 }
 
 const CSR::ControlState *Machine::control_state() {
-    return controlst;
+    return controlst.data();
 }
 
 const Memory *Machine::memory() {
-    return mem;
+    return mem.data();
 }
 
 Memory *Machine::memory_rw() {
-    return mem;
+    return mem.data();
 }
 
 const Cache *Machine::cache_program() {
-    return cch_program;
+    return cch_program.data();
 }
 
 const Cache *Machine::cache_data() {
-    return cch_data;
+    return cch_data.data();
 }
 
 const Cache *Machine::cache_level2() {
-    return cch_level2;
+    return cch_level2.data();
 }
 
 Cache *Machine::cache_data_rw() {
-    return cch_data;
+    return cch_data.data();
 }
 
 void Machine::cache_sync() {
-    if (cch_program != nullptr) { cch_program->sync(); }
-    if (cch_data != nullptr) { cch_data->sync(); }
-    if (cch_level2 != nullptr) { cch_level2->sync(); }
+    if (!cch_program.isNull()) { cch_program->sync(); }
+    if (!cch_data.isNull()) { cch_data->sync(); }
+    if (!cch_level2.isNull()) { cch_level2->sync(); }
 }
 
 const MemoryDataBus *Machine::memory_data_bus() {
-    return data_bus;
+    return data_bus.data();
 }
 
 MemoryDataBus *Machine::memory_data_bus_rw() {
-    return data_bus;
+    return data_bus.data();
 }
 
 SerialPort *Machine::serial_port() {
@@ -264,8 +243,8 @@ LcdDisplay *Machine::peripheral_lcd_display() {
 }
 
 SymbolTable *Machine::symbol_table_rw(bool create) {
-    if (create && (symtab == nullptr)) { symtab = new SymbolTable; }
-    return symtab;
+    if (create && (symtab.isNull())) { symtab.reset(new SymbolTable); }
+    return symtab.data();
 }
 
 const SymbolTable *Machine::symbol_table(bool create) {
@@ -278,24 +257,24 @@ void Machine::set_symbol(
     uint32_t size,
     unsigned char info,
     unsigned char other) {
-    if (symtab == nullptr) { symtab = new SymbolTable; }
+    if (symtab.isNull()) { symtab.reset(new SymbolTable); }
     symtab->set_symbol(name, value, size, info, other);
 }
 
 const Core *Machine::core() {
-    return cr;
+    return cr.data();
 }
 
 const CoreSingle *Machine::core_singe() {
-    return machine_config.pipelined() ? nullptr : (const CoreSingle *)cr;
+    return machine_config.pipelined() ? nullptr : (const CoreSingle *)cr.data();
 }
 
 const CorePipelined *Machine::core_pipelined() {
-    return machine_config.pipelined() ? (const CorePipelined *)cr : nullptr;
+    return machine_config.pipelined() ? (const CorePipelined *)cr.data() : nullptr;
 }
 
 bool Machine::executable_loaded() const {
-    return (mem_program_only != nullptr);
+    return (!mem_program_only.isNull());
 }
 
 enum Machine::Status Machine::status() {
@@ -404,7 +383,7 @@ void Machine::step_timer() {
 void Machine::restart() {
     pause();
     regs->reset();
-    if (mem_program_only != nullptr) { mem->reset(*mem_program_only); }
+    if (!mem_program_only.isNull()) { mem->reset(*mem_program_only); }
     cch_program->reset();
     cch_data->reset();
     cch_level2->reset();
@@ -419,7 +398,7 @@ void Machine::set_status(enum Status st) {
 }
 
 void Machine::register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler) {
-    if (cr != nullptr) { cr->register_exception_handler(excause, exhandler); }
+    if (!cr.isNull()) { cr->register_exception_handler(excause, exhandler); }
 }
 
 bool Machine::memory_bus_insert_range(
@@ -427,44 +406,44 @@ bool Machine::memory_bus_insert_range(
     Address start_addr,
     Address last_addr,
     bool move_ownership) {
-    if (data_bus == nullptr) { return false; }
+    if (data_bus.isNull()) { return false; }
     return data_bus->insert_device_to_range(mem_acces, start_addr, last_addr, move_ownership);
 }
 
 void Machine::insert_hwbreak(Address address) {
-    if (cr != nullptr) { cr->insert_hwbreak(address); }
+    if (!cr.isNull()) { cr->insert_hwbreak(address); }
 }
 
 void Machine::remove_hwbreak(Address address) {
-    if (cr != nullptr) { cr->remove_hwbreak(address); }
+    if (!cr.isNull()) { cr->remove_hwbreak(address); }
 }
 
 bool Machine::is_hwbreak(Address address) {
-    if (cr != nullptr) { return cr->is_hwbreak(address); }
+    if (!cr.isNull()) { return cr->is_hwbreak(address); }
     return false;
 }
 
 void Machine::set_stop_on_exception(enum ExceptionCause excause, bool value) {
-    if (cr != nullptr) { cr->set_stop_on_exception(excause, value); }
+    if (!cr.isNull()) { cr->set_stop_on_exception(excause, value); }
 }
 
 bool Machine::get_stop_on_exception(enum ExceptionCause excause) const {
-    if (cr != nullptr) { return cr->get_stop_on_exception(excause); }
+    if (!cr.isNull()) { return cr->get_stop_on_exception(excause); }
     return false;
 }
 
 void Machine::set_step_over_exception(enum ExceptionCause excause, bool value) {
-    if (cr != nullptr) { cr->set_step_over_exception(excause, value); }
+    if (!cr.isNull()) { cr->set_step_over_exception(excause, value); }
 }
 
 bool Machine::get_step_over_exception(enum ExceptionCause excause) const {
-    if (cr != nullptr) { return cr->get_step_over_exception(excause); }
+    if (!cr.isNull()) { return cr->get_step_over_exception(excause); }
     return false;
 }
 
 enum ExceptionCause Machine::get_exception_cause() const {
     uint32_t val;
-    if (controlst == nullptr) { return EXCAUSE_NONE; }
+    if (controlst.isNull()) { return EXCAUSE_NONE; }
     val = (controlst->read_internal(CSR::Id::MCAUSE).as_u64());
     if (val & 0xffffffff80000000) {
         return EXCAUSE_INT;

@@ -8,6 +8,11 @@
 #include <stdexcept>
 #include <sys/types.h>
 
+// This is a workaround to ignore libelfin ref-counting cycle.
+#ifdef __SANITIZE_ADDRESS__
+#include <sanitizer/lsan_interface.h>
+#endif
+
 LOG_CATEGORY("machine.ProgramLoader");
 
 using namespace machine;
@@ -31,14 +36,14 @@ public:
         }
     }
 
-    ~MemLoader() override {
+    ~MemLoader() override { close(); }
+
+    void close() {
         if (mapped != nullptr) {
             file.unmap(mapped);
             mapped = nullptr;
         }
-        if (file.isOpen()) {
-            file.close();
-        }
+        if (file.isOpen()) { file.close(); }
     }
 
     const void *load(off_t offset, size_t len) override {
@@ -56,8 +61,17 @@ private:
 
 ProgramLoader::ProgramLoader(const QString &file) {
     try {
+#ifdef __SANITIZE_ADDRESS__
+        __lsan_disable();
+#endif
         elf_file = elf::elf(std::make_shared<MemLoader>(file));
+#ifdef __SANITIZE_ADDRESS__
+        __lsan_enable();
+#endif
     } catch (const std::exception &e) {
+#ifdef __SANITIZE_ADDRESS__
+        __lsan_enable();
+#endif
         throw SIMULATOR_EXCEPTION(Input, "Elf library initialization failed", e.what());
     }
 
@@ -94,7 +108,14 @@ ProgramLoader::ProgramLoader(const QString &file) {
 
 ProgramLoader::ProgramLoader(const char *file) : ProgramLoader(QString::fromLocal8Bit(file)) {}
 
-ProgramLoader::~ProgramLoader() {}
+ProgramLoader::~ProgramLoader() {
+    // This is a fix for upstream issue where libelf creates a ref-counting cycle.
+    auto loader = elf_file.get_loader();
+    if (loader) {
+        auto mem_loader = std::dynamic_pointer_cast<MemLoader>(loader);
+        if (mem_loader) { mem_loader->close(); }
+    }
+}
 
 void ProgramLoader::to_memory(Memory *mem) {
     for (const auto &seg : load_segments) {
