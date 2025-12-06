@@ -55,16 +55,23 @@ namespace machine { namespace CSR {
         }
     }
 
-    RegisterValue ControlState::read(Address address) const {
-        // Only machine level privilege is supported so no checking is needed.
+    RegisterValue ControlState::read(Address address, PrivilegeLevel current_priv) const {
         size_t reg_id = get_register_internal_id(address);
+        PrivilegeLevel required = address.get_privilege_level();
+        if (current_priv < required) {
+            throw SIMULATOR_EXCEPTION(
+                UnsupportedInstruction,
+                QString("CSR address %1 not accessible at current privilege level.")
+                    .arg(address.data),
+                "");
+        }
         RegisterValue value = register_data[reg_id];
         DEBUG("Read CSR[%u] == 0x%" PRIx64, address.data, value.as_u64());
         emit read_signal(reg_id, value);
         return value;
     }
 
-    void ControlState::write(Address address, RegisterValue value) {
+    void ControlState::write(Address address, RegisterValue value, PrivilegeLevel current_priv) {
         DEBUG(
             "Write CSR[%u/%zu] <== 0x%zu", address.data, get_register_internal_id(address),
             value.as_u64());
@@ -74,6 +81,15 @@ namespace machine { namespace CSR {
                 UnsupportedInstruction,
                 QString("CSR address %1 is not writable.").arg(address.data), "");
         }
+
+        PrivilegeLevel required = address.get_privilege_level();
+        if (current_priv < required) {
+            throw SIMULATOR_EXCEPTION(
+                UnsupportedInstruction,
+                QString("CSR address %1 not writable at current privilege level.").arg(address.data),
+                "");
+        }
+
         write_internal(get_register_internal_id(address), value);
     }
 
@@ -102,6 +118,27 @@ namespace machine { namespace CSR {
         reg = val;
         register_data[Id::CYCLE] = val;
         write_signal(Id::CYCLE, register_data[Id::CYCLE]);
+    }
+
+    void ControlState::sstatus_wlrl_write_handler(
+        const RegisterDesc &desc,
+        RegisterValue &reg,
+        RegisterValue val) {
+        uint64_t s_mask
+            = Field::mstatus::SIE.mask() | Field::mstatus::SPIE.mask() | Field::mstatus::SPP.mask();
+
+        if (xlen == Xlen::_64) {
+            s_mask |= Field::mstatus::UXL.mask();
+            s_mask |= Field::mstatus::SXL.mask();
+        }
+        uint64_t write_val = val.as_u64() & desc.write_mask.as_u64();
+        uint64_t mstatus_val = register_data[Id::MSTATUS].as_u64();
+        mstatus_val = (mstatus_val & ~s_mask) | (write_val & s_mask);
+        register_data[Id::MSTATUS] = mstatus_val;
+        uint64_t new_sstatus = mstatus_val & s_mask;
+        if (xlen == Xlen::_32) new_sstatus &= 0xffffffff;
+        reg = new_sstatus;
+        emit write_signal(Id::MSTATUS, register_data[Id::MSTATUS]);
     }
 
     bool ControlState::operator==(const ControlState &other) const {
@@ -169,17 +206,52 @@ namespace machine { namespace CSR {
         emit write_signal(reg_id, reg);
     }
 
-    PrivilegeLevel ControlState::exception_return(enum PrivilegeLevel act_privlev) {
+    PrivilegeLevel ControlState::exception_return(
+        enum PrivilegeLevel act_privlev,
+        enum PrivilegeLevel xret_privlev) {
         size_t reg_id = Id::MSTATUS;
         RegisterValue &reg = register_data[reg_id];
-        PrivilegeLevel restored_privlev;
-        Q_UNUSED(act_privlev)
+        PrivilegeLevel restored_privlev = PrivilegeLevel::MACHINE;
+        if (xret_privlev == PrivilegeLevel::MACHINE) {
+            // MRET semantics:
+            //   MIE  <- MPIE
+            //   MPIE <- 1
+            //   restored_privlev <- MPP
+            //   MPP  <- 0
+            write_field(Field::mstatus::MIE, read_field(Field::mstatus::MPIE).as_u32());
+            write_field(Field::mstatus::MPIE, (uint64_t)1);
+            uint32_t raw_mpp
+                = static_cast<uint32_t>(read_field(Field::mstatus::MPP).as_u32()) & 0x3;
+            switch (raw_mpp) {
+            case 0: restored_privlev = PrivilegeLevel::UNPRIVILEGED; break;
+            case 1: restored_privlev = PrivilegeLevel::SUPERVISOR; break;
+            case 2: restored_privlev = PrivilegeLevel::HYPERVISOR; break;
+            case 3: restored_privlev = PrivilegeLevel::MACHINE; break;
+            default: restored_privlev = PrivilegeLevel::UNPRIVILEGED; break;
+            }
+            write_field(Field::mstatus::MPP, (uint64_t)0); // clear MPP per spec
+        } else if (xret_privlev == PrivilegeLevel::SUPERVISOR) {
+            // SRET semantics:
+            //   SIE  <- SPIE
+            //   SPIE <- 1
+            //   restored_privlev <- SPP
+            //   SPP  <- 0
+            write_field(Field::mstatus::SIE, read_field(Field::mstatus::SPIE).as_u32());
+            write_field(Field::mstatus::SPIE, (uint64_t)1);
+            uint32_t raw_spp
+                = static_cast<uint32_t>(read_field(Field::mstatus::SPP).as_u32()) & 0x1;
+            restored_privlev
+                = (raw_spp == 1) ? PrivilegeLevel::SUPERVISOR : PrivilegeLevel::UNPRIVILEGED;
+            write_field(Field::mstatus::SPP, (uint64_t)0);
+        } else {
+            restored_privlev = PrivilegeLevel::UNPRIVILEGED;
+        }
 
-        write_field(Field::mstatus::MIE, read_field(Field::mstatus::MPIE).as_u32());
-        write_field(Field::mstatus::MPIE, (uint64_t)1);
-
-        restored_privlev = static_cast<PrivilegeLevel>(read_field(Field::mstatus::MPP).as_u32());
-        write_field(Field::mstatus::MPP, (uint64_t)0);
+        // If the instruction was executed in M-mode and the restored privilege is less-privileged
+        // than M, clear MPRV per the privileged spec.
+        if (act_privlev == PrivilegeLevel::MACHINE && restored_privlev != PrivilegeLevel::MACHINE) {
+            write_field(Field::mstatus::MPRV, (uint64_t)0);
+        }
 
         emit write_signal(reg_id, reg);
 
