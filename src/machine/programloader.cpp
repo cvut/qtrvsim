@@ -10,7 +10,7 @@
 
 // This is a workaround to ignore libelfin ref-counting cycle.
 #ifdef __SANITIZE_ADDRESS__
-#include <sanitizer/lsan_interface.h>
+    #include <sanitizer/lsan_interface.h>
 #endif
 
 LOG_CATEGORY("machine.ProgramLoader");
