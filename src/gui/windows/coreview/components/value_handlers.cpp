@@ -50,7 +50,7 @@ RegIdValue::RegIdValue(svgscene::SimpleTextItem *element, const machine::Registe
     , data(data) {}
 
 void RegIdValue::update() {
-    element->setText(QString("%1").arg(data, 2, 10, QChar('0')));
+    element->setText(QString("%1").arg(int(data), 2, 10, QChar('0')));
 }
 
 DebugValue::DebugValue(SimpleTextItem *element, const unsigned int &data)
