@@ -5,6 +5,10 @@ on: [ push, workflow_dispatch, pull_request, merge_group ]
 jobs:
   build:
     name: ${{ matrix.config.name }}
+    env:
+      QtLatestVersion: &QtLatest "6.9.3"
+      QtBrewVersion: &QtBrew "6.9.3"
+      QtMinimalVersion: &QtMinimal "5.12.0"
     needs: [ build-riscv-tests, build-stud-support-tests ]
     # Avoid duplicate builds on PR from the same repository
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
@@ -13,54 +17,88 @@ jobs:
       fail-fast: false
       matrix:
         config:
+          # Linux testing
           - {
-            name: "Ubuntu Latest GCC",
+            name: "Ubuntu latest (GCC) + packaged Qt6",
             os: ubuntu-latest,
             build_type: "Debug",
             cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
             qt_version: "native",
-            qt_install_command: "sudo apt-get update && sudo apt-get install qtbase5-dev",
-            # Apt is significantly faster that aqt.
+            qt_install_command: "sudo apt-get update && sudo apt-get install qt6-base-dev"
           }
           - {
-            name: "Ubuntu Latest GCC + Qt6",
+            name: "Ubuntu latest (GCC) + packaged Qt5",
             os: ubuntu-latest,
             build_type: "Debug",
             cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
-            qt_version: "6.2.1"
+            qt_version: "native",
+            qt_install_command: "sudo apt-get update && sudo apt-get install qtbase5-dev"
           }
           - {
-            name: "macOS AMD64 Clang",
-            os: macos-13,
+            name: "Ubuntu latest (GCC) + latest Qt6",
+            os: ubuntu-latest,
             build_type: "Debug",
-            cc: "clang", cxx: "clang++", build_system: "Unix Makefiles",
-            qt_version: "5.15.2",
-            # Cached aqt is faster that brew.
+            cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
+            qt_version: *QtLatest
           }
           - {
-            name: "macOS ARM Clang + Qt6",
+            name: "Ubuntu oldest (GCC) + minimal supported Qt",
+            os: ubuntu-22.04,
+            build_type: "Debug",
+            cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
+            qt_version: *QtMinimal
+          }
+          # macOS testing
+          - {
+            name: "macOS latest ARM64 (Clang) + Qt6",
             os: macos-latest,
             build_type: "Debug",
             cc: "clang", cxx: "clang++", build_system: "Unix Makefiles",
-            qt_version: "6.6.3",
+            qt_version: *QtBrew
             # Cached aqt is faster that brew.
           }
           - {
-            name: "Windows 2022 MinGW",
-            os: windows-2022,
+            name: "macOS latest AMD64 (Clang) + Qt6",
+            os: macos-15-intel,
             build_type: "Debug",
-            cc: "gcc", cxx: "g++", build_system: "MinGW Makefiles",
-            # Older Qt releases do not have 64bit mingw release
-            qt_version: "5.12.9", qt_arch: "win64_mingw73"
+            cc: "clang", cxx: "clang++", build_system: "Unix Makefiles",
+            qt_version: *QtBrew
+            # Cached aqt is faster that brew.
           }
           - {
-            name: "Windows 2022 Clang + Qt6",
+            name: "macOS oldest AMD64 (Clang) + minimal supported Qt",
+            os: macos-15-intel,
+            build_type: "Debug",
+            cc: "clang", cxx: "clang++", build_system: "Unix Makefiles",
+            qt_version: *QtMinimal
+            # Cached aqt is faster that brew.
+          }
+          # Windows testing
+          - {
+            name: "Windows latest (Clang) + Qt6",
+            os: windows-latest,
+            build_type: "Debug",
+            # on Windows, msbuild does not support Clang with GNU-like interface
+            #  and NMake does not support parallel builds
+            cc: "clang", cxx: "clang++", build_system: "Ninja",
+            qt_version: *QtLatest, qt_arch: "win64_msvc2022_64"
+          }
+          - {
+            name: "Windows oldest (Clang) + minimal supported Qt",
             os: windows-2022,
             build_type: "Debug",
             # on Windows, msbuild does not support Clang with GNU-like interface
             #  and NMake does not support parallel builds
             cc: "clang", cxx: "clang++", build_system: "Ninja",
-            qt_version: "6.7.0", qt_arch: "win64_msvc2019_64"
+            qt_version: *QtMinimal, qt_arch: "win64_msvc2017_64"
+          }
+          - {
+            name: "Windows 2022 (MinGW) + Qt5",
+            os: windows-2022,
+            build_type: "Debug",
+            cc: "gcc", cxx: "g++", build_system: "Ninja",
+            # Older Qt releases do not have 64bit mingw release
+            qt_version: "5.12.9", qt_arch: "win64_mingw73"
           }
 
 
@@ -185,7 +223,7 @@ jobs:
       - name: Store created artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: target-${{ runner.os }}-qt${{ matrix.config.qt_version }}
+          name: target-${{ runner.name }}
           path: ${{ github.workspace }}/build/target
 
   build-emscripten:
