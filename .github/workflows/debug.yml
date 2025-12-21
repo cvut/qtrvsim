@@ -6,7 +6,7 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     env:
-      QtLatestVersion: &QtLatest "6.9.3"
+      QtLatestVersion: &QtLatest "6.10.1"
       QtBrewVersion: &QtBrew "6.9.3"
       QtMinimalVersion: &QtMinimal "5.12.0"
     needs: [ build-riscv-tests, build-stud-support-tests ]
