@@ -18,6 +18,14 @@ public:
         CELLSIZE_WORD,
     };
 
+    enum MemoryAccessAtLevel {
+        MEM_ACC_AS_CPU = 0,
+        MEM_ACC_VIRT_ADDR = 1,
+        MEM_ACC_PHYS_ADDR = 2,
+        MEM_ACC_PHYS_ADDR_SKIP_CACHES = 3,
+        MEM_ACC_AS_MACHINE = 4,
+    };
+
     explicit MemoryModel(QObject *parent);
     [[nodiscard]] int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     [[nodiscard]] int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -61,7 +69,6 @@ public:
         }
         return true;
     }
-
 public slots:
     void setup(machine::Machine *machine);
     void set_cell_size(int index);
@@ -75,6 +82,8 @@ signals:
 private:
     [[nodiscard]] const machine::FrontendMemory *mem_access() const;
     [[nodiscard]] machine::FrontendMemory *mem_access_rw() const;
+    [[nodiscard]] const machine::FrontendMemory *mem_access_phys() const;
+    [[nodiscard]] machine::FrontendMemory *mem_access_phys_rw() const;
     enum MemoryCellSize cell_size;
     unsigned int cells_per_row;
     machine::Address index0_offset;
@@ -82,7 +91,7 @@ private:
     machine::Machine *machine;
     uint32_t memory_change_counter;
     uint32_t cache_data_change_counter;
-    int access_through_cache;
+    int mem_access_kind;
 };
 
 #endif // MEMORYMODEL_H

@@ -19,7 +19,7 @@ MemoryDataBus::~MemoryDataBus() {
 }
 
 WriteResult
-MemoryDataBus::write(Address destination, const void *source, size_t size, WriteOptions options) {
+MemoryDataBus::write(AddressWithMode destination, const void *source, size_t size, WriteOptions options) {
     return repeat_access_until_completed<WriteResult>(
         destination, source, size, options,
         [this](Address dst, const void *src, size_t s, WriteOptions opt) -> WriteResult {
@@ -48,7 +48,7 @@ WriteResult MemoryDataBus::write_single(
 }
 
 ReadResult
-MemoryDataBus::read(void *destination, Address source, size_t size, ReadOptions options) const {
+MemoryDataBus::read(void *destination, AddressWithMode source, size_t size, ReadOptions options) const {
     return repeat_access_until_completed<ReadResult>(
         destination, source, size, options,
         [this](void *dst, Address src, size_t s, ReadOptions opt) -> ReadResult {
@@ -190,13 +190,13 @@ TrivialBus::TrivialBus(BackendMemory *backend_memory)
     , device(backend_memory) {}
 
 WriteResult
-TrivialBus::write(Address destination, const void *source, size_t size, WriteOptions options) {
+TrivialBus::write(AddressWithMode destination, const void *source, size_t size, WriteOptions options) {
     change_counter += 1; // Counter is mandatory by the frontend interface.
     return device->write(destination.get_raw(), source, size, options);
 }
 
 ReadResult
-TrivialBus::read(void *destination, Address source, size_t size, ReadOptions options) const {
+TrivialBus::read(void *destination, AddressWithMode source, size_t size, ReadOptions options) const {
     return device->read(destination, source.get_raw(), size, options);
 }
 

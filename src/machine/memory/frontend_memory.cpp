@@ -1,42 +1,43 @@
 #include "memory/frontend_memory.h"
 
 #include "common/endian.h"
+#include "tlb/tlb.h"
 
 namespace machine {
 
-bool FrontendMemory::write_u8(Address address, uint8_t value, AccessEffects type) {
+bool FrontendMemory::write_u8(AddressWithMode address, uint8_t value, AccessEffects type) {
     return write_generic<typeof(value)>(address, value, type);
 }
 
-bool FrontendMemory::write_u16(Address address, uint16_t value, AccessEffects type) {
+bool FrontendMemory::write_u16(AddressWithMode address, uint16_t value, AccessEffects type) {
     return write_generic<typeof(value)>(address, value, type);
 }
 
-bool FrontendMemory::write_u32(Address address, uint32_t value, AccessEffects type) {
+bool FrontendMemory::write_u32(AddressWithMode address, uint32_t value, AccessEffects type) {
     return write_generic<typeof(value)>(address, value, type);
 }
 
-bool FrontendMemory::write_u64(Address address, uint64_t value, AccessEffects type) {
+bool FrontendMemory::write_u64(AddressWithMode address, uint64_t value, AccessEffects type) {
     return write_generic<typeof(value)>(address, value, type);
 }
 
-uint8_t FrontendMemory::read_u8(Address address, AccessEffects type) const {
+uint8_t FrontendMemory::read_u8(AddressWithMode address, AccessEffects type) const {
     return read_generic<uint8_t>(address, type);
 }
 
-uint16_t FrontendMemory::read_u16(Address address, AccessEffects type) const {
+uint16_t FrontendMemory::read_u16(AddressWithMode address, AccessEffects type) const {
     return read_generic<uint16_t>(address, type);
 }
 
-uint32_t FrontendMemory::read_u32(Address address, AccessEffects type) const {
+uint32_t FrontendMemory::read_u32(AddressWithMode address, AccessEffects type) const {
     return read_generic<uint32_t>(address, type);
 }
 
-uint64_t FrontendMemory::read_u64(Address address, AccessEffects type) const {
+uint64_t FrontendMemory::read_u64(AddressWithMode address, AccessEffects type) const {
     return read_generic<uint64_t>(address, type);
 }
 
-void FrontendMemory::write_ctl(enum AccessControl ctl, Address offset, RegisterValue value) {
+void FrontendMemory::write_ctl(enum AccessControl ctl, AddressWithMode offset, RegisterValue value) {
     switch (ctl) {
     case AC_NONE: {
         break;
@@ -69,7 +70,7 @@ void FrontendMemory::write_ctl(enum AccessControl ctl, Address offset, RegisterV
     }
 }
 
-RegisterValue FrontendMemory::read_ctl(enum AccessControl ctl, Address address) const {
+RegisterValue FrontendMemory::read_ctl(enum AccessControl ctl, AddressWithMode address) const {
     switch (ctl) {
     case AC_NONE: return 0;
     case AC_I8: return (int8_t)read_u8(address);
@@ -96,7 +97,7 @@ LocationStatus FrontendMemory::location_status(Address address) const {
 }
 
 template<typename T>
-T FrontendMemory::read_generic(Address address, AccessEffects type) const {
+T FrontendMemory::read_generic(AddressWithMode address, AccessEffects type) const {
     T value;
     read(&value, address, sizeof(T), { .type = type });
     // When cross-simulating (BIG simulator on LITTLE host machine and vice
@@ -126,7 +127,7 @@ T FrontendMemory::read_generic(Address address, AccessEffects type) const {
 }
 
 template<typename T>
-bool FrontendMemory::write_generic(Address address, const T value, AccessEffects type) {
+bool FrontendMemory::write_generic(AddressWithMode address, const T value, AccessEffects type) {
     // See example in read_generic for byteswap explanation.
     const T swapped_value = byteswap_if(value, this->simulated_machine_endian != NATIVE_ENDIAN);
     return write(address, &swapped_value, sizeof(T), { .type = type }).changed;

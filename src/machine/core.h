@@ -58,6 +58,14 @@ public:
     bool get_stop_on_exception(enum ExceptionCause excause) const;
     void set_step_over_exception(enum ExceptionCause excause, bool value);
     bool get_step_over_exception(enum ExceptionCause excause) const;
+    void set_current_privilege(CSR::PrivilegeLevel privilege);
+    CSR::PrivilegeLevel get_current_privilege() const;
+    static inline AccessMode make_access_mode(const CoreState &st) {
+        CSR::PrivilegeLevel priv = st.current_privilege();
+        uint16_t asid = st.current_asid();
+        bool uncached = false;
+        return AccessMode::pack(asid, priv, uncached);
+    }
 
     /**
      * Abstracts XLEN from code flow. XLEN core will obtain XLEN value from register value.
@@ -108,8 +116,8 @@ protected:
         Address mem_ref_addr);
 
     const Xlen xlen;
-    const InstructionFlags check_inst_flags_val;
-    const InstructionFlags check_inst_flags_mask;
+    InstructionFlags check_inst_flags_val;
+    InstructionFlags check_inst_flags_mask;
     BORROWED Registers *const regs;
     BORROWED CSR::ControlState *const control_state;
     BORROWED BranchPredictor *const predictor;

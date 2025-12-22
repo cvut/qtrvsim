@@ -60,6 +60,11 @@ enum InstructionFlags : unsigned {
     // TODO do we want to add those signals to the visualization?
 
     IMF_RV64 = 1L << 24, /**< Mark instructions which are available in 64-bit mode only. */
+
+    /* Privilege requirement flags */
+    IMF_PRIV_S = 1L << 25, /**< Requires at least Supervisor privilege */
+    IMF_PRIV_H = 1L << 26, /**< Requires at least Hypervisor privilege */
+    IMF_PRIV_M = 1L << 27, /**< Requires Machine privilege */
 };
 
 /**

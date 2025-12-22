@@ -57,6 +57,7 @@ void Core::reset() {
     state.cycle_count = 0;
     state.stall_count = 0;
     do_reset();
+    set_current_privilege(CSR::PrivilegeLevel::MACHINE);
 }
 
 unsigned Core::get_cycle_count() const {
@@ -124,6 +125,29 @@ Xlen Core::get_xlen() const {
     return xlen;
 }
 
+void Core::set_current_privilege(CSR::PrivilegeLevel privilege) {
+    state.set_current_privilege(privilege);
+    const unsigned PRIV_BITS = unsigned(IMF_PRIV_M) | unsigned(IMF_PRIV_H) | unsigned(IMF_PRIV_S);
+
+    InstructionFlags base_mask = InstructionFlags(unsigned(check_inst_flags_mask) & ~PRIV_BITS);
+    InstructionFlags base_val = InstructionFlags(unsigned(check_inst_flags_val) & ~PRIV_BITS);
+
+    unsigned allowed_priv = 0;
+    if (privilege >= CSR::PrivilegeLevel::SUPERVISOR) { allowed_priv |= unsigned(IMF_PRIV_S); }
+    if (privilege >= CSR::PrivilegeLevel::HYPERVISOR) { allowed_priv |= unsigned(IMF_PRIV_H); }
+    if (privilege >= CSR::PrivilegeLevel::MACHINE) { allowed_priv |= unsigned(IMF_PRIV_M); }
+    unsigned disallowed_priv = (PRIV_BITS & ~allowed_priv);
+    InstructionFlags new_mask = InstructionFlags(unsigned(base_mask) | disallowed_priv);
+    InstructionFlags new_val = base_val;
+
+    check_inst_flags_mask = new_mask;
+    check_inst_flags_val = new_val;
+}
+
+CSR::PrivilegeLevel Core::get_current_privilege() const {
+    return state.current_privilege();
+};
+
 void Core::register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler) {
     if (excause == EXCAUSE_NONE) {
         ex_default_handler.reset(exhandler);
@@ -155,7 +179,8 @@ bool Core::handle_exception(
         if (control_state->read_internal(CSR::Id::MTVEC) != 0
             && !get_step_over_exception(excause)) {
             control_state->exception_initiate(
-                CSR::PrivilegeLevel::MACHINE, CSR::PrivilegeLevel::MACHINE);
+                get_current_privilege(), CSR::PrivilegeLevel::MACHINE);
+            set_current_privilege(CSR::PrivilegeLevel::MACHINE);
             regs->write_pc(control_state->exception_pc_address());
         }
     }
@@ -276,7 +301,7 @@ enum ExceptionCause Core::memory_special(
 FetchState Core::fetch(PCInterstage pc, bool skip_break) {
     if (pc.stop_if) { return {}; }
 
-    const Address inst_addr = Address(regs->read_pc());
+    const AddressWithMode inst_addr = AddressWithMode(regs->read_pc(), make_access_mode(state));
     const Instruction inst(mem_program->read_u32(inst_addr));
     ExceptionCause excause = EXCAUSE_NONE;
 
@@ -307,7 +332,18 @@ DecodeState Core::decode(const FetchInterstage &dt) {
     ExceptionCause excause = dt.excause;
 
     dt.inst.flags_alu_op_mem_ctl(flags, alu_op, mem_ctl);
-
+    CSR::PrivilegeLevel inst_xret_priv = CSR::PrivilegeLevel::UNPRIVILEGED;
+    if (flags & IMF_XRET) {
+        if (flags & IMF_PRIV_M) {
+            inst_xret_priv = CSR::PrivilegeLevel::MACHINE;
+        } else if (flags & IMF_PRIV_H) {
+            inst_xret_priv = CSR::PrivilegeLevel::HYPERVISOR;
+        } else if (flags & IMF_PRIV_S) {
+            inst_xret_priv = CSR::PrivilegeLevel::SUPERVISOR;
+        } else {
+            inst_xret_priv = CSR::PrivilegeLevel::UNPRIVILEGED;
+        }
+    }
     if ((flags ^ check_inst_flags_val) & check_inst_flags_mask) { excause = EXCAUSE_INSN_ILLEGAL; }
 
     RegisterId num_rs = (flags & (IMF_ALU_REQ_RS | IMF_ALU_RS_ID)) ? dt.inst.rs() : 0;
@@ -322,8 +358,9 @@ DecodeState Core::decode(const FetchInterstage &dt) {
     const bool regwrite = flags & IMF_REGWRITE;
 
     CSR::Address csr_address = (flags & IMF_CSR) ? dt.inst.csr_address() : CSR::Address(0);
-    RegisterValue csr_read_val
-        = ((control_state != nullptr && (flags & IMF_CSR))) ? control_state->read(csr_address) : 0;
+    RegisterValue csr_read_val = ((control_state != nullptr && (flags & IMF_CSR)))
+                                     ? control_state->read(csr_address, get_current_privilege())
+                                     : 0;
     bool csr_write = (flags & IMF_CSR) && (!(flags & IMF_CSR_TO_ALU) || (num_rs != 0));
 
     if ((flags & IMF_EXCEPTION) && (excause == EXCAUSE_NONE)) {
@@ -383,6 +420,7 @@ DecodeState Core::decode(const FetchInterstage &dt) {
                                 .csr_to_alu = bool(flags & IMF_CSR_TO_ALU),
                                 .csr_write = csr_write,
                                 .xret = bool(flags & IMF_XRET),
+                                .xret_privlev = inst_xret_priv,
                                 .insert_stall_before = bool(flags & IMF_CSR) } };
 }
 
@@ -453,12 +491,13 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
                  .csr = dt.csr,
                  .csr_write = dt.csr_write,
                  .xret = dt.xret,
+                 .xret_privlev = dt.xret_privlev,
              } };
 }
 
 MemoryState Core::memory(const ExecuteInterstage &dt) {
     RegisterValue towrite_val = dt.alu_val;
-    auto mem_addr = Address(get_xlen_from_reg(dt.alu_val));
+    auto mem_addr = AddressWithMode(get_xlen_from_reg(dt.alu_val), make_access_mode(state));
     bool memread = dt.memread;
     bool memwrite = dt.memwrite;
     bool regwrite = dt.regwrite;
@@ -513,11 +552,13 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
     if (control_state != nullptr && dt.is_valid && dt.excause == EXCAUSE_NONE) {
         control_state->increment_internal(CSR::Id::MINSTRET, 1);
         if (dt.csr_write) {
-            control_state->write(dt.csr_address, dt.alu_val);
+            control_state->write(dt.csr_address, dt.alu_val, get_current_privilege());
             csr_written = true;
         }
         if (dt.xret) {
-            control_state->exception_return(CSR::PrivilegeLevel::MACHINE);
+            CSR::PrivilegeLevel restored
+                = control_state->exception_return(get_current_privilege(), dt.xret_privlev);
+            set_current_privilege(restored);
             if (this->xlen == Xlen::_32)
                 computed_next_inst_addr
                     = Address(control_state->read_internal(CSR::Id::MEPC).as_u32());
@@ -566,6 +607,7 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
                  .regwrite = regwrite,
                  .is_valid = dt.is_valid,
                  .csr_written = csr_written,
+                 .xret_privlev = dt.xret_privlev,
              } };
 }
 

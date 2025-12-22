@@ -2,6 +2,7 @@
 #define FRONTEND_MEMORY_H
 
 #include "common/endian.h"
+#include "csr/address.h"
 #include "machinedefs.h"
 #include "memory/address.h"
 #include "memory/memory_utils.h"
@@ -10,6 +11,8 @@
 
 #include <QObject>
 #include <cstdint>
+
+#include "address_with_mode.h"
 
 // Shortcut for enum class values, type is obvious from context.
 using ae = machine::AccessEffects;
@@ -51,15 +54,15 @@ public:
      */
     explicit FrontendMemory(Endian simulated_endian);
 
-    bool write_u8(Address address, uint8_t value, AccessEffects type = ae::REGULAR);
-    bool write_u16(Address address, uint16_t value, AccessEffects type = ae::REGULAR);
-    bool write_u32(Address address, uint32_t value, AccessEffects type = ae::REGULAR);
-    bool write_u64(Address address, uint64_t value, AccessEffects type = ae::REGULAR);
+    bool write_u8(AddressWithMode address, uint8_t value, AccessEffects type = ae::REGULAR);
+    bool write_u16(AddressWithMode address, uint16_t value, AccessEffects type = ae::REGULAR);
+    bool write_u32(AddressWithMode address, uint32_t value, AccessEffects type = ae::REGULAR);
+    bool write_u64(AddressWithMode address, uint64_t value, AccessEffects type = ae::REGULAR);
 
-    [[nodiscard]] uint8_t read_u8(Address address, AccessEffects type = ae::REGULAR) const;
-    [[nodiscard]] uint16_t read_u16(Address address, AccessEffects type = ae::REGULAR) const;
-    [[nodiscard]] uint32_t read_u32(Address address, AccessEffects type = ae::REGULAR) const;
-    [[nodiscard]] uint64_t read_u64(Address address, AccessEffects type = ae::REGULAR) const;
+    [[nodiscard]] uint8_t read_u8(AddressWithMode address, AccessEffects type = ae::REGULAR) const;
+    [[nodiscard]] uint16_t read_u16(AddressWithMode address, AccessEffects type = ae::REGULAR) const;
+    [[nodiscard]] uint32_t read_u32(AddressWithMode address, AccessEffects type = ae::REGULAR) const;
+    [[nodiscard]] uint64_t read_u64(AddressWithMode address, AccessEffects type = ae::REGULAR) const;
 
     /**
      * Store with size specified by the CPU control unit.
@@ -68,7 +71,7 @@ public:
      * REGULAR.
      * @param control_signal    CPU control unit signal
      */
-    void write_ctl(AccessControl control_signal, Address destination, RegisterValue value);
+    void write_ctl(AccessControl control_signal, AddressWithMode destination, RegisterValue value);
 
     /**
      * Read with size specified by the CPU control unit.
@@ -77,12 +80,11 @@ public:
      * ae::REGULAR.
      * @param control_signal    CPU control unit signal
      */
-    [[nodiscard]] RegisterValue read_ctl(enum AccessControl ctl, Address source) const;
+    [[nodiscard]] RegisterValue read_ctl(enum AccessControl control_signal, AddressWithMode source) const;
 
     virtual void sync();
     [[nodiscard]] virtual LocationStatus location_status(Address address) const;
     [[nodiscard]] virtual uint32_t get_change_counter() const = 0;
-
     /**
      * Write byte sequence to memory
      *
@@ -92,7 +94,7 @@ public:
      * @return              true when memory before and after write differs
      */
     virtual WriteResult
-    write(Address destination, const void *source, size_t size, WriteOptions options)
+    write(AddressWithMode destination, const void *source, size_t size, WriteOptions options)
         = 0;
 
     /**
@@ -105,7 +107,7 @@ public:
      *                      definition
      */
     virtual ReadResult
-    read(void *destination, Address source, size_t size, ReadOptions options) const
+    read(void *destination, AddressWithMode source, size_t size, ReadOptions options) const
         = 0;
 
     /**
@@ -143,7 +145,7 @@ private:
      * @return              requested data with type T
      */
     template<typename T>
-    T read_generic(Address address, AccessEffects type) const;
+    T read_generic(AddressWithMode address, AccessEffects type) const;
 
     /**
      * Write to any type from memory
@@ -160,7 +162,7 @@ private:
      * @return              true when memory before and after write differs
      */
     template<typename T>
-    bool write_generic(Address address, T value, AccessEffects type);
+    bool write_generic(AddressWithMode address, T value, AccessEffects type);
 };
 
 } // namespace machine
