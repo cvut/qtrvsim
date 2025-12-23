@@ -112,6 +112,8 @@ public slots:
     // Actions - help
     void about_program();
     void about_qt();
+    // Actions - webeval
+    void webeval_config();
     // Actions - execution speed
     void set_speed();
     // Machine signals
@@ -128,6 +130,8 @@ public slots:
         const QString &hint);
     // Update data
     void update_core_frequency(double frequency);
+    // Public accessors
+    SrcEditor *get_current_editor() const;
 
 protected:
     void closeEvent(QCloseEvent *cancel) override;
