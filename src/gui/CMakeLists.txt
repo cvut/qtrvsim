@@ -45,6 +45,7 @@ set(gui_lib_SOURCES
         windows/registers/registersdock.cpp
         dialogs/savechanged/savechangeddialog.cpp
         dialogs/webeval/webevalconfigdialog.cpp
+        windows/webeval/webevaldock.cpp
         windows/editor/srceditor.cpp
         statictable.cpp
         windows/terminal/terminaldock.cpp
@@ -93,6 +94,7 @@ set(gui_lib_HEADERS
         windows/registers/registersdock.h
         dialogs/savechanged/savechangeddialog.h
         dialogs/webeval/webevalconfigdialog.h
+        windows/webeval/webevaldock.h
         windows/editor/srceditor.h
         statictable.h
         windows/terminal/terminaldock.h
