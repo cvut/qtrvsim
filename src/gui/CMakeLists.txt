@@ -47,6 +47,7 @@ set(gui_SOURCES
         dialogs/savechanged/savechangeddialog.cpp
         dialogs/webeval/webevalconfigdialog.cpp
         windows/webeval/webevaldock.cpp
+        windows/webeval/taskdescriptiondock.cpp
         windows/editor/srceditor.cpp
         statictable.cpp
         windows/terminal/terminaldock.cpp
@@ -96,6 +97,7 @@ set(gui_HEADERS
         dialogs/savechanged/savechangeddialog.h
         dialogs/webeval/webevalconfigdialog.h
         windows/webeval/webevaldock.h
+        windows/webeval/taskdescriptiondock.h
         windows/editor/srceditor.h
         statictable.h
         windows/terminal/terminaldock.h

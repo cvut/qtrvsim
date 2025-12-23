@@ -133,8 +133,10 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     lcd_display.reset(new LcdDisplayDock(this, settings));
     lcd_display->hide();
     webeval.reset(new WebEvalDock(this, settings));
-    webeval->setup(this);
     webeval->hide();
+    task_description.reset(new TaskDescriptionDock(this));
+    task_description->hide();
+    webeval->setup(this, task_description.data());
     csrdock = new CsrDock(this);
     csrdock->hide();
     messages = new MessagesDock(this, settings);
@@ -469,6 +471,7 @@ SHOW_HANDLER(peripherals, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(terminal, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(lcd_display, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(webeval, Qt::RightDockWidgetArea, false)
+SHOW_HANDLER(task_description, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(csrdock, Qt::TopDockWidgetArea, false)
 SHOW_HANDLER(messages, Qt::BottomDockWidgetArea, false)
 #undef SHOW_HANDLER
@@ -528,6 +531,13 @@ void MainWindow::webeval_config() {
 SrcEditor *MainWindow::get_current_editor() const {
     if (!editor_tabs) return nullptr;
     return editor_tabs->get_current_editor();
+}
+
+void MainWindow::set_task_description(const QString &task_name, const QString &description) {
+    if (task_description) {
+        task_description->set_description(task_name, description);
+        show_task_description();
+    }
 }
 
 void MainWindow::set_speed() {
