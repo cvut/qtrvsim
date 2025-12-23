@@ -1,6 +1,7 @@
 #include "webevaldock.h"
 
 #include "mainwindow/mainwindow.h"
+#include "taskdescriptiondock.h"
 #include "windows/editor/editordock.h"
 #include "windows/editor/srceditor.h"
 
@@ -54,12 +55,18 @@ WebEvalDock::WebEvalDock(QWidget *parent, QSettings *settings)
 
     layout->addLayout(buttons_layout2);
 
+    auto *desc_btn = new QPushButton("Show Description", this);
+    connect(desc_btn, &QPushButton::clicked, this, &WebEvalDock::show_task_description);
+    layout->addWidget(desc_btn);
+
     setWidget(content);
     network_manager = new QNetworkAccessManager(this);
+    description_dock = nullptr;
 }
 
-void WebEvalDock::setup(MainWindow *mw) {
+void WebEvalDock::setup(MainWindow *mw, TaskDescriptionDock *desc_dock) {
     mainwindow = mw;
+    description_dock = desc_dock;
 }
 
 void WebEvalDock::refresh_tasks() {
@@ -249,5 +256,57 @@ void WebEvalDock::handle_load_reply() {
 
     editor->setPlainText(code);
     //QMessageBox::information(this, "Success", "Code loaded from " + load_type + " successfully.");
+    reply->deleteLater();
+}
+
+void WebEvalDock::show_task_description() {
+    QString url = settings->value("webeval/url", "https://eval.comparch.edu.cvut.cz").toString().trimmed();
+    QString api_key = settings->value("webeval/api_key", "").toString().trimmed();
+
+    if (url.isEmpty() || api_key.isEmpty()) {
+        QMessageBox::warning(this, "Error", "Please configure URL and API Key in Options > WebEval Configuration.");
+        return;
+    }
+
+    QListWidgetItem *selected = tasks_list->currentItem();
+    if (!selected) {
+        QMessageBox::warning(this, "Error", "Please select a task first.");
+        return;
+    }
+
+    int task_id = selected->data(Qt::UserRole).toInt();
+
+    QNetworkRequest request(QUrl(url + "/api/user/task/" + QString::number(task_id)));
+    request.setRawHeader("Authorization", ("Bearer " + api_key).toUtf8());
+
+    QNetworkReply *reply = network_manager->get(request);
+    connect(reply, &QNetworkReply::finished, this, &WebEvalDock::handle_task_detail_reply);
+}
+
+void WebEvalDock::handle_task_detail_reply() {
+    auto *reply = qobject_cast<QNetworkReply *>(sender());
+    if (!reply) return;
+
+    if (reply->error() != QNetworkReply::NoError) {
+        QMessageBox::warning(this, "Error", "Failed to fetch task details: " + reply->errorString());
+        reply->deleteLater();
+        return;
+    }
+
+    QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+    if (doc.isObject()) {
+        QJsonObject obj = doc.object();
+        QString task_name = obj["task_name"].toString();
+        QString description = obj["description"].toString();
+
+        if (!description.isEmpty()) {
+            if (mainwindow) {
+                mainwindow->set_task_description(task_name, description);
+            }
+        } else {
+            QMessageBox::information(this, "No Description", "This task has no description.");
+        }
+    }
+
     reply->deleteLater();
 }
