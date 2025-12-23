@@ -132,6 +132,9 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     terminal->hide();
     lcd_display.reset(new LcdDisplayDock(this, settings));
     lcd_display->hide();
+    webeval.reset(new WebEvalDock(this, settings));
+    webeval->setup(this);
+    webeval->hide();
     csrdock = new CsrDock(this);
     csrdock->hide();
     messages = new MessagesDock(this, settings);
@@ -181,6 +184,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(ui->actionTerminal, &QAction::triggered, this, &MainWindow::show_terminal);
     connect(ui->actionLcdDisplay, &QAction::triggered, this, &MainWindow::show_lcd_display);
     connect(ui->actionCsrShow, &QAction::triggered, this, &MainWindow::show_csrdock);
+    connect(ui->actionWebEvalShow, &QAction::triggered, this, &MainWindow::show_webeval);
     connect(ui->actionCore_View_show, &QAction::triggered, this, &MainWindow::show_hide_coreview);
     connect(ui->actionMessages, &QAction::triggered, this, &MainWindow::show_messages);
     connect(ui->actionResetWindows, &QAction::triggered, this, &MainWindow::reset_windows);
@@ -464,6 +468,7 @@ SHOW_HANDLER(bp_info, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(peripherals, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(terminal, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(lcd_display, Qt::RightDockWidgetArea, false)
+SHOW_HANDLER(webeval, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(csrdock, Qt::TopDockWidgetArea, false)
 SHOW_HANDLER(messages, Qt::BottomDockWidgetArea, false)
 #undef SHOW_HANDLER
@@ -481,6 +486,7 @@ void MainWindow::reset_windows() {
     reset_state_peripherals();
     reset_state_terminal();
     reset_state_lcd_display();
+    reset_state_webeval();
     reset_state_csrdock();
     reset_state_messages();
 }
@@ -515,7 +521,7 @@ void MainWindow::about_qt() {
 }
 
 void MainWindow::webeval_config() {
-    auto *dialog = new WebEvalConfigDialog(settings.get(), this, this);
+    auto *dialog = new WebEvalConfigDialog(settings.get(), this);
     dialog->exec();
 }
 

@@ -95,6 +95,7 @@
     <addaction name="actionPeripherals"/>
     <addaction name="actionTerminal"/>
     <addaction name="actionLcdDisplay"/>
+    <addaction name="actionWebEvalShow"/>
     <addaction name="actionCsrShow"/>
     <addaction name="actionCore_View_show"/>
     <addaction name="actionMessages"/>
@@ -652,7 +653,12 @@
   </action>
   <action name="actionWebEvalConfig">
    <property name="text">
-    <string>WebEval Configuration...</string>
+    <string>WebEval Configuration</string>
+   </property>
+  </action>
+  <action name="actionWebEvalShow">
+   <property name="text">
+    <string>WebEval</string>
    </property>
   </action>
 <action name="actionData_TLB">
