@@ -29,6 +29,7 @@
 #include "windows/registers/registersdock.h"
 #include "windows/terminal/terminaldock.h"
 #include "windows/tlb/tlbdock.h"
+#include "windows/webeval/webevaldock.h"
 
 #include <QMainWindow>
 #include <QPointer>
@@ -85,6 +86,7 @@ public slots:
     void reset_state_terminal();
     void reset_state_lcd_display();
     void reset_state_csrdock();
+    void reset_state_webeval();
     void reset_state_messages();
     void show_registers();
     void show_program();
@@ -98,6 +100,7 @@ public slots:
     void show_terminal();
     void show_lcd_display();
     void show_csrdock();
+    void show_webeval();
     void show_hide_coreview(bool show);
     void show_messages();
     void reset_windows();
@@ -162,6 +165,7 @@ private:
     Box<PeripheralsDock> peripherals {};
     Box<TerminalDock> terminal {};
     Box<LcdDisplayDock> lcd_display {};
+    Box<WebEvalDock> webeval {};
     CsrDock *csrdock {};
     MessagesDock *messages {};
     bool coreview_shown = true;
