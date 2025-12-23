@@ -5,6 +5,7 @@
 #include "dialogs/about/aboutdialog.h"
 #include "dialogs/gotosymbol/gotosymboldialog.h"
 #include "dialogs/savechanged/savechangeddialog.h"
+#include "dialogs/webeval/webevalconfigdialog.h"
 #include "extprocess.h"
 #include "helper/async_modal.h"
 #include "os_emulation/ossyscall.h"
@@ -185,6 +186,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(ui->actionResetWindows, &QAction::triggered, this, &MainWindow::reset_windows);
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about_program);
     connect(ui->actionAboutQt, &QAction::triggered, this, &MainWindow::about_qt);
+    connect(ui->actionWebEvalConfig, &QAction::triggered, this, &MainWindow::webeval_config);
     connect(ui->ips1, &QAction::toggled, this, &MainWindow::set_speed);
     connect(ui->ips2, &QAction::toggled, this, &MainWindow::set_speed);
     connect(ui->ips5, &QAction::toggled, this, &MainWindow::set_speed);
@@ -510,6 +512,16 @@ void MainWindow::about_program() {
 
 void MainWindow::about_qt() {
     QMessageBox::aboutQt(this);
+}
+
+void MainWindow::webeval_config() {
+    auto *dialog = new WebEvalConfigDialog(settings.get(), this, this);
+    dialog->exec();
+}
+
+SrcEditor *MainWindow::get_current_editor() const {
+    if (!editor_tabs) return nullptr;
+    return editor_tabs->get_current_editor();
 }
 
 void MainWindow::set_speed() {

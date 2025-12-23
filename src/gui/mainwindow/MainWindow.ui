@@ -134,6 +134,7 @@
      <string>Options</string>
     </property>
     <addaction name="actionEditorShowLineNumbers"/>
+    <addaction name="actionWebEvalConfig"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuMachine"/>
@@ -647,6 +648,11 @@
   <action name="actionBranch_Predictor_Info">
    <property name="text">
     <string>Branch Predictor (Info)</string>
+   </property>
+  </action>
+  <action name="actionWebEvalConfig">
+   <property name="text">
+    <string>WebEval Configuration...</string>
    </property>
   </action>
 <action name="actionData_TLB">
