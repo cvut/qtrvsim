@@ -16,7 +16,7 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -36,10 +36,16 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Prepare artifact with /manual subdirectory
+        run: |
+          rm -rf pages
+          mkdir -p pages/manual
+          cp -a docs/user/book/. pages/manual/
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/user/book
+          path: pages
 
   deploy:
     environment:
