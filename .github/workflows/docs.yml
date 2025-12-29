@@ -1,4 +1,4 @@
-name: docs
+name: Docs
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
           mdbook-version: "latest"
 
       - name: Build the book
-        run: mdbook build docs/manual
+        run: mdbook build docs/user
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -39,7 +39,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/manual/book
+          path: docs/user/book
 
   deploy:
     environment:
