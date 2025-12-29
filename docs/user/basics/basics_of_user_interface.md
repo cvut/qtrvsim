@@ -2,9 +2,9 @@
 
 After selecting a configuration preset (or loading an example) in the initial dialog, the main **QtRvSim window** appears.
 This chapter introduces the primary functional areas of the interface necessary for basic operation.
-![QtRvSim main window (empty workspace)](images/gui_elements/user_interface.webp)
+![QtRvSim main window (empty workspace)](media/gui_elements/user_interface.webp)
 The interface can be divided into five main areas:
-![The QtRvSim interface, divided into main sections](images/gui_elements/user_interface_annotated.webp)
+![The QtRvSim interface, divided into main sections](media/gui_elements/user_interface_annotated.webp)
 
 ## 1. Menu Bar & Toolbar (Blue Area)
 
@@ -13,10 +13,10 @@ The interface can be divided into five main areas:
 - The **Toolbar** below offers quick access to the most commonly used commands via icons.
 
 **Key Toolbar Buttons (basic simulation):**
-- <img src="images/icons/compfile-256.png" style="vertical-align: middle; width: 20px; height: 20px"> **Compile Source** – Assemble your code.
-- <img src="images/icons/play.png" style="vertical-align: middle; width: 20px; height: 20px"> **Run** – Execute the program continuously.
-- <img src="images/icons/next.png" style="vertical-align: middle; width: 20px; height: 20px"> **Step** – Advance execution one instruction (or one cycle) at a time.
-- <img src="images/icons/reload.png" style="vertical-align: middle; width: 20px; height: 20px"> **Reset** – Reset the simulation state to the beginning.
+- <img src="../media/icons/compfile-256.png" style="vertical-align: middle; width: 20px; height: 20px"> **Compile Source** – Assemble your code.
+- <img src="../media/icons/play.png" style="vertical-align: middle; width: 20px; height: 20px"> **Run** – Execute the program continuously.
+- <img src="../media/icons/next.png" style="vertical-align: middle; width: 20px; height: 20px"> **Step** – Advance execution one instruction (or one cycle) at a time.
+- <img src="../media/icons/reload.png" style="vertical-align: middle; width: 20px; height: 20px"> **Reset** – Reset the simulation state to the beginning.
 
 ## 2. Program Panel (Green Area)
 
@@ -51,7 +51,7 @@ Counters reset when you **Reset** or **Reload** the simulation.
 QtRvSim offers several **dockable panels** to inspect system state in detail.
 These can be opened from the **`Windows`** menu:
 
-![QtRvSim with the windows menu open](images/gui_elements/windows_menu.webp)
+![QtRvSim with the windows menu open](media/gui_elements/windows_menu.webp)
 
 You can rearrange, dock, tab, or float these windows to customize your workspace. Use **`Windows -> Reset Windows`** to restore the default layout.
 

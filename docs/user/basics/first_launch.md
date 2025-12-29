@@ -3,7 +3,7 @@
 When you start QtRvSim, or when you select **`File > New Simulation`**, the **Pre-sets and ELF File** dialog will appear.
 This dialog allows you to select a hardware configuration (pre-set) and, optionally, load a program to run.
 
-![QtRvSim launch window](images/gui_elements/launch_window.webp)
+![QtRvSim launch window](media/gui_elements/launch_window.webp)
 
 ## Dialog Options
 
