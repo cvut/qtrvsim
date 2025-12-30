@@ -12,14 +12,20 @@
 #include "windows/editor/editordock.h"
 #include "windows/editor/editortab.h"
 
+#include <QDesktopServices>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QMetaObject>
 #include <QProcessEnvironment>
+#include <QSysInfo>
 #include <QTextDocument>
+#include <QUrl>
+#include <QUrlQuery>
 #include <QtWidgets>
 #include <qactiongroup.h>
 #include <qwidget.h>
+
+
 
 LOG_CATEGORY("gui.mainwindow");
 
@@ -183,6 +189,39 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(ui->actionCore_View_show, &QAction::triggered, this, &MainWindow::show_hide_coreview);
     connect(ui->actionMessages, &QAction::triggered, this, &MainWindow::show_messages);
     connect(ui->actionResetWindows, &QAction::triggered, this, &MainWindow::reset_windows);
+    connect(ui->actionUserManual, &QAction::triggered, this, [] {
+        QDesktopServices::openUrl(QUrl(APP_USER_MANUAL_URL));
+    });
+    connect(ui->actionReportProblem, &QAction::triggered, this, [] {
+        const QString version = QString::fromUtf8(APP_VERSION);
+        const QString qtVersion = QString::fromUtf8(qVersion());
+        const QString os = QSysInfo::prettyProductName();
+        const QString arch = QSysInfo::currentCpuArchitecture();
+
+        QString body;
+        body += "## Describe the problem\n";
+        body += "\n";
+        body += "## Steps to reproduce\n";
+        body += "1.\n";
+        body += "\n";
+        body += "## Expected behavior\n";
+        body += "\n";
+        body += "## Actual behavior\n";
+        body += "\n";
+        body += "## Environment\n";
+        body += "- QtRVSim version: " + version + "\n";
+        body += "- OS: " + os + "\n";
+        body += "- Arch: " + arch + "\n";
+        body += "- Qt: " + qtVersion + "\n";
+
+        QUrl url(QString::fromUtf8(APP_REPORT_PROBLEM_URL));
+        QUrlQuery query;
+        query.addQueryItem("title", "Bug report");
+        query.addQueryItem("body", body);
+        url.setQuery(query);
+
+        QDesktopServices::openUrl(url);
+    });
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about_program);
     connect(ui->actionAboutQt, &QAction::triggered, this, &MainWindow::about_qt);
     connect(ui->ips1, &QAction::toggled, this, &MainWindow::set_speed);

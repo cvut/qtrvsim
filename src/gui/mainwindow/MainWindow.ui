@@ -126,6 +126,9 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="actionUserManual"/>
+    <addaction name="actionReportProblem"/>
+    <addaction name="separator"/>
     <addaction name="actionAbout"/>
     <addaction name="actionAboutQt"/>
    </widget>
@@ -565,6 +568,16 @@
   <action name="actionAboutQt">
    <property name="text">
     <string>About &amp;Qt</string>
+   </property>
+  </action>
+  <action name="actionUserManual">
+   <property name="text">
+    <string>&amp;User Manual</string>
+   </property>
+  </action>
+  <action name="actionReportProblem">
+   <property name="text">
+    <string>&amp;Report a Problem...</string>
    </property>
   </action>
   <action name="actionPeripherals">
