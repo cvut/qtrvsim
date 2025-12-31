@@ -26,9 +26,7 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         if (load_symtab) { symtab.reset(program.get_symbol_table()); }
 
         program_end = program.end();
-        if (program.get_executable_entry() != 0x0_addr) {
-            regs->write_pc(program.get_executable_entry());
-        }
+        regs->write_pc(program.get_executable_entry());
         mem.reset(new Memory(*mem_program_only));
     } else {
         mem.reset(new Memory(machine_config.get_simulated_endian()));
