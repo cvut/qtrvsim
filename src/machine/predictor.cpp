@@ -696,6 +696,11 @@ uint8_t BranchPredictor::get_number_of_bht_bits() const {
     return number_of_bht_bits;
 }
 
+const PredictionStatistics *BranchPredictor::get_stats() const {
+    if (!enabled) { return nullptr; }
+    return &total_stats;
+}
+
 void BranchPredictor::increment_jumps() {
     total_stats.total += 1;
     total_stats.correct = total_stats.total - total_stats.wrong;

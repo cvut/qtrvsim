@@ -273,6 +273,7 @@ public: // General functions
     uint8_t get_number_of_bhr_bits() const;
     uint8_t get_number_of_bht_addr_bits() const;
     uint8_t get_number_of_bht_bits() const;
+    const PredictionStatistics *get_stats() const;
     void increment_jumps();
     void increment_mispredictions();
     Address

@@ -32,6 +32,14 @@ public:
     void enable_cache_stats() { e_cache_stats = true; };
     void enable_cycles_reporting() { e_cycles = true; };
     void enable_symbol_table_reporting() { e_symtab = true; };
+    void enable_branch_predictor_stats() { e_predictor = true; };
+    void enable_all_reporting() {
+        e_regs = true;
+        e_cache_stats = true;
+        e_cycles = true;
+        e_symtab = true;
+        e_predictor = true;
+    }
 
     enum FailReason {
         FR_NONE = 0,
@@ -65,6 +73,7 @@ private:
     bool e_cache_stats = false;
     bool e_cycles = false;
     bool e_symtab = false;
+    bool e_predictor = false;
     FailReason e_fail = FR_NONE;
 
     void report();
@@ -75,6 +84,7 @@ private:
     void report_csr_reg(size_t internal_id, bool last);
     void report_gp_reg(unsigned int i, bool last);
     void report_cache(const char *cache_name, const machine::Cache &cache);
+    void report_predictor();
 
     void exit(int retcode);
 
