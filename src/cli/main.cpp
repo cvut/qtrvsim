@@ -184,7 +184,7 @@ void configure_branch_predictor(MachineConfig &config, const QStringList &bpred)
     if (pieces.size() < 5) {
         fprintf(
             stderr,
-            "Parameters for branch predictor incorrect (correct ant,wt,10,4,4).\n");
+            "Parameters for branch predictor are incorrect.\n");
         exit(EXIT_FAILURE);
     }
 
