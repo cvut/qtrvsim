@@ -89,9 +89,20 @@ void create_parser(QCommandLineParser &p) {
           "L2 cache. Format policy,sets,words_in_blocks,associativity where "
           "policy is random/lru/lfu",
           "L2CACHE" });
+    p.addOption(
+        { "branch-predictor",
+          "Branch predictor. Format type,init_state,btb,bhr,bht\n"
+          "type is always_not_taken/always_taken/btfnt/smith_1_bit/smith_2_bit/smith_2_bit_hysteresis\n"
+          "init_state is (for smith 1) not_taken/taken, (for smith 2) strongly_not_taken/weakly_not_taken/weakly_taken/strongly_taken\n"
+          "for other predictors it is ignored/undefined\n"
+          "btb is number of branch target buffer bits\n"
+          "bhr is number of branch history register bits\n"
+          "bht is number of branch history table address bits",
+          "BPRED" });
     p.addOption({ "read-time", "Memory read access time (cycles).", "RTIME" });
     p.addOption({ "write-time", "Memory read access time (cycles).", "WTIME" });
     p.addOption({ "burst-time", "Memory read access time (cycles).", "BTIME" });
+    p.addOption({ "l2-time", "L2 cache access time (cycles).", "L2TIME" });
     p.addOption({ { "serial-in", "serin" }, "File connected to the serial port input.", "FNAME" });
     p.addOption(
         { { "serial-out", "serout" }, "File connected to the serial port output.", "FNAME" });
@@ -164,6 +175,73 @@ void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const 
     }
 }
 
+void configure_branch_predictor(MachineConfig &config, const QStringList &bpred) {
+    if (bpred.empty()) { return; }
+    config.set_bp_enabled(true);
+    QStringList pieces = bpred.at(bpred.size() - 1).split(",");
+    if (pieces.size() < 5) {
+        fprintf(
+            stderr,
+            "Parameters for branch predictor incorrect (correct ant,wt,10,4,4).\n");
+        exit(EXIT_FAILURE);
+    }
+
+    PredictorType ptype =
+        pieces.at(0).toLower() == "always_not_taken"   ? PredictorType::ALWAYS_NOT_TAKEN
+        : pieces.at(0).toLower() == "always_taken"  ? PredictorType::ALWAYS_TAKEN
+        : pieces.at(0).toLower() == "btfnt"  ? PredictorType::BTFNT
+        : pieces.at(0).toLower() == "smith_1_bit"  ? PredictorType::SMITH_1_BIT
+        : pieces.at(0).toLower() == "smith_2_bit"  ? PredictorType::SMITH_2_BIT
+        : pieces.at(0).toLower() == "smith_2_bit_hysteresis" ? PredictorType::SMITH_2_BIT_HYSTERESIS
+        : PredictorType::UNDEFINED;
+
+    PredictorState init_state =
+        pieces.at(1).toLower() == "not_taken"   ? PredictorState::NOT_TAKEN
+        : pieces.at(1).toLower() == "taken"  ? PredictorState::TAKEN
+        : pieces.at(1).toLower() == "strongly_not_taken" ? PredictorState::STRONGLY_NOT_TAKEN
+        : pieces.at(1).toLower() == "weakly_not_taken" ? PredictorState::WEAKLY_NOT_TAKEN
+        : pieces.at(1).toLower() == "weakly_taken"  ? PredictorState::WEAKLY_TAKEN
+        : pieces.at(1).toLower() == "strongly_taken"  ? PredictorState::STRONGLY_TAKEN
+        : PredictorState::UNDEFINED;
+
+    switch (ptype) {
+      case PredictorType::ALWAYS_NOT_TAKEN:
+      case PredictorType::ALWAYS_TAKEN:
+      case PredictorType::BTFNT:
+        init_state = PredictorState::UNDEFINED;
+        break;
+      case PredictorType::SMITH_1_BIT:
+        if (init_state != PredictorState::NOT_TAKEN &&
+            init_state != PredictorState::TAKEN) {
+          fprintf(stderr,
+                  "Initial state for Smith 1 bit predictor must be "
+                  "not_taken/taken.\n");
+          exit(EXIT_FAILURE);
+        }
+        break;
+      case PredictorType::SMITH_2_BIT:
+      case PredictorType::SMITH_2_BIT_HYSTERESIS:
+        if (init_state == PredictorState::UNDEFINED) {
+          fprintf(stderr,
+                  "Initial state for Smith 2 bit predictor must be "
+                  "strongly_not_taken/weakly_not_taken/weakly_taken/"
+                  "strongly_taken.\n");
+          exit(EXIT_FAILURE);
+        }
+        break;
+
+      default:
+        fprintf(stderr, "Unknown predictor type specified.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    config.set_bp_type(ptype);
+    config.set_bp_init_state(init_state);
+    config.set_bp_btb_bits(pieces.at(2).toLong());
+    config.set_bp_bhr_bits(pieces.at(3).toLong());
+    config.set_bp_bht_addr_bits(pieces.at(4).toLong());
+}
+
 void parse_u32_option(
     QCommandLineParser &parser,
     const QString &option_name,
@@ -208,11 +286,14 @@ void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
     parse_u32_option(parser, "read-time", config, &MachineConfig::set_memory_access_time_read);
     parse_u32_option(parser, "write-time", config, &MachineConfig::set_memory_access_time_write);
     parse_u32_option(parser, "burst-time", config, &MachineConfig::set_memory_access_time_burst);
+    parse_u32_option(parser, "l2-time", config, &MachineConfig::set_memory_access_time_level2);
     if (!parser.values("burst-time").empty()) config.set_memory_access_enable_burst(true);
 
     configure_cache(*config.access_cache_data(), parser.values("d-cache"), "data");
     configure_cache(*config.access_cache_program(), parser.values("i-cache"), "instruction");
     configure_cache(*config.access_cache_level2(), parser.values("l2-cache"), "level2");
+
+    configure_branch_predictor(config, parser.values("branch-predictor"));
 
     config.set_osemu_enable(parser.isSet("os-emulation"));
     config.set_osemu_known_syscall_stop(false);
