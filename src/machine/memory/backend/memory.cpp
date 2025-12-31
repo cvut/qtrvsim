@@ -137,6 +137,7 @@ void Memory::reset() {
 
 void Memory::reset(const Memory &m) {
     free_section_tree(this->mt_root, 0);
+    delete[] this->mt_root;
     this->mt_root = copy_section_tree(m.get_memory_tree_root(), 0);
 }
 
