@@ -238,6 +238,10 @@ const Cache *Machine::cache_level2() {
     return cch_level2.data();
 }
 
+const BranchPredictor *Machine::branch_predictor() {
+    return predictor.data();
+}
+
 Cache *Machine::cache_data_rw() {
     return cch_data.data();
 }

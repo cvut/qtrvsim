@@ -126,6 +126,8 @@ void Reporter::report() {
         if (dump_format & DumpFormat::JSON) { dump_data_json["symbols"] = symtab_json; }
     }
 
+    if (e_predictor) { report_predictor(); }
+
     if (dump_format & DumpFormat::JSON) {
         QFile file(dump_file_json);
         QByteArray bytes = QJsonDocument(dump_data_json).toJson(QJsonDocument::Indented);
@@ -217,6 +219,28 @@ void Reporter::report_cache(const char *cache_name, const Cache &cache) {
         printf("%s:hit-rate: %.3lf\n", cache_name, cache.get_hit_rate());
         printf("%s:stalled-cycles: %" PRIu32 "\n", cache_name, cache.get_stall_count());
         printf("%s:improved-speed: %.3lf\n", cache_name, cache.get_speed_improvement());
+    }
+}
+
+void Reporter::report_predictor() {
+    const BranchPredictor *predictor = machine->branch_predictor();
+    const PredictionStatistics *stats = predictor->get_stats();
+
+    if (dump_format & DumpFormat::JSON) { 
+        QJsonObject predictorObj = dump_data_json["predictor"].toObject(); 
+        QJsonObject temp = {};
+        temp["total_predictions"] = QString::asprintf("%" PRIu32, stats->total);
+        temp["hits"] = QString::asprintf("%" PRIu32,  stats->correct);
+        temp["misses"] = QString::asprintf("%" PRIu32, stats->wrong);
+        temp["accuracy"] = QString::asprintf("%.3lf", stats->accuracy);
+        predictorObj = temp;
+        dump_data_json["predictor"] = predictorObj;
+    }
+    if (dump_format & DumpFormat::CONSOLE) {
+        printf("branch predictor:total predictions: %" PRIu32 "\n", stats->total);
+        printf("branch predictor:hits: %" PRIu32 "\n", stats->correct);
+        printf("branch predictor:misses: %" PRIu32 "\n", stats->wrong);
+        printf("branch predictor:accuracy: %.3lf\n", stats->accuracy);
     }
 }
 

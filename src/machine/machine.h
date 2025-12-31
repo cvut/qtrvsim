@@ -41,6 +41,7 @@ public:
     const Cache *cache_program();
     const Cache *cache_data();
     const Cache *cache_level2();
+    const BranchPredictor *branch_predictor();
     Cache *cache_data_rw();
     void cache_sync();
     const TLB *get_tlb_program() const;
