@@ -123,6 +123,9 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     program.reset(new ProgramDock(this, settings));
     addDockWidget(Qt::LeftDockWidgetArea, program.data());
     program->show();
+    connect(
+        program.data(), &ProgramDock::highlight_source_line, this,
+        &MainWindow::highlight_source_line);
     memory.reset(new MemoryDock(this, settings));
     memory->hide();
     cache_program.reset(new CacheDock(this, "Program"));
@@ -177,6 +180,8 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(
         ui->actionMnemonicRegisters, &QAction::triggered, this,
         &MainWindow::view_mnemonics_registers);
+    connect(
+        ui->actionFollowExecution, &QAction::triggered, this, &MainWindow::view_follow_execution);
     connect(ui->actionCompileSource, &QAction::triggered, this, &MainWindow::compile_source);
     connect(ui->actionBuildExe, &QAction::triggered, this, &MainWindow::build_execute);
     connect(ui->actionShow_Symbol, &QAction::triggered, this, &MainWindow::show_symbol_dialog);
@@ -258,6 +263,9 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     restoreGeometry(settings->value("windowGeometry").toByteArray());
     if (settings->value("viewMnemonicRegisters").toBool()) {
         ui->actionMnemonicRegisters->trigger();
+    }
+    if (settings->value("viewFollowExecution", true).toBool()) {
+        ui->actionFollowExecution->setChecked(true);
     }
 
     for (const QString &file_name : settings->value("openSrcFiles").toStringList()) {
@@ -413,9 +421,24 @@ void MainWindow::create_core(
     connect(
         machine->core(), &machine::Core::step_done, program.data(),
         &ProgramDock::update_pipeline_addrs);
+    connect(machine->core(), &machine::Core::step_done, this, [this]() {
+        bool follow = ui->actionFollowExecution->isChecked();
+        bool auto_open = settings->value("EditorAutoOpen", true).toBool();
+        editor_tabs->follow_debug_location(
+            machine->get_debug_info(), machine->registers()->read_pc().get_raw(), &debug_info_hint,
+            follow, auto_open);
+    });
 
     // Set status to ready
     machine_status(machine::Machine::ST_READY);
+
+    // Update settings
+    bool line_numbers_visible = settings->value("EditorShowLineNumbers", true).toBool();
+    editor_tabs->set_show_line_numbers(line_numbers_visible);
+    ui->actionEditorShowLineNumbers->setChecked(line_numbers_visible);
+
+    bool follow_exec = settings->value("viewFollowExecution", true).toBool();
+    ui->actionFollowExecution->setChecked(follow_exec);
 }
 
 bool MainWindow::configured() {
@@ -617,6 +640,10 @@ void MainWindow::view_mnemonics_registers(bool enable) {
     program->request_update_all();
 }
 
+void MainWindow::view_follow_execution(bool enable) {
+    settings->setValue("viewFollowExecution", enable);
+}
+
 void MainWindow::closeEvent(QCloseEvent *event) {
     settings->setValue("windowGeometry", saveGeometry());
     settings->setValue("windowState", saveState());
@@ -755,6 +782,31 @@ void MainWindow::message_selected(
     editor->setExtraSelections({ selection });
 }
 
+void MainWindow::highlight_source_line(machine::Address addr) {
+    if (machine == nullptr) { return; }
+    auto *debug_info = machine->get_debug_info();
+    if (debug_info == nullptr) { return; }
+
+    auto *loc = debug_info->find(addr.get_raw(), &debug_info_hint);
+    if (loc != nullptr) {
+        QString file = QString::fromStdString(debug_info->get_file_path(loc->file_id));
+        if (!file.isEmpty()) {
+            editor_tabs->open_file_if_not_open(file, false);
+            editor_tabs->set_cursor_to(file, loc->line, 1, true);
+            // Highlight
+            auto editor = editor_tabs->get_current_editor();
+            if (editor) {
+                QTextEdit::ExtraSelection selection;
+                selection.format.setBackground(QColor(Qt::yellow).lighter(160));
+                selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+                selection.cursor = editor->textCursor();
+                selection.cursor.clearSelection();
+                editor->setExtraSelections(QList<QTextEdit::ExtraSelection> { selection });
+            }
+        }
+    }
+}
+
 void MainWindow::update_core_frequency(double frequency) {
     frequency_label->setText(QString("Core frequency: %1 kHz").arg(frequency / 1000.0, 0, 'f', 3));
 }
@@ -778,6 +830,8 @@ void MainWindow::compile_source() {
 
     machine->cache_sync();
     machine->tlb_sync();
+
+    if (machine->get_debug_info()) { machine->get_debug_info()->clear(); }
 
     auto editor = editor_tabs->get_current_editor();
     auto filename = editor->filename().isEmpty() ? "Unknown" : editor->filename();
@@ -821,7 +875,9 @@ void MainWindow::compile_source() {
             if (program != nullptr) { program->focus_addr(addr); }
         });
 
-    sasm.setup(mem, &symtab, machine::Address(0x00000200), machine->core()->get_xlen());
+    sasm.setup(
+        mem, &symtab, machine::Address(0x00000200), machine->core()->get_xlen(),
+        machine->get_debug_info());
 
     int ln = 1;
     for (QTextBlock block = content->begin(); block.isValid(); block = block.next(), ln++) {

@@ -105,11 +105,12 @@ void SrcEditor::setCursorToLine(int ln) {
     setTextCursor(cursor);
 }
 
-void SrcEditor::setCursorTo(int ln, int col) {
+void SrcEditor::setCursorTo(int ln, int col, bool center) {
     QTextCursor cursor(document()->findBlockByNumber(ln - 1));
     cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor, col - 1);
     setTextCursor(cursor);
     setFocus();
+    if (center) { centerCursor(); }
 }
 
 bool SrcEditor::isModified() const {
