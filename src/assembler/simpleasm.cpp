@@ -74,7 +74,7 @@ void SimpleAsm::setup(
     machine::Xlen xlen) {
     this->mem = mem;
     this->symtab = symtab;
-    this->address = address;
+    this->next_instr_dest_addr = address;
     this->symtab->setSymbol("XLEN", static_cast<uint64_t>(xlen), sizeof(uint64_t));
 }
 
@@ -205,7 +205,7 @@ bool SimpleAsm::process_line(
         }
     }
 
-    if (!label.isEmpty()) { symtab->setSymbol(label, address.get_raw(), 4); }
+    if (!label.isEmpty()) { symtab->setSymbol(label, next_instr_dest_addr.get_raw(), 4); }
 
     if (op.isEmpty()) {
         if (operands.count() != 0) {
@@ -277,7 +277,7 @@ bool SimpleAsm::process_line(
             if (error_ptr != nullptr) { *error_ptr = error; }
             return false;
         }
-        ok = expression.eval(value, symtab, error, address);
+        ok = expression.eval(value, symtab, error, next_instr_dest_addr);
         if (!ok) {
             fatal_occured = true;
             error = tr(".orig %1 evaluation error.").arg(line);
@@ -286,7 +286,7 @@ bool SimpleAsm::process_line(
             if (error_ptr != nullptr) { *error_ptr = error; }
             return false;
         }
-        address = machine::Address(value);
+        next_instr_dest_addr = machine::Address(value);
         return true;
     }
     if ((op == ".space") || (op == ".skip")) {
@@ -311,7 +311,7 @@ bool SimpleAsm::process_line(
                 if (error_ptr != nullptr) { *error_ptr = error; }
                 return false;
             }
-            ok = expression.eval(fill, symtab, error, address);
+            ok = expression.eval(fill, symtab, error, next_instr_dest_addr);
             if (!ok) {
                 fatal_occured = true;
                 error = tr(".space/.skip %1 evaluation error.").arg(line);
@@ -330,7 +330,7 @@ bool SimpleAsm::process_line(
             if (error_ptr != nullptr) { *error_ptr = error; }
             return false;
         }
-        ok = expression.eval(value, symtab, error, address);
+        ok = expression.eval(value, symtab, error, next_instr_dest_addr);
         if (!ok) {
             fatal_occured = true;
             error = tr(".space/.skip %1 evaluation error.").arg(line);
@@ -340,8 +340,10 @@ bool SimpleAsm::process_line(
             return false;
         }
         while (value-- > 0) {
-            if (!fatal_occured) { mem->write_u8(address, (uint8_t)fill, ae::INTERNAL); }
-            address += 1;
+            if (!fatal_occured) {
+                mem->write_u8(next_instr_dest_addr, (uint8_t)fill, ae::INTERNAL);
+            }
+            next_instr_dest_addr += 1;
         }
         return true;
     }
@@ -360,7 +362,7 @@ bool SimpleAsm::process_line(
         if (operands.count() > 1) {
             fixmatheval::FmeExpression expression;
             ok = expression.parse(operands.at(1), error);
-            if (ok) { ok = expression.eval(value, symtab, error, address); }
+            if (ok) { ok = expression.eval(value, symtab, error, next_instr_dest_addr); }
             if (!ok) {
                 error = tr(".set or .equ %1 parse error.").arg(operands.at(1));
                 emit report_message(messagetype::MSG_ERROR, filename, line_number, 0, error, "");
@@ -437,12 +439,14 @@ bool SimpleAsm::process_line(
                     target_byte = host_char.toLatin1();
                 }
 
-                if (!fatal_occured) { mem->write_u8(address, target_byte, ae::INTERNAL); }
-                address += 1;
+                if (!fatal_occured) {
+                    mem->write_u8(next_instr_dest_addr, target_byte, ae::INTERNAL);
+                }
+                next_instr_dest_addr += 1;
             }
             if (append_zero) {
-                if (!fatal_occured) { mem->write_u8(address, 0, ae::INTERNAL); }
-                address += 1;
+                if (!fatal_occured) { mem->write_u8(next_instr_dest_addr, 0, ae::INTERNAL); }
+                next_instr_dest_addr += 1;
             }
         }
         return true;
@@ -466,7 +470,7 @@ bool SimpleAsm::process_line(
                     if (error_ptr != nullptr) { *error_ptr = error; }
                     return false;
                 }
-                ok = expression.eval(value, symtab, error, address);
+                ok = expression.eval(value, symtab, error, next_instr_dest_addr);
                 if (!ok) {
                     fatal_occured = true;
                     error = tr(".byte %1 evaluation error.").arg(line);
@@ -478,15 +482,15 @@ bool SimpleAsm::process_line(
                 }
                 val = (uint8_t)value;
             }
-            if (!fatal_occured) { mem->write_u8(address, (uint8_t)val, ae::INTERNAL); }
-            address += 1;
+            if (!fatal_occured) { mem->write_u8(next_instr_dest_addr, (uint8_t)val, ae::INTERNAL); }
+            next_instr_dest_addr += 1;
         }
         return true;
     }
 
-    while (address.get_raw() & 3) {
-        if (!fatal_occured) { mem->write_u8(address, 0, ae::INTERNAL); }
-        address += 1;
+    while (next_instr_dest_addr.get_raw() & 3) {
+        if (!fatal_occured) { mem->write_u8(next_instr_dest_addr, 0, ae::INTERNAL); }
+        next_instr_dest_addr += 1;
     }
 
     if (op == ".word") {
@@ -498,10 +502,11 @@ bool SimpleAsm::process_line(
             if (chars_taken != s.size()) {
                 val = 0;
                 reloc.append(new machine::RelocExpression(
-                    address, s, 0, -0xffffffff, 0xffffffff, &wordArg, filename, line_number));
+                    next_instr_dest_addr, s, 0, -0xffffffff, 0xffffffff, &wordArg, filename,
+                    line_number));
             }
-            if (!fatal_occured) { mem->write_u32(address, val, ae::INTERNAL); }
-            address += 4;
+            if (!fatal_occured) { mem->write_u32(next_instr_dest_addr, val, ae::INTERNAL); }
+            next_instr_dest_addr += 4;
         }
         return true;
     }
@@ -509,7 +514,7 @@ bool SimpleAsm::process_line(
     uint32_t inst[2] = { 0, 0 };
     size_t size = 0;
     try {
-        machine::TokenizedInstruction inst_tok { op, operands, address, filename,
+        machine::TokenizedInstruction inst_tok { op, operands, next_instr_dest_addr, filename,
                                                  static_cast<unsigned>(line_number) };
         size = machine::Instruction::code_from_tokens(inst, 8, inst_tok, &reloc);
     } catch (machine::Instruction::ParseError &e) {
@@ -521,8 +526,8 @@ bool SimpleAsm::process_line(
     }
     uint32_t *p = inst;
     for (size_t l = 0; l < size; l += 4) {
-        if (!fatal_occured) { mem->write_u32(address, *(p++), ae::INTERNAL); }
-        address += 4;
+        if (!fatal_occured) { mem->write_u32(next_instr_dest_addr, *(p++), ae::INTERNAL); }
+        next_instr_dest_addr += 4;
     }
     return true;
 }
