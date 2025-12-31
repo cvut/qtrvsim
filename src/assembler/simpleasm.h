@@ -72,7 +72,7 @@ protected:
     bool error_occured {};
     bool fatal_occured {};
     SymbolTableDb *symtab {};
-    machine::Address address {};
+    machine::Address next_instr_dest_addr {};
 
 private:
     QStringList include_stack;

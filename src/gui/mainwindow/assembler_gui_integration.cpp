@@ -57,7 +57,7 @@ bool AssemblerGuiIntegration::process_pragma(
                 "expression parse error " + error, "");
             return true;
         }
-        ok = expression.eval(value, symtab, error, address);
+        ok = expression.eval(value, symtab, error, next_instr_dest_addr);
         if (!ok) {
             emit report_message(
                 messagetype::MSG_WARNING, filename, line_number, 0,
