@@ -68,8 +68,8 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
         this, &ProgramDock::focus_addr_with_save, program_content,
         &ProgramTableView::focus_address_with_save);
     connect(
-        program_content, &QAbstractItemView::doubleClicked, program_model,
-        &ProgramModel::toggle_hw_break);
+        program_content, &QAbstractItemView::doubleClicked, this,
+        &ProgramDock::program_double_clicked);
     connect(
         this, &ProgramDock::stage_addr_changed, program_model, &ProgramModel::update_stage_addr);
     connect(program_model, &ProgramModel::report_error, this, &ProgramDock::report_error);
@@ -146,4 +146,16 @@ void ProgramDock::update_follow_position() {
 
 void ProgramDock::report_error(const QString &error) {
     showAsyncMessageBox(this, QMessageBox::Critical, "Simulator Error", error);
+}
+
+void ProgramDock::program_double_clicked(const QModelIndex &index) {
+    auto *model = qobject_cast<ProgramModel *>(const_cast<QAbstractItemModel *>(index.model()));
+    if (model == nullptr) { return; }
+
+    if (index.column() == 0) {
+        model->toggle_hw_break(index);
+    } else if (index.column() == 1) {
+        machine::Address addr;
+        if (model->get_row_address(addr, index.row())) { emit highlight_source_line(addr); }
+    }
 }

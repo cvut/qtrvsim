@@ -65,7 +65,8 @@ Cache::write(AddressWithMode destination, const void *source, size_t size, Write
     return { .n_bytes = size, .changed = changed };
 }
 
-ReadResult Cache::read(void *destination, AddressWithMode source, size_t size, ReadOptions options) const {
+ReadResult
+Cache::read(void *destination, AddressWithMode source, size_t size, ReadOptions options) const {
     if (!cache_config.enabled() || is_in_uncached_area(source)
         || is_in_uncached_area(source + size)) {
         mem_reads++;

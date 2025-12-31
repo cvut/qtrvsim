@@ -25,11 +25,15 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
 
         if (load_symtab) { symtab.reset(program.get_symbol_table()); }
 
+        debug_info.reset(new debuginfo::DebugInfo());
+        program.load_debug_info(*debug_info);
+
         program_end = program.end();
         regs->write_pc(program.get_executable_entry());
         mem.reset(new Memory(*mem_program_only));
     } else {
         mem.reset(new Memory(machine_config.get_simulated_endian()));
+        debug_info.reset(new debuginfo::DebugInfo());
     }
 
     data_bus.reset(new MemoryDataBus(machine_config.get_simulated_endian()));
@@ -298,6 +302,10 @@ SymbolTable *Machine::symbol_table_rw(bool create) {
 
 const SymbolTable *Machine::symbol_table(bool create) {
     return symbol_table_rw(create);
+}
+
+debuginfo::DebugInfo *Machine::get_debug_info() {
+    return debug_info.data();
 }
 
 void Machine::set_symbol(

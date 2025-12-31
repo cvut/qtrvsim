@@ -1,6 +1,7 @@
 #include "editordock.h"
 
 #include "common/logging.h"
+#include "debuginfo/debuginfo.h"
 #include "dialogs/savechanged/savechangeddialog.h"
 #include "editortab.h"
 #include "helper/async_modal.h"
@@ -9,6 +10,7 @@
 #include <QFileInfo>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QTextEdit>
 #include <qtabbar.h>
 #include <utility>
 
@@ -318,7 +320,7 @@ void EditorDock::confirm_close_tab_dialog(int index) {
     msgbox->open();
 }
 
-bool EditorDock::set_cursor_to(const QString &filename, int line, int column) {
+bool EditorDock::set_cursor_to(const QString &filename, int line, int column, bool center) {
     auto tab = (filename == "Unknown") ? get_tab(currentIndex()) : find_tab_by_filename(filename);
     if (tab == nullptr) {
         WARN(
@@ -326,6 +328,38 @@ bool EditorDock::set_cursor_to(const QString &filename, int line, int column) {
         return false;
     }
     setCurrentWidget(tab);
-    tab->get_editor()->setCursorTo(line, column);
+    tab->get_editor()->setCursorTo(line, column, center);
     return true;
+}
+
+void EditorDock::follow_debug_location(
+    debuginfo::DebugInfo *debug_info,
+    uint64_t pc,
+    size_t *hint,
+    bool follow,
+    bool auto_open) {
+    if (!follow && !auto_open) { return; }
+    if (!debug_info) { return; }
+
+    auto *loc = debug_info->find(pc, hint);
+    if (!loc) { return; }
+
+    QString file = QString::fromStdString(debug_info->get_file_path(loc->file_id));
+    if (file.isEmpty()) { return; }
+
+    if (auto_open) { open_file_if_not_open(file, false); }
+
+    if (follow && find_tab_by_filename(file)) {
+        set_cursor_to(file, loc->line, 1, true);
+        // Highlight
+        auto editor = get_current_editor();
+        if (editor) {
+            QTextEdit::ExtraSelection selection;
+            selection.format.setBackground(QColor(Qt::green).lighter(180));
+            selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+            selection.cursor = editor->textCursor();
+            selection.cursor.clearSelection();
+            editor->setExtraSelections(QList<QTextEdit::ExtraSelection> { selection });
+        }
+    }
 }

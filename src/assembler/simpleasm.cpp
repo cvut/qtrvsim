@@ -71,10 +71,12 @@ void SimpleAsm::setup(
     machine::FrontendMemory *mem,
     SymbolTableDb *symtab,
     machine::Address address,
-    machine::Xlen xlen) {
+    machine::Xlen xlen,
+    debuginfo::DebugInfo *debug_info) {
     this->mem = mem;
     this->symtab = symtab;
     this->next_instr_dest_addr = address;
+    this->debug_info = debug_info;
     this->symtab->setSymbol("XLEN", static_cast<uint64_t>(xlen), sizeof(uint64_t));
 }
 
@@ -524,11 +526,18 @@ bool SimpleAsm::process_line(
         if (error_ptr != nullptr) { *error_ptr = error; }
         return false;
     }
-    uint32_t *p = inst;
-    for (size_t l = 0; l < size; l += 4) {
-        if (!fatal_occured) { mem->write_u32(next_instr_dest_addr, *(p++), ae::INTERNAL); }
+
+    if (debug_info != nullptr && size != 0) {
+        // OPTIMIZATION: This could be optimized by hoisting the file lookup out of this function.
+        auto file_id = debug_info->get_file_id(filename.toStdString());
+        debug_info->add_line(next_instr_dest_addr.get_raw(), file_id, line_number);
+    }
+
+    for (size_t i = 0; i < size / 4; i += 1) {
+        if (!fatal_occured) { mem->write_u32(next_instr_dest_addr, inst[i], ae::INTERNAL); }
         next_instr_dest_addr += 4;
     }
+
     return true;
 }
 
@@ -545,8 +554,8 @@ bool SimpleAsm::process_file(const QString &filename, QString *error_ptr) {
     }
     for (int ln = 1; !srcfile.atEnd(); ln++) {
         QString line = srcfile.readLine();
-        if ((line.count() > 0) && (line.at(line.count() - 1) == '\n')) {
-            line.truncate(line.count() - 1);
+        if ((line.size() > 0) && (line.at(line.size() - 1) == '\n')) {
+            line.truncate(line.size() - 1);
         }
         if (!process_line(line, filename, ln, error_ptr)) { res = false; }
     }
@@ -606,6 +615,8 @@ bool SimpleAsm::finish(QString *error_ptr) {
     }
 
     emit mem->external_change_notify(mem, Address::null(), Address(0xffffffff), ae::INTERNAL);
+
+    if (debug_info) { debug_info->finalize(); }
 
     return !error_occured;
 }

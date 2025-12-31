@@ -58,11 +58,14 @@ public:
 
     ~Cache() override;
 
-    WriteResult
-    write(AddressWithMode destination, const void *source, size_t size, WriteOptions options) override;
+    WriteResult write(
+        AddressWithMode destination,
+        const void *source,
+        size_t size,
+        WriteOptions options) override;
 
-    ReadResult
-    read(void *destination, AddressWithMode source, size_t size, ReadOptions options) const override;
+    ReadResult read(void *destination, AddressWithMode source, size_t size, ReadOptions options)
+        const override;
 
     uint32_t get_change_counter() const override;
 

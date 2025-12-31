@@ -25,6 +25,7 @@ signals:
     void jump_to_pc(machine::Address);
     void focus_addr(machine::Address);
     void focus_addr_with_save(machine::Address);
+    void highlight_source_line(machine::Address);
     void stage_addr_changed(uint stage, machine::Address addr);
     void request_update_all();
 public slots:
@@ -36,6 +37,7 @@ public slots:
     void writeback_inst_addr(machine::Address addr);
     void report_error(const QString &error);
     void update_pipeline_addrs(const machine::CoreState &p);
+    void program_double_clicked(const QModelIndex &index);
 
 private:
     enum FollowSource {

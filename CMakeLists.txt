@@ -269,6 +269,7 @@ add_subdirectory("external/svgscene")
 # =============================================================================
 
 add_subdirectory("src/common")
+add_subdirectory("src/debuginfo")
 add_subdirectory("src/machine")
 add_subdirectory("src/assembler")
 add_subdirectory("src/os_emulation")

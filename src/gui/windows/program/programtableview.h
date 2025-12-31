@@ -17,6 +17,7 @@ public:
     ProgramTableView(QWidget *parent, QSettings *settings);
 
     void resizeEvent(QResizeEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
 signals:
     void address_changed(uint32_t address);
     void adjust_scroll_pos_queue();

@@ -116,9 +116,7 @@ Address TLB::translate_virtual_to_physical(AddressWithMode vaddr) {
     bool satp_mode_on = is_mode_enabled_in_satp(current_satp_raw);
     bool should_translate = vm_enabled && satp_mode_on && (priv != CSR::PrivilegeLevel::MACHINE);
 
-    if (!should_translate) {
-        return vaddr;
-    }
+    if (!should_translate) { return vaddr; }
 
     constexpr unsigned PAGE_SHIFT = 12;
     constexpr uint64_t PAGE_MASK = (1ULL << PAGE_SHIFT) - 1;
@@ -181,7 +179,8 @@ ReadResult TLB::read(void *dst, AddressWithMode src, size_t sz, ReadOptions opts
     return const_cast<TLB *>(this)->translate_and_read(dst, src, sz, opts);
 }
 
-WriteResult TLB::translate_and_write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts) {
+WriteResult
+TLB::translate_and_write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts) {
     Address pa = translate_virtual_to_physical(dst);
     return mem->write(pa, src, sz, opts);
 }

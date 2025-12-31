@@ -3,7 +3,6 @@
 
 #include "assembler/simpleasm.h"
 #include "machine/machine.h"
-
 #include <QObject>
 
 class EditorDock;

@@ -134,6 +134,7 @@
      <string>Options</string>
     </property>
     <addaction name="actionEditorShowLineNumbers"/>
+    <addaction name="actionFollowExecution"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuMachine"/>
@@ -632,6 +633,20 @@
    </property>
    <property name="toolTip">
     <string>Show line number in the code editor.</string>
+   </property>
+  </action>
+  <action name="actionFollowExecution">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Follow &amp;Execution</string>
+   </property>
+   <property name="toolTip">
+    <string>Follow execution in the source code editor.</string>
    </property>
   </action>
   <action name="actionBranch_Predictor_History_table">
