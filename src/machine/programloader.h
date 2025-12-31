@@ -2,6 +2,7 @@
 #define PROGRAM_H
 
 #include "common/endian.h"
+#include "debuginfo/debuginfo.h"
 #include "memory/backend/memory.h"
 #include "symboltable.h"
 
@@ -30,6 +31,8 @@ public:
                                  // sure
     Address get_executable_entry() const;
     SymbolTable *get_symbol_table();
+    /** Load DWARF. Returns a warning for DWARF5, empty otherwise. */
+    QString load_debug_info(debuginfo::DebugInfo &debug_info);
 
     Endian get_endian() const;
 

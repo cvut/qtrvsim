@@ -2,9 +2,12 @@
 #define EDITORDOCK_H
 
 #include "common/memory_ownership.h"
+#include "debuginfo/debuginfo.h"
 #include "editortab.h"
 #include "widgets/hidingtabwidget.h"
 
+#include <QPointer>
+#include <QSet>
 #include <QSettings>
 #include <optional>
 
@@ -22,15 +25,20 @@ public:
         QWidget *parent = nullptr);
     BORROWED [[nodiscard]] EditorTab *get_tab(int index) const;
     BORROWED EditorTab *create_empty_tab();
-    BORROWED EditorTab *open_file(const QString &filename, bool save_as_required = false);
     BORROWED EditorTab *
-    open_file_if_not_open(const QString &filename, bool save_as_required = false);
+    open_file(const QString &filename, bool save_as_required = false, bool activate = true);
+    BORROWED EditorTab *open_file_if_not_open(
+        const QString &filename,
+        bool save_as_required = false,
+        bool activate = true);
     BORROWED [[nodiscard]] std::optional<int> find_tab_id_by_filename(const QString &filename) const;
     BORROWED [[nodiscard]] EditorTab *find_tab_by_filename(const QString &filename) const;
     BORROWED [[nodiscard]] SrcEditor *get_current_editor() const;
     [[nodiscard]] QStringList get_open_file_list() const;
     bool get_modified_tab_filenames(QStringList &output, bool report_unnamed = false) const;
-    bool set_cursor_to(const QString &filename, int line, int column);
+    bool set_cursor_to(const QString &filename, int line, int column, bool center = false);
+    BORROWED [[nodiscard]] SrcEditor *
+    navigate_to_source(const QString &filename, uint32_t line, bool auto_open = true);
 
 protected:
     void tabCountChanged() override;
@@ -40,6 +48,8 @@ signals:
 
 public slots:
     void set_show_line_numbers(bool visible);
+    void clear_execution_highlight();
+    void clear_failed_open_cache();
 
     void open_file_dialog();
     void save_tab(int index);
@@ -51,15 +61,26 @@ public slots:
     void close_tab(int index);
     void close_current_tab();
     void close_tab_by_name(QString &filename, bool ask = false);
+    void follow_debug_location(
+        debuginfo::DebugInfo *debug_info,
+        uint64_t pc,
+        size_t *hint_index,
+        bool follow,
+        bool auto_open);
 
 private:
+    void activate_tab(EditorTab *tab);
     void close_tab_unchecked(int index);
     void confirm_close_tab_dialog(int index);
 
 private:
     QSharedPointer<QSettings> settings;
+    QPointer<QTabWidget> parent_tabs;
+    QPointer<SrcEditor> execution_editor;
     bool line_numbers_visible = true;
+    bool activate_tab_changes = true;
     size_t unknown_editor_counter = 1;
+    QSet<QString> unopenable_files;
 };
 
 #endif // EDITORDOCK_H

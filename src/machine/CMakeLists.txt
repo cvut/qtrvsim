@@ -85,7 +85,7 @@ add_library(machine STATIC
 		${machine_HEADERS})
 target_link_libraries(machine
 		PRIVATE ${QtLib}::Core
-		PUBLIC elf++ dwarf++)
+		PUBLIC elf++ dwarf++ debuginfo)
 target_include_directories(machine
 		PUBLIC "${PROJECT_SOURCE_DIR}/external/libelfin")
 
@@ -203,7 +203,7 @@ if (NOT ${WASM})
 			symboltable.h
 	)
 	target_link_libraries(program_loader_test
-			PRIVATE ${QtLib}::Core ${QtLib}::Test elf++ dwarf++)
+			PRIVATE ${QtLib}::Core ${QtLib}::Test elf++ dwarf++ debuginfo)
 	target_include_directories(program_loader_test
 			PRIVATE "${PROJECT_SOURCE_DIR}/external/libelfin")
 	add_test(NAME program_loader COMMAND program_loader_test)
@@ -246,6 +246,14 @@ if (NOT ${WASM})
 			PRIVATE "${PROJECT_SOURCE_DIR}/external/libelfin")
 	add_test(NAME core COMMAND core_test)
 
+	add_executable(machine_test
+			machine.test.cpp
+			machine.test.h
+	)
+	target_link_libraries(machine_test
+			PRIVATE machine ${QtLib}::Core ${QtLib}::Test)
+	add_test(NAME machine COMMAND machine_test)
+
 	add_custom_target(machine_unit_tests
-			DEPENDS alu_test registers_test memory_test cache_test instruction_test program_loader_test core_test)
+			DEPENDS alu_test registers_test memory_test cache_test instruction_test program_loader_test core_test machine_test)
 endif ()

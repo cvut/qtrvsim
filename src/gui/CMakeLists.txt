@@ -186,6 +186,24 @@ set_target_properties(gui PROPERTIES
 )
 # END MACOS
 
+if (NOT "${WASM}")
+    add_executable(editor_dock_test
+            windows/editor/editordock.test.cpp
+            windows/editor/editordock.test.h
+            windows/editor/editordock.cpp
+            windows/editor/editortab.cpp
+            windows/editor/srceditor.cpp
+            windows/editor/linenumberarea.cpp
+            windows/editor/highlighterasm.cpp
+            windows/editor/highlighterc.cpp
+            dialogs/savechanged/savechangeddialog.cpp
+            widgets/hidingtabwidget.cpp)
+    target_include_directories(editor_dock_test PRIVATE .)
+    target_link_libraries(editor_dock_test PRIVATE machine ${QtLib}::Widgets ${QtLib}::Test)
+    add_test(NAME editor_dock COMMAND editor_dock_test)
+    set_tests_properties(editor_dock PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+endif ()
+
 # =============================================================================
 # Installation
 # =============================================================================

@@ -5,6 +5,7 @@
 #include "linenumberarea.h"
 #include "machine/machine.h"
 
+#include <QColor>
 #include <QMimeData>
 #include <QString>
 #include <QSyntaxHighlighter>
@@ -17,6 +18,8 @@ class SrcEditor : public QPlainTextEdit {
     using Super = QPlainTextEdit;
 
 public:
+    enum class LineHighlight { Execution, Navigation, Diagnostic };
+
     explicit SrcEditor(QWidget *parent);
     [[nodiscard]] QString filename() const;
     QString title();
@@ -24,7 +27,9 @@ public:
     bool saveFile(QString filename = "");
     bool loadByteArray(const QByteArray &content, const QString &filename = "");
     void setCursorToLine(int ln);
-    void setCursorTo(int ln, int col);
+    void setCursorTo(int ln, int col, bool center = false);
+    void setLineHighlight(LineHighlight kind, const QColor &color);
+    void clearLineHighlight(LineHighlight kind);
     void setFileName(const QString &filename);
     [[nodiscard]] bool isModified() const;
     void setModified(bool val);
@@ -48,6 +53,8 @@ private slots:
     void updateLineNumberArea(const QRect &rect, int dy);
 
 private:
+    QList<QTextEdit::ExtraSelection> selectionsWithout(LineHighlight kind) const;
+
     ::Box<QSyntaxHighlighter> highlighter {};
     LineNumberArea *line_number_area;
     bool line_numbers_visible = true;

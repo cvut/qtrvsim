@@ -182,7 +182,8 @@ private:
     mutable uint32_t burst_writes = 0;
     mutable uint32_t change_counter_for_tlb_ops = 0;
 
-    WriteResult translate_and_write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts);
+    WriteResult
+    translate_and_write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts);
     ReadResult translate_and_read(void *dst, AddressWithMode src, size_t sz, ReadOptions opts);
     inline size_t set_index(uint64_t vpn) const { return vpn & (num_sets_ - 1); }
     inline bool is_mode_enabled_in_satp(uint64_t satp_raw) const {

@@ -18,8 +18,11 @@ MemoryDataBus::~MemoryDataBus() {
     }
 }
 
-WriteResult
-MemoryDataBus::write(AddressWithMode destination, const void *source, size_t size, WriteOptions options) {
+WriteResult MemoryDataBus::write(
+    AddressWithMode destination,
+    const void *source,
+    size_t size,
+    WriteOptions options) {
     return repeat_access_until_completed<WriteResult>(
         destination, source, size, options,
         [this](Address dst, const void *src, size_t s, WriteOptions opt) -> WriteResult {
@@ -47,8 +50,11 @@ WriteResult MemoryDataBus::write_single(
     return result;
 }
 
-ReadResult
-MemoryDataBus::read(void *destination, AddressWithMode source, size_t size, ReadOptions options) const {
+ReadResult MemoryDataBus::read(
+    void *destination,
+    AddressWithMode source,
+    size_t size,
+    ReadOptions options) const {
     return repeat_access_until_completed<ReadResult>(
         destination, source, size, options,
         [this](void *dst, Address src, size_t s, ReadOptions opt) -> ReadResult {
@@ -189,8 +195,11 @@ TrivialBus::TrivialBus(BackendMemory *backend_memory)
     : FrontendMemory(backend_memory->simulated_machine_endian)
     , device(backend_memory) {}
 
-WriteResult
-TrivialBus::write(AddressWithMode destination, const void *source, size_t size, WriteOptions options) {
+WriteResult TrivialBus::write(
+    AddressWithMode destination,
+    const void *source,
+    size_t size,
+    WriteOptions options) {
     change_counter += 1; // Counter is mandatory by the frontend interface.
     return device->write(destination.get_raw(), source, size, options);
 }

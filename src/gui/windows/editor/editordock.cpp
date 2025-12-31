@@ -1,6 +1,7 @@
 #include "editordock.h"
 
 #include "common/logging.h"
+#include "debuginfo/debuginfo.h"
 #include "dialogs/savechanged/savechangeddialog.h"
 #include "editortab.h"
 #include "helper/async_modal.h"
@@ -9,6 +10,9 @@
 #include <QFileInfo>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QScopedValueRollback>
+#include <QTextEdit>
+#include <QTimer>
 #include <qtabbar.h>
 #include <utility>
 
@@ -30,7 +34,8 @@ int compare_filenames(const QString &filename1, const QString &filename2) {
 
 EditorDock::EditorDock(QSharedPointer<QSettings> settings, QTabWidget *parent_tabs, QWidget *parent)
     : Super(parent)
-    , settings(std::move(settings)) {
+    , settings(std::move(settings))
+    , parent_tabs(parent_tabs) {
     {
         auto bar = tabBar();
         bar->setMovable(true);
@@ -44,44 +49,54 @@ EditorDock::EditorDock(QSharedPointer<QSettings> settings, QTabWidget *parent_ta
     setTabsClosable(true);
     connect(this, &EditorDock::tabCloseRequested, this, [this](int index) { close_tab(index); });
 
-    connect(
-        this, &EditorDock::currentChanged, parent_tabs,
-        [this, parent_tabs](int index) {
-            // Update parent title
-            if (count() == 0 || index < 0) return;
-            auto *editor = get_tab(index)->get_editor();
+    connect(this, &EditorDock::currentChanged, this, [this](int) {
+        if (activate_tab_changes && this->parent_tabs && currentIndex() >= 0) {
+            this->parent_tabs->setCurrentWidget(this);
+        }
+        QTimer::singleShot(0, this, [this]() {
+            if (!this->parent_tabs || count() == 0 || currentIndex() < 0) return;
+            auto *editor = get_current_editor();
             QString title = QString("&Editor (%1)").arg(editor->title());
-            parent_tabs->setTabText(parent_tabs->indexOf(this), title);
-            // IMPORTANT: This repeated call solved a very annoying QT resize bug. Do not remove it!
-            parent_tabs->setTabText(parent_tabs->indexOf(this), title);
-            parent_tabs->setCurrentIndex(parent_tabs->indexOf(this));
-        },
-        Qt::QueuedConnection);
+            this->parent_tabs->setTabText(this->parent_tabs->indexOf(this), title);
+            // IMPORTANT: This repeated call solves a Qt resize bug. Do not remove it!
+            this->parent_tabs->setTabText(this->parent_tabs->indexOf(this), title);
+        });
+    });
+}
+
+void EditorDock::activate_tab(EditorTab *tab) {
+    setCurrentWidget(tab);
+    if (parent_tabs) { parent_tabs->setCurrentWidget(this); }
 }
 
 EditorTab *EditorDock::get_tab(int index) const {
     return dynamic_cast<EditorTab *>(widget(index));
 }
 
-EditorTab *EditorDock::open_file(const QString &filename, bool save_as_required) {
+EditorTab *EditorDock::open_file(const QString &filename, bool save_as_required, bool activate) {
+    if (unopenable_files.contains(filename)) { return nullptr; }
     auto tab = new EditorTab(line_numbers_visible, this);
     if (tab->get_editor()->loadFile(filename)) {
+        unopenable_files.remove(filename);
+        QScopedValueRollback<bool> activation_guard(activate_tab_changes, activate);
         addTab(tab, tab->title());
-        setCurrentWidget(tab);
+        if (activate) { activate_tab(tab); }
         if (save_as_required) tab->get_editor()->setSaveAsRequired(save_as_required);
         return tab;
     } else {
+        unopenable_files.insert(filename);
         delete tab;
         return nullptr;
     }
 }
 
-EditorTab *EditorDock::open_file_if_not_open(const QString &filename, bool save_as_required) {
+EditorTab *
+EditorDock::open_file_if_not_open(const QString &filename, bool save_as_required, bool activate) {
     auto tab = find_tab_by_filename(filename);
     if (tab == nullptr) {
-        return open_file(filename, save_as_required);
+        return open_file(filename, save_as_required, activate);
     } else {
-        setCurrentWidget(tab);
+        if (activate) { activate_tab(tab); }
         return tab;
     }
 }
@@ -97,7 +112,7 @@ EditorTab *EditorDock::create_empty_tab() {
         }
     }
     addTab(tab, tab->title());
-    setCurrentWidget(tab);
+    activate_tab(tab);
     return tab;
 }
 
@@ -174,7 +189,7 @@ void EditorDock::open_file_dialog() {
 
     auto tab_id = find_tab_id_by_filename(file_name);
     if (tab_id.has_value()) {
-        setCurrentIndex(tab_id.value());
+        activate_tab(get_tab(tab_id.value()));
         return;
     }
 
@@ -318,14 +333,71 @@ void EditorDock::confirm_close_tab_dialog(int index) {
     msgbox->open();
 }
 
-bool EditorDock::set_cursor_to(const QString &filename, int line, int column) {
+bool EditorDock::set_cursor_to(const QString &filename, int line, int column, bool center) {
     auto tab = (filename == "Unknown") ? get_tab(currentIndex()) : find_tab_by_filename(filename);
     if (tab == nullptr) {
         WARN(
             "Cannot find tab for file '%s'. Unable to set cursor.", filename.toStdString().c_str());
         return false;
     }
-    setCurrentWidget(tab);
-    tab->get_editor()->setCursorTo(line, column);
+    activate_tab(tab);
+    tab->get_editor()->setCursorTo(line, column, center);
     return true;
+}
+
+SrcEditor *EditorDock::navigate_to_source(const QString &filename, uint32_t line, bool auto_open) {
+    if (filename.isEmpty()) { return nullptr; }
+    auto *tab = auto_open ? open_file_if_not_open(filename, false, false)
+                          : find_tab_by_filename(filename);
+    if (!tab) { return nullptr; }
+    auto *editor = tab->get_editor();
+    if (line == 0 || line > static_cast<uint32_t>(editor->blockCount())) { return nullptr; }
+    activate_tab(tab);
+    editor->setCursorTo(static_cast<int>(line), 1, true);
+    return editor;
+}
+
+void EditorDock::clear_execution_highlight() {
+    if (execution_editor) {
+        execution_editor->clearLineHighlight(SrcEditor::LineHighlight::Execution);
+        execution_editor.clear();
+    }
+}
+
+void EditorDock::clear_failed_open_cache() {
+    unopenable_files.clear();
+}
+
+void EditorDock::follow_debug_location(
+    debuginfo::DebugInfo *debug_info,
+    uint64_t pc,
+    size_t *hint,
+    bool follow,
+    bool auto_open) {
+    if (!follow) { clear_execution_highlight(); }
+    if (!follow && !auto_open) { return; }
+    if (!debug_info) {
+        clear_execution_highlight();
+        return;
+    }
+
+    auto *loc = debug_info->find(pc, hint);
+    if (!loc) {
+        clear_execution_highlight();
+        return;
+    }
+
+    QString file = QString::fromStdString(debug_info->get_file_path(loc->file_id));
+    if (!follow) {
+        if (auto_open && !file.isEmpty()) { open_file_if_not_open(file, false, false); }
+        return;
+    }
+
+    auto *editor = navigate_to_source(file, loc->line, auto_open);
+    if (execution_editor != editor) { clear_execution_highlight(); }
+    if (editor) {
+        execution_editor = editor;
+        editor->setLineHighlight(
+            SrcEditor::LineHighlight::Execution, QColor(Qt::green).lighter(180));
+    }
 }

@@ -2,6 +2,7 @@
 #define MACHINE_H
 
 #include "core.h"
+#include "debuginfo/debuginfo.h"
 #include "machineconfig.h"
 #include "memory/backend/aclintmswi.h"
 #include "memory/backend/aclintmtimer.h"
@@ -66,6 +67,9 @@ public:
     const CoreSingle *core_singe();
     const CorePipelined *core_pipelined();
     bool executable_loaded() const;
+
+    debuginfo::DebugInfo *get_debug_info();
+    const QString &get_debug_info_warning() const;
 
     enum Status {
         ST_READY,   // Machine is ready to be started or step to be called
@@ -162,6 +166,9 @@ private:
     uint64_t last_cycle_count = 0;
 
     Box<SymbolTable> symtab;
+    Box<debuginfo::DebugInfo> debug_info;
+    Box<debuginfo::DebugInfo> debug_info_program_only;
+    QString debug_info_warning;
     Address program_end = 0xffff0000_addr;
     enum Status stat = ST_READY;
     void set_status(enum Status st);
