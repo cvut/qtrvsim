@@ -33,6 +33,7 @@ set(gui_SOURCES
         windows/editor/linenumberarea.cpp
         windows/editor/editordock.cpp
         windows/editor/editortab.cpp
+        mainwindow/assembler_gui_integration.cpp
         hinttabledelegate.cpp
         windows/lcd/lcddisplaydock.cpp
         windows/lcd/lcddisplayview.cpp

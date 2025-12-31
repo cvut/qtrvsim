@@ -2,6 +2,7 @@
 
 #include "assembler/fixmatheval.h"
 #include "assembler/simpleasm.h"
+#include "assembler_gui_integration.h"
 #include "dialogs/about/aboutdialog.h"
 #include "dialogs/gotosymbol/gotosymboldialog.h"
 #include "dialogs/savechanged/savechangeddialog.h"
@@ -683,97 +684,6 @@ void MainWindow::update_core_frequency(double frequency) {
     frequency_label->setText(QString("Core frequency: %1 kHz").arg(frequency / 1000.0, 0, 'f', 3));
 }
 
-bool SimpleAsmWithEditorCheck::process_file(const QString &filename, QString *error_ptr) {
-    EditorTab *tab = mainwindow->editor_tabs->find_tab_by_filename(filename);
-    if (tab == nullptr) { return Super::process_file(filename, error_ptr); }
-    SrcEditor *editor = tab->get_editor();
-    QTextDocument *doc = editor->document();
-    int ln = 1;
-    for (QTextBlock block = doc->begin(); block.isValid(); block = block.next(), ln++) {
-        QString line = block.text();
-        process_line(line, filename, ln);
-    }
-    return !error_occured;
-}
-
-bool SimpleAsmWithEditorCheck::process_pragma(
-    QStringList &operands,
-    const QString &filename,
-    int line_number,
-    QString *error_ptr) {
-    (void)error_ptr;
-#if 0
-    static const QMap<QString, QDockWidget *MainWindow::*> pragma_how_map = {
-        {QString("registers"), static_cast<QDockWidget *MainWindow::*>(&MainWindow::registers)},
-    };
-#endif
-    if (operands.count() < 2
-        || (QString::compare(operands.at(0), "qtrvsim", Qt::CaseInsensitive)
-            && QString::compare(operands.at(0), "qtmips", Qt::CaseInsensitive))) {
-        return true;
-    }
-    QString op = operands.at(1).toLower();
-    if (op == "show") {
-        if (operands.count() < 3) { return true; }
-        QString show_method = "show_" + operands.at(2);
-        QString show_method_sig = show_method + "()";
-        if (mainwindow->metaObject()->indexOfMethod(show_method_sig.toLatin1().data()) == -1) {
-            emit report_message(
-                messagetype::MSG_WARNING, filename, line_number, 0,
-                "#pragma qtrvsim show - unknown object " + operands.at(2), "");
-            return true;
-        }
-        QMetaObject::invokeMethod(mainwindow, show_method.toLatin1().data());
-        return true;
-    }
-    if (op == "tab") {
-        if ((operands.count() < 3) || error_occured) { return true; }
-        if (!QString::compare(operands.at(2), "core", Qt::CaseInsensitive)
-            && (mainwindow->editor_tabs != nullptr) && (mainwindow->coreview != nullptr)) {
-            mainwindow->editor_tabs->setCurrentWidget(mainwindow->coreview.data());
-        }
-        return true;
-    }
-    if (op == "focus") {
-        bool ok;
-        if (operands.count() < 4) { return true; }
-        fixmatheval::FmeExpression expression;
-        fixmatheval::FmeValue value;
-        QString error;
-        ok = expression.parse(operands.at(3), error);
-        if (!ok) {
-            emit report_message(
-                messagetype::MSG_WARNING, filename, line_number, 0,
-                "expression parse error " + error, "");
-            return true;
-        }
-        ok = expression.eval(value, symtab, error, address);
-        if (!ok) {
-            emit report_message(
-                messagetype::MSG_WARNING, filename, line_number, 0,
-                "expression evaluation error " + error, "");
-            return true;
-        }
-        if (!QString::compare(operands.at(2), "memory", Qt::CaseInsensitive)
-            && (mainwindow->memory != nullptr)) {
-            mainwindow->memory->focus_addr(machine::Address(value));
-            return true;
-        }
-        if (!QString::compare(operands.at(2), "program", Qt::CaseInsensitive)
-            && (mainwindow->program != nullptr)) {
-            mainwindow->program->focus_addr(machine::Address(value));
-            return true;
-        }
-        emit report_message(
-            messagetype::MSG_WARNING, filename, line_number, 0,
-            "unknown #pragma qtrvsim focus unknown object " + operands.at(2), "");
-        return true;
-    }
-    emit report_message(
-        messagetype::MSG_WARNING, filename, line_number, 0, "unknown #pragma qtrvsim " + op, "");
-    return true;
-}
-
 void MainWindow::compile_source() {
     bool error_occured = false;
     if (machine != nullptr) {
@@ -799,9 +709,42 @@ void MainWindow::compile_source() {
     auto content = editor->document();
 
     emit clear_messages();
-    SimpleAsmWithEditorCheck sasm(this);
+    AssemblerGuiIntegration sasm(editor_tabs.data(), this);
 
     connect(&sasm, &SimpleAsm::report_message, this, &MainWindow::report_message);
+    connect(
+        &sasm, &AssemblerGuiIntegration::dock_show_requested, this,
+        [this](const QString &name, const QString &file, int line) {
+            QString show_method = "show_" + name;
+            QString show_method_sig = show_method + "()";
+            if (metaObject()->indexOfMethod(show_method_sig.toLatin1().data()) == -1) {
+                emit report_message(
+                    messagetype::MSG_WARNING, file, line, 0,
+                    "#pragma qtrvsim show - unknown object " + name, "");
+            } else {
+                QMetaObject::invokeMethod(this, show_method.toLatin1().data());
+            }
+        });
+    connect(
+        &sasm, &AssemblerGuiIntegration::tab_switch_requested, this,
+        [this](const QString &name, const QString &file, int line) {
+            (void)file;
+            (void)line;
+            if (!QString::compare(name, "core", Qt::CaseInsensitive) && (editor_tabs != nullptr)
+                && (coreview != nullptr)) {
+                editor_tabs->setCurrentWidget(coreview.data());
+            }
+        });
+    connect(
+        &sasm, &AssemblerGuiIntegration::memory_focus_requested, this,
+        [this](machine::Address addr) {
+            if (memory != nullptr) { memory->focus_addr(addr); }
+        });
+    connect(
+        &sasm, &AssemblerGuiIntegration::program_focus_requested, this,
+        [this](machine::Address addr) {
+            if (program != nullptr) { program->focus_addr(addr); }
+        });
 
     sasm.setup(mem, &symtab, machine::Address(0x00000200), machine->core()->get_xlen());
 

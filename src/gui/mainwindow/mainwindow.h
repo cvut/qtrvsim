@@ -38,8 +38,6 @@
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
-    friend class SimpleAsmWithEditorCheck;
-
 public:
     explicit MainWindow(OWNED QSettings *settings, QWidget *parent = nullptr);
     ~MainWindow() override;
@@ -180,27 +178,6 @@ private:
     QPrinter printer { QPrinter::HighResolution };
     QPrintDialog print_dialog { &printer, this };
 #endif
-};
-
-class SimpleAsmWithEditorCheck : public SimpleAsm {
-    Q_OBJECT
-    using Super = SimpleAsm;
-
-public:
-    explicit SimpleAsmWithEditorCheck(MainWindow *a_mainwindow, QObject *parent = nullptr)
-        : Super(parent)
-        , mainwindow(a_mainwindow) {}
-    bool process_file(const QString &filename, QString *error_ptr = nullptr) override;
-
-protected:
-    bool process_pragma(
-        QStringList &operands,
-        const QString &filename = "",
-        int line_number = 0,
-        QString *error_ptr = nullptr) override;
-
-private:
-    MainWindow *mainwindow;
 };
 
 #endif // MAINWINDOW_H
