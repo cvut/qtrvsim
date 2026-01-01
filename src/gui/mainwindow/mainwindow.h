@@ -10,13 +10,13 @@
 #include "extprocess.h"
 #include "machine/machine.h"
 #include "machine/machineconfig.h"
+#include "mainwindow/assembler_gui_integration.h"
 #include "scene.h"
 #include "ui_MainWindow.h"
 #include "widgets/hidingtabwidget.h"
 #include "windows/cache/cachedock.h"
 #include "windows/csr/csrdock.h"
 #include "windows/editor/editordock.h"
-#include "windows/editor/editortab.h"
 #include "windows/editor/srceditor.h"
 #include "windows/lcd/lcddisplaydock.h"
 #include "windows/memory/memorydock.h"
@@ -37,8 +37,6 @@
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
-
-    friend class SimpleAsmWithEditorCheck;
 
 public:
     explicit MainWindow(OWNED QSettings *settings, QWidget *parent = nullptr);
@@ -119,6 +117,8 @@ public slots:
     void machine_exit();
     void machine_trap(machine::SimulatorException &e);
     void view_mnemonics_registers(bool enable);
+    void view_follow_execution(bool enable);
+    void highlight_source_line(machine::Address addr);
     void message_selected(
         messagetype::Type type,
         const QString &file,
@@ -167,6 +167,7 @@ private:
     QSharedPointer<QSettings> settings;
 
     Box<machine::Machine> machine; // Current simulated machine
+    size_t debug_info_hint = 0;
 
     void show_dockwidget(
         QDockWidget *w,
@@ -180,27 +181,6 @@ private:
     QPrinter printer { QPrinter::HighResolution };
     QPrintDialog print_dialog { &printer, this };
 #endif
-};
-
-class SimpleAsmWithEditorCheck : public SimpleAsm {
-    Q_OBJECT
-    using Super = SimpleAsm;
-
-public:
-    explicit SimpleAsmWithEditorCheck(MainWindow *a_mainwindow, QObject *parent = nullptr)
-        : Super(parent)
-        , mainwindow(a_mainwindow) {}
-    bool process_file(const QString &filename, QString *error_ptr = nullptr) override;
-
-protected:
-    bool process_pragma(
-        QStringList &operands,
-        const QString &filename = "",
-        int line_number = 0,
-        QString *error_ptr = nullptr) override;
-
-private:
-    MainWindow *mainwindow;
 };
 
 #endif // MAINWINDOW_H

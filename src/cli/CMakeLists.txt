@@ -117,3 +117,19 @@ add_cli_test(
         --dump-registers
         EXPECTED_OUTPUT "tests/cli/virtual_memory/exec/stdout.txt"
 )
+
+add_cli_test(
+        NAME debuginfo_trace
+        ARGS
+        --asm "${CMAKE_SOURCE_DIR}/tests/cli/debuginfo_trace/program.S"
+        --trace-fetch --trace-source
+        EXPECTED_OUTPUT "tests/cli/debuginfo_trace/stdout.txt"
+)
+
+add_cli_test(
+        NAME debuginfo_multifile
+        ARGS
+        --asm "${CMAKE_SOURCE_DIR}/tests/cli/debuginfo_multifile/main.S"
+        --trace-fetch --trace-source
+        EXPECTED_OUTPUT "tests/cli/debuginfo_multifile/stdout.txt"
+)

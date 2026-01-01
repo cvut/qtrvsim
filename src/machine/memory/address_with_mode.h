@@ -1,11 +1,12 @@
 #ifndef ADDRESS_WITH_MODE_H
 #define ADDRESS_WITH_MODE_H
 
-#include <utility>
-#include <cstdint>
-#include <QMetaType>
 #include "address.h"
 #include "csr/address.h"
+
+#include <QMetaType>
+#include <cstdint>
+#include <utility>
 
 namespace machine {
 
@@ -17,14 +18,12 @@ struct AccessMode {
 
     static AccessMode pack(uint16_t asid, CSR::PrivilegeLevel priv, bool uncached = false) {
         uint32_t t = (static_cast<uint32_t>(priv) & 0x3u)
-            | ((static_cast<uint32_t>(asid) & 0xFFFFu) << 2)
-            | (uncached ? (1u << 18) : 0u);
+                     | ((static_cast<uint32_t>(asid) & 0xFFFFu) << 2)
+                     | (uncached ? (1u << 18) : 0u);
         return AccessMode(t);
     }
     uint16_t asid() const { return static_cast<uint16_t>((token >> 2) & 0xFFFFu); }
-    CSR::PrivilegeLevel priv() const {
-        return static_cast<CSR::PrivilegeLevel>(token & 0x3u);
-    }
+    CSR::PrivilegeLevel priv() const { return static_cast<CSR::PrivilegeLevel>(token & 0x3u); }
     bool uncached() const { return ((token >> 18) & 0x1u) != 0; }
     uint32_t raw() const { return token; }
 };
@@ -48,10 +47,12 @@ public:
     uint32_t access_mode_raw() const noexcept { return mode.raw(); }
 
     constexpr bool operator==(const AddressWithMode &other) const noexcept {
-        return static_cast<const Address&>(*this) == static_cast<const Address&>(other)
+        return static_cast<const Address &>(*this) == static_cast<const Address &>(other)
                && mode.raw() == other.mode.raw();
     }
-    constexpr bool operator!=(const AddressWithMode &other) const noexcept { return !(*this == other); }
+    constexpr bool operator!=(const AddressWithMode &other) const noexcept {
+        return !(*this == other);
+    }
 
     constexpr std::pair<Address, AccessMode> unpack() const noexcept {
         return { Address(get_raw()), mode };

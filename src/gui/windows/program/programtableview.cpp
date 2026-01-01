@@ -23,6 +23,7 @@ ProgramTableView::ProgramTableView(QWidget *parent, QSettings *settings) : Super
     adjust_scroll_pos_in_progress = false;
     need_addr0_save = false;
     setTextElideMode(Qt::ElideNone);
+    setMouseTracking(true);
 }
 
 void ProgramTableView::addr0_save_change(machine::Address val) {
@@ -187,4 +188,14 @@ void ProgramTableView::keyPressEvent(QKeyEvent *event) {
     } else {
         Super::keyPressEvent(event);
     }
+}
+
+void ProgramTableView::mouseMoveEvent(QMouseEvent *event) {
+    QModelIndex index = indexAt(event->pos());
+    if (index.isValid() && index.column() == 1) {
+        setCursor(Qt::PointingHandCursor);
+    } else {
+        setCursor(Qt::ArrowCursor);
+    }
+    Super::mouseMoveEvent(event);
 }

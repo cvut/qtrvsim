@@ -1,6 +1,7 @@
 #ifndef FRONTEND_MEMORY_H
 #define FRONTEND_MEMORY_H
 
+#include "address_with_mode.h"
 #include "common/endian.h"
 #include "csr/address.h"
 #include "machinedefs.h"
@@ -11,8 +12,6 @@
 
 #include <QObject>
 #include <cstdint>
-
-#include "address_with_mode.h"
 
 // Shortcut for enum class values, type is obvious from context.
 using ae = machine::AccessEffects;
@@ -80,7 +79,8 @@ public:
      * ae::REGULAR.
      * @param control_signal    CPU control unit signal
      */
-    [[nodiscard]] RegisterValue read_ctl(enum AccessControl control_signal, AddressWithMode source) const;
+    [[nodiscard]] RegisterValue
+    read_ctl(enum AccessControl control_signal, AddressWithMode source) const;
 
     virtual void sync();
     [[nodiscard]] virtual LocationStatus location_status(Address address) const;

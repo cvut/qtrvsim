@@ -1115,6 +1115,65 @@
            </item>
           </layout>
          </widget>
+            <widget class="QWidget" name="tab_editor">
+                <property name="accessibleName">
+                    <string>Editor</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_editor">
+                    <item>
+                        <widget class="QGroupBox" name="group_editor">
+                            <property name="title">
+                                <string>Editor</string>
+                            </property>
+                            <layout class="QVBoxLayout" name="verticalLayout_editor_group">
+                                <item>
+                                    <widget class="QCheckBox" name="editor_show_line_numbers">
+                                        <property name="text">
+                                            <string>Show line numbers</string>
+                                        </property>
+                                        <property name="checked">
+                                            <bool>true</bool>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item>
+                                    <widget class="QCheckBox" name="editor_highlight_line">
+                                        <property name="text">
+                                            <string>Highlight executed line</string>
+                                        </property>
+                                        <property name="checked">
+                                            <bool>true</bool>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item>
+                                    <widget class="QCheckBox" name="editor_auto_open">
+                                        <property name="text">
+                                            <string>Automatically open files</string>
+                                        </property>
+                                        <property name="checked">
+                                            <bool>true</bool>
+                                        </property>
+                                    </widget>
+                                </item>
+                            </layout>
+                        </widget>
+                    </item>
+                    <item>
+                        <spacer name="verticalSpacer_editor">
+                            <property name="orientation">
+                                <enum>Qt::Vertical</enum>
+                            </property>
+                            <property name="sizeHint" stdset="0">
+                                <size>
+                                    <width>20</width>
+                                    <height>40</height>
+                                </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
         </widget>
        </item>
       </layout>

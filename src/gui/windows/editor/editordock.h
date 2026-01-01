@@ -2,6 +2,7 @@
 #define EDITORDOCK_H
 
 #include "common/memory_ownership.h"
+#include "debuginfo/debuginfo.h"
 #include "editortab.h"
 #include "widgets/hidingtabwidget.h"
 
@@ -30,7 +31,7 @@ public:
     BORROWED [[nodiscard]] SrcEditor *get_current_editor() const;
     [[nodiscard]] QStringList get_open_file_list() const;
     bool get_modified_tab_filenames(QStringList &output, bool report_unnamed = false) const;
-    bool set_cursor_to(const QString &filename, int line, int column);
+    bool set_cursor_to(const QString &filename, int line, int column, bool center = false);
 
 protected:
     void tabCountChanged() override;
@@ -51,6 +52,12 @@ public slots:
     void close_tab(int index);
     void close_current_tab();
     void close_tab_by_name(QString &filename, bool ask = false);
+    void follow_debug_location(
+        debuginfo::DebugInfo *debug_info,
+        uint64_t pc,
+        size_t *hint_index,
+        bool follow,
+        bool auto_open);
 
 private:
     void close_tab_unchecked(int index);
