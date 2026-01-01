@@ -1,0 +1,36 @@
+Fetch: addi x1, x0, 1 [main.S:4]
+Decode: nop
+Execute: nop
+Memory: nop
+Writeback: nop
+Fetch: addi x2, x0, 2 [helper.S:1]
+Decode: addi x1, x0, 1 [main.S:4]
+Execute: nop
+Memory: nop
+Writeback: nop
+Fetch: addi x3, x0, 3 [main.S:6]
+Decode: addi x2, x0, 2 [helper.S:1]
+Execute: addi x1, x0, 1 [main.S:4]
+Memory: nop
+Writeback: nop
+Fetch: ebreak [main.S:7]
+Decode: addi x3, x0, 3 [main.S:6]
+Execute: addi x2, x0, 2 [helper.S:1]
+Memory: addi x1, x0, 1 [main.S:4]
+Writeback: nop
+Fetch: nop
+Decode: !ebreak [main.S:7]
+Execute: addi x3, x0, 3 [main.S:6]
+Memory: addi x2, x0, 2 [helper.S:1]
+Writeback: addi x1, x0, 1 [main.S:4]
+Fetch: nop
+Decode: nop
+Execute: !ebreak [main.S:7]
+Memory: addi x3, x0, 3 [main.S:6]
+Writeback: addi x2, x0, 2 [helper.S:1]
+Machine stopped on BREAK exception.
+Fetch: nop
+Decode: nop
+Execute: nop
+Memory: !ebreak [main.S:7]
+Writeback: addi x3, x0, 3 [main.S:6]

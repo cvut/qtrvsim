@@ -1,0 +1,6 @@
+Fetch: lui x1, 0x12345 [program.S:3]
+Fetch: addi x1, x1, 1656 [program.S:3]
+Fetch: jal x0, 0x220 [program.S:4]
+Fetch: nop
+Machine stopped on BREAK exception.
+Fetch: ebreak [program.S:8]

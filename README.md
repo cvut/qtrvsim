@@ -158,6 +158,9 @@ or 64-bit (`-mabi=lp64 -march=rv64i` to `rv64ima_zicsr`).
 Simulation will execute them as XLEN=32 or XLEN=64 according to the ELF file header.
 There is even initial support for endianness selection based on the ELF file header.
 
+Source-level navigation and `--trace-source` need `-g -gdwarf-4`. DWARF5 binaries
+still run, but source tracing is unavailable and a warning is shown.
+
 - 64-bit RISC-V ISA RV64IM and 32-bit RV32IM ELF executables are supported.
 - Compressed instructions are not yet supported.
 
