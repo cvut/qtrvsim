@@ -15,6 +15,7 @@ if (NOT ${WASM})
             debuginfo.test.cpp
             debuginfo.test.h
     )
+    target_include_directories(debuginfo_test PRIVATE ${CMAKE_SOURCE_DIR}/src)
     target_link_libraries(debuginfo_test
             PRIVATE debuginfo ${QtLib}::Core ${QtLib}::Test)
     add_test(NAME debuginfo COMMAND debuginfo_test)

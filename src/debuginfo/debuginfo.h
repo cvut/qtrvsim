@@ -14,7 +14,6 @@ struct SourceLocation {
     uint32_t line;
 };
 
-/** Provides effective mapping of addresses to source location */
 class DebugInfo {
 public:
     DebugInfo() = default;
@@ -66,8 +65,6 @@ public:
 
 private:
     std::vector<std::string> files;
-    // Struct of arrays optimized loopup table.
-    // Index `i` in `addresses` maps to index `i` in locations.
     std::vector<uint64_t> addresses;
     std::vector<SourceLocation> locations;
 };

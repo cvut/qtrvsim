@@ -11,6 +11,7 @@ set(polyfills_HEADERS
 		qt5/qfontmetrics.h
 		qt5/qlinef.h
 		qt5/qtableview.h
+		qt5/qtest.h
 		)
 
 # =============================================================================
@@ -37,4 +38,3 @@ if(NOT "${WASM}")
 	add_test(NAME mulh64
 			COMMAND mulh64_test)
 endif()
-

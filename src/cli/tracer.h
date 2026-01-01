@@ -1,6 +1,7 @@
 #ifndef TRACER_H
 #define TRACER_H
 
+#include "debuginfo/debuginfo.h"
 #include "machine/instruction.h"
 #include "machine/machine.h"
 #include "machine/memory/address.h"
@@ -30,6 +31,9 @@ public:
     bool trace_fetch = false, trace_decode = false, trace_execute = false, trace_memory = false,
          trace_writeback = false, trace_pc = false, trace_wrmem = false, trace_rdmem = false,
          trace_regs_gp = false;
+    bool trace_source = false;
+    BORROWED debuginfo::DebugInfo *debug_info = nullptr;
+    size_t debug_hint = 0;
     quint64 cycle_limit;
 };
 
