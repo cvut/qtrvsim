@@ -1,0 +1,5 @@
+Fetch: addi x1, x0, 1 [main.S:4]
+Fetch: addi x2, x0, 2 [helper.S:1]
+Fetch: addi x3, x0, 3 [main.S:6]
+Machine stopped on BREAK exception.
+Fetch: nop [main.S:7]

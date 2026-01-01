@@ -59,6 +59,7 @@ void create_parser(QCommandLineParser &p) {
           "Print general purpose register changes. You can use * for "
           "all registers.",
           "REG" });
+    p.addOption({ "trace-source", "Include source file:line in trace output." });
     p.addOption({ "dump-to-json", "Configure reportor dump to json file.", "FNAME" });
     p.addOption({ "only-dump", "Do not start the processor." });
     p.addOption({ "disable-console-dump", "Configure reporter not to dump to console." });
@@ -351,7 +352,7 @@ void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
     config.set_vm_enabled(parser.isSet("enable-vm"));
 }
 
-void configure_tracer(QCommandLineParser &p, Tracer &tr) {
+void configure_tracer(QCommandLineParser &p, Tracer &tr, Machine *machine) {
     if (p.isSet("trace-fetch")) { tr.trace_fetch = true; }
     if (p.isSet("pipelined")) { // Following are added only if we have stages
         if (p.isSet("trace-decode")) { tr.trace_decode = true; }
@@ -383,6 +384,11 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
     if (p.isSet("trace-wrmem")) { tr.trace_wrmem = true; }
     if (p.isSet("trace-exception")) { tr.trace_exception = true; }
     if (p.isSet("trace-mode-change")) { tr.trace_mode_change = true; }
+
+    if (p.isSet("trace-source")) {
+        tr.trace_source = true;
+        tr.debug_info = machine->get_debug_info();
+    }
 
     QStringList clim = p.values("cycle-limit");
     if (!clim.empty()) {
@@ -523,9 +529,7 @@ void configure_osemu(QCommandLineParser &p, MachineConfig &config, Machine *mach
     int siz;
 
     siz = p.values("std-in").size();
-    if (siz >= 1) {
-        std_in_path.reset(new QString(p.values("std-in").at(siz - 1)));
-    }
+    if (siz >= 1) { std_in_path.reset(new QString(p.values("std-in").at(siz - 1))); }
     siz = p.values("std-out").size();
     if (siz >= 1) {
         auto *qf = new QFile(p.values("std-out").at(siz - 1));
@@ -563,7 +567,9 @@ void configure_osemu(QCommandLineParser &p, MachineConfig &config, Machine *mach
             config.osemu_fs_root());
         if (!std_in_path.isNull() && !std_in_path->isEmpty()) {
             if (!osemu_handler->map_stdin_to_hostfile(*std_in_path)) {
-                fprintf(stderr, "Failed to map stdin to host file '%s'\n", std_in_path->toLatin1().data());
+                fprintf(
+                    stderr, "Failed to map stdin to host file '%s'\n",
+                    std_in_path->toLatin1().data());
                 exit(EXIT_FAILURE);
             }
         }
@@ -643,7 +649,9 @@ bool assemble(Machine &machine, MsgReport &msgrep, const QString &filename) {
 
     SimpleAsm::connect(&assembler, &SimpleAsm::report_message, &msgrep, &MsgReport::report_message);
 
-    assembler.setup(mem, &symbol_table_db, 0x00000200_addr, machine.core()->get_xlen());
+    assembler.setup(
+        mem, &symbol_table_db, 0x00000200_addr, machine.core()->get_xlen(),
+        machine.get_debug_info());
 
     if (!assembler.process_file(filename)) { return false; }
 
@@ -667,7 +675,7 @@ int main(int argc, char *argv[]) {
     Machine machine(config, !asm_source, !asm_source);
 
     Tracer tr(&machine);
-    configure_tracer(p, tr);
+    configure_tracer(p, tr, &machine);
 
     configure_serial_port(p, machine.serial_port());
 
