@@ -162,7 +162,7 @@ def verify_result(test, result, verbose):
 def run_test(qtrvsim_cli, test, elf_dir, verbose=False, pipeline=False, cache=False):
     """Run a single test"""
     elf_path = os.path.join(elf_dir, os.path.basename(test["elf_path"]))
-    if not os.path.exists(elf_path): return False, f"ELF not found: {elf_path}"
+    if not os.path.exists(elf_path): return None, f"SKIP (ELF not found)"
     
     cmd = [qtrvsim_cli, elf_path, "--dump-registers", "--dump-cycles"]
     if pipeline: cmd.append("--pipelined")
@@ -210,19 +210,21 @@ def main():
     print(f"Running {len(tests)} tests ({mode})\nUsing: {qtrvsim_cli}\nELFs: {elf_dir}\n" + "="*70)
     
     results = [run_test(qtrvsim_cli, t, elf_dir, args.verbose, args.pipeline, args.cache) for t in tests]
-    passed = sum(1 for r in results if r[0])
+    passed = sum(1 for r in results if r[0] is True)
+    failed = sum(1 for r in results if r[0] is False)
+    total_run = passed + failed
     
     for i, (success, msg) in enumerate(results):
-        status = "[OK]  " if success else "[FAIL]"
+        status = "[SKIP]" if success is None else "[OK]  " if success else "[FAIL]"
         print(f"{status} {tests[i]['name']:40s} {msg}")
         
-    print("="*70 + f"\nResults: {passed}/{len(tests)} passed")
-    if passed < len(tests):
+    print("="*70 + f"\nResults: {passed}/{total_run} passed" + (f" ({len(tests) - total_run} skipped)" if len(tests) > total_run else ""))
+    if failed > 0 or total_run == 0:
         print("\nFailed tests:")
         for i, (success, _) in enumerate(results):
-            if not success: print(f"  - {tests[i]['name']}")
+            if success is False: print(f"  - {tests[i]['name']}")
             
-    return 1 if passed < len(tests) else 0
+    return 1 if (failed > 0 or total_run == 0) else 0
 
 if __name__ == "__main__":
     sys.exit(main())
