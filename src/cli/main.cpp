@@ -223,7 +223,10 @@ void configure_branch_predictor(MachineConfig &config, const QStringList &bpred)
         break;
       case PredictorType::SMITH_2_BIT:
       case PredictorType::SMITH_2_BIT_HYSTERESIS:
-        if (init_state == PredictorState::UNDEFINED) {
+        if (init_state != PredictorState::STRONGLY_NOT_TAKEN &&
+            init_state != PredictorState::WEAKLY_NOT_TAKEN &&
+            init_state != PredictorState::WEAKLY_TAKEN &&
+            init_state != PredictorState::STRONGLY_TAKEN) {
           fprintf(stderr,
                   "Initial state for Smith 2 bit predictor must be "
                   "strongly_not_taken/weakly_not_taken/weakly_taken/"
