@@ -224,7 +224,9 @@ void Reporter::report_cache(const char *cache_name, const Cache &cache) {
 
 void Reporter::report_predictor() {
     const BranchPredictor *predictor = machine->branch_predictor();
+    if (predictor == nullptr) { return; }
     const PredictionStatistics *stats = predictor->get_stats();
+    if (stats == nullptr) { return; }
 
     if (dump_format & DumpFormat::JSON) { 
         QJsonObject predictorObj = dump_data_json["predictor"].toObject(); 
