@@ -78,8 +78,9 @@ void create_parser(QCommandLineParser &p) {
           "TRAP" });
     p.addOption(
         { "d-cache",
-          "Data cache. Format policy,sets,words_in_blocks,associativity where "
-          "policy is random/lru/lfu",
+          "Data cache. Format policy,sets,words_in_blocks,associativity[,writeback] where "
+          "policy is random/lru/lfu "
+          "and writeback is optional wb/wt/wtna/wta",
           "DCACHE" });
     p.addOption(
         { "i-cache",
@@ -88,8 +89,9 @@ void create_parser(QCommandLineParser &p) {
           "ICACHE" });
     p.addOption(
         { "l2-cache",
-          "L2 cache. Format policy,sets,words_in_blocks,associativity where "
-          "policy is random/lru/lfu",
+          "L2 cache. Format policy,sets,words_in_blocks,associativity[,writeback] where "
+          "policy is random/lru/lfu "
+          "and writeback is optional wb/wt/wtna/wta",
           "L2CACHE" });
     p.addOption(
         { "branch-predictor",
