@@ -85,6 +85,8 @@ _exit:
 
 .bss
 
+.align 4
+
 /* the area which can be used for a heap from the bootom
  * and stack from the top
  */
