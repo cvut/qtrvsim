@@ -1,0 +1,5 @@
+[book]
+title = "QtRVSim User Manual"
+authors = ["Filip Kraus"]
+language = "en"
+src = "."

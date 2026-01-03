@@ -147,6 +147,8 @@ target_compile_definitions(gui
         APP_GIT=\"${MAIN_PROJECT_HOMEPAGE_URL}\"
         APP_NAME=\"${MAIN_PROJECT_NAME}\"
         APP_VERSION=\"${MAIN_PROJECT_VERSION}\"
+        APP_USER_MANUAL_URL=\"https://comparch.edu.cvut.cz/qtrvsim/manual\"
+        APP_REPORT_PROBLEM_URL=\"https://github.com/cvut/qtrvsim/issues/new\"
         ENV_CONFIG_FILE_NAME=\"${MAIN_PROJECT_NAME_UPPER}_CONFIG_FILE\")
 set_target_properties(gui PROPERTIES
         OUTPUT_NAME "${MAIN_PROJECT_NAME_LOWER}_${PROJECT_NAME}")
@@ -181,4 +183,3 @@ install(TARGETS gui
         RUNTIME DESTINATION bin
         BUNDLE DESTINATION ${EXECUTABLE_OUTPUT_PATH}
 )
-

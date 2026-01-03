@@ -4,6 +4,8 @@ Welcome to the **QtRvSim User Manual**.
 
 QtRvSim is a graphical simulator designed to support learning the fundamentals of computer architecture using the **RISC-V instruction set**. It provides an interactive environment for writing, assembling, and simulating simple RISC-V assembly programs. By visualizing instruction execution on different processor models, QtRvSim helps make abstract computer architecture concepts clear and tangible.
 
+The project is developed by the [Computer Architectures Education](http://comparch.edu.cvut.cz) project at [Czech Technical University](http://www.cvut.cz/) and souce code is available on [GitHub](https://github.com/cvut/qtrvsim).
+
 ## Key Features
 
 - **Visual Datapaths** – Observe execution on both single-cycle and 5-stage pipelined processor models.
