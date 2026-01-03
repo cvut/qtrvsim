@@ -37,28 +37,62 @@ Or for RV64:
 riscv64-unknown-elf-gcc -march=rv64i -mabi=lp64 -nostdlib -nostartfiles -o program.elf program.s
 ```
 
+The above choice is for basic RISC-V integer ISA with 32 registers.
+
+QtRvSim supports even following extensions:
+
+- M (`-march=rv32im`/`-march=rv64im`) - hardware multiply and divide instructions
+- A (with M `-march=rv32ima`/`-march=rv64ima`) - atomic operations
+- Zicsr (with A and M `-march=rv32ima_zicsr`/`-march=rv64ima_zicsr`) support for control registers
+
+The A, M and XLEN should match setting in the `Core ISA and Hazards` setup dialog tab.
+
 ## Compiling C Programs
 
 For C programs, you need a minimal startup file and appropriate compiler flags.
 
 **Startup code (`crt0.s`):**
 ```asm
+/* minimal replacement of crt0.o which is else provided by C library */
+
+.globl main
 .globl _start
+.globl _heap_stack_start
+.globl _heap_stack_end
+
 .text
 
 _start:
-    la sp, _stack_top    # Initialize stack pointer
-    call main            # Call main function
-
+        .option push
+        .option norelax
+        /* set a global pointer to allow access to C global variables */
+        la gp, __global_pointer$
+        /* it has to be done without "relax", because else it is
+         * optimized to a gp register relative operation by linker
+         */
+        .option pop
+        la      sp, _heap_stack_end
+        addi    a0, zero, 0
+        addi    a1, zero, 0
+        jal     main
 _exit:
-    ebreak               # Stop execution
-    j _exit
+        addi    a0, zero, 0
+        addi    a7, zero, 93  /* SYS_exit */
+        ecall
+        /* catch case when syscalls are disabled */
+        ebreak
+        j       _exit
 
-.section .bss
-.align 4
-_stack_bottom:
-    .space 4096          # 4KB stack
-_stack_top:
+.bss
+
+/* the area which can be used for a heap from the bootom
+ * and stack from the top
+ */
+_heap_stack_start:
+        .skip   16384
+_heap_stack_end:
+
+.end
 ```
 
 **Example C program (`hello.c`):**
