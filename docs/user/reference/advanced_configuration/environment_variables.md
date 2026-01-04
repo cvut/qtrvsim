@@ -28,6 +28,16 @@ qtrvsim_gui.exe
 
 ---
 
+### Scale GUi Fonts for Classroom Projector
+
+The fonts can be to small for students to see them from the more distant places or projector resolution can be interpolated or scaled that text in editors and menus is hard to read. The next option allows to scale fonts for the whole application.
+
+```bash
+QT_SCALE_FACTOR=1.4 ./qtrvsim_gui
+```
+
+---
+
 ## Logging
 
 Logging environment variables are primarily intended for development and debugging purposes. For detailed information about available logging options, please refer to the developer documentation.
