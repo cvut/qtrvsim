@@ -5,6 +5,7 @@
 #include "dialogs/about/aboutdialog.h"
 #include "dialogs/gotosymbol/gotosymboldialog.h"
 #include "dialogs/savechanged/savechangeddialog.h"
+#include "dialogs/webeval/webevalconfigdialog.h"
 #include "extprocess.h"
 #include "helper/async_modal.h"
 #include "os_emulation/ossyscall.h"
@@ -137,6 +138,11 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     terminal->hide();
     lcd_display.reset(new LcdDisplayDock(this, settings));
     lcd_display->hide();
+    webeval.reset(new WebEvalDock(this, settings));
+    webeval->hide();
+    task_description.reset(new TaskDescriptionDock(this));
+    task_description->hide();
+    webeval->setup(this, task_description.data());
     csrdock = new CsrDock(this);
     csrdock->hide();
     messages = new MessagesDock(this, settings);
@@ -186,6 +192,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     connect(ui->actionTerminal, &QAction::triggered, this, &MainWindow::show_terminal);
     connect(ui->actionLcdDisplay, &QAction::triggered, this, &MainWindow::show_lcd_display);
     connect(ui->actionCsrShow, &QAction::triggered, this, &MainWindow::show_csrdock);
+    connect(ui->actionWebEvalShow, &QAction::triggered, this, &MainWindow::show_webeval);
     connect(ui->actionCore_View_show, &QAction::triggered, this, &MainWindow::show_hide_coreview);
     connect(ui->actionMessages, &QAction::triggered, this, &MainWindow::show_messages);
     connect(ui->actionResetWindows, &QAction::triggered, this, &MainWindow::reset_windows);
@@ -224,6 +231,7 @@ MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     });
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about_program);
     connect(ui->actionAboutQt, &QAction::triggered, this, &MainWindow::about_qt);
+    connect(ui->actionWebEvalConfig, &QAction::triggered, this, &MainWindow::webeval_config);
     connect(ui->ips1, &QAction::toggled, this, &MainWindow::set_speed);
     connect(ui->ips2, &QAction::toggled, this, &MainWindow::set_speed);
     connect(ui->ips5, &QAction::toggled, this, &MainWindow::set_speed);
@@ -501,6 +509,8 @@ SHOW_HANDLER(bp_info, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(peripherals, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(terminal, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(lcd_display, Qt::RightDockWidgetArea, false)
+SHOW_HANDLER(webeval, Qt::RightDockWidgetArea, false)
+SHOW_HANDLER(task_description, Qt::RightDockWidgetArea, false)
 SHOW_HANDLER(csrdock, Qt::TopDockWidgetArea, false)
 SHOW_HANDLER(messages, Qt::BottomDockWidgetArea, false)
 #undef SHOW_HANDLER
@@ -518,6 +528,7 @@ void MainWindow::reset_windows() {
     reset_state_peripherals();
     reset_state_terminal();
     reset_state_lcd_display();
+    reset_state_webeval();
     reset_state_csrdock();
     reset_state_messages();
 }
@@ -549,6 +560,23 @@ void MainWindow::about_program() {
 
 void MainWindow::about_qt() {
     QMessageBox::aboutQt(this);
+}
+
+void MainWindow::webeval_config() {
+    auto *dialog = new WebEvalConfigDialog(settings.get(), this);
+    dialog->exec();
+}
+
+SrcEditor *MainWindow::get_current_editor() const {
+    if (!editor_tabs) return nullptr;
+    return editor_tabs->get_current_editor();
+}
+
+void MainWindow::set_task_description(const QString &task_name, const QString &description) {
+    if (task_description) {
+        task_description->set_description(task_name, description);
+        show_task_description();
+    }
 }
 
 void MainWindow::set_speed() {
