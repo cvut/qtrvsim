@@ -76,7 +76,7 @@ should invoke CMake directly.
 
 ```shell
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-O3 -march=native"
-make -C build
+make -C build # Or you can use all the available threads of your CPU by using make -C build -j $(nproc)
 ```
 
 The built binaries are to be found in the directory `target` in the build directory.
@@ -131,7 +131,7 @@ Tests are managed by CTest (part of CMake). To build and run all tests, use this
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-O3 -march=native"
-make -C build
+make -C build # Or you can use all the available threads of your CPU by using make -C build -j $(nproc)
 cd build && ctest
 ```
 
