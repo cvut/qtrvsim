@@ -46,6 +46,13 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: pages
+      - name: Create ZIP for Comparch deployment
+        run: |
+          cd docs/user/book
+          zip -r ../../../manual.zip .
+      - name: Deploy to Comparch
+        run: |
+          curl -X POST -H "Authorization: Bearer ${{ secrets.COMPARCH_DOCS_TOKEN }}" -F "file=@manual.zip" http://eval.comparch.edu.cvut.cz:1111/github-actions/update-manual
 
   deploy:
     environment:
