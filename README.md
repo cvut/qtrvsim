@@ -139,9 +139,11 @@ The project was developed and extended as theses of Karel Kočí, Jakub Dupak an
 
 ## Accepted Binary Formats
 
-The simulator accepts ELF statically linked executables compiled for RISC-V target (`--march=rv64g`).
-The simulator will automatically select endianness based on the ELF file header.
-Simulation will execute as XLEN=32 or XLEN=32 according to the ELF file header.
+The simulator accepts statically linked little-endian ELF executables compiled for
+the RISC-V target, either 32-bit (GCC options `-mabi=ilp32 -march=rv32i` to `rv32ima_zicsr`)
+or 64-bit (`-mabi=lp64 -march=rv64i` to `rv64ima_zicsr`).
+Simulation will execute them as XLEN=32 or XLEN=64 according to the ELF file header.
+There is even initial support for endianness selection based on the ELF file header.
 
 - 64-bit RISC-V ISA RV64IM and 32-bit RV32IM ELF executables are supported.
 - Compressed instructions are not yet supported.
