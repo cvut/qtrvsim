@@ -1,7 +1,7 @@
 include .dev-config.mk
 
 .dev-config.mk:
-	[ ! -f .dev-config.mk ] && cp .dev-config.mk.default .dev-config.mk
+	[ ! -f .dev-config.mk ] && cp .dev-config.local.mk .dev-config.mk
 
 release:
 	mkdir -p build/Release

@@ -58,6 +58,12 @@ Please, report any difficulties via [GitHub issues](https://github.com/cvut/qtrv
 - Qt 5 (minimal tested version is 5.9.5), experimental support of Qt 6
 - elfutils (optional; libelf works too but there can be some problems)
 
+Before building, initialize and update git submodules:
+
+```shell
+git submodule update --init --recursive
+```
+
 ### Quick Compilation on Linux
 
 On Linux, you can use a wrapper Makefile and run `make` in the project root directory. It will create a build directory
@@ -69,12 +75,11 @@ should invoke CMake directly.
 ### General Compilation
 
 ```shell
-cmake -DCMAKE_BUILD_TYPE=Release /path/to/qtrvsim
-make
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-O3 -march=native"
+make -C build # Or you can use all the available threads of your CPU by using make -C build -j $(nproc)
 ```
 
-Where `/path/to/qtrvsim` is path to this project root. The built binaries are to be found in the directory `target`in
-the build directory (the one, where cmake was called).
+The built binaries are to be found in the directory `target` in the build directory.
 
 `-DCMAKE_BUILD_TYPE=Debug` builds development version including sanitizers.
 
@@ -125,9 +130,9 @@ nix-env -if .
 Tests are managed by CTest (part of CMake). To build and run all tests, use this commands:
 
 ```bash
-cmake -DCMAKE_BUILD_TYPE=Release /path/to/QtRVSim
-make
-ctest
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-O3 -march=native"
+make -C build # Or you can use all the available threads of your CPU by using make -C build -j $(nproc)
+cd build && ctest
 ```
 
 ## Documentation
