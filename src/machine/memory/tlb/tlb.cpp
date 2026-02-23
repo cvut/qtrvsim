@@ -13,6 +13,7 @@ TLB::TLB(
     FrontendMemory *memory,
     TLBType type_,
     const TLBConfig *config,
+    Xlen xlen,
     bool vm_enabled,
     uint32_t memory_access_penalty_r,
     uint32_t memory_access_penalty_w,
@@ -22,6 +23,7 @@ TLB::TLB(
     , mem(memory)
     , type(type_)
     , tlb_config(config)
+    , xlen(xlen)
     , vm_enabled(vm_enabled)
     , access_pen_r(memory_access_penalty_r)
     , access_pen_w(memory_access_penalty_w)
@@ -44,22 +46,19 @@ TLB::TLB(
 
 void TLB::on_csr_write(size_t internal_id, RegisterValue val) {
     if (internal_id != CSR::Id::SATP) return;
-    current_satp_raw = static_cast<uint32_t>(val.as_u64());
-    for (size_t s = 0; s < num_sets_; s++) {
-        for (size_t w = 0; w < associativity_; w++) {
-            auto &e = table[s][w];
-            if (e.valid) {
-                uint16_t old_asid = e.asid;
-                uint64_t old_vpn = e.vpn;
-                e.valid = false;
-                emit tlb_update(
-                    static_cast<unsigned>(w), static_cast<unsigned>(s), false, old_asid, old_vpn,
-                    0ull, false);
-            }
-        }
+
+    uint64_t new_satp = val.as_u64();
+    bool old_mode = is_mode_enabled_in_satp(current_satp_raw);
+    bool new_mode = is_mode_enabled_in_satp(new_satp);
+    current_satp_raw = new_satp;
+    if (old_mode != new_mode) {
+        flush_all_entries();
+        DEBUG(
+            "TLB: SATP changed -> translation mode changed (%u -> %u), flushed all",
+            static_cast<unsigned>(old_mode), static_cast<unsigned>(new_mode));
+    } else {
+        update_all_statistics();
     }
-    LOG("TLB: SATP changed → flushed all; new SATP=0x%08x", current_satp_raw);
-    update_all_statistics();
 }
 
 void TLB::flush_single(VirtualAddress va, uint16_t asid) {
@@ -181,7 +180,7 @@ void TLB::sfence_vma(uint64_t vaddr, uint64_t asid) {
     flush_by_vpn(vpn);
 }
 
-Address TLB::translate_virtual_to_physical(AddressWithMode vaddr) {
+TLB::TranslationResult TLB::translate_virtual_to_physical(AddressWithMode vaddr) {
     uint64_t virt = vaddr.get_raw();
 
     AccessMode mode = vaddr.access_mode();
@@ -191,14 +190,13 @@ Address TLB::translate_virtual_to_physical(AddressWithMode vaddr) {
     bool satp_mode_on = is_mode_enabled_in_satp(current_satp_raw);
     bool should_translate = vm_enabled && satp_mode_on && (priv != CSR::PrivilegeLevel::MACHINE);
 
-    if (!should_translate) {
-        return vaddr;
-    }
+    if (!should_translate) { return { vaddr, std::numeric_limits<size_t>::max() }; }
 
     constexpr unsigned PAGE_SHIFT = 12;
     constexpr uint64_t PAGE_MASK = (1ULL << PAGE_SHIFT) - 1;
+    constexpr size_t PAGE_BYTES = (1ULL << PAGE_SHIFT);
 
-    uint64_t off = virt & ((1ULL << PAGE_SHIFT) - 1);
+    uint64_t off = virt & PAGE_MASK;
     uint64_t vpn = virt >> PAGE_SHIFT;
     size_t s = set_index(vpn);
     const char *tag = (type == PROGRAM ? "I" : "D");
@@ -208,22 +206,38 @@ Address TLB::translate_virtual_to_physical(AddressWithMode vaddr) {
         auto &e = table[s][w];
         if (e.valid && e.vpn == vpn && e.asid == asid) {
             repl_policy->notify_access(s, w, /*valid=*/true);
-            uint64_t pbase = e.phys.get_raw() & ~((1ULL << PAGE_SHIFT) - 1);
+            uint64_t pbase = e.phys.get_raw() & ~PAGE_MASK;
             hit_count_++;
             emit hit_update(hit_count_);
             emit tlb_update(
                 static_cast<unsigned>(w), static_cast<unsigned>(s), true, e.asid, e.vpn, pbase,
                 false);
             update_all_statistics();
-            return Address { pbase + off };
+            return { Address { pbase + off }, static_cast<size_t>(PAGE_BYTES - off) };
         }
     }
 
     // TLB miss -> resolve with page table walker
-    VirtualAddress va { static_cast<uint32_t>(virt) };
+    VirtualAddress va { virt };
+
     PageTableWalker walker(mem);
 
-    Address resolved_pa = walker.walk(va, current_satp_raw);
+    Address resolved_pa;
+    switch (xlen) {
+    case Xlen::_32:
+        walker.set_pte_factory(PageTableWalker::sv32_pte_factory());
+        resolved_pa = walker.walk<Sv32Pte, 1>(va, current_satp_raw);
+        break;
+    case Xlen::_64:
+        walker.set_pte_factory(PageTableWalker::sv39_pte_factory());
+        resolved_pa = walker.walk<Sv39Pte, 2>(va, current_satp_raw);
+        break;
+    default:
+        walker.set_pte_factory(PageTableWalker::sv32_pte_factory());
+        resolved_pa = walker.walk<Sv32Pte, 1>(va, current_satp_raw);
+        break;
+    }
+
     mem_reads += 1;
     emit memory_reads_update(mem_reads);
 
@@ -242,10 +256,11 @@ Address TLB::translate_virtual_to_physical(AddressWithMode vaddr) {
         static_cast<unsigned>(victim), static_cast<unsigned>(s), true, ent.asid, ent.vpn, phys_base,
         false);
 
-    LOG("TLB[%s]: cached VA=0x%llx -> PA=0x%llx (ASID=%u) on miss", tag, (unsigned long long)virt,
+    DEBUG(
+        "TLB[%s]: cached VA=0x%llx -> PA=0x%llx (ASID=%u) on miss", tag, (unsigned long long)virt,
         (unsigned long long)phys_base, asid);
     update_all_statistics();
-    return Address { phys_base + off };
+    return { Address { phys_base + off }, static_cast<size_t>(PAGE_BYTES - off) };
 }
 
 WriteResult TLB::write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts) {
@@ -257,13 +272,53 @@ ReadResult TLB::read(void *dst, AddressWithMode src, size_t sz, ReadOptions opts
 }
 
 WriteResult TLB::translate_and_write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts) {
-    Address pa = translate_virtual_to_physical(dst);
-    return mem->write(pa, src, sz, opts);
+    const uint8_t *cur_src = static_cast<const uint8_t *>(src);
+    uint64_t cur_virt = dst.get_raw();
+    size_t remaining = sz;
+
+    size_t total_written = 0;
+    bool any_changed = false;
+
+    while (remaining > 0) {
+        AddressWithMode cur_va(Address { cur_virt }, dst.access_mode());
+        auto tr = translate_virtual_to_physical(cur_va);
+
+        size_t bytes_to_write = std::min(remaining, tr.bytes_until_page_end);
+
+        WriteResult wr = mem->write(tr.phys, cur_src, bytes_to_write, opts);
+        total_written += wr.n_bytes;
+        any_changed |= wr.changed;
+
+        cur_src += bytes_to_write;
+        cur_virt += bytes_to_write;
+        remaining -= bytes_to_write;
+    }
+
+    return { .n_bytes = total_written, .changed = any_changed };
 }
 
 ReadResult TLB::translate_and_read(void *dst, AddressWithMode src, size_t sz, ReadOptions opts) {
-    Address pa = translate_virtual_to_physical(src);
-    return mem->read(dst, pa, sz, opts);
+    uint8_t *cur_dst = static_cast<uint8_t *>(dst);
+    uint64_t cur_virt = src.get_raw();
+    size_t remaining = sz;
+
+    size_t total_read = 0;
+
+    while (remaining > 0) {
+        AddressWithMode cur_va(Address { cur_virt }, src.access_mode());
+        auto tr = translate_virtual_to_physical(cur_va);
+
+        size_t bytes_to_read = std::min(remaining, tr.bytes_until_page_end);
+
+        ReadResult rr = mem->read(cur_dst, tr.phys, bytes_to_read, opts);
+        total_read += rr.n_bytes;
+
+        cur_dst += bytes_to_read;
+        cur_virt += bytes_to_read;
+        remaining -= bytes_to_read;
+    }
+
+    return { .n_bytes = total_read };
 }
 
 bool TLB::reverse_lookup(Address paddr, VirtualAddress &out_va) const {

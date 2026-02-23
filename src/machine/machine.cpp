@@ -70,9 +70,10 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
 
     tlb_program.reset(new TLB(
         cch_program.data(), PROGRAM, machine_config.access_tlb_program(),
-        machine_config.get_vm_enabled()));
+        machine_config.get_simulated_xlen(), machine_config.get_vm_enabled()));
     tlb_data.reset(new TLB(
-        cch_data.data(), DATA, machine_config.access_tlb_data(), machine_config.get_vm_enabled()));
+        cch_data.data(), DATA, machine_config.access_tlb_data(),
+        machine_config.get_simulated_xlen(), machine_config.get_vm_enabled()));
     tlb_program->on_csr_write(CSR::Id::SATP, 0);
     tlb_data->on_csr_write(CSR::Id::SATP, 0);
     connect(

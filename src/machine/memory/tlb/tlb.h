@@ -9,6 +9,7 @@
 #include "tlb_policy.h"
 
 #include <cstdint>
+#include <memory/virtual/sv39.h>
 
 namespace machine {
 
@@ -21,9 +22,15 @@ class Machine;
 class TLB : public FrontendMemory {
     Q_OBJECT
 public:
+    struct TranslationResult {
+        Address phys;
+        size_t bytes_until_page_end;
+    };
+
     TLB(FrontendMemory *memory,
         TLBType type,
         const TLBConfig *config,
+        Xlen xlen,
         bool vm_enabled = true,
         uint32_t memory_access_penalty_r = 1,
         uint32_t memory_access_penalty_w = 1,
@@ -43,7 +50,7 @@ public:
 
     void sfence_vma(uint64_t vaddr, uint64_t asid) override;
 
-    Address translate_virtual_to_physical(AddressWithMode vaddr);
+    TranslationResult translate_virtual_to_physical(AddressWithMode vaddr);
 
     WriteResult write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts) override;
 
@@ -53,7 +60,13 @@ public:
 
     void set_replacement_policy(std::unique_ptr<TLBPolicy> p) { repl_policy = std::move(p); }
 
-    uint32_t root_page_table_ppn() const { return current_satp_raw & ((1u << PPN_BITS) - 1); }
+    uint64_t root_page_table_ppn() const {
+        switch (xlen) {
+        case Xlen::_32: return current_satp_raw & ((uint64_t(1) << Sv32Pte::PPN_BITS) - 1ULL);
+        case Xlen::_64: return current_satp_raw & ((uint64_t(1) << Sv39Pte::PPN_BITS) - 1ULL);
+        default: return current_satp_raw & ((uint64_t(1) << Sv32Pte::PPN_BITS) - 1ULL);
+        }
+    }
 
     bool reverse_lookup(Address paddr, VirtualAddress &out_va) const;
 
@@ -99,7 +112,8 @@ private:
     FrontendMemory *mem;
     TLBType type;
     const TLBConfig tlb_config;
-    uint32_t current_satp_raw = 0;
+    uint64_t current_satp_raw = 0;
+    Xlen xlen;
     const bool vm_enabled;
 
     size_t num_sets_;
@@ -123,7 +137,13 @@ private:
     WriteResult translate_and_write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts);
     ReadResult translate_and_read(void *dst, AddressWithMode src, size_t sz, ReadOptions opts);
     inline size_t set_index(uint64_t vpn) const { return vpn & (num_sets_ - 1); }
-    inline bool is_mode_enabled_in_satp(uint32_t satp_raw) { return (satp_raw & (1u << 31)) != 0; }
+    inline bool is_mode_enabled_in_satp(uint64_t satp_raw) const {
+        switch (xlen) {
+        case Xlen::_32: return (satp_raw & (1u << 31)) != 0;
+        case Xlen::_64: return ((satp_raw >> 60) & 0xFULL) != 0;
+        default: return (satp_raw & (1u << 31)) != 0;
+        }
+    }
 };
 
 } // namespace machine
