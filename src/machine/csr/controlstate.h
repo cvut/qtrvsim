@@ -20,6 +20,8 @@ namespace machine { namespace CSR {
         enum IdxType {
             // Unprivileged Counter/Timers
             CYCLE,
+            TIME,
+            STIMECMP,
             // Machine Information Registers
             MVENDORID,
             MARCHID,
@@ -29,11 +31,11 @@ namespace machine { namespace CSR {
             // Machine Trap Setup
             MSTATUS,
             MISA,
-            //            MEDELEG,
-            //            MIDELET,
+            MEDELEG,
+            MIDELEG,
             MIE,
             MTVEC,
-            //            MCOUNTERN,
+            MCOUNTERN,
             //            MSTATUSH,
             // Machine Trap Handling
             MSCRATCH,
@@ -43,12 +45,18 @@ namespace machine { namespace CSR {
             MIP,
             MTINST,
             MTVAL2,
+            // Machine Configuration
+            MENVCFG,
+            MENVCFGH,
+            // ...
+            PMPCFG0,
+            PMPADDR0,
             // ...
             MCYCLE,
             MINSTRET,
             // Supervisor Trap Setup
             SSTATUS,
-            // ...
+            SIE,
             STVEC,
             // ...
             // Supervisor Trap Handling
@@ -56,6 +64,7 @@ namespace machine { namespace CSR {
             SEPC,
             SCAUSE,
             STVAL,
+            SIP,
             // ...
             // Supervisor Protection and Translation
             SATP,
@@ -170,6 +179,10 @@ namespace machine { namespace CSR {
         default_wlrl_write_handler(const RegisterDesc &desc, RegisterValue &reg, RegisterValue val);
         void
         mstatus_wlrl_write_handler(const RegisterDesc &desc, RegisterValue &reg, RegisterValue val);
+
+        void
+        satp_wlrl_write_handler(const RegisterDesc &desc, RegisterValue &reg, RegisterValue val);
+
         void
         mcycle_wlrl_write_handler(const RegisterDesc &desc, RegisterValue &reg, RegisterValue val);
         void
@@ -204,6 +217,13 @@ namespace machine { namespace CSR {
                 = { "MPIE", Id::MSTATUS, { 1, 7 }, "Previous MIE before the trap" };
             static constexpr RegisterFieldDesc MPRV
                 = { "MPRV", Id::MSTATUS, { 1, 17 }, "Modify privilege for loads/stores/fetches" };
+            static constexpr RegisterFieldDesc SUM
+                = { "SUM", Id::MSTATUS, { 1, 18 }, "Permit Supervisor access to User memory" };
+            static constexpr RegisterFieldDesc MXR
+                = { "MXR",
+                    Id::MSTATUS,
+                    { 1, 19 },
+                    "Make eXecutable Readable (treat X pages as readable for loads)" };
             static constexpr RegisterFieldDesc SPP
                 = { "SPP", Id::MSTATUS, { 1, 8 }, "System previous privilege mode" };
             static constexpr RegisterFieldDesc MPP
@@ -216,15 +236,49 @@ namespace machine { namespace CSR {
                 = { &SIE, &MIE, &SPIE, &MPIE, &SPP, &MPP, &UXL, &SXL };
             static constexpr unsigned count = sizeof(fields) / sizeof(fields[0]);
         } // namespace mstatus
-        namespace satp {
-            static constexpr RegisterFieldDesc MODE
-                = { "MODE", Id::SATP, { 1, 31 }, "Address translation mode" };
-            static constexpr RegisterFieldDesc ASID
-                = { "ASID", Id::SATP, { 9, 22 }, "Address-space ID" };
-            static constexpr RegisterFieldDesc PPN
-                = { "PPN", Id::SATP, { 22, 0 }, "Root page-table physical page number" };
-            static constexpr const RegisterFieldDesc *fields[] = { &MODE, &ASID, &PPN };
+        namespace sstatus {
+            static constexpr RegisterFieldDesc SIE
+                = { "SIE",
+                    Id::SSTATUS,
+                    { 1, 1 },
+                    "Supervisor global interrupt-enable (alias of mstatus.SIE)" };
+            static constexpr RegisterFieldDesc SPIE
+                = { "SPIE",
+                    Id::SSTATUS,
+                    { 1, 5 },
+                    "Previous SIE before the trap (alias of mstatus.SPIE)" };
+            static constexpr RegisterFieldDesc SPP
+                = { "SPP",
+                    Id::SSTATUS,
+                    { 1, 8 },
+                    "Supervisor previous privilege mode (alias of mstatus.SPP)" };
+            static constexpr RegisterFieldDesc SUM
+                = { "SUM",
+                    Id::SSTATUS,
+                    { 1, 18 },
+                    "Permit Supervisor access to User memory (alias of mstatus.SUM)" };
+            static constexpr RegisterFieldDesc MXR
+                = { "MXR",
+                    Id::SSTATUS,
+                    { 1, 19 },
+                    "Make eXecutable Readable (alias of mstatus.MXR)" };
+            static constexpr RegisterFieldDesc UXL
+                = { "UXL", Id::SSTATUS, { 2, 32 }, "User mode XLEN (RV64 only) (alias)" };
+            static constexpr RegisterFieldDesc SXL
+                = { "SXL", Id::SSTATUS, { 2, 34 }, "Supervisor mode XLEN (RV64 only) (alias)" };
+            static constexpr const RegisterFieldDesc *fields[] = { &SIE, &SPIE, &SPP, &UXL, &SXL };
             static constexpr unsigned count = sizeof(fields) / sizeof(fields[0]);
+        } // namespace sstatus
+        namespace satp {
+            // RV32 Layout
+            static constexpr RegisterFieldDesc MODE32 = { "MODE", Id::SATP, { 1, 31 }, "" };
+            static constexpr RegisterFieldDesc ASID32 = { "ASID", Id::SATP, { 9, 22 }, "" };
+            static constexpr RegisterFieldDesc PPN32 = { "PPN", Id::SATP, { 22, 0 }, "" };
+
+            // RV64 Layout (Sv39)
+            static constexpr RegisterFieldDesc MODE64 = { "MODE", Id::SATP, { 4, 60 }, "" };
+            static constexpr RegisterFieldDesc ASID64 = { "ASID", Id::SATP, { 16, 44 }, "" };
+            static constexpr RegisterFieldDesc PPN64 = { "PPN", Id::SATP, { 44, 0 }, "" };
         } // namespace satp
     } // namespace Field
 
@@ -232,6 +286,8 @@ namespace machine { namespace CSR {
     inline constexpr std::array<RegisterDesc, Id::_COUNT> REGISTERS {
         { // Unprivileged Counter/Timers
           [Id::CYCLE] = { "cycle", 0xC00_csr, "Cycle counter for RDCYCLE instruction.", 0, 0 },
+          [Id::TIME] = { "time", 0xC01_csr, "Timer for RDTIME instruction.", 0, 0 },
+          [Id::STIMECMP] = { "stimecmp ", 0x14D_csr, "Supervisor Timer Compare.", 0, 0xffffffff },
           // Priviledged Machine Mode Registers
           [Id::MVENDORID] = { "mvendorid", 0xF11_csr, "Vendor ID.", 0, 0 },
           [Id::MARCHID] = { "marchid", 0xF12_csr, "Architecture ID.", 0, 0 },
@@ -245,8 +301,13 @@ namespace machine { namespace CSR {
                             &ControlState::mstatus_wlrl_write_handler,
                             { Field::mstatus::fields, Field::mstatus::count } },
           [Id::MISA] = { "misa", 0x301_csr, "Machine ISA Register.", 0, 0 },
+          [Id::MEDELEG]
+          = { "medeleg", 0x302_csr, "Machine exception delegation register.", 0, 0xfffef7ff },
+          [Id::MIDELEG]
+          = { "mideleg", 0x303_csr, "Machine interrupt delegation register.", 0, 0xffffffff },
           [Id::MIE] = { "mie", 0x304_csr, "Machine interrupt-enable register.", 0, 0x00ff0AAA },
           [Id::MTVEC] = { "mtvec", 0x305_csr, "Machine trap-handler base address." },
+          [Id::MCOUNTERN] = { "mcounteren", 0x306_csr, "Machine counter enable.", 0, 0xffffffff },
           [Id::MSCRATCH] = { "mscratch", 0x340_csr, "Scratch register for machine trap handlers." },
           [Id::MEPC] = { "mepc", 0x341_csr, "Machine exception program counter." },
           [Id::MCAUSE] = { "mcause", 0x342_csr, "Machine trap cause." },
@@ -254,6 +315,16 @@ namespace machine { namespace CSR {
           [Id::MIP] = { "mip", 0x344_csr, "Machine interrupt pending.", 0, 0x00000222 },
           [Id::MTINST] = { "mtinst", 0x34A_csr, "Machine trap instruction (transformed)." },
           [Id::MTVAL2] = { "mtval2", 0x34B_csr, "Machine bad guest physical address." },
+          // Machine Configuration
+          [Id::MENVCFG]
+          = { "menvcfg", 0x30A_csr, "Machine environment configuration register.", 0, 0xffffffff },
+          [Id::MENVCFGH]
+          = { "menvcfgh", 0x31A_csr, "Upper 32 bits of menvcfg, RV32 only.", 0, 0xffffffff },
+          // Machine Memory Protection
+          [Id::PMPCFG0]
+          = { "pmpcfg0", 0x3A0_csr, "Physical memory protection configuration.", 0, 0xFFFFFFFF },
+          [Id::PMPADDR0] = { "pmpaddr0", 0x3B0_csr, "Physical memory protection address register.",
+                             0, 0xFFFFFFFC },
           // Machine Counter/Timers
           [Id::MCYCLE]
           = { "mcycle", 0xB00_csr, "Machine cycle counter.", 0,
@@ -262,19 +333,21 @@ namespace machine { namespace CSR {
           // Supervisor-level CSRs
           [Id::SSTATUS] = { "sstatus", 0x100_csr, "Supervisor status register.", 0, 0xffffffff,
                             &ControlState::sstatus_wlrl_write_handler },
+          [Id::SIE] = { "sie", 0x104_csr, "Supervisor interrupt-enable register.", 0, 0x00010222 },
           [Id::STVEC] = { "stvec", 0x105_csr, "Supervisor trap-handler base address." },
           [Id::SSCRATCH]
           = { "sscratch", 0x140_csr, "Scratch register for supervisor trap handlers." },
           [Id::SEPC] = { "sepc", 0x141_csr, "Supervisor exception program counter." },
           [Id::SCAUSE] = { "scause", 0x142_csr, "Supervisor trap cause." },
           [Id::STVAL] = { "stval", 0x143_csr, "Supervisor bad address or instruction." },
+          [Id::SIP] = { "sip", 0x144_csr, "Supervisor interrupt pending.", 0, 0x00010222 },
           [Id::SATP] = { "satp",
                          0x180_csr,
                          "Supervisor address translation and protection",
                          0,
                          0xffffffff,
-                         &ControlState::default_wlrl_write_handler,
-                         { Field::satp::fields, Field::satp::count } } }
+                         &ControlState::satp_wlrl_write_handler,
+                         { nullptr, 0 } } }
     };
 
     /** Lookup from CSR address (value used in instruction) to internal id (index in continuous

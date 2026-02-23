@@ -110,6 +110,27 @@ namespace machine { namespace CSR {
         default_wlrl_write_handler(desc, reg, val);
     }
 
+    void ControlState::satp_wlrl_write_handler(
+        const RegisterDesc &desc,
+        RegisterValue &reg,
+        RegisterValue val) {
+        uint64_t value = val.as_u64();
+        Q_UNUSED(desc)
+
+        if (xlen == Xlen::_32) {
+            // RV32 - Mode is bit 31. Only 0 (Bare) and 1 (Sv32) are valid.
+            uint32_t mode = (value >> 31) & 0x1;
+            Q_UNUSED(mode)
+            reg = value & 0xFFFFFFFF;
+        } else {
+            // RV64 - Mode is bits 63:60.
+            uint64_t mode = (value >> 60) & 0xF;
+
+            if (mode != 0 && mode != 8 && mode != 9) { value &= ~(0xFULL << 60); }
+            reg = value;
+        }
+    }
+
     void ControlState::mcycle_wlrl_write_handler(
         const RegisterDesc &desc,
         RegisterValue &reg,
