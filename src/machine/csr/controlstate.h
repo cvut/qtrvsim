@@ -138,13 +138,13 @@ namespace machine { namespace CSR {
             write_internal(field_desc.regId, u);
         }
 
-        void update_exception_cause(enum ExceptionCause excause);
+        void update_exception_cause(enum ExceptionCause excause, PrivilegeLevel to_privlev);
 
         bool operator==(const ControlState &other) const;
         bool operator!=(const ControlState &c) const;
 
-        bool core_interrupt_request();
-        machine::Address exception_pc_address();
+        ExceptionCause core_interrupt_request(PrivilegeLevel current_priv);
+        machine::Address exception_pc_address(PrivilegeLevel to_privlev);
 
     signals:
         void write_signal(size_t internal_reg_id, RegisterValue val);

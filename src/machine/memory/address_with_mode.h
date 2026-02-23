@@ -1,13 +1,25 @@
 #ifndef ADDRESS_WITH_MODE_H
 #define ADDRESS_WITH_MODE_H
 
-#include <utility>
-#include <cstdint>
-#include <QMetaType>
 #include "address.h"
 #include "csr/address.h"
+#include "memory_utils.h"
+
+#include <QMetaType>
+#include <cstdint>
+#include <utility>
 
 namespace machine {
+
+// field masks / shifts
+static constexpr uint32_t PRIV_MASK = 0x3u; // 2 bits
+static constexpr int PRIV_SHIFT = 0;
+static constexpr uint32_t ASID_MASK = 0xFFFFu;  // 16 bits
+static constexpr int ASID_SHIFT = 2;            // bits 2..17
+static constexpr uint32_t UNCACHED_MASK = 0x3u; // 2 bits
+static constexpr int UNCACHED_SHIFT = 18;       // bits 18..19
+static constexpr uint32_t OPKIND_MASK = 0xFFu;  // 8 bits
+static constexpr int OPKIND_SHIFT = 20;         // bits 20..27
 
 struct AccessMode {
     uint32_t token = 0;
@@ -15,17 +27,28 @@ struct AccessMode {
     AccessMode() = default;
     explicit AccessMode(uint32_t t) : token(t) {}
 
-    static AccessMode pack(uint16_t asid, CSR::PrivilegeLevel priv, bool uncached = false) {
-        uint32_t t = (static_cast<uint32_t>(priv) & 0x3u)
-            | ((static_cast<uint32_t>(asid) & 0xFFFFu) << 2)
-            | (uncached ? (1u << 18) : 0u);
+    static AccessMode
+    pack(uint16_t asid, CSR::PrivilegeLevel priv, AccessOp opkind, uint8_t uncached = 0) {
+        uint32_t t = ((static_cast<uint32_t>(priv) & PRIV_MASK) << PRIV_SHIFT)
+                     | ((static_cast<uint32_t>(asid) & ASID_MASK) << ASID_SHIFT)
+                     | ((static_cast<uint32_t>(uncached) & UNCACHED_MASK) << UNCACHED_SHIFT)
+                     | ((static_cast<uint32_t>(static_cast<uint8_t>(opkind)) & OPKIND_MASK)
+                        << OPKIND_SHIFT);
         return AccessMode(t);
     }
-    uint16_t asid() const { return static_cast<uint16_t>((token >> 2) & 0xFFFFu); }
+
+    uint16_t asid() const { return static_cast<uint16_t>((token >> ASID_SHIFT) & ASID_MASK); }
+
     CSR::PrivilegeLevel priv() const {
-        return static_cast<CSR::PrivilegeLevel>(token & 0x3u);
+        return static_cast<CSR::PrivilegeLevel>((token >> PRIV_SHIFT) & PRIV_MASK);
     }
-    bool uncached() const { return ((token >> 18) & 0x1u) != 0; }
+
+    uint8_t uncached() const {
+        return static_cast<uint8_t>((token >> UNCACHED_SHIFT) & UNCACHED_MASK);
+    }
+
+    AccessOp opkind() const { return static_cast<AccessOp>((token >> OPKIND_SHIFT) & OPKIND_MASK); }
+
     uint32_t raw() const { return token; }
 };
 

@@ -53,7 +53,8 @@ constexpr const char *get_exception_name(ExceptionCause exception_cause) {
     // Simulator specific exception cause codes, alliases
     case EXCAUSE_HWBREAK: return "HWBREAK";
     case EXCAUSE_ECALL_ANY: return "ECALL_ANY";
-    case EXCAUSE_INT: return "INT";
+    case EXCAUSE_INT_M: return "INT_M";
+    case EXCAUSE_INT_S: return "INT_S";
     default: UNREACHABLE
     }
 }

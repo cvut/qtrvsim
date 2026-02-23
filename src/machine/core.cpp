@@ -43,7 +43,8 @@ Core::Core(
     , ex_default_handler(new StopExceptionHandler()) {
     stop_on_exception.fill(true);
     step_over_exception.fill(true);
-    step_over_exception[EXCAUSE_INT] = false;
+    step_over_exception[EXCAUSE_INT_M] = false;
+    step_over_exception[EXCAUSE_INT_S] = false;
 }
 
 void Core::step(bool skip_break) {
@@ -171,17 +172,65 @@ bool Core::handle_exception(
             QString::number(inst.data(), 16));
     }
 
-    if (excause == EXCAUSE_HWBREAK) { regs->write_pc(inst_addr); }
+    if (excause == EXCAUSE_HWBREAK) {
+        regs->write_pc(inst_addr);
+        if (get_stop_on_exception(excause)) {
+            emit stop_on_exception_reached();
+            return true;
+        }
+    }
+
+    state.LoadReservedRange.reset();
+
+    CSR::PrivilegeLevel origin_priv = get_current_privilege();
+
+    bool is_interrupt = (excause == EXCAUSE_INT_M || excause == EXCAUSE_INT_S);
+    bool deliver_to_s = false; // By default, all traps at any privilege level are handled in
+                               // machine mode.
+
+    if (is_interrupt) {
+        deliver_to_s = (excause == EXCAUSE_INT_S);
+    } else if (
+        (origin_priv == CSR::PrivilegeLevel::SUPERVISOR
+         || origin_priv == CSR::PrivilegeLevel::UNPRIVILEGED)
+        && control_state->read_internal(CSR::Id::MEDELEG).as_u64() & (1ULL << excause)) {
+        // Synchronous exception delegation:
+        // Only exceptions originating from S/U mode can be delegated.
+        // Exceptions in M-mode are always handled in M-mode.
+        deliver_to_s = true;
+    }
 
     if (control_state != nullptr) {
-        control_state->write_internal(CSR::Id::MEPC, inst_addr.get_raw());
-        control_state->update_exception_cause(excause);
-        if (control_state->read_internal(CSR::Id::MTVEC) != 0
-            && !get_step_over_exception(excause)) {
-            control_state->exception_initiate(
-                get_current_privilege(), CSR::PrivilegeLevel::MACHINE);
-            set_current_privilege(CSR::PrivilegeLevel::MACHINE);
-            regs->write_pc(control_state->exception_pc_address());
+        CSR::PrivilegeLevel target_priv
+            = deliver_to_s ? CSR::PrivilegeLevel::SUPERVISOR : CSR::PrivilegeLevel::MACHINE;
+        CSR::Id::IdxType sepc_id = deliver_to_s ? CSR::Id::SEPC : CSR::Id::MEPC;
+        CSR::Id::IdxType tval_id = deliver_to_s ? CSR::Id::STVAL : CSR::Id::MTVAL;
+        CSR::Id::IdxType tvec_id = deliver_to_s ? CSR::Id::STVEC : CSR::Id::MTVEC;
+
+        control_state->write_internal(sepc_id, inst_addr.get_raw());
+
+        switch (excause) {
+        case EXCAUSE_INSN_PAGE_FAULT:
+        case EXCAUSE_LOAD_PAGE_FAULT:
+        case EXCAUSE_STORE_PAGE_FAULT:
+        case EXCAUSE_LOAD_MISALIGNED:
+        case EXCAUSE_STORE_MISALIGNED:
+        case EXCAUSE_INSN_FAULT:
+        case EXCAUSE_LOAD_FAULT:
+        case EXCAUSE_STORE_FAULT:
+            control_state->write_internal(tval_id, mem_ref_addr.get_raw());
+            break;
+        default: control_state->write_internal(tval_id, 0); break;
+        }
+
+        CSR::PrivilegeLevel update_priv
+            = deliver_to_s ? CSR::PrivilegeLevel::SUPERVISOR : state.current_privilege();
+        control_state->update_exception_cause(excause, update_priv);
+
+        if (control_state->read_internal(tvec_id) != 0 && !get_step_over_exception(excause)) {
+            control_state->exception_initiate(get_current_privilege(), target_priv);
+            set_current_privilege(target_priv);
+            regs->write_pc(control_state->exception_pc_address(state.current_privilege()));
         }
     }
 
@@ -301,16 +350,22 @@ enum ExceptionCause Core::memory_special(
 FetchState Core::fetch(PCInterstage pc, bool skip_break) {
     if (pc.stop_if) { return {}; }
 
-    const AddressWithMode inst_addr = AddressWithMode(regs->read_pc(), make_access_mode(state));
-    const Instruction inst(mem_program->read_u32(inst_addr));
+    const AddressWithMode inst_addr
+        = AddressWithMode(regs->read_pc(), make_access_mode(state, AccessOp::FETCH));
+
+    Instruction inst = Instruction::NOP;
     ExceptionCause excause = EXCAUSE_NONE;
+
+    try {
+        inst = Instruction(mem_program->read_u32(inst_addr));
+    } catch (const SimulatorExceptionPageFault &e) { excause = EXCAUSE_INSN_PAGE_FAULT; }
 
     if (!skip_break && hw_breaks.contains(inst_addr)) { excause = EXCAUSE_HWBREAK; }
 
     if (control_state != nullptr) { control_state->increment_internal(CSR::Id::MCYCLE, 1); }
 
     if (control_state != nullptr && excause == EXCAUSE_NONE) {
-        if (control_state->core_interrupt_request()) { excause = EXCAUSE_INT; }
+        excause = control_state->core_interrupt_request(get_current_privilege());
     }
 
     return { FetchInternalState { .fetched_value = inst.data() },
@@ -367,8 +422,12 @@ DecodeState Core::decode(const FetchInterstage &dt) {
         if (flags & IMF_EBREAK) {
             excause = EXCAUSE_BREAK;
         } else if (flags & IMF_ECALL) {
-            excause = EXCAUSE_ECALL_M;
-            // TODO: EXCAUSE_ECALL_S, EXCAUSE_ECALL_U
+            switch (get_current_privilege()) {
+            case CSR::PrivilegeLevel::UNPRIVILEGED: excause = EXCAUSE_ECALL_U; break;
+            case CSR::PrivilegeLevel::SUPERVISOR: excause = EXCAUSE_ECALL_S; break;
+            case CSR::PrivilegeLevel::MACHINE:
+            default: excause = EXCAUSE_ECALL_M; break;
+            }
         }
     }
     if (flags & IMF_FORCE_W_OP) w_operation = true;
@@ -501,23 +560,33 @@ ExecuteState Core::execute(const DecodeInterstage &dt) {
 
 MemoryState Core::memory(const ExecuteInterstage &dt) {
     RegisterValue towrite_val = dt.alu_val;
-    auto mem_addr = AddressWithMode(get_xlen_from_reg(dt.alu_val), make_access_mode(state));
     bool memread = dt.memread;
     bool memwrite = dt.memwrite;
     bool regwrite = dt.regwrite;
+    AccessOp opkind = AccessOp::READ;
+    if (memwrite || dt.amo) { opkind = AccessOp::WRITE; }
+    auto mem_addr = AddressWithMode(get_xlen_from_reg(dt.alu_val), make_access_mode(state, opkind));
     Address computed_next_inst_addr;
 
     enum ExceptionCause excause = dt.excause;
     if (excause == EXCAUSE_NONE) {
-        if (is_special_access(dt.memctl)) {
-            excause = memory_special(
-                dt.memctl, dt.inst.rt(), memread, memwrite, towrite_val, dt.val_rt, mem_addr);
-        } else if (is_regular_access(dt.memctl)) {
-            if (memwrite) { mem_data->write_ctl(dt.memctl, mem_addr, dt.val_rt); }
-            if (memread) { towrite_val = mem_data->read_ctl(dt.memctl, mem_addr); }
-        } else {
-            Q_ASSERT(dt.memctl == AC_NONE);
-            // AC_NONE is memory NOP
+        try {
+            if (is_special_access(dt.memctl)) {
+                excause = memory_special(
+                    dt.memctl, dt.inst.rt(), memread, memwrite, towrite_val, dt.val_rt, mem_addr);
+            } else if (is_regular_access(dt.memctl)) {
+                if (memwrite) { mem_data->write_ctl(dt.memctl, mem_addr, dt.val_rt); }
+                if (memread) { towrite_val = mem_data->read_ctl(dt.memctl, mem_addr); }
+            } else {
+                Q_ASSERT(dt.memctl == AC_NONE);
+                // AC_NONE is memory NOP
+            }
+        } catch (const SimulatorExceptionPageFault &e) {
+            excause = e.get_cause();
+            memread = false;
+            memwrite = false;
+            regwrite = false;
+            towrite_val = 0;
         }
     }
 
@@ -563,12 +632,16 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
             CSR::PrivilegeLevel restored
                 = control_state->exception_return(get_current_privilege(), dt.xret_privlev);
             set_current_privilege(restored);
-            if (this->xlen == Xlen::_32)
-                computed_next_inst_addr
-                    = Address(control_state->read_internal(CSR::Id::MEPC).as_u32());
+            CSR::Id::IdxType epc_reg;
+            if (dt.xret_privlev == CSR::PrivilegeLevel::MACHINE)
+                epc_reg = CSR::Id::MEPC;
             else
-                computed_next_inst_addr
-                    = Address(control_state->read_internal(CSR::Id::MEPC).as_u64());
+                epc_reg = CSR::Id::SEPC;
+
+            if (this->xlen == Xlen::_32)
+                computed_next_inst_addr = Address(control_state->read_internal(epc_reg).as_u32());
+            else
+                computed_next_inst_addr = Address(control_state->read_internal(epc_reg).as_u64());
             csr_written = true;
         }
     }
@@ -605,7 +678,7 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
                      if (dt.branch_jalr || dt.branch_jal) return dt.next_inst_addr.get_raw();
                      return towrite_val;
                  }(),
-                 .excause = dt.excause,
+                 .excause = excause,
                  .num_rd = dt.num_rd,
                  .memtoreg = memread,
                  .regwrite = regwrite,

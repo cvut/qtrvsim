@@ -107,14 +107,17 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
     connect(run_t.data(), &QTimer::timeout, this, &Machine::step_timer);
 
     for (int i = 0; i < EXCAUSE_COUNT; i++) {
-        if (i != EXCAUSE_INT && i != EXCAUSE_BREAK && i != EXCAUSE_HWBREAK) {
+        if (i != EXCAUSE_INT_M && i != EXCAUSE_INT_S && i != EXCAUSE_BREAK
+            && i != EXCAUSE_HWBREAK) {
             set_stop_on_exception((enum ExceptionCause)i, machine_config.osemu_exception_stop());
             set_step_over_exception((enum ExceptionCause)i, machine_config.osemu_exception_stop());
         }
     }
 
-    set_stop_on_exception(EXCAUSE_INT, machine_config.osemu_interrupt_stop());
-    set_step_over_exception(EXCAUSE_INT, false);
+    set_stop_on_exception(EXCAUSE_INT_M, machine_config.osemu_interrupt_stop());
+    set_stop_on_exception(EXCAUSE_INT_S, machine_config.osemu_interrupt_stop());
+    set_step_over_exception(EXCAUSE_INT_M, false);
+    set_step_over_exception(EXCAUSE_INT_S, false);
 }
 void Machine::setup_lcd_display() {
     perip_lcd_display = new LcdDisplay(machine_config.get_simulated_endian());
@@ -493,12 +496,17 @@ bool Machine::get_step_over_exception(enum ExceptionCause excause) const {
 }
 
 enum ExceptionCause Machine::get_exception_cause() const {
-    uint32_t val;
     if (controlst.isNull()) { return EXCAUSE_NONE; }
-    val = (controlst->read_internal(CSR::Id::MCAUSE).as_u64());
-    if (val & 0xffffffff80000000) {
-        return EXCAUSE_INT;
+
+    CSR::PrivilegeLevel priv = cr->get_current_privilege();
+    CSR::Id::IdxType cause_reg
+        = (priv == CSR::PrivilegeLevel::SUPERVISOR) ? CSR::Id::SCAUSE : CSR::Id::MCAUSE;
+
+    uint64_t val = controlst->read_internal(cause_reg).as_u64();
+
+    if (val & 0xffffffff80000000ULL) {
+        return priv == CSR::PrivilegeLevel::SUPERVISOR ? EXCAUSE_INT_S : EXCAUSE_INT_M;
     } else {
-        return (ExceptionCause)val;
+        return static_cast<ExceptionCause>(val);
     }
 }
