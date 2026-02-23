@@ -83,6 +83,7 @@ public:
     [[nodiscard]] RegisterValue read_ctl(enum AccessControl control_signal, AddressWithMode source) const;
 
     virtual void sync();
+    virtual void sfence_vma(uint64_t vaddr, uint64_t asid);
     [[nodiscard]] virtual LocationStatus location_status(Address address) const;
     [[nodiscard]] virtual uint32_t get_change_counter() const = 0;
     /**

@@ -65,23 +65,32 @@ void TLB::on_csr_write(size_t internal_id, RegisterValue val) {
 void TLB::flush_single(VirtualAddress va, uint16_t asid) {
     uint64_t vpn = va.get_raw() >> 12;
     size_t s = set_index(vpn);
+    bool any_invalidated = false;
+    const char *tag = type == PROGRAM ? "I" : "D";
+
     for (size_t w = 0; w < associativity_; w++) {
         auto &e = table[s][w];
-        if (e.valid && e.vpn == vpn && e.asid == asid) {
+        if (e.valid && e.vpn == vpn && (e.asid == asid || asid == 0)) {
             uint16_t old_asid = e.asid;
             uint64_t old_vpn = e.vpn;
             e.valid = false;
-            const char *tag = (type == PROGRAM ? "I" : "D");
-            LOG("TLB[%s]: flushed VA=0x%llx ASID=%u", tag, (unsigned long long)va.get_raw(), asid);
+            DEBUG(
+                "TLB[%s]: flushed VA=0x%llx ASID=%u (wildcard=%s)", tag,
+                (unsigned long long)va.get_raw(), asid, (asid == 0 ? "true" : "false"));
             emit tlb_update(
                 static_cast<unsigned>(w), static_cast<unsigned>(s), false, old_asid, old_vpn, 0ull,
                 false);
-            update_all_statistics();
+            any_invalidated = true;
         }
+    }
+
+    if (any_invalidated) {
+        ++change_counter;
+        update_all_statistics();
     }
 }
 
-void TLB::flush() {
+void TLB::flush_all_entries() {
     if (num_sets_ == 0 || associativity_ == 0) return;
     const char *tag = (type == PROGRAM ? "I" : "D");
     for (size_t s = 0; s < num_sets_; s++) {
@@ -98,13 +107,78 @@ void TLB::flush() {
         }
     }
     change_counter++;
-    LOG("TLB[%s]: flushed all entries", tag);
+    DEBUG("TLB[%s]: flushed all entries", tag);
     update_all_statistics();
 }
 
+void TLB::flush_by_asid(uint16_t asid) {
+    bool any_invalidated = false;
+    for (size_t s = 0; s < num_sets_; ++s) {
+        for (size_t w = 0; w < associativity_; ++w) {
+            auto &e = table[s][w];
+            if (e.valid && e.asid == asid) {
+                uint16_t old_asid = e.asid;
+                uint64_t old_vpn = e.vpn;
+                e.valid = false;
+                emit tlb_update(
+                    static_cast<unsigned>(w), static_cast<unsigned>(s), false, old_asid, old_vpn,
+                    0ull, false);
+                any_invalidated = true;
+            }
+        }
+    }
+    if (any_invalidated) {
+        ++change_counter;
+        update_all_statistics();
+    }
+}
+
+void TLB::flush_by_vpn(uint64_t vpn) {
+    bool any_invalidated = false;
+    for (size_t s = 0; s < num_sets_; ++s) {
+        for (size_t w = 0; w < associativity_; ++w) {
+            auto &e = table[s][w];
+            if (e.valid && e.vpn == vpn) {
+                uint16_t old_asid = e.asid;
+                uint64_t old_vpn = e.vpn;
+                e.valid = false;
+                emit tlb_update(
+                    static_cast<unsigned>(w), static_cast<unsigned>(s), false, old_asid, old_vpn,
+                    0ull, false);
+                any_invalidated = true;
+            }
+        }
+    }
+    if (any_invalidated) {
+        ++change_counter;
+        update_all_statistics();
+    }
+}
+
 void TLB::sync() {
-    flush();
     mem->sync();
+    update_all_statistics();
+}
+
+void TLB::sfence_vma(uint64_t vaddr, uint64_t asid) {
+    if (vaddr == 0 && asid == 0) {
+        flush_all_entries();
+        return;
+    }
+
+    if (vaddr != 0 && asid != 0) {
+        VirtualAddress va { vaddr };
+        flush_single(va, static_cast<uint16_t>(asid & 0xFFFFu));
+        return;
+    }
+
+    if (vaddr == 0 && asid != 0) {
+        flush_by_asid(static_cast<uint16_t>(asid & 0xFFFFu));
+        return;
+    }
+
+    uint64_t vpn = vaddr >> 12;
+    flush_by_vpn(vpn);
 }
 
 Address TLB::translate_virtual_to_physical(AddressWithMode vaddr) {

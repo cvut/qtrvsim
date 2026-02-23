@@ -341,6 +341,14 @@ enum ExceptionCause Core::memory_special(
         towrite_val = fetched_value;
         break;
     }
+    case AC_SFENCE_VMA: {
+        uint64_t vaddr = towrite_val.as_u64(); // rs1
+        uint64_t asid = rt_value.as_u64();     // rs2
+        mem_data->sfence_vma(vaddr, asid);
+        mem_program->sfence_vma(vaddr, asid);
+        predictor->flush();
+        break;
+    }
     default: break;
     }
 

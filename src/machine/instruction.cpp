@@ -453,6 +453,19 @@ static const struct InstructionMap ENVIRONMENT_AND_BREAKPOINTS_map[] = {
     {"ebreak", IT_I, NOALU, NOMEM, nullptr, {}, 0x00100073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_EXCEPTION | IMF_EBREAK }, nullptr},
 };
 
+// sub-decoder for SYSTEM_PRIV slot indexed by bits [29:25] == 8
+// this subfield uses bits [22:20] (3 bits) to distinguish sret/wfi/etc.
+static const struct InstructionMap SYSTEM_PRIV_slot8_map[] = {
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    {"sret", IT_I, NOALU, NOMEM, nullptr, {}, 0x10200073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_XRET | IMF_PRIV_S }, nullptr},
+    IM_UNKNOWN,
+    IM_UNKNOWN,
+    {"wfi", IT_I, NOALU, NOMEM, nullptr, {}, 0x10500073, 0xffffffff, { .flags = IMF_SUPPORTED }, nullptr},
+    IM_UNKNOWN,
+    IM_UNKNOWN
+};
+
 // Priviledged system isntructions, only 5-bits (29:25) are decoded for now.
 // Full decode is should cover 128 entries (31:25) but we radly support hypervisor even in future
 static const struct InstructionMap SYSTEM_PRIV_map[] = {
@@ -464,8 +477,8 @@ static const struct InstructionMap SYSTEM_PRIV_map[] = {
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
-    {"sret", IT_I, NOALU, NOMEM, nullptr, {}, 0x10200073, 0xffffffff, { .flags = IMF_SUPPORTED | IMF_XRET | IMF_PRIV_S }, nullptr},
-    IM_UNKNOWN,
+    {"sret/wfi", IT_I, NOALU, NOMEM, SYSTEM_PRIV_slot8_map, {}, 0x10000073, 0xff8fffff, { .subfield = {3, 20} }, nullptr },
+    {"sfence.vma", IT_I, NOALU, AC_SFENCE_VMA, nullptr, {"s", "t"}, 0x12000073, 0xfe007fff, { .flags = IMF_SUPPORTED | IMF_PRIV_S }, nullptr},
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,

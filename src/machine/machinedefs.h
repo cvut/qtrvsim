@@ -40,6 +40,7 @@ enum AccessControl {
     AC_AMOMAX64,
     AC_AMOMINU64,
     AC_AMOMAXU64,
+    AC_SFENCE_VMA,
     AC_CACHE_OP,
 };
 

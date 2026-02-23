@@ -33,9 +33,15 @@ public:
     void on_csr_write(size_t internal_id, RegisterValue val);
     void flush_single(VirtualAddress va, uint16_t asid);
 
-    void flush();
+    void flush_all_entries();
+
+    void flush_by_asid(uint16_t asid);
+
+    void flush_by_vpn(uint64_t vpn);
 
     void sync() override;
+
+    void sfence_vma(uint64_t vaddr, uint64_t asid) override;
 
     Address translate_virtual_to_physical(AddressWithMode vaddr);
 
