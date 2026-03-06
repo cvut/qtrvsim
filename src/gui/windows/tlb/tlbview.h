@@ -24,7 +24,13 @@ public slots:
         unsigned asid,
         quint64 vpn,
         quint64 phys,
-        bool write);
+        bool R,
+        bool W,
+        bool X,
+        bool U,
+        bool G,
+        bool A,
+        bool D);
 
 private:
     unsigned width;
@@ -49,7 +55,13 @@ public slots:
         unsigned asid,
         quint64 vpn,
         quint64 phys,
-        bool write);
+        bool R,
+        bool W,
+        bool X,
+        bool U,
+        bool G,
+        bool A,
+        bool D);
 
 private:
     QPointer<machine::TLB> tlb;
@@ -59,6 +71,14 @@ private:
     std::vector<BORROWED QGraphicsSimpleTextItem *> asid;
     std::vector<BORROWED QGraphicsSimpleTextItem *> vpn;
     std::vector<BORROWED QGraphicsSimpleTextItem *> phys;
+    std::vector<BORROWED QGraphicsSimpleTextItem *> r_bit;
+    std::vector<BORROWED QGraphicsSimpleTextItem *> w_bit;
+    std::vector<BORROWED QGraphicsSimpleTextItem *> x_bit;
+    std::vector<BORROWED QGraphicsSimpleTextItem *> u_bit;
+    std::vector<BORROWED QGraphicsSimpleTextItem *> g_bit;
+    std::vector<BORROWED QGraphicsSimpleTextItem *> a_bit;
+    std::vector<BORROWED QGraphicsSimpleTextItem *> d_bit;
+
     unsigned curr_row;
     unsigned last_set;
     bool last_highlighted;
