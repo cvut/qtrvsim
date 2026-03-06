@@ -11,6 +11,18 @@
 
 namespace machine {
 
+struct WalkResult {
+    Address phys;
+    Address pte_addr;
+    std::unique_ptr<GenericPte> leaf_pte;
+    bool pte_was_written = false;
+
+    WalkResult() = default;
+    WalkResult(Address phys_, std::unique_ptr<GenericPte> leaf_pte_)
+        : phys(phys_)
+        , leaf_pte(std::move(leaf_pte_)) {}
+};
+
 // Performs multi-level page-table walks (SV32) in memory to resolve a virtual address to a physical
 // one.
 class PageTableWalker {
@@ -20,7 +32,12 @@ public:
         std::function<std::unique_ptr<GenericPte>(uint64_t)> pte_factory = sv32_pte_factory());
 
     template<typename T, int max_level_idx>
-    Address walk(const VirtualAddress &va, uint64_t raw_satp);
+    WalkResult walk(
+        const VirtualAddress &va,
+        uint64_t raw_satp,
+        uint64_t raw_sstatus,
+        const AccessMode &access_mode);
+
     static std::function<std::unique_ptr<GenericPte>(uint64_t)> sv32_pte_factory();
     static std::function<std::unique_ptr<GenericPte>(uint64_t)> sv39_pte_factory();
 

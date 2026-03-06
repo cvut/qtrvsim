@@ -2,6 +2,7 @@
 #define MEMORY_UTILS_H
 
 #include "common/endian.h"
+#include "csr/controlstate.h"
 #include "utils.h"
 
 #include <cstdint>
@@ -95,6 +96,63 @@ struct WriteResult {
         this->changed |= other.changed;
     }
 };
+
+/**
+ * Checks whether a memory access is permitted for a given page table entry.
+ *
+ * This function evaluates access permissions based on the page table entry
+ * flags (U, R, W, X), the current privilege level, and relevant bits from
+ * the sstatus CSR (SUM and MXR).
+ *
+ * @tparam PTEType            Type representing a page table entry. Must provide
+ *                      methods u(), r(), w(), and x() returning permission bits.
+ * @param pte           Page table entry being checked.
+ * @param raw_sstatus   Raw value of the sstatus CSR.
+ * @param priv          Current privilege level of the access.
+ * @param op            Type of memory access (FETCH, READ, or WRITE).
+ * @return              true if the access is permitted, false otherwise.
+ */
+template<typename PTEType>
+bool check_permissions(
+    const PTEType &pte,
+    uint64_t raw_sstatus,
+    CSR::PrivilegeLevel priv,
+    AccessOp op) {
+    bool p_u = pte.u();
+    bool p_r = pte.r();
+    bool p_w = pte.w();
+    bool p_x = pte.x();
+
+    bool sum = (CSR::Field::sstatus::SUM.decode(raw_sstatus) != 0);
+    bool mxr = (CSR::Field::sstatus::MXR.decode(raw_sstatus) != 0);
+
+    // User-mode accesses always require U==1
+    if (priv == CSR::PrivilegeLevel::UNPRIVILEGED) {
+        if (!p_u) return false;
+    }
+
+    // Supervisor-mode: for user pages (U==1), loads/stores allowed only if SUM=1.
+    // Supervisor must not execute user pages.
+    if (priv == CSR::PrivilegeLevel::SUPERVISOR) {
+        if (p_u) {
+            if (op == AccessOp::READ || op == AccessOp::WRITE) {
+                if (!sum) return false;
+            }
+            if (op == AccessOp::FETCH) return false;
+        }
+    }
+
+    switch (op) {
+    case AccessOp::READ:
+        if (p_r) return true;
+        // MXR: loads allowed from X pages when MXR=1
+        if (mxr && p_x) return true;
+        return false;
+    case AccessOp::WRITE: return p_w;
+    case AccessOp::FETCH: return p_x;
+    default: return false;
+    }
+}
 
 /**
  * Returns page-fault cause corresponding to the current access type.

@@ -69,10 +69,10 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
         new CSR::ControlState(machine_config.get_simulated_xlen(), machine_config.get_isa_word()));
 
     tlb_program.reset(new TLB(
-        cch_program.data(), PROGRAM, machine_config.access_tlb_program(),
+        cch_program.data(), cch_program.data(), PROGRAM, machine_config.access_tlb_program(),
         machine_config.get_simulated_xlen(), machine_config.get_vm_enabled()));
     tlb_data.reset(new TLB(
-        cch_data.data(), DATA, machine_config.access_tlb_data(),
+        cch_data.data(), cch_program.data(), DATA, machine_config.access_tlb_data(),
         machine_config.get_simulated_xlen(), machine_config.get_vm_enabled()));
     tlb_program->on_csr_write(CSR::Id::SATP, 0);
     tlb_data->on_csr_write(CSR::Id::SATP, 0);
