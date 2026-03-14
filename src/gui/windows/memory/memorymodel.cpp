@@ -82,12 +82,15 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
         }
         if (mem == nullptr) { return QString(""); }
         address += cellSizeBytes() * (index.column() - 1);
+        machine::AccessMode mode = machine::Core::make_access_mode(
+            machine->core()->get_state(), machine::AccessOp::READ);
+        machine::AddressWithMode awm(address, mode);
         if (address < index0_offset) { return QString(""); }
         switch (cell_size) {
-        case CELLSIZE_BYTE: data = mem->read_u8(address, ae::INTERNAL); break;
-        case CELLSIZE_HWORD: data = mem->read_u16(address, ae::INTERNAL); break;
+        case CELLSIZE_BYTE: data = mem->read_u8(awm, ae::INTERNAL); break;
+        case CELLSIZE_HWORD: data = mem->read_u16(awm, ae::INTERNAL); break;
         default:
-        case CELLSIZE_WORD: data = mem->read_u32(address, ae::INTERNAL); break;
+        case CELLSIZE_WORD: data = mem->read_u32(awm, ae::INTERNAL); break;
         }
 
         t = QString::number(data, 16);
@@ -239,11 +242,14 @@ bool MemoryModel::setData(const QModelIndex &index, const QVariant &value, int r
             mem = machine->cache_data_rw();
         }
         address += cellSizeBytes() * (index.column() - 1);
+        machine::AccessMode mode = machine::Core::make_access_mode(
+            machine->core()->get_state(), machine::AccessOp::READ);
+        machine::AddressWithMode awm(address, mode);
         switch (cell_size) {
-        case CELLSIZE_BYTE: mem->write_u8(address, data, ae::INTERNAL); break;
-        case CELLSIZE_HWORD: mem->write_u16(address, data, ae::INTERNAL); break;
+        case CELLSIZE_BYTE: mem->write_u8(awm, data, ae::INTERNAL); break;
+        case CELLSIZE_HWORD: mem->write_u16(awm, data, ae::INTERNAL); break;
         default:
-        case CELLSIZE_WORD: mem->write_u32(address, data, ae::INTERNAL); break;
+        case CELLSIZE_WORD: mem->write_u32(awm, data, ae::INTERNAL); break;
         }
     }
     return true;
