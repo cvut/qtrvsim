@@ -48,7 +48,8 @@ void MemoryTableView::adjustColumnCount() {
 
         // int width0_dh = itemDelegate(idx)->sizeHint(viewOptions(),
         // idx).get_width() + 2;
-        int width0_dh = delegate->sizeHintForText(viewOpts, idx, "0x00000000").width() + 2;
+        int width0_dh = delegate->sizeHintForText(viewOpts, idx, "0x000000000000").width()
+                        + 2; // Quic hack enable more byte for 64-bit
         horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
         horizontalHeader()->resizeSection(0, width0_dh);
 
