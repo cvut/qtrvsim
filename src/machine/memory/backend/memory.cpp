@@ -19,13 +19,13 @@ WriteResult
 MemorySection::write(Offset dst_offset, const void *source, size_t size, WriteOptions options) {
     UNUSED(options)
 
-    auto destination = static_cast<size_t>(dst_offset);
-
-    if (destination >= length()) {
+    if (dst_offset >= length()) {
         throw SIMULATOR_EXCEPTION(
             OutOfMemoryAccess, "Trying to write outside of the memory section",
-            QString("Accessing using offset: ") + QString::number(destination));
+            QString("Accessing using offset: ") + QString::number(dst_offset));
     }
+
+    size_t destination = static_cast<size_t>(dst_offset);
 
     // Size the can be read from this section
     const size_t available_size = std::min(destination + size, length()) - destination;
@@ -41,15 +41,15 @@ ReadResult
 MemorySection::read(void *destination, Offset src_offset, size_t size, ReadOptions options) const {
     UNUSED(options)
 
-    auto source = static_cast<size_t>(src_offset);
-
-    size = std::min(source + size, length()) - source;
-
-    if (source >= length()) {
+    if (src_offset >= length()) {
         throw SIMULATOR_EXCEPTION(
             OutOfMemoryAccess, "Trying to read outside of the memory section",
-            QString("Accessing using offset: ") + QString::number(source));
+            QString("Accessing using offset: ") + QString::number(src_offset));
     }
+
+    size_t source = static_cast<size_t>(src_offset);
+
+    size = std::min(source + size, length()) - source;
 
     memcpy(destination, &dt[source], size);
 
@@ -80,10 +80,6 @@ bool MemorySection::operator!=(const MemorySection &ms) const {
 // Settings sanity checks
 static_assert(MEMORY_SECTION_SIZE != 0, "Nonzero memory section size is required.");
 static_assert(MEMORY_TREE_ROW_SIZE != 0, "Nonzero memory tree row size is required.");
-static_assert(
-    ((32 - MEMORY_SECTION_BITS) % MEMORY_TREE_BITS) == 0,
-    "Number of bits in tree row has to be exact division of available number "
-    "of bits.");
 
 /**
  * Generate mask to get memory section index from address.
@@ -96,14 +92,15 @@ static_assert(
  *  ```address & generate_mask(8, 0)```
  */
 constexpr uint64_t generate_mask(size_t section_size, size_t unit_size) {
-    return ((1U << section_size) - 1) << unit_size;
+    return ((1LLU << section_size) - 1) << unit_size;
 }
 
 /**
  * Get index in row for given offset and row number i
  */
 constexpr size_t tree_row_bit_offset(size_t i) {
-    return 32 - MEMORY_TREE_BITS - i * MEMORY_TREE_BITS;
+    return (MEMORY_TREE_BITS * MEMORY_TREE_DEPTH + MEMORY_SECTION_BITS)
+           - MEMORY_TREE_BITS * (i + 1);
 }
 
 /*
@@ -143,7 +140,7 @@ void Memory::reset(const Memory &m) {
     this->mt_root = copy_section_tree(m.get_memory_tree_root(), 0);
 }
 
-MemorySection *Memory::get_section(size_t offset, bool create) const {
+MemorySection *Memory::get_section(Offset offset, bool create) const {
     union MemoryTree *w = this->mt_root;
     size_t row_num;
     // Walk memory tree branch from root to leaf and create new nodes when
@@ -221,7 +218,7 @@ union machine::MemoryTree *Memory::allocate_section_tree() {
     return mt;
 }
 
-void Memory::free_section_tree(union MemoryTree *mt, size_t depth) {
+void Memory::free_section_tree(union MemoryTree *mt, unsigned depth) {
     if (depth < (MEMORY_TREE_DEPTH - 1)) { // Following level is memory tree
         for (size_t i = 0; i < MEMORY_TREE_ROW_SIZE; i++) {
             if (mt[i].subtree != nullptr) {
@@ -239,7 +236,7 @@ void Memory::free_section_tree(union MemoryTree *mt, size_t depth) {
 bool Memory::compare_section_tree(
     const union MemoryTree *mt1,
     const union MemoryTree *mt2,
-    size_t depth) {
+    unsigned depth) {
     if (depth < (MEMORY_TREE_DEPTH - 1)) { // Following level is memory tree
         for (size_t i = 0; i < MEMORY_TREE_ROW_SIZE; i++) {
             if (((mt1[i].subtree == nullptr || mt2[i].subtree == nullptr)
@@ -260,7 +257,7 @@ bool Memory::compare_section_tree(
     return true;
 }
 
-union machine::MemoryTree *Memory::copy_section_tree(const union MemoryTree *mt, size_t depth) {
+union machine::MemoryTree *Memory::copy_section_tree(const union MemoryTree *mt, unsigned depth) {
     union MemoryTree *nmt = allocate_section_tree();
     if (depth < (MEMORY_TREE_DEPTH - 1)) { // Following level is memory tree
         for (size_t i = 0; i < MEMORY_TREE_ROW_SIZE; i++) {

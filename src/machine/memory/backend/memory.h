@@ -45,16 +45,17 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 /// Some optimisation options
 // How big memory sections will be in bits (2^8=256 bytes)
-constexpr size_t MEMORY_SECTION_BITS = 8;
+constexpr unsigned MEMORY_SECTION_BITS = 12;
 // How big one row of lookup tree will be in bits (2^4=16)
-constexpr size_t MEMORY_TREE_BITS = 4;
+constexpr unsigned MEMORY_TREE_BITS = 9;
 //////////////////////////////////////////////////////////////////////////////
 // Size of one section
-constexpr size_t MEMORY_SECTION_SIZE = (1u << MEMORY_SECTION_BITS);
+constexpr size_t MEMORY_SECTION_SIZE = (1llu << MEMORY_SECTION_BITS);
 // Size of one memory row
-constexpr size_t MEMORY_TREE_ROW_SIZE = (1u << MEMORY_TREE_BITS);
+constexpr size_t MEMORY_TREE_ROW_SIZE = (1llu << MEMORY_TREE_BITS);
 // Depth of tree
-constexpr size_t MEMORY_TREE_DEPTH = ((32 - MEMORY_SECTION_BITS) / MEMORY_TREE_BITS);
+constexpr unsigned MEMORY_TREE_DEPTH = ((64 - MEMORY_SECTION_BITS
+                            + MEMORY_TREE_BITS - 1) / MEMORY_TREE_BITS);
 
 union MemoryTree {
     union MemoryTree *subtree;
@@ -78,7 +79,7 @@ public:
     void reset(const Memory &);
 
     // returns section containing given address
-    [[nodiscard]] MemorySection *get_section(size_t offset, bool create) const;
+    [[nodiscard]] MemorySection *get_section(Offset offset, bool create) const;
 
     WriteResult
     write(Offset destination, const void *source, size_t size, WriteOptions options) override;
@@ -97,10 +98,10 @@ private:
     union MemoryTree *mt_root;
     uint32_t change_counter = 0;
     static union MemoryTree *allocate_section_tree();
-    static void free_section_tree(union MemoryTree *, size_t depth);
+    static void free_section_tree(union MemoryTree *, unsigned depth);
     static bool
-    compare_section_tree(const union MemoryTree *, const union MemoryTree *, size_t depth);
-    static union MemoryTree *copy_section_tree(const union MemoryTree *, size_t depth);
+    compare_section_tree(const union MemoryTree *, const union MemoryTree *, unsigned depth);
+    static union MemoryTree *copy_section_tree(const union MemoryTree *, unsigned depth);
     [[nodiscard]] uint32_t get_change_counter() const;
 };
 } // namespace machine

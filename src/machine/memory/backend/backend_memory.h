@@ -15,7 +15,7 @@ namespace machine {
 /**
  * Relative index within an instance of backend memory.
  */
-typedef size_t Offset;
+typedef uint64_t Offset;
 
 /**
  * Interface for physical memory or periphery.
@@ -105,8 +105,8 @@ signals:
      */
     void external_backend_change_notify(
         const BackendMemory *mem_access,
-        uint32_t start_addr,
-        uint32_t last_addr,
+        Offset start_addr,
+        Offset last_addr,
         AccessEffects type) const;
 };
 
