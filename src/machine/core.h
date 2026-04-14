@@ -148,7 +148,7 @@ protected:
         bool memwrite,
         RegisterValue &towrite_val,
         RegisterValue rt_value,
-        Address mem_addr);
+        AddressWithMode mem_addr);
 };
 
 class CoreSingle : public Core {

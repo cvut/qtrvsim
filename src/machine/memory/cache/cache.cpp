@@ -108,6 +108,7 @@ void Cache::flush() {
 
 void Cache::sync() {
     flush();
+    mem->sync();
 }
 
 void Cache::reset() {

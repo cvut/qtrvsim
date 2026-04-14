@@ -236,7 +236,7 @@ enum ExceptionCause Core::memory_special(
     bool memwrite,
     RegisterValue &towrite_val,
     RegisterValue rt_value,
-    Address mem_addr) {
+    AddressWithMode mem_addr) {
     Q_UNUSED(mode)
 
     switch (memctl) {

@@ -104,6 +104,7 @@ void TLB::flush() {
 
 void TLB::sync() {
     flush();
+    mem->sync();
 }
 
 Address TLB::translate_virtual_to_physical(AddressWithMode vaddr) {
