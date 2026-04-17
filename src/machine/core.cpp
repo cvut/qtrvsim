@@ -45,6 +45,7 @@ Core::Core(
     step_over_exception.fill(true);
     step_over_exception[EXCAUSE_INT_M] = false;
     step_over_exception[EXCAUSE_INT_S] = false;
+    state.LoadReservedRange.reset();
 }
 
 void Core::step(bool skip_break) {
@@ -59,6 +60,7 @@ void Core::reset() {
     state.stall_count = 0;
     do_reset();
     set_current_privilege(CSR::PrivilegeLevel::MACHINE);
+    state.LoadReservedRange.reset();
 }
 
 unsigned Core::get_cycle_count() const {
@@ -322,6 +324,7 @@ enum ExceptionCause Core::memory_special(
         } else {
             towrite_val = 1;
         }
+        state.LoadReservedRange.reset();
         break;
     case AC_FISRT_AMO_MODIFY32 ... AC_LAST_AMO_MODIFY32: {
         if (!memread || !memwrite) { break; }
@@ -347,6 +350,7 @@ enum ExceptionCause Core::memory_special(
         mem_data->sfence_vma(vaddr, asid);
         mem_program->sfence_vma(vaddr, asid);
         predictor->flush();
+        state.LoadReservedRange.reset();
         break;
     }
     default: break;
@@ -651,6 +655,7 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
             else
                 computed_next_inst_addr = Address(control_state->read_internal(epc_reg).as_u64());
             csr_written = true;
+            state.LoadReservedRange.reset();
         }
     }
 
