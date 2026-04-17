@@ -120,6 +120,7 @@ void create_parser(QCommandLineParser &p) {
     p.addOption(
         { { "isa-variant", "isavariant" }, "Instruction set to emulate (default RV32IMA)", "STR" });
     p.addOption({ "cycle-limit", "Limit execution to specified maximum clock cycles", "NUMBER" });
+    p.addOption({ "enable-vm", "Enable virtual memory support." });
 }
 
 void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const QString &which) {
@@ -343,6 +344,7 @@ void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
                 config.modify_isa_word(flag, flag);
         }
     }
+    config.set_vm_enabled(parser.isSet("enable-vm"));
 }
 
 void configure_tracer(QCommandLineParser &p, Tracer &tr) {
