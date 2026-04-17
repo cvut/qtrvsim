@@ -10,6 +10,13 @@
 #include <functional>
 
 namespace machine {
+struct AccessMode;
+
+enum class AccessOp : uint8_t {
+    FETCH = 0,
+    READ = 1,
+    WRITE = 2,
+};
 
 /**
  * Determines what effects should memory access cause.
@@ -88,6 +95,24 @@ struct WriteResult {
         this->changed |= other.changed;
     }
 };
+
+/**
+ * Returns page-fault cause corresponding to the current access type.
+ *
+ * FETCH maps to instruction page fault, READ to load page fault and
+ * WRITE to store page fault.
+ *
+ * @param opkind   Type of memory access.
+ * @return         Matching exception cause for the given access type.
+ */
+inline ExceptionCause get_current_cause(AccessOp opkind) {
+    switch (opkind) {
+    case AccessOp::FETCH: return EXCAUSE_INSN_PAGE_FAULT;
+    case AccessOp::WRITE: return EXCAUSE_STORE_PAGE_FAULT;
+    case AccessOp::READ:
+    default: return EXCAUSE_LOAD_PAGE_FAULT;
+    }
+}
 
 /**
  * Perform n-byte read into periphery that only supports u32 access.

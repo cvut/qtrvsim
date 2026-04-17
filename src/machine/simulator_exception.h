@@ -1,6 +1,8 @@
 #ifndef SIMULATOR_EXCEPTION_H
 #define SIMULATOR_EXCEPTION_H
 
+#include "machinedefs.h"
+
 #include <exception>
 #include <qstring.h>
 
@@ -9,14 +11,21 @@ namespace machine {
 // Base exception for all machine ones
 class SimulatorException : public std::exception {
 public:
-    SimulatorException(QString reason, QString ext, QString file, int line);
+    SimulatorException(
+        QString reason,
+        QString ext,
+        QString file,
+        int line,
+        ExceptionCause cause = EXCAUSE_NONE);
     ~SimulatorException();
     const char *what() const noexcept override;
     QString msg(bool pos) const;
+    ExceptionCause get_cause() const { return cause_; }
 
 protected:
     QString name, reason, ext, file;
     int line;
+    ExceptionCause cause_;
 
 private:
     mutable char *cached_what;
@@ -77,15 +86,20 @@ private:
 #define EXCEPTION(NAME, PARENT)                                                                    \
     class SimulatorException##NAME : public SimulatorException##PARENT {                           \
     public:                                                                                        \
-        SimulatorException##NAME(QString reason, QString ext, QString file, int line);             \
+        SimulatorException##NAME(                                                                  \
+            QString reason,                                                                        \
+            QString ext,                                                                           \
+            QString file,                                                                          \
+            int line,                                                                              \
+            ExceptionCause cause = EXCAUSE_NONE);                                                  \
     };
 SIMULATOR_EXCEPTIONS
 #undef EXCEPTION
 
 // This is helper macro for throwing QtRvSim exceptions
-#define SIMULATOR_EXCEPTION(TYPE, REASON, EXT)                                                     \
-    (machine::SimulatorException##TYPE(QString(REASON), QString(EXT), QString(__FILE__), __LINE__))
-
+#define SIMULATOR_EXCEPTION(TYPE, REASON, EXT, ...)                                                \
+    (machine::SimulatorException##TYPE(                                                            \
+        QString(REASON), QString(EXT), QString(__FILE__), __LINE__, ##__VA_ARGS__))
 #define SANITY_EXCEPTION(MSG)                                                                      \
     SIMULATOR_EXCEPTION(                                                                           \
         Sanity, "Internal error",                                                                  \
