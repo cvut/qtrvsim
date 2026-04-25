@@ -1,11 +1,14 @@
 #include "tracer.h"
 
+#include "utilandtext.h"
+
 #include <cinttypes>
 
 using namespace machine;
 
 Tracer::Tracer(Machine *machine) : core_state(machine->core()->get_state()) {
     cycle_limit = 0;
+    last_priv_lev = CSR::PrivilegeLevel::MACHINE;
 
     connect(machine->core(), &Core::step_done, this, &Tracer::step_output);
 }
@@ -48,6 +51,19 @@ void Tracer::step_output() {
         printf(
             "MEM[%" PRIx64 "]:  WR %" PRIx64 "\n", mem_wb.mem_addr.get_raw(),
             mem.mem_write_val.as_u64());
+    }
+    if (trace_exception) {
+        if (mem_wb.excause != EXCAUSE_NONE) {
+            printf("EXCEPTION %s\n", get_exception_name(mem_wb.excause));
+        }
+    }
+    if (trace_mode_change) {
+        if (last_priv_lev != core_state.current_privilege()) {
+            printf(
+                "MODE CHANGED from %s to %s\n", get_privilege_level_name(last_priv_lev),
+                get_privilege_level_name(core_state.current_privilege()));
+            last_priv_lev = core_state.current_privilege();
+        }
     }
     if ((cycle_limit != 0) && (core_state.cycle_count >= cycle_limit)) {
         emit cycle_limit_reached();

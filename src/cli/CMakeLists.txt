@@ -11,12 +11,14 @@ set(cli_SOURCES
         msgreport.cpp
         reporter.cpp
         tracer.cpp
+        utilandtext.cpp
 )
 set(cli_HEADERS
         chariohandler.h
         msgreport.h
         reporter.h
         tracer.h
+        utilandtext.h
 )
 
 add_executable(cli
