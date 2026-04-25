@@ -380,7 +380,7 @@ void Machine::step_internal(bool skip_break) {
         emit program_trap(e);
         return;
     }
-    if (regs->read_pc() >= program_end) {
+    if (false && (regs->read_pc() >= program_end)) {
         stop_core_clock();
         set_status(ST_EXIT);
         emit program_exit();
