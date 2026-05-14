@@ -8,6 +8,7 @@
 - [First Launch](basics/first_launch.md)
 - [Basics of the User Interface](basics/basics_of_user_interface.md)
   - [Menus and the Toolbar](basics/menus_and_the_toolbar.md)
+  - [Machine Configuration](basics/machine_configuration.md)
 - [Writing Programs](basics/writing_programs.md)
 
 # Reference
