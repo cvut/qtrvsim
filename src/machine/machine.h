@@ -95,7 +95,7 @@ public:
 
     Address virtual_to_physical(AddressWithMode v) {
         if (tlb_data) {
-            return tlb_data->translate_virtual_to_physical(v);
+            return tlb_data->translate_virtual_to_physical(v).phys;
         } else {
             return v;
         }

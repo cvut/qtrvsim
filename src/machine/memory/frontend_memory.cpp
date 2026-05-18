@@ -90,6 +90,12 @@ RegisterValue FrontendMemory::read_ctl(enum AccessControl ctl, AddressWithMode a
 
 void FrontendMemory::sync() {}
 
+void FrontendMemory::sfence_vma(uint64_t vaddr, uint64_t asid) {
+    (void)vaddr;
+    (void)asid;
+    sync();
+}
+
 LocationStatus FrontendMemory::location_status(Address address) const {
     (void)address;
     return LOCSTAT_NONE;

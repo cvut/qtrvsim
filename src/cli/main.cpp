@@ -52,6 +52,8 @@ void create_parser(QCommandLineParser &p) {
     p.addOption({ { "trace-pc", "tr-pc" }, "Print program counter register changes." });
     p.addOption({ { "trace-wrmem", "tr-wr" }, "Trace writes into memory." });
     p.addOption({ { "trace-rdmem", "tr-rd" }, "Trace reads from memory." });
+    p.addOption({ { "trace-exception", "tr-excpt" }, "Trace exceptions." });
+    p.addOption({ { "trace-mode-change", "tr-mode" }, "Trace mode changes." });
     p.addOption(
         { { "trace-gp", "tr-gp" },
           "Print general purpose register changes. You can use * for "
@@ -120,6 +122,9 @@ void create_parser(QCommandLineParser &p) {
     p.addOption(
         { { "isa-variant", "isavariant" }, "Instruction set to emulate (default RV32IMA)", "STR" });
     p.addOption({ "cycle-limit", "Limit execution to specified maximum clock cycles", "NUMBER" });
+    p.addOption({ "enable-vm", "Enable virtual memory support." });
+    p.addOption({ "enable-exception", "Enable exception delivery to the run code." });
+    p.addOption({ "enable-interrupt", "Enable interrupts delivery to the run code." });
 }
 
 void configure_cache(CacheConfig &cacheconf, const QStringList &cachearg, const QString &which) {
@@ -343,6 +348,7 @@ void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
                 config.modify_isa_word(flag, flag);
         }
     }
+    config.set_vm_enabled(parser.isSet("enable-vm"));
 }
 
 void configure_tracer(QCommandLineParser &p, Tracer &tr) {
@@ -375,6 +381,8 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
 
     if (p.isSet("trace-rdmem")) { tr.trace_rdmem = true; }
     if (p.isSet("trace-wrmem")) { tr.trace_wrmem = true; }
+    if (p.isSet("trace-exception")) { tr.trace_exception = true; }
+    if (p.isSet("trace-mode-change")) { tr.trace_mode_change = true; }
 
     QStringList clim = p.values("cycle-limit");
     if (!clim.empty()) {
@@ -527,6 +535,24 @@ void configure_osemu(QCommandLineParser &p, MachineConfig &config, Machine *mach
             exit(EXIT_FAILURE);
         }
     }
+
+    if (p.isSet("enable-exception")) {
+        config.set_osemu_exception_stop(false);
+        for (int excause = EXCAUSE_NONE + 1; excause < EXCAUSE_COUNT; excause++) {
+            if (excause != EXCAUSE_INT_M && excause != EXCAUSE_INT_S) {
+                machine->set_step_over_exception(static_cast<ExceptionCause>(excause), false);
+                machine->set_stop_on_exception(static_cast<ExceptionCause>(excause), false);
+            }
+        }
+    }
+    if (p.isSet("enable-interrupt")) {
+        config.set_osemu_interrupt_stop(false);
+        machine->set_step_over_exception(EXCAUSE_INT_M, false);
+        machine->set_step_over_exception(EXCAUSE_INT_S, false);
+        machine->set_stop_on_exception(EXCAUSE_INT_M, false);
+        machine->set_stop_on_exception(EXCAUSE_INT_S, false);
+    }
+
     const static machine::ExceptionCause ecall_variats[]
         = { machine::EXCAUSE_ECALL_ANY, machine::EXCAUSE_ECALL_M, machine::EXCAUSE_ECALL_S,
             machine::EXCAUSE_ECALL_U };

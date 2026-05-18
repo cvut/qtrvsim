@@ -40,6 +40,7 @@ enum AccessControl {
     AC_AMOMAX64,
     AC_AMOMINU64,
     AC_AMOMAXU64,
+    AC_SFENCE_VMA,
     AC_CACHE_OP,
 };
 
@@ -83,8 +84,9 @@ enum ExceptionCause {
     // Simulator specific exception cause codes, alliases
     EXCAUSE_HWBREAK = 16,
     EXCAUSE_ECALL_ANY = 17, // sythetic exception to mark ECALL instruction
-    EXCAUSE_INT = 18,       // External/asynchronous interrupt, bit 32 or 63
-    EXCAUSE_COUNT = 19,
+    EXCAUSE_INT_M = 18,     // External/asynchronous M-mode interrupt, bit 32 or 63
+    EXCAUSE_INT_S = 19,     // External/asynchronous S-mode interrupt, bit 32 or 63
+    EXCAUSE_COUNT = 20,
 };
 
 enum LocationStatus {

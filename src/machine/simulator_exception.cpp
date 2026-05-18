@@ -6,13 +6,19 @@
 
 using namespace machine;
 
-SimulatorException::SimulatorException(QString reason, QString ext, QString file, int line) {
+SimulatorException::SimulatorException(
+    QString reason,
+    QString ext,
+    QString file,
+    int line,
+    ExceptionCause cause) {
     this->name = "Exception";
     this->reason = std::move(reason);
     this->ext = std::move(ext);
     this->file = std::move(file);
     this->line = line;
     this->cached_what = nullptr;
+    this->cause_ = cause;
 }
 
 SimulatorException::~SimulatorException() {
@@ -46,9 +52,9 @@ QString SimulatorException::msg(bool pos) const {
 
 #define EXCEPTION(NAME, PARENT)                                                                    \
     SimulatorException##NAME::SimulatorException##NAME(                                            \
-        QString reason, QString ext, QString file, int line)                                       \
-        : SimulatorException##PARENT(reason, ext, file, line) {                                    \
-        name = #NAME;                                                                              \
+        QString reason, QString ext, QString file, int line, ExceptionCause cause)                 \
+        : SimulatorException##PARENT(reason, ext, file, line, cause) {                             \
+        this->name = #NAME;                                                                        \
     }
 SIMULATOR_EXCEPTIONS
 #undef EXCEPTION

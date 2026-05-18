@@ -43,7 +43,8 @@ static const std::unordered_map<unsigned, QString> EXCEPTION_NAME_TABLE = {
     // Simulator specific exception cause codes, alliases
     { machine::EXCAUSE_HWBREAK, QStringLiteral("HWBREAK") },
     { machine::EXCAUSE_ECALL_ANY, QStringLiteral("ECALL") },
-    { machine::EXCAUSE_INT, QStringLiteral("INT") },
+    { machine::EXCAUSE_INT_M, QStringLiteral("INT_M") },
+    { machine::EXCAUSE_INT_S, QStringLiteral("INT_S") },
 };
 
 static const std::unordered_map<unsigned, QString> STALL_TEXT_TABLE = {

@@ -74,6 +74,8 @@ set(machine_HEADERS
 		memory/virtual/virtual_address.h
 		memory/tlb/tlb.h
 		memory/virtual/sv32.h
+		memory/virtual/sv39.h
+		memory/virtual/generic_pte.h
 		memory/tlb/tlb_policy.h
 		memory/virtual/page_table_walker.h
 		memory/address_with_mode.h

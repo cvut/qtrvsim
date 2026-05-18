@@ -1,6 +1,7 @@
 #include "controlstate.h"
 
 #include "common/logging.h"
+#include "machine.h"
 #include "machinedefs.h"
 #include "simulator_exception.h"
 
@@ -110,6 +111,27 @@ namespace machine { namespace CSR {
         default_wlrl_write_handler(desc, reg, val);
     }
 
+    void ControlState::satp_wlrl_write_handler(
+        const RegisterDesc &desc,
+        RegisterValue &reg,
+        RegisterValue val) {
+        uint64_t value = val.as_u64();
+        Q_UNUSED(desc)
+
+        if (xlen == Xlen::_32) {
+            // RV32 - Mode is bit 31. Only 0 (Bare) and 1 (Sv32) are valid.
+            uint32_t mode = (value >> 31) & 0x1;
+            Q_UNUSED(mode)
+            reg = value & 0xFFFFFFFF;
+        } else {
+            // RV64 - Mode is bits 63:60.
+            uint64_t mode = (value >> 60) & 0xF;
+
+            if (mode != 0 && mode != 8 && mode != 9) { value &= ~(0xFULL << 60); }
+            reg = value;
+        }
+    }
+
     void ControlState::mcycle_wlrl_write_handler(
         const RegisterDesc &desc,
         RegisterValue &reg,
@@ -149,13 +171,23 @@ namespace machine { namespace CSR {
         return !this->operator==(c);
     }
 
-    void ControlState::update_exception_cause(enum ExceptionCause excause) {
-        RegisterValue &value = register_data[Id::MCAUSE];
-        if (excause != EXCAUSE_INT) {
+    void
+    ControlState::update_exception_cause(enum ExceptionCause excause, PrivilegeLevel to_privlev) {
+        size_t cause_reg_id = (to_privlev == PrivilegeLevel::MACHINE) ? Id::MCAUSE : Id::SCAUSE;
+
+        RegisterValue value;
+
+        if (excause != EXCAUSE_INT_M && excause != EXCAUSE_INT_S) {
             value = static_cast<unsigned>(excause);
         } else {
             RegisterValue mie = register_data[Id::MIE];
             RegisterValue mip = register_data[Id::MIP];
+
+            if (to_privlev == PrivilegeLevel::SUPERVISOR) {
+                mie = register_data[Id::SIE];
+                mip = register_data[Id::SIP];
+            }
+
             int irq_to_signal = 0;
 
             quint64 irqs = mie.as_u64() & mip.as_u64() & 0xffffffff;
@@ -167,42 +199,74 @@ namespace machine { namespace CSR {
 
             value = (uint64_t)(irq_to_signal | ((uint64_t)1 << ((xlen == Xlen::_32) ? 31 : 63)));
         }
-        emit write_signal(Id::MCAUSE, value);
+        register_data[cause_reg_id] = value;
+        emit write_signal(cause_reg_id, value);
     }
 
     void ControlState::set_interrupt_signal(uint irq_num, bool active) {
         if (irq_num >= 32) { return; }
-        uint64_t mask = 1 << irq_num;
-        size_t reg_id = Id::MIP;
-        RegisterValue &value = register_data[reg_id];
-        if (active) {
-            value = value.as_xlen(xlen) | mask;
-        } else {
-            value = value.as_xlen(xlen) & ~mask;
-        }
-        emit write_signal(reg_id, value);
+
+        uint64_t mask = 1ULL << irq_num;
+
+        uint64_t mideleg = register_data[Id::MIDELEG].as_u64();
+
+        uint64_t mip = register_data[Id::MIP].as_u64();
+
+        if (active)
+            mip |= mask;
+        else
+            mip &= ~mask;
+
+        register_data[Id::MIP] = mip;
+        emit write_signal(Id::MIP, register_data[Id::MIP]);
+
+        mideleg = register_data[Id::MIDELEG].as_u64();
+        register_data[Id::SIP] = mip & mideleg;
+        emit write_signal(Id::SIP, register_data[Id::SIP]);
     }
 
-    bool ControlState::core_interrupt_request() {
-        RegisterValue mie = register_data[Id::MIE];
-        RegisterValue mip = register_data[Id::MIP];
+    ExceptionCause ControlState::core_interrupt_request(PrivilegeLevel current_priv) {
+        uint64_t mie = register_data[Id::MIE].as_u64();
+        uint64_t mip = register_data[Id::MIP].as_u64();
 
-        uint64_t irqs = mie.as_u64() & mip.as_u64() & 0xffffffff;
+        uint64_t sie = register_data[Id::SIE].as_u64();
+        uint64_t sip = register_data[Id::SIP].as_u64();
 
-        return irqs && read_field(Field::mstatus::MIE).as_u64();
+        uint64_t m_pending = mip & mie;
+        uint64_t s_pending = sip & sie;
+
+        if (m_pending != 0) {
+            bool m_enabled = (current_priv < PrivilegeLevel::MACHINE)
+                             || (current_priv == PrivilegeLevel::MACHINE
+                                 && read_field(Field::mstatus::MIE).as_u64());
+            if (m_enabled) { return EXCAUSE_INT_M; }
+        }
+
+        if (s_pending != 0) {
+            bool s_enabled = (current_priv < PrivilegeLevel::SUPERVISOR)
+                             || (current_priv == PrivilegeLevel::SUPERVISOR
+                                 && read_field(Field::mstatus::SIE).as_u64());
+            if (s_enabled) { return EXCAUSE_INT_S; }
+        }
+
+        return EXCAUSE_NONE;
     }
 
     void ControlState::exception_initiate(PrivilegeLevel act_privlev, PrivilegeLevel to_privlev) {
-        size_t reg_id = Id::MSTATUS;
+        size_t reg_id = (to_privlev == PrivilegeLevel::MACHINE) ? Id::MSTATUS : Id::SSTATUS;
         RegisterValue &reg = register_data[reg_id];
-        Q_UNUSED(act_privlev)
-        Q_UNUSED(to_privlev)
 
-        write_field(Field::mstatus::MPIE, read_field(Field::mstatus::MIE).as_u32());
-        write_field(Field::mstatus::MIE, (uint64_t)0);
+        if (to_privlev == PrivilegeLevel::MACHINE) {
+            write_field(Field::mstatus::MPIE, read_field(Field::mstatus::MIE).as_u32());
+            write_field(Field::mstatus::MIE, (uint64_t)0);
 
-        write_field(Field::mstatus::MPP, static_cast<uint64_t>(act_privlev));
+            write_field(Field::mstatus::MPP, static_cast<uint64_t>(act_privlev));
+        } else {
+            write_field(Field::sstatus::SPIE, read_field(Field::sstatus::SIE).as_u32());
+            write_field(Field::sstatus::SIE, (uint64_t)0);
 
+            write_field(Field::sstatus::SPP, (act_privlev == PrivilegeLevel::SUPERVISOR) ? 1 : 0);
+        }
         emit write_signal(reg_id, reg);
     }
 
@@ -218,10 +282,11 @@ namespace machine { namespace CSR {
             //   MPIE <- 1
             //   restored_privlev <- MPP
             //   MPP  <- 0
-            write_field(Field::mstatus::MIE, read_field(Field::mstatus::MPIE).as_u32());
+            uint64_t old_mpie = read_field(Field::mstatus::MPIE).as_u64();
+            write_field(Field::mstatus::MIE, old_mpie);
             write_field(Field::mstatus::MPIE, (uint64_t)1);
-            uint32_t raw_mpp
-                = static_cast<uint32_t>(read_field(Field::mstatus::MPP).as_u32()) & 0x3;
+
+            uint64_t raw_mpp = read_field(Field::mstatus::MPP).as_u64() & 0x3ULL;
             switch (raw_mpp) {
             case 0: restored_privlev = PrivilegeLevel::UNPRIVILEGED; break;
             case 1: restored_privlev = PrivilegeLevel::SUPERVISOR; break;
@@ -236,10 +301,10 @@ namespace machine { namespace CSR {
             //   SPIE <- 1
             //   restored_privlev <- SPP
             //   SPP  <- 0
-            write_field(Field::mstatus::SIE, read_field(Field::mstatus::SPIE).as_u32());
+            uint64_t old_spie = read_field(Field::mstatus::SPIE).as_u64();
+            write_field(Field::mstatus::SIE, old_spie);
             write_field(Field::mstatus::SPIE, (uint64_t)1);
-            uint32_t raw_spp
-                = static_cast<uint32_t>(read_field(Field::mstatus::SPP).as_u32()) & 0x1;
+            uint64_t raw_spp = read_field(Field::mstatus::SPP).as_u64() & 0x1ULL;
             restored_privlev
                 = (raw_spp == 1) ? PrivilegeLevel::SUPERVISOR : PrivilegeLevel::UNPRIVILEGED;
             write_field(Field::mstatus::SPP, (uint64_t)0);
@@ -258,7 +323,10 @@ namespace machine { namespace CSR {
         return restored_privlev;
     }
 
-    machine::Address ControlState::exception_pc_address() {
+    machine::Address ControlState::exception_pc_address(PrivilegeLevel to_privlev) {
+        if (to_privlev == PrivilegeLevel::SUPERVISOR) {
+            return machine::Address(register_data[Id::STVEC].as_u64());
+        }
         return machine::Address(register_data[Id::MTVEC].as_u64());
     }
 
