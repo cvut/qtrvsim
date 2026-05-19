@@ -74,6 +74,10 @@ Manages visibility of all simulation panels.
 ![alt text](media/gui_elements/data_cache.webp)
 - **L2 Cache** – Second-level cache view (if enabled).
 ![alt text](media/gui_elements/l2_cache.webp)
+- **Instruction TLB** – Displays instruction TLB entries (if configured).
+![alt text](media/gui_elements/instruction_tlb.webp)
+- **Data TLB** – Displays data TLB entries (if configured).
+![alt text](media/gui_elements/data_tlb.webp)
 - **Branch Predictor** – Displays prediction tables and data (if configured).
 ![alt text](media/gui_elements/branch_predictor.webp)
 - **Peripherals** – Container for simulated I/O devices.
@@ -119,3 +123,8 @@ The toolbar provides quick access to frequently used actions:
 - <img src="../media/icons/closetab.png" style="vertical-align: middle; width: 20px; height: 20px"> **Close Source** – Close active code editor tab (Ctrl+W).
 - <img src="../media/icons/compfile-256.png" style="vertical-align: middle; width: 20px; height: 20px"> **Compile Source** – Assemble current RISC-V program with the built-in assembler (Ctrl+E).
 - <img src="../media/icons/build-256.png" style="vertical-align: middle; width: 20px; height: 20px"> **Build Executable** – Build ELF with external RISC-V toolchain (Ctrl+B).
+
+## Next Steps
+The following sections introduce machine configuration options in QtRvSim, including cache, branch prediction, and virtual memory settings.
+
+Users who are primarily interested in running simulations may skip this chapter and return later when advanced configuration is needed.
