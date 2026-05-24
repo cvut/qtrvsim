@@ -90,23 +90,44 @@ void CacheDock::paintEvent(QPaintEvent *event) {
 }
 
 void CacheDock::hit_update(unsigned val) {
-    hit = val;
+    if (hit != val) {
+        hit = val;
+        l_hit->update();
+    }
 }
 
 void CacheDock::miss_update(unsigned val) {
-    miss = val;
+    if (miss != val) {
+        miss = val;
+        l_miss->update();
+    }
 }
 
 void CacheDock::memory_reads_update(unsigned val) {
-    memory_reads = val;
+    if (memory_reads != val) {
+        memory_reads = val;
+        l_m_reads->update();
+    }
 }
 
 void CacheDock::memory_writes_update(unsigned val) {
-    memory_writes = val;
+    if (memory_writes != val) {
+        memory_writes = val;
+        l_m_writes->update();
+    }
 }
 
 void CacheDock::statistics_update(unsigned stalled_cycles, double speed_improv, double hit_rate) {
-    this->stalled = stalled_cycles;
-    this->hit = hit_rate;
-    this->speed_improv = speed_improv;
+    if (this->stalled != stalled_cycles) {
+        this->stalled = stalled_cycles;
+        l_stalled->update();
+    }
+    if (this->hit_rate != hit_rate) {
+        this->hit_rate = hit_rate;
+        l_hit_rate->update();
+    }
+    if (this->speed_improv != speed_improv) {
+        this->speed_improv = speed_improv;
+        l_speed->update();
+    }
 }
