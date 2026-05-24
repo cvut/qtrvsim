@@ -110,30 +110,44 @@ void TLBDock::paintEvent(QPaintEvent *event) {
 }
 
 void TLBDock::hit_update(unsigned val) {
-    hit = val;
-    update();
+    if (hit != val) {
+        hit = val;
+        l_hit->update();
+    }
 }
 
 void TLBDock::miss_update(unsigned val) {
-    miss = val;
-    update();
+    if (miss != val) {
+        miss = val;
+        l_miss->update();
+    }
 }
 
 void TLBDock::statistics_update(unsigned stalled_cycles, double speed_improv_v, double hit_rate_v) {
-    stalled = stalled_cycles;
-    speed_improv = speed_improv_v;
-    hit_rate = hit_rate_v;
-    update();
+    if (stalled != stalled_cycles) {
+        stalled = stalled_cycles;
+        l_stalled->update();
+    }
+    if (speed_improv != speed_improv_v) {
+        speed_improv = speed_improv_v;
+        l_speed->update();
+    }
+    if (hit_rate != hit_rate_v) {
+        hit_rate = hit_rate_v;
+        l_hit_rate->update();
+    }
 }
 
 void TLBDock::memory_reads_update(unsigned val) {
-    memory_reads = val;
-    l_m_reads->setText(QString::number(memory_reads));
-    update();
+    if (memory_reads != val) {
+        memory_reads = val;
+        l_m_reads->update();
+    }
 }
 
 void TLBDock::memory_writes_update(unsigned val) {
-    memory_writes = val;
-    l_m_writes->setText(QString::number(memory_writes));
-    update();
+    if (memory_writes != val) {
+        memory_writes = val;
+        l_m_writes->update();
+    }
 }
