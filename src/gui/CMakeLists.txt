@@ -45,6 +45,9 @@ set(gui_SOURCES
         windows/program/programtableview.cpp
         windows/registers/registersdock.cpp
         dialogs/savechanged/savechangeddialog.cpp
+        dialogs/webeval/webevalconfigdialog.cpp
+        windows/webeval/webevaldock.cpp
+        windows/webeval/taskdescriptiondock.cpp
         windows/editor/srceditor.cpp
         statictable.cpp
         windows/terminal/terminaldock.cpp
@@ -92,6 +95,9 @@ set(gui_HEADERS
         windows/program/programtableview.h
         windows/registers/registersdock.h
         dialogs/savechanged/savechangeddialog.h
+        dialogs/webeval/webevalconfigdialog.h
+        windows/webeval/webevaldock.h
+        windows/webeval/taskdescriptiondock.h
         windows/editor/srceditor.h
         statictable.h
         windows/terminal/terminaldock.h
@@ -138,7 +144,7 @@ add_executable(gui
         ${gui_RESOURCES})
 target_include_directories(gui PUBLIC . windows/coreview)
 target_link_libraries(gui
-        PRIVATE ${QtLib}::Core ${QtLib}::Widgets ${QtLib}::Gui
+        PRIVATE ${QtLib}::Core ${QtLib}::Widgets ${QtLib}::Gui ${QtLib}::Network
         PRIVATE machine os_emulation assembler svgscene)
 target_compile_definitions(gui
         PRIVATE

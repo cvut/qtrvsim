@@ -244,7 +244,7 @@ endif ()
 # this variable based on detected version major of Qt.
 set(QtLib "Qt${QT_VERSION_MAJOR}")
 find_package(${QtLib}
-        REQUIRED COMPONENTS Core Widgets Gui Test
+        REQUIRED COMPONENTS Core Widgets Gui Test Network
         OPTIONAL_COMPONENTS PrintSupport)
 
 message(STATUS "${QtLib} version: ${${QtLib}Core_VERSION}")
