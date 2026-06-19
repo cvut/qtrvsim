@@ -109,6 +109,22 @@ namespace machine { namespace CSR {
         RegisterValue &reg,
         RegisterValue val) {
         default_wlrl_write_handler(desc, reg, val);
+
+        uint64_t s_mask
+        = Field::mstatus::SIE.mask() | Field::mstatus::SPIE.mask() | Field::mstatus::SPP.mask()
+        | Field::mstatus::SUM.mask() | Field::mstatus::MXR.mask();
+
+        if (xlen == Xlen::_64) {
+            s_mask |= Field::mstatus::UXL.mask();
+            s_mask |= Field::mstatus::SXL.mask();
+        }
+
+        uint64_t new_sstatus = reg.as_u64() & s_mask;
+        if (xlen == Xlen::_32) new_sstatus &= 0xffffffff;
+
+        register_data[Id::SSTATUS] = new_sstatus;
+
+        emit write_signal(Id::SSTATUS, register_data[Id::SSTATUS]);
     }
 
     void ControlState::satp_wlrl_write_handler(
@@ -147,7 +163,8 @@ namespace machine { namespace CSR {
         RegisterValue &reg,
         RegisterValue val) {
         uint64_t s_mask
-            = Field::mstatus::SIE.mask() | Field::mstatus::SPIE.mask() | Field::mstatus::SPP.mask();
+            = Field::mstatus::SIE.mask() | Field::mstatus::SPIE.mask() | Field::mstatus::SPP.mask()
+            | Field::mstatus::SUM.mask() | Field::mstatus::MXR.mask();
 
         if (xlen == Xlen::_64) {
             s_mask |= Field::mstatus::UXL.mask();

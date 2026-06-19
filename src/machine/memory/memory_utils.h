@@ -138,7 +138,6 @@ bool check_permissions(
             if (op == AccessOp::READ || op == AccessOp::WRITE) {
                 if (!sum) return false;
             }
-            if (op == AccessOp::FETCH) return false;
         }
     }
 
