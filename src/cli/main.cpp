@@ -129,6 +129,8 @@ void create_parser(QCommandLineParser &p) {
     p.addOption(
         { { "isa-variant", "isavariant" }, "Instruction set to emulate (default RV32IMA)", "STR" });
     p.addOption({ "cycle-limit", "Limit execution to specified maximum clock cycles", "NUMBER" });
+    p.addOption(
+        { "instruction-limit", "Limit execution to specified retired instructions", "NUMBER" });
     p.addOption({ "enable-vm", "Enable virtual memory support." });
     p.addOption({ "enable-exception", "Enable exception delivery to the run code." });
     p.addOption({ "enable-interrupt", "Enable interrupts delivery to the run code." });
@@ -390,17 +392,27 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr, bool pipelined) {
     if (p.isSet("trace-exception")) { tr.trace_exception = true; }
     if (p.isSet("trace-mode-change")) { tr.trace_mode_change = true; }
 
-    QStringList clim = p.values("cycle-limit");
-    if (!clim.empty()) {
-        bool ok;
-        tr.cycle_limit = clim.at(clim.size() - 1).toLong(&ok);
-        if (!ok) {
-            fprintf(stderr, "Cycle limit parse error\n");
-            exit(EXIT_FAILURE);
-        }
-    }
+    tr.start();
+}
 
-    // TODO
+uint64_t parse_execution_limit(QCommandLineParser &parser, const QString &option_name) {
+    const QStringList values = parser.values(option_name);
+    if (values.empty()) { return 0; }
+
+    bool ok;
+    uint64_t value = values.last().toULongLong(&ok);
+    if (!ok) {
+        fprintf(
+            stderr, "Value of option %s is not a valid unsigned integer.\n",
+            qPrintable(option_name));
+        exit(EXIT_FAILURE);
+    }
+    return value;
+}
+
+void configure_execution_limits(QCommandLineParser &parser, Machine &machine) {
+    machine.set_cycle_limit(parse_execution_limit(parser, "cycle-limit"));
+    machine.set_instruction_limit(parse_execution_limit(parser, "instruction-limit"));
 }
 
 void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *symtab) {
@@ -578,6 +590,9 @@ void configure_osemu(QCommandLineParser &p, MachineConfig &config, Machine *mach
                 osemu_handler, &osemu::OsSyscallExceptionHandler::char_written, std_out,
                 QOverload<int, unsigned>::of(&CharIOHandler::writeByte));
         }
+        machine::Machine::connect(
+            osemu_handler, &osemu::OsSyscallExceptionHandler::program_exit, machine,
+            &machine::Machine::terminate_program);
         /*connect(
             osemu_handler, &osemu::OsSyscallExceptionHandler::rx_byte_pool, terminal,
             &TerminalDock::rx_byte_pool);*/
@@ -707,6 +722,7 @@ int main(int argc, char *argv[]) {
 
     bool asm_source = p.isSet("asm");
     Machine machine(config, !asm_source, !asm_source);
+    configure_execution_limits(p, machine);
 
     Tracer tr(&machine);
     configure_tracer(p, tr, config.pipelined());
@@ -723,12 +739,11 @@ int main(int argc, char *argv[]) {
     Reporter r(&app, &machine);
     configure_reporter(p, r, machine.symbol_table());
 
-    QObject::connect(&tr, &Tracer::cycle_limit_reached, &r, &Reporter::cycle_limit_reached);
-
     load_ranges(machine, p.values("load-range"));
 
     if (p.isSet("only-dump")) {
-        QMetaObject::invokeMethod(&machine, &Machine::program_exit, Qt::QueuedConnection);
+        QMetaObject::invokeMethod(
+            &machine, "terminate_program", Qt::QueuedConnection, Q_ARG(int, 0));
     } else {
         // QTimer::singleShot(0, &machine, &Machine::play); alternative
         QMetaObject::invokeMethod(&machine, &Machine::play, Qt::QueuedConnection);

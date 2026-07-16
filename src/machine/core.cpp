@@ -51,6 +51,7 @@ Core::Core(
 void Core::step(bool skip_break) {
     emit step_started();
     state.cycle_count++;
+    total_cycle_count++;
     do_step(skip_break);
     emit step_done(state);
 }
@@ -58,17 +59,24 @@ void Core::step(bool skip_break) {
 void Core::reset() {
     state.cycle_count = 0;
     state.stall_count = 0;
+    total_cycle_count = 0;
+    total_stall_count = 0;
+    total_instruction_count = 0;
     do_reset();
     set_current_privilege(CSR::PrivilegeLevel::MACHINE);
     state.LoadReservedRange.reset();
 }
 
-unsigned Core::get_cycle_count() const {
-    return state.cycle_count;
+uint64_t Core::get_cycle_count() const {
+    return total_cycle_count;
 }
 
-unsigned Core::get_stall_count() const {
-    return state.stall_count;
+uint64_t Core::get_stall_count() const {
+    return total_stall_count;
+}
+
+uint64_t Core::get_instruction_count() const {
+    return total_instruction_count;
 }
 
 Registers *Core::get_regs() const {
@@ -635,6 +643,7 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
 
     bool csr_written = false;
     if (control_state != nullptr && dt.is_valid && dt.excause == EXCAUSE_NONE) {
+        total_instruction_count++;
         control_state->increment_internal(CSR::Id::MINSTRET, 1);
         if (dt.csr_write) {
             control_state->write(dt.csr_address, dt.alu_val, get_current_privilege());
@@ -851,6 +860,7 @@ void CorePipelined::handle_stall(const FetchInterstage &saved_if_id) {
     id_ex.flush();
     id_ex.stall = true; // for visualization
     state.stall_count++;
+    total_stall_count++;
 }
 
 bool CorePipelined::detect_mispredicted_jump() const {
