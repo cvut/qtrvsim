@@ -118,6 +118,15 @@ if (NOT ${WASM})
 			PRIVATE ${QtLib}::Core ${QtLib}::Test)
 	add_test(NAME registers COMMAND registers_test)
 
+	add_executable(machineconfig_test
+			machineconfig.cpp
+			machineconfig.h
+			machineconfig.test.cpp
+	)
+	target_link_libraries(machineconfig_test
+			PRIVATE ${QtLib}::Core ${QtLib}::Test)
+	add_test(NAME machineconfig COMMAND machineconfig_test)
+
 	add_executable(memory_test
 			machineconfig.cpp
 			machineconfig.h
@@ -252,5 +261,5 @@ if (NOT ${WASM})
 	add_test(NAME core COMMAND core_test)
 
 	add_custom_target(machine_unit_tests
-			DEPENDS alu_test registers_test memory_test cache_test instruction_test program_loader_test core_test)
+			DEPENDS alu_test registers_test machineconfig_test memory_test cache_test instruction_test program_loader_test core_test)
 endif ()

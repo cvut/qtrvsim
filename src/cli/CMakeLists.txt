@@ -60,6 +60,15 @@ add_cli_test(
 )
 
 add_cli_test(
+        NAME machine-config
+        ARGS
+        --machine-config "${CMAKE_SOURCE_DIR}/tests/cli/machine-config/machine.json"
+        --asm "${CMAKE_SOURCE_DIR}/tests/cli/stalls/program.S"
+        --dump-registers
+        EXPECTED_OUTPUT "tests/cli/stalls/stdout.txt"
+)
+
+add_cli_test(
         NAME asm_error
         ARGS
         --asm "${CMAKE_SOURCE_DIR}/tests/cli/asm-error/program.S"

@@ -1,0 +1,82 @@
+{
+  "schema": "qtrvsim.machine-config",
+  "version": 1,
+  "machine": {
+    "endian": "little",
+    "xlen": 32,
+    "isa_word": "0x1111",
+    "core": {
+      "pipelined": false,
+      "delay_slot": true,
+      "hazard_unit": "forward"
+    },
+    "memory": {
+      "execute_protection": false,
+      "write_protection": false,
+      "read_time": 10,
+      "write_time": 10,
+      "burst_time": 0,
+      "level2_time": 2,
+      "burst_enabled": false
+    },
+    "os_emulation": {
+      "enabled": false,
+      "stop_on_known_syscall": false,
+      "stop_on_unknown_syscall": true,
+      "stop_on_interrupt": true,
+      "stop_on_exception": true,
+      "filesystem_root": ""
+    },
+    "reset_at_compile": true,
+    "elf": "",
+    "caches": {
+      "program": {
+        "enabled": false,
+        "sets": 1,
+        "block_size": 1,
+        "associativity": 1,
+        "replacement_policy": "random",
+        "write_policy": "through-no-allocate"
+      },
+      "data": {
+        "enabled": false,
+        "sets": 1,
+        "block_size": 1,
+        "associativity": 1,
+        "replacement_policy": "random",
+        "write_policy": "through-no-allocate"
+      },
+      "level2": {
+        "enabled": false,
+        "sets": 1,
+        "block_size": 1,
+        "associativity": 1,
+        "replacement_policy": "random",
+        "write_policy": "through-no-allocate"
+      }
+    },
+    "branch_predictor": {
+      "enabled": false,
+      "type": "smith_1_bit",
+      "initial_state": "not_taken",
+      "btb_bits": 2,
+      "bhr_bits": 0,
+      "bht_address_bits": 2
+    },
+    "virtual_memory": {
+      "enabled": false,
+      "program_tlb": {
+        "asid": 0,
+        "sets": 16,
+        "associativity": 1,
+        "replacement_policy": "lru"
+      },
+      "data_tlb": {
+        "asid": 0,
+        "sets": 16,
+        "associativity": 1,
+        "replacement_policy": "lru"
+      }
+    }
+  }
+}
