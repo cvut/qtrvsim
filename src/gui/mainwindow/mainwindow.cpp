@@ -25,8 +25,6 @@
 #include <qactiongroup.h>
 #include <qwidget.h>
 
-
-
 LOG_CATEGORY("gui.mainwindow");
 
 #ifdef __EMSCRIPTEN__
@@ -42,6 +40,16 @@ constexpr bool WEB_ASSEMBLY = false;
 MainWindow::MainWindow(QSettings *settings, QWidget *parent)
     : QMainWindow(parent)
     , settings(settings) {
+    // Because we are nor compiling GUI as a static library, we need to make sure the linker does
+    // not strip static resources.
+    static bool initialized = false;
+    if (!initialized) {
+        Q_INIT_RESOURCE(icons);
+        Q_INIT_RESOURCE(samples);
+        Q_INIT_RESOURCE(schemas);
+        initialized = true;
+    }
+
     machine.reset();
     corescene.reset();
 

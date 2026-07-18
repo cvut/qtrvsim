@@ -7,7 +7,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(gui_SOURCES
+set(gui_lib_SOURCES
         dialogs/about/aboutdialog.cpp
         windows/cache/cachedock.cpp
         windows/cache/cacheview.cpp
@@ -36,7 +36,6 @@ set(gui_SOURCES
         hinttabledelegate.cpp
         windows/lcd/lcddisplaydock.cpp
         windows/lcd/lcddisplayview.cpp
-        main.cpp
         mainwindow/mainwindow.cpp
         windows/peripherals/peripheralsdock.cpp
         windows/peripherals/peripheralsview.cpp
@@ -56,7 +55,7 @@ set(gui_SOURCES
         windows/predictor/predictor_bht_dock.cpp
         windows/predictor/predictor_info_dock.cpp
 )
-set(gui_HEADERS
+set(gui_lib_HEADERS
         dialogs/about/aboutdialog.h
         windows/cache/cachedock.h
         windows/cache/cacheview.h
@@ -105,14 +104,14 @@ set(gui_HEADERS
         windows/predictor/predictor_bht_dock.h
         windows/predictor/predictor_info_dock.h
 )
-set(gui_UI
+set(gui_lib_UI
         dialogs/gotosymbol/gotosymboldialog.ui
         dialogs/new/NewDialog.ui
         windows/peripherals/peripheralsview.ui
         mainwindow/MainWindow.ui
         dialogs/new/NewDialogCache.ui
 )
-set(gui_RESOURCES
+set(gui_lib_RESOURCES
         resources/icons/icons.qrc
         resources/samples/samples.qrc
         windows/coreview/schemas/schemas.qrc
@@ -121,8 +120,8 @@ set(gui_RESOURCES
 
 if ("${WASM}")
     message(STATUS "gui :: Including WASM only files.")
-    list(APPEND gui_SOURCES qhtml5file_html5.cpp)
-    list(APPEND gui_HEADERS qhtml5file.h)
+    list(APPEND gui_lib_SOURCES qhtml5file_html5.cpp)
+    list(APPEND gui_lib_HEADERS qhtml5file.h)
 endif ()
 
 # MACOS
@@ -130,18 +129,21 @@ set(ICON_NAME gui)
 set(ICON_PATH ${CMAKE_SOURCE_DIR}/data/icons/macos/${ICON_NAME}.icns)
 # END MACOS
 
-add_executable(gui
-        ${ICON_PATH}
-        ${gui_SOURCES}
-        ${gui_HEADERS}
-        ${gui_UI}
-        ${gui_RESOURCES})
-target_include_directories(gui PUBLIC . windows/coreview)
-target_link_libraries(gui
-        PRIVATE ${QtLib}::Core ${QtLib}::Widgets ${QtLib}::Gui
-        PRIVATE machine os_emulation assembler svgscene)
-target_compile_definitions(gui
-        PRIVATE
+add_library(gui_lib STATIC
+        ${gui_lib_SOURCES}
+        ${gui_lib_HEADERS}
+        ${gui_lib_UI}
+        ${gui_lib_RESOURCES})
+target_include_directories(gui_lib
+        PUBLIC
+        . windows/coreview
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gui_lib_autogen/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gui_lib_autogen/include_$<CONFIG>>)
+target_link_libraries(gui_lib
+        PUBLIC ${QtLib}::Core ${QtLib}::Widgets ${QtLib}::Gui
+        PUBLIC machine os_emulation assembler svgscene)
+target_compile_definitions(gui_lib
+        PUBLIC
         APP_ORGANIZATION=\"${MAIN_PROJECT_ORGANIZATION}\"
         APP_ORGANIZATION_DOMAIN=\"${MAIN_PROJECT_HOMEPAGE_URL}\"
         APP_GIT=\"${MAIN_PROJECT_HOMEPAGE_URL}\"
@@ -150,12 +152,18 @@ target_compile_definitions(gui
         APP_USER_MANUAL_URL=\"https://comparch.edu.cvut.cz/qtrvsim/manual\"
         APP_REPORT_PROBLEM_URL=\"https://github.com/cvut/qtrvsim/issues/new\"
         ENV_CONFIG_FILE_NAME=\"${MAIN_PROJECT_NAME_UPPER}_CONFIG_FILE\")
+
+add_executable(gui
+        ${ICON_PATH}
+        main.cpp)
+target_link_libraries(gui
+        PRIVATE gui_lib ${QtLib}::Core ${QtLib}::Gui ${QtLib}::Widgets)
 set_target_properties(gui PROPERTIES
         OUTPUT_NAME "${MAIN_PROJECT_NAME_LOWER}_${PROJECT_NAME}")
 
 if (${${QtLib}PrintSupport_FOUND} AND NOT ${WASM})
-    target_link_libraries(gui PRIVATE ${QtLib}::PrintSupport)
-    target_compile_definitions(gui PRIVATE WITH_PRINTING=1)
+    target_link_libraries(gui_lib PUBLIC ${QtLib}::PrintSupport)
+    target_compile_definitions(gui_lib PUBLIC WITH_PRINTING=1)
 endif ()
 
 # MACOS
