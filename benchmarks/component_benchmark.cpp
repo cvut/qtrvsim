@@ -224,6 +224,8 @@ QJsonObject benchmark_scenario(
         { "name", scenario.name },
         { "unit", "ns" },
         { "workload", "core-alu-loop-v1" },
+        { "primary_metric", "cycles_per_second" },
+        { "higher_is_better", true },
         { "config",
           QJsonObject {
               { "pipelined", scenario.pipelined },
@@ -243,6 +245,8 @@ QJsonObject benchmark_scenario(
               { "median_ns", median },
               { "mean_ns", mean },
               { "max_ns", static_cast<double>(sorted.back()) },
+              { "cycles_per_second",
+                static_cast<double>(expected_cycles) * 1e9 / median },
               { "instructions_per_second",
                 static_cast<double>(work_units) * 1e9 / median },
           } },

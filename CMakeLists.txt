@@ -35,7 +35,7 @@ include(cmake/GPL-3.0-or-later.cmake)
 
 set(DEV_MODE false CACHE BOOL "Enable developer options in this CMake, like packaging.\
     They should be ignored, when user just wants to build this project.")
-set(BUILD_BENCHMARKS false CACHE BOOL "Build deterministic component benchmark executables.")
+set(BUILD_BENCHMARKS false CACHE BOOL "Build deterministic benchmark executables.")
 set(FORCE_ELFLIB_STATIC false CACHE BOOL
         "Use included statically linked libelf even if system one is available.")
 set(SANITIZERS "address,undefined" CACHE STRING

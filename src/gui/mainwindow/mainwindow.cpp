@@ -419,6 +419,10 @@ bool MainWindow::configured() {
     return (machine != nullptr);
 }
 
+machine::Machine *MainWindow::current_machine() {
+    return machine.data();
+}
+
 void MainWindow::new_machine() {
     ndialog->show();
 }
