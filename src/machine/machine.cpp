@@ -99,6 +99,7 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
             regs.data(), predictor.data(), tlb_program.data(), tlb_data.data(), controlst.data(),
             machine_config.get_simulated_xlen(), machine_config.get_isa_word()));
     }
+    connect(cr.data(), &Core::stop_on_exception_reached, this, &Machine::core_stop_reached);
     connect(
         this, &Machine::set_interrupt_signal, controlst.data(),
         &CSR::ControlState::set_interrupt_signal);
@@ -340,6 +341,42 @@ bool Machine::exited() {
     return stat == ST_EXIT || stat == ST_TRAPPED;
 }
 
+enum Machine::StopReason Machine::stop_reason() const {
+    return last_stop_reason;
+}
+
+const char *Machine::stop_reason_name(enum StopReason reason) {
+    switch (reason) {
+    case SR_NONE: return "none";
+    case SR_PROGRAM_EXIT: return "program_exit";
+    case SR_EXCEPTION: return "exception";
+    case SR_CYCLE_LIMIT: return "cycle_limit";
+    case SR_INSTRUCTION_LIMIT: return "instruction_limit";
+    case SR_TRAP: return "trap";
+    }
+    Q_UNREACHABLE();
+}
+
+int Machine::exit_code() const {
+    return last_exit_code;
+}
+
+void Machine::set_cycle_limit(uint64_t value) {
+    configured_cycle_limit = value;
+}
+
+void Machine::set_instruction_limit(uint64_t value) {
+    configured_instruction_limit = value;
+}
+
+uint64_t Machine::cycle_limit() const {
+    return configured_cycle_limit;
+}
+
+uint64_t Machine::instruction_limit() const {
+    return configured_instruction_limit;
+}
+
 // We don't allow to call control methods when machine exited or if it's busy
 // We rather silently fail.
 #define CTL_GUARD                                                                                  \
@@ -349,6 +386,8 @@ bool Machine::exited() {
 
 void Machine::play() {
     CTL_GUARD;
+    last_stop_reason = SR_NONE;
+    last_exit_code = 0;
     set_status(ST_RUNNING);
     start_core_clock();
     step_internal(true);
@@ -372,18 +411,19 @@ void Machine::step_internal(bool skip_break) {
         timer.start();
         do {
             cr->step(skip_break);
+            if (stat == ST_BUSY && check_execution_limits()) { break; }
         } while (time_chunk != 0 && stat == ST_BUSY && !skip_break
                  && timer.elapsed() < (int)time_chunk);
     } catch (SimulatorException &e) {
         stop_core_clock();
+        last_stop_reason = SR_TRAP;
+        last_exit_code = 0;
         set_status(ST_TRAPPED);
         emit program_trap(e);
         return;
     }
     if (false && (regs->read_pc() >= program_end)) {
-        stop_core_clock();
-        set_status(ST_EXIT);
-        emit program_exit();
+        terminate_program(0);
     } else {
         if (stat == ST_BUSY) { set_status(stat_prev); }
     }
@@ -411,6 +451,10 @@ void Machine::stop_core_clock() {
 }
 
 void Machine::step() {
+    if (!exited() && stat != ST_BUSY) {
+        last_stop_reason = SR_NONE;
+        last_exit_code = 0;
+    }
     step_internal(true);
 }
 
@@ -443,7 +487,46 @@ void Machine::restart() {
     cch_data->reset();
     cch_level2->reset();
     cr->reset();
+    last_stop_reason = SR_NONE;
+    last_exit_code = 0;
     set_status(ST_READY);
+}
+
+void Machine::terminate_program(int exit_code) {
+    if (exited()) { return; }
+    stop_core_clock();
+    last_stop_reason = SR_PROGRAM_EXIT;
+    last_exit_code = exit_code;
+    set_status(ST_EXIT);
+    emit program_exit();
+}
+
+bool Machine::check_execution_limits() {
+    if (configured_cycle_limit != 0 && cr->get_cycle_count() >= configured_cycle_limit) {
+        terminate_limit(SR_CYCLE_LIMIT);
+        return true;
+    }
+    if (configured_instruction_limit != 0
+        && cr->get_instruction_count() >= configured_instruction_limit) {
+        terminate_limit(SR_INSTRUCTION_LIMIT);
+        return true;
+    }
+    return false;
+}
+
+void Machine::terminate_limit(enum StopReason reason) {
+    stop_core_clock();
+    last_stop_reason = reason;
+    last_exit_code = 0;
+    set_status(ST_EXIT);
+    emit execution_limit_reached(reason);
+}
+
+void Machine::core_stop_reached() {
+    if (!exited()) {
+        last_stop_reason = SR_EXCEPTION;
+        last_exit_code = 0;
+    }
 }
 
 void Machine::set_status(enum Status st) {

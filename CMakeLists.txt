@@ -35,6 +35,7 @@ include(cmake/GPL-3.0-or-later.cmake)
 
 set(DEV_MODE false CACHE BOOL "Enable developer options in this CMake, like packaging.\
     They should be ignored, when user just wants to build this project.")
+set(BUILD_BENCHMARKS false CACHE BOOL "Build deterministic benchmark executables.")
 set(FORCE_ELFLIB_STATIC false CACHE BOOL
         "Use included statically linked libelf even if system one is available.")
 set(SANITIZERS "address,undefined" CACHE STRING
@@ -275,6 +276,9 @@ add_subdirectory("src/os_emulation")
 add_subdirectory("src/gui")
 if (NOT "${WASM}")
     add_subdirectory("src/cli")
+    if (BUILD_BENCHMARKS)
+        add_subdirectory("benchmarks")
+    endif ()
     add_custom_target(all_unit_tests
             DEPENDS common_unit_tests machine_unit_tests)
 endif ()
