@@ -73,6 +73,9 @@ macro(package_debian_quilt target_name config_file_name template debian_dir outp
 	file(COPY ${debian_dir}/changelog
 			DESTINATION ${CMAKE_BINARY_DIR}/debian
 			FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+	file(COPY ${debian_dir}/copyright
+			DESTINATION ${CMAKE_BINARY_DIR}/debian
+			FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 	file(COPY ${debian_dir}/source/format
 			DESTINATION ${CMAKE_BINARY_DIR}/debian/source
 			FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)

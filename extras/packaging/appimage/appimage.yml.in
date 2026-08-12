@@ -7,7 +7,6 @@ build:
     - pkgconfig(Qt5Widgets)
     - pkgconfig(Qt5Test)
     - pkgconfig(Qt5PrintSupport)
-    - libelf-devel
 
 script:
   - cd $BUILD_SOURCE_DIR

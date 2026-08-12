@@ -8,7 +8,7 @@ Homepage: @PACKAGE_URL@
 Standards-Version: 3.9.8
 Vcs-Browser: @PACKAGE_URL@
 Vcs-Git: @PACKAGE_GIT@
-Build-Depends: debhelper (>= 9), qtbase5-dev, libelf-dev, cmake
+Build-Depends: debhelper (>= 9), qtbase5-dev, cmake
 Package-List:
  @PACKAGE_NAME@ deb devel optional arch=any
 Checksums-Sha1:

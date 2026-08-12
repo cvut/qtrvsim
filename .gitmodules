@@ -3,4 +3,5 @@
 	url = https://github.com/riscv-software-src/riscv-tests.git
 [submodule "external/libelfin"]
 	path = external/libelfin
-	url = https://github.com/mortbopet/libelfin
+	url = https://github.com/cvut/libelfin
+	branch = qtrvsim/stable

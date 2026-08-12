@@ -7,6 +7,20 @@
 - Run `make open_build_service_bundle`.
 - Deploy the contents of `<build_dir>/target/pkg` to Open Build Service (and Launchpad).
 
+## Libelfin stable branch
+
+To make sure all commits of QtRvSim `master` history are buildable, we use a
+special branch `qtrvsim/stable` of `libelfin` library. This branch must be
+append only.
+
+Use this command to merge new commits to it. This will make a snapshot of the
+`<update-branch>`.
+
+```shell
+git switch qtrvsim/stable
+git merge --no-ff -X theirs <update-branch>
+```
+
 ## Debian changelog
 
 Debian changelog has very strict (and little weird) format. Bash script `extras/packaging/add-to-changelog.sh
@@ -67,4 +81,3 @@ osc commit
 ```
 
 - If something went wrong, delete th directory and start from th beginning.
-

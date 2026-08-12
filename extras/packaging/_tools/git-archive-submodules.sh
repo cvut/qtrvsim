@@ -40,6 +40,16 @@ ${GIT} submodule update --init --recursive
 ${GIT} submodule foreach --recursive 'git archive --prefix=${TARPREFIX}/${displaypath}/ HEAD > ${TMPDIR}tmp.tar &&
 ${TAR} --concatenate --file=${TMPDIR}${TARPREFIX}.tar ${TMPDIR}tmp.tar'
 
+# Package archives must contain ordinary files in place of both gitlinks.
+for REQUIRED_SUBMODULE_FILE in \
+  "${TARPREFIX}/external/libelfin/CMakeLists.txt" \
+  "${TARPREFIX}/external/libelfin/external/cpp-mmaplib/mmaplib.h"; do
+  if ! ${TAR} --list --file="${TMPDIR}${TARPREFIX}.tar" "${REQUIRED_SUBMODULE_FILE}" >/dev/null; then
+    echo "ERROR: source archive is missing vendored submodule file ${REQUIRED_SUBMODULE_FILE}."
+    exit 1
+  fi
+done
+
 popd || exit
 
 # compress tar file
