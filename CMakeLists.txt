@@ -230,6 +230,11 @@ endif ()
 
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 set(CMAKE_PROJECT_libelfin_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/LibElfinSettings.cmake")
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/external/libelfin/CMakeLists.txt")
+    message(FATAL_ERROR
+            "The libelfin submodule is not initialized."
+            "Run `git submodule update --init --recursive` from the QtRVSim source directory.")
+endif()
 add_subdirectory("external/libelfin")
 
 # Detect Qt used qt version

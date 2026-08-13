@@ -1,8 +1,26 @@
-{ lib, stdenv, cmake, wrapQtAppsHook, qtbase, qtsvg }:
+{ lib, stdenv, cmake, wrapQtAppsHook, python3, qtbase, qtsvg, qtrvsimSource ? ../../.. }:
+let
+    sourceRoot = toString qtrvsimSource;
+    source = lib.cleanSourceWith {
+        src = qtrvsimSource;
+        filter = path: type:
+            let
+                relativePath = lib.removePrefix "${sourceRoot}/" (toString path);
+                topLevel = builtins.head (lib.splitString "/" relativePath);
+            in
+                lib.cleanSourceFilter path type
+                && !(builtins.elem topLevel [ "build" "CMakeFiles" "test_dir" ])
+                && !(builtins.elem relativePath [
+                    ".dev-config.mk"
+                    "compile_commands.json"
+                    "src/project_info.h"
+                ]);
+    };
+in
 stdenv.mkDerivation {
     name = "QtRVSim";
-    src = builtins.fetchGit ../../..;
-    nativeBuildInputs = [ cmake wrapQtAppsHook ];
+    src = source;
+    nativeBuildInputs = [ cmake wrapQtAppsHook python3 ];
     buildInputs = [ qtbase qtsvg ];
     meta = {
         description = "RISC-V CPU simulator for education purposes.";

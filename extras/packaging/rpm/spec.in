@@ -40,11 +40,9 @@ BuildRequires:  pkgconfig(Qt5Test)
 BuildRequires:  pkgconfig(Qt5Widgets)
 %if ! 0%{?suse_version}
 BuildRequires:  desktop-file-utils
-BuildRequires:  pkgconfig(libelf)
 %endif
 
 %if 0%{?suse_version}
-BuildRequires:  libelf-devel
 BuildRequires:  update-desktop-files
 %endif
 
@@ -64,6 +62,10 @@ BuildRequires:  update-desktop-files
 
 %install
 %cmake_install
+install -Dm0644 external/libelfin/LICENSE \
+    %{buildroot}%{_licensedir}/%{name}/libelfin-LICENSE
+install -Dm0644 external/libelfin/external/cpp-mmaplib/LICENSE \
+    %{buildroot}%{_licensedir}/%{name}/cpp-mmaplib-LICENSE
 
 #desktop icon
 %if 0%{?suse_version}
@@ -84,6 +86,8 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/@PACKAGE_NAME@.deskto
 %{_datadir}/metainfo/cz.cvut.edu.comparch.qtrvsim.metainfo.xml
 
 %license LICENSE
+%license %{_licensedir}/%{name}/libelfin-LICENSE
+%license %{_licensedir}/%{name}/cpp-mmaplib-LICENSE
 %doc README.md
 
 %changelog

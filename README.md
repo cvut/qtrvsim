@@ -58,13 +58,26 @@ Please, report any difficulties via [GitHub issues](https://github.com/cvut/qtrv
 - Qt 5 (minimal tested version is 5.9.5), experimental support of Qt 6
 - elfutils (optional; libelf works too but there can be some problems)
 
+Clone the repository with its recursive submodules:
+
+```shell
+git clone --recurse-submodules https://github.com/cvut/qtrvsim.git
+```
+
+For an existing checkout, initialize or repair the dependencies with:
+
+```shell
+git submodule update --init --recursive
+```
+
 ### Quick Compilation on Linux
 
 On Linux, you can use a wrapper Makefile and run `make` in the project root directory. It will create a build directory
 and run CMake in it. Available targets are: `release` (default) and `debug`.
 
 Note for packagers: This Makefile is deleted by CMake when source archive is created to avoid any ambiguity. Packages
-should invoke CMake directly.
+should invoke CMake directly. The generated source archive vendors all submodule contents and can be built without Git
+metadata or network access.
 
 ### General Compilation
 
