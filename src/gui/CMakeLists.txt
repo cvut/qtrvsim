@@ -44,6 +44,9 @@ set(gui_lib_SOURCES
         windows/program/programtableview.cpp
         windows/registers/registersdock.cpp
         dialogs/savechanged/savechangeddialog.cpp
+        dialogs/webeval/webevalconfigdialog.cpp
+        windows/webeval/webevaldock.cpp
+        windows/webeval/taskdescriptiondock.cpp
         windows/editor/srceditor.cpp
         statictable.cpp
         windows/terminal/terminaldock.cpp
@@ -91,6 +94,9 @@ set(gui_lib_HEADERS
         windows/program/programtableview.h
         windows/registers/registersdock.h
         dialogs/savechanged/savechangeddialog.h
+        dialogs/webeval/webevalconfigdialog.h
+        windows/webeval/webevaldock.h
+        windows/webeval/taskdescriptiondock.h
         windows/editor/srceditor.h
         statictable.h
         windows/terminal/terminaldock.h
@@ -140,7 +146,7 @@ target_include_directories(gui_lib
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gui_lib_autogen/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gui_lib_autogen/include_$<CONFIG>>)
 target_link_libraries(gui_lib
-        PUBLIC ${QtLib}::Core ${QtLib}::Widgets ${QtLib}::Gui
+        PUBLIC ${QtLib}::Core ${QtLib}::Widgets ${QtLib}::Gui ${QtLib}::Network
         PUBLIC machine os_emulation assembler svgscene)
 target_compile_definitions(gui_lib
         PUBLIC
@@ -157,7 +163,7 @@ add_executable(gui
         ${ICON_PATH}
         main.cpp)
 target_link_libraries(gui
-        PRIVATE gui_lib ${QtLib}::Core ${QtLib}::Gui ${QtLib}::Widgets)
+        PRIVATE gui_lib ${QtLib}::Core ${QtLib}::Gui ${QtLib}::Widgets ${QtLib}::Network)
 set_target_properties(gui PROPERTIES
         OUTPUT_NAME "${MAIN_PROJECT_NAME_LOWER}_${PROJECT_NAME}")
 
