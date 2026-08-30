@@ -96,7 +96,7 @@ void FrontendMemory::sfence_vma(uint64_t vaddr, uint64_t asid) {
     sync();
 }
 
-LocationStatus FrontendMemory::location_status(Address address) const {
+LocationStatus FrontendMemory::location_status(AddressWithMode address) const {
     (void)address;
     return LOCSTAT_NONE;
 }

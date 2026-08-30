@@ -84,7 +84,7 @@ public:
 
     virtual void sync();
     virtual void sfence_vma(uint64_t vaddr, uint64_t asid);
-    [[nodiscard]] virtual LocationStatus location_status(Address address) const;
+    [[nodiscard]] virtual LocationStatus location_status(AddressWithMode address) const;
     [[nodiscard]] virtual uint32_t get_change_counter() const = 0;
     /**
      * Write byte sequence to memory

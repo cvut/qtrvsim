@@ -91,6 +91,8 @@ public:
 
     ReadResult read(void *dst, AddressWithMode src, size_t sz, ReadOptions opts) const override;
 
+    enum LocationStatus location_status(AddressWithMode address) const override;
+
     uint32_t get_change_counter() const override {
         uint32_t base = mem->get_change_counter();
         if (pt_walk_mem != mem) base += pt_walk_mem->get_change_counter();

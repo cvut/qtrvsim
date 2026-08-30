@@ -393,6 +393,20 @@ bool TLB::reverse_lookup(Address paddr, VirtualAddress &out_va) const {
     return false;
 }
 
+enum LocationStatus TLB::location_status(AddressWithMode address) const {
+    TranslationResult tr;
+    AccessMode mode = address.access_mode();
+    if (mode.opkind() == AccessOp::WRITE) {
+        address.set_access_mode(AccessMode::pack(mode.asid(), mode.priv(), AccessOp::READ, false));
+    }
+    try {
+        // TODO: extend page-walker template to provide even cost variant
+        // the INTERNAL access in read mode hould not modify anything as well
+        tr = const_cast<TLB *>(this)->translate_virtual_to_physical(address, ae::INTERNAL);
+    } catch (machine::SimulatorExceptionPageFault &e) { return LocationStatus::LOCSTAT_ILLEGAL; }
+    return mem->location_status(tr.phys);
+}
+
 double TLB::get_hit_rate() const {
     unsigned comp = hit_count_ + miss_count_;
     if (comp == 0) return 0.0;

@@ -126,6 +126,10 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
             return {};
         }
         address += cellSizeBytes() * (index.column() - 1);
+        machine::AccessMode mode = machine::Core::make_access_mode(
+            machine->core()->get_state(), machine::AccessOp::READ);
+        machine::AddressWithMode awm(address, mode);
+        if (address < index0_offset) { return {}; }
         machine::LocationStatus loc_stat;
         const machine::FrontendMemory *mem = nullptr;
         if (mem_acc_at_level < MEM_ACC_CACHED && machine->cache_data() != nullptr) {
@@ -135,7 +139,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
         }
         if (mem == nullptr) { return {}; }
         try {
-            loc_stat = machine->cache_data()->location_status(address);
+            loc_stat = mem->location_status(awm);
         } catch (machine::SimulatorExceptionPageFault &e) {
             QBrush bgd(Qt::darkRed);
             return bgd;

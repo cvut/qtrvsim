@@ -83,7 +83,7 @@ public:
 
     const CacheConfig &get_config() const;
 
-    enum LocationStatus location_status(Address address) const override;
+    enum LocationStatus location_status(machine::AddressWithMode address) const override;
 
 signals:
     void hit_update(uint32_t) const;

@@ -323,7 +323,7 @@ CacheLocation Cache::compute_location(Address address) const {
              .byte = byte };
 }
 
-enum LocationStatus Cache::location_status(Address address) const {
+enum LocationStatus Cache::location_status(AddressWithMode address) const {
     const CacheLocation loc = compute_location(address);
 
     if (cache_config.enabled()) {

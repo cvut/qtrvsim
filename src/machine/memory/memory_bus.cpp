@@ -77,7 +77,7 @@ uint32_t MemoryDataBus::get_change_counter() const {
     return change_counter;
 }
 
-enum LocationStatus MemoryDataBus::location_status(Address address) const {
+enum LocationStatus MemoryDataBus::location_status(AddressWithMode address) const {
     const RangeDesc *range = find_range(address);
     if (range == nullptr) { return LOCSTAT_ILLEGAL; }
     return range->device->location_status(address - range->start_addr);
