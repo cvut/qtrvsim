@@ -21,10 +21,10 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     cell_size->addItem("Word", MemoryModel::CELLSIZE_WORD);
     cell_size->setCurrentIndex(MemoryModel::CELLSIZE_WORD);
 
-    auto *cached_access = new QComboBox();
-    cached_access->addItem("Direct", 0);
-    cached_access->addItem("Cached", 1);
-    cached_access->addItem("As CPU (VMA)", 2);
+    auto *access_at_level = new QComboBox();
+    access_at_level->addItem("Direct", MemoryModel::MEM_ACC_DIRECT);
+    access_at_level->addItem("Cached", MemoryModel::MEM_ACC_CACHED);
+    access_at_level->addItem("As CPU (VMA)", MemoryModel::MEM_ACC_AS_CPU);
 
     auto *memory_content = new MemoryTableView(nullptr, settings);
     // memory_content->setSizePolicy();
@@ -37,7 +37,7 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
 
     auto *layout_top = new QHBoxLayout;
     layout_top->addWidget(cell_size);
-    layout_top->addWidget(cached_access);
+    layout_top->addWidget(access_at_level);
     auto *layout = new QVBoxLayout;
     layout->addLayout(layout_top);
     layout->addWidget(memory_content);
@@ -53,8 +53,8 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
         cell_size, QOverload<int>::of(&QComboBox::currentIndexChanged), memory_content,
         &MemoryTableView::set_cell_size);
     connect(
-        cached_access, QOverload<int>::of(&QComboBox::currentIndexChanged), memory_model,
-        &MemoryModel::cached_access);
+        access_at_level, QOverload<int>::of(&QComboBox::currentIndexChanged), memory_model,
+        &MemoryModel::set_access_at_level);
     connect(
         go_edit, &HexLineEdit::value_edit_finished, memory_content,
         [memory_content](uint64_t value) {

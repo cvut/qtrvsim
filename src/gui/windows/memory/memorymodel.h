@@ -19,11 +19,9 @@ public:
     };
 
     enum MemoryAccessAtLevel {
-        MEM_ACC_AS_CPU = 0,
-        MEM_ACC_VIRT_ADDR = 1,
-        MEM_ACC_PHYS_ADDR = 2,
-        MEM_ACC_PHYS_ADDR_SKIP_CACHES = 3,
-        MEM_ACC_AS_MACHINE = 4,
+        MEM_ACC_DIRECT = 0,
+        MEM_ACC_CACHED = 1,
+        MEM_ACC_AS_CPU = 2,
     };
 
     explicit MemoryModel(QObject *parent);
@@ -73,7 +71,7 @@ public slots:
     void setup(machine::Machine *machine);
     void set_cell_size(int index);
     void check_for_updates();
-    void cached_access(int cached);
+    void set_access_at_level(int acc_level); // direct, cached, virtual
 
 signals:
     void cell_size_changed();
@@ -82,8 +80,8 @@ signals:
 private:
     [[nodiscard]] const machine::FrontendMemory *mem_access() const;
     [[nodiscard]] machine::FrontendMemory *mem_access_rw() const;
-    [[nodiscard]] const machine::FrontendMemory *mem_access_phys() const;
-    [[nodiscard]] machine::FrontendMemory *mem_access_phys_rw() const;
+    [[nodiscard]] const machine::FrontendMemory *mem_access_at_level() const;
+    [[nodiscard]] machine::FrontendMemory *mem_access_at_level_rw() const;
     enum MemoryCellSize cell_size;
     unsigned int cells_per_row;
     machine::Address index0_offset;
@@ -91,7 +89,7 @@ private:
     machine::Machine *machine;
     uint32_t memory_change_counter;
     uint32_t cache_data_change_counter;
-    int mem_access_kind;
+    MemoryAccessAtLevel mem_acc_at_level;
 };
 
 #endif // MEMORYMODEL_H

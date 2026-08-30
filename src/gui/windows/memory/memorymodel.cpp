@@ -12,7 +12,7 @@ MemoryModel::MemoryModel(QObject *parent) : Super(parent), data_font("Monospace"
     machine = nullptr;
     memory_change_counter = 0;
     cache_data_change_counter = 0;
-    mem_access_kind = MEM_ACC_AS_CPU;
+    mem_acc_at_level = MEM_ACC_DIRECT;
 }
 
 const machine::FrontendMemory *MemoryModel::mem_access() const {
@@ -29,6 +29,28 @@ machine::FrontendMemory *MemoryModel::mem_access_rw() const {
     // Direct access to memory is not allowed, data bus must be used. At least a
     // trivial one. If this occurred, there is a misconfigured machine.
     throw std::logic_error("No memory available on machine. This is u bug, please report it.");
+}
+
+const machine::FrontendMemory *MemoryModel::mem_access_at_level() const {
+    if (!machine) return nullptr;
+    if (mem_acc_at_level == MEM_ACC_AS_CPU && machine->config().get_vm_enabled()) {
+        return machine->get_tlb_data();
+    } else if (mem_acc_at_level >= MEM_ACC_CACHED && machine->cache_data()) {
+        return machine->cache_data();
+    } else {
+        return mem_access();
+    }
+}
+
+machine::FrontendMemory *MemoryModel::mem_access_at_level_rw() const {
+    if (!machine) return nullptr;
+    if (mem_acc_at_level == MEM_ACC_AS_CPU && machine->config().get_vm_enabled()) {
+        return machine->get_tlb_data_rw();
+    } else if (mem_acc_at_level >= MEM_ACC_CACHED && machine->cache_data_rw()) {
+        return machine->cache_data_rw();
+    } else {
+        return mem_access_rw();
+    }
 }
 
 int MemoryModel::rowCount(const QModelIndex & /*parent*/) const {
@@ -67,19 +89,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
             return { QString("0x") + s + t };
         }
         if (machine == nullptr) { return QString(""); }
-        bool vm_enabled = machine->config().get_vm_enabled();
-        if (!vm_enabled) {
-            mem = mem_access();
-            if ((mem_access_kind > MEM_ACC_AS_CPU) && (machine->cache_data() != nullptr)) {
-                mem = machine->cache_data();
-            }
-        } else {
-            if (mem_access_kind == MEM_ACC_PHYS_ADDR) {
-                mem = machine->get_tlb_data();
-            } else {
-                mem = mem_access_phys();
-            }
-        }
+        mem = mem_access_at_level();
         if (mem == nullptr) { return QString(""); }
         address += cellSizeBytes() * (index.column() - 1);
         machine::AccessMode mode = machine::Core::make_access_mode(
@@ -116,16 +126,26 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const {
             return {};
         }
         address += cellSizeBytes() * (index.column() - 1);
-        if (machine->cache_data() != nullptr) {
-            machine::LocationStatus loc_stat;
+        machine::LocationStatus loc_stat;
+        const machine::FrontendMemory *mem = nullptr;
+        if (mem_acc_at_level < MEM_ACC_CACHED && machine->cache_data() != nullptr) {
+            mem = machine->cache_data();
+        } else {
+            mem = mem_access_at_level();
+        }
+        if (mem == nullptr) { return {}; }
+        try {
             loc_stat = machine->cache_data()->location_status(address);
-            if (loc_stat & machine::LOCSTAT_DIRTY) {
-                QBrush bgd(Qt::yellow);
-                return bgd;
-            } else if (loc_stat & machine::LOCSTAT_CACHED) {
-                QBrush bgd(Qt::lightGray);
-                return bgd;
-            }
+        } catch (machine::SimulatorExceptionPageFault &e) {
+            QBrush bgd(Qt::darkRed);
+            return bgd;
+        }
+        if (loc_stat & machine::LOCSTAT_DIRTY) {
+            QBrush bgd(Qt::yellow);
+            return bgd;
+        } else if (loc_stat & machine::LOCSTAT_CACHED) {
+            QBrush bgd(Qt::lightGray);
+            return bgd;
         }
         return {};
     }
@@ -206,9 +226,10 @@ bool MemoryModel::adjustRowAndOffset(int &row, machine::Address address) {
     }
     return get_row_for_address(row, address);
 }
-void MemoryModel::cached_access(int cached) {
-    mem_access_kind = cached;
-    update_all();
+void MemoryModel::set_access_at_level(int acc_level) {
+    beginResetModel();
+    mem_acc_at_level = (enum MemoryAccessAtLevel)acc_level;
+    endResetModel();
 }
 Qt::ItemFlags MemoryModel::flags(const QModelIndex &index) const {
     if (index.column() == 0) {
@@ -227,50 +248,20 @@ bool MemoryModel::setData(const QModelIndex &index, const QVariant &value, int r
         if (!ok) { return false; }
         if (!get_row_address(address, index.row())) { return false; }
         if (index.column() == 0 || machine == nullptr) { return false; }
-        if (machine->config().get_vm_enabled()) {
-            if (mem_access_kind == MEM_ACC_PHYS_ADDR) {
-                mem = machine->get_tlb_data_rw();
-            } else {
-                mem = mem_access_phys_rw();
-            }
-        } else {
-            mem = mem_access_rw();
-            if (mem_access_kind > MEM_ACC_AS_CPU && machine->cache_data_rw()) {
-                mem = machine->cache_data_rw();
-            }
-        }
+        mem = mem_access_at_level_rw();
         if (mem == nullptr) { return false; }
-        if ((mem_access_kind > MEM_ACC_AS_CPU) && (machine->cache_data_rw() != nullptr)) {
-            mem = machine->cache_data_rw();
-        }
         address += cellSizeBytes() * (index.column() - 1);
         machine::AccessMode mode = machine::Core::make_access_mode(
             machine->core()->get_state(), machine::AccessOp::READ);
         machine::AddressWithMode awm(address, mode);
-        switch (cell_size) {
-        case CELLSIZE_BYTE: mem->write_u8(awm, data, ae::INTERNAL); break;
-        case CELLSIZE_HWORD: mem->write_u16(awm, data, ae::INTERNAL); break;
-        default:
-        case CELLSIZE_WORD: mem->write_u32(awm, data, ae::INTERNAL); break;
-        }
+        try {
+            switch (cell_size) {
+            case CELLSIZE_BYTE: mem->write_u8(awm, data, ae::INTERNAL); break;
+            case CELLSIZE_HWORD: mem->write_u16(awm, data, ae::INTERNAL); break;
+            default:
+            case CELLSIZE_WORD: mem->write_u32(awm, data, ae::INTERNAL); break;
+            }
+        } catch (machine::SimulatorExceptionPageFault &e) {};
     }
     return true;
-}
-
-const machine::FrontendMemory *MemoryModel::mem_access_phys() const {
-    if (!machine) return nullptr;
-    if (mem_access_kind > MEM_ACC_AS_CPU && machine->cache_data()) {
-        return machine->cache_data();
-    } else {
-        return machine->memory_data_bus();
-    }
-}
-
-machine::FrontendMemory *MemoryModel::mem_access_phys_rw() const {
-    if (!machine) return nullptr;
-    if (mem_access_kind > MEM_ACC_AS_CPU && machine->cache_data_rw()) {
-        return machine->cache_data_rw();
-    } else {
-        return machine->memory_data_bus_rw();
-    }
 }
