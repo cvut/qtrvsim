@@ -2,6 +2,7 @@
 #define SV39_H
 
 #include "generic_pte.h"
+#include "memory/address.h"
 
 // SV39-specific definitions: page-table entry (PTE) bitfields, shifts/masks, and PTE to physical
 // address helpers. This header documents the SV39 layout (RISC-V 64-bit virtual memory):
@@ -103,6 +104,10 @@ struct Sv39Pte : public GenericPte {
     bool d() const noexcept override { return (raw >> D_SHIFT) & 0x1ull; }
     uint64_t rsw() const noexcept { return (raw >> RSW_SHIFT) & 0x3ull; }
     uint64_t ppn() const noexcept override { return (raw >> PPN_SHIFT) & PPN_MASK; }
+
+    // Flag modification operations
+    void set_a(bool val) noexcept override { raw = (raw & ~A_MASK) | (val << A_SHIFT); };
+    void set_d(bool val) noexcept override { raw = (raw & ~D_MASK) | (val << D_SHIFT); };
 
     // Convenience methods used by the page-table walker
     bool is_leaf() const noexcept override { return r() || x(); }

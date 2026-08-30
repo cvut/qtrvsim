@@ -36,7 +36,8 @@ public:
         const VirtualAddress &va,
         uint64_t raw_satp,
         uint64_t raw_sstatus,
-        const AccessMode &access_mode);
+        const AccessMode &access_mode,
+        AccessEffects ae_type);
 
     static std::function<std::unique_ptr<GenericPte>(uint64_t)> sv32_pte_factory();
     static std::function<std::unique_ptr<GenericPte>(uint64_t)> sv39_pte_factory();

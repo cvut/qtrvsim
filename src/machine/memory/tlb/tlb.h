@@ -16,7 +16,6 @@ namespace machine {
 
 enum TLBType { PROGRAM, DATA };
 enum AccessStatus { ACCESS_OK, ACCESS_NOT_OK };
-enum UpdateStatus { UPDATE_REQUIRED, UPDATE_NOT_REQUIRED };
 
 class Machine;
 
@@ -86,7 +85,7 @@ public:
 
     void sfence_vma(uint64_t vaddr, uint64_t asid) override;
 
-    TranslationResult translate_virtual_to_physical(AddressWithMode vaddr);
+    TranslationResult translate_virtual_to_physical(AddressWithMode vaddr, AccessEffects ae_type);
 
     WriteResult write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts) override;
 
@@ -179,9 +178,6 @@ private:
 
     WriteResult translate_and_write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts);
     ReadResult translate_and_read(void *dst, AddressWithMode src, size_t sz, ReadOptions opts);
-    UpdateStatus ensure_ad_bits(Entry &e, AccessOp op);
-    template<typename RawPte>
-    UpdateStatus ensure_ad_bits_impl(Entry &e, AccessOp op);
     inline size_t set_index(uint64_t vpn) const { return vpn & (num_sets_ - 1); }
     inline bool is_mode_enabled_in_satp(uint64_t satp_raw) const {
         switch (xlen) {
