@@ -89,6 +89,9 @@ private:
     machine::Machine *machine;
     uint32_t memory_change_counter;
     uint32_t cache_data_change_counter;
+    uint32_t tlb_change_counter;
+    machine::CSR::PrivilegeLevel last_priv_level;
+    unsigned last_asid;
     MemoryAccessAtLevel mem_acc_at_level;
 };
 

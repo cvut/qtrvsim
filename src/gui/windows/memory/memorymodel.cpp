@@ -12,6 +12,9 @@ MemoryModel::MemoryModel(QObject *parent) : Super(parent), data_font("Monospace"
     machine = nullptr;
     memory_change_counter = 0;
     cache_data_change_counter = 0;
+    tlb_change_counter = 0;
+    last_priv_level = machine::CSR::PrivilegeLevel::MACHINE;
+    last_asid = 0;
     mem_acc_at_level = MEM_ACC_DIRECT;
 }
 
@@ -193,6 +196,13 @@ void MemoryModel::update_all() {
         if (machine->cache_data() != nullptr) {
             cache_data_change_counter = machine->cache_data()->get_change_counter();
         }
+        if (mem_acc_at_level == MEM_ACC_AS_CPU && machine->config().get_vm_enabled()
+            && machine->get_tlb_data() != nullptr) {
+            tlb_change_counter = machine->get_tlb_data()->get_change_counter();
+            auto state = machine->core()->get_state();
+            last_priv_level = state.current_privilege();
+            last_asid = state.current_asid();
+        }
     }
     emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
 }
@@ -207,6 +217,16 @@ void MemoryModel::check_for_updates() {
     if (machine->cache_data() != nullptr) {
         if (cache_data_change_counter != machine->cache_data()->get_change_counter()) {
             need_update = true;
+        }
+        if (mem_acc_at_level == MEM_ACC_AS_CPU && machine->config().get_vm_enabled()
+            && machine->get_tlb_data() != nullptr) {
+            if (tlb_change_counter != machine->get_tlb_data()->get_change_counter()) {
+                need_update = true;
+            }
+            auto state = machine->core()->get_state();
+            if (last_priv_level != state.current_privilege() || last_asid != state.current_asid()) {
+                need_update = true;
+            }
         }
     }
     if (!need_update) { return; }
