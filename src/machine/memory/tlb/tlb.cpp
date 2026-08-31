@@ -63,13 +63,14 @@ void TLB::on_csr_write(size_t internal_id, RegisterValue val) {
     current_satp_raw = new_satp;
 
     if (old_mode != new_mode) {
-        flush_all_entries();
+        ++change_counter_for_tlb_ops;
+        // the software is responsible for flush after SATP change
+        // flush_all_entries();
         DEBUG(
-            "TLB: SATP changed -> translation mode changed (%u -> %u), flushed all",
+            "TLB: SATP changed -> translation mode changed (%u -> %u)",
             static_cast<unsigned>(old_mode), static_cast<unsigned>(new_mode));
-    } else {
-        update_all_statistics();
     }
+    update_all_statistics();
 }
 
 void TLB::flush_single(VirtualAddress va, uint16_t asid) {
@@ -95,7 +96,7 @@ void TLB::flush_single(VirtualAddress va, uint16_t asid) {
     }
 
     if (any_invalidated) {
-        ++change_counter;
+        ++change_counter_for_tlb_ops;
         update_all_statistics();
     }
 }
@@ -116,7 +117,7 @@ void TLB::flush_all_entries() {
             }
         }
     }
-    change_counter++;
+    change_counter_for_tlb_ops++;
     DEBUG("TLB[%s]: flushed all entries", tag);
     update_all_statistics();
 }
@@ -138,7 +139,7 @@ void TLB::flush_by_asid(uint16_t asid) {
         }
     }
     if (any_invalidated) {
-        ++change_counter;
+        ++change_counter_for_tlb_ops;
         update_all_statistics();
     }
 }
@@ -160,7 +161,7 @@ void TLB::flush_by_vpn(uint64_t vpn) {
         }
     }
     if (any_invalidated) {
-        ++change_counter;
+        ++change_counter_for_tlb_ops;
         update_all_statistics();
     }
 }
@@ -467,7 +468,7 @@ void TLB::reset() {
     mem_writes = 0;
     burst_reads = 0;
     burst_writes = 0;
-    change_counter = 0;
+    change_counter_for_tlb_ops = 0;
 
     emit hit_update(get_hit_count());
     emit miss_update(get_miss_count());

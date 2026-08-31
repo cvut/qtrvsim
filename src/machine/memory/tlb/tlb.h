@@ -94,7 +94,7 @@ public:
     enum LocationStatus location_status(AddressWithMode address) const override;
 
     uint32_t get_change_counter() const override {
-        uint32_t base = mem->get_change_counter();
+        uint32_t base = mem->get_change_counter() + change_counter_for_tlb_ops;
         if (pt_walk_mem != mem) base += pt_walk_mem->get_change_counter();
         return base;
     }
@@ -176,7 +176,7 @@ private:
     mutable uint32_t ptw_writes = 0;
     mutable uint32_t burst_reads = 0;
     mutable uint32_t burst_writes = 0;
-    mutable uint32_t change_counter = 0;
+    mutable uint32_t change_counter_for_tlb_ops = 0;
 
     WriteResult translate_and_write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts);
     ReadResult translate_and_read(void *dst, AddressWithMode src, size_t sz, ReadOptions opts);
