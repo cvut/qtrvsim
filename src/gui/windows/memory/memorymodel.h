@@ -76,6 +76,7 @@ public slots:
 signals:
     void cell_size_changed();
     void setup_done();
+    void report_error(QString error);
 
 private:
     [[nodiscard]] const machine::FrontendMemory *mem_access() const;

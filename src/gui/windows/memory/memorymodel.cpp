@@ -287,7 +287,9 @@ bool MemoryModel::setData(const QModelIndex &index, const QVariant &value, int r
             default:
             case CELLSIZE_WORD: mem->write_u32(awm, data, ae::INTERNAL); break;
             }
-        } catch (machine::SimulatorExceptionPageFault &e) {};
+        } catch (machine::SimulatorExceptionPageFault &e) {
+            emit report_error(tr("data write error"));
+        }
     }
     return true;
 }

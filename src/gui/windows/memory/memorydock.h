@@ -21,6 +21,9 @@ signals:
     void machine_setup(machine::Machine *machine);
     void focus_addr(machine::Address);
 
+public slots:
+    void report_error(const QString &error);
+
 private:
     machine::Machine *machinePtr;
 };

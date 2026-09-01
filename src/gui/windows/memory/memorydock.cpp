@@ -1,5 +1,6 @@
 #include "memorydock.h"
 
+#include "helper/async_modal.h"
 #include "memorymodel.h"
 #include "memorytableview.h"
 #include "ui/hexlineedit.h"
@@ -67,8 +68,13 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     connect(
         memory_model, &MemoryModel::setup_done, memory_content,
         &MemoryTableView::recompute_columns);
+    connect(memory_model, &MemoryModel::report_error, this, &MemoryDock::report_error);
 }
 
 void MemoryDock::setup(machine::Machine *machine) {
     emit machine_setup(machine);
+}
+
+void MemoryDock::report_error(const QString &error) {
+    showAsyncMessageBox(this, QMessageBox::Critical, "Simulator Error", error);
 }
