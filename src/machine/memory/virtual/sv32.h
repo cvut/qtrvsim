@@ -102,6 +102,7 @@ struct Sv32Pte : public GenericPte {
     bool d() const noexcept override { return (raw >> D_SHIFT) & 0x1u; }
     uint64_t rsw() const noexcept { return (raw >> RSW_SHIFT) & 0x3u; }
     uint64_t ppn() const noexcept override { return (raw >> PPN_SHIFT) & PPN_MASK; }
+    unsigned pbmt() const noexcept override { return 0; }
 
     // Flag modification operations
     void set_a(bool val) noexcept override { raw = (raw & ~A_MASK) | (val << A_SHIFT); };

@@ -41,6 +41,9 @@ struct GenericPte {
     // PPN extraction
     virtual uint64_t ppn() const noexcept = 0;
 
+    // PBMT extraction
+    virtual unsigned pbmt() const noexcept = 0;
+
     // Convenience
     virtual bool is_leaf() const noexcept = 0;
     virtual bool is_valid() const noexcept = 0;

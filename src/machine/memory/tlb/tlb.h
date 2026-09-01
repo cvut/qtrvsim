@@ -39,6 +39,7 @@ public:
         bool G;
         bool A;
         bool D;
+        uint8_t pte_pbmt = 0;
 
         [[nodiscard]] bool r() const { return R; }
 
@@ -53,11 +54,14 @@ public:
         [[nodiscard]] bool a() const { return A; }
 
         [[nodiscard]] bool d() const { return D; }
+
+        [[nodiscard]] unsigned pbmt() const { return pte_pbmt; }
     };
 
     struct TranslationResult {
         Address phys;
         size_t bytes_until_page_end;
+        unsigned pbmt = 0;
         Entry *entry = nullptr;
     };
 

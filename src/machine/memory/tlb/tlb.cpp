@@ -241,7 +241,8 @@ TLB::translate_virtual_to_physical(AddressWithMode vaddr, AccessEffects ae_type)
                     ent->d());
                 update_all_statistics();
             }
-            return { Address { pbase + off }, static_cast<size_t>(PAGE_BYTES - off), ent };
+            return { Address { pbase + off }, static_cast<size_t>(PAGE_BYTES - off), ent->pbmt(),
+                     ent };
         }
     }
 
@@ -309,6 +310,7 @@ TLB::translate_virtual_to_physical(AddressWithMode vaddr, AccessEffects ae_type)
     ent->G = res.leaf_pte->g();
     ent->A = res.leaf_pte->a();
     ent->D = res.leaf_pte->d();
+    ent->pte_pbmt = res.leaf_pte->pbmt();
     repl_policy->notify_access(ent_set, ent_way, /*valid=*/true);
     emit tlb_update(
         static_cast<unsigned>(ent_way), static_cast<unsigned>(ent_set), true, ent->asid, ent->vpn,
@@ -318,7 +320,7 @@ TLB::translate_virtual_to_physical(AddressWithMode vaddr, AccessEffects ae_type)
         "TLB[%s]: cached VA=0x%llx -> PA=0x%llx (ASID=%u) on miss", tag, (unsigned long long)virt,
         (unsigned long long)phys_base, asid);
     update_all_statistics();
-    return { Address { phys_base + off }, static_cast<size_t>(PAGE_BYTES - off), ent };
+    return { Address { phys_base + off }, static_cast<size_t>(PAGE_BYTES - off), ent->pbmt(), ent };
 }
 
 WriteResult TLB::write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts) {
@@ -343,7 +345,10 @@ WriteResult TLB::translate_and_write(AddressWithMode dst, const void *src, size_
 
         size_t bytes_to_write = std::min(remaining, tr.bytes_until_page_end);
 
-        WriteResult wr = mem->write(tr.phys, cur_src, bytes_to_write, opts);
+        AddressWithMode awm(tr.phys, dst.access_mode());
+        if (tr.pbmt > awm.uncached()) awm.set_uncached(tr.pbmt);
+
+        WriteResult wr = mem->write(awm, cur_src, bytes_to_write, opts);
         total_written += wr.n_bytes;
         any_changed |= wr.changed;
 
@@ -368,7 +373,10 @@ ReadResult TLB::translate_and_read(void *dst, AddressWithMode src, size_t sz, Re
 
         size_t bytes_to_read = std::min(remaining, tr.bytes_until_page_end);
 
-        ReadResult rr = mem->read(cur_dst, tr.phys, bytes_to_read, opts);
+        AddressWithMode awm(tr.phys, src.access_mode());
+        if (tr.pbmt > awm.uncached()) awm.set_uncached(tr.pbmt);
+
+        ReadResult rr = mem->read(cur_dst, awm, bytes_to_read, opts);
         total_read += rr.n_bytes;
 
         cur_dst += bytes_to_read;
