@@ -47,6 +47,11 @@ struct AccessMode {
         return static_cast<uint8_t>((token >> UNCACHED_SHIFT) & UNCACHED_MASK);
     }
 
+    void set_uncached(uint8_t val) noexcept {
+        token &= ~(UNCACHED_MASK << UNCACHED_SHIFT);
+        token |= (val & UNCACHED_MASK) << UNCACHED_SHIFT;
+    }
+
     AccessOp opkind() const { return static_cast<AccessOp>((token >> OPKIND_SHIFT) & OPKIND_MASK); }
 
     uint32_t raw() const { return token; }
@@ -69,6 +74,9 @@ public:
     constexpr AccessMode access_mode() const noexcept { return mode; }
     void set_access_mode(AccessMode m) noexcept { mode = m; }
     uint32_t access_mode_raw() const noexcept { return mode.raw(); }
+
+    uint8_t uncached() const noexcept { return mode.uncached(); }
+    void set_uncached(uint8_t val) noexcept { mode.set_uncached(val); }
 
     constexpr bool operator==(const AddressWithMode &other) const noexcept {
         return static_cast<const Address&>(*this) == static_cast<const Address&>(other)

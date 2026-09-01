@@ -103,7 +103,7 @@ public:
      */
     void clean_range(Address start_addr, Address last_addr);
 
-    enum LocationStatus location_status(Address address) const override;
+    enum LocationStatus location_status(AddressWithMode address) const override;
 
 private slots:
     /**

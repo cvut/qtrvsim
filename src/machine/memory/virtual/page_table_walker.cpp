@@ -30,7 +30,8 @@ WalkResult PageTableWalker::walk(
     const VirtualAddress &va,
     uint64_t raw_satp,
     uint64_t raw_sstatus,
-    const AccessMode &access_mode) {
+    const AccessMode &access_mode,
+    AccessEffects ae_type) {
     if (!(raw_satp & PagingMode::SATP_MODE_MASK)) {
         return WalkResult { Address { va.get_raw() }, nullptr };
     }
@@ -39,13 +40,19 @@ WalkResult PageTableWalker::walk(
     uint64_t va_raw = va.get_raw();
     WalkResult res;
 
+    res.pte_was_written = false;
+
     for (int lvl = max_level_idx; lvl >= 0; --lvl) {
         uint32_t vpn_idx = (va_raw >> (PagingMode::PAGE_SHIFT + (lvl * PagingMode::VPN_BITS)))
                            & PagingMode::VPN_MASK;
         Address pte_addr { (ppn << PagingMode::PAGE_SHIFT)
                            + (vpn_idx * sizeof(typename PagingMode::RawType)) };
         typename PagingMode::RawType raw_pte = 0;
-        memory->read(&raw_pte, pte_addr, sizeof(raw_pte), { .type = AccessEffects::REGULAR });
+        switch (sizeof(raw_pte)) {
+        case 4: raw_pte = memory->read_u32(pte_addr, ae_type); break;
+        case 8: raw_pte = memory->read_u64(pte_addr, ae_type); break;
+        default: assert(0);
+        }
         DEBUG(
             "PTW: L%u PTE@0x%08" PRIx64 " = 0x%08" PRIx64, lvl, pte_addr.get_raw(),
             (uint64_t)raw_pte);
@@ -68,6 +75,21 @@ WalkResult PageTableWalker::walk(
                 throw SIMULATOR_EXCEPTION(
                     PageFault, "PTW: access fault (permission check failed)", "",
                     get_current_cause(access_mode.opkind()));
+            }
+            if (!pte->d() && access_mode.opkind() == AccessOp::WRITE) {
+                pte->set_d(true);
+                res.pte_was_written = true;
+            }
+            if (!pte->a() && ae_type != ae::INTERNAL) {
+                pte->set_a(true);
+                res.pte_was_written = true;
+            }
+            if (res.pte_was_written) {
+                switch (sizeof(raw_pte)) {
+                case 4: memory->write_u32(pte_addr, uint32_t(pte->raw), ae_type); break;
+                case 8: memory->write_u64(pte_addr, uint64_t(pte->raw), ae_type); break;
+                default: assert(0);
+                }
             }
 
             Address pa = pte->make_phys(va_raw, lvl);
@@ -95,12 +117,14 @@ template WalkResult PageTableWalker::walk<Sv32Pte, 1>(
     const VirtualAddress &va,
     uint64_t raw_satp,
     uint64_t raw_sstatus,
-    const AccessMode &access_mode);
+    const AccessMode &access_mode,
+    AccessEffects ae_type);
 template WalkResult PageTableWalker::walk<Sv39Pte, 2>(
     const VirtualAddress &va,
     uint64_t raw_satp,
     uint64_t raw_sstatus,
-    const AccessMode &access_mode);
+    const AccessMode &access_mode,
+    AccessEffects ae_type);
 
 template bool check_permissions<GenericPte>(
     const GenericPte &pte,

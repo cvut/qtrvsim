@@ -5,8 +5,6 @@
 
 // Abstract parent interface for PTEs. Concrete PTE types (Sv32, Sv39, ...) implement these methods.
 namespace machine {
-static constexpr uint64_t PHYS_PPN_START = 0x200; // I have noticed that programs are loaded into
-                                                  // memory starting at 0x200.
 
 class Address;
 
@@ -37,8 +35,14 @@ struct GenericPte {
     virtual bool a() const noexcept = 0;
     virtual bool d() const noexcept = 0;
 
+    virtual void set_a(bool val) noexcept = 0;
+    virtual void set_d(bool val) noexcept = 0;
+
     // PPN extraction
     virtual uint64_t ppn() const noexcept = 0;
+
+    // PBMT extraction
+    virtual unsigned pbmt() const noexcept = 0;
 
     // Convenience
     virtual bool is_leaf() const noexcept = 0;

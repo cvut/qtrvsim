@@ -93,9 +93,9 @@ public:
     bool get_step_over_exception(enum ExceptionCause excause) const;
     enum ExceptionCause get_exception_cause() const;
 
-    Address virtual_to_physical(AddressWithMode v) {
+    Address virtual_to_physical(AddressWithMode v, AccessEffects ae_type) {
         if (tlb_data) {
-            return tlb_data->translate_virtual_to_physical(v).phys;
+            return tlb_data->translate_virtual_to_physical(v, ae_type).phys;
         } else {
             return v;
         }

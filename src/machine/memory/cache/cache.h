@@ -83,7 +83,7 @@ public:
 
     const CacheConfig &get_config() const;
 
-    enum LocationStatus location_status(Address address) const override;
+    enum LocationStatus location_status(machine::AddressWithMode address) const override;
 
 signals:
     void hit_update(uint32_t) const;
@@ -115,7 +115,7 @@ private:
     mutable uint32_t hit_read = 0, miss_read = 0, hit_write = 0, miss_write = 0, mem_reads = 0,
                      mem_writes = 0, burst_reads = 0, burst_writes = 0, change_counter = 0;
 
-    void internal_read(Address source, void *destination, size_t size) const;
+    void internal_read(AddressWithMode source, void *destination, size_t size) const;
 
     bool access(Address address, void *buffer, size_t size, AccessType access_type) const;
 
@@ -134,7 +134,7 @@ private:
      * @return          associativity index of found block, max index + 1 if not
      *                  found
      */
-    size_t find_block_index(const CacheLocation &loc) const;
+    size_t find_block_way(const CacheLocation &loc) const;
 
     bool is_in_uncached_area(Address source) const;
 

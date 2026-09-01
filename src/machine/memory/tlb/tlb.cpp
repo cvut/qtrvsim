@@ -63,13 +63,14 @@ void TLB::on_csr_write(size_t internal_id, RegisterValue val) {
     current_satp_raw = new_satp;
 
     if (old_mode != new_mode) {
-        flush_all_entries();
+        ++change_counter_for_tlb_ops;
+        // the software is responsible for flush after SATP change
+        // flush_all_entries();
         DEBUG(
-            "TLB: SATP changed -> translation mode changed (%u -> %u), flushed all",
+            "TLB: SATP changed -> translation mode changed (%u -> %u)",
             static_cast<unsigned>(old_mode), static_cast<unsigned>(new_mode));
-    } else {
-        update_all_statistics();
     }
+    update_all_statistics();
 }
 
 void TLB::flush_single(VirtualAddress va, uint16_t asid) {
@@ -95,7 +96,7 @@ void TLB::flush_single(VirtualAddress va, uint16_t asid) {
     }
 
     if (any_invalidated) {
-        ++change_counter;
+        ++change_counter_for_tlb_ops;
         update_all_statistics();
     }
 }
@@ -116,7 +117,7 @@ void TLB::flush_all_entries() {
             }
         }
     }
-    change_counter++;
+    change_counter_for_tlb_ops++;
     DEBUG("TLB[%s]: flushed all entries", tag);
     update_all_statistics();
 }
@@ -138,7 +139,7 @@ void TLB::flush_by_asid(uint16_t asid) {
         }
     }
     if (any_invalidated) {
-        ++change_counter;
+        ++change_counter_for_tlb_ops;
         update_all_statistics();
     }
 }
@@ -160,7 +161,7 @@ void TLB::flush_by_vpn(uint64_t vpn) {
         }
     }
     if (any_invalidated) {
-        ++change_counter;
+        ++change_counter_for_tlb_ops;
         update_all_statistics();
     }
 }
@@ -191,7 +192,8 @@ void TLB::sfence_vma(uint64_t vaddr, uint64_t asid) {
     flush_by_vpn(vpn);
 }
 
-TLB::TranslationResult TLB::translate_virtual_to_physical(AddressWithMode vaddr) {
+TLB::TranslationResult
+TLB::translate_virtual_to_physical(AddressWithMode vaddr, AccessEffects ae_type) {
     uint64_t virt = vaddr.get_raw();
 
     AccessMode mode = vaddr.access_mode();
@@ -209,28 +211,38 @@ TLB::TranslationResult TLB::translate_virtual_to_physical(AddressWithMode vaddr)
 
     uint64_t off = virt & PAGE_MASK;
     uint64_t vpn = virt >> PAGE_SHIFT;
-    size_t s = set_index(vpn);
+
+    Entry *ent = nullptr;
+    size_t ent_way = 0;
+    size_t ent_set = set_index(vpn);
     const char *tag = (type == PROGRAM ? "I" : "D");
 
     // Check TLB hit
     for (size_t w = 0; w < associativity_; w++) {
-        auto &e = table[s][w];
-        if (e.valid && e.vpn == vpn && e.asid == asid) {
-            if (!check_permissions(e, current_sstatus_raw, mode.priv(), mode.opkind())) {
+        Entry *e = &table[ent_set][w];
+        if (e->valid && e->vpn == vpn && e->asid == asid) {
+            ent = e;
+            ent_way = w;
+            if (!check_permissions(*ent, current_sstatus_raw, mode.priv(), mode.opkind())) {
                 throw SIMULATOR_EXCEPTION(
                     PageFault, "TLB: access fault on TLB hit", "",
                     get_current_cause(mode.opkind()));
             }
 
-            repl_policy->notify_access(s, w, /*valid=*/true);
-            uint64_t pbase = e.phys.get_raw() & ~PAGE_MASK;
-            hit_count_++;
-            emit hit_update(hit_count_);
-            emit tlb_update(
-                static_cast<unsigned>(w), static_cast<unsigned>(s), true, e.asid, e.vpn, pbase,
-                e.r(), e.w(), e.x(), e.u(), e.g(), e.a(), e.d());
-            update_all_statistics();
-            return { Address { pbase + off }, static_cast<size_t>(PAGE_BYTES - off), &e};
+            uint64_t pbase = ent->phys.get_raw() & ~PAGE_MASK;
+            if (ae_type != ae::INTERNAL) {
+                repl_policy->notify_access(ent_set, w, /*valid=*/true);
+                hit_count_++;
+                emit hit_update(hit_count_);
+                if (!ent->a() || (!ent->d() && mode.opkind() == AccessOp::WRITE)) break;
+                emit tlb_update(
+                    static_cast<unsigned>(w), static_cast<unsigned>(ent_set), true, ent->asid,
+                    ent->vpn, pbase, ent->r(), ent->w(), ent->x(), ent->u(), ent->g(), ent->a(),
+                    ent->d());
+                update_all_statistics();
+            }
+            return { Address { pbase + off }, static_cast<size_t>(PAGE_BYTES - off), ent->pbmt(),
+                     ent };
         }
     }
 
@@ -243,16 +255,21 @@ TLB::TranslationResult TLB::translate_virtual_to_physical(AddressWithMode vaddr)
     switch (xlen) {
     case Xlen::_32:
         walker.set_pte_factory(PageTableWalker::sv32_pte_factory());
-        res = walker.walk<Sv32Pte, 1>(va, current_satp_raw, current_sstatus_raw, mode);
+        res = walker.walk<Sv32Pte, 1>(va, current_satp_raw, current_sstatus_raw, mode, ae_type);
         break;
     case Xlen::_64:
         walker.set_pte_factory(PageTableWalker::sv39_pte_factory());
-        res = walker.walk<Sv39Pte, 2>(va, current_satp_raw, current_sstatus_raw, mode);
+        res = walker.walk<Sv39Pte, 2>(va, current_satp_raw, current_sstatus_raw, mode, ae_type);
         break;
     default:
         walker.set_pte_factory(PageTableWalker::sv32_pte_factory());
-        res = walker.walk<Sv32Pte, 1>(va, current_satp_raw, current_sstatus_raw, mode);
+        res = walker.walk<Sv32Pte, 1>(va, current_satp_raw, current_sstatus_raw, mode, ae_type);
         break;
+    }
+    uint64_t phys_base = res.phys.get_raw() & ~PAGE_MASK;
+
+    if (ae_type == ae::INTERNAL) {
+        return { Address { phys_base + off }, static_cast<size_t>(PAGE_BYTES - off) };
     }
 
     if (res.pte_was_written) {
@@ -267,41 +284,43 @@ TLB::TranslationResult TLB::translate_virtual_to_physical(AddressWithMode vaddr)
     emit memory_reads_update(get_read_count());
 
     // Cache the resolved mapping in the TLB
-    uint64_t phys_base = res.phys.get_raw() & ~PAGE_MASK;
-    size_t victim = repl_policy->select_way(s);
-    auto &ent = table[s][victim];
-    ent.valid = true;
-    ent.asid = asid;
-    ent.vpn = vpn;
-    ent.phys = Address { phys_base };
-    ent.pte_addr = res.pte_addr;
+    if (ent == nullptr) {
+        ent_way = repl_policy->select_way(ent_set);
+        ent = &table[ent_set][ent_way];
+        miss_count_++;
+        emit miss_update(miss_count_);
+    }
+    ent->valid = true;
+    ent->asid = asid;
+    ent->vpn = vpn;
+    ent->phys = Address { phys_base };
+    ent->pte_addr = res.pte_addr;
     switch (xlen) {
     case Xlen::_32:
-        ent.pte_bytes = sizeof(uint32_t); // 4
+        ent->pte_bytes = sizeof(uint32_t); // 4
         break;
     case Xlen::_64:
-        ent.pte_bytes = sizeof(uint64_t); // 8
+        ent->pte_bytes = sizeof(uint64_t); // 8
         break;
     }
-    ent.R = res.leaf_pte->r();
-    ent.W = res.leaf_pte->w();
-    ent.X = res.leaf_pte->x();
-    ent.U = res.leaf_pte->u();
-    ent.G = res.leaf_pte->g();
-    ent.A = res.leaf_pte->a();
-    ent.D = res.leaf_pte->d();
-    repl_policy->notify_access(s, victim, /*valid=*/true);
-    miss_count_++;
-    emit miss_update(miss_count_);
+    ent->R = res.leaf_pte->r();
+    ent->W = res.leaf_pte->w();
+    ent->X = res.leaf_pte->x();
+    ent->U = res.leaf_pte->u();
+    ent->G = res.leaf_pte->g();
+    ent->A = res.leaf_pte->a();
+    ent->D = res.leaf_pte->d();
+    ent->pte_pbmt = res.leaf_pte->pbmt();
+    repl_policy->notify_access(ent_set, ent_way, /*valid=*/true);
     emit tlb_update(
-        static_cast<unsigned>(victim), static_cast<unsigned>(s), true, ent.asid, ent.vpn, phys_base,
-        ent.r(), ent.w(), ent.x(), ent.u(), ent.g(), ent.a(), ent.d());
+        static_cast<unsigned>(ent_way), static_cast<unsigned>(ent_set), true, ent->asid, ent->vpn,
+        phys_base, ent->r(), ent->w(), ent->x(), ent->u(), ent->g(), ent->a(), ent->d());
 
     DEBUG(
         "TLB[%s]: cached VA=0x%llx -> PA=0x%llx (ASID=%u) on miss", tag, (unsigned long long)virt,
         (unsigned long long)phys_base, asid);
     update_all_statistics();
-    return { Address { phys_base + off }, static_cast<size_t>(PAGE_BYTES - off), &ent };
+    return { Address { phys_base + off }, static_cast<size_t>(PAGE_BYTES - off), ent->pbmt(), ent };
 }
 
 WriteResult TLB::write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts) {
@@ -322,22 +341,14 @@ WriteResult TLB::translate_and_write(AddressWithMode dst, const void *src, size_
 
     while (remaining > 0) {
         AddressWithMode cur_va(Address { cur_virt }, dst.access_mode());
-        auto tr = translate_virtual_to_physical(cur_va);
-
-        bool satp_mode_on = is_mode_enabled_in_satp(current_satp_raw);
-        if (vm_enabled && satp_mode_on
-            && (dst.access_mode().priv() != CSR::PrivilegeLevel::MACHINE)) {
-            if (tr.entry
-                && ensure_ad_bits(*tr.entry, AccessOp::WRITE) == UpdateStatus::UPDATE_REQUIRED) {
-                DEBUG(
-                    "TLB: Updated A/D bits in memory for PPN 0x%lu",
-                    tr.entry->phys.get_raw() >> 12);
-            }
-        }
+        auto tr = translate_virtual_to_physical(cur_va, opts.type);
 
         size_t bytes_to_write = std::min(remaining, tr.bytes_until_page_end);
 
-        WriteResult wr = mem->write(tr.phys, cur_src, bytes_to_write, opts);
+        AddressWithMode awm(tr.phys, dst.access_mode());
+        if (tr.pbmt > awm.uncached()) awm.set_uncached(tr.pbmt);
+
+        WriteResult wr = mem->write(awm, cur_src, bytes_to_write, opts);
         total_written += wr.n_bytes;
         any_changed |= wr.changed;
 
@@ -358,20 +369,14 @@ ReadResult TLB::translate_and_read(void *dst, AddressWithMode src, size_t sz, Re
 
     while (remaining > 0) {
         AddressWithMode cur_va(Address { cur_virt }, src.access_mode());
-        auto tr = translate_virtual_to_physical(cur_va);
-
-        bool satp_mode_on = is_mode_enabled_in_satp(current_satp_raw);
-        if (vm_enabled && satp_mode_on
-            && (src.access_mode().priv() != CSR::PrivilegeLevel::MACHINE)) {
-            if (tr.entry
-                && ensure_ad_bits(*tr.entry, AccessOp::READ) == UpdateStatus::UPDATE_REQUIRED) {
-                DEBUG("TLB: Updated A bit in memory for PPN 0x%lu", tr.entry->phys.get_raw() >> 12);
-            }
-        }
+        auto tr = translate_virtual_to_physical(cur_va, opts.type);
 
         size_t bytes_to_read = std::min(remaining, tr.bytes_until_page_end);
 
-        ReadResult rr = mem->read(cur_dst, tr.phys, bytes_to_read, opts);
+        AddressWithMode awm(tr.phys, src.access_mode());
+        if (tr.pbmt > awm.uncached()) awm.set_uncached(tr.pbmt);
+
+        ReadResult rr = mem->read(cur_dst, awm, bytes_to_read, opts);
         total_read += rr.n_bytes;
 
         cur_dst += bytes_to_read;
@@ -395,6 +400,20 @@ bool TLB::reverse_lookup(Address paddr, VirtualAddress &out_va) const {
         }
     }
     return false;
+}
+
+enum LocationStatus TLB::location_status(AddressWithMode address) const {
+    TranslationResult tr;
+    AccessMode mode = address.access_mode();
+    if (mode.opkind() == AccessOp::WRITE) {
+        address.set_access_mode(AccessMode::pack(mode.asid(), mode.priv(), AccessOp::READ, false));
+    }
+    try {
+        // TODO: extend page-walker template to provide even cost variant
+        // the INTERNAL access in read mode hould not modify anything as well
+        tr = const_cast<TLB *>(this)->translate_virtual_to_physical(address, ae::INTERNAL);
+    } catch (machine::SimulatorExceptionPageFault &e) { return LocationStatus::LOCSTAT_ILLEGAL; }
+    return mem->location_status(tr.phys);
 }
 
 double TLB::get_hit_rate() const {
@@ -457,44 +476,13 @@ void TLB::reset() {
     mem_writes = 0;
     burst_reads = 0;
     burst_writes = 0;
-    change_counter = 0;
+    change_counter_for_tlb_ops = 0;
 
     emit hit_update(get_hit_count());
     emit miss_update(get_miss_count());
     emit memory_reads_update(get_read_count());
     emit memory_writes_update(get_write_count());
     update_all_statistics();
-}
-
-template<typename RawPte>
-UpdateStatus TLB::ensure_ad_bits_impl(Entry &e, AccessOp op) {
-    constexpr RawPte A_BIT = RawPte(1) << 6;
-    constexpr RawPte D_BIT = RawPte(1) << 7;
-
-    std::scoped_lock lock(pte_lock_);
-
-    RawPte raw {};
-    pt_walk_mem->read(&raw, e.pte_addr, sizeof(RawPte), { .type = AccessEffects::REGULAR });
-
-    RawPte updated = raw | A_BIT;
-    if (op == AccessOp::WRITE) { updated |= D_BIT; }
-
-    if (updated != raw) {
-        pt_walk_mem->write(
-            e.pte_addr, &updated, sizeof(RawPte), { .type = AccessEffects::REGULAR });
-        e.A = true;
-        if (op == AccessOp::WRITE) e.D = true;
-        return UPDATE_REQUIRED;
-    }
-
-    e.A = true;
-    if (op == AccessOp::WRITE) e.D = true;
-    return UPDATE_NOT_REQUIRED;
-}
-
-UpdateStatus TLB::ensure_ad_bits(Entry &e, AccessOp op) {
-    return e.pte_bytes == 4 ? ensure_ad_bits_impl<uint32_t>(e, op)
-                            : ensure_ad_bits_impl<uint64_t>(e, op);
 }
 
 template bool check_permissions<TLB::Entry>(

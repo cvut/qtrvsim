@@ -2,6 +2,7 @@
 #define SV39_H
 
 #include "generic_pte.h"
+#include "memory/address.h"
 
 // SV39-specific definitions: page-table entry (PTE) bitfields, shifts/masks, and PTE to physical
 // address helpers. This header documents the SV39 layout (RISC-V 64-bit virtual memory):
@@ -23,7 +24,9 @@ namespace machine {
 //  7 D (dirty)
 //  8..9 RSW (reserved for supervisor use)
 // 10..53 PPN (physical page number: 44 bits)
-// 54..63 reserved for software/higher bits
+// 54..60 reserved for software/higher bits
+// 61..62 PBMT (page-based memory type)
+// 63 N (translation contiguity)
 //
 // A PTE is considered a "leaf" when it grants read or execute permission (R or X).
 // Validation rules: PTE is valid if V==1 and (if W==1 then R must also be 1).
@@ -72,6 +75,7 @@ struct Sv39Pte : public GenericPte {
     static constexpr unsigned D_SHIFT = 7;
     static constexpr unsigned RSW_SHIFT = 8;  // two bits: 8..9
     static constexpr unsigned PPN_SHIFT = 10; // PPN starts at bit 10
+    static constexpr unsigned PBMT_SHIFT = 61; // PBMT starts at bit 61
 
     // Masks for each single-bit flag
     static constexpr uint64_t V_MASK = (1ull << V_SHIFT);
@@ -85,6 +89,9 @@ struct Sv39Pte : public GenericPte {
 
     // Mask for the 2-bit RSW field (bits 8..9).
     static constexpr uint64_t RSW_MASK = (0x3ull << RSW_SHIFT);
+
+    // Mask for the 2-bit PBMT field (bits 61..62).
+    static constexpr uint64_t PBMT_MASK = (3ull << PBMT_SHIFT);
 
     // Mask that selects the PPN field within the raw PTE (bits 10..(10 + PPN_BITS - 1))
     static constexpr std::uint64_t PPN_MASK64 = (PPN_MASK << PPN_SHIFT);
@@ -103,6 +110,11 @@ struct Sv39Pte : public GenericPte {
     bool d() const noexcept override { return (raw >> D_SHIFT) & 0x1ull; }
     uint64_t rsw() const noexcept { return (raw >> RSW_SHIFT) & 0x3ull; }
     uint64_t ppn() const noexcept override { return (raw >> PPN_SHIFT) & PPN_MASK; }
+    unsigned pbmt() const noexcept override { return (raw & PBMT_MASK) >> PBMT_SHIFT; }
+
+    // Flag modification operations
+    void set_a(bool val) noexcept override { raw = (raw & ~A_MASK) | (val << A_SHIFT); };
+    void set_d(bool val) noexcept override { raw = (raw & ~D_MASK) | (val << D_SHIFT); };
 
     // Convenience methods used by the page-table walker
     bool is_leaf() const noexcept override { return r() || x(); }
@@ -119,7 +131,8 @@ struct Sv39Pte : public GenericPte {
         bool a_,
         bool d_,
         uint64_t rsw_,
-        uint64_t ppn_) {
+        uint64_t ppn_,
+        unsigned pbmt_ = 0) {
         uint64_t r = 0;
         r |= (uint64_t(v_) << V_SHIFT);
         r |= (uint64_t(r_) << R_SHIFT);
@@ -131,6 +144,7 @@ struct Sv39Pte : public GenericPte {
         r |= (uint64_t(d_) << D_SHIFT);
         r |= ((rsw_ & 0x3ull) << RSW_SHIFT);
         r |= ((ppn_ & PPN_MASK) << PPN_SHIFT);
+        r |= (pbmt_ << PPN_SHIFT) & PPN_MASK;
         return Sv39Pte(r);
     }
     Address make_phys(uint64_t va_raw, int level) const override;

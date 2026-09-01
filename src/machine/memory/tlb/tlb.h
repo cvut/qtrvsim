@@ -16,7 +16,6 @@ namespace machine {
 
 enum TLBType { PROGRAM, DATA };
 enum AccessStatus { ACCESS_OK, ACCESS_NOT_OK };
-enum UpdateStatus { UPDATE_REQUIRED, UPDATE_NOT_REQUIRED };
 
 class Machine;
 
@@ -40,6 +39,7 @@ public:
         bool G;
         bool A;
         bool D;
+        uint8_t pte_pbmt = 0;
 
         [[nodiscard]] bool r() const { return R; }
 
@@ -54,11 +54,14 @@ public:
         [[nodiscard]] bool a() const { return A; }
 
         [[nodiscard]] bool d() const { return D; }
+
+        [[nodiscard]] unsigned pbmt() const { return pte_pbmt; }
     };
 
     struct TranslationResult {
         Address phys;
         size_t bytes_until_page_end;
+        unsigned pbmt = 0;
         Entry *entry = nullptr;
     };
 
@@ -86,14 +89,16 @@ public:
 
     void sfence_vma(uint64_t vaddr, uint64_t asid) override;
 
-    TranslationResult translate_virtual_to_physical(AddressWithMode vaddr);
+    TranslationResult translate_virtual_to_physical(AddressWithMode vaddr, AccessEffects ae_type);
 
     WriteResult write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts) override;
 
     ReadResult read(void *dst, AddressWithMode src, size_t sz, ReadOptions opts) const override;
 
+    enum LocationStatus location_status(AddressWithMode address) const override;
+
     uint32_t get_change_counter() const override {
-        uint32_t base = mem->get_change_counter();
+        uint32_t base = mem->get_change_counter() + change_counter_for_tlb_ops;
         if (pt_walk_mem != mem) base += pt_walk_mem->get_change_counter();
         return base;
     }
@@ -175,13 +180,10 @@ private:
     mutable uint32_t ptw_writes = 0;
     mutable uint32_t burst_reads = 0;
     mutable uint32_t burst_writes = 0;
-    mutable uint32_t change_counter = 0;
+    mutable uint32_t change_counter_for_tlb_ops = 0;
 
     WriteResult translate_and_write(AddressWithMode dst, const void *src, size_t sz, WriteOptions opts);
     ReadResult translate_and_read(void *dst, AddressWithMode src, size_t sz, ReadOptions opts);
-    UpdateStatus ensure_ad_bits(Entry &e, AccessOp op);
-    template<typename RawPte>
-    UpdateStatus ensure_ad_bits_impl(Entry &e, AccessOp op);
     inline size_t set_index(uint64_t vpn) const { return vpn & (num_sets_ - 1); }
     inline bool is_mode_enabled_in_satp(uint64_t satp_raw) const {
         switch (xlen) {
