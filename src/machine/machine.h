@@ -74,8 +74,26 @@ public:
         ST_EXIT,    // Machine exited
         ST_TRAPPED  // Machine exited with failure
     };
+    enum StopReason {
+        SR_NONE,
+        SR_PROGRAM_EXIT,
+        SR_EXCEPTION,
+        SR_CYCLE_LIMIT,
+        SR_INSTRUCTION_LIMIT,
+        SR_TRAP,
+    };
+    Q_ENUM(StopReason)
+
     enum Status status();
     bool exited();
+    enum StopReason stop_reason() const;
+    static const char *stop_reason_name(enum StopReason reason);
+    int exit_code() const;
+
+    void set_cycle_limit(uint64_t value);
+    void set_instruction_limit(uint64_t value);
+    uint64_t cycle_limit() const;
+    uint64_t instruction_limit() const;
 
     void register_exception_handler(ExceptionCause excause, ExceptionHandler *exhandler);
     bool memory_bus_insert_range(
@@ -106,9 +124,11 @@ public slots:
     void pause();
     void step();
     void restart();
+    void terminate_program(int exit_code);
 
 signals:
     void program_exit();
+    void execution_limit_reached(enum machine::Machine::StopReason reason);
     void program_trap(machine::SimulatorException &e);
     void status_change(enum machine::Machine::Status st);
     void tick();      // Time tick
@@ -120,9 +140,12 @@ signals:
 
 private slots:
     void step_timer();
+    void core_stop_reached();
 
 private:
     void step_internal(bool skip_break = false);
+    bool check_execution_limits();
+    void terminate_limit(enum StopReason reason);
 
     void start_core_clock();
     void stop_core_clock();
@@ -164,6 +187,10 @@ private:
     Box<SymbolTable> symtab;
     Address program_end = 0xffff0000_addr;
     enum Status stat = ST_READY;
+    enum StopReason last_stop_reason = SR_NONE;
+    int last_exit_code = 0;
+    uint64_t configured_cycle_limit = 0;
+    uint64_t configured_instruction_limit = 0;
     void set_status(enum Status st);
     void setup_serial_port();
     void setup_perip_spi_led();

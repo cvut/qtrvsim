@@ -5,8 +5,10 @@
 #include "config_isa.h"
 #include "predictor_types.h"
 
+#include <QJsonObject>
 #include <QSettings>
 #include <QString>
+#include <optional>
 
 namespace machine {
 
@@ -41,6 +43,8 @@ public:
     explicit CacheConfig(const QSettings *, const QString &prefix = "");
 
     void store(QSettings *, const QString &prefix = "") const;
+    QJsonObject to_json() const;
+    static std::optional<CacheConfig> from_json(const QJsonObject &json, QString *error = nullptr);
 
     void preset(enum ConfigPresets);
 
@@ -91,6 +95,8 @@ public:
     explicit TLBConfig(const QSettings *, const QString &prefix = "");
 
     void store(QSettings *, const QString &prefix = "") const;
+    QJsonObject to_json() const;
+    static std::optional<TLBConfig> from_json(const QJsonObject &json, QString *error = nullptr);
 
     void preset(enum ConfigPresets);
 
@@ -133,6 +139,9 @@ public:
     explicit MachineConfig(const QSettings *, const QString &prefix = "");
 
     void store(QSettings *, const QString &prefix = "");
+    QJsonObject to_json() const;
+    static std::optional<MachineConfig>
+    from_json(const QJsonObject &json, QString *error = nullptr);
 
     void preset(enum ConfigPresets);
 

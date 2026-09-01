@@ -1,0 +1,5 @@
+Specified instruction limit reached
+Machine state report:
+cycles: 6
+instructions: 3
+stalls: 1

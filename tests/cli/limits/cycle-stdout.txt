@@ -1,0 +1,5 @@
+Specified cycle limit reached
+Machine state report:
+cycles: 5
+instructions: 5
+stalls: 0

@@ -11,6 +11,8 @@
 #include <QCommandLineParser>
 #include <QCoreApplication>
 #include <QFile>
+#include <QJsonDocument>
+#include <QJsonParseError>
 #include <cctype>
 #include <fstream>
 #include <iostream>
@@ -29,6 +31,11 @@ void create_parser(QCommandLineParser &p) {
     p.addPositionalArgument("FILE", "Input ELF executable file or assembler source");
 
     // p.addOptions({}); available only from Qt 5.4+
+    p.addOption(
+        { "machine-config",
+          "Load complete machine configuration from a JSON file. Explicit command-line options "
+          "override loaded values.",
+          "FNAME" });
     p.addOption({ "asm", "Treat provided file argument as assembler source." });
     p.addOption({ "pipelined", "Configure CPU to use five stage pipeline." });
     p.addOption({ "no-delay-slot", "Disable jump delay slot." });
@@ -122,6 +129,8 @@ void create_parser(QCommandLineParser &p) {
     p.addOption(
         { { "isa-variant", "isavariant" }, "Instruction set to emulate (default RV32IMA)", "STR" });
     p.addOption({ "cycle-limit", "Limit execution to specified maximum clock cycles", "NUMBER" });
+    p.addOption(
+        { "instruction-limit", "Limit execution to specified retired instructions", "NUMBER" });
     p.addOption({ "enable-vm", "Enable virtual memory support." });
     p.addOption({ "enable-exception", "Enable exception delivery to the run code." });
     p.addOption({ "enable-interrupt", "Enable interrupts delivery to the run code." });
@@ -284,8 +293,8 @@ void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
     }
     config.set_elf(arguments[0]);
 
-    config.set_delay_slot(!parser.isSet("no-delay-slot"));
-    config.set_pipelined(parser.isSet("pipelined"));
+    if (parser.isSet("pipelined")) { config.set_pipelined(true); }
+    if (parser.isSet("no-delay-slot")) { config.set_delay_slot(false); }
 
     auto hazard_unit_values = parser.values("hazard-unit");
     if (!hazard_unit_values.empty()) {
@@ -307,8 +316,7 @@ void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
 
     configure_branch_predictor(config, parser.values("branch-predictor"));
 
-    config.set_osemu_enable(parser.isSet("os-emulation"));
-    config.set_osemu_known_syscall_stop(false);
+    if (parser.isSet("os-emulation")) { config.set_osemu_enable(true); }
 
     int siz = parser.values("os-fs-root").size();
     if (siz >= 1) {
@@ -348,12 +356,12 @@ void configure_machine(QCommandLineParser &parser, MachineConfig &config) {
                 config.modify_isa_word(flag, flag);
         }
     }
-    config.set_vm_enabled(parser.isSet("enable-vm"));
+    if (parser.isSet("enable-vm")) { config.set_vm_enabled(true); }
 }
 
-void configure_tracer(QCommandLineParser &p, Tracer &tr) {
+void configure_tracer(QCommandLineParser &p, Tracer &tr, bool pipelined) {
     if (p.isSet("trace-fetch")) { tr.trace_fetch = true; }
-    if (p.isSet("pipelined")) { // Following are added only if we have stages
+    if (pipelined) { // Following are added only if we have stages
         if (p.isSet("trace-decode")) { tr.trace_decode = true; }
         if (p.isSet("trace-execute")) { tr.trace_execute = true; }
         if (p.isSet("trace-memory")) { tr.trace_memory = true; }
@@ -384,17 +392,27 @@ void configure_tracer(QCommandLineParser &p, Tracer &tr) {
     if (p.isSet("trace-exception")) { tr.trace_exception = true; }
     if (p.isSet("trace-mode-change")) { tr.trace_mode_change = true; }
 
-    QStringList clim = p.values("cycle-limit");
-    if (!clim.empty()) {
-        bool ok;
-        tr.cycle_limit = clim.at(clim.size() - 1).toLong(&ok);
-        if (!ok) {
-            fprintf(stderr, "Cycle limit parse error\n");
-            exit(EXIT_FAILURE);
-        }
-    }
+    tr.start();
+}
 
-    // TODO
+uint64_t parse_execution_limit(QCommandLineParser &parser, const QString &option_name) {
+    const QStringList values = parser.values(option_name);
+    if (values.empty()) { return 0; }
+
+    bool ok;
+    uint64_t value = values.last().toULongLong(&ok);
+    if (!ok) {
+        fprintf(
+            stderr, "Value of option %s is not a valid unsigned integer.\n",
+            qPrintable(option_name));
+        exit(EXIT_FAILURE);
+    }
+    return value;
+}
+
+void configure_execution_limits(QCommandLineParser &parser, Machine &machine) {
+    machine.set_cycle_limit(parse_execution_limit(parser, "cycle-limit"));
+    machine.set_instruction_limit(parse_execution_limit(parser, "instruction-limit"));
 }
 
 void configure_reporter(QCommandLineParser &p, Reporter &r, const SymbolTable *symtab) {
@@ -572,6 +590,9 @@ void configure_osemu(QCommandLineParser &p, MachineConfig &config, Machine *mach
                 osemu_handler, &osemu::OsSyscallExceptionHandler::char_written, std_out,
                 QOverload<int, unsigned>::of(&CharIOHandler::writeByte));
         }
+        machine::Machine::connect(
+            osemu_handler, &osemu::OsSyscallExceptionHandler::program_exit, machine,
+            &machine::Machine::terminate_program);
         /*connect(
             osemu_handler, &osemu::OsSyscallExceptionHandler::rx_byte_pool, terminal,
             &TerminalDock::rx_byte_pool);*/
@@ -650,6 +671,39 @@ bool assemble(Machine &machine, MsgReport &msgrep, const QString &filename) {
     return assembler.finish();
 }
 
+MachineConfig load_machine_config(const QString &path) {
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        fprintf(stderr, "Cannot open machine configuration file: %s\n", qPrintable(path));
+        exit(EXIT_FAILURE);
+    }
+
+    QJsonParseError parse_error;
+    QJsonDocument document = QJsonDocument::fromJson(file.readAll(), &parse_error);
+    if (parse_error.error != QJsonParseError::NoError) {
+        fprintf(
+            stderr, "Cannot parse machine configuration file %s: %s\n", qPrintable(path),
+            qPrintable(parse_error.errorString()));
+        exit(EXIT_FAILURE);
+    }
+    if (!document.isObject()) {
+        fprintf(
+            stderr, "Cannot parse machine configuration file %s: root must be an object\n",
+            qPrintable(path));
+        exit(EXIT_FAILURE);
+    }
+
+    QString config_error;
+    auto config = MachineConfig::from_json(document.object(), &config_error);
+    if (!config) {
+        fprintf(
+            stderr, "Invalid machine configuration file %s: %s\n", qPrintable(path),
+            qPrintable(config_error));
+        exit(EXIT_FAILURE);
+    }
+    return *config;
+}
+
 int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName(APP_NAME);
@@ -661,13 +715,17 @@ int main(int argc, char *argv[]) {
     p.process(app);
 
     MachineConfig config;
+    config.set_osemu_enable(false);
+    config.set_osemu_known_syscall_stop(false);
+    if (p.isSet("machine-config")) { config = load_machine_config(p.value("machine-config")); }
     configure_machine(p, config);
 
     bool asm_source = p.isSet("asm");
     Machine machine(config, !asm_source, !asm_source);
+    configure_execution_limits(p, machine);
 
     Tracer tr(&machine);
-    configure_tracer(p, tr);
+    configure_tracer(p, tr, config.pipelined());
 
     configure_serial_port(p, machine.serial_port());
 
@@ -681,12 +739,11 @@ int main(int argc, char *argv[]) {
     Reporter r(&app, &machine);
     configure_reporter(p, r, machine.symbol_table());
 
-    QObject::connect(&tr, &Tracer::cycle_limit_reached, &r, &Reporter::cycle_limit_reached);
-
     load_ranges(machine, p.values("load-range"));
 
     if (p.isSet("only-dump")) {
-        QMetaObject::invokeMethod(&machine, &Machine::program_exit, Qt::QueuedConnection);
+        QMetaObject::invokeMethod(
+            &machine, "terminate_program", Qt::QueuedConnection, Q_ARG(int, 0));
     } else {
         // QTimer::singleShot(0, &machine, &Machine::play); alternative
         QMetaObject::invokeMethod(&machine, &Machine::play, Qt::QueuedConnection);

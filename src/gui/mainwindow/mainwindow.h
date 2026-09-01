@@ -49,6 +49,7 @@ public:
         const machine::MachineConfig &config,
         bool load_executable = true,
         bool keep_memory = false);
+    machine::Machine *current_machine();
 
     bool configured();
 

@@ -1,0 +1,81 @@
+name: Benchmarks
+
+on:
+  pull_request:
+    paths:
+      - "CMakeLists.txt"
+      - "benchmarks/**"
+      - "src/**"
+      - ".github/workflows/benchmark.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: benchmarks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  run:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build qt6-base-dev
+
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Configure
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSANITIZERS=none \
+            -DBUILD_BENCHMARKS=ON \
+            -DQT_VERSION_MAJOR=6
+
+      - name: Build benchmarks
+        run: |
+          cmake --build build \
+            --target qtrvsim_component_benchmark qtrvsim_gui_benchmark \
+            --parallel
+
+      - name: Run component benchmarks
+        run: |
+          build/target/qtrvsim_component_benchmark \
+            --samples 5 \
+            --warmups 1 \
+            --work-units 500000
+
+      - name: Run CLI and GUI benchmarks
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          build/target/qtrvsim_gui_benchmark \
+            --scenario cli-pipeline-cache-hash \
+            --scenario cli-pipeline-cache-memory \
+            --scenario cli-pipeline-cache-peripheral \
+            --scenario cli-pipeline-cache-classifier \
+            --scenario cli-pipeline-cache-mmu \
+            --scenario gui-pipeline-cache-hash-none-unlimited \
+            --scenario gui-pipeline-cache-memory-none-unlimited \
+            --scenario gui-pipeline-cache-peripheral-none-unlimited \
+            --scenario gui-pipeline-cache-classifier-none-unlimited \
+            --scenario gui-pipeline-cache-mmu-none-unlimited \
+            --scenario gui-pipeline-cache-hash-all-max \
+            --scenario gui-pipeline-cache-memory-all-max \
+            --scenario gui-pipeline-cache-peripheral-all-max \
+            --scenario gui-pipeline-cache-classifier-all-max \
+            --scenario gui-pipeline-cache-mmu-tlbs-max \
+            --scenario gui-pipeline-cache-predictor-hash-none-unlimited \
+            --scenario gui-pipeline-cache-predictor-classifier-none-unlimited \
+            --scenario gui-pipeline-cache-predictor-mmu-none-unlimited \
+            --samples 3 \
+            --warmups 1 \
+            --work-units 2000

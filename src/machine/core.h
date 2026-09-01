@@ -39,8 +39,9 @@ public:
     void step(bool skip_break = false);
     void reset(); // Reset core (only core, memory and registers has to be reset separately).
 
-    unsigned get_cycle_count() const;
-    unsigned get_stall_count() const;
+    uint64_t get_cycle_count() const;
+    uint64_t get_stall_count() const;
+    uint64_t get_instruction_count() const;
 
     Registers *get_regs() const;
     CSR::ControlState *get_control_state() const;
@@ -128,6 +129,9 @@ protected:
     QMap<Address, OWNED hwBreak *> hw_breaks {};
     QMap<ExceptionCause, OWNED ExceptionHandler *> ex_handlers;
     Box<ExceptionHandler> ex_default_handler;
+    uint64_t total_cycle_count = 0;
+    uint64_t total_stall_count = 0;
+    uint64_t total_instruction_count = 0;
 
     FetchState fetch(PCInterstage pc, bool skip_break);
     DecodeState decode(const FetchInterstage &);

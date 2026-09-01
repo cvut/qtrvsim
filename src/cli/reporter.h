@@ -56,11 +56,9 @@ public:
     };
     void add_dump_range(Address start, size_t len, const QString &path_to_write);
 
-public slots:
-    void cycle_limit_reached();
-
 private slots:
     void machine_exit();
+    void execution_limit_reached(enum machine::Machine::StopReason reason);
     void machine_trap(machine::SimulatorException &e);
     void machine_exception_reached();
 
@@ -74,6 +72,7 @@ private:
     bool e_cycles = false;
     bool e_symtab = false;
     bool e_predictor = false;
+    bool report_failed = false;
     FailReason e_fail = FR_NONE;
 
     void report();
@@ -84,6 +83,8 @@ private:
     void report_csr_reg(size_t internal_id, bool last);
     void report_gp_reg(unsigned int i, bool last);
     void report_cache(const char *cache_name, const machine::Cache &cache);
+    void report_tlbs();
+    void report_tlb(const char *tlb_name, const machine::TLB &tlb);
     void report_predictor();
 
     void exit(int retcode);
