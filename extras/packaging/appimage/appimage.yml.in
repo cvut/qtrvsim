@@ -6,6 +6,7 @@ build:
     - pkgconfig(Qt5Core)
     - pkgconfig(Qt5Widgets)
     - pkgconfig(Qt5Test)
+    - pkgconfig(Qt5Network)
     - pkgconfig(Qt5PrintSupport)
 
 script:
