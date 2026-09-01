@@ -75,11 +75,7 @@ ReadResult Cache::read(void *destination, AddressWithMode source, size_t size, R
     }
 
     if (options.type == ae::INTERNAL) {
-        if (!(location_status(source) & LOCSTAT_CACHED)) {
-            mem->read(destination, source, size, options);
-        } else {
-            internal_read(source, destination, size);
-        }
+        internal_read(source, destination, size);
         return {};
     }
 
@@ -94,11 +90,11 @@ bool Cache::is_in_uncached_area(Address source) const {
 void Cache::flush() {
     if (!cache_config.enabled()) { return; }
 
-    for (size_t assoc_index = 0; assoc_index < cache_config.associativity(); assoc_index += 1) {
+    for (size_t way = 0; way < cache_config.associativity(); way += 1) {
         for (size_t set_index = 0; set_index < cache_config.set_count(); set_index += 1) {
-            if (dt[assoc_index][set_index].valid) {
-                kick(assoc_index, set_index);
-                emit cache_update(assoc_index, set_index, 0, false, false, 0, nullptr, false);
+            if (dt[way][set_index].valid) {
+                kick(way, set_index);
+                emit cache_update(way, set_index, 0, false, false, 0, nullptr, false);
             }
         }
     }
@@ -139,28 +135,33 @@ void Cache::reset() {
     update_all_statistics();
 
     if (cache_config.enabled()) {
-        for (size_t assoc_index = 0; assoc_index < cache_config.associativity(); assoc_index++) {
+        for (size_t way = 0; way < cache_config.associativity(); way++) {
             for (size_t set_index = 0; set_index < cache_config.set_count(); set_index++) {
-                emit cache_update(assoc_index, set_index, 0, false, false, 0, nullptr, false);
+                emit cache_update(way, set_index, 0, false, false, 0, nullptr, false);
             }
         }
     }
 }
 
-void Cache::internal_read(Address source, void *destination, size_t size) const {
+void Cache::internal_read(AddressWithMode source, void *destination, size_t size) const {
     CacheLocation loc = compute_location(source);
-    for (size_t assoc_index = 0; assoc_index < cache_config.associativity(); assoc_index++) {
-        if (dt[assoc_index][loc.row].valid && dt[assoc_index][loc.row].tag == loc.tag) {
-            memcpy(destination, (byte *)&dt[assoc_index][loc.row].data[loc.col] + loc.byte, size);
-            return;
-        }
+    size_t way = find_block_way(loc);
+    const size_t size_overflow = calculate_overflow_to_next_blocks(size, loc);
+    const size_t size_within_block = size - size_overflow;
+    if (way < cache_config.associativity()) {
+        memcpy(destination, (byte *)&dt[way][loc.row].data[loc.col] + loc.byte, size_within_block);
+    } else {
+        mem->read(destination, source, size_within_block, { .type = ae::INTERNAL });
     }
-    memset(destination, 0, size); // TODO is this correct
+    if (size_overflow > 0) {
+        internal_read(
+            source + size_within_block, (char *)destination + size_within_block, size_overflow);
+    }
 }
 
 bool Cache::access(Address address, void *buffer, size_t size, AccessType access_type) const {
     const CacheLocation loc = compute_location(address);
-    size_t way = find_block_index(loc);
+    size_t way = find_block_way(loc);
 
     // check for zero because else last_affected_col can became
     // ULONG_MAX / BLOCK_ITEM_SIZE and update can take forever
@@ -268,13 +269,13 @@ size_t Cache::calculate_overflow_to_next_blocks(size_t access_size, const CacheL
         { 0 });
 }
 
-size_t Cache::find_block_index(const CacheLocation &loc) const {
-    uint32_t index = 0;
-    while (index < cache_config.associativity()
-           and (!dt[index][loc.row].valid or dt[index][loc.row].tag != loc.tag)) {
-        index++;
+size_t Cache::find_block_way(const CacheLocation &loc) const {
+    uint32_t way = 0;
+    while (way < cache_config.associativity()
+           and (!dt[way][loc.row].valid or dt[way][loc.row].tag != loc.tag)) {
+        way++;
     }
-    return index;
+    return way;
 }
 
 void Cache::kick(size_t way, size_t row) const {
