@@ -63,13 +63,16 @@ public slots:
     void update_all();
 
 private:
-    [[nodiscard]] const machine::FrontendMemory *mem_access() const;
+    [[nodiscard]] const machine::FrontendMemory *progmem_access() const;
     [[nodiscard]] machine::FrontendMemory *mem_access_rw() const;
     machine::Address index0_offset;
     QFont data_font;
     machine::Machine *machine;
     uint32_t memory_change_counter;
     uint32_t cache_program_change_counter;
+    uint32_t tlb_change_counter;
+    machine::CSR::PrivilegeLevel last_priv_level;
+    unsigned last_asid;
     machine::Address stage_addr[STAGEADDR_COUNT] {};
     bool stages_need_update;
 };

@@ -36,9 +36,10 @@ machine::FrontendMemory *MemoryModel::mem_access_rw() const {
 
 const machine::FrontendMemory *MemoryModel::mem_access_at_level() const {
     if (!machine) return nullptr;
-    if (mem_acc_at_level == MEM_ACC_AS_CPU && machine->config().get_vm_enabled()) {
+    if (mem_acc_at_level == MEM_ACC_AS_CPU && machine->config().get_vm_enabled()
+        && machine->get_tlb_data() != nullptr) {
         return machine->get_tlb_data();
-    } else if (mem_acc_at_level >= MEM_ACC_CACHED && machine->cache_data()) {
+    } else if (mem_acc_at_level >= MEM_ACC_CACHED && machine->cache_data() != nullptr) {
         return machine->cache_data();
     } else {
         return mem_access();
@@ -47,9 +48,10 @@ const machine::FrontendMemory *MemoryModel::mem_access_at_level() const {
 
 machine::FrontendMemory *MemoryModel::mem_access_at_level_rw() const {
     if (!machine) return nullptr;
-    if (mem_acc_at_level == MEM_ACC_AS_CPU && machine->config().get_vm_enabled()) {
+    if (mem_acc_at_level == MEM_ACC_AS_CPU && machine->config().get_vm_enabled()
+        && machine->get_tlb_data() != nullptr) {
         return machine->get_tlb_data_rw();
-    } else if (mem_acc_at_level >= MEM_ACC_CACHED && machine->cache_data_rw()) {
+    } else if (mem_acc_at_level >= MEM_ACC_CACHED && machine->cache_data_rw() != nullptr) {
         return machine->cache_data_rw();
     } else {
         return mem_access_rw();
@@ -218,15 +220,15 @@ void MemoryModel::check_for_updates() {
         if (cache_data_change_counter != machine->cache_data()->get_change_counter()) {
             need_update = true;
         }
-        if (mem_acc_at_level == MEM_ACC_AS_CPU && machine->config().get_vm_enabled()
-            && machine->get_tlb_data() != nullptr) {
-            if (tlb_change_counter != machine->get_tlb_data()->get_change_counter()) {
-                need_update = true;
-            }
-            auto state = machine->core()->get_state();
-            if (last_priv_level != state.current_privilege() || last_asid != state.current_asid()) {
-                need_update = true;
-            }
+    }
+    if (mem_acc_at_level == MEM_ACC_AS_CPU && machine->config().get_vm_enabled()
+        && machine->get_tlb_data() != nullptr) {
+        if (tlb_change_counter != machine->get_tlb_data()->get_change_counter()) {
+            need_update = true;
+        }
+        auto state = machine->core()->get_state();
+        if (last_priv_level != state.current_privilege() || last_asid != state.current_asid()) {
+            need_update = true;
         }
     }
     if (!need_update) { return; }
