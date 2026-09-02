@@ -3,11 +3,11 @@ app: @PACKAGE_NAME@
 build:
   packages:
     - linuxdeployqt
-    - pkgconfig(Qt5Core)
-    - pkgconfig(Qt5Widgets)
-    - pkgconfig(Qt5Test)
-    - pkgconfig(Qt5Network)
-    - pkgconfig(Qt5PrintSupport)
+    - pkgconfig(Qt6Core)
+    - pkgconfig(Qt6Widgets)
+    - pkgconfig(Qt6Test)
+    - pkgconfig(Qt6Network)
+    - pkgconfig(Qt6PrintSupport)
 
 script:
   - cd $BUILD_SOURCE_DIR

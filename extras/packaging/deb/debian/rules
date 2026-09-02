@@ -5,7 +5,10 @@ export DH_VERBOSE = 1
 
 export DEB_BUILD_MAINT_OPTIONS=hardening=+all
 export DEB_LDFLAGS_MAINT_APPEND=-Wl,--as-needed
-export QT_SELECT := qt5
+
+# QT_SELECT is obsolete and would prevent
+# Qt6 builds
+# export QT_SELECT := qt5
 
 #  --parallel
 
