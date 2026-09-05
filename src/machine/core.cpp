@@ -167,7 +167,8 @@ bool Core::handle_exception(
     Address inst_addr,
     Address next_addr,
     Address jump_branch_pc,
-    Address mem_ref_addr) {
+    Address fault_data_addr,
+    Address fault_inst_addr) {
     if (excause == EXCAUSE_INSN_ILLEGAL) {
         throw SIMULATOR_EXCEPTION(
             UnsupportedInstruction, "Instruction with following encoding is not supported",
@@ -205,22 +206,24 @@ bool Core::handle_exception(
     if (control_state != nullptr) {
         CSR::PrivilegeLevel target_priv
             = deliver_to_s ? CSR::PrivilegeLevel::SUPERVISOR : CSR::PrivilegeLevel::MACHINE;
-        CSR::Id::IdxType sepc_id = deliver_to_s ? CSR::Id::SEPC : CSR::Id::MEPC;
+        CSR::Id::IdxType epc_id = deliver_to_s ? CSR::Id::SEPC : CSR::Id::MEPC;
         CSR::Id::IdxType tval_id = deliver_to_s ? CSR::Id::STVAL : CSR::Id::MTVAL;
         CSR::Id::IdxType tvec_id = deliver_to_s ? CSR::Id::STVEC : CSR::Id::MTVEC;
 
-        control_state->write_internal(sepc_id, inst_addr.get_raw());
+        control_state->write_internal(epc_id, inst_addr.get_raw());
 
         switch (excause) {
         case EXCAUSE_INSN_PAGE_FAULT:
+        case EXCAUSE_INSN_FAULT:
+            control_state->write_internal(tval_id, fault_inst_addr.get_raw());
+            break;
         case EXCAUSE_LOAD_PAGE_FAULT:
         case EXCAUSE_STORE_PAGE_FAULT:
         case EXCAUSE_LOAD_MISALIGNED:
         case EXCAUSE_STORE_MISALIGNED:
-        case EXCAUSE_INSN_FAULT:
         case EXCAUSE_LOAD_FAULT:
         case EXCAUSE_STORE_FAULT:
-            control_state->write_internal(tval_id, mem_ref_addr.get_raw());
+            control_state->write_internal(tval_id, fault_data_addr.get_raw());
             break;
         default: control_state->write_internal(tval_id, 0); break;
         }
@@ -240,7 +243,7 @@ bool Core::handle_exception(
     ExceptionHandler *exhandler = ex_handlers.value(excause, ex_default_handler.data());
     if (exhandler != nullptr) {
         ret = exhandler->handle_exception(
-            this, regs, excause, inst_addr, next_addr, jump_branch_pc, mem_ref_addr);
+            this, regs, excause, inst_addr, next_addr, jump_branch_pc, fault_data_addr);
     }
 
     if (get_stop_on_exception(excause)) { emit stop_on_exception_reached(); }
@@ -364,13 +367,20 @@ FetchState Core::fetch(PCInterstage pc, bool skip_break) {
 
     const AddressWithMode inst_addr
         = AddressWithMode(regs->read_pc(), make_access_mode(state, AccessOp::FETCH));
-
+    Address next_inst_addr;
     Instruction inst = Instruction::NOP;
     ExceptionCause excause = EXCAUSE_NONE;
 
     try {
         inst = Instruction(mem_program->read_u32(inst_addr));
-    } catch (const SimulatorExceptionPageFault &e) { excause = EXCAUSE_INSN_PAGE_FAULT; }
+        next_inst_addr = inst_addr + inst.size();
+    } catch (const SimulatorExceptionPageFault &e) {
+        excause = EXCAUSE_INSN_PAGE_FAULT;
+        // Use next_inst_addr to report faulted address instead of inst_addr
+        // because mtval and stval needs to report start address of instruction
+        // portion which waulted in case of compressed instructions support
+        next_inst_addr = inst_addr;
+    }
 
     if (!skip_break && hw_breaks.contains(inst_addr)) { excause = EXCAUSE_HWBREAK; }
 
@@ -384,7 +394,7 @@ FetchState Core::fetch(PCInterstage pc, bool skip_break) {
              FetchInterstage {
                  .inst = inst,
                  .inst_addr = inst_addr,
-                 .next_inst_addr = inst_addr + inst.size(),
+                 .next_inst_addr = next_inst_addr,
                  .predicted_next_inst_addr = predictor->predict_next_pc_address(inst, inst_addr),
                  .excause = excause,
                  .is_valid = true,
@@ -761,7 +771,7 @@ void CoreSingle::do_step(bool skip_break) {
     if (mem_wb.excause != EXCAUSE_NONE) {
         handle_exception(
             mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, regs->read_pc(), prev_inst_addr,
-            mem_wb.mem_addr);
+            mem_wb.mem_addr, mem_wb.next_inst_addr);
         return;
     }
     prev_inst_addr = mem_wb.inst_addr;
@@ -817,7 +827,7 @@ void CorePipelined::do_step(bool skip_break) {
         /* Exception handler may override this behavior and change the PC (e.g. hwbreak). */
         handle_exception(
             mem_wb.excause, mem_wb.inst, mem_wb.inst_addr, mem_wb.computed_next_inst_addr,
-            jump_branch_pc, mem_wb.mem_addr);
+            jump_branch_pc, mem_wb.mem_addr, mem_wb.next_inst_addr);
     } else if (detect_mispredicted_jump() || mem_wb.csr_written) {
         /* If the jump was predicted incorrectly or csr register was written, we need to flush the
          * pipeline. */

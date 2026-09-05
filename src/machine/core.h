@@ -113,7 +113,8 @@ protected:
         Address inst_addr,
         Address next_addr,
         Address jump_branch_pc,
-        Address mem_ref_addr);
+        Address fault_data_addr,
+        Address fault_inst_addr);
 
     const Xlen xlen;
     InstructionFlags check_inst_flags_val;
