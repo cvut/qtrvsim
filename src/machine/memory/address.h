@@ -106,6 +106,9 @@ public:
 
     /* Distance arithmetic */
     constexpr inline int64_t operator-(const Address &other) const;
+
+    /* Maximal value */
+    static constexpr inline Address limit_max();
 };
 
 constexpr Address operator""_addr(unsigned long long literal) {
@@ -219,6 +222,13 @@ constexpr Address Address::operator<<(const uint64_t &size) const {
 
 constexpr int64_t Address::operator-(const Address &other) const {
     return this->get_raw() - other.get_raw();
+}
+
+/*
+ * Maximal value
+ */
+constexpr Address Address::limit_max() {
+    return Address(~((typeof(data))0));
 }
 
 } // namespace machine
