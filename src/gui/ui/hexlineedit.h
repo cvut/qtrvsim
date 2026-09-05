@@ -18,12 +18,16 @@ public:
 
 public slots:
     void set_value(uint64_t value);
+    void set_digits(int value);
 
 signals:
     void value_edit_finished(uint64_t value);
 
 private slots:
     void on_edit_finished();
+
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     int base;

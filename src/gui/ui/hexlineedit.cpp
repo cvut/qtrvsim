@@ -1,21 +1,66 @@
 #include "hexlineedit.h"
 
+#include <QKeyEvent>
 #include <QTextStream>
 #include <QtGlobal>
 
 HexLineEdit::HexLineEdit(QWidget *parent, int digits, int base, const QString &prefix)
     : Super(parent) {
     this->base = base;
-    this->digits = digits;
+    this->digits = -1;
     this->prefix = prefix;
     last_set = 0;
+
+    set_digits(digits);
+
+    connect(this, &QLineEdit::editingFinished, this, &HexLineEdit::on_edit_finished);
+
+    set_value(0);
+}
+
+void HexLineEdit::keyPressEvent(QKeyEvent *event) {
+    if (event->key() == Qt::Key_Escape) {
+        set_value(last_set);
+        return;
+    } else {
+        Super::keyPressEvent(event);
+    }
+}
+
+void HexLineEdit::set_value(uint64_t value) {
+    QString s, t = "";
+    last_set = value;
+    s = QString::number(value, base);
+    if (s.count() < digits) { t.fill('0', digits - s.count()); }
+    setText(prefix + t + s);
+}
+
+void HexLineEdit::on_edit_finished() {
+    bool ok;
+    uint64_t val;
+
+    val = text().toULongLong(&ok, base);
+    if (!ok) {
+        set_value(last_set);
+        return;
+    }
+    last_set = val;
+    emit value_edit_finished(val);
+}
+
+void HexLineEdit::set_digits(int value) {
     QChar dmask;
     QString t = "";
     QString mask = "";
 
+    if (value == digits) return;
+
+    digits = value;
+
     for (int i = 0; i < prefix.count(); i++) {
         mask += "\\" + QString(prefix.at(i));
     }
+
     switch (base) {
     case 10:
         mask += "D";
@@ -38,28 +83,5 @@ HexLineEdit::HexLineEdit(QWidget *parent, int digits, int base, const QString &p
 
     setInputMask(mask);
 
-    connect(this, &QLineEdit::editingFinished, this, &HexLineEdit::on_edit_finished);
-
-    set_value(0);
-}
-
-void HexLineEdit::set_value(uint64_t value) {
-    QString s, t = "";
-    last_set = value;
-    s = QString::number(value, base);
-    if (s.count() < digits) { t.fill('0', digits - s.count()); }
-    setText(prefix + t + s);
-}
-
-void HexLineEdit::on_edit_finished() {
-    bool ok;
-    uint64_t val;
-
-    val = text().toULongLong(&ok, base);
-    if (!ok) {
-        set_value(last_set);
-        return;
-    }
-    last_set = val;
-    emit value_edit_finished(val);
+    set_value(last_set);
 }
