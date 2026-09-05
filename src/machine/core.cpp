@@ -379,7 +379,7 @@ FetchState Core::fetch(PCInterstage pc, bool skip_break) {
         // Use next_inst_addr to report faulted address instead of inst_addr
         // because mtval and stval needs to report start address of instruction
         // portion which waulted in case of compressed instructions support
-        next_inst_addr = inst_addr;
+        next_inst_addr = e.get_fault_address();
     }
 
     if (!skip_break && hw_breaks.contains(inst_addr)) { excause = EXCAUSE_HWBREAK; }
@@ -616,6 +616,7 @@ MemoryState Core::memory(const ExecuteInterstage &dt) {
             memwrite = false;
             regwrite = false;
             towrite_val = 0;
+            mem_addr = e.get_fault_address();
         }
     }
 

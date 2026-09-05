@@ -11,7 +11,8 @@ SimulatorException::SimulatorException(
     QString ext,
     QString file,
     int line,
-    ExceptionCause cause) {
+    ExceptionCause cause,
+    Address fault_address) {
     this->name = "Exception";
     this->reason = std::move(reason);
     this->ext = std::move(ext);
@@ -19,6 +20,7 @@ SimulatorException::SimulatorException(
     this->line = line;
     this->cached_what = nullptr;
     this->cause_ = cause;
+    this->fault_address_ = fault_address;
 }
 
 SimulatorException::~SimulatorException() {
@@ -52,8 +54,9 @@ QString SimulatorException::msg(bool pos) const {
 
 #define EXCEPTION(NAME, PARENT)                                                                    \
     SimulatorException##NAME::SimulatorException##NAME(                                            \
-        QString reason, QString ext, QString file, int line, ExceptionCause cause)                 \
-        : SimulatorException##PARENT(reason, ext, file, line, cause) {                             \
+        QString reason, QString ext, QString file, int line, ExceptionCause cause,                 \
+        Address fault_address)                                                                     \
+        : SimulatorException##PARENT(reason, ext, file, line, cause, fault_address) {              \
         this->name = #NAME;                                                                        \
     }
 SIMULATOR_EXCEPTIONS

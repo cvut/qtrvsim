@@ -61,20 +61,21 @@ WalkResult PageTableWalker::walk(
         if (!pte->is_valid()) {
             throw SIMULATOR_EXCEPTION(
                 PageFault, "PTW: page fault, leaf PTE invalid",
-                QString::number(pte_addr.get_raw(), 16), get_current_cause(access_mode.opkind()));
+                QString::number(pte_addr.get_raw(), 16), get_current_cause(access_mode.opkind()),
+                Address(va.get_raw()));
         }
         if (pte->is_leaf()) {
             uint64_t mask = (1ull << (lvl * PagingMode::VPN_BITS)) - 1;
             if (lvl > 0 && (pte->ppn() & mask) != 0) {
                 throw SIMULATOR_EXCEPTION(
                     PageFault, "PTW: misaligned superpage", "",
-                    get_current_cause(access_mode.opkind()));
+                    get_current_cause(access_mode.opkind()), Address(va.get_raw()));
             }
 
             if (!check_permissions(*pte, raw_sstatus, access_mode.priv(), access_mode.opkind())) {
                 throw SIMULATOR_EXCEPTION(
                     PageFault, "PTW: access fault (permission check failed)", "",
-                    get_current_cause(access_mode.opkind()));
+                    get_current_cause(access_mode.opkind()), Address(va.get_raw()));
             }
             if (!pte->d() && access_mode.opkind() == AccessOp::WRITE) {
                 pte->set_d(true);
@@ -103,14 +104,15 @@ WalkResult PageTableWalker::walk(
         if (pte->r() || pte->w() || pte->x()) {
             throw SIMULATOR_EXCEPTION(
                 PageFault, "PTW: invalid non-leaf", QString::number(raw_pte, 16),
-                get_current_cause(access_mode.opkind()));
+                get_current_cause(access_mode.opkind()), Address(va.get_raw()));
         }
 
         ppn = pte->ppn();
     }
 
     throw SIMULATOR_EXCEPTION(
-        PageFault, "PTW: no leaf found", "", get_current_cause(access_mode.opkind()));
+        PageFault, "PTW: no leaf found", "", get_current_cause(access_mode.opkind()),
+        Address(va.get_raw()));
 }
 
 template WalkResult PageTableWalker::walk<Sv32Pte, 1>(

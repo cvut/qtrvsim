@@ -225,8 +225,8 @@ TLB::translate_virtual_to_physical(AddressWithMode vaddr, AccessEffects ae_type)
             ent_way = w;
             if (!check_permissions(*ent, current_sstatus_raw, mode.priv(), mode.opkind())) {
                 throw SIMULATOR_EXCEPTION(
-                    PageFault, "TLB: access fault on TLB hit", "",
-                    get_current_cause(mode.opkind()));
+                    PageFault, "TLB: access fault on TLB hit", "", get_current_cause(mode.opkind()),
+                    vaddr);
             }
 
             uint64_t pbase = ent->phys.get_raw() & ~PAGE_MASK;

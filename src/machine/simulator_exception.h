@@ -16,16 +16,19 @@ public:
         QString ext,
         QString file,
         int line,
-        ExceptionCause cause = EXCAUSE_NONE);
+        ExceptionCause cause = EXCAUSE_NONE,
+        Address fault_address = 0_addr);
     ~SimulatorException();
     const char *what() const noexcept override;
     QString msg(bool pos) const;
     ExceptionCause get_cause() const { return cause_; }
+    Address get_fault_address() const { return fault_address_; }
 
 protected:
     QString name, reason, ext, file;
     int line;
     ExceptionCause cause_;
+    Address fault_address_;
 
 private:
     mutable char *cached_what;
@@ -91,7 +94,8 @@ private:
             QString ext,                                                                           \
             QString file,                                                                          \
             int line,                                                                              \
-            ExceptionCause cause = EXCAUSE_NONE);                                                  \
+            ExceptionCause cause = EXCAUSE_NONE,                                                   \
+            Address fault_address = 0_addr);                                                       \
     };
 SIMULATOR_EXCEPTIONS
 #undef EXCEPTION
