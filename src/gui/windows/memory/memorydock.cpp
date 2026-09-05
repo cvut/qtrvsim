@@ -64,6 +64,10 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
     connect(
         memory_content, &MemoryTableView::address_changed, go_edit,
         [go_edit](machine::Address addr) { go_edit->set_value(addr.get_raw()); });
+    connect(this, &MemoryDock::set_address_digits, go_edit, &HexLineEdit::set_digits);
+    connect(
+        this, &MemoryDock::set_address_digits, memory_content,
+        &MemoryTableView::set_address_digits);
     connect(this, &MemoryDock::focus_addr, memory_content, &MemoryTableView::focus_address);
     connect(
         memory_model, &MemoryModel::setup_done, memory_content,
@@ -73,6 +77,8 @@ MemoryDock::MemoryDock(QWidget *parent, QSettings *settings) : Super(parent) {
 
 void MemoryDock::setup(machine::Machine *machine) {
     emit machine_setup(machine);
+    if (machine == nullptr) { return; }
+    emit set_address_digits(machine->config().get_simulated_xlen() == machine::Xlen::_64 ? 16 : 8);
 }
 
 void MemoryDock::report_error(const QString &error) {

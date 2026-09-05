@@ -25,6 +25,7 @@ public slots:
     void go_to_address(machine::Address address);
     void focus_address(machine::Address address);
     void recompute_columns();
+    void set_address_digits(int value);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -39,6 +40,7 @@ private:
 
     machine::Address initial_address;
     bool adjust_scroll_pos_in_progress;
+    int address_digits;
 };
 
 #endif // MEMORYTABLEVIEW_H

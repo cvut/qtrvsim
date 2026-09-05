@@ -18,12 +18,13 @@ public:
 
     void resizeEvent(QResizeEvent *event) override;
 signals:
-    void address_changed(uint32_t address);
+    void address_changed(uint64_t address);
     void adjust_scroll_pos_queue();
 public slots:
     void go_to_address(machine::Address address);
     void focus_address(machine::Address address);
     void focus_address_with_save(machine::Address address);
+    void set_address_digits(int value);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -40,6 +41,7 @@ private:
     machine::Address initial_address;
     bool adjust_scroll_pos_in_progress;
     bool need_addr0_save;
+    int address_digits;
 };
 
 #endif // PROGRAMTABLEVIEW_H

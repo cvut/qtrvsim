@@ -20,6 +20,7 @@ public:
 signals:
     void machine_setup(machine::Machine *machine);
     void focus_addr(machine::Address);
+    void set_address_digits(int digits);
 
 public slots:
     void report_error(const QString &error);

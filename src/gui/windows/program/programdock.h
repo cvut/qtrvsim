@@ -27,6 +27,8 @@ signals:
     void focus_addr_with_save(machine::Address);
     void stage_addr_changed(uint stage, machine::Address addr);
     void request_update_all();
+    void set_address_digits(int digits);
+
 public slots:
     void set_follow_inst(int);
     void fetch_inst_addr(machine::Address addr);

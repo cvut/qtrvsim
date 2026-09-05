@@ -53,6 +53,7 @@ void HexLineEdit::set_digits(int value) {
     QString t = "";
     QString mask = "";
 
+    if (digits < 1) digits = 1;
     if (value == digits) return;
 
     digits = value;

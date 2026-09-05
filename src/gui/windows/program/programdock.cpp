@@ -41,7 +41,7 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
     program_content->verticalHeader()->hide();
     // program_content->setHorizontalHeader(program_model->);
 
-    auto *go_edit = new HexLineEdit(nullptr, 8, 16, "0x");
+    auto *go_edit = new HexLineEdit(nullptr, 16, 16, "0x");
 
     auto *layout = new QVBoxLayout;
     layout->addWidget(follow_inst);
@@ -55,10 +55,14 @@ ProgramDock::ProgramDock(QWidget *parent, QSettings *settings) : Super(parent) {
     connect(this, &ProgramDock::machine_setup, program_model, &ProgramModel::setup);
     connect(
         go_edit, &HexLineEdit::value_edit_finished, program_content,
-        [program_content](uint32_t value) {
+        [program_content](uint64_t value) {
             program_content->go_to_address(machine::Address(value));
         });
     connect(program_content, &ProgramTableView::address_changed, go_edit, &HexLineEdit::set_value);
+    connect(this, &ProgramDock::set_address_digits, go_edit, &HexLineEdit::set_digits);
+    connect(
+        this, &ProgramDock::set_address_digits, program_content,
+        &ProgramTableView::set_address_digits);
     connect(this, &ProgramDock::jump_to_pc, program_content, &ProgramTableView::go_to_address);
     connect(
         follow_inst, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
@@ -80,6 +84,7 @@ void ProgramDock::setup(machine::Machine *machine) {
     machine::Address pc;
     emit machine_setup(machine);
     if (machine == nullptr) { return; }
+    emit set_address_digits(machine->config().get_simulated_xlen() == machine::Xlen::_64 ? 16 : 8);
     pipeline_handle = &machine->core()->get_state();
     pc = machine->registers()->read_pc();
     for (machine::Address &address : follow_addr) {

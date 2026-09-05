@@ -61,9 +61,11 @@ public:
             return false;
         }
         row = (address - index0_offset) / (cells_per_row * cellSizeBytes());
-        if ((address - index0_offset > 0x80000000) || row > rowCount()) {
-            row = rowCount();
-            return false;
+        if (index0_offset <= machine::Address::limit_max() - 0x80000000) {
+            if ((address > index0_offset + 0x80000000) || row > rowCount()) {
+                row = rowCount();
+                return false;
+            }
         }
         return true;
     }

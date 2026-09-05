@@ -22,6 +22,7 @@ ProgramTableView::ProgramTableView(QWidget *parent, QSettings *settings) : Super
     initial_address = machine::Address(settings->value("ProgramViewAddr0", 0).toULongLong());
     adjust_scroll_pos_in_progress = false;
     need_addr0_save = false;
+    address_digits = 8;
     setTextElideMode(Qt::ElideNone);
 }
 
@@ -52,7 +53,9 @@ void ProgramTableView::adjustColumnCount() {
     totwidth += cwidth_dh0;
 
     idx = m->index(0, 1);
-    auto cwidth_dh1 = delegate->sizeHintForText(viewOpts, idx, "0x00000000").width() + 2;
+    QString s("0x");
+    s = s.leftJustified(address_digits + 2, '0');
+    auto cwidth_dh1 = delegate->sizeHintForText(viewOpts, idx, s).width() + 2;
     horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
     horizontalHeader()->resizeSection(1, cwidth_dh1);
     totwidth += cwidth_dh1;
@@ -187,4 +190,12 @@ void ProgramTableView::keyPressEvent(QKeyEvent *event) {
     } else {
         Super::keyPressEvent(event);
     }
+}
+
+void ProgramTableView::set_address_digits(int value) {
+    if (value == address_digits) return;
+    if (value < 2) value = 2;
+    if (value > 16) value = 16;
+    address_digits = value;
+    adjustColumnCount();
 }

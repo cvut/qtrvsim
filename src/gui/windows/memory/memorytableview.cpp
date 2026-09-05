@@ -23,6 +23,7 @@ MemoryTableView::MemoryTableView(QWidget *parent, QSettings *settings) : Super(p
     this->settings = settings;
     initial_address = machine::Address(settings->value("DataViewAddr0", 0).toULongLong());
     adjust_scroll_pos_in_progress = false;
+    address_digits = 8;
     setTextElideMode(Qt::ElideNone);
 }
 
@@ -48,8 +49,9 @@ void MemoryTableView::adjustColumnCount() {
 
         // int width0_dh = itemDelegate(idx)->sizeHint(viewOptions(),
         // idx).get_width() + 2;
-        int width0_dh = delegate->sizeHintForText(viewOpts, idx, "0x000000000000").width()
-                        + 2; // Quic hack enable more byte for 64-bit
+        QString s("0x");
+        s = s.leftJustified(address_digits + 2, '0');
+        int width0_dh = delegate->sizeHintForText(viewOpts, idx, s).width() + 2;
         horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
         horizontalHeader()->resizeSection(0, width0_dh);
 
@@ -205,4 +207,12 @@ void MemoryTableView::keyPressEvent(QKeyEvent *event) {
     } else {
         Super::keyPressEvent(event);
     }
+}
+
+void MemoryTableView::set_address_digits(int value) {
+    if (value == address_digits) return;
+    if (value < 2) value = 2;
+    if (value > 16) value = 16;
+    address_digits = value;
+    adjustColumnCount();
 }
