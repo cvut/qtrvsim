@@ -411,7 +411,9 @@ DecodeState Core::decode(const FetchInterstage &dt) {
             inst_xret_priv = CSR::PrivilegeLevel::UNPRIVILEGED;
         }
     }
-    if ((flags ^ check_inst_flags_val) & check_inst_flags_mask) { excause = EXCAUSE_INSN_ILLEGAL; }
+    if ((flags ^ check_inst_flags_val) & check_inst_flags_mask) {
+        if (excause == EXCAUSE_NONE) { excause = EXCAUSE_INSN_ILLEGAL; }
+    }
 
     RegisterId num_rs = (flags & (IMF_ALU_REQ_RS | IMF_ALU_RS_ID)) ? dt.inst.rs() : 0;
     RegisterId num_rt = (flags & IMF_ALU_REQ_RT) ? dt.inst.rt() : 0;
@@ -425,9 +427,14 @@ DecodeState Core::decode(const FetchInterstage &dt) {
     const bool regwrite = flags & IMF_REGWRITE;
 
     CSR::Address csr_address = (flags & IMF_CSR) ? dt.inst.csr_address() : CSR::Address(0);
-    RegisterValue csr_read_val = ((control_state != nullptr && (flags & IMF_CSR)))
-                                     ? control_state->read(csr_address, get_current_privilege())
-                                     : 0;
+    RegisterValue csr_read_val = 0;
+    if ((control_state != nullptr) && (flags & IMF_CSR)) {
+        try {
+            csr_read_val = control_state->read(csr_address, get_current_privilege());
+        } catch (const SimulatorExceptionUnsupportedInstruction &e) {
+            if (excause == EXCAUSE_NONE) { excause = EXCAUSE_INSN_ILLEGAL; }
+        }
+    }
     bool csr_write = (flags & IMF_CSR) && (!(flags & IMF_CSR_TO_ALU) || (num_rs != 0));
 
     if ((flags & IMF_EXCEPTION) && (excause == EXCAUSE_NONE)) {
