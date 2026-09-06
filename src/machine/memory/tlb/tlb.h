@@ -157,6 +157,7 @@ private:
     const TLBConfig tlb_config;
     uint64_t current_satp_raw = 0;
     uint64_t current_sstatus_raw = 0;
+    uint64_t current_mstatus_raw = 0;
     Xlen xlen;
     const bool vm_enabled;
     mutable std::mutex pte_lock_;

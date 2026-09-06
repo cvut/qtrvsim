@@ -56,6 +56,10 @@ void TLB::on_csr_write(size_t internal_id, RegisterValue val) {
         current_sstatus_raw = val.as_u64();
         return;
     }
+    if (internal_id == CSR::Id::MSTATUS) {
+        current_mstatus_raw = val.as_u64();
+        return;
+    }
     if (internal_id != CSR::Id::SATP) return;
 
     uint64_t new_satp = val.as_u64();
@@ -198,11 +202,23 @@ TLB::translate_virtual_to_physical(AddressWithMode vaddr, AccessEffects ae_type)
     uint64_t virt = vaddr.get_raw();
 
     AccessMode mode = vaddr.access_mode();
-    CSR::PrivilegeLevel priv = mode.priv();
     uint16_t asid = mode.asid();
 
-    bool satp_mode_on = is_mode_enabled_in_satp(current_satp_raw);
-    bool should_translate = vm_enabled && satp_mode_on && (priv != CSR::PrivilegeLevel::MACHINE);
+    bool should_translate = false;
+
+    if (vm_enabled) {
+        bool mprv = CSR::Field::mstatus::MPRV.decode(current_mstatus_raw) != 0;
+
+        if (mprv && (mode.opkind() == AccessOp::READ || mode.opkind() == AccessOp::WRITE)
+            && ae_type == AccessEffects::REGULAR) {
+            // if MPRV is set in mstatus then data accesses are processed as if the privilege
+            // mode specified by mastatus.MPP field is active
+            mode.set_priv(static_cast<CSR::PrivilegeLevel>(
+                CSR::Field::mstatus::MPP.decode(current_mstatus_raw)));
+        }
+        bool satp_mode_on = is_mode_enabled_in_satp(current_satp_raw);
+        should_translate = satp_mode_on && (mode.priv() != CSR::PrivilegeLevel::MACHINE);
+    }
 
     if (!should_translate) { return { vaddr, std::numeric_limits<size_t>::max() }; }
 

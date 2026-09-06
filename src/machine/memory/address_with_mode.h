@@ -43,6 +43,11 @@ struct AccessMode {
         return static_cast<CSR::PrivilegeLevel>((token >> PRIV_SHIFT) & PRIV_MASK);
     }
 
+    void set_priv(CSR::PrivilegeLevel val) noexcept {
+        token &= ~(PRIV_MASK << PRIV_SHIFT);
+        token |= (static_cast<typeof(token)>(val) & PRIV_MASK) << PRIV_SHIFT;
+    }
+
     uint8_t uncached() const {
         return static_cast<uint8_t>((token >> UNCACHED_SHIFT) & UNCACHED_MASK);
     }
