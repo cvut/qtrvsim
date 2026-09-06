@@ -4,7 +4,6 @@
 #include "memory/frontend_memory.h"
 #include "sv32.h"
 #include "sv39.h"
-#include "virtual_address.h"
 
 #include <inttypes.h>
 #include <memory>
@@ -33,7 +32,7 @@ public:
 
     template<typename T, int max_level_idx>
     WalkResult walk(
-        const VirtualAddress &va,
+        const Address &va,
         uint64_t raw_satp,
         uint64_t raw_sstatus,
         const AccessMode &access_mode,

@@ -5,7 +5,6 @@
 #include "csr/address.h"
 #include "memory/frontend_memory.h"
 #include "memory/virtual/sv32.h"
-#include "memory/virtual/virtual_address.h"
 #include "tlb_policy.h"
 
 #include <cstdint>
@@ -77,7 +76,7 @@ public:
         bool memory_access_enable_b = false);
 
     void on_csr_write(size_t internal_id, RegisterValue val);
-    void flush_single(VirtualAddress va, uint16_t asid);
+    void flush_single(Address va, uint16_t asid);
 
     void flush_all_entries();
 
@@ -113,7 +112,7 @@ public:
         }
     }
 
-    bool reverse_lookup(Address paddr, VirtualAddress &out_va) const;
+    bool reverse_lookup(Address paddr, Address &out_va) const;
 
     unsigned get_hit_count() const { return hit_count_; }
     unsigned get_miss_count() const { return miss_count_; }

@@ -73,7 +73,7 @@ void TLB::on_csr_write(size_t internal_id, RegisterValue val) {
     update_all_statistics();
 }
 
-void TLB::flush_single(VirtualAddress va, uint16_t asid) {
+void TLB::flush_single(Address va, uint16_t asid) {
     uint64_t vpn = va.get_raw() >> 12;
     size_t s = set_index(vpn);
     bool any_invalidated = false;
@@ -178,7 +178,7 @@ void TLB::sfence_vma(uint64_t vaddr, uint64_t asid) {
     }
 
     if (vaddr != 0 && asid != 0) {
-        VirtualAddress va { vaddr };
+        Address va { vaddr };
         flush_single(va, static_cast<uint16_t>(asid & 0xFFFFu));
         return;
     }
@@ -247,7 +247,7 @@ TLB::translate_virtual_to_physical(AddressWithMode vaddr, AccessEffects ae_type)
     }
 
     // TLB miss -> resolve with page table walker
-    VirtualAddress va { virt };
+    Address va { virt };
 
     PageTableWalker walker(pt_walk_mem);
     WalkResult res;
@@ -387,14 +387,14 @@ ReadResult TLB::translate_and_read(void *dst, AddressWithMode src, size_t sz, Re
     return { .n_bytes = total_read };
 }
 
-bool TLB::reverse_lookup(Address paddr, VirtualAddress &out_va) const {
+bool TLB::reverse_lookup(Address paddr, Address &out_va) const {
     uint64_t ppn = paddr.get_raw() >> 12;
     uint64_t offset = paddr.get_raw() & 0xFFF;
     for (size_t s = 0; s < num_sets_; s++) {
         for (size_t w = 0; w < associativity_; w++) {
             auto &e = table[s][w];
             if (e.valid && (e.phys.get_raw() >> 12) == ppn) {
-                out_va = VirtualAddress { (e.vpn << 12) | offset };
+                out_va = Address { (e.vpn << 12) | offset };
                 return true;
             }
         }

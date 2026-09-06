@@ -71,7 +71,6 @@ set(machine_HEADERS
 		utils.h
 		execute/alu_op.h
 		execute/mul_op.h
-		memory/virtual/virtual_address.h
 		memory/tlb/tlb.h
 		memory/virtual/sv32.h
 		memory/virtual/sv39.h

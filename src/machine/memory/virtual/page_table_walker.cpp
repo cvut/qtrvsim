@@ -27,7 +27,7 @@ std::function<std::unique_ptr<GenericPte>(uint64_t)> PageTableWalker::sv39_pte_f
 
 template<typename PagingMode, int max_level_idx>
 WalkResult PageTableWalker::walk(
-    const VirtualAddress &va,
+    const Address &va,
     uint64_t raw_satp,
     uint64_t raw_sstatus,
     const AccessMode &access_mode,
@@ -116,13 +116,13 @@ WalkResult PageTableWalker::walk(
 }
 
 template WalkResult PageTableWalker::walk<Sv32Pte, 1>(
-    const VirtualAddress &va,
+    const Address &va,
     uint64_t raw_satp,
     uint64_t raw_sstatus,
     const AccessMode &access_mode,
     AccessEffects ae_type);
 template WalkResult PageTableWalker::walk<Sv39Pte, 2>(
-    const VirtualAddress &va,
+    const Address &va,
     uint64_t raw_satp,
     uint64_t raw_sstatus,
     const AccessMode &access_mode,
