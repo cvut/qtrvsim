@@ -31,7 +31,7 @@ using namespace machine;
 #define DFC_VM_ENABLED false
 #define DFC_TLB_SETS   16
 #define DFC_TLB_ASSOC  1
-#define DFC_TLB_REPLAC RP_LRU
+#define DFC_TLB_REPLAC CacheConfig::RP_LRU
 //////////////////////////////////////////////////////////////////////////////
 /// Default config of CacheConfig
 #define DFC_EN     false
@@ -162,7 +162,7 @@ TLBConfig::TLBConfig() {
     vm_asid = 0;
     n_sets = DFC_TLB_SETS;
     d_associativity = DFC_TLB_ASSOC;
-    replac_pol = (enum ReplacementPolicy)DFC_TLB_REPLAC;
+    replac_pol = (enum CacheConfig::ReplacementPolicy)DFC_TLB_REPLAC;
 }
 
 TLBConfig::TLBConfig(const TLBConfig *tc) {
@@ -170,7 +170,7 @@ TLBConfig::TLBConfig(const TLBConfig *tc) {
         vm_asid = 0;
         n_sets = DFC_TLB_SETS;
         d_associativity = DFC_TLB_ASSOC;
-        replac_pol = (enum ReplacementPolicy)DFC_TLB_REPLAC;
+        replac_pol = (enum CacheConfig::ReplacementPolicy)DFC_TLB_REPLAC;
         return;
     }
     vm_asid = tc->get_vm_asid();
@@ -185,7 +185,8 @@ TLBConfig::TLBConfig(const QSettings *sts, const QString &prefix) {
     vm_asid = sts->value(N("VM_ASID"), 0u).toUInt();
     n_sets = sts->value(N("NumSets"), DFC_TLB_SETS).toUInt();
     d_associativity = sts->value(N("Associativity"), DFC_TLB_ASSOC).toUInt();
-    replac_pol = (enum ReplacementPolicy)sts->value(N("Policy"), DFC_TLB_REPLAC).toUInt();
+    replac_pol
+        = (enum CacheConfig::ReplacementPolicy)sts->value(N("Policy"), DFC_TLB_REPLAC).toUInt();
 }
 
 void TLBConfig::store(QSettings *sts, const QString &prefix) const {
@@ -206,7 +207,7 @@ void TLBConfig::preset(enum ConfigPresets p) {
         vm_asid = 0;
         n_sets = DFC_TLB_SETS;
         d_associativity = DFC_TLB_ASSOC;
-        replac_pol = (enum ReplacementPolicy)DFC_TLB_REPLAC;
+        replac_pol = (enum CacheConfig::ReplacementPolicy)DFC_TLB_REPLAC;
     }
 }
 
@@ -226,7 +227,7 @@ void TLBConfig::set_tlb_associativity(unsigned v) {
     d_associativity = v > 0 ? v : 1;
 }
 
-void TLBConfig::set_tlb_replacement_policy(TLBConfig::ReplacementPolicy p) {
+void TLBConfig::set_tlb_replacement_policy(CacheConfig::ReplacementPolicy p) {
     replac_pol = p;
 }
 
@@ -238,7 +239,7 @@ unsigned TLBConfig::get_tlb_associativity() const {
     return d_associativity;
 }
 
-TLBConfig::ReplacementPolicy TLBConfig::get_tlb_replacement_policy() const {
+CacheConfig::ReplacementPolicy TLBConfig::get_tlb_replacement_policy() const {
     return replac_pol;
 }
 

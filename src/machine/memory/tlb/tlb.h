@@ -3,9 +3,9 @@
 
 #include "common/logging.h"
 #include "csr/address.h"
+#include "memory/cache/cache_policy.h"
 #include "memory/frontend_memory.h"
 #include "memory/virtual/sv32.h"
-#include "tlb_policy.h"
 
 #include <cstdint>
 #include <memory/virtual/sv39.h>
@@ -102,7 +102,7 @@ public:
         return base;
     }
 
-    void set_replacement_policy(std::unique_ptr<TLBPolicy> p) { repl_policy = std::move(p); }
+    void set_replacement_policy(std::unique_ptr<CachePolicy> p) { repl_policy = std::move(p); }
 
     uint64_t root_page_table_ppn() const {
         switch (xlen) {
@@ -164,7 +164,7 @@ private:
     size_t num_sets_;
     size_t associativity_;
     std::vector<std::vector<Entry>> table;
-    std::unique_ptr<TLBPolicy> repl_policy;
+    std::unique_ptr<CachePolicy> repl_policy;
 
     const uint32_t access_pen_r;
     const uint32_t access_pen_w;

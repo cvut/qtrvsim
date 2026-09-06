@@ -550,8 +550,8 @@ void NewDialog::itlb_assoc_changed(int v) {
 }
 
 void NewDialog::itlb_policy_changed(int idx) {
-    machine::TLBConfig::ReplacementPolicy pol;
-    pol = static_cast<machine::TLBConfig::ReplacementPolicy>(idx);
+    machine::CacheConfig::ReplacementPolicy pol;
+    pol = static_cast<machine::CacheConfig::ReplacementPolicy>(idx);
     if (config->access_tlb_program()->get_tlb_replacement_policy() != pol) {
         config->access_tlb_program()->set_tlb_replacement_policy(pol);
         switch_to_custom();
@@ -575,8 +575,8 @@ void NewDialog::dtlb_assoc_changed(int v) {
 }
 
 void NewDialog::dtlb_policy_changed(int idx) {
-    machine::TLBConfig::ReplacementPolicy pol;
-    pol = static_cast<machine::TLBConfig::ReplacementPolicy>(idx);
+    machine::CacheConfig::ReplacementPolicy pol;
+    pol = static_cast<machine::CacheConfig::ReplacementPolicy>(idx);
     if (config->access_tlb_data()->get_tlb_replacement_policy() != pol) {
         config->access_tlb_data()->set_tlb_replacement_policy(pol);
         switch_to_custom();

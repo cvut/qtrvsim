@@ -31,7 +31,10 @@ public:
     virtual void update_stats(size_t way, size_t row, bool is_valid) = 0;
 
     virtual ~CachePolicy() = default;
-
+    static std::unique_ptr<CachePolicy> get_policy_instance(
+        CacheConfig::ReplacementPolicy policy,
+        unsigned associativity,
+        unsigned set_count);
     static std::unique_ptr<CachePolicy> get_policy_instance(const CacheConfig *config);
 };
 

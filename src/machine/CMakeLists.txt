@@ -23,7 +23,6 @@ set(machine_SOURCES
 		memory/frontend_memory.cpp
 		memory/memory_bus.cpp
 		memory/tlb/tlb.cpp
-		memory/tlb/tlb_policy.cpp
 		memory/virtual/page_table_walker.cpp
 		programloader.cpp
 		predictor.cpp
@@ -75,7 +74,6 @@ set(machine_HEADERS
 		memory/virtual/sv32.h
 		memory/virtual/sv39.h
 		memory/virtual/generic_pte.h
-		memory/tlb/tlb_policy.h
 		memory/virtual/page_table_walker.h
 		memory/address_with_mode.h
 )
@@ -129,8 +127,8 @@ if (NOT ${WASM})
 			memory/frontend_memory.h
 			memory/tlb/tlb.h
 			memory/tlb/tlb.cpp
-			memory/tlb/tlb_policy.h
-			memory/tlb/tlb_policy.cpp
+			memory/cache/cache_policy.h
+			memory/cache/cache_policy.cpp
 			memory/virtual/page_table_walker.h
 			memory/virtual/page_table_walker.cpp
 			memory/memory_bus.cpp
@@ -160,8 +158,6 @@ if (NOT ${WASM})
 			memory/frontend_memory.h
 			memory/tlb/tlb.h
 			memory/tlb/tlb.cpp
-			memory/tlb/tlb_policy.h
-			memory/tlb/tlb_policy.cpp
 			memory/virtual/page_table_walker.h
 			memory/virtual/page_table_walker.cpp
 			memory/memory_bus.cpp

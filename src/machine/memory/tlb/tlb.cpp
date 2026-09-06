@@ -2,6 +2,7 @@
 
 #include "csr/controlstate.h"
 #include "machine.h"
+#include "memory/cache/cache_policy.h"
 #include "memory/virtual/page_table_walker.h"
 #include "memory/virtual/sv32.h"
 
@@ -34,7 +35,7 @@ TLB::TLB(
     num_sets_ = tlb_config.get_tlb_num_sets();
     associativity_ = tlb_config.get_tlb_associativity();
     auto pol = tlb_config.get_tlb_replacement_policy();
-    repl_policy = make_tlb_policy(static_cast<TLBPolicyKind>(pol), associativity_, num_sets_);
+    repl_policy = CachePolicy::get_policy_instance(pol, associativity_, num_sets_);
     table.clear();
     table.resize(num_sets_);
     for (size_t s = 0; s < num_sets_; ++s) {
@@ -231,7 +232,7 @@ TLB::translate_virtual_to_physical(AddressWithMode vaddr, AccessEffects ae_type)
 
             uint64_t pbase = ent->phys.get_raw() & ~PAGE_MASK;
             if (ae_type != ae::INTERNAL) {
-                repl_policy->notify_access(ent_set, w, /*valid=*/true);
+                repl_policy->update_stats(w, ent_set, /*valid=*/true);
                 hit_count_++;
                 emit hit_update(hit_count_);
                 if (!ent->a() || (!ent->d() && mode.opkind() == AccessOp::WRITE)) break;
@@ -285,7 +286,7 @@ TLB::translate_virtual_to_physical(AddressWithMode vaddr, AccessEffects ae_type)
 
     // Cache the resolved mapping in the TLB
     if (ent == nullptr) {
-        ent_way = repl_policy->select_way(ent_set);
+        ent_way = repl_policy->select_way_to_evict(ent_set);
         ent = &table[ent_set][ent_way];
         miss_count_++;
         emit miss_update(miss_count_);
@@ -311,7 +312,7 @@ TLB::translate_virtual_to_physical(AddressWithMode vaddr, AccessEffects ae_type)
     ent->A = res.leaf_pte->a();
     ent->D = res.leaf_pte->d();
     ent->pte_pbmt = res.leaf_pte->pbmt();
-    repl_policy->notify_access(ent_set, ent_way, /*valid=*/true);
+    repl_policy->update_stats(ent_way, ent_set, /*valid=*/true);
     emit tlb_update(
         static_cast<unsigned>(ent_way), static_cast<unsigned>(ent_set), true, ent->asid, ent->vpn,
         phys_base, ent->r(), ent->w(), ent->x(), ent->u(), ent->g(), ent->a(), ent->d());

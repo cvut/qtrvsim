@@ -8,20 +8,26 @@
 
 namespace machine {
 
+std::unique_ptr<CachePolicy> CachePolicy::get_policy_instance(
+    CacheConfig::ReplacementPolicy policy,
+    unsigned associativity,
+    unsigned set_count) {
+    switch (policy) {
+    case CacheConfig::RP_RAND: return std::make_unique<CachePolicyRAND>(associativity);
+    case CacheConfig::RP_LRU: return std::make_unique<CachePolicyLRU>(associativity, set_count);
+    case CacheConfig::RP_LFU: return std::make_unique<CachePolicyLFU>(associativity, set_count);
+    case CacheConfig::RP_PLRU: return std::make_unique<CachePolicyPLRU>(associativity, set_count);
+    case CacheConfig::RP_NMRU: return std::make_unique<CachePolicyNMRU>(associativity, set_count);
+    default: return { nullptr };
+    }
+
+    Q_UNREACHABLE();
+}
+
 std::unique_ptr<CachePolicy> CachePolicy::get_policy_instance(const CacheConfig *config) {
     if (config->enabled()) {
-        switch (config->replacement_policy()) {
-        case CacheConfig::RP_RAND:
-            return std::make_unique<CachePolicyRAND>(config->associativity());
-        case CacheConfig::RP_LRU:
-            return std::make_unique<CachePolicyLRU>(config->associativity(), config->set_count());
-        case CacheConfig::RP_LFU:
-            return std::make_unique<CachePolicyLFU>(config->associativity(), config->set_count());
-        case CacheConfig::RP_PLRU:
-            return std::make_unique<CachePolicyPLRU>(config->associativity(), config->set_count());
-        case CacheConfig::RP_NMRU:
-            return std::make_unique<CachePolicyNMRU>(config->associativity(), config->set_count());
-        }
+        return get_policy_instance(
+            config->replacement_policy(), config->associativity(), config->set_count());
     } else {
         // Disabled cache will never use it.
         return { nullptr };

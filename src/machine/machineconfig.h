@@ -96,24 +96,17 @@ public:
 
     enum VmMode { VM_BARE, VM_SV32 };
 
-    enum ReplacementPolicy {
-        RP_RAND, // Random
-        RP_LRU,  // Least recently used
-        RP_LFU,  // Least frequently used
-        RP_PLRU  // Pseudo Least recently used
-    };
-
     // Virtual Memory
     void set_vm_asid(uint32_t a);
     uint32_t get_vm_asid() const;
 
     void set_tlb_num_sets(unsigned);
     void set_tlb_associativity(unsigned);
-    void set_tlb_replacement_policy(ReplacementPolicy);
+    void set_tlb_replacement_policy(CacheConfig::ReplacementPolicy);
 
     unsigned get_tlb_num_sets() const;
     unsigned get_tlb_associativity() const;
-    ReplacementPolicy get_tlb_replacement_policy() const;
+    CacheConfig::ReplacementPolicy get_tlb_replacement_policy() const;
 
     bool operator==(const TLBConfig &c) const;
     bool operator!=(const TLBConfig &c) const;
@@ -123,7 +116,7 @@ private:
     uint32_t vm_asid = 0;
     unsigned n_sets = 1;
     unsigned d_associativity = 1;
-    enum ReplacementPolicy replac_pol = RP_RAND;
+    enum CacheConfig::ReplacementPolicy replac_pol = CacheConfig::RP_RAND;
 };
 
 class MachineConfig {
