@@ -189,6 +189,8 @@ void NewDialog::cancel() {
 void NewDialog::create() {
     auto *p_window = (MainWindow *)parent();
 
+    store_settings(); // Save to settings
+
     try {
         p_window->create_core(*config, true, false);
     } catch (const machine::SimulatorExceptionInput &e) {
@@ -198,22 +200,21 @@ void NewDialog::create() {
         return;
     }
 
-    store_settings(); // Save to settings
     this->close();
 }
 
 void NewDialog::create_empty() {
     auto *p_window = (MainWindow *)parent();
-    p_window->create_core(*config, false, true);
     store_settings(); // Save to settings
+    p_window->create_core(*config, false, true);
     this->close();
 }
 
 void NewDialog::create_example() {
     auto *p_window = (MainWindow *)parent();
     QString example(":/samples/template.S");
-    p_window->create_core(*config, false, true);
     store_settings(); // Save to settings
+    p_window->create_core(*config, false, true);
     p_window->close_source_by_name(example, false);
     p_window->example_source(example);
     p_window->show_program();
@@ -715,6 +716,11 @@ void NewDialog::load_settings() {
     }
 
     config_gui();
+
+    ui->editor_show_line_numbers->setChecked(
+        settings->value("EditorShowLineNumbers", true).toBool());
+    ui->editor_highlight_line->setChecked(settings->value("viewFollowExecution", true).toBool());
+    ui->editor_auto_open->setChecked(settings->value("EditorAutoOpen", false).toBool());
 }
 
 void NewDialog::store_settings() {
@@ -726,6 +732,10 @@ void NewDialog::store_settings() {
     } else {
         settings->setValue("Preset", preset_number());
     }
+
+    settings->setValue("EditorShowLineNumbers", ui->editor_show_line_numbers->isChecked());
+    settings->setValue("viewFollowExecution", ui->editor_highlight_line->isChecked());
+    settings->setValue("EditorAutoOpen", ui->editor_auto_open->isChecked());
 }
 
 NewDialogCacheHandler::NewDialogCacheHandler(NewDialog *nd, Ui::NewDialogCache *cui) : Super(nd) {

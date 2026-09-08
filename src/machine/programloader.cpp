@@ -4,7 +4,9 @@
 #include "common/logging.h"
 #include "simulator_exception.h"
 
+#include <dwarf/dwarf++.hh>
 #include <exception>
+#include <map>
 #include <stdexcept>
 #include <sys/types.h>
 
@@ -173,4 +175,41 @@ Endian ProgramLoader::get_endian() const {
 
 ArchitectureType ProgramLoader::get_architecture_type() const {
     return architecture_type;
+}
+
+void ProgramLoader::load_debug_info(debuginfo::DebugInfo &debug_info) {
+#ifdef __SANITIZE_ADDRESS__
+    // There is a ref-counting cycle in libelfin that causes memory leaks.
+    __lsan_disable();
+#endif
+    try {
+        dwarf::dwarf dwarf(dwarf::elf::create_loader(elf_file));
+
+        for (auto &cu : dwarf.compilation_units()) {
+            // Map from DWARF file index to debuginfo::FileId for the current CU
+            std::map<unsigned, debuginfo::FileId> file_map;
+
+            for (auto &entry : cu.get_line_table()) {
+                if (entry.file && !entry.file->path.empty()) {
+                    debuginfo::FileId file_id;
+                    auto it = file_map.find(entry.file_index);
+                    if (it != file_map.end()) {
+                        file_id = it->second;
+                    } else {
+                        file_id = debug_info.get_file_id(entry.file->path);
+                        file_map[entry.file_index] = file_id;
+                    }
+                    debug_info.add_line(entry.address, file_id, entry.line);
+                }
+            }
+        }
+
+        debug_info.finalize();
+    } catch (const std::exception &e) {
+        // It is not critical if we fail to load debug info
+        WARN("Failed to load debug info: %s", e.what());
+    }
+#ifdef __SANITIZE_ADDRESS__
+    __lsan_enable();
+#endif
 }

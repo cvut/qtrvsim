@@ -24,6 +24,7 @@ ProgramTableView::ProgramTableView(QWidget *parent, QSettings *settings) : Super
     need_addr0_save = false;
     address_digits = 8;
     setTextElideMode(Qt::ElideNone);
+    setMouseTracking(true);
 }
 
 void ProgramTableView::addr0_save_change(machine::Address val) {
@@ -198,4 +199,14 @@ void ProgramTableView::set_address_digits(int value) {
     if (value > 16) value = 16;
     address_digits = value;
     adjustColumnCount();
+}
+
+void ProgramTableView::mouseMoveEvent(QMouseEvent *event) {
+    QModelIndex index = indexAt(event->pos());
+    if (index.isValid() && index.column() == 1) {
+        setCursor(Qt::PointingHandCursor);
+    } else {
+        setCursor(Qt::ArrowCursor);
+    }
+    Super::mouseMoveEvent(event);
 }
