@@ -859,9 +859,9 @@ void MainWindow::compile_source() {
         [this](const QString &name, const QString &file, int line) {
             (void)file;
             (void)line;
-            if (!QString::compare(name, "core", Qt::CaseInsensitive) && (editor_tabs != nullptr)
-                && (coreview != nullptr)) {
-                editor_tabs->setCurrentWidget(coreview.data());
+            if (!QString::compare(name, "core", Qt::CaseInsensitive)
+                && (central_widget_tabs != nullptr) && (coreview != nullptr)) {
+                central_widget_tabs->setCurrentWidget(coreview.data());
             }
         });
     connect(
