@@ -145,7 +145,8 @@ target_include_directories(gui_lib
         PUBLIC
         . windows/coreview
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gui_lib_autogen/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gui_lib_autogen/include_$<CONFIG>>)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/gui_lib_autogen/include_$<CONFIG>>
+        PRIVATE "${GENERATED_INCLUDE_PATH}")
 target_link_libraries(gui_lib
         PUBLIC ${QtLib}::Core ${QtLib}::Widgets ${QtLib}::Gui ${QtLib}::Network
         PUBLIC machine os_emulation assembler svgscene)

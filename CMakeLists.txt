@@ -94,6 +94,8 @@ set(MAIN_PROJECT_HOMEPAGE_URL "${PROJECT_HOMEPAGE_URL}")
 string(TOLOWER "${PROJECT_NAME}" MAIN_PROJECT_NAME_LOWER)
 string(TOUPPER "${PROJECT_NAME}" MAIN_PROJECT_NAME_UPPER)
 
+set(GENERATED_INCLUDE_PATH "${CMAKE_BINARY_DIR}/target/include")
+
 # =============================================================================
 # CMake config and tools
 # =============================================================================
@@ -354,4 +356,6 @@ if ("${DEV_MODE}")
             WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/pkg)
 endif ()
 
-configure_file(src/project_info.h.in ${CMAKE_CURRENT_LIST_DIR}/src/project_info.h @ONLY)
+make_directory ( "${GENERATED_INCLUDE_PATH}" )
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/project_info.h.in"
+        "${GENERATED_INCLUDE_PATH}/project_info.h" @ONLY)
