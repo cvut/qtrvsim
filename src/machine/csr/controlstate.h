@@ -264,9 +264,7 @@ namespace machine { namespace CSR {
                     "Make eXecutable Readable (alias of mstatus.MXR)" };
             static constexpr RegisterFieldDesc UXL
                 = { "UXL", Id::SSTATUS, { 2, 32 }, "User mode XLEN (RV64 only) (alias)" };
-            static constexpr RegisterFieldDesc SXL
-                = { "SXL", Id::SSTATUS, { 2, 34 }, "Supervisor mode XLEN (RV64 only) (alias)" };
-            static constexpr const RegisterFieldDesc *fields[] = { &SIE, &SPIE, &SPP, &UXL, &SXL };
+            static constexpr const RegisterFieldDesc *fields[] = { &SIE, &SPIE, &SPP, &UXL };
             static constexpr unsigned count = sizeof(fields) / sizeof(fields[0]);
         } // namespace sstatus
         namespace satp {

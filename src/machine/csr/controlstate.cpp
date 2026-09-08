@@ -41,6 +41,7 @@ namespace machine { namespace CSR {
         if (xlen == Xlen::_64) {
             write_field_raw(Field::mstatus::UXL, 2);
             write_field_raw(Field::mstatus::SXL, 2);
+            write_field_raw(Field::sstatus::UXL, 2);
         }
     }
 
