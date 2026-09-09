@@ -6,11 +6,21 @@
 
 using namespace machine;
 
-Tracer::Tracer(Machine *machine) : core_state(machine->core()->get_state()) {
-    cycle_limit = 0;
+Tracer::Tracer(Machine *machine)
+    : core(machine->core())
+    , core_state(core->get_state()) {
     last_priv_lev = CSR::PrivilegeLevel::MACHINE;
+}
 
-    connect(machine->core(), &Core::step_done, this, &Tracer::step_output);
+void Tracer::start() {
+    if (started
+        || !(trace_fetch || trace_decode || trace_execute || trace_memory || trace_writeback
+             || trace_pc || trace_wrmem || trace_rdmem || trace_regs_gp || trace_exception
+             || trace_mode_change)) {
+        return;
+    }
+    connect(core, &Core::step_done, this, &Tracer::step_output);
+    started = true;
 }
 
 template<typename StageStruct>
@@ -64,8 +74,5 @@ void Tracer::step_output() {
                 get_privilege_level_name(core_state.current_privilege()));
             last_priv_lev = core_state.current_privilege();
         }
-    }
-    if ((cycle_limit != 0) && (core_state.cycle_count >= cycle_limit)) {
-        emit cycle_limit_reached();
     }
 }

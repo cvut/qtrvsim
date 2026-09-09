@@ -60,6 +60,76 @@ add_cli_test(
 )
 
 add_cli_test(
+        NAME machine-config
+        ARGS
+        --machine-config "${CMAKE_SOURCE_DIR}/tests/cli/machine-config/machine.json"
+        --asm "${CMAKE_SOURCE_DIR}/tests/cli/stalls/program.S"
+        --dump-registers
+        EXPECTED_OUTPUT "tests/cli/stalls/stdout.txt"
+)
+
+add_cli_test(
+        NAME cycle-limit
+        ARGS
+        --cycle-limit 5
+        --asm "${CMAKE_SOURCE_DIR}/tests/cli/stalls/program.S"
+        --dump-cycles
+        EXPECTED_OUTPUT "tests/cli/limits/cycle-stdout.txt"
+)
+
+add_cli_test(
+        NAME instruction-limit
+        ARGS
+        --pipelined
+        --instruction-limit 3
+        --asm "${CMAKE_SOURCE_DIR}/tests/cli/stalls/program.S"
+        --dump-cycles
+        EXPECTED_OUTPUT "tests/cli/limits/instruction-stdout.txt"
+)
+
+add_custom_target(
+        cli_test_limit-json
+        COMMAND ${CMAKE_COMMAND} -E make_directory "Testing"
+        COMMAND cli
+        --cycle-limit 5
+        --asm "${CMAKE_SOURCE_DIR}/tests/cli/stalls/program.S"
+        --dump-cycles
+        --dump-to-json "Testing/limit-report.json"
+        --disable-console-dump
+        COMMAND ${CMAKE_COMMAND} -E compare_files
+        "Testing/limit-report.json"
+        "${CMAKE_SOURCE_DIR}/tests/cli/limits/report.json"
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+        DEPENDS cli
+)
+add_test(
+        NAME cli_limit-json
+        COMMAND ${CMAKE_COMMAND} --build . --target cli_test_limit-json
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+)
+
+add_custom_target(
+        cli_test_os-exit
+        COMMAND ${CMAKE_COMMAND} -E make_directory "Testing"
+        COMMAND cli
+        --os-emulation
+        --asm "${CMAKE_SOURCE_DIR}/tests/cli/os-exit/program.S"
+        --dump-cycles
+        --dump-to-json "Testing/os-exit-report.json"
+        --disable-console-dump
+        COMMAND ${CMAKE_COMMAND} -E compare_files
+        "Testing/os-exit-report.json"
+        "${CMAKE_SOURCE_DIR}/tests/cli/os-exit/report.json"
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+        DEPENDS cli
+)
+add_test(
+        NAME cli_os-exit
+        COMMAND ${CMAKE_COMMAND} --build . --target cli_test_os-exit
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+)
+
+add_cli_test(
         NAME asm_error
         ARGS
         --asm "${CMAKE_SOURCE_DIR}/tests/cli/asm-error/program.S"

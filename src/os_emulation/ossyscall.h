@@ -64,6 +64,7 @@ public:
 signals:
     void char_written(int fd, unsigned int val);
     void rx_byte_pool(int fd, unsigned int &data, bool &available);
+    void program_exit(int status);
 
 private:
     enum FdMapping {

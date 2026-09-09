@@ -360,6 +360,9 @@ void MainWindow::create_core(
         connect(
             osemu_handler, &osemu::OsSyscallExceptionHandler::rx_byte_pool, terminal.data(),
             &TerminalDock::rx_byte_pool);
+        connect(
+            osemu_handler, &osemu::OsSyscallExceptionHandler::program_exit, machine.data(),
+            &machine::Machine::terminate_program);
         for (auto ecall_variat : ecall_variats) {
             machine->register_exception_handler(ecall_variat, osemu_handler);
             machine->set_step_over_exception(ecall_variat, true);
@@ -379,6 +382,9 @@ void MainWindow::create_core(
     connect(ui->actionRestart, &QAction::triggered, machine.data(), &machine::Machine::restart);
     connect(machine.data(), &machine::Machine::status_change, this, &MainWindow::machine_status);
     connect(machine.data(), &machine::Machine::program_exit, this, &MainWindow::machine_exit);
+    connect(
+        machine.data(), &machine::Machine::execution_limit_reached, this,
+        &MainWindow::machine_exit);
     connect(machine.data(), &machine::Machine::program_trap, this, &MainWindow::machine_trap);
     connect(
         machine.data(), &machine::Machine::report_core_frequency, this,
@@ -419,6 +425,10 @@ void MainWindow::create_core(
 
 bool MainWindow::configured() {
     return (machine != nullptr);
+}
+
+machine::Machine *MainWindow::current_machine() {
+    return machine.data();
 }
 
 void MainWindow::new_machine() {

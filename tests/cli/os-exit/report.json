@@ -1,0 +1,13 @@
+{
+    "cycles": {
+        "cycles": 3,
+        "instructions": 2,
+        "stalls": 0
+    },
+    "schema": "qtrvsim.cli-report",
+    "termination": {
+        "exit_code": 7,
+        "reason": "program_exit"
+    },
+    "version": 1
+}

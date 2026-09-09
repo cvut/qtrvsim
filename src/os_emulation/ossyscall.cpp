@@ -612,7 +612,9 @@ bool OsSyscallExceptionHandler::handle_exception(
     status = (this->*sdesc->handler)(
         result, core, syscall_num, a1.as_u64(), a2.as_u64(), a3.as_u64(), a4.as_u64(), a5.as_u64(),
         a6.as_u64());
-    if (known_syscall_stop) { emit core->stop_on_exception_reached(); }
+    if (known_syscall_stop && sdesc->handler != &OsSyscallExceptionHandler::do_sys_exit) {
+        emit core->stop_on_exception_reached();
+    }
 
     if (status < 0) {
         regs->write_gp(10, status);
@@ -811,7 +813,6 @@ int OsSyscallExceptionHandler::syscall_default_handler(
 #endif
     (void)core;
     (void)syscall_num;
-    (void)a1;
     (void)a2;
     (void)a3;
     (void)a4;
@@ -835,7 +836,6 @@ int OsSyscallExceptionHandler::do_sys_exit(
     uint64_t a6) {
     (void)core;
     (void)syscall_num;
-    (void)a1;
     (void)a2;
     (void)a3;
     (void)a4;
@@ -846,7 +846,7 @@ int OsSyscallExceptionHandler::do_sys_exit(
     int status = a1;
 
     printf("sys_exit status %d\n", status);
-    emit core->stop_on_exception_reached();
+    emit program_exit(status);
 
     return 0;
 }
