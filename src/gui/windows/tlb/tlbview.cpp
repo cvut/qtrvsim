@@ -4,6 +4,7 @@
 #include <QFont>
 #include <QPainter>
 #include <QString>
+#include <QtAlgorithms>
 
 static const int ROW_HEIGHT = 16;
 static const int VCOL_WIDTH = 18;
@@ -13,7 +14,7 @@ static const int FIELD_WIDTH = 120;
 TLBAddressBlock::TLBAddressBlock(machine::TLB *tlb, unsigned width) {
     this->width = width;
     rows = tlb->get_config().get_tlb_num_sets();
-    s_row = rows > 1 ? (32 - __builtin_clz(rows - 1)) : 0;
+    s_row = rows > 1 ? (32 - qCountLeadingZeroBits((quint32)(rows - 1))) : 0;
     s_tag = 32 - s_row - 2;
     tag = 0;
     row = 0;
