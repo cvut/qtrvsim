@@ -4,7 +4,11 @@
 #include "common/logging.h"
 #include "simulator_exception.h"
 
+#include <QCoreApplication>
+#include <cstring>
+#include <dwarf/dwarf++.hh>
 #include <exception>
+#include <map>
 #include <stdexcept>
 #include <sys/types.h>
 
@@ -18,6 +22,42 @@ LOG_CATEGORY("machine.ProgramLoader");
 using namespace machine;
 
 constexpr int EM_RISCV = 243;
+
+namespace {
+
+template<typename T>
+T read_dwarf_header(const unsigned char *data, size_t size, size_t &offset, Endian endian) {
+    if (size - offset < sizeof(T)) { throw dwarf::format_error("truncated DWARF unit header"); }
+    T value;
+    std::memcpy(&value, data + offset, sizeof(value));
+    offset += sizeof(value);
+    return byteswap_if(value, endian != NATIVE_ENDIAN);
+}
+
+bool contains_dwarf5(const elf::section &section, Endian endian) {
+    const auto *data = static_cast<const unsigned char *>(section.data());
+    const size_t size = section.size();
+    if (size != 0 && data == nullptr) { throw dwarf::format_error("missing DWARF section data"); }
+    size_t offset = 0;
+    while (offset < size) {
+        uint64_t length = read_dwarf_header<uint32_t>(data, size, offset, endian);
+        if (length == 0) { continue; }
+        if (length == 0xffffffff) {
+            length = read_dwarf_header<uint64_t>(data, size, offset, endian);
+        } else if (length >= 0xfffffff0) {
+            throw dwarf::format_error("reserved DWARF unit length");
+        }
+        if (length < sizeof(uint16_t) || length > size - offset) {
+            throw dwarf::format_error("invalid DWARF unit length");
+        }
+        const size_t end = offset + static_cast<size_t>(length);
+        if (read_dwarf_header<uint16_t>(data, size, offset, endian) == 5) { return true; }
+        offset = end;
+    }
+    return false;
+}
+
+} // namespace
 
 class MemLoader : public elf::loader {
 public:
@@ -173,4 +213,79 @@ Endian ProgramLoader::get_endian() const {
 
 ArchitectureType ProgramLoader::get_architecture_type() const {
     return architecture_type;
+}
+
+QString ProgramLoader::load_debug_info(debuginfo::DebugInfo &debug_info) {
+    debug_info.clear();
+#ifdef __SANITIZE_ADDRESS__
+    // There is a ref-counting cycle in libelfin that causes memory leaks.
+    __lsan_disable();
+#endif
+    try {
+        for (const char *name : { ".debug_info", ".debug_line" }) {
+            const auto section = elf_file.get_section(name);
+            if (section.valid() && contains_dwarf5(section, get_endian())) {
+                const auto warning = QCoreApplication::translate(
+                    "ProgramLoader",
+                    "DWARF 5 is not supported. Rebuild with -gdwarf-4 for source tracing. "
+                    "The program can still run.");
+#ifdef __SANITIZE_ADDRESS__
+                __lsan_enable();
+#endif
+                return warning;
+            }
+        }
+
+        debuginfo::DebugInfo loaded;
+        dwarf::dwarf dwarf(dwarf::elf::create_loader(elf_file));
+
+        for (auto &cu : dwarf.compilation_units()) {
+            // Map from DWARF file index to debuginfo::FileId for the current CU
+            std::map<unsigned, debuginfo::FileId> file_map;
+            bool sequence_open = false;
+            const auto &table = cu.get_line_table();
+            auto it = table.begin();
+
+            for (; it != table.end(); ++it) {
+                const auto &entry = *it;
+                if (entry.end_sequence) {
+                    loaded.add_end_sequence(entry.address);
+                    sequence_open = false;
+                    continue;
+                }
+                sequence_open = true;
+                const char *path = nullptr;
+                if (entry.file && !entry.file->path.empty()) {
+                    path = entry.file->path.c_str();
+                } else {
+                    path = "<unknown>";
+                }
+
+                debuginfo::FileId file_id;
+                auto map_it = file_map.find(entry.file_index);
+                if (map_it != file_map.end()) {
+                    file_id = map_it->second;
+                } else {
+                    file_id = loaded.get_file_id(path);
+                    file_map[entry.file_index] = file_id;
+                }
+                loaded.add_line(entry.address, file_id, entry.line);
+            }
+            if (sequence_open && it->end_sequence) {
+                loaded.add_end_sequence(it->address);
+                sequence_open = false;
+            }
+            if (sequence_open) { throw dwarf::format_error("unterminated line table sequence"); }
+        }
+
+        loaded.finalize();
+        debug_info = std::move(loaded);
+    } catch (const std::exception &e) {
+        // It is not critical if we fail to load debug info
+        WARN("Failed to load debug info: %s", e.what());
+    }
+#ifdef __SANITIZE_ADDRESS__
+    __lsan_enable();
+#endif
+    return {};
 }

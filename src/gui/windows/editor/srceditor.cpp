@@ -20,6 +20,10 @@
 
 LOG_CATEGORY("gui.src_editor");
 
+namespace {
+constexpr int HIGHLIGHT_KIND = QTextFormat::UserProperty;
+}
+
 SrcEditor::SrcEditor(QWidget *parent) : Super(parent), line_number_area(new LineNumberArea(this)) {
     QFont font1;
     saveAsRequiredFl = true;
@@ -42,8 +46,10 @@ SrcEditor::SrcEditor(QWidget *parent) : Super(parent), line_number_area(new Line
     connect(this, &SrcEditor::blockCountChanged, this, &SrcEditor::updateMargins);
     connect(this, &SrcEditor::updateRequest, this, &SrcEditor::updateLineNumberArea);
 
-    // Clear error highlight on typing
-    connect(this, &SrcEditor::textChanged, [this]() { setExtraSelections({}); });
+    // Clear line highlights on typing.
+    connect(document(), &QTextDocument::contentsChange, this, [this](int, int removed, int added) {
+        if (removed != 0 || added != 0) { setExtraSelections({}); }
+    });
 
     updateMargins(0);
 }
@@ -105,11 +111,43 @@ void SrcEditor::setCursorToLine(int ln) {
     setTextCursor(cursor);
 }
 
-void SrcEditor::setCursorTo(int ln, int col) {
+void SrcEditor::setCursorTo(int ln, int col, bool center) {
     QTextCursor cursor(document()->findBlockByNumber(ln - 1));
     cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::MoveAnchor, col - 1);
     setTextCursor(cursor);
     setFocus();
+    if (center) { centerCursor(); }
+}
+
+QList<QTextEdit::ExtraSelection> SrcEditor::selectionsWithout(LineHighlight kind) const {
+    QList<QTextEdit::ExtraSelection> selections;
+    for (const auto &selection : extraSelections()) {
+        if (!selection.format.hasProperty(HIGHLIGHT_KIND)
+            || selection.format.intProperty(HIGHLIGHT_KIND) != static_cast<int>(kind)) {
+            selections.append(selection);
+        }
+    }
+    return selections;
+}
+
+void SrcEditor::setLineHighlight(LineHighlight kind, const QColor &color) {
+    auto selections = selectionsWithout(kind);
+    QTextEdit::ExtraSelection selection;
+    selection.format.setBackground(color);
+    selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+    selection.format.setProperty(HIGHLIGHT_KIND, static_cast<int>(kind));
+    selection.cursor = textCursor();
+    selection.cursor.clearSelection();
+    if (kind == LineHighlight::Execution) {
+        selections.prepend(selection);
+    } else {
+        selections.append(selection);
+    }
+    setExtraSelections(selections);
+}
+
+void SrcEditor::clearLineHighlight(LineHighlight kind) {
+    setExtraSelections(selectionsWithout(kind));
 }
 
 bool SrcEditor::isModified() const {

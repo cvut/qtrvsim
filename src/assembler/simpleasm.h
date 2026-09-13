@@ -1,6 +1,7 @@
 #ifndef SIMPLEASM_H
 #define SIMPLEASM_H
 
+#include "debuginfo/debuginfo.h"
 #include "fixmatheval.h"
 #include "machine/machine.h"
 #include "machine/memory/frontend_memory.h"
@@ -54,7 +55,8 @@ public:
         machine::FrontendMemory *mem,
         SymbolTableDb *symtab,
         machine::Address address,
-        machine::Xlen xlen);
+        machine::Xlen xlen,
+        debuginfo::DebugInfo *debug_info = nullptr);
     bool process_line(
         const QString &line,
         const QString &filename = "",
@@ -72,6 +74,7 @@ protected:
     bool error_occured {};
     bool fatal_occured {};
     SymbolTableDb *symtab {};
+    BORROWED debuginfo::DebugInfo *debug_info {};
     machine::Address next_instr_dest_addr {};
 
 private:

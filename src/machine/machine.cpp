@@ -25,11 +25,16 @@ Machine::Machine(MachineConfig config, bool load_symtab, bool load_executable)
 
         if (load_symtab) { symtab.reset(program.get_symbol_table()); }
 
+        debug_info.reset(new debuginfo::DebugInfo());
+        debug_info_warning = program.load_debug_info(*debug_info);
+        debug_info_program_only.reset(new debuginfo::DebugInfo(*debug_info));
+
         program_end = program.end();
         regs->write_pc(program.get_executable_entry());
         mem.reset(new Memory(*mem_program_only));
     } else {
         mem.reset(new Memory(machine_config.get_simulated_endian()));
+        debug_info.reset(new debuginfo::DebugInfo());
     }
 
     data_bus.reset(new MemoryDataBus(machine_config.get_simulated_endian()));
@@ -195,6 +200,8 @@ Machine::~Machine() {
     cch_level2.reset();
     data_bus.reset();
     mem_program_only.reset();
+    debug_info_program_only.reset();
+    debug_info.reset();
     symtab.reset();
     predictor.reset();
 }
@@ -302,6 +309,14 @@ SymbolTable *Machine::symbol_table_rw(bool create) {
 
 const SymbolTable *Machine::symbol_table(bool create) {
     return symbol_table_rw(create);
+}
+
+debuginfo::DebugInfo *Machine::get_debug_info() {
+    return debug_info.data();
+}
+
+const QString &Machine::get_debug_info_warning() const {
+    return debug_info_warning;
 }
 
 void Machine::set_symbol(
@@ -435,8 +450,13 @@ void Machine::step_timer() {
 
 void Machine::restart() {
     pause();
+    if (!mem_program_only.isNull()) {
+        mem->reset(*mem_program_only);
+        if (!debug_info_program_only.isNull() && !debug_info.isNull()) {
+            *debug_info = *debug_info_program_only;
+        }
+    }
     regs->reset();
-    if (!mem_program_only.isNull()) { mem->reset(*mem_program_only); }
     cch_program->reset();
     cch_data->reset();
     cch_level2->reset();

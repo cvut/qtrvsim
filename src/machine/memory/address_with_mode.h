@@ -84,10 +84,12 @@ public:
     void set_uncached(uint8_t val) noexcept { mode.set_uncached(val); }
 
     constexpr bool operator==(const AddressWithMode &other) const noexcept {
-        return static_cast<const Address&>(*this) == static_cast<const Address&>(other)
+        return static_cast<const Address &>(*this) == static_cast<const Address &>(other)
                && mode.raw() == other.mode.raw();
     }
-    constexpr bool operator!=(const AddressWithMode &other) const noexcept { return !(*this == other); }
+    constexpr bool operator!=(const AddressWithMode &other) const noexcept {
+        return !(*this == other);
+    }
 
     constexpr std::pair<Address, AccessMode> unpack() const noexcept {
         return { Address(get_raw()), mode };
