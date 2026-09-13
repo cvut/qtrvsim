@@ -405,7 +405,8 @@ jobs:
       - name: Checkout stud-support
         if: ${{ steps.cache-stud-support.outputs.cache-hit != 'true' }}
         run: |
-          git clone https://gitlab.fel.cvut.cz/b35apo/stud-support.git stud-support
+          # Temporary stopgap: clone from GitHub mirror because gitlab.fel.cvut.cz blocks GitHub Actions runners
+          git clone https://github.com/jdupak/stud-support.git stud-support
           cd stud-support
           git checkout ${{ env.STUD_SUPPORT_REV }}
 
