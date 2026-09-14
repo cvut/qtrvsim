@@ -191,8 +191,8 @@ private:
     bool ignore_unsaved = false;
 
 #ifdef WITH_PRINTING
-    QPrinter printer { QPrinter::HighResolution };
-    QPrintDialog print_dialog { &printer, this };
+    Box<QPrinter> printer {};
+    Box<QPrintDialog> print_dialog {};
 #endif
 };
 
