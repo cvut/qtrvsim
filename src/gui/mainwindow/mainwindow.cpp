@@ -480,8 +480,12 @@ void MainWindow::machine_reload(bool force_memory_reset, bool force_elf_load) {
 
 void MainWindow::print_action() {
 #ifdef WITH_PRINTING
-    printer.setColorMode(QPrinter::Color);
-    if (print_dialog.exec() == QDialog::Accepted) {
+    if (printer.isNull()) {
+        printer.reset(new QPrinter(QPrinter::HighResolution));
+        print_dialog.reset(new QPrintDialog(printer.data(), this));
+    }
+    printer->setColorMode(QPrinter::Color);
+    if (print_dialog->exec() == QDialog::Accepted) {
         // This vector pre-drawing step is required because Qt fallbacks to
         // bitmap and produces extremely large and slow to render files.
         // (https://forum.qt.io/topic/21330/printing-widgets-not-as-bitmap-but-in-a-vector-based-format/3)
@@ -494,8 +498,8 @@ void MainWindow::print_action() {
 
         // Prepare printer for PDF printing with appropriate resize.
         QRectF scene_rect = corescene->sceneRect();
-        if (printer.outputFormat() == QPrinter::PdfFormat && (scene_rect.height() != 0)) {
-            QPageLayout layout = printer.pageLayout();
+        if (printer->outputFormat() == QPrinter::PdfFormat && (scene_rect.height() != 0)) {
+            QPageLayout layout = printer->pageLayout();
             layout.setOrientation(QPageLayout::Portrait);
             QPageSize pagesize = layout.pageSize();
             QRectF paint_rect = layout.paintRect(QPageLayout::Point);
@@ -511,12 +515,12 @@ void MainWindow::print_action() {
             }
             pagesize = QPageSize(pointsize, "custom", QPageSize::ExactMatch);
             layout.setPageSize(pagesize, layout.margins());
-            printer.setPageLayout(layout);
+            printer->setPageLayout(layout);
         }
 
-        QPainter painter(&printer);
+        QPainter painter(printer.data());
         // scale to fit paint size
-        QRectF paint_rect = printer.pageLayout().paintRect(QPageLayout::Millimeter);
+        QRectF paint_rect = printer->pageLayout().paintRect(QPageLayout::Millimeter);
         double xscale = paint_rect.width() / scene_as_vector.widthMM();
         double yscale = paint_rect.height() / scene_as_vector.heightMM();
         double scale = qMin(xscale, yscale);
