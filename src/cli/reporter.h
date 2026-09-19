@@ -62,7 +62,7 @@ public slots:
 private slots:
     void machine_exit();
     void machine_trap(machine::SimulatorException &e);
-    void machine_exception_reached();
+    void machine_exception_reached(machine::ExceptionCause excause);
 
 private:
     BORROWED QCoreApplication *const app;

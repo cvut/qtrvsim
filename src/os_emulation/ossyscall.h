@@ -17,8 +17,9 @@ namespace osemu {
 
 #define OSSYCALL_HANDLER_DECLARE(name)                                                             \
     int name(                                                                                      \
-        uint64_t &result, machine::Core *core, uint64_t syscall_num, uint64_t a1, uint64_t a2,     \
-        uint64_t a3, uint64_t a4, uint64_t a5, uint64_t a6)
+        uint64_t &result, machine::Core *core, machine::ExceptionCause excause,                    \
+        uint64_t syscall_num, uint64_t a1, uint64_t a2, uint64_t a3, uint64_t a4, uint64_t a5,     \
+        uint64_t a6)
 
 class OsSyscallExceptionHandler : public machine::ExceptionHandler {
     Q_OBJECT

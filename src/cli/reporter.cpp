@@ -32,8 +32,7 @@ void Reporter::machine_exit() {
     }
 }
 
-void Reporter::machine_exception_reached() {
-    ExceptionCause excause = machine->get_exception_cause();
+void Reporter::machine_exception_reached(ExceptionCause excause) {
     printf("Machine stopped on %s exception.\n", get_exception_name(excause));
     report();
     exit(0);

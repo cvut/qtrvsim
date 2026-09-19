@@ -99,7 +99,7 @@ protected:
     MemoryInterstage &mem_wb;
 
 signals:
-    void stop_on_exception_reached();
+    void stop_on_exception_reached(ExceptionCause excause);
     void step_started();
     void step_done(const CoreState &);
 

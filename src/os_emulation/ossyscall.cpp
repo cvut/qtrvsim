@@ -511,6 +511,7 @@ int status_from_result(uint32_t result) {
 typedef int (OsSyscallExceptionHandler::*syscall_handler_t)(
     uint64_t &result,
     Core *core,
+    ExceptionCause excause,
     uint64_t syscall_num,
     uint64_t a1,
     uint64_t a2,
@@ -610,9 +611,9 @@ bool OsSyscallExceptionHandler::handle_exception(
 
 #endif
     status = (this->*sdesc->handler)(
-        result, core, syscall_num, a1.as_u64(), a2.as_u64(), a3.as_u64(), a4.as_u64(), a5.as_u64(),
-        a6.as_u64());
-    if (known_syscall_stop) { emit core->stop_on_exception_reached(); }
+        result, core, excause, syscall_num, a1.as_u64(), a2.as_u64(), a3.as_u64(), a4.as_u64(),
+        a5.as_u64(), a6.as_u64());
+    if (known_syscall_stop) { emit core->stop_on_exception_reached(excause); }
 
     if (status < 0) {
         regs->write_gp(10, status);
@@ -794,6 +795,7 @@ QString OsSyscallExceptionHandler::filepath_to_host(QString path) {
 int OsSyscallExceptionHandler::syscall_default_handler(
     uint64_t &result,
     Core *core,
+    ExceptionCause excause,
     uint64_t syscall_num,
     uint64_t a1,
     uint64_t a2,
@@ -818,7 +820,7 @@ int OsSyscallExceptionHandler::syscall_default_handler(
     (void)a5;
     (void)a6;
     result = 0;
-    if (unknown_syscall_stop) emit core->stop_on_exception_reached();
+    if (unknown_syscall_stop) emit core->stop_on_exception_reached(excause);
     return TARGET_ENOSYS;
 }
 
@@ -826,6 +828,7 @@ int OsSyscallExceptionHandler::syscall_default_handler(
 int OsSyscallExceptionHandler::do_sys_exit(
     uint64_t &result,
     Core *core,
+    ExceptionCause excause,
     uint64_t syscall_num,
     uint64_t a1,
     uint64_t a2,
@@ -846,7 +849,7 @@ int OsSyscallExceptionHandler::do_sys_exit(
     int status = a1;
 
     printf("sys_exit status %d\n", status);
-    emit core->stop_on_exception_reached();
+    emit core->stop_on_exception_reached(excause);
 
     return 0;
 }
@@ -855,6 +858,7 @@ int OsSyscallExceptionHandler::do_sys_exit(
 int OsSyscallExceptionHandler::do_sys_writev(
     uint64_t &result,
     Core *core,
+    ExceptionCause excause,
     uint64_t syscall_num,
     uint64_t a1,
     uint64_t a2,
@@ -863,6 +867,7 @@ int OsSyscallExceptionHandler::do_sys_writev(
     uint64_t a5,
     uint64_t a6) {
     (void)core;
+    (void)excause;
     (void)syscall_num;
     (void)a1;
     (void)a2;
@@ -909,6 +914,7 @@ int OsSyscallExceptionHandler::do_sys_writev(
 int OsSyscallExceptionHandler::do_sys_write(
     uint64_t &result,
     Core *core,
+    ExceptionCause excause,
     uint64_t syscall_num,
     uint64_t a1,
     uint64_t a2,
@@ -917,6 +923,7 @@ int OsSyscallExceptionHandler::do_sys_write(
     uint64_t a5,
     uint64_t a6) {
     (void)core;
+    (void)excause;
     (void)syscall_num;
     (void)a1;
     (void)a2;
@@ -953,6 +960,7 @@ int OsSyscallExceptionHandler::do_sys_write(
 int OsSyscallExceptionHandler::do_sys_readv(
     uint64_t &result,
     Core *core,
+    ExceptionCause excause,
     uint64_t syscall_num,
     uint64_t a1,
     uint64_t a2,
@@ -961,6 +969,7 @@ int OsSyscallExceptionHandler::do_sys_readv(
     uint64_t a5,
     uint64_t a6) {
     (void)core;
+    (void)excause;
     (void)syscall_num;
     (void)a1;
     (void)a2;
@@ -1007,6 +1016,7 @@ int OsSyscallExceptionHandler::do_sys_readv(
 int OsSyscallExceptionHandler::do_sys_read(
     uint64_t &result,
     Core *core,
+    ExceptionCause excause,
     uint64_t syscall_num,
     uint64_t a1,
     uint64_t a2,
@@ -1015,6 +1025,7 @@ int OsSyscallExceptionHandler::do_sys_read(
     uint64_t a5,
     uint64_t a6) {
     (void)core;
+    (void)excause;
     (void)syscall_num;
     (void)a1;
     (void)a2;
@@ -1052,6 +1063,7 @@ int OsSyscallExceptionHandler::do_sys_read(
 int OsSyscallExceptionHandler::do_sys_openat(
     uint64_t &result,
     Core *core,
+    ExceptionCause excause,
     uint64_t syscall_num,
     uint64_t a1,
     uint64_t a2,
@@ -1071,7 +1083,7 @@ int OsSyscallExceptionHandler::do_sys_openat(
     result = 0;
     if (int64_t(a1) != TARGET_AT_FDCWD) {
         printf("Unimplemented openat argument a1 %" PRId64 "\n", a1);
-        if (unknown_syscall_stop) { emit core->stop_on_exception_reached(); }
+        if (unknown_syscall_stop) { emit core->stop_on_exception_reached(excause); }
         return TARGET_ENOSYS;
     }
     Address pathname_ptr = Address(core->get_xlen_from_reg(a2));
@@ -1099,6 +1111,7 @@ int OsSyscallExceptionHandler::do_sys_openat(
 int OsSyscallExceptionHandler::do_sys_close(
     uint64_t &result,
     Core *core,
+    ExceptionCause excause,
     uint64_t syscall_num,
     uint64_t a1,
     uint64_t a2,
@@ -1107,6 +1120,7 @@ int OsSyscallExceptionHandler::do_sys_close(
     uint64_t a5,
     uint64_t a6) {
     (void)core;
+    (void)excause;
     (void)syscall_num;
     (void)a1;
     (void)a2;
@@ -1137,6 +1151,7 @@ int OsSyscallExceptionHandler::do_sys_close(
 int OsSyscallExceptionHandler::do_sys_ftruncate(
     uint64_t &result,
     Core *core,
+    ExceptionCause excause,
     uint64_t syscall_num,
     uint64_t a1,
     uint64_t a2,
@@ -1145,6 +1160,7 @@ int OsSyscallExceptionHandler::do_sys_ftruncate(
     uint64_t a5,
     uint64_t a6) {
     (void)core;
+    (void)excause;
     (void)syscall_num;
     (void)a1;
     (void)a2;
@@ -1175,6 +1191,7 @@ int OsSyscallExceptionHandler::do_sys_ftruncate(
 int OsSyscallExceptionHandler::do_sys_brk(
     uint64_t &result,
     Core *core,
+    ExceptionCause excause,
     uint64_t syscall_num,
     uint64_t a1,
     uint64_t a2,
@@ -1183,6 +1200,7 @@ int OsSyscallExceptionHandler::do_sys_brk(
     uint64_t a5,
     uint64_t a6) {
     (void)core;
+    (void)excause;
     (void)syscall_num;
     (void)a1;
     (void)a2;
@@ -1204,6 +1222,7 @@ int OsSyscallExceptionHandler::do_sys_brk(
 int OsSyscallExceptionHandler::do_sys_mmap(
     uint64_t &result,
     Core *core,
+    ExceptionCause excause,
     uint64_t syscall_num,
     uint64_t a1,
     uint64_t a2,
@@ -1212,6 +1231,7 @@ int OsSyscallExceptionHandler::do_sys_mmap(
     uint64_t a5,
     uint64_t a6) {
     (void)core;
+    (void)excause;
     (void)syscall_num;
     (void)a1;
     (void)a2;

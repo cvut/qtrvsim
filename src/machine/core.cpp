@@ -178,7 +178,7 @@ bool Core::handle_exception(
     if (excause == EXCAUSE_HWBREAK) {
         regs->write_pc(inst_addr);
         if (get_stop_on_exception(excause)) {
-            emit stop_on_exception_reached();
+            emit stop_on_exception_reached(excause);
             return true;
         }
     }
@@ -246,7 +246,7 @@ bool Core::handle_exception(
             this, regs, excause, inst_addr, next_addr, jump_branch_pc, fault_data_addr);
     }
 
-    if (get_stop_on_exception(excause)) { emit stop_on_exception_reached(); }
+    if (get_stop_on_exception(excause)) { emit stop_on_exception_reached(excause); }
 
     return ret;
 }
