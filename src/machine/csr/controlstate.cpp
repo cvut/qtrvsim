@@ -246,12 +246,13 @@ namespace machine { namespace CSR {
     ExceptionCause ControlState::core_interrupt_request(PrivilegeLevel current_priv) {
         uint64_t mie = register_data[Id::MIE].as_u64();
         uint64_t mip = register_data[Id::MIP].as_u64();
+        uint64_t mideleg = register_data[Id::MIDELEG].as_u64();
 
         uint64_t sie = register_data[Id::SIE].as_u64();
         uint64_t sip = register_data[Id::SIP].as_u64();
 
-        uint64_t m_pending = mip & mie;
-        uint64_t s_pending = sip & sie;
+        uint64_t m_pending = mip & mie & ~mideleg;
+        uint64_t s_pending = sip & sie & mideleg;
 
         if (m_pending != 0) {
             bool m_enabled = (current_priv < PrivilegeLevel::MACHINE)
