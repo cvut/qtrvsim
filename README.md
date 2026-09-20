@@ -55,8 +55,7 @@ Please, report any difficulties via [GitHub issues](https://github.com/cvut/qtrv
 
 ### Build Dependencies
 
-- Qt 5 (minimal tested version is 5.9.5), experimental support of Qt 6
-- elfutils (optional; libelf works too but there can be some problems)
+- Qt 6 or Qt 5 (minimal tested version is 5.9.5)
 
 Clone the repository with its recursive submodules:
 
@@ -64,10 +63,16 @@ Clone the repository with its recursive submodules:
 git clone --recurse-submodules https://github.com/cvut/qtrvsim.git
 ```
 
-For an existing checkout, initialize or repair the dependencies with:
+For an existing checkout, initialize or repair the dependencies by running next command in the source tree:
 
 ```shell
 git submodule update --init --recursive
+```
+
+For update in already existing GIT clone run:
+
+```shell
+git pull --recurse-submodules
 ```
 
 ### Quick Compilation on Linux
@@ -363,6 +368,9 @@ Following Control Status registers are recognized
 | Number | Name       | Description                                                         |
 |-------:|:-----------|:--------------------------------------------------------------------|
 |  0x300 | mstatus    | Machine status register. |
+|  0x301 | misa       | Machine ISA Register. |
+|  0x302 | medeleg    | Machine exception delegation register. |
+|  0x303 | mideleg    | Machine interrupt delegation register. |
 |  0x304 | mie        | Machine interrupt-enable register. |
 |  0x305 | mtvec      | Machine trap-handler base address. |
 |  0x340 | mscratch   | Scratch register for machine trap handlers. |
@@ -372,12 +380,21 @@ Following Control Status registers are recognized
 |  0x344 | mip        | Machine interrupt pending. |
 |  0x34A | mtinsr     | Machine trap instruction (transformed). |
 |  0x34B | mtval2     | Machine bad guest physical address. |
+|  0x100 | sstatus    | Supervisor status register. |
+|  0x104 | sie        | Supervisor interrupt-enable register. |
+|  0x105 | stvec      | Supervisor trap-handler base address. |
+|  0x140 | sscratch   | Scratch register for supervisor trap handlers. |
+|  0x141 | sepc       | Supervisor exception program counter. |
+|  0x142 | scause     | Supervisor trap cause. |
+|  0x143 | stval      | Supervisor bad address or instruction. |
+|  0x144 | sip        | Supervisor interrupt pending. |
+|  0x180 | satp       | Supervisor address translation and protection |
 |  0xB00 | mcycle     | Machine cycle counter. |
 |  0xB02 | minstret   | Machine instructions-retired counter. |
 |  0xF11 | mvendorid  | Vendor ID. |
 |  0xF12 | marchid    | Architecture ID. |
 |  0xF13 | mimpid     | Implementation ID. |
-|  0xF14 | mhardid    | Hardware thread ID. |
+|  0xF14 | mhartid    | Hardware thread ID. |
 
 `csrr`, `csrw`, `csrrs` , `csrrs` and `csrrw` are used to copy and exchange value from/to RISC-V control status registers.
 
@@ -519,6 +536,7 @@ pairs of base address, length pairs stored in memory at address pass in `iov`.
   - **RV32A/RV64A**: `lr.w, sc.w, amoswap.w, amoadd.w, amoxor.w, amoand.w, amoor.w, amomin.w, amomax.w, amominu.w, amomaxu.w`
   - **RV64A**: `lr.d, sc.d, amoswap.d, amoadd.d, amoxor.d, amoand.d, amoor.d, amomin.d, amomax.d, amominu.d, amomaxu.d`
   - **Zicsr**: `csrrw, csrrs, csrrc, csrrwi, csrrsi, csrrci`
+  - **Sv32 and Sv39**: `sret, sfence.vma`
 
 For details about RISC-V, refer to the ISA specification:
 [https://riscv.org/technical/specifications/](https://riscv.org/technical/specifications/).
