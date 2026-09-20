@@ -433,6 +433,7 @@ void MainWindow::create_core(
         &ProgramDock::update_pipeline_addrs);
     connect(machine->core(), &machine::Core::step_done, this, [this]() {
         bool follow = ui->actionFollowExecution->isChecked();
+        if (!follow) return;
         bool auto_open = settings->value("EditorAutoOpen", true).toBool();
         editor_tabs->follow_debug_location(
             machine->get_debug_info(), machine->registers()->read_pc().get_raw(), &debug_info_hint,
