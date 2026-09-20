@@ -17,9 +17,14 @@
   </description>
 
   <releases>
-    <release version="@MAIN_PROJECT_VERSION@" date="2024-10-01">
+    <release version="@MAIN_PROJECT_VERSION@" date="2026-09-20">
       <description>
         <p>Current project release.</p>
+      </description>
+    </release>
+    <release version="0.9.8" date="2024-10-01">
+      <description>
+        <p>Machien and GUI: Include Jiri Stefan's work on branch predictor</p>
       </description>
     </release>
     <release version="0.9.7" date="2024-02-16">
