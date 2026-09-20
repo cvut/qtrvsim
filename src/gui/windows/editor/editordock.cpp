@@ -169,7 +169,7 @@ bool EditorDock::get_modified_tab_filenames(QStringList &output, bool report_unn
 
 void EditorDock::set_show_line_numbers(bool visible) {
     line_numbers_visible = visible;
-    settings->setValue("editorShowLineNumbers", visible);
+    settings->setValue("EditorShowLineNumbers", visible);
     for (int i = 0; i < this->count(); i++) {
         get_tab(i)->set_show_line_number(visible);
     }
