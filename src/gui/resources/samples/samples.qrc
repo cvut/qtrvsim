@@ -3,5 +3,6 @@
         <file>simple-lw-sw-ia.S</file>
         <file>template.S</file>
         <file>template-os.S</file>
+        <file>page-to-page-copy.S</file>
     </qresource>
 </RCC>
