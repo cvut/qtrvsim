@@ -290,7 +290,7 @@ namespace machine { namespace CSR {
           [Id::MVENDORID] = { "mvendorid", 0xF11_csr, "Vendor ID.", 0, 0 },
           [Id::MARCHID] = { "marchid", 0xF12_csr, "Architecture ID.", 0, 0 },
           [Id::MIMPID] = { "mimpid", 0xF13_csr, "Implementation ID.", 0, 0 },
-          [Id::MHARTID] = { "mhardid", 0xF14_csr, "Hardware thread ID." },
+          [Id::MHARTID] = { "mhartid", 0xF14_csr, "Hardware thread ID." },
           [Id::MSTATUS] = { "mstatus",
                             0x300_csr,
                             "Machine status register.",
