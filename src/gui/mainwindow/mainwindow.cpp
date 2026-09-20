@@ -481,6 +481,12 @@ void MainWindow::machine_reload(bool force_memory_reset, bool force_elf_load) {
 
 void MainWindow::print_action() {
 #ifdef WITH_PRINTING
+    if (corescene.isNull()) {
+        showAsyncMessageBox(
+            this, QMessageBox::Information, "Nothing to print.",
+            "The core view is disabled.");
+        return;
+    }
     if (printer.isNull()) {
         printer.reset(new QPrinter(QPrinter::HighResolution));
         print_dialog.reset(new QPrintDialog(printer.data(), this));
