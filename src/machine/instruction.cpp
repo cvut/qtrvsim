@@ -261,6 +261,11 @@ static const struct InstructionMap inst_aliases_csrrs[] = {
     INST_ALIAS_LIST_END,
 };
 
+static const struct InstructionMap inst_aliases_sfence_vma[] = {
+    { .name = "sfence.vma", .args = {}, .code = 0x12000073, .mask = 0xffffffff, .flags = IMF_SUPPORTED },
+    INST_ALIAS_LIST_END,
+};
+
 // RV32/64A - Atomi Memory Operations
 
 #define AMO_ARGS_LOAD {"d", "(s)"}
@@ -478,7 +483,7 @@ static const struct InstructionMap SYSTEM_PRIV_map[] = {
     IM_UNKNOWN,
     IM_UNKNOWN,
     {"sret/wfi", IT_I, NOALU, NOMEM, SYSTEM_PRIV_slot8_map, {}, 0x10000073, 0xff8fffff, { .subfield = {3, 20} }, nullptr },
-    {"sfence.vma", IT_I, NOALU, AC_SFENCE_VMA, nullptr, {"s", "t"}, 0x12000073, 0xfe007fff, { .flags = IMF_SUPPORTED | IMF_PRIV_S }, nullptr},
+    {"sfence.vma", IT_I, NOALU, AC_SFENCE_VMA, nullptr, {"s", "t"}, 0x12000073, 0xfe007fff, { .flags = IMF_SUPPORTED | IMF_PRIV_S }, inst_aliases_sfence_vma},
     IM_UNKNOWN,
     IM_UNKNOWN,
     IM_UNKNOWN,
