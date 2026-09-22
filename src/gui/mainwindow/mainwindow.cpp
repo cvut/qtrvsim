@@ -437,7 +437,7 @@ void MainWindow::create_core(
         bool auto_open = settings->value("EditorAutoOpen", true).toBool();
         editor_tabs->follow_debug_location(
             machine->get_debug_info(), machine->registers()->read_pc().get_raw(), &debug_info_hint,
-            follow, auto_open);
+            follow, auto_open, false);
     });
 
     // Set status to ready

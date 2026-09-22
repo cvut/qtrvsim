@@ -37,8 +37,11 @@ public:
     [[nodiscard]] QStringList get_open_file_list() const;
     bool get_modified_tab_filenames(QStringList &output, bool report_unnamed = false) const;
     bool set_cursor_to(const QString &filename, int line, int column, bool center = false);
-    BORROWED [[nodiscard]] SrcEditor *
-    navigate_to_source(const QString &filename, uint32_t line, bool auto_open = true);
+    BORROWED [[nodiscard]] SrcEditor *navigate_to_source(
+        const QString &filename,
+        uint32_t line,
+        bool auto_open = true,
+        bool set_focus = true);
 
 protected:
     void tabCountChanged() override;
@@ -66,10 +69,11 @@ public slots:
         uint64_t pc,
         size_t *hint_index,
         bool follow,
-        bool auto_open);
+        bool auto_open,
+        bool set_focus);
 
 private:
-    void activate_tab(EditorTab *tab);
+    void activate_tab(EditorTab *tab, bool activate_in_parent = true);
     void close_tab_unchecked(int index);
     void confirm_close_tab_dialog(int index);
 

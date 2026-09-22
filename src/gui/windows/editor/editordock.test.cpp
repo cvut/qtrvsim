@@ -83,7 +83,7 @@ void TestEditorDock::follow_location() {
     info.add_end_sequence(0x204);
     info.finalize();
     size_t hint = 0;
-    dock.follow_debug_location(&info, 0x200, &hint, follow, auto_open);
+    dock.follow_debug_location(&info, 0x200, &hint, follow, auto_open, follow);
     QCoreApplication::processEvents();
 
     auto *tab = dock.find_tab_by_filename(filename);
@@ -179,8 +179,8 @@ void TestEditorDock::execution_highlight_moves() {
     info.add_line(0x204, info.get_file_id(second_file.toStdString()), 1);
     info.add_end_sequence(0x208);
     info.finalize();
-    fixture.dock.follow_debug_location(&info, 0x200, nullptr, true, false);
-    fixture.dock.follow_debug_location(&info, 0x200, nullptr, true, false);
+    fixture.dock.follow_debug_location(&info, 0x200, nullptr, true, false, true);
+    fixture.dock.follow_debug_location(&info, 0x200, nullptr, true, false, true);
     QCoreApplication::processEvents();
     QCOMPARE(first->extraSelections().size(), 3);
     QCOMPARE(
@@ -190,13 +190,13 @@ void TestEditorDock::execution_highlight_moves() {
     QCOMPARE(first->extraSelections().at(1).format.background().color(), QColor(Qt::red));
     QCOMPARE(second->extraSelections().size(), 1);
 
-    fixture.dock.follow_debug_location(&info, 0x204, nullptr, true, false);
+    fixture.dock.follow_debug_location(&info, 0x204, nullptr, true, false, true);
     QCOMPARE(first->extraSelections().size(), 2);
     QCOMPARE(first->extraSelections().first().format.background().color(), QColor(Qt::red));
     QCOMPARE(first->extraSelections().last().format.background().color(), QColor(Qt::yellow));
     QCOMPARE(second->extraSelections().size(), 2);
     QCOMPARE(second->extraSelections().first().cursor.blockNumber(), 0);
-    fixture.dock.follow_debug_location(&info, 0x208, nullptr, true, false);
+    fixture.dock.follow_debug_location(&info, 0x208, nullptr, true, false, true);
     QCOMPARE(second->extraSelections().size(), 1);
     QCOMPARE(second->extraSelections().first().format.background().color(), QColor(Qt::yellow));
 }
@@ -234,7 +234,7 @@ void TestEditorDock::execution_highlight_clears() {
     info.add_line(0x218, info.get_file_id(next_filename.toStdString()), 1);
     info.add_end_sequence(0x21c);
     info.finalize();
-    fixture.dock.follow_debug_location(&info, 0x200, nullptr, true, false);
+    fixture.dock.follow_debug_location(&info, 0x200, nullptr, true, false, true);
     QCoreApplication::processEvents();
     QCOMPARE(editor->extraSelections().size(), 2);
     fixture.parent.setCurrentWidget(&fixture.core);
@@ -253,7 +253,7 @@ void TestEditorDock::execution_highlight_clears() {
         fixture.dock.follow_debug_location(
             reason == "no-debug-info" ? nullptr : &info, pc, nullptr,
             reason != "disabled" && reason != "auto-open-only",
-            reason == "auto-open-only" || reason == "missing-source");
+            reason == "auto-open-only" || reason == "missing-source", reason != "auto-open-only");
     }
     QCoreApplication::processEvents();
     QCOMPARE(editor->extraSelections().size(), 1);
@@ -277,11 +277,11 @@ void TestEditorDock::execution_highlight_survives_tab_close() {
     info.add_line(0x200, info.get_file_id(filename.toStdString()), 1);
     info.add_end_sequence(0x204);
     info.finalize();
-    fixture.dock.follow_debug_location(&info, 0x200, nullptr, true, false);
+    fixture.dock.follow_debug_location(&info, 0x200, nullptr, true, false, true);
     fixture.dock.close_current_tab();
     QVERIFY(editor.isNull());
     fixture.dock.clear_execution_highlight();
-    fixture.dock.follow_debug_location(&info, 0x200, nullptr, true, true);
+    fixture.dock.follow_debug_location(&info, 0x200, nullptr, true, true, true);
     QCoreApplication::processEvents();
     QCOMPARE(fixture.dock.count(), 1);
     QCOMPARE(fixture.dock.get_current_editor()->extraSelections().size(), 1);
@@ -300,7 +300,7 @@ void TestEditorDock::failed_open_cache() {
     info.add_line(0x200, info.get_file_id(non_existent.toStdString()), 1);
     info.add_end_sequence(0x204);
     info.finalize();
-    fixture.dock.follow_debug_location(&info, 0x200, nullptr, true, true);
+    fixture.dock.follow_debug_location(&info, 0x200, nullptr, true, true, true);
     QCOMPARE(fixture.dock.count(), 0);
 
     // Creating the file and clearing cache allows subsequent open

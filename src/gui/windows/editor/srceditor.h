@@ -27,7 +27,7 @@ public:
     bool saveFile(QString filename = "");
     bool loadByteArray(const QByteArray &content, const QString &filename = "");
     void setCursorToLine(int ln);
-    void setCursorTo(int ln, int col, bool center = false);
+    void setCursorTo(int ln, int col, bool center = false, bool set_focus = true);
     void setLineHighlight(LineHighlight kind, const QColor &color);
     void clearLineHighlight(LineHighlight kind);
     void setFileName(const QString &filename);

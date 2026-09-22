@@ -64,9 +64,9 @@ EditorDock::EditorDock(QSharedPointer<QSettings> settings, QTabWidget *parent_ta
     });
 }
 
-void EditorDock::activate_tab(EditorTab *tab) {
+void EditorDock::activate_tab(EditorTab *tab, bool activate_in_parent) {
     setCurrentWidget(tab);
-    if (parent_tabs) { parent_tabs->setCurrentWidget(this); }
+    if (parent_tabs && activate_in_parent) { parent_tabs->setCurrentWidget(this); }
 }
 
 EditorTab *EditorDock::get_tab(int index) const {
@@ -345,15 +345,19 @@ bool EditorDock::set_cursor_to(const QString &filename, int line, int column, bo
     return true;
 }
 
-SrcEditor *EditorDock::navigate_to_source(const QString &filename, uint32_t line, bool auto_open) {
+SrcEditor *EditorDock::navigate_to_source(
+    const QString &filename,
+    uint32_t line,
+    bool auto_open,
+    bool set_focus) {
     if (filename.isEmpty()) { return nullptr; }
     auto *tab = auto_open ? open_file_if_not_open(filename, false, false)
                           : find_tab_by_filename(filename);
     if (!tab) { return nullptr; }
     auto *editor = tab->get_editor();
     if (line == 0 || line > static_cast<uint32_t>(editor->blockCount())) { return nullptr; }
-    activate_tab(tab);
-    editor->setCursorTo(static_cast<int>(line), 1, true);
+    activate_tab(tab, set_focus);
+    editor->setCursorTo(static_cast<int>(line), 1, false, set_focus);
     return editor;
 }
 
@@ -373,7 +377,8 @@ void EditorDock::follow_debug_location(
     uint64_t pc,
     size_t *hint,
     bool follow,
-    bool auto_open) {
+    bool auto_open,
+    bool set_focus) {
     if (!follow) { clear_execution_highlight(); }
     if (!follow && !auto_open) { return; }
     if (!debug_info) {
@@ -389,11 +394,11 @@ void EditorDock::follow_debug_location(
 
     QString file = QString::fromStdString(debug_info->get_file_path(loc->file_id));
     if (!follow) {
-        if (auto_open && !file.isEmpty()) { open_file_if_not_open(file, false, false); }
+        if (auto_open && !file.isEmpty()) { open_file_if_not_open(file, false, set_focus); }
         return;
     }
 
-    auto *editor = navigate_to_source(file, loc->line, auto_open);
+    auto *editor = navigate_to_source(file, loc->line, auto_open, set_focus);
     if (execution_editor != editor) { clear_execution_highlight(); }
     if (editor) {
         execution_editor = editor;
