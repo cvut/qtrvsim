@@ -21,6 +21,7 @@ WebEvalDock::WebEvalDock(QWidget *parent, QSettings *settings)
     , mainwindow(nullptr) {
     setObjectName("WebEval");
     setWindowTitle("WebEval");
+    setMinimumSize(360, 320);
 
     auto *content = new QWidget(this);
     auto *layout = new QVBoxLayout(content);
