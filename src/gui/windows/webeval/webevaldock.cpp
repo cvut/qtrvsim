@@ -1,5 +1,6 @@
 #include "webevaldock.h"
 
+#include "helper/async_modal.h"
 #include "mainwindow/mainwindow.h"
 #include "taskdescriptiondock.h"
 #include "windows/editor/editordock.h"
@@ -75,8 +76,9 @@ void WebEvalDock::refresh_tasks() {
     QString api_key = settings->value("webeval/api_key", "").toString().trimmed();
 
     if (url.isEmpty() || api_key.isEmpty()) {
-        QMessageBox::warning(
-            this, "Error", "Please configure URL and API Key in Options > WebEval Configuration.");
+        showAsyncMessageBox(
+            this, QMessageBox::Warning, "Error",
+            "Please configure URL and API Key in Options > WebEval Configuration.");
         return;
     }
 
@@ -93,27 +95,29 @@ void WebEvalDock::submit_current_file() {
     QString api_key = settings->value("webeval/api_key", "").toString().trimmed();
 
     if (url.isEmpty() || api_key.isEmpty()) {
-        QMessageBox::warning(
-            this, "Error", "Please configure URL and API Key in Options > WebEval Configuration.");
+        showAsyncMessageBox(
+            this, QMessageBox::Warning, "Error",
+            "Please configure URL and API Key in Options > WebEval Configuration.");
         return;
     }
 
     QListWidgetItem *selected = tasks_list->currentItem();
     if (!selected) {
-        QMessageBox::warning(this, "Error", "Please select a task first.");
+        showAsyncMessageBox(this, QMessageBox::Warning, "Error", "Please select a task first.");
         return;
     }
 
     int task_id = selected->data(Qt::UserRole).toInt();
 
     if (!mainwindow) {
-        QMessageBox::warning(this, "Error", "MainWindow not initialized.");
+        showAsyncMessageBox(this, QMessageBox::Warning, "Error", "MainWindow not initialized.");
         return;
     }
 
     auto *editor = mainwindow->get_current_editor();
     if (!editor) {
-        QMessageBox::warning(this, "Error", "No editor window is currently open.");
+        showAsyncMessageBox(
+            this, QMessageBox::Warning, "Error", "No editor window is currently open.");
         return;
     }
 
@@ -137,14 +141,15 @@ void WebEvalDock::load_code(const QString &load_type) {
     QString api_key = settings->value("webeval/api_key", "").toString().trimmed();
 
     if (url.isEmpty() || api_key.isEmpty()) {
-        QMessageBox::warning(
-            this, "Error", "Please configure URL and API Key in Options > WebEval Configuration.");
+        showAsyncMessageBox(
+            this, QMessageBox::Warning, "Error",
+            "Please configure URL and API Key in Options > WebEval Configuration.");
         return;
     }
 
     QListWidgetItem *selected = tasks_list->currentItem();
     if (!selected) {
-        QMessageBox::warning(this, "Error", "Please select a task first.");
+        showAsyncMessageBox(this, QMessageBox::Warning, "Error", "Please select a task first.");
         return;
     }
 
@@ -165,7 +170,8 @@ void WebEvalDock::handle_tasks_reply() {
     tasks_list->clear();
 
     if (reply->error() != QNetworkReply::NoError) {
-        QMessageBox::warning(this, "Error", "Failed to fetch tasks: " + reply->errorString());
+        showAsyncMessageBox(
+            this, QMessageBox::Warning, "Error", "Failed to fetch tasks: " + reply->errorString());
         reply->deleteLater();
         return;
     }
@@ -196,7 +202,8 @@ void WebEvalDock::handle_submit_reply() {
     if (!reply) return;
 
     if (reply->error() != QNetworkReply::NoError) {
-        QMessageBox::warning(this, "Error", "Submission failed: " + reply->errorString());
+        showAsyncMessageBox(
+            this, QMessageBox::Warning, "Error", "Submission failed: " + reply->errorString());
         reply->deleteLater();
         return;
     }
@@ -209,7 +216,7 @@ void WebEvalDock::handle_submit_reply() {
         if (obj.contains("message")) { message = obj["message"].toString(); }
     }
 
-    QMessageBox::information(this, "Success", message);
+    showAsyncMessageBox(this, QMessageBox::Information, "Success", message);
     reply->deleteLater();
 }
 
@@ -218,7 +225,8 @@ void WebEvalDock::handle_load_reply() {
     if (!reply) return;
 
     if (reply->error() != QNetworkReply::NoError) {
-        QMessageBox::warning(this, "Error", "Failed to load code: " + reply->errorString());
+        showAsyncMessageBox(
+            this, QMessageBox::Warning, "Error", "Failed to load code: " + reply->errorString());
         reply->deleteLater();
         return;
     }
@@ -240,20 +248,21 @@ void WebEvalDock::handle_load_reply() {
     }
 
     if (code.isEmpty()) {
-        QMessageBox::warning(this, "Error", "No code found for " + load_type);
+        showAsyncMessageBox(this, QMessageBox::Warning, "Error", "No code found for " + load_type);
         reply->deleteLater();
         return;
     }
 
     if (!mainwindow) {
-        QMessageBox::warning(this, "Error", "MainWindow not initialized.");
+        showAsyncMessageBox(this, QMessageBox::Warning, "Error", "MainWindow not initialized.");
         reply->deleteLater();
         return;
     }
 
     auto *editor = mainwindow->get_current_editor();
     if (!editor) {
-        QMessageBox::warning(this, "Error", "No editor window is currently open.");
+        showAsyncMessageBox(
+            this, QMessageBox::Warning, "Error", "No editor window is currently open.");
         reply->deleteLater();
         return;
     }
@@ -270,14 +279,15 @@ void WebEvalDock::show_task_description() {
     QString api_key = settings->value("webeval/api_key", "").toString().trimmed();
 
     if (url.isEmpty() || api_key.isEmpty()) {
-        QMessageBox::warning(
-            this, "Error", "Please configure URL and API Key in Options > WebEval Configuration.");
+        showAsyncMessageBox(
+            this, QMessageBox::Warning, "Error",
+            "Please configure URL and API Key in Options > WebEval Configuration.");
         return;
     }
 
     QListWidgetItem *selected = tasks_list->currentItem();
     if (!selected) {
-        QMessageBox::warning(this, "Error", "Please select a task first.");
+        showAsyncMessageBox(this, QMessageBox::Warning, "Error", "Please select a task first.");
         return;
     }
 
@@ -295,8 +305,9 @@ void WebEvalDock::handle_task_detail_reply() {
     if (!reply) return;
 
     if (reply->error() != QNetworkReply::NoError) {
-        QMessageBox::warning(
-            this, "Error", "Failed to fetch task details: " + reply->errorString());
+        showAsyncMessageBox(
+            this, QMessageBox::Warning, "Error",
+            "Failed to fetch task details: " + reply->errorString());
         reply->deleteLater();
         return;
     }
@@ -310,7 +321,8 @@ void WebEvalDock::handle_task_detail_reply() {
         if (!description.isEmpty()) {
             if (mainwindow) { mainwindow->set_task_description(task_name, description); }
         } else {
-            QMessageBox::information(this, "No Description", "This task has no description.");
+            showAsyncMessageBox(
+                this, QMessageBox::Information, "No Description", "This task has no description.");
         }
     }
 

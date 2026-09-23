@@ -27,6 +27,7 @@ inline void showAsyncMessageBox(
     msg->setDetailedText(detailed_text);
     msg->setToolTip(tooltip_text);
     // This is necessary as WASM does not support blocking APIs.
+    msg->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     msg->setAttribute(Qt::WA_DeleteOnClose);
     msg->open();
 }

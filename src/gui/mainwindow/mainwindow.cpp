@@ -623,7 +623,10 @@ void MainWindow::about_qt() {
 
 void MainWindow::webeval_config() {
     auto *dialog = new WebEvalConfigDialog(settings.get(), this);
-    dialog->exec();
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setAttribute(Qt::WA_ShowModal);
+    dialog->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    dialog->open();
 }
 
 SrcEditor *MainWindow::get_current_editor() const {
