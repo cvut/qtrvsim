@@ -124,6 +124,7 @@ public:
 
     uint32_t get_stall_count() const;
     double get_speed_improvement() const;
+    bool get_vm_enabled() const { return vm_enabled; };
     const TLBConfig &get_config() const;
 
     void reset();

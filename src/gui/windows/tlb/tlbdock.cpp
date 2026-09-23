@@ -89,7 +89,7 @@ void TLBDock::setup(machine::TLB *tlb) {
 
     delete tlbscene;
     tlbscene = nullptr;
-    if (tlb != nullptr) {
+    if (tlb != nullptr && tlb->get_vm_enabled()) {
         tlbscene = new TLBViewScene(tlb);
         graphicsview->setScene(tlbscene);
     } else {

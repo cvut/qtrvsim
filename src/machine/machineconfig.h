@@ -112,7 +112,6 @@ public:
     bool operator!=(const TLBConfig &c) const;
 
 private:
-    bool vm_enabled = false;
     uint32_t vm_asid = 0;
     unsigned n_sets = 1;
     unsigned d_associativity = 1;
