@@ -26,6 +26,12 @@ inline void showAsyncMessageBox(
     auto msg = new QMessageBox(icon, title, text, QMessageBox::Ok, parent);
     msg->setDetailedText(detailed_text);
     msg->setToolTip(tooltip_text);
+
+    // set min size in WASM
+    #ifdef __EMSCRIPTEN__
+        msg->setMinimumSize(480, 180);
+    #endif
+    
     // This is necessary as WASM does not support blocking APIs.
     msg->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     msg->setAttribute(Qt::WA_DeleteOnClose);

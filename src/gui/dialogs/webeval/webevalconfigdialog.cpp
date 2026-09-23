@@ -8,6 +8,7 @@ WebEvalConfigDialog::WebEvalConfigDialog(QSettings *settings, QWidget *parent)
     : QDialog(parent)
     , settings(settings) {
     setWindowTitle("WebEval Configuration");
+    setMinimumSize(520, 160);
 
     auto *layout = new QVBoxLayout(this);
     auto *form_layout = new QFormLayout();
