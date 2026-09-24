@@ -17,7 +17,7 @@
 # this program. If not, see <https://www.gnu.org/licenses/>
 #
 # Please submit bugfixes or comments via
-#   @PROJECT_HOME_PAGE@
+#   @PROJECT_HOMEPAGE_URL@
 # issues tracker.
 #
 
@@ -35,13 +35,16 @@ BuildRequires:  gcc-c++
 BuildRequires:  hicolor-icon-theme
 BuildRequires:  pkgconfig
 
-%if 0%{?suse_version} >= 1500 || 0%{?fedora} >= 42
+%if 0%{?suse_version} >= 1600 || 0%{?fedora} >= 42
 BuildRequires:  pkgconfig(Qt6Core)
 BuildRequires:  pkgconfig(Qt6PrintSupport)
 BuildRequires:  pkgconfig(Qt6Test)
 BuildRequires:  pkgconfig(Qt6Widgets)
 BuildRequires:  pkgconfig(Qt6Network)
 %else
+%if 0%{?suse_version}
+BuildRequires:  gcc13-c++
+%endif
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5PrintSupport)
 BuildRequires:  pkgconfig(Qt5Test)
@@ -65,7 +68,12 @@ BuildRequires:  update-desktop-files
 
 %build
 %if 0%{?suse_version}
+%if 0%{?suse_version} >= 1600
 %cmake -DCMAKE_CXX_FLAGS="-Wno-error" -DCMAKE_C_FLAGS="-Wno-error"
+%else
+%cmake -DCMAKE_CXX_FLAGS="-Wno-error" -DCMAKE_C_FLAGS="-Wno-error" \
+       -DCMAKE_C_COMPILER=gcc-13 -DCMAKE_CXX_COMPILER=g++-13
+%endif
 %else
 %cmake
 %endif
