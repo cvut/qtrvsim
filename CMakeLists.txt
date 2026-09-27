@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 cmake_policy(VERSION 3.10)
 
+# Workaround for gcc-15_15.2.0-16ubuntu1 and  gcc-15_15.3.0-3ubuntu1 LTO miss-compilation
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+
 project(QtRVSim
         LANGUAGES C CXX
         VERSION 0.9.9
@@ -359,3 +362,8 @@ endif ()
 make_directory ( "${GENERATED_INCLUDE_PATH}" )
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/project_info.h.in"
         "${GENERATED_INCLUDE_PATH}/project_info.h" @ONLY)
+
+# Workaround for gcc-15_15.2.0-16ubuntu1 and  gcc-15_15.3.0-3ubuntu1 LTO miss-compilation
+string(REPLACE "-flto=auto" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+string(REPLACE "-flto=auto" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+string(REPLACE "-flto=auto" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
