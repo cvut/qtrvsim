@@ -499,8 +499,7 @@ pairs of base address, length pairs stored in memory at address pass in `iov`.
 ### QtRvSim limitations
 
 * Only very minimal support for privileged instruction is implemented for now (mret).
-* Only machine mode and minimal subset of machine CSRs is implemented.
-* TLB and virtual memory are not implemented.
+* Only machine mode and minimal of machine, supervisor and unprivileged CSRs is implemented.
 * No floating point support
 * Memory access stall (stalling execution because of cache miss would be pretty annoying for users so difference between
   cache and memory is just in collected statistics)
