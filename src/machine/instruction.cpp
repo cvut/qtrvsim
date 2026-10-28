@@ -244,6 +244,7 @@ static const struct InstructionMap inst_aliases_jal[] = {
 static const struct InstructionMap inst_aliases_jalr[] = {
     { .name = "ret", .args = {}, .code = 0x67 | (0 << 7) | (1 << 15) , .mask = 0xfffffffful, .flags = IMF_SUPPORTED },
     { .name = "jr", .args = {"s"}, .code = 0x67 | (0 << 7) , .mask = 0x7f | (31 << 7) | (0xffful << 20), .flags = IMF_SUPPORTED },
+    { .name = "jr", .args = {"s", "o"}, .code = 0x67 | (0 << 7) , .mask = 0x7f | (31 << 7), .flags = IMF_SUPPORTED },
     { .name = "jr", .args = {"o(s)"}, .code = 0x67 | (0 << 7) , .mask = 0x7f | (31 << 7), .flags = IMF_SUPPORTED },
     { .name = "jalr", .args = {"s"}, .code = 0x67 | (1 << 7) , .mask = 0x7f | (31 << 7) | (0xffful << 20), .flags = IMF_SUPPORTED },
     { .name = "jalr", .args = {"o(s)"}, .code = 0x67 | (1 << 7) , .mask = 0x7f | (31 << 7), .flags = IMF_SUPPORTED },
