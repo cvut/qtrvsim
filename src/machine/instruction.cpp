@@ -1355,7 +1355,7 @@ bool parse_num_val (const char *p, char **r, uint64_t *num_val, bool isUnsigned)
         p = &p[3];
         base = 2;
     }
-    *num_val = strtoll(p, r, base);
+    *num_val = (isUnsigned ? strtoull(p, r, base) : strtoll(p, r, base));
     return true;
 }
 
