@@ -1340,6 +1340,29 @@ uint32_t Instruction::parse_field(
     return inst_code;
 }
 
+bool parse_num_val (const char *p, char **r, uint64_t *num_val, bool isUnsigned) {
+    // strtoll/strtoull on Windows does not support binary numbers with the '0b' prefix
+    // --> detect manually and parse with base=2
+    int base = 0;
+    bool isNegativeBin = false;
+    if (p[0] == '0' && (p[1] == 'b' || p[1] == 'B')) {
+        if (p[2] != '0' && p[2] != '1') 
+            return false;
+        p = &p[2];
+        base = 2;
+    } else if (p[0] == '-' && p[1] == '0' && (p[2] == 'b' || p[2] == 'B')) {
+        if (p[3] != '0' && p[3] != '1') 
+            return false;
+        p = &p[3];
+        base = 2;
+        isNegativeBin = true;
+    }
+    *num_val = (isUnsigned ? strtoull(p, r, base) : strtoll(p, r, base));
+    if (isNegativeBin) 
+        *num_val = -*num_val;
+    return true;
+}
+
 bool parse_immediate_value(
     const QString &field_token,
     Address &inst_addr,
@@ -1365,11 +1388,8 @@ bool parse_immediate_value(
         cstr[i] = 0;
         const char *p = cstr;
         char *r;
-        if (adesc->min < 0) {
-            num_val = strtoll(p, &r, 0);
-        } else {
-            num_val = strtoull(p, &r, 0);
-        }
+        if (!parse_num_val(p, &r, &num_val, adesc->min < 0)) 
+            return false;
         while (*r && isspace(*r)) {
             r++;
         }
