@@ -1344,6 +1344,7 @@ bool parse_num_val (const char *p, char **r, uint64_t *num_val, bool isUnsigned)
     // strtoll/strtoull on Windows does not support binary numbers with the '0b' prefix
     // --> detect manually and parse with base=2
     int base = 0;
+    bool isNegativeBin = false;
     if (p[0] == '0' && (p[1] == 'b' || p[1] == 'B')) {
         if (p[2] != '0' && p[2] != '1') 
             return false;
@@ -1354,8 +1355,11 @@ bool parse_num_val (const char *p, char **r, uint64_t *num_val, bool isUnsigned)
             return false;
         p = &p[3];
         base = 2;
+        isNegativeBin = true;
     }
     *num_val = (isUnsigned ? strtoull(p, r, base) : strtoll(p, r, base));
+    if (isNegativeBin) 
+        *num_val = -*num_val;
     return true;
 }
 
